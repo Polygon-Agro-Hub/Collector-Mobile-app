@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { FontAwesome, FontAwesome5, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import LottieView from 'lottie-react-native';
 import { useTranslation } from "react-i18next";
@@ -101,9 +102,22 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
+  // This hook runs every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      // Reset search state when screen comes into focus
+      setSearchPhone("");
+      setErrorMessage("");
+      
+      // Fetch fresh data
+      fetchInitialData();
+      
+      // Optional: Return a cleanup function if needed
+      return () => {
+        // Cleanup code here if needed
+      };
+    }, [])
+  );
 
   const fetchInitialData = async () => {
     await Promise.all([fetchOrders(), fetchCustomers()]);

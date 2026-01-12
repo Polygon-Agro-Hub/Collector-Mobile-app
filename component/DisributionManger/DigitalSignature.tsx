@@ -172,14 +172,13 @@ export default function DigitalSignature({
   navigation,
 }: DigitalSignatureProps) {
   const signatureRef = useRef<any>(null);
+  const { orderId, fromScreen } = route.params;
   const [loading, setLoading] = useState(false);
   const [signatureDrawn, setSignatureDrawn] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<
-    string | React.ReactNode
-  >("");
+  const [successMessage, setSuccessMessage] = useState<string | React.ReactNode>("");
 
-  
+  console.log("order id in digital sig screen", orderId, fromScreen);
 
   // Use useFocusEffect to handle orientation changes
   useFocusEffect(
@@ -235,10 +234,10 @@ export default function DigitalSignature({
         return;
       }
 
-    //   if (!processOrderIds || processOrderIds.length === 0) {
-    //     Alert.alert("Error", "No order IDs provided");
-    //     return;
-    //   }
+      if (!orderId) {
+        Alert.alert("Error", "Order ID not provided");
+        return;
+      }
 
       // Create FormData
       const formData = new FormData();
@@ -248,7 +247,7 @@ export default function DigitalSignature({
         ? signatureBase64.split(",")[1]
         : signatureBase64;
 
-      const fileName = `signature_${Date.now()}.png`;
+      const fileName = `pickup_signature_${Date.now()}.png`;
 
       // Create file object for React Native
       const file = {
@@ -257,18 +256,16 @@ export default function DigitalSignature({
         name: fileName,
       };
 
-      // Append the file to FormData
+      // Append the signature file to FormData
       formData.append("signature", file as any);
 
-      // Append each processOrderId individually
-    //   processOrderIds.forEach((id, index) => {
-    //     formData.append(`processOrderIds[${index}]`, id.toString());
-    //   });
+      // Append the orderId to FormData
+      formData.append("orderId", orderId.toString());
 
-    //   console.log("Saving signature for order:", processOrderIds[0]);
+      console.log("Saving pickup signature for order:", orderId);
 
       const response = await axios.post(
-        `${environment.API_BASE_URL}api/order/save-signature`,
+        `${environment.API_BASE_URL}api/pickup/update-pickup-Details`,
         formData,
         {
           headers: {
@@ -280,70 +277,34 @@ export default function DigitalSignature({
       );
 
       if (response.data.status === "success") {
-        console.log("Signature saved successfully:", response.data);
+        console.log("Pickup signature saved successfully:", response.data);
 
-        // Call onOrderComplete if provided
-        // if (onOrderComplete) {
-        //   onOrderComplete(processOrderIds[0]);
-        // }
-
-        // Get invoice numbers from the response
-        const invoiceNumbers: string[] =
-          response.data.data?.invoiceNumbers || [];
-        console.log("Invoice numbers from response:", invoiceNumbers);
-
-        // Create success message with bold invoice numbers
-        let message: string | React.ReactNode;
-
-        if (invoiceNumbers.length === 0) {
-          message = "Signature saved successfully and order completed!";
-        } else if (invoiceNumbers.length === 1) {
-          message = (
-            <View className="items-center">
-              <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
-                Order:{" "}
-                <Text className="font-bold text-[#000000]">
-                  {invoiceNumbers[0]}
-                </Text>{" "}
-                has been completed successfully!
-              </Text>
-            </View>
-          );
-        } else {
-          // For multiple orders
-          message = (
-            <View className="items-center">
-              <Text className="text-center text-[#4E4E4E] mb-2">Orders:</Text>
-              {invoiceNumbers.map((invNo: string, index: number) => (
-                <Text
-                  key={index}
-                  className="text-center font-bold text-[#000000] mb-1"
-                >
-                  {invNo}
-                </Text>
-              ))}
-              <Text className="text-center text-[#4E4E4E] mt-2">
-                have been completed successfully!
-              </Text>
-            </View>
-          );
-        }
+        // Create success message
+        const message = (
+          <View className="items-center">
+            <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
+              Pickup details for order:{" "}
+              <Text className="font-bold text-[#000000]">{String(orderId)}</Text> has
+              been saved successfully!
+            </Text>
+          </View>
+        );
 
         setSuccessMessage(message);
         setShowSuccessModal(true);
 
-        // Add backup navigation timeout in case modal doesn't auto-close
+        // Add backup navigation timeout
         setTimeout(() => {
           if (showSuccessModal) {
             setShowSuccessModal(false);
             handleNavigationAfterSuccess();
           }
-        }, 4000);
+        }, 3000);
       } else {
         throw new Error(response.data.message || "Failed to save signature");
       }
     } catch (error: any) {
-      console.error("Error saving signature:", error);
+      console.error("Error saving pickup signature:", error);
 
       let errorMessage = "Failed to save signature. Please try again.";
 
@@ -363,19 +324,32 @@ export default function DigitalSignature({
   };
 
  const handleNavigationAfterSuccess = () => {
-  // Navigate back to the screen that opened the signature screen
-  // Check if there's a "from" parameter in route.params
-//  const fromScreen = route.params?.fromScreen;
-  
-
-    // Navigate to the specific screen
-    navigation.navigate( "DigitalSignature");
- 
-};
+     // Always navigate to ReadytoPickupOrders screen after successful signature
+     navigation.navigate("ReadytoPickupOrders" as any);
+   };
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
     handleNavigationAfterSuccess();
+  };
+
+  const handleBackPress = () => {
+    Alert.alert(
+      "Cancel Signature",
+      "Are you sure you want to cancel? Your signature will not be saved.",
+      [
+        {
+          text: "No, Continue",
+          style: "cancel",
+        },
+        {
+          text: "Yes, Cancel",
+          onPress: () => {
+            handleNavigationAfterSuccess();
+          },
+        },
+      ]
+    );
   };
 
   const handleOK = async (signature: string) => {
@@ -384,14 +358,14 @@ export default function DigitalSignature({
       return;
     }
 
-    // if (!processOrderIds || processOrderIds.length === 0) {
-    //   Alert.alert("Error", "No order IDs available");
-    //   return;
-    // }
+    if (!orderId) {
+      Alert.alert("Error", "Order ID not available");
+      return;
+    }
 
     Alert.alert(
       "Confirm Signature",
-      "Are you sure you want to save this signature and mark the order as delivered?",
+      "Are you sure you want to save this signature for pickup?",
       [
         {
           text: "Cancel",
@@ -458,8 +432,6 @@ export default function DigitalSignature({
 
   return (
     <View className="flex-1 bg-white">
-   
-
       {/* SIGNATURE AREA */}
       <View className="flex-1 mx-4 mb-4 mt-2">
         <DashedBorder
@@ -512,7 +484,7 @@ export default function DigitalSignature({
       {/* BOTTOM BUTTONS */}
       <View className="flex-row justify-between items-center px-4 pb-4">
         <TouchableOpacity
-      //    onPress={handleBackPress} 
+          onPress={handleBackPress}
           className="flex-row items-center bg-white border border-gray-300 px-6 py-3 rounded-full"
           disabled={loading}
         >
@@ -550,7 +522,38 @@ export default function DigitalSignature({
         )}
       </View>
 
-     
+      {/* Success Modal - You can add your custom modal here if needed */}
+      {showSuccessModal && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderRadius: 10,
+              width: "80%",
+            }}
+          >
+            {successMessage}
+            <TouchableOpacity
+              onPress={handleSuccessModalClose}
+              className="bg-[#F7CA21] px-6 py-3 rounded-full mt-4"
+            >
+              <Text className="text-center font-semibold text-black">OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }

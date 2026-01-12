@@ -9,6 +9,7 @@ import {
   ScrollView,
   Modal,
   Platform,
+  Alert,
 } from "react-native";
 import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -21,7 +22,6 @@ import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
 import DateTimePicker from "@react-native-community/datetimepicker";
-
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -39,8 +39,13 @@ interface Transaction {
   id: string;
   orderId: string;
   cash: number;
+  fullTotal:string;
   receivedTime: string;
   date: string;
+  pickupOrderId?: string;
+  invoiceNo?: string;
+  paymentMethod?: string;
+  transactionId?: string;
 }
 
 const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
@@ -48,53 +53,18 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
   navigation,
 }) => {
   const { t } = useTranslation();
-  const [selectedDate, setSelectedDate] = useState(new Date("2025-01-02"));
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [allTransactions] = useState<Transaction[]>([
-    {
-      id: "1",
-      orderId: "241205000020",
-      cash: 1200.0,
-      receivedTime: "2025/01/02 11:54 AM",
-      date: "2025-01-02",
-    },
-    {
-      id: "2",
-      orderId: "241205000020",
-      cash: 1200.0,
-      receivedTime: "2025/01/02 11:54 AM",
-      date: "2025-01-02",
-    },
-    {
-      id: "3",
-      orderId: "241205000020",
-      cash: 1200.0,
-      receivedTime: "2025/01/02 11:54 AM",
-      date: "2025-01-02",
-    },
-    {
-      id: "4",
-      orderId: "241205000021",
-      cash: 800.0,
-      receivedTime: "2025/01/03 10:30 AM",
-      date: "2025-01-03",
-    },
-    {
-      id: "5",
-      orderId: "241205000022",
-      cash: 1500.0,
-      receivedTime: "2025/01/03 02:15 PM",
-      date: "2025-01-03",
-    },
-  ]);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Calculate total cash
-  const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
+ // Calculate total cash
+ const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
 
-  // Format date
+  // Format date for display
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -110,19 +80,110 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     return `${year}-${month}-${day}`;
   };
 
+  // Format datetime from API
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours % 12 || 12;
+    
+    return `${year}/${month}/${day} ${displayHours}:${minutes} ${ampm}`;
+  };
+
+  // Extract date only from datetime string
+  const extractDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Fetch received cash data
+  const fetchReceivedCash = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found");
+        return;
+      }
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/pickup/get-received-cash`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("oooooooooooooo",response.data)
+
+      if (response.data.success) {
+        // Map API data to Transaction format
+        const mappedData: Transaction[] = response.data.data.map((item: any) => ({
+          id: item.pickupOrderId?.toString() || item.processOrderId?.toString(),
+          orderId: item.processOrderOrderId || item.pickupOrderOrderId || "N/A",
+          cash: parseFloat(item.fullTotal) || 0,
+          receivedTime: item.handOverTime 
+            ? formatDateTime(item.handOverTime)
+            : formatDateTime(item.pickupCreatedAt),
+          date: item.handOverTime
+            ? extractDate(item.handOverTime)
+            : extractDate(item.pickupCreatedAt),
+          pickupOrderId: item.pickupOrderId?.toString(),
+          invoiceNo: item.invNo,
+          paymentMethod: item.paymentMethod,
+          transactionId: item.transactionId,
+        }));
+
+        setAllTransactions(mappedData);
+        console.log("Fetched transactions:", mappedData.length);
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch data");
+      }
+    } catch (error: any) {
+      console.error("Error fetching received cash:", error);
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to fetch received cash data"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filter transactions by selected date
-  const filterTransactionsByDate = () => {
+  const filterTransactionsByDate = useCallback(() => {
     const selectedDateStr = formatDateForComparison(selectedDate);
     const filtered = allTransactions.filter(
       (transaction) => transaction.date === selectedDateStr
     );
     setTransactions(filtered);
-  };
+  }, [selectedDate, allTransactions]);
 
   // Effect to filter transactions when date changes
   useEffect(() => {
     filterTransactionsByDate();
-  }, [selectedDate]);
+  }, [filterTransactionsByDate]);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchReceivedCash();
+  }, []);
+
+  // Refresh data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchReceivedCash();
+    }, [])
+  );
 
   // Handle date change
   const onDateChange = (event: any, date?: Date) => {
@@ -145,32 +206,27 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     setShowDatePicker(false);
   };
 
-  // Refresh handler (simulated)
+  // Refresh handler
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  };
-
-  // Delete all transactions
-  const handleDeleteAll = () => {
-    // Implement delete functionality
-    console.log("Delete all transactions");
+    await fetchReceivedCash();
+    setRefreshing(false);
   };
 
   // Render transaction item
   const renderTransaction = ({ item }: { item: Transaction }) => (
     <View className="bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border border-[#738FAE] shadow-sm">
       <Text className="text-sm font-medium text-gray-900 mb-1">
-        {t("ReceivedCash.Order ID")} : {item.orderId}
+        {t("ReceivedCash.Order ID")} : {item.invoiceNo}
       </Text>
+
       <View className="flex-row">
-      <Text className="text-sm text-[#848484] mb-1">
-        {t("ReceivedCash.Cash")} : 
-      </Text><Text className="text-sm text-black font-medium"> Rs.{item.cash.toFixed(2)}</Text>
+        <Text className="text-sm text-[#848484] mb-1">
+          {t("ReceivedCash.Cash")} : 
+        </Text>
+        <Text className="text-sm text-black font-medium"> Rs.{item.cash}</Text>
       </View>
+   
       <Text className="text-xs text-[#848484]">
         {t("ReceivedCash.Received Time")} : {item.receivedTime}
       </Text>
@@ -181,12 +237,12 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
   const EmptyState = () => (
     <View className="flex-1 items-center justify-center py-20">
       <View className=" items-center justify-center mb-4">
-         <LottieView
-                   source={require('../../assets/lottie/NoComplaints.json')}
-                   autoPlay
-                   loop
-                   style={{ width: 150, height: 150 }}
-                 />
+        <LottieView
+          source={require('../../assets/lottie/NoComplaints.json')}
+          autoPlay
+          loop
+          style={{ width: 150, height: 150 }}
+        />
       </View>
       <Text className="text-[#828282] text-base italic">
         - {t("ReceivedCash.No cash was received today")} -
@@ -228,29 +284,29 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
       </View>
 
       {/* Total Card */}
-     <View className="px-4 py-4">
-  <View 
-    style={{
-      borderStyle: 'dashed',
-      borderWidth: 2,
-      borderColor: '#980775',
-      borderRadius: 12,
-      backgroundColor: 'white',
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      marginHorizontal: 40,
-    }}
-  >
-    <View className="flex-row items-center justify-center">
-      <Text className=" font-medium text-black">
-        {t("ReceivedCash.Full Total")} :   {" "}
-      </Text>
-      <Text className="text-xl font-bold text-[#980775]">
-        Rs.{totalCash.toFixed(2)}
-      </Text>
-    </View>
-  </View>
-</View>
+      <View className="px-4 py-4">
+        <View 
+          style={{
+            borderStyle: 'dashed',
+            borderWidth: 2,
+            borderColor: '#980775',
+            borderRadius: 12,
+            backgroundColor: 'white',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            marginHorizontal: 40,
+          }}
+        >
+          <View className="flex-row items-center justify-center">
+            <Text className=" font-medium text-black">
+              {t("ReceivedCash.Full Total")} :   {" "}
+            </Text>
+            <Text className="text-xl font-bold text-[#980775]">
+              Rs.{totalCash.toFixed(2)}
+            </Text>
+          </View>
+        </View>
+      </View>
 
       {/* Transactions List */}
       {loading ? (
@@ -262,7 +318,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
           data={transactions}
           renderItem={renderTransaction}
           keyExtractor={(item) => item.id}
-         // contentContainerClassName="pb-5"
           ListEmptyComponent={EmptyState}
           refreshControl={
             <RefreshControl

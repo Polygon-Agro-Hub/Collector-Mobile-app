@@ -271,7 +271,7 @@ ReceivedCashQrCode: {
 };
 DailyTargetListOfficerDistribution:{officerId:string,collectionOfficerId:number};
 PassTarget:undefined
-DigitalSignature:undefined;
+DigitalSignature:{orderId:Number ,fromScreen :string}
 DistributionOfficerReport:{officerId:string,collectionOfficerId:number};
 ReadytoPickupOrders:undefined;
 qrcode: {
