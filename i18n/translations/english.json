@@ -1060,7 +1060,8 @@
     "Done":"Done",
     "Deselect All":"Deselect All",
     "Select All":"Select All",
-    "Hand Over":"Hand Over"
+    "Hand Over":"Hand Over",
+    "No cash was received recently":"No cash was received recently"
   },
   "ViewPickupOrders":{
     "Order Details":"Order Details",
@@ -1070,6 +1071,17 @@
     "Make Phone Call":"Make Phone Call",
     "Scan Order":"Scan Order"
 
+  },
+  "qrcode":{
+    "success": "Success!",
+  "error": "Error",
+  "cashHandoverSuccess": "Rs.{{amount}} has been successfully handed over to {{officerCode}}.",
+  "cashHandoverFailed": "Failed to hand over cash",
+  "Loading camera":"Loading camera...",
+  "Camera Permission Required":"Camera Permission Required",
+  "Please grant camera permission to scan QR codes":"Please grant camera permission to scan QR codes",
+  "Grant Permission":"Grant Permission",
+  "Handing Over Cash":"Handing Over Cash..."
   }
 }
 

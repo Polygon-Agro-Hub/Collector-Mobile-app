@@ -9,6 +9,7 @@ import {
   ScrollView,
   Modal,
   Platform,
+  Alert,
 } from "react-native";
 import { AntDesign, Entypo, FontAwesome5, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -21,7 +22,6 @@ import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
 import DateTimePicker from "@react-native-community/datetimepicker";
-
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -41,6 +41,34 @@ interface Transaction {
   cash: number;
   receivedTime: string;
   date: string;
+  pickupOrderId: string;
+  invNo: string;
+  paymentMethod: string;
+}
+
+interface ApiTransaction {
+  pickupOrderId: number;
+  pickupOrderOrderId: number;
+  orderIssuedOfficer: number;
+  handOverOfficer: number | null;
+  signature: string | null;
+  handOverPrice: number | null;
+  handOverTime: string | null;
+  pickupCreatedAt: string;
+  processOrderId: number;
+  processOrderOrderId: number;
+  invNo: string;
+  transactionId: string;
+  paymentMethod: string;
+  isPaid: number;
+  amount: number;
+  processStatus: string;
+  orderId: number;
+  userId: number;
+  orderApp: string;
+  delivaryMethod: string;
+  fullTotal: number;
+  orderCreatedAt: string;
 }
 
 const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
@@ -48,51 +76,134 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
   navigation,
 }) => {
   const { t } = useTranslation();
-  const [selectedDate, setSelectedDate] = useState(new Date("2025-01-02"));
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [allTransactions] = useState<Transaction[]>([
-    {
-      id: "1",
-      orderId: "241205000020",
-      cash: 1200.0,
-      receivedTime: "2025/01/02 11:54 AM",
-      date: "2025-01-02",
-    },
-    {
-      id: "2",
-      orderId: "241205000020",
-      cash: 1200.0,
-      receivedTime: "2025/01/02 11:54 AM",
-      date: "2025-01-02",
-    },
-    {
-      id: "3",
-      orderId: "241205000020",
-      cash: 1200.0,
-      receivedTime: "2025/01/02 11:54 AM",
-      date: "2025-01-02",
-    },
-    {
-      id: "4",
-      orderId: "241205000021",
-      cash: 800.0,
-      receivedTime: "2025/01/03 10:30 AM",
-      date: "2025-01-03",
-    },
-    {
-      id: "5",
-      orderId: "241205000022",
-      cash: 1500.0,
-      receivedTime: "2025/01/03 02:15 PM",
-      date: "2025-01-03",
-    },
-  ]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedTransactions, setSelectedTransactions] = useState<Set<string>>(new Set());
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate total cash
+  // Format date from API response
+  const formatApiDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    
+    return {
+      date: `${year}-${month}-${day}`,
+      time: `${year}/${month}/${day} ${formattedHours}:${minutes} ${ampm}`
+    };
+  };
+
+  // Transform API data to Transaction format
+  const transformApiData = (apiData: ApiTransaction[]): Transaction[] => {
+    return apiData
+      .filter(item => {
+        // Only show Cash payments where handOverOfficer is null
+        const isCash = item.paymentMethod?.toLowerCase() === 'cash';
+        const notHandedOver = item.handOverOfficer === null;
+        
+        console.log('Filtering item:', {
+          invNo: item.invNo,
+          paymentMethod: item.paymentMethod,
+          isCash,
+          handOverOfficer: item.handOverOfficer,
+          notHandedOver,
+          shouldInclude: isCash && notHandedOver
+        });
+        
+        return isCash && notHandedOver;
+      })
+      .map(item => {
+        const { date, time } = formatApiDate(item.pickupCreatedAt);
+        // Use fullTotal if handOverPrice is null
+        const cashAmount = item.handOverPrice ?? parseFloat(item.fullTotal.toString()) ?? 0;
+        
+        console.log('Transforming item:', {
+          invNo: item.invNo,
+          handOverPrice: item.handOverPrice,
+          fullTotal: item.fullTotal,
+          cashAmount
+        });
+        
+        return {
+          id: item.pickupOrderId.toString(),
+          orderId: item.invNo,
+          cash: cashAmount,
+          receivedTime: time,
+          date: date,
+          pickupOrderId: item.pickupOrderId.toString(),
+          invNo: item.invNo,
+          paymentMethod: item.paymentMethod,
+        };
+      });
+  };
+
+  // Fetch data from API
+  const fetchReceivedCash = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please login again.");
+        return;
+      }
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/pickup/get-received-cash-officer`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("API Response:", response.data);
+
+      if (response.data.success) {
+        const transformedData = transformApiData(response.data.data);
+        setTransactions(transformedData);
+        console.log("Fetched transactions:", transformedData.length);
+        console.log("Transformed data:", transformedData);
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("Error fetching received cash:", error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          Alert.alert("Session Expired", "Please login again.");
+        } else {
+          Alert.alert(
+            "Error", 
+            error.response?.data?.message || "Failed to fetch received cash data"
+          );
+        }
+      } else {
+        Alert.alert("Error", "An unexpected error occurred");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchReceivedCash();
+  }, []);
+
+  //  Refresh when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchReceivedCash();
+    }, [])
+  );
+
+  //  Calculate total cash
   const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
 
   // Calculate selected total cash
@@ -100,66 +211,11 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
     .filter(t => selectedTransactions.has(t.id))
     .reduce((sum, t) => sum + t.cash, 0);
 
-  // Format date
-  const formatDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}/${month}/${day}`;
-  };
-
-  // Format date for comparison
-  const formatDateForComparison = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  // Filter transactions by selected date
-  const filterTransactionsByDate = () => {
-    const selectedDateStr = formatDateForComparison(selectedDate);
-    const filtered = allTransactions.filter(
-      (transaction) => transaction.date === selectedDateStr
-    );
-    setTransactions(filtered);
-    // Clear selections when date changes
-    setSelectedTransactions(new Set());
-  };
-
-  // Effect to filter transactions when date changes
-  useEffect(() => {
-    filterTransactionsByDate();
-  }, [selectedDate]);
-
-  // Handle date change
-  const onDateChange = (event: any, date?: Date) => {
-    if (Platform.OS === "android") {
-      setShowDatePicker(false);
-    }
-    
-    if (date) {
-      setSelectedDate(date);
-    }
-  };
-
-  // Show calendar
-  const handleCalendarPress = () => {
-    setShowDatePicker(true);
-  };
-
-  // Close calendar (iOS)
-  const handleCalendarClose = () => {
-    setShowDatePicker(false);
-  };
-
-  // Refresh handler (simulated)
+  // Refresh handler
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await fetchReceivedCash();
+    setRefreshing(false);
   };
 
   // Toggle transaction selection
@@ -185,25 +241,26 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
   };
 
   // Handle hand over
-  // Handle hand over
-const handleHandOver = () => {
-  console.log("Hand over selected transactions:", Array.from(selectedTransactions));
-  
-  // Get the selected transactions data
-  const selectedTransactionsData = transactions
-    .filter(t => selectedTransactions.has(t.id))
-    .map(t => ({
-      id: t.id,
-      orderId: t.orderId,
-      cash: t.cash
-    }));
-  
-  // Pass the selected transactions data to QR code screen
-  navigation.navigate("ReceivedCashQrCode", {
-    selectedTransactions: selectedTransactionsData,
-    fromScreen: "ReceivedCashOfficer"
-  });
-};
+  const handleHandOver = () => {
+    console.log("Hand over selected transactions:", Array.from(selectedTransactions));
+    
+    // Get the selected transactions data
+    const selectedTransactionsData = transactions
+      .filter(t => selectedTransactions.has(t.id))
+      .map(t => ({
+        id: t.id,
+        orderId: t.orderId,
+        cash: t.cash,
+        pickupOrderId: t.pickupOrderId,
+        invNo: t.invNo,
+      }));
+    
+    // Pass the selected transactions data to QR code screen
+    navigation.navigate("ReceivedCashQrCode", {
+      selectedTransactions: selectedTransactionsData,
+      fromScreen: "ReceivedCashOfficer"
+    });
+  };
 
   // Check if all transactions are selected
   const allSelected = transactions.length > 0 && selectedTransactions.size === transactions.length;
@@ -281,20 +338,16 @@ const handleHandOver = () => {
         </TouchableOpacity>
         <View className="flex-1 items-center justofy-center ml-2">
           <Text className="text-lg font-semibold text-gray-900">
-            {t("ReceivedCash.Received Cash ")}
+            {t("ReceivedCash.Received Cash")}
           </Text>
-        
         </View>
-       
       </View>
 
-      {/* Filter Tabs and Select All */}
+      {/* Filter Tabs */}
       <View className="bg-white px-4 py-3 flex-row items-center justify-between">
         <Text className="text-sm font-medium text-gray-900">
           {t("ReceivedCash.All")} ({transactions.length})
         </Text>
-        
-      
       </View>
 
       {/* Total Card */}
@@ -322,8 +375,8 @@ const handleHandOver = () => {
         </View>
       </View>
 
-        {transactions.length > 0 && (
-          <View className="p-6">
+      {transactions.length > 0 && (
+        <View className="p-6">
           <TouchableOpacity 
             onPress={allSelected ? handleDeselectAll : handleSelectAll}
             className="flex-row items-center"
@@ -337,13 +390,13 @@ const handleHandOver = () => {
               {allSelected ? t("ReceivedCash.Deselect All") : t("ReceivedCash.Select All")}
             </Text>
           </TouchableOpacity>
-          </View>
-        )}
+        </View>
+      )}
 
       {/* Transactions List */}
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#EF4444" />
+          <ActivityIndicator size="large" color="#980775" />
         </View>
       ) : (
         <FlatList
@@ -356,8 +409,8 @@ const handleHandOver = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#EF4444"
-              colors={["#EF4444"]}
+              tintColor="#980775"
+              colors={["#980775"]}
             />
           }
           showsVerticalScrollIndicator={false}
@@ -372,64 +425,12 @@ const handleHandOver = () => {
             className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center"
             activeOpacity={0.8}
           >
- <FontAwesome6 name="hand-holding-hand" size={18} color="white" 
-              
-                />
+            <FontAwesome6 name="hand-holding-hand" size={18} color="white" />
             <Text className="text-white text-base font-semibold ml-4">
-              {t("ReceivedCash.Hand Over")}
+              {t("ReceivedCash.Hand Over")} (Rs.{selectedTotalCash.toFixed(2)})
             </Text>
           </TouchableOpacity>
         </View>
-      )}
-
-      {/* Date Picker */}
-      {showDatePicker && (
-        <>
-          {Platform.OS === "ios" ? (
-            <Modal
-              transparent={true}
-              animationType="slide"
-              visible={showDatePicker}
-              onRequestClose={handleCalendarClose}
-            >
-              <View className="flex-1 justify-end bg-black/50">
-                <View className="bg-white rounded-t-3xl">
-                  <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
-                    <TouchableOpacity onPress={handleCalendarClose}>
-                      <Text className="text-red-600 text-base font-medium">
-                        {t("Hand Over.Cancel")}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text className="text-base font-semibold text-gray-900">
-                      {t("Hand Over.Select Date")}
-                    </Text>
-                    <TouchableOpacity onPress={handleCalendarClose}>
-                      <Text className="text-blue-600 text-base font-medium">
-                        {t("Hand Over.Done")}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="spinner"
-                    onChange={onDateChange}
-                    maximumDate={new Date()}
-                    textColor="#000"
-                  />
-                </View>
-              </View>
-            </Modal>
-          ) : (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="default"
-              onChange={onDateChange}
-              maximumDate={new Date()}
-            />
-          )}
-        </>
       )}
     </View>
   );

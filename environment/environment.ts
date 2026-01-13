@@ -2,7 +2,7 @@ export const environment = {
     production: true,
  // API_BASE_URL: "https://dev.polygonagro.com/collector-api/agro-api/collection-api/",
   // API_BASE_URL: "https://polygonagro.com/collector-api/agro-api/collection-api/",
-    API_BASE_URL: "http://192.168.8.180:3000/agro-api/collection-api/",
+    API_BASE_URL: "http://192.168.1.13:3000/agro-api/collection-api/",
     // API_BASE_URL: "https://agroworld.lk/collector-api/agro-api/collection-api/",
     // API_BASE_URL: "http://192.168.8.104:3000/agro-api/collection-api/",
 

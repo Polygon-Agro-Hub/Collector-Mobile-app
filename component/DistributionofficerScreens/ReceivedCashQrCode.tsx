@@ -22,6 +22,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTranslation } from 'react-i18next';
 
 type ReceivedCashQrCodeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -61,7 +62,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
 
   useEffect(() => {
     if (visible) {
-      // Scale animation
       Animated.spring(scaleAnim, {
         toValue: 1,
         tension: 50,
@@ -69,7 +69,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
         useNativeDriver: true,
       }).start();
 
-      // Pulse animation for icon
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
@@ -85,7 +84,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
         ])
       ).start();
 
-      // Progress bar animation
       if (autoClose) {
         progressAnim.setValue(100);
         Animated.timing(progressAnim, {
@@ -94,7 +92,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
           useNativeDriver: false,
         }).start();
 
-        // Auto close
         const timer = setTimeout(() => {
           onClose();
         }, duration);
@@ -119,7 +116,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
           style={{ transform: [{ scale: scaleAnim }] }}
           className="bg-white rounded-3xl p-6 mx-6 w-[85%] max-w-sm relative overflow-hidden"
         >
-          {/* Close Button */}
           <TouchableOpacity
             onPress={onClose}
             className="absolute top-4 right-4 z-10"
@@ -127,12 +123,10 @@ const FailedModal: React.FC<FailedModalProps> = ({
             <MaterialIcons name="close" size={24} color="#000" />
           </TouchableOpacity>
 
-          {/* Title */}
           <Text className="text-xl font-bold text-center text-gray-800 mb-6">
             {title}
           </Text>
 
-          {/* Icon with pulsing animation */}
           <Animated.View
             style={{ transform: [{ scale: pulseAnim }] }}
             className="items-center mb-6"
@@ -146,7 +140,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
             </View>
           </Animated.View>
 
-          {/* Message */}
           <View className="mb-6">
             {typeof message === "string" ? (
               <Text className="text-center text-gray-600 text-base">
@@ -157,7 +150,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
             )}
           </View>
 
-          {/* Progress Bar */}
           {autoClose && (
             <View
               className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"
@@ -210,7 +202,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
 
   useEffect(() => {
     if (visible) {
-      // Scale animation for modal
       Animated.spring(scaleAnim, {
         toValue: 1,
         tension: 50,
@@ -218,7 +209,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
         useNativeDriver: true,
       }).start();
 
-      // Check mark animation
       Animated.sequence([
         Animated.delay(200),
         Animated.spring(checkAnim, {
@@ -229,7 +219,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
         }),
       ]).start();
 
-      // Progress bar animation
       if (autoClose) {
         progressAnim.setValue(100);
         Animated.timing(progressAnim, {
@@ -238,7 +227,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
           useNativeDriver: false,
         }).start();
 
-        // Auto close
         const timer = setTimeout(() => {
           onClose();
         }, duration);
@@ -264,7 +252,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
           style={{ transform: [{ scale: scaleAnim }] }}
           className="bg-white rounded-3xl p-6 mx-6 w-[85%] max-w-sm relative overflow-hidden"
         >
-          {/* Close Button */}
           <TouchableOpacity
             onPress={onClose}
             className="absolute top-4 right-4 z-10"
@@ -272,12 +259,10 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
             <MaterialIcons name="close" size={24} color="#000" />
           </TouchableOpacity>
 
-          {/* Title */}
           <Text className="text-xl font-bold text-center text-gray-800 mb-6">
             {title}
           </Text>
 
-          {/* Icon with animation */}
           <Animated.View
             style={{ transform: [{ scale: checkAnim }] }}
             className="items-center mb-6"
@@ -291,7 +276,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
             </View>
           </Animated.View>
 
-          {/* Message */}
           <View className="mb-6">
             {typeof message === "string" ? (
               <Text className="text-center text-gray-600 text-base">
@@ -302,7 +286,6 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
             )}
           </View>
 
-          {/* Progress Bar */}
           {autoClose && (
             <View
               className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"
@@ -341,13 +324,13 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
   // Get data from route params
   const selectedTransactions = route.params?.selectedTransactions || [];
   const fromScreen = route.params?.fromScreen;
-  
-  // Check if this is a cash handover operation
-  const isCashHandover = fromScreen === "ReceivedCashOfficer" && selectedTransactions.length > 0;
-  
-  // For backward compatibility, we can still support order verification if needed
-  const isOrderVerification = false;
+  const { t } = useTranslation();
 
+  console.log("Selected Transactions:", selectedTransactions);
+  
+  // Calculate total cash
+  const totalCash = selectedTransactions.reduce((sum: number, t: any) => sum + t.cash, 0);
+  
   // Timer states for timeout
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -359,35 +342,27 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
   const [showRescanButton, setShowRescanButton] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | React.ReactElement>("");
   
-  // Calculate total cash if we have transactions
-  const totalCash = selectedTransactions.reduce((sum: number, t: any) => sum + t.cash, 0);
-  
   // Track if screen is focused
   const isFocusedRef = useRef(true);
 
   // Handle screen focus/blur
   useFocusEffect(
     React.useCallback(() => {
-      // Screen is focused
       isFocusedRef.current = true;
       
-      // Reset all states when screen comes into focus
       setScanned(false);
       setLoading(false);
       setShowTimeoutModal(false);
       setShowErrorModal(false);
       setShowSuccessModal(false);
       
-      // Start the timer
       if (permission?.granted) {
         startTimeoutTimer();
       }
 
       return () => {
-        // Screen is blurred (navigating away)
         isFocusedRef.current = false;
         
-        // Clear the timer when leaving the screen
         if (timerRef.current) {
           clearTimeout(timerRef.current);
           timerRef.current = null;
@@ -397,7 +372,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
   );
 
   useEffect(() => {
-    // Request permission only if not granted
     if (permission && !permission.granted && permission.canAskAgain) {
       requestPermission();
     }
@@ -412,7 +386,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
   }, []);
 
   useEffect(() => {
-    // Start timer ONLY when camera permission is granted and screen is focused
     if (permission?.granted && !scanned && !loading && isFocusedRef.current) {
       startTimeoutTimer();
     }
@@ -424,16 +397,12 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     };
   }, [permission?.granted, scanned, loading]);
 
-  // Start timeout timer
   const startTimeoutTimer = () => {
-    // Clear existing timer
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
-    // Set new timer for 15 seconds
     timerRef.current = setTimeout(() => {
-      // Only show timeout if screen is still focused
       if (!scanned && !loading && isFocusedRef.current) {
         setModalTitle("Scan Timeout");
         setModalMessage(
@@ -445,20 +414,16 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     }, 15000);
   };
 
-  // Reset timer and scanning
   const resetScanning = () => {
-    // Clear timer
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
-    // Reset states
     setScanned(false);
     setShowTimeoutModal(false);
     setShowErrorModal(false);
     setShowSuccessModal(false);
 
-    // Restart timer only if screen is focused
     if (isFocusedRef.current) {
       startTimeoutTimer();
     }
@@ -486,7 +451,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     try {
       console.log("Raw QR Data for cash officer:", qrData);
 
-      // Method 1: Check if QR contains DCM officer ID pattern (DCM followed by exactly 5 digits)
+      // Method 1: Check if QR contains DCM officer ID pattern
       const dcmOfficerPattern = /DCM\d{5}/gi;
       const dcmMatch = qrData.match(dcmOfficerPattern);
       if (dcmMatch) {
@@ -500,7 +465,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
           const parsed = JSON.parse(qrData);
           console.log("Parsed JSON for officer:", parsed);
           
-          // Check for DCM pattern in various fields
           const fieldsToCheck = [
             parsed.officerId, 
             parsed.officerCode, 
@@ -543,73 +507,8 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
 
   // Validate if the officer code is in correct DCM format
   const validateDCMOfficerCode = (officerCode: string): boolean => {
-    // Must be exactly DCM followed by 5 digits
     const dcmPattern = /^DCM\d{5}$/i;
     return dcmPattern.test(officerCode);
-  };
-
-  // Extract invoice number from QR data (for backward compatibility)
-  const extractInvoiceNumber = (qrData: string): string | null => {
-    try {
-      console.log("Raw QR Data:", qrData);
-
-      // Method 1: Check if QR contains invoice pattern (INV followed by numbers)
-      const invoicePattern = /INV[0-9]+/gi;
-      const match = qrData.match(invoicePattern);
-      if (match) {
-        console.log("Found invoice pattern:", match[0]);
-        return match[0];
-      }
-
-      // Method 2: Check if QR is JSON containing invoice
-      if (qrData.startsWith("{") && qrData.endsWith("}")) {
-        try {
-          const parsed = JSON.parse(qrData);
-          console.log("Parsed JSON:", parsed);
-          if (
-            parsed.invoiceNo ||
-            parsed.invNo ||
-            parsed.invoiceNumber ||
-            parsed.invoice
-          ) {
-            const invoice =
-              parsed.invoiceNo ||
-              parsed.invNo ||
-              parsed.invoiceNumber ||
-              parsed.invoice;
-            console.log("Found invoice in JSON:", invoice);
-            return invoice;
-          }
-        } catch (e) {
-          console.log("Not valid JSON");
-        }
-      }
-
-      // Method 3: Check if it's just the invoice number (alphanumeric, 6-20 chars)
-      const simplePattern = /^[A-Z0-9]{6,20}$/;
-      if (simplePattern.test(qrData)) {
-        console.log("Simple pattern matched:", qrData);
-        return qrData;
-      }
-
-      // Method 4: Try to extract any alphanumeric code (6+ characters)
-      const alphanumericPattern = /[A-Z0-9]{6,}/gi;
-      const alphanumericMatches = qrData.match(alphanumericPattern);
-      if (alphanumericMatches && alphanumericMatches.length > 0) {
-        console.log("Alphanumeric matches:", alphanumericMatches);
-        // Return the longest match (likely to be the invoice)
-        const longestMatch = alphanumericMatches.reduce((a, b) =>
-          a.length > b.length ? a : b
-        );
-        return longestMatch;
-      }
-
-      console.log("No invoice number found in QR data");
-      return null;
-    } catch (error) {
-      console.error("Error extracting invoice:", error);
-      return null;
-    }
   };
 
   // API call to hand over cash to officer
@@ -622,15 +521,13 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
         throw new Error("Authentication token not found");
       }
 
-      // Construct the API URL for cash handover
-      const apiUrl = `${environment.API_BASE_URL}api/cash/handover`;
-      console.log("Making API call to:", apiUrl);
       console.log("Officer Code:", officerCode);
+      
+      const apiUrl = `${environment.API_BASE_URL}api/pickup/update-cash-received`;
+      console.log("Making API call to:", apiUrl);
       console.log("Transactions:", transactions);
       console.log("Total Cash:", totalCash);
-      console.log("Token:", token.substring(0, 20) + "...");
 
-      // Prepare the data for API
       const handoverData = {
         officerCode: officerCode,
         transactions: transactions.map(t => ({
@@ -670,81 +567,15 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
 
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          // Server responded with error
           throw {
             message: error.response.data?.message || "Failed to hand over cash",
             status: error.response.status,
             data: error.response.data,
           };
         } else if (error.request) {
-          // Request made but no response
           throw new Error("Network error. Please check your connection.");
         } else {
-          // Other errors
           throw new Error(error.message || "Failed to hand over cash");
-        }
-      } else {
-        throw new Error("An unexpected error occurred");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // API call to assign order (for backward compatibility)
-  const assignOrderToDriver = async (invoiceNo: string) => {
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-
-      // Construct the full API URL using environment
-      const apiUrl = `${environment.API_BASE_URL}api/order/assign-driver-order`;
-      console.log("Making API call to:", apiUrl);
-      console.log("Invoice:", invoiceNo);
-      console.log("Token:", token.substring(0, 20) + "...");
-
-      const response = await axios.post(
-        apiUrl,
-        {
-          invNo: invoiceNo,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 10000,
-        }
-      );
-
-      console.log("API Response:", response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        url: error.config?.url,
-      });
-
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          // Server responded with error
-          throw {
-            message: error.response.data?.message || "Failed to assign order",
-            status: error.response.status,
-            data: error.response.data,
-          };
-        } else if (error.request) {
-          // Request made but no response
-          throw new Error("Network error. Please check your connection.");
-        } else {
-          // Other errors
-          throw new Error(error.message || "Failed to assign order");
         }
       } else {
         throw new Error("An unexpected error occurred");
@@ -765,217 +596,84 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
 
     setScanned(true);
 
-    // Clear the timeout timer when scan is detected
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
     try {
-      // If this is cash handover mode
-      if (isCashHandover) {
-        // Extract the cash officer's ID from QR (must be DCM followed by 5 digits)
-        const cashOfficerCode = extractCashOfficerCode(data);
-        
-        if (!cashOfficerCode) {
-          setModalTitle("Failed!");
-          setModalMessage("The QR code is not identified.\nPlease check and try again.");
-          setShowRescanButton(true);
-          setShowErrorModal(true);
-          return;
-        }
-        
-        // Validate the officer code format
-        if (!validateDCMOfficerCode(cashOfficerCode)) {
-          setModalTitle("Failed!");
-          setModalMessage("Invalid officer code format.\nMust be DCM followed by 5 digits (e.g., DCM00001).");
-          setShowRescanButton(true);
-          setShowErrorModal(true);
-          return;
-        }
-        
-        // Call API to hand over cash
-        const result = await handOverCashToOfficer(selectedTransactions, cashOfficerCode);
-        
-        if (result.status === "success" || result.success) {
-          // Show success message as per the image
-          setModalTitle("Success!");
-          setModalMessage(
-            <View className="items-center">
-              <Text className="text-center font-bold text-[#000000] text-lg mb-2">
-                Rs.{totalCash.toFixed(2)}
-              </Text>
-              <Text className="text-center text-[#4E4E4E] text-base">
-                has been successfully handed over to
-              </Text>
-              <Text className="text-center font-bold text-[#000000] text-lg mt-1">
-                {cashOfficerCode.toUpperCase()}.
-              </Text>
-            </View>
-          );
-          setShowSuccessModal(true);
-        } else {
-          // Handle non-success responses from API
-          setModalTitle("Error");
-          setModalMessage(result.message || "Failed to hand over cash");
-          setShowErrorModal(true);
-        }
-        return;
-      }
-
-      // Original driver assignment mode (for backward compatibility)
-      const invoiceNo = extractInvoiceNumber(data);
-
-      if (!invoiceNo) {
-        setModalTitle("Error!");
-        setModalMessage(
-          "The QR code is not identified.\nPlease check and try again."
-        );
+      // Extract the cash officer's ID from QR
+      const cashOfficerCode = extractCashOfficerCode(data);
+      
+      if (!cashOfficerCode) {
+        setModalTitle("Failed!");
+        setModalMessage("The QR code is not identified.\nPlease check and try again.");
         setShowRescanButton(true);
         setShowErrorModal(true);
         return;
       }
-
-      console.log("Extracted invoice:", invoiceNo);
-
-      // Call API to assign order
-      const result = await assignOrderToDriver(invoiceNo);
-
-      if (result.status === "success") {
-        setModalTitle("Successful!");
+      
+      // Validate the officer code format
+      if (!validateDCMOfficerCode(cashOfficerCode)) {
+        setModalTitle("Failed!");
+        setModalMessage("Invalid officer code format.\nMust be DCM followed by 5 digits (e.g., DCM00001).");
+        setShowRescanButton(true);
+        setShowErrorModal(true);
+        return;
+      }
+      
+      // Call API to hand over cash
+      const result = await handOverCashToOfficer(selectedTransactions, cashOfficerCode);
+      
+    if (result.status === "success" || result.success) {
+        setModalTitle(t("qrcode.success"));
         setModalMessage(
           <View className="items-center">
-            <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
-              Order:{" "}
-              <Text className="font-bold text-[#000000]">{invoiceNo}</Text> has
-              been successfully assigned to you.
+            <Text className="text-center text-[#000000] mb-2">
+              {t("qrcode.cashHandoverSuccess", {
+                amount: totalCash.toFixed(2),
+                officerCode: cashOfficerCode.toUpperCase()
+              })}
             </Text>
           </View>
         );
         setShowSuccessModal(true);
       } else {
-        // Handle non-success responses from API
-        let title = "Error";
-        const message = result.message || "Failed to assign order";
-
-        if (message.includes("already in your target list")) {
-          title = "Already got this!";
-        } else if (
-          message.includes("already been collected") ||
-          message.includes("already been assigned to another driver")
-        ) {
-          title = "Order Unavailable!";
-        } else if (
-          message.includes("Still processing this order") ||
-          message.includes("Scanning will be available")
-        ) {
-          title = "Order Not Ready!";
-        }
-
-        setModalTitle(title);
-        setModalMessage(message);
+        setModalTitle(t("error"));
+        setModalMessage(result.message || t("cashHandoverFailed"));
         setShowErrorModal(true);
       }
     } catch (error: any) {
       console.error("Error processing QR scan:", error);
 
-      let title = "Error";
-      let message = error.message || "Failed to process QR code";
+      let title = "Failed!";
+      let message = "The QR code is not identified.\nPlease check and try again.";
 
-      // Get the actual error message from the response
-      const errorMessage = error.response?.data?.message || error.message || message;
+      const errorMessage = error.response?.data?.message || error.message;
       const statusCode = error.response?.status || error.status;
 
       console.log("Error details:", { errorMessage, statusCode });
 
-      // Handle cash handover specific errors
-      if (isCashHandover) {
-        if (errorMessage.includes("officer") || errorMessage.includes("Officer")) {
-          title = "Officer Error";
-        } else if (errorMessage.includes("already handed over") || errorMessage.includes("already processed")) {
-          title = "Already Processed!";
-          message = "These transactions have already been handed over.";
-        } else if (statusCode === 404) {
-          title = "Officer Not Found";
-          message = "The cash officer code is not recognized.";
-        } else if (statusCode === 400) {
-          title = "Invalid Request";
-        } else {
-          // Default error for cash handover
-          title = "Failed!";
-          message = "The QR code is not identified.\nPlease check and try again.";
-        }
-      } else {
-        // Original error handling for driver assignment
-        // PRIORITY 1: Check if order already assigned to SAME driver (409 status)
-        if (
-          statusCode === 409 &&
-          (errorMessage.includes("already in your target list") ||
-           errorMessage.toLowerCase().includes("already got"))
-        ) {
-          title = "Already got this!";
-          message = errorMessage;
-        }
-        // PRIORITY 2: Check if order assigned to ANOTHER driver (409 status)
-        else if (
-          statusCode === 409 &&
-          (errorMessage.includes("already been collected") ||
-           errorMessage.includes("already been assigned to another driver") ||
-           errorMessage.toLowerCase().includes("collected by another Driver") ||
-           errorMessage.toLowerCase().includes("assigned to another") ||
-           errorMessage.toLowerCase().includes("Driver id:"))
-        ) {
-          title = "Order Unavailable!";
-          // Replace "officer" with "Driver" in the error message
-          message = errorMessage
-            .replace(/officer/gi, "Driver")
-            .replace(/Officer ID:/gi, "Driver ID:");
-        }
-        // PRIORITY 3: Check for "Order Not Ready" (400 status with processing message)
-        else if (
-          statusCode === 400 &&
-          (errorMessage.includes("Still processing this order") ||
-           errorMessage.includes("Scanning will be available") ||
-           errorMessage.toLowerCase().includes("not ready") ||
-           errorMessage.toLowerCase().includes("processing"))
-        ) {
-          title = "Order Not Ready!";
-          message = errorMessage.includes("Scanning will be available") 
-            ? errorMessage 
-            : "Still processing this order. Scanning will be available after it's set to Out For Delivery.";
-        }
-        // Check for invalid invoice (404 status)
-        else if (
-          statusCode === 404 ||
-          errorMessage.includes("not found") ||
-          errorMessage.includes("Invoice number not found") ||
-          errorMessage.toLowerCase().includes("invalid invoice")
-        ) {
-          title = "Error!";
-          message = "The QR code is not identified.Please check and try again.";
-        }
-        // Network errors
-        else if (
-          errorMessage.includes("Network error") ||
-          errorMessage.includes("Network Error")
-        ) {
-          title = "Network Error";
-          message = "Please check your internet connection and try again.";
-        }
-        // Authentication errors (401 status)
-        else if (statusCode === 401 || errorMessage.includes("Unauthorized")) {
-          title = "Session Expired";
-          message = "Please login again to continue.";
-        }
-        // Server errors (500 status)
-        else if (statusCode === 500) {
-          title = "Server Error";
-          message = "Internal server error. Please try again later.";
-        }
-        // Bad request (400 status) - general
-        else if (statusCode === 400) {
-          title = "Invalid Request";
-          message = errorMessage || "Invalid request. Please try again.";
-        }
+      if (errorMessage.includes("officer") || errorMessage.includes("Officer")) {
+        title = "Officer Error";
+        message = errorMessage;
+      } else if (errorMessage.includes("already handed over") || errorMessage.includes("already processed")) {
+        title = "Already Processed!";
+        message = "These transactions have already been handed over.";
+      } else if (statusCode === 404) {
+        title = "Officer Not Found";
+        message = "The cash officer code is not recognized.";
+      } else if (statusCode === 400) {
+        title = "Invalid Request";
+        message = errorMessage || "Invalid request. Please try again.";
+      } else if (errorMessage.includes("Network error")) {
+        title = "Network Error";
+        message = "Please check your internet connection and try again.";
+      } else if (statusCode === 401) {
+        title = "Session Expired";
+        message = "Please login again to continue.";
+      } else if (statusCode === 500) {
+        title = "Server Error";
+        message = "Internal server error. Please try again later.";
       }
 
       setModalTitle(title);
@@ -992,12 +690,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
     setScanned(false);
-    
-    // Navigate back to ReceivedCashOfficer screen after successful cash handover
-    if (isCashHandover) {
-      // Navigate back with a flag to refresh the data
-      navigation.goBack();
-    }
+    navigation.goBack();
   };
 
   const handleTimeoutModalClose = () => {
@@ -1010,7 +703,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     resetScanning();
   };
 
-  // Show loading while permission is being checked
   if (!permission) {
     return (
       <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
@@ -1018,12 +710,11 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
         <View className="bg-black/50 p-8 rounded-full">
           <ActivityIndicator size="large" color="black" />
         </View>
-        <Text className="text-white text-lg mt-4">Loading camera...</Text>
+        <Text className="text-white text-lg mt-4"> {t("qrcode.Loading camera")}</Text>
       </SafeAreaView>
     );
   }
 
-  // Show permission denied screen
   if (!permission.granted) {
     return (
       <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center px-6">
@@ -1032,17 +723,17 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
           <Ionicons name="camera" size={wp(15)} color="#EF4444" />
         </View>
         <Text className="text-white text-2xl font-bold mb-3 text-center">
-          Camera Permission Required
+         {t("qrcode.Camera Permission Required")} 
         </Text>
         <Text className="text-gray-400 text-center mb-8 px-4">
-          Please grant camera permission to scan QR codes.
+        {t("qrcode.Please grant camera permission to scan QR codes.")}  
         </Text>
         <TouchableOpacity
           className="bg-[black] py-4 px-12 rounded-xl"
           onPress={requestPermission}
         >
           <Text className="text-black font-bold text-base">
-            Grant Permission
+           {t("qrcode.Grant Permission")}  
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -1058,21 +749,17 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     <View className="flex-1">
       <StatusBar barStyle="light-content" />
 
-      {/* Loading Overlays */}
       {loading && (
         <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/70 z-50 justify-center items-center">
           <View className="bg-black/80 p-6 rounded-xl items-center">
             <ActivityIndicator size="large" color="black" />
             <Text className="text-white text-lg font-semibold mt-4">
-              {isCashHandover ? "Handing Over Cash..." : "Processing..."}
+              {t("qrcode.Handing Over Cash")} 
             </Text>
           </View>
         </View>
       )}
 
-      
-
-      {/* Timeout Modal */}
       <FailedModal
         visible={showTimeoutModal}
         title="Scan Timeout"
@@ -1084,7 +771,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
         duration={4000}
       />
 
-      {/* Error Modal */}
       <FailedModal
         visible={showErrorModal}
         title={modalTitle}
@@ -1096,7 +782,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
         duration={4000}
       />
 
-      {/* Success Modal */}
       <SuccessModal
         visible={showSuccessModal}
         title={modalTitle}
@@ -1107,9 +792,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
       />
 
       <View className="flex-1">
-        {/* Semi-transparent overlay */}
         <View className="flex-1 bg-black/50">
-          {/* Back Button */}
           <View className="flex-row items-center justify-between px-4 py-3 relative">
             <TouchableOpacity
               onPress={() => navigation.goBack()}
@@ -1127,14 +810,9 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
                 }}
               />
             </TouchableOpacity>
-            
-            {/* Screen Title */}
-         
           </View>
 
-          {/* Scan Frame Container */}
           <View className="flex-1 justify-center items-center">
-            {/* Scan Frame with Camera */}
             <View
               style={{
                 width: wp(80),
@@ -1144,7 +822,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
                 position: "relative",
               }}
             >
-              {/* Camera View inside the frame */}
               <CameraView
                 style={{
                   position: "absolute",
@@ -1162,7 +839,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
                 }
               />
 
-              {/* Animated Scan Line */}
               <Animated.View
                 style={{
                   width: "100%",
@@ -1297,8 +973,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
                 />
               </View>
             </View>
-            
-          
           </View>
         </View>
       </View>

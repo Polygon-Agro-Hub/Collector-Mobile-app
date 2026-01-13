@@ -61,8 +61,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
   const [loading, setLoading] = useState(false);
 
   // Calculate total cash
- // Calculate total cash
- const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
+  const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
 
   // Format date for display
   const formatDate = (date: Date) => {
@@ -166,6 +165,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
       (transaction) => transaction.date === selectedDateStr
     );
     setTransactions(filtered);
+    console.log("Filtered for date:", selectedDateStr, "Found:", filtered.length);
   }, [selectedDate, allTransactions]);
 
   // Effect to filter transactions when date changes
@@ -173,14 +173,42 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     filterTransactionsByDate();
   }, [filterTransactionsByDate]);
 
-  // Fetch data on component mount
+  // Fetch data on component mount and load saved date
   useEffect(() => {
+    loadSelectedDate();
     fetchReceivedCash();
   }, []);
+
+  // Load selected date from AsyncStorage
+  const loadSelectedDate = async () => {
+    try {
+      const savedDateStr = await AsyncStorage.getItem("selectedCashDate");
+      if (savedDateStr) {
+        const savedDate = new Date(savedDateStr);
+        if (!isNaN(savedDate.getTime())) {
+          setSelectedDate(savedDate);
+          console.log("Loaded saved date:", savedDate);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading selected date:", error);
+    }
+  };
+
+  // Save selected date to AsyncStorage
+  const saveSelectedDate = async (date: Date) => {
+    try {
+      await AsyncStorage.setItem("selectedCashDate", date.toISOString());
+      console.log("Saved date:", date);
+    } catch (error) {
+      console.error("Error saving selected date:", error);
+    }
+  };
 
   // Refresh data when screen comes into focus
   useFocusEffect(
     useCallback(() => {
+      // Don't reset date when coming back, just refetch data
       fetchReceivedCash();
     }, [])
   );
@@ -193,6 +221,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     
     if (date) {
       setSelectedDate(date);
+      saveSelectedDate(date); // Save the selected date
     }
   };
 
@@ -203,6 +232,12 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
 
   // Close calendar (iOS)
   const handleCalendarClose = () => {
+    setShowDatePicker(false);
+  };
+
+  // Confirm date selection for iOS
+  const handleDateConfirm = () => {
+    saveSelectedDate(selectedDate);
     setShowDatePicker(false);
   };
 
@@ -260,7 +295,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
         >
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <View className="flex-1 items-center justofy-center ml-2">
+        <View className="flex-1 items-center justify-center ml-2">
           <Text className="text-lg font-semibold text-gray-900">
             {t("ReceivedCash.Received Cash")}
           </Text>
@@ -311,14 +346,12 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
       {/* Transactions List */}
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#EF4444" />
+          <ActivityIndicator size="large" color="black" />
         </View>
-      ) : (
-        <FlatList
-          data={transactions}
-          renderItem={renderTransaction}
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={EmptyState}
+      ) : transactions.length > 0 ? (
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -327,8 +360,41 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
               colors={["#EF4444"]}
             />
           }
-          showsVerticalScrollIndicator={false}
-        />
+          contentContainerStyle={{
+            paddingBottom: 16,
+            flexGrow: 1,
+          }}
+        >
+          {transactions.map((item) => (
+            <View key={item.id} className="bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border border-[#738FAE] shadow-sm">
+              <Text className="text-sm font-medium text-gray-900 mb-1">
+                {t("ReceivedCash.Order ID")} : {item.invoiceNo}
+              </Text>
+              <View className="flex-row">
+                <Text className="text-sm text-[#848484] mb-1">
+                  {t("ReceivedCash.Cash")} : 
+                </Text>
+                <Text className="text-sm text-black font-medium"> Rs.{item.cash}</Text>
+              </View>
+              <Text className="text-xs text-[#848484]">
+                {t("ReceivedCash.Received Time")} : {item.receivedTime}
+              </Text>
+            </View>
+          ))}
+          {/* Add extra space at bottom if needed */}
+          <View className="h-20" />
+        </ScrollView>
+      ) : (
+        <View className="flex-1">
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#EF4444"
+            colors={["#EF4444"]}
+          >
+            <EmptyState />
+          </RefreshControl>
+        </View>
       )}
 
       {/* Date Picker */}
@@ -352,7 +418,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                     <Text className="text-base font-semibold text-gray-900">
                       {t("ReceivedCash.Select Date")}
                     </Text>
-                    <TouchableOpacity onPress={handleCalendarClose}>
+                    <TouchableOpacity onPress={handleDateConfirm}>
                       <Text className="text-blue-600 text-base font-medium">
                         {t("ReceivedCash.Done")}
                       </Text>

@@ -1061,7 +1061,8 @@
     "Done": "සම්පූර්ණයි",
     "Deselect All": "සියල්ල ඉවත් කරන්න",
     "Select All": "සියල්ල තෝරන්න",
-    "Hand Over": "භාර දෙන්න"
+    "Hand Over": "භාර දෙන්න",
+    "No cash was received recently":"මෑතකදී මුදල් ලැබුණේ නැහැ."
   
 },
  "ViewPickupOrders":{
@@ -1072,5 +1073,16 @@
     "Make Phone Call":"දුරකථන ඇමතුමක් ගන්න",
     "Scan Order":"ස්කෑන් ඇණවුම"
 
+  },
+    "qrcode":{
+  "success": "සාර්ථකයි!",
+  "error": "දෝෂයකි",
+  "cashHandoverSuccess": "Rs.{{amount}} {{officerCode}} වෙත සාර්ථකව භාර දී ඇත.",
+  "cashHandoverFailed": "මුදල් භාර දීම අසාර්ථක විය",
+   "Loading camera":"කැමරාව පූරණය වෙමින්...",
+   "Camera Permission Required":"කැමරා අවසරය අවශ්‍යයි",
+   "Please grant camera permission to scan QR codes":"QR කේත ස්කෑන් කිරීමට කැමරා අවසරය ලබා දෙන්න.",
+   "Grant Permission":"අවසර දෙන්න",
+   "Handing Over Cash":"මුදල් භාරදීම..."
   }
 }

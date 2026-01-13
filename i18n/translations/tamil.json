@@ -1061,7 +1061,8 @@
     "Done": "முடிந்தது",
     "Deselect All": "அனைத்தையும் தேர்வு நீக்கு",
     "Select All": "அனைத்தையும் தேர்ந்தெடு",
-    "Hand Over": "கையளி"
+    "Hand Over": "கையளி",
+    "No cash was received recently":"சமீபத்தில் எந்தப் பணமும் பெறப்படவில்லை."
   
 },
  "ViewPickupOrders":{
@@ -1072,5 +1073,16 @@
     "Make Phone Call":"தொலைபேசி அழைப்பு செய்",
     "Scan Order":"ஸ்கேன் ஆர்டர்"
 
+  },
+  "qrcode":{
+    "success": "வெற்றி!",
+  "error": "பிழை",
+  "cashHandoverSuccess": "Rs.{{amount}} {{officerCode}} க்கு வெற்றிகரமாக ஒப்படைக்கப்பட்டது.",
+  "cashHandoverFailed": "பணம் ஒப்படைப்பு தோல்வியடைந்தது",
+   "Loading camera":"கேமராவை ஏற்றுகிறது...",
+   "Camera Permission Required":"கேமரா அனுமதி தேவை",
+   "Please grant camera permission to scan QR codes":"QR குறியீடுகளை ஸ்கேன் செய்ய கேமராவுக்கு அனுமதி வழங்கவும்.",
+   "Grant Permission":"அனுமதி வழங்கு",
+   "Handing Over Cash":"பணத்தை ஒப்படைத்தல்..."
   }
  }
