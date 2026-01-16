@@ -92,7 +92,6 @@ interface OrderCardProps {
 
 interface EmptyStateProps {
   message: string;
-  onClear: () => void;
 }
 
 const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
@@ -401,7 +400,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
           {(searchState === "initial" || searchState === "results") &&
             orders.length > 0 && (
-              <View className="p-4">
+              <View className="p-4 pb-24">
                 {filteredOrders.map((order, index) => (
                   <OrderCard
                     key={`${order.orderId}-${index}`}
@@ -412,34 +411,11 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
               </View>
             )}
 
-          {/* Clear Search Button - Shows at bottom when searching */}
-          {isSearching && (
-            <View className="flexbg-white p-4">
-              <TouchableOpacity
-                onPress={handleClearSearch}
-                className="bg-black px-8 py-3 rounded-full w-full items-center"
-              >
-                <View className="flex-row items-center">
-                  <Ionicons
-                    name="close"
-                    size={20}
-                    color="#fff"
-                    style={{ marginRight: 8 }}
-                  />
-                  <Text className="text-white text-base font-semibold">
-                    {t("ReadytoPickupOrders.Clear Search")}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
-
           {searchState === "no-orders" && (
             <EmptyState
               message={t(
                 "ReadytoPickupOrders.No orders from this user for pickup"
               )}
-              onClear={handleClearSearch}
             />
           )}
 
@@ -448,11 +424,32 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
               message={t(
                 "ReadytoPickupOrders.No registered customer using this phone number"
               )}
-              onClear={handleClearSearch}
             />
           )}
         </ScrollView>
       </View>
+
+      {/* Clear Search Button - Fixed at bottom when searching */}
+      {isSearching && (
+        <View className="absolute bottom-20 left-0 right-0 bg-white px-6 pb-6 pt-2  border-gray-100">
+          <TouchableOpacity
+            onPress={handleClearSearch}
+            className="bg-black px-8 py-3 rounded-full w-full items-center"
+          >
+            <View className="flex-row items-center">
+              <Ionicons
+                name="close"
+                size={20}
+                color="#fff"
+                style={{ marginRight: 8 }}
+              />
+              <Text className="text-white text-base font-semibold">
+                {t("ReadytoPickupOrders.Clear Search")}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -573,11 +570,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   );
 };
 
-const EmptyState: React.FC<EmptyStateProps> = ({ message, onClear }) => {
-  const { t } = useTranslation();
-
+const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
   return (
-    <View className="flex-1 justify-center items-center mt-20 px-4">
+    <View className="flex-1 justify-center items-center mt-20 px-4 pb-24">
       <View className="relative">
         <Image
           source={require("../../assets/images/notfound.webp")}
@@ -589,23 +584,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message, onClear }) => {
       <Text className="text-base text-[#828282] text-center mb-8 mt-4 italic">
         - {message} -
       </Text>
-
-      <TouchableOpacity
-        onPress={onClear}
-        className="bg-black px-8 py-3 rounded-full w-full max-w-xs items-center mb-6"
-      >
-        <View className="flex-row items-center">
-          <Ionicons
-            name="close"
-            size={20}
-            color="#fff"
-            style={{ marginRight: 8 }}
-          />
-          <Text className="text-white text-base font-semibold">
-            {t("ReadytoPickupOrders.Clear Search")}
-          </Text>
-        </View>
-      </TouchableOpacity>
     </View>
   );
 };
