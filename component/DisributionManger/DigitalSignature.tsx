@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Signature from "react-native-signature-canvas";
-import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons, Entypo } from "@expo/vector-icons";
 import {
   useNavigation,
   useFocusEffect,
@@ -16,11 +16,14 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/component/types";
 import * as ScreenOrientation from "expo-screen-orientation";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -176,7 +179,9 @@ export default function DigitalSignature({
   const [loading, setLoading] = useState(false);
   const [signatureDrawn, setSignatureDrawn] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | React.ReactNode>("");
+  const [successMessage, setSuccessMessage] = useState<
+    string | React.ReactNode
+  >("");
 
   console.log("order id in digital sig screen", orderId, fromScreen);
 
@@ -284,8 +289,10 @@ export default function DigitalSignature({
           <View className="items-center">
             <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
               Pickup details for order:{" "}
-              <Text className="font-bold text-[#000000]">{String(orderId)}</Text> has
-              been saved successfully!
+              <Text className="font-bold text-[#000000]">
+                {String(orderId)}
+              </Text>{" "}
+              has been saved successfully!
             </Text>
           </View>
         );
@@ -295,10 +302,8 @@ export default function DigitalSignature({
 
         // Add backup navigation timeout
         setTimeout(() => {
-          if (showSuccessModal) {
-            setShowSuccessModal(false);
-            handleNavigationAfterSuccess();
-          }
+          setShowSuccessModal(false);
+          navigation.navigate("ReadytoPickupOrders");
         }, 3000);
       } else {
         throw new Error(response.data.message || "Failed to save signature");
@@ -323,14 +328,9 @@ export default function DigitalSignature({
     }
   };
 
- const handleNavigationAfterSuccess = () => {
-     // Always navigate to ReadytoPickupOrders screen after successful signature
-     navigation.navigate("ReadytoPickupOrders" as any);
-   };
-
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    handleNavigationAfterSuccess();
+    navigation.navigate("ReadytoPickupOrders");
   };
 
   const handleBackPress = () => {
@@ -345,7 +345,7 @@ export default function DigitalSignature({
         {
           text: "Yes, Cancel",
           onPress: () => {
-            handleNavigationAfterSuccess();
+            navigation.navigate("ReadytoPickupOrders");
           },
         },
       ]
@@ -432,6 +432,35 @@ export default function DigitalSignature({
 
   return (
     <View className="flex-1 bg-white">
+      {/* HEADER */}
+      <View className="flex-row items-center justify-between px-4 pb-3">
+        {/* LEFT - BACK BUTTON */}
+        <View style={{ width: wp(15) }}>
+          <TouchableOpacity onPress={handleBackPress} className="items-start">
+            <Entypo
+              name="chevron-left"
+              size={25}
+              color="black"
+              style={{
+                backgroundColor: "#F7FAFF",
+                borderRadius: 50,
+                padding: wp(2.5),
+              }}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* CENTER - TITLE */}
+        <View className="flex-1 items-center">
+          <Text className="text-lg font-bold text-gray-800">
+            Customer's Digital Signature
+          </Text>
+        </View>
+
+        {/* RIGHT - EMPTY SPACE FOR BALANCE */}
+        <View style={{ width: wp(15) }} />
+      </View>
+
       {/* SIGNATURE AREA */}
       <View className="flex-1 mx-4 mb-4 mt-2">
         <DashedBorder
@@ -485,7 +514,7 @@ export default function DigitalSignature({
       <View className="flex-row justify-between items-center px-4 pb-4">
         <TouchableOpacity
           onPress={handleBackPress}
-          className="flex-row items-center bg-white border border-gray-300 px-6 py-3 rounded-full"
+          className="flex-row items-center bg-[#DFE5F2] border border-[#DFE5F2] px-6 py-3 rounded-full"
           disabled={loading}
         >
           <Ionicons name="close" size={20} color="black" />
@@ -512,12 +541,12 @@ export default function DigitalSignature({
                 signatureRef.current.readSignature();
               }
             }}
-            className="flex-row items-center bg-[#F7CA21] px-6 py-3 rounded-full"
+            className="flex-row items-center bg-[#980775] px-6 py-3 rounded-full"
             disabled={!signatureDrawn || loading}
             style={{ opacity: signatureDrawn ? 1 : 0.5 }}
           >
-            <FontAwesome6 name="check" size={18} color={"black"} />
-            <Text className="font-semibold text-black ml-2">Done</Text>
+            <FontAwesome6 name="check" size={18} color={"white"} />
+            <Text className="font-semibold text-white ml-2">Done</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -541,15 +570,15 @@ export default function DigitalSignature({
               backgroundColor: "white",
               padding: 20,
               borderRadius: 10,
-              width: "80%",
+              width: "35%",
             }}
           >
             {successMessage}
             <TouchableOpacity
               onPress={handleSuccessModalClose}
-              className="bg-[#F7CA21] px-6 py-3 rounded-full mt-4"
+              className="bg-[#980775] px-6 py-3 rounded-full mt-4"
             >
-              <Text className="text-center font-semibold text-black">OK</Text>
+              <Text className="text-center font-semibold text-white">OK</Text>
             </TouchableOpacity>
           </View>
         </View>
