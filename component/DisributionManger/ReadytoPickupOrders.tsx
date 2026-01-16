@@ -6,13 +6,18 @@ import {
   ScrollView,
   TextInput,
   Image,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
-import { FontAwesome, FontAwesome5, FontAwesome6, Ionicons } from "@expo/vector-icons";
+import {
+  FontAwesome5,
+  FontAwesome6,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
-import LottieView from 'lottie-react-native';
+import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -98,9 +103,14 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [searchState, setSearchState] = useState<"initial" | "results" | "no-orders" | "no-user" | "no-orders-at-all">("initial");
+  const [searchState, setSearchState] = useState<
+    "initial" | "results" | "no-orders" | "no-user" | "no-orders-at-all"
+  >("initial");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Check if we're in search mode
+  const isSearching = searchPhone.trim().length > 0;
 
   // This hook runs every time the screen comes into focus
   useFocusEffect(
@@ -108,10 +118,10 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       // Reset search state when screen comes into focus
       setSearchPhone("");
       setErrorMessage("");
-      
+
       // Fetch fresh data
       fetchInitialData();
-      
+
       // Optional: Return a cleanup function if needed
       return () => {
         // Cleanup code here if needed
@@ -126,7 +136,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   const fetchCustomers = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      
+
       if (!token) {
         console.error("No authentication token found");
         return;
@@ -157,7 +167,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       setErrorMessage("");
 
       const token = await AsyncStorage.getItem("token");
-      
+
       if (!token) {
         setErrorMessage(t("Error.No authentication token found"));
         return;
@@ -178,7 +188,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         const ordersData = response.data.data;
         setOrders(ordersData);
         setFilteredOrders(ordersData);
-        
+
         if (ordersData.length === 0) {
           setSearchState("no-orders-at-all");
         } else {
@@ -188,14 +198,16 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         setOrders([]);
         setFilteredOrders([]);
         setSearchState("no-orders-at-all");
-        setErrorMessage(response.data.message || t("Error.Failed to fetch orders"));
+        setErrorMessage(
+          response.data.message || t("Error.Failed to fetch orders")
+        );
       }
     } catch (error: any) {
       console.error("Error fetching pickup orders:", error);
       setOrders([]);
       setFilteredOrders([]);
       setSearchState("no-orders-at-all");
-      
+
       if (error.response?.status === 404) {
         setErrorMessage(t("Error.No pickup orders available"));
       } else if (error.response?.status === 401) {
@@ -222,18 +234,22 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
     if (text.trim()) {
       const normalizedSearch = normalizePhone(text);
-      
+
       // First, search for orders with this phone number (exact or partial match)
       const results = orders.filter((order) => {
         // Check phone number only (without code) for matching
         const phone1 = normalizePhone(order.phoneNumber);
-        const phone2 = order.phoneNumber2 
+        const phone2 = order.phoneNumber2
           ? normalizePhone(order.phoneNumber2)
           : "";
-        
+
         // Use exact match or starts with for better accuracy
-        return phone1 === normalizedSearch || phone2 === normalizedSearch ||
-               phone1.startsWith(normalizedSearch) || phone2.startsWith(normalizedSearch);
+        return (
+          phone1 === normalizedSearch ||
+          phone2 === normalizedSearch ||
+          phone1.startsWith(normalizedSearch) ||
+          phone2.startsWith(normalizedSearch)
+        );
       });
 
       if (results.length > 0) {
@@ -247,13 +263,17 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       const customerExists = customers.some((customer) => {
         // Check phone number only (without code) for matching
         const phone1 = normalizePhone(customer.phoneNumber);
-        const phone2 = customer.phoneNumber2 
+        const phone2 = customer.phoneNumber2
           ? normalizePhone(customer.phoneNumber2)
           : "";
-        
+
         // Use exact match or starts with for better accuracy
-        return phone1 === normalizedSearch || phone2 === normalizedSearch ||
-               phone1.startsWith(normalizedSearch) || phone2.startsWith(normalizedSearch);
+        return (
+          phone1 === normalizedSearch ||
+          phone2 === normalizedSearch ||
+          phone1.startsWith(normalizedSearch) ||
+          phone2.startsWith(normalizedSearch)
+        );
       });
 
       if (customerExists) {
@@ -278,7 +298,21 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   };
 
   const handleOrderClick = (order: Order) => {
-    navigation.navigate("ViewPickupOrders", { order });
+    navigation.navigate("ViewPickupOrders", {
+      order,
+      orderId: order.orderId,
+    });
+  };
+
+  // Helper function to format count: 0 as "0", 1-9 as "01", "02", etc.
+  const formatCount = (count: number) => {
+    if (count === 0) {
+      return "0";
+    } else if (count < 10) {
+      return `0${count}`;
+    } else {
+      return count.toString();
+    }
   };
 
   const NoOrdersState = () => {
@@ -286,7 +320,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       <View className="flex-1 justify-center items-center mt-[-25%] px-4">
         <View className="items-center">
           <LottieView
-            source={require('../../assets/lottie/NoComplaints.json')}
+            source={require("../../assets/lottie/NoComplaints.json")}
             autoPlay
             loop
             style={{ width: 150, height: 150 }}
@@ -331,7 +365,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       </View>
 
       {/* Search Bar */}
-      <View className="flex-row items-center mx-4 mt-4 px-3 py-1 border border-[#C0C0C0] rounded-full">
+      <View className="flex-row items-center mx-4 mt-4 pl-3 border border-[#C0C0C0] rounded-full">
         <TextInput
           className="flex-1 text-base text-black py-2"
           placeholder={t("ReadytoPickupOrders.Search by phone number")}
@@ -344,7 +378,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
             className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center"
             onPress={handleClearSearch}
           >
-            <FontAwesome name="close" size={16} color="black" />
+            <MaterialIcons name="close" size={24} color="black" />
           </TouchableOpacity>
         ) : (
           <View className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center">
@@ -353,44 +387,72 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         )}
       </View>
 
-      {orders.length > 0 && !searchPhone && (
-        <Text className="text-sm text-gray-600 mx-4 mt-3">
-          {t("ReadytoPickupOrders.All")} ({filteredOrders.length})
+      {/* Always show the "All (X)" count */}
+      <View className="px-4 py-3 flex-row items-center">
+        <Text className="text-sm font-medium text-gray-900">
+          {t("ReadytoPickupOrders.All")} ({formatCount(orders.length)})
         </Text>
-      )}
+      </View>
 
       {/* Content Area */}
-      <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-        {searchState === "no-orders-at-all" && (
-          <NoOrdersState />
-        )}
+      <View className="flex-1">
+        <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+          {searchState === "no-orders-at-all" && <NoOrdersState />}
 
-        {(searchState === "initial" || searchState === "results") && orders.length > 0 && (
-          <View className="p-4">
-            {filteredOrders.map((order, index) => (
-              <OrderCard
-                key={`${order.orderId}-${index}`}
-                order={order}
-                onPress={() => handleOrderClick(order)}
-              />
-            ))}
-          </View>
-        )}
+          {(searchState === "initial" || searchState === "results") &&
+            orders.length > 0 && (
+              <View className="p-4">
+                {filteredOrders.map((order, index) => (
+                  <OrderCard
+                    key={`${order.orderId}-${index}`}
+                    order={order}
+                    onPress={() => handleOrderClick(order)}
+                  />
+                ))}
+              </View>
+            )}
 
-        {searchState === "no-orders" && (
-          <EmptyState
-            message={t("ReadytoPickupOrders.No orders from this user for pickup")}
-            onClear={handleClearSearch}
-          />
-        )}
+          {/* Clear Search Button - Shows at bottom when searching */}
+          {isSearching && (
+            <View className="flexbg-white p-4">
+              <TouchableOpacity
+                onPress={handleClearSearch}
+                className="bg-black px-8 py-3 rounded-full w-full items-center"
+              >
+                <View className="flex-row items-center">
+                  <Ionicons
+                    name="close"
+                    size={20}
+                    color="#fff"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text className="text-white text-base font-semibold">
+                    {t("ReadytoPickupOrders.Clear Search")}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
 
-        {searchState === "no-user" && (
-          <EmptyState
-            message={t("ReadytoPickupOrders.No registered customer using this phone number")}
-            onClear={handleClearSearch}
-          />
-        )}
-      </ScrollView>
+          {searchState === "no-orders" && (
+            <EmptyState
+              message={t(
+                "ReadytoPickupOrders.No orders from this user for pickup"
+              )}
+              onClear={handleClearSearch}
+            />
+          )}
+
+          {searchState === "no-user" && (
+            <EmptyState
+              message={t(
+                "ReadytoPickupOrders.No registered customer using this phone number"
+              )}
+              onClear={handleClearSearch}
+            />
+          )}
+        </ScrollView>
+      </View>
     </View>
   );
 };
@@ -403,74 +465,108 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   };
 
   const phone1 = formatPhoneNumber(order.phoneCode, order.phoneNumber);
-  const phone2 = order.phoneCode2 && order.phoneNumber2 
-    ? formatPhoneNumber(order.phoneCode2, order.phoneNumber2)
-    : null;
+  const phone2 =
+    order.phoneCode2 && order.phoneNumber2
+      ? formatPhoneNumber(order.phoneCode2, order.phoneNumber2)
+      : null;
   const phoneDisplay = phone2 ? `${phone1}, ${phone2}` : phone1;
 
-  const scheduledDate = new Date(order.sheduleDate).toLocaleDateString('en-US');
+  const scheduledDate = new Date(order.sheduleDate).toLocaleDateString("en-US");
   const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
 
   const readyDate = new Date(order.createdAt);
-  const readyTimeDisplay = `At ${readyDate.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
-    minute: '2-digit',
-    hour12: true 
-  })} on ${readyDate.toLocaleDateString('en-US')}`;
+  const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })} on ${readyDate.toLocaleDateString("en-US")}`;
 
   const shouldShowAmount = !order.isPaid;
-  const cashAmount = order.fullTotal.toLocaleString('en-US', { 
-    minimumFractionDigits: 2, 
-    maximumFractionDigits: 2 
+  const cashAmount = order.fullTotal.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="bg-white rounded-lg p-4 mb-3 border border-gray-200 shadow-sm"
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-      }}
+      className="bg-[#ADADAD1A] rounded-2xl p-4 mb-3 "
     >
       <View className="flex-row mb-2">
-        <Text className="text-sm font-semibold">{t("ReadytoPickupOrders.Order ID")} :</Text>
+        <Text className="text-sm font-semibold">
+          {t("ReadytoPickupOrders.Order ID")} :
+        </Text>
         <Text className="text-sm font-semibold ml-1">{order.invNo}</Text>
       </View>
 
       <View className="flex-row mb-2 items-center">
-        <FontAwesome5 name="phone-alt" size={16} color="black" style={{ marginRight: 8 }} />
-        <Text className="text-sm text-[#565559]">{t("ReadytoPickupOrders.Phone")} : </Text>
+        <FontAwesome5
+          name="phone-alt"
+          size={16}
+          color="black"
+          style={{ marginRight: 8 }}
+        />
+        <Text className="text-sm text-[#565559]">
+          {t("ReadytoPickupOrders.Phone")} :{" "}
+        </Text>
         <Text className="text-sm font-semibold ml-1">{phoneDisplay}</Text>
       </View>
 
       <View className="flex-row items-center mb-2">
         {shouldShowAmount ? (
           <>
-            <FontAwesome5 name="coins" size={16} color="black" style={{ marginRight: 8 }} />
-            <Text className="text-sm text-[#565559]">{t("ReadytoPickupOrders.Cash")} :  </Text>
-            <Text className="text-sm font-semibold ml-1">{t("ViewPickupOrders.Rs")}. {cashAmount}</Text>
+            <FontAwesome5
+              name="coins"
+              size={16}
+              color="black"
+              style={{ marginRight: 8 }}
+            />
+            <Text className="text-sm text-[#565559]">
+              {t("ReadytoPickupOrders.Cash")} :{" "}
+            </Text>
+            <Text className="text-sm font-semibold ml-1">
+              {t("ViewPickupOrders.Rs")}. {cashAmount}
+            </Text>
           </>
         ) : (
           <>
-            <Ionicons name="checkmark-circle" size={20} color="black" style={{ marginRight: 8 }} />
-            <Text className="text-sm font-semibold text-[#565559]"> {t("ViewPickupOrders.Already Paid") || "Already Paid!"}</Text>
+            <Ionicons
+              name="checkmark-circle"
+              size={20}
+              color="black"
+              style={{ marginRight: 8 }}
+            />
+            <Text className="text-sm font-semibold text-[#565559]">
+              {" "}
+              {t("ViewPickupOrders.Already Paid") || "Already Paid!"}
+            </Text>
           </>
         )}
       </View>
 
       <View className="flex-row mb-2 items-center">
-        <FontAwesome5 name="clock" size={16} color="black" style={{ marginRight: 8 }} />
-        <Text className="text-sm text-[#565559]">{t("ReadytoPickupOrders.Scheduled")} : </Text>
+        <FontAwesome5
+          name="clock"
+          size={16}
+          color="black"
+          style={{ marginRight: 8 }}
+        />
+        <Text className="text-sm text-[#565559]">
+          {t("ReadytoPickupOrders.Scheduled")} :{" "}
+        </Text>
         <Text className="text-sm font-semibold ml-1">{scheduledDisplay}</Text>
       </View>
 
       <View className="flex-row items-center mb-2">
-        <FontAwesome6 name="clock-rotate-left" size={16} color="black" style={{ marginRight: 8 }} />
-        <Text className="text-sm text-[#565559]">{t("ReadytoPickupOrders.Ready Time")} : </Text>
+        <FontAwesome6
+          name="clock-rotate-left"
+          size={16}
+          color="black"
+          style={{ marginRight: 8 }}
+        />
+        <Text className="text-sm text-[#565559]">
+          {t("ReadytoPickupOrders.Ready Time")} :{" "}
+        </Text>
         <Text className="text-sm font-semibold ml-1">{readyTimeDisplay}</Text>
       </View>
     </TouchableOpacity>
@@ -490,16 +586,21 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message, onClear }) => {
         />
       </View>
 
-      <Text className="text-base text-gray-600 text-center mb-8 mt-4">
-        {message}
+      <Text className="text-base text-[#828282] text-center mb-8 mt-4 italic">
+        - {message} -
       </Text>
 
       <TouchableOpacity
         onPress={onClear}
-        className="bg-black px-8 py-3 rounded-full w-full max-w-xs items-center"
+        className="bg-black px-8 py-3 rounded-full w-full max-w-xs items-center mb-6"
       >
         <View className="flex-row items-center">
-          <Ionicons name="close" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Ionicons
+            name="close"
+            size={20}
+            color="#fff"
+            style={{ marginRight: 8 }}
+          />
           <Text className="text-white text-base font-semibold">
             {t("ReadytoPickupOrders.Clear Search")}
           </Text>
