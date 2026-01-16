@@ -1081,7 +1081,9 @@
   "Camera Permission Required":"Camera Permission Required",
   "Please grant camera permission to scan QR codes":"Please grant camera permission to scan QR codes",
   "Grant Permission":"Grant Permission",
-  "Handing Over Cash":"Handing Over Cash..."
+  "Handing Over Cash":"Handing Over Cash...",
+  "Rs":"Rs",
+  "has been successfully handed over to":"has been successfully handed over to"
   }
 }
 

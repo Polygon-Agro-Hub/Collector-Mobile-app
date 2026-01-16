@@ -1083,6 +1083,8 @@
    "Camera Permission Required":"කැමරා අවසරය අවශ්‍යයි",
    "Please grant camera permission to scan QR codes":"QR කේත ස්කෑන් කිරීමට කැමරා අවසරය ලබා දෙන්න.",
    "Grant Permission":"අවසර දෙන්න",
-   "Handing Over Cash":"මුදල් භාරදීම..."
+   "Handing Over Cash":"මුදල් භාරදීම...",
+   "Rs":"රු",
+   "has been successfully handed over to":"සාර්ථකව භාර දී ඇත."
   }
 }
