@@ -872,7 +872,9 @@
      "TargetOrders":"ඉලක්කගත ඇණවුම්",
     "Search": "NIC මගින් සොයන්න",
     "Pending":"අපරිපූර්ණ",
-     "Opened": "විවෘත කළ"
+     "Opened": "විවෘත කළ",
+     "Received Cash":"ලැබුණු මුදල්",
+     "Pickup Order Scan":"පිකප් ඇණවුම් ස්කෑන් කිරීම"
   },
   "TargetOrderScreen" :{
        "LNG": "si",
@@ -1027,5 +1029,62 @@
      "has":"ඇත",
       "01 order has been sent out for delivery":"ඇණවුම් 01ක් බෙදා හැරීම සඳහා යවා ඇත.",
       "orders have been sent out for delivery":"බෙදා හැරීම සඳහා ඇණවුම් {{successCount}} යවා ඇත."
+  },
+      "ReadytoPickupOrders": {
+    "No orders to be picked up": "අත්පත් කර ගැනීමට නියමිත ඇණවුම් නැත",
+    "Ready to Pickup Orders": "අත්පත් කර ගැනීමට සූදානම් ඇණවුම්",
+    "Search by phone number": "දුරකථන අංකයෙන් සොයන්න...",
+    "All": "සියල්ල",
+    "No orders from this user for pickup": "මෙම පරිශීලකයාගෙන් අත්පත් කර ගැනීමට ඇණවුම් නැත",
+    "No registered customer using this phone number": "මෙම දුරකථන අංකය භාවිතා කරන ලියාපදිංචි පාරිභෝගිකයෙකු නැත",
+    "No orders matching your search": "ඔබේ සෙවුමට ගැලපෙන ඇණවුම් නැත",
+    "Order ID": "ඇණවුම් අංකය",
+    "Phone": "දුරකථනය",
+    "Cash": "මුදල් : රු.",
+    "Scheduled": "සැලසුම් කරන ලද",
+    "Ready Time": "සූදානම් වන වේලාව",
+    "Clear Search": "සෙවුම මකන්න",
+      "Loading orders":"ඇණවුම් පූරණය වෙමින්..."
+  },
+  
+  "ReceivedCash": {
+    "Order ID": "ඇණවුම් අංකය",
+    "Cash": "මුදල්",
+    "Received Time": "ලැබුනු වේලාව",
+    "No cash was received today": "අද මුදල් ලැබුනේ නැත",
+    "Received Cash": "ලැබුනු මුදල්",
+    "On": "දිනය",
+    "All": "සියල්ල",
+    "Full Total": "සම්පූර්ණ එකතුව",
+    "Cancel": "අවලංගු කරන්න",
+    "Select Date": "දිනය තෝරන්න",
+    "Done": "සම්පූර්ණයි",
+    "Deselect All": "සියල්ල ඉවත් කරන්න",
+    "Select All": "සියල්ල තෝරන්න",
+    "Hand Over": "භාර දෙන්න",
+    "No cash was received recently":"මෑතකදී මුදල් ලැබුණේ නැහැ."
+  
+},
+ "ViewPickupOrders":{
+    "Order Details":"ඇණවුම් විස්තර",
+    "Ready":"සූදානම්",
+    "Already Paid":"දැනටමත් ගෙවා ඇත!",
+    "Rs":"රු",
+    "Make Phone Call":"දුරකථන ඇමතුමක් ගන්න",
+    "Scan Order":"ස්කෑන් ඇණවුම"
+
+  },
+    "qrcode":{
+  "success": "සාර්ථකයි!",
+  "error": "දෝෂයකි",
+  "cashHandoverSuccess": "Rs.{{amount}} {{officerCode}} වෙත සාර්ථකව භාර දී ඇත.",
+  "cashHandoverFailed": "මුදල් භාර දීම අසාර්ථක විය",
+   "Loading camera":"කැමරාව පූරණය වෙමින්...",
+   "Camera Permission Required":"කැමරා අවසරය අවශ්‍යයි",
+   "Please grant camera permission to scan QR codes":"QR කේත ස්කෑන් කිරීමට කැමරා අවසරය ලබා දෙන්න.",
+   "Grant Permission":"අවසර දෙන්න",
+   "Handing Over Cash":"මුදල් භාරදීම...",
+   "Rs":"රු",
+   "has been successfully handed over to":"සාර්ථකව භාර දී ඇත."
   }
 }

@@ -42,7 +42,8 @@
         "CHANGE_NETWORK_STATE",
         "VIBRATE",
         "USE_FINGERPRINT",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "CALL_PHONE"
       ]
     },
     "web": {
@@ -85,7 +86,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "f16cbe0f-cd05-4da7-b99e-7625dab9a5c0"
+        "projectId": "862b6cd8-4979-44be-9d35-ae69ac83e3b1"
       }
     },
     "expo-camera": {

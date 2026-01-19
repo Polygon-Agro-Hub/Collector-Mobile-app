@@ -118,7 +118,14 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../services/reducxStore';
 
 import ReplaceRequestsApprove from '@/component/DisributionManger/ReplaceRequestsApprove';
-import DistributionOfficerReport from '@/component/DisributionManger/DistributionOfficerReport'
+import DistributionOfficerReport from '@/component/DisributionManger/DistributionOfficerReport';
+import  ReadytoPickupOrders  from '@/component/DisributionManger/ReadytoPickupOrders';
+import ViewPickupOrders from '@/component/DisributionManger/ViewPickupOrders';
+import qrcode from '@/component/DisributionManger/qrcode';
+import DigitalSignature from '@/component/DisributionManger/DigitalSignature';
+import ReceivedCash from '@/component/DisributionManger/ReceivedCash';
+import ReceivedCashOfficer from '@/component/DistributionofficerScreens/ReceivedCashOfficer';
+import ReceivedCashQrCode from '@/component/DistributionofficerScreens/ReceivedCashQrCode';
 
 
 LogBox.ignoreAllLogs(true);
@@ -222,7 +229,11 @@ function MainTabNavigator() {
       />
        
       <Tab.Screen name="TransactionList" component={TransactionList as any} />
+      <Tab.Screen name="ReadytoPickupOrders" component={ReadytoPickupOrders as any} />
       <Tab.Screen name="OfficerSummary" component={OfficerSummary as any} />
+       <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
+       <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
+       <Tab.Screen name="ReceivedCashOfficer" component={ReceivedCashOfficer as any} />
      {/* <Stack.Screen name="RegisterDriver" component={RegisterDriver as any} /> */}
       {/* <Stack.Screen name="AddDriverAddressDetails" component={AddDriverAddressDetails as any} /> */}
       {/* <Stack.Screen name="AddVehicleDetails" component={AddVehicleDetails as any} /> */}
@@ -413,6 +424,7 @@ const onlineStatus = async () => {
           {/* <Stack.Screen name="TransactionList" component={TransactionList as any} /> */}
           <Stack.Screen name="OTPE" component={OTPE} />
           <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
+          <Stack.Screen name="ReceivedCashQrCode" component={ReceivedCashQrCode as any} />
           <Stack.Screen
             name="EditTargetScreen"
             component={EditTargetScreen as any}
@@ -481,6 +493,8 @@ const onlineStatus = async () => {
       <Stack.Screen name="AddDriverAddressDetails" component={AddDriverAddressDetails as any} />
       <Stack.Screen name="AddVehicleDetails" component={AddVehicleDetails as any} />
       <Stack.Screen name="NewReport" component={NewReport as any} />
+       <Stack.Screen name="qrcode" component={qrcode as any} />
+        <Stack.Screen name="DigitalSignature" component={DigitalSignature as any} />
       <Stack.Screen name="otpBankDetailsupdate" component={otpBankDetailsupdate as any} /> 
             <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} /> 
 

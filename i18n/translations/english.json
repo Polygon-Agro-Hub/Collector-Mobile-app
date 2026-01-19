@@ -872,7 +872,9 @@
     "TargetOrders":"Target Orders",
     "Search": "Search By NIC",
     "Pending":"Pending",
-     "Opened": "Opened"
+     "Opened": "Opened",
+     "Received Cash":"Received Cash",
+     "Pickup Order Scan":"Pickup Order Scan"
   },
   "TargetOrderScreen" :{
      "LNG": "en",
@@ -1027,6 +1029,61 @@
      "has":"has",
      "01 order has been sent out for delivery":"01 order has been released to the next stage.",
      "orders have been sent out for delivery":"{{successCount}} orders have been released to the next stage."
+  },
+  "ReadytoPickupOrders":{
+    "No orders to be picked up":"No orders to be picked up",
+    "Ready to Pickup Orders":"Ready to Pickup Orders",
+    "Search by phone number":"Search by phone number...",
+    "All":"All",
+    "No orders from this user for pickup":"No orders from this user for pickup",
+    "No registered customer using this phone number":"No registered customer using this phone number",
+    "No orders matching your search":"No orders matching your search",
+    "Order ID":"Order ID",
+    "Phone":"Phone",
+    "Cash":"Cash : Rs.",
+    "Scheduled":"Scheduled",
+    "Ready Time":"Ready Time",
+    "Clear Search":"Clear Search",
+    "Loading orders":"Loading orders..."
+  },
+  "ReceivedCash":{
+    "Order ID":"Order ID",
+    "Cash":"Cash",
+    "Received Time":"Received Time",
+    "No cash was received today":"No cash was received today",
+    "Received Cash":"Received Cash",
+    "On":"On",
+    "All":"All",
+    "Full Total":"Full Total",
+    "Cancel":"Cancel",
+    "Select Date":"Select Date",
+    "Done":"Done",
+    "Deselect All":"Deselect All",
+    "Select All":"Select All",
+    "Hand Over":"Hand Over",
+    "No cash was received recently":"No cash was received recently"
+  },
+  "ViewPickupOrders":{
+    "Order Details":"Order Details",
+    "Ready":"Ready",
+    "Already Paid":"Already Paid!",
+    "Rs":"Rs",
+    "Make Phone Call":"Make Phone Call",
+    "Scan Order":"Scan Order"
+
+  },
+  "qrcode":{
+    "success": "Success!",
+  "error": "Error",
+  "cashHandoverSuccess": "Rs.{{amount}} has been successfully handed over to {{officerCode}}.",
+  "cashHandoverFailed": "Failed to hand over cash",
+  "Loading camera":"Loading camera...",
+  "Camera Permission Required":"Camera Permission Required",
+  "Please grant camera permission to scan QR codes":"Please grant camera permission to scan QR codes",
+  "Grant Permission":"Grant Permission",
+  "Handing Over Cash":"Handing Over Cash...",
+  "Rs":"Rs",
+  "has been successfully handed over to":"has been successfully handed over to"
   }
 }
 
