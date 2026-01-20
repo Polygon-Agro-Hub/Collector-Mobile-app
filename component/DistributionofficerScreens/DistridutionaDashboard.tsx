@@ -79,7 +79,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
         setEmpId(response.data.data.empId);
         setJobeRole(response.data.data.jobRole)
         setCenterId(response.data.data.centerId); 
-        console.log("data:", response.data.data);
+     //   console.log("data:", response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
@@ -104,7 +104,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-    //  console.log("response for percentage target", response.data);
+     //console.log("response for percentage target", response.data);
       
       if (response.data.success && response.data.data && response.data.data.length > 0) {
         const targets = response.data.data;

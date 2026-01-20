@@ -397,7 +397,7 @@ const fetchTargets = useCallback(async () => {
       }
     );
 
-    console.log("target [[[[[[[[[[[[[[[[[",response.data)
+   // console.log("target [[[[[[[[[[[[[[[[[",response.data)
 
     if (response.data.success) {
       const apiData = response.data.data;
@@ -1794,7 +1794,7 @@ const formatOutTime = (dateString: string | null): string => {
     : { fontSize: 15 }
 ]}
       className="flex-[2] text-center text-white font-bold">
-        {selectedToggle === 'Completed' ? t("CenterTargetScreen.Completed") : t("TargetOrderScreen.Date")}
+        {selectedToggle === 'Completed' ? t("CenterTargetScreen.Time") : t("TargetOrderScreen.Date")}
       </Text>
       <Text 
                   style={[

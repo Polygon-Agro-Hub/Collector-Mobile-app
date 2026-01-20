@@ -71,6 +71,7 @@ interface Order {
   regCode: string;
   officerFirstName: string;
   officerLastName: string;
+  fullName:string;
 }
 
 interface Customer {
@@ -387,11 +388,20 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       </View>
 
       {/* Always show the "All (X)" count */}
+        {!isSearching && (
       <View className="px-4 py-3 flex-row items-center">
         <Text className="text-sm font-medium text-gray-900">
           {t("ReadytoPickupOrders.All")} ({formatCount(orders.length)})
         </Text>
       </View>
+        )}
+          {isSearching && (
+      <View className="px-4 py-3 flex-row items-center">
+        <Text className="text-sm font-medium text-gray-900">
+         
+        </Text>
+      </View>
+        )}
 
       {/* Content Area */}
       <View className="flex-1">
@@ -479,10 +489,22 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   })} on ${readyDate.toLocaleDateString("en-US")}`;
 
   const shouldShowAmount = !order.isPaid;
-  const cashAmount = order.fullTotal.toLocaleString("en-US", {
+  // const cashAmount = order.fullTotal.toLocaleString("en-US", {
+  //   minimumFractionDigits: 2,
+  //   maximumFractionDigits: 2,
+  // });
+const formatCurrency = (amount: number | undefined | null): string => {
+  // Handle undefined, null, or non-numeric values
+  const numericAmount = Number(amount) || 0;
+  
+  return numericAmount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+};
+
+// Use in your OrderCard component:
+const cashAmount = formatCurrency(order.fullTotal);
 
   return (
     <TouchableOpacity
