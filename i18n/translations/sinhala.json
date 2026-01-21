@@ -1064,7 +1064,8 @@
     "Deselect All": "සියල්ල ඉවත් කරන්න",
     "Select All": "සියල්ල තෝරන්න",
     "Hand Over": "භාර දෙන්න",
-    "No cash was received recently":"මෑතකදී මුදල් ලැබුණේ නැහැ."
+    "No cash was received recently":"මෑතකදී මුදල් ලැබුණේ නැහැ.",
+    "Rs":"රු."
   
 },
  "ViewPickupOrders":{

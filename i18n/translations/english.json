@@ -1063,7 +1063,8 @@
     "Deselect All":"Deselect All",
     "Select All":"Select All",
     "Hand Over":"Hand Over",
-    "No cash was received recently":"No cash was received recently"
+    "No cash was received recently":"No cash was received recently",
+    "Rs":"Rs."
   },
   "ViewPickupOrders":{
     "Order Details":"Order Details",

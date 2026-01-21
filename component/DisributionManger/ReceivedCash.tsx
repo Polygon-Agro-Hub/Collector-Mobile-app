@@ -183,42 +183,17 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     filterTransactionsByDate();
   }, [filterTransactionsByDate]);
 
-  // Fetch data on component mount and load saved date
+  // Fetch data on component mount
   useEffect(() => {
-    loadSelectedDate();
     fetchReceivedCash();
   }, []);
 
-  // Load selected date from AsyncStorage
-  const loadSelectedDate = async () => {
-    try {
-      const savedDateStr = await AsyncStorage.getItem("selectedCashDate");
-      if (savedDateStr) {
-        const savedDate = new Date(savedDateStr);
-        if (!isNaN(savedDate.getTime())) {
-          setSelectedDate(savedDate);
-          console.log("Loaded saved date:", savedDate);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading selected date:", error);
-    }
-  };
-
-  // Save selected date to AsyncStorage
-  const saveSelectedDate = async (date: Date) => {
-    try {
-      await AsyncStorage.setItem("selectedCashDate", date.toISOString());
-      console.log("Saved date:", date);
-    } catch (error) {
-      console.error("Error saving selected date:", error);
-    }
-  };
-
-  // Refresh data when screen comes into focus
+  // Refresh data and reset date when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      // Don't reset date when coming back, just refetch data
+      // Reset to current date
+      setSelectedDate(new Date());
+      // Refetch data
       fetchReceivedCash();
     }, [])
   );
@@ -231,7 +206,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
 
     if (date) {
       setSelectedDate(date);
-      saveSelectedDate(date); // Save the selected date
     }
   };
 
@@ -247,7 +221,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
 
   // Confirm date selection for iOS
   const handleDateConfirm = () => {
-    saveSelectedDate(selectedDate);
     setShowDatePicker(false);
   };
 
@@ -319,7 +292,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   {t("ReceivedCash.Full Total")} :{" "}
                 </Text>
                 <Text className="text-xl font-bold text-[#980775]">
-                  Rs.{totalCash.toFixed(2)}
+                  {t("ReceivedCash.Rs")}{totalCash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Text>
               </View>
             </View>
@@ -356,7 +329,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   </Text>
                   <Text className="text-sm text-black font-medium">
                     {" "}
-                    Rs.{item.cash}
+                    {t("ReceivedCash.Rs")}{item.cash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </Text>
                 </View>
                 <Text className="text-xs text-[#848484]">
