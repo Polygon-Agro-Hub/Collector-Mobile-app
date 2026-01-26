@@ -26,6 +26,7 @@
     "error":"සමාවෙන්න",
     "Error":"දෝෂයක්",
     "Failed to fetch empid.":"සේවක හැඳුනුම්පත සොයා ගැනීමට අසමත් විය.",
+    "This EMP ID is not approved.":"මෙම EMP ID අනුමත කර නැත.",
     "New password and confirm password do not match.":"නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය එකිනෙකට නොගැලපේ.",
     "New password must be at least 6 characters long.":"නව මුරපදයට අවම වශයෙන් අක්ෂර 6 ක් තිබිය යුතුය.",
     "Failed to update password.":"මුරපදය යාවත්කාලීන කිරීම අසාර්ථකයි.",

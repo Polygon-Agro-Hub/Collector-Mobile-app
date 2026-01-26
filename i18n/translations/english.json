@@ -26,6 +26,7 @@
     "error":"Sorry",
     "Error":"Error",
     "Failed to fetch empid.":"Failed to fetch Employee ID.",
+    "This EMP ID is not approved.":"This EMP ID is not approved.",
     "New password and confirm password do not match.":"New password and confirm password do not match.",
     "New password must be at least 6 characters long.":"New password must be at least 6 characters long.",
     "Failed to update password.":"Failed to update password.",

@@ -26,6 +26,7 @@
     "error":"மன்னிக்கவும்",
     "Error":"பிழை",
     "Failed to fetch empid.":"பணியாளர் ஐடியைப் பெறுவதில் தோல்வி.",
+    "This EMP ID is not approved.":"இந்த EMP ஐடி அங்கீகரிக்கப்படவில்லை.",
     "New password and confirm password do not match.":"புதிய கடவுச்சொல்லும் உறுதிப்படுத்தல் கடவுச்சொல்லும் பொருந்தவில்லை.",
     "New password must be at least 6 characters long.":"புதிய கடவுச்சொல் குறைந்தது 6 எழுத்துகள் நீளமாக இருக்க வேண்டும்.",
     "Failed to update password.":"கடவுச்சொல்லைப் புதுப்பிக்க முடியவில்லை.",
