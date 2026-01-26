@@ -11,7 +11,7 @@ import {
   Keyboard,
   BackHandler,
 } from "react-native";
-import React, { useCallback,  useState } from "react";
+import React, { useCallback, useState } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "./types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import LottieView from "lottie-react-native"; 
+import LottieView from "lottie-react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "../store/authSlice";
 import { useDispatch } from "react-redux";
@@ -29,7 +29,6 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import NetInfo from "@react-native-community/netinfo";
-
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -199,12 +198,20 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
       if (response.status === 403) {
         setLoading(false);
-        Alert.alert(
-          t("Error.error"),
-          t("Error.This EMP ID is not approved."),
-        );
+
+        // Handle different account statuses
+        let errorMessage = t("Error.This EMP ID is not approved.");
+
+        if (data.accountStatus === "Rejected") {
+          errorMessage = t("Error.This EMP ID is Rejected");
+        } else if (data.accountStatus === "Not Approved") {
+          errorMessage = t("Error.This EMP ID is not approved.");
+        }
+
+        Alert.alert(t("Error.error"), errorMessage);
         return;
       }
+
       if (!response.ok) {
         setLoading(false);
         if (response.status === 404) {
