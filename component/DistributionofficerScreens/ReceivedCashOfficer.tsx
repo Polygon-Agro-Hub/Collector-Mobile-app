@@ -297,7 +297,9 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
                 <Text className="text-sm text-[#848484] mb-1">
                   {t("ReceivedCash.Cash")} : 
                 </Text>
-                <Text className="text-sm text-black font-medium"> Rs.{item.cash.toFixed(2)}</Text>
+              <Text className="text-sm text-black font-medium">
+                  {t("ReceivedCash.Rs")}{item.cash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+             </Text>
               </View>
               <Text className="text-xs text-[#848484]">
                 {t("ReceivedCash.Received Time")} : {item.receivedTime}
@@ -370,7 +372,8 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
                 {t("ReceivedCash.Full Total")} :   {" "}
               </Text>
               <Text className="text-xl font-bold text-[#980775]">
-                Rs.{totalCash.toFixed(2)}
+                {/* Rs.{totalCash.toFixed(2)} */}
+                 {t("ReceivedCash.Rs")}{totalCash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </Text>
             </View>
           </View>
@@ -429,7 +432,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           >
             <FontAwesome6 name="hand-holding-hand" size={18} color="white" />
             <Text className="text-white text-base font-semibold ml-4">
-              {t("ReceivedCash.Hand Over")} (Rs.{selectedTotalCash.toFixed(2)})
+              {t("ReceivedCash.Hand Over")} {t("ReceivedCash.Rs")}({selectedTotalCash.toFixed(2)})
             </Text>
           </TouchableOpacity>
         </View>

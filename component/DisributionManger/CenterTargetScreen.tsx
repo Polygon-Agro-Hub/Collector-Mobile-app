@@ -177,7 +177,7 @@ const [selectionLimitReached, setSelectionLimitReached] = useState(false);
     const dayAfterTomorrow = new Date(today);
     dayAfterTomorrow.setDate(today.getDate() + 2);
 
-    const timeSlots = ['8-12 AM', '12-4 PM', '4-8 PM'];
+    const timeSlots = ['8AM - 2PM', '2PM - 8PM'];
 
     return [
       {
@@ -397,7 +397,7 @@ const fetchTargets = useCallback(async () => {
       }
     );
 
-    console.log("target [[[[[[[[[[[[[[[[[",response.data)
+   // console.log("target [[[[[[[[[[[[[[[[[",response.data)
 
     if (response.data.success) {
       const apiData = response.data.data;
@@ -521,60 +521,7 @@ const fetchTargets = useCallback(async () => {
     const isFilterActive = selectedDateFilter !== null || selectedStatusFilter !== null;
     setHasActiveFilter(isFilterActive);
   }, [selectedDateFilter, selectedStatusFilter]);
-const getCompletionStatus = (completedTime: string | null | undefined, scheduleTime: string | null | undefined): 'on-time' | 'late' | 'unknown' => {
-  if (!completedTime || !scheduleTime) return 'unknown';
-  
-  try {
-    // Parse completed time with timezone adjustment
-    const completedDate = new Date(completedTime);
-    const offsetMilliseconds = 6.5 * 60 * 60 * 1000;
-    const adjustedCompletedDate = new Date(completedDate.getTime() + offsetMilliseconds);
-    
-    // Check if the completion date is today
-    const today = new Date();
-    const isToday = adjustedCompletedDate.getDate() === today.getDate() &&
-                   adjustedCompletedDate.getMonth() === today.getMonth() &&
-                   adjustedCompletedDate.getFullYear() === today.getFullYear();
-    
-    // If not today, return 'unknown' to show black color
-    if (!isToday) return 'unknown';
-    
-    const completedHour = adjustedCompletedDate.getHours();
-    const completedMinute = adjustedCompletedDate.getMinutes();
-    const completedTotalMinutes = completedHour * 60 + completedMinute;
-    
-    // Extract time range from scheduleTime (e.g., "Within 8-12 PM" or "8-12 PM")
-    const timeRangeMatch = scheduleTime.match(/(\d+)-(\d+)\s*(AM|PM)/i);
-    if (!timeRangeMatch) return 'unknown';
-    
-    const [, startHourStr, endHourStr, period] = timeRangeMatch;
-    let startHour = parseInt(startHourStr);
-    let endHour = parseInt(endHourStr);
-    
-    // Convert to 24-hour format
-    if (period.toUpperCase() === 'PM') {
-      if (startHour !== 12) startHour += 12;
-      if (endHour !== 12) endHour += 12;
-    } else if (period.toUpperCase() === 'AM') {
-      if (startHour === 12) startHour = 0;
-      if (endHour === 12) endHour = 0;
-    }
-    
-    const startTotalMinutes = startHour * 60;
-    const endTotalMinutes = endHour * 60;
-    
-    // Check if completion time is within the scheduled time slot
-    if (completedTotalMinutes >= startTotalMinutes && completedTotalMinutes <= endTotalMinutes) {
-      return 'on-time';
-    } else {
-      return 'late';
-    }
-    
-  } catch (error) {
-    console.error('Error determining completion status:', error);
-    return 'unknown';
-  }
-};
+
 
 const getCompletionStatusColor = (status: 'on-time' | 'late' | 'unknown'): string => {
   switch (status) {
@@ -634,21 +581,7 @@ const getScheduleDisplayForCompleted = (scheduleDate: string, scheduleTime: stri
     fetchTargets();
   };
 
-  // const isScheduleDateToday = (dateString: string): boolean => {
-  //   if (!dateString) return false;
-    
-  //   try {
-  //     const scheduleDate = new Date(dateString);
-  //     const today = new Date();
-      
-  //     return scheduleDate.getFullYear() === today.getFullYear() &&
-  //            scheduleDate.getMonth() === today.getMonth() &&
-  //            scheduleDate.getDate() === today.getDate();
-  //   } catch (error) {
-  //     console.error('Error checking if date is today:', error);
-  //     return false;
-  //   }
-  // };
+ 
   const isScheduleDateToday = (dateString: string): boolean => {
     if (!dateString) return false;
     
@@ -688,10 +621,140 @@ const getScheduleDisplayForCompleted = (scheduleDate: string, scheduleTime: stri
     }
   };
 
-  const formatScheduleTime = (timeString: string): string => {
-    if (!timeString) return '';
-    return timeString.replace(/^Within\s*/i, '').trim();
-  };
+// Fix the getOutingStatus function
+const getOutingStatus = (outTime: string | null, scheduleTime: string | null): string => {
+  if (!outTime || !scheduleTime) return 'N/A';
+  
+  try {
+    // Parse outTime (assuming it's in ISO format with timezone)
+    const outDate = new Date(outTime);
+    
+    // Extract time range from scheduleTime (e.g., "Within 8AM - 2PM")
+    const timeRangeMatch = scheduleTime.match(/within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
+    
+    if (!timeRangeMatch) {
+      // Try alternative format if the first one doesn't match
+      const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
+      if (!altMatch) return 'N/A';
+      
+      var [, startHourStr, startPeriod, endHourStr, endPeriod] = altMatch;
+    } else {
+      var [, startHourStr, startPeriod, endHourStr, endPeriod] = timeRangeMatch;
+    }
+    
+    // Convert to 24-hour format
+    const convertTo24Hour = (hourStr: string, period: string): number => {
+      let hour = parseInt(hourStr);
+      
+      if (period.toUpperCase() === 'PM' && hour !== 12) {
+        hour += 12;
+      } else if (period.toUpperCase() === 'AM' && hour === 12) {
+        hour = 0;
+      }
+      
+      return hour;
+    };
+    
+    const startHour = convertTo24Hour(startHourStr, startPeriod);
+    const endHour = convertTo24Hour(endHourStr, endPeriod);
+    
+    // Get the hour from outDate
+    const outHour = outDate.getHours();
+    const outMinutes = outDate.getMinutes();
+    const outTotalMinutes = outHour * 60 + outMinutes;
+    
+    // Calculate start and end in minutes
+    const startTotalMinutes = startHour * 60;
+    const endTotalMinutes = endHour * 60;
+    
+    // Determine status
+    if (outTotalMinutes >= startTotalMinutes && outTotalMinutes <= endTotalMinutes) {
+      return t("CenterTargetScreen.On Time");
+    } else if (outTotalMinutes < startTotalMinutes) {
+      return t("CenterTargetScreen.On Time"); // Early is also considered On Time
+    } else {
+      return t("CenterTargetScreen.Late");
+    }
+  } catch (error) {
+    console.error('Error determining outing status:', error);
+    return 'N/A';
+  }
+};
+
+// Also update getCompletionStatus for the Completed section to handle the same format
+const getCompletionStatus = (completedTime: string | null | undefined, scheduleTime: string | null | undefined): 'on-time' | 'late' | 'unknown' => {
+  if (!completedTime || !scheduleTime) return 'unknown';
+  
+  try {
+    const completedDate = new Date(completedTime);
+    const offsetMilliseconds = 6.5 * 60 * 60 * 1000;
+    const adjustedCompletedDate = new Date(completedDate.getTime() + offsetMilliseconds);
+    
+    // Check if completion is today
+    const today = new Date();
+    const isToday = adjustedCompletedDate.getDate() === today.getDate() &&
+                   adjustedCompletedDate.getMonth() === today.getMonth() &&
+                   adjustedCompletedDate.getFullYear() === today.getFullYear();
+    
+    if (!isToday) return 'unknown';
+    
+    const completedHour = adjustedCompletedDate.getHours();
+    const completedMinute = adjustedCompletedDate.getMinutes();
+    const completedTotalMinutes = completedHour * 60 + completedMinute;
+    
+    // Extract time range from scheduleTime
+    const timeRangeMatch = scheduleTime.match(/within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
+    
+    if (!timeRangeMatch) {
+      const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
+      if (!altMatch) return 'unknown';
+      
+      var [, startHourStr, startPeriod, endHourStr, endPeriod] = altMatch;
+    } else {
+      var [, startHourStr, startPeriod, endHourStr, endPeriod] = timeRangeMatch;
+    }
+    
+    // Convert to 24-hour format
+    const convertTo24Hour = (hourStr: string, period: string): number => {
+      let hour = parseInt(hourStr);
+      
+      if (period.toUpperCase() === 'PM' && hour !== 12) {
+        hour += 12;
+      } else if (period.toUpperCase() === 'AM' && hour === 12) {
+        hour = 0;
+      }
+      
+      return hour;
+    };
+    
+    const startHour = convertTo24Hour(startHourStr, startPeriod);
+    const endHour = convertTo24Hour(endHourStr, endPeriod);
+    
+    const startTotalMinutes = startHour * 60;
+    const endTotalMinutes = endHour * 60;
+    
+    // Check if completion time is within the scheduled time slot
+    if (completedTotalMinutes >= startTotalMinutes && completedTotalMinutes <= endTotalMinutes) {
+      return 'on-time';
+    } else if (completedTotalMinutes < startTotalMinutes) {
+      return 'on-time'; // Early completion is also on-time
+    } else {
+      return 'late';
+    }
+    
+  } catch (error) {
+    console.error('Error determining completion status:', error);
+    return 'unknown';
+  }
+};
+
+// Helper function to format schedule time for display (if needed)
+const formatScheduleTime = (timeString: string): string => {
+  if (!timeString) return '';
+  // Return without "Within" prefix for cleaner display
+  return timeString.replace(/^within\s*/i, '').trim();
+};
+
 
   const formatScheduleDate = (dateString: string): string => {
     if (!dateString) return '';
@@ -971,16 +1034,7 @@ const confirmAction = async () => {
       throw new Error("Failed to fetch any order details for PDF generation");
     }
 
-  //  console.log(`Fetched ${orderDetailsResult.successful.length} complete order details`);
-    // console.log("Sample order structure:", {
-    //   keys: Object.keys(orderDetailsResult.successful[0] || {}),
-    //   hasOrder: !!orderDetailsResult.successful[0]?.order,
-    //   hasInvoiceNumber: !!orderDetailsResult.successful[0]?.invoiceNumber
-    // });
 
-   
-   // console.log("Processing orders for PDF generation and email sending...");
-    
     
     const emailResult = await processOrdersForDelivery(orderDetailsResult.successful, authToken);
     
@@ -1124,37 +1178,7 @@ const formatOutTime = (dateString: string | null): string => {
   }
 };
 
-const getOutingStatus = (outTime: string | null, scheduleTime: string | null): string => {
-  if (!outTime || !scheduleTime) return 'N/A';
-  
-  try {
-    const outDate = new Date(outTime);
-   
-    outDate.setHours(outDate.getHours() + 5);
-    
-    
-    const timeRangeMatch = scheduleTime.match(/(\d+)-(\d+)\s*(AM|PM)/i);
-    if (!timeRangeMatch) return 'N/A';
-    
-    const [, startHourStr, endHourStr, period] = timeRangeMatch;
-    const startHour = parseInt(startHourStr) + (period.toUpperCase() === 'PM' && startHourStr !== '12' ? 12 : 0);
-    const endHour = parseInt(endHourStr) + (period.toUpperCase() === 'PM' && endHourStr !== '12' ? 12 : 0);
-    
-    const outHour = outDate.getHours();
-    
-    // Check if out time is within the scheduled time range
-    if (outHour >= startHour && outHour < endHour) {
-      return t("CenterTargetScreen.On Time");
-    } else if (outHour < startHour) {
-      return t("CenterTargetScreen.On Time");
-    } else {
-      return t("CenterTargetScreen.Late");
-    }
-  } catch (error) {
-    console.error('Error determining outing status:', error);
-    return 'N/A';
-  }
-};
+
 
 
   return (
@@ -1770,7 +1794,7 @@ const getOutingStatus = (outTime: string | null, scheduleTime: string | null): s
     : { fontSize: 15 }
 ]}
       className="flex-[2] text-center text-white font-bold">
-        {selectedToggle === 'Completed' ? t("CenterTargetScreen.Completed") : t("TargetOrderScreen.Date")}
+        {selectedToggle === 'Completed' ? t("CenterTargetScreen.Time") : t("TargetOrderScreen.Date")}
       </Text>
       <Text 
                   style={[

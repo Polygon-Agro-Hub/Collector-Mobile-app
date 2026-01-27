@@ -300,6 +300,8 @@ export type RootStackParamList = {
     order: Order;
     orderId: string;
   };
+  GoviPensionForm: { farmerNIC: string , farmerPhone: string, userId: any};
+  GoviPensionStatus: { status: string };
 };
 
 export interface OrderItem {
@@ -353,6 +355,7 @@ export interface Order {
   regCode: string;
   officerFirstName: string;
   officerLastName: string;
+  fullName: string;
 }
 
 export type OfficerBasicDetailsFormData = {

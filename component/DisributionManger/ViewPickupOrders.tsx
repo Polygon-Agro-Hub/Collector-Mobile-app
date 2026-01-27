@@ -42,7 +42,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Format customer name
-  const customerName = `${order.firstName} ${order.lastName}`;
+  const customerName = `${order.fullName}`;
 
   // Format phone numbers
   const formatPhoneNumber = (code: string, number: string) => {
@@ -128,10 +128,10 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
   // Determine payment status
   const isPaid = order.isPaid;
-  const cashAmount = order.fullTotal.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+ const cashAmount = (Number(order.fullTotal) || 0).toLocaleString("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
   const makePhoneCall = (phoneNumber: string) => {
     const cleanedNumber = phoneNumber.replace(/[^0-9+]/g, "");
