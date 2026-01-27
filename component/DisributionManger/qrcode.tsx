@@ -772,7 +772,7 @@ const qrcode: React.FC<qrcodeProps> = ({ navigation, route }) => {
           setModalTitle("Success!");
           setModalMessage(
             <View className="items-center">
-              <Text className="text-center text-[#4E4E4E] mb-3 mt-2">
+              <Text className="text-center text-[#000000] mb-3 mt-2 font-bold text-lg">
                 Order ID:
               </Text>
               <Text className="text-center font-bold text-[#000000] text-lg">

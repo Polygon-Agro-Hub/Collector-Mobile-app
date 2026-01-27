@@ -219,6 +219,8 @@ const [typeName, setTypeeName] = useState<string>('');
   ]);
 const [retailItems, setRetailItems] = useState<RetailItem[]>([]);
 const [loadingRetailItems, setLoadingRetailItems] = useState(false);
+// Add this with your other state declarations
+const [completingOrder, setCompletingOrder] = useState(false);
  
   const [additionalItems, setAdditionalItems] = useState<AdditionalItem[]>([
   
@@ -650,11 +652,14 @@ const handleCompleteOrder = async () => {
     }
     
     console.log('Starting order completion...');
+     setCompletingOrder(true);
     setOrderCompletionState('completing');
 
       const netState = await NetInfo.fetch();
       if (!netState.isConnected) {
+    setCompletingOrder(false);
     return; 
+  
   }
     
     try {
@@ -722,6 +727,7 @@ const handleCompleteOrder = async () => {
            
             setOrderCompletionState('completed');
             setShowSuccessModal(true);
+             setCompletingOrder(false);
           //  console.log('Order completed successfully - modal should show');
             
         } else {
@@ -732,6 +738,9 @@ const handleCompleteOrder = async () => {
         console.error('Error completing order:', error);
         
         // Reset state on error
+            setCompletingOrder(false); // Reset loading
+
+         setCompletingOrder(false);
         setOrderCompletionState('idle');
         setOrderStatus('Opened');
         setCompletedTime(null);
@@ -1229,6 +1238,7 @@ const handleSubmitPress = () => {
 const handleBackToEdit = () => {
   setShowCompletionPrompt(false);
   setIsUserInitiatedCompletion(false); // Reset the flag
+  setCompletingOrder(false);
   resetCountdown();
 };
 
@@ -1582,45 +1592,145 @@ const getDynamicStatus = (): 'Pending' | 'Opened' | 'Completed' => {
   const hasFamily = familyPackItems.length > 0;
   const hasAdditional = additionalItems.length > 0;
 
-  let allSelected = false;
-  let someSelected = false;
-  
-  if (hasFamily && hasAdditional) {
-    const familyAllSelected = areAllFamilyPackItemsSelected();
-    const familyHasSelections = hasFamilyPackSelections();
-    const additionalAllSelected = areAllAdditionalItemsSelected();
-    const additionalHasSelections = hasAdditionalItemSelections();
-    
-    allSelected = familyAllSelected && additionalAllSelected;
-    
-    // Check if one is completed and other is pending (no selections)
-    const oneCompletedOnePending = 
-      (familyAllSelected && !additionalHasSelections) || 
-      (additionalAllSelected && !familyHasSelections);
-    
-    if (oneCompletedOnePending) {
-      return 'Pending'; // Return Pending when one is completed and other has no selections
-    }
-    
-    // NEW: Check if one has partial progress (Opened) and other is pending (no selections)
-    const oneOpenedOnePending = 
-      (familyHasSelections && !familyAllSelected && !additionalHasSelections) || 
-      (additionalHasSelections && !additionalAllSelected && !familyHasSelections);
-    
-    if (oneOpenedOnePending) {
-      return 'Pending'; // Return Pending when one is opened and other has no selections
-    }
-    
-    someSelected = familyHasSelections || additionalHasSelections;
-  } else if (hasFamily && !hasAdditional) {
-    allSelected = areAllFamilyPackItemsSelected();
-    someSelected = hasFamilyPackSelections();
-  } else if (!hasFamily && hasAdditional) {
-    allSelected = areAllAdditionalItemsSelected();
-    someSelected = hasAdditionalItemSelections();
+  // If no items at all, return Pending
+  if (!hasFamily && !hasAdditional) {
+    return 'Pending';
   }
+
+  // Get package groups to check each package separately
+  const packageGroups = getPackageGroups();
   
-  return allSelected ? 'Completed' : someSelected ? 'Opened' : 'Pending';
+  let allPackagesCompleted = false;
+  let anyPackageInProgress = false;
+  let anyPackageHasSelections = false;
+  let allItemsInPackageCompleted = true;
+
+  // Check family pack items by package
+  if (packageGroups.length > 0) {
+    for (const packageGroup of packageGroups) {
+      const packageAllSelected = packageGroup.items.every(item => item.selected);
+      const packageSomeSelected = packageGroup.items.some(item => item.selected);
+      const packageNoneSelected = !packageSomeSelected;
+      
+      if (packageAllSelected) {
+        // Package is completed
+        allPackagesCompleted = allPackagesCompleted || true;
+      } else if (packageSomeSelected) {
+        // Package is in progress (Opened)
+        anyPackageInProgress = true;
+        anyPackageHasSelections = true;
+        allItemsInPackageCompleted = false;
+      } else if (packageNoneSelected) {
+        // Package is pending (no selections)
+        allItemsInPackageCompleted = false;
+      }
+    }
+  }
+
+  // Check additional items
+  const additionalAllSelected = areAllAdditionalItemsSelected();
+  const additionalSomeSelected = hasAdditionalItemSelections();
+  const additionalNoneSelected = !additionalSomeSelected && additionalItems.length > 0;
+
+  // Determine overall status
+  if (hasFamily && hasAdditional) {
+    // Both sections exist
+    
+    // Case 1: Everything is completed
+    if (allPackagesCompleted && additionalAllSelected) {
+      return 'Completed';
+    }
+    
+    // Case 2: Any package OR additional items have partial selections (Opened)
+    // But ONLY if there are no pending packages/items
+    const hasPendingFamily = packageGroups.some(pkg => 
+      !pkg.items.some(item => item.selected) && 
+      !pkg.items.every(item => item.selected)
+    );
+    const hasPendingAdditional = additionalNoneSelected;
+    
+    if ((anyPackageInProgress || additionalSomeSelected) && 
+        !hasPendingFamily && 
+        !hasPendingAdditional) {
+      return 'Opened';
+    }
+    
+    // Case 3: Any pending items (no selections at all in some packages/items)
+    if ((packageGroups.some(pkg => !pkg.items.some(item => item.selected)) || 
+         additionalNoneSelected) &&
+        !anyPackageInProgress && 
+        !additionalSomeSelected) {
+      return 'Pending';
+    }
+    
+    // Case 4: Mixed state (some completed, some opened, some pending)
+    const completedPackages = packageGroups.filter(pkg => 
+      pkg.items.every(item => item.selected)
+    ).length;
+    const openedPackages = packageGroups.filter(pkg => 
+      pkg.items.some(item => item.selected) && 
+      !pkg.items.every(item => item.selected)
+    ).length;
+    const pendingPackages = packageGroups.filter(pkg => 
+      !pkg.items.some(item => item.selected)
+    ).length;
+    
+    // If there are ANY pending packages OR pending additional items, status is Pending
+    if (pendingPackages > 0 || additionalNoneSelected) {
+      return 'Pending';
+    }
+    
+    // If there are opened packages or additional items in progress
+    if (openedPackages > 0 || additionalSomeSelected) {
+      return 'Opened';
+    }
+    
+  } else if (hasFamily && !hasAdditional) {
+    // Only family pack items exist
+    
+    // Count package statuses
+    const completedPackages = packageGroups.filter(pkg => 
+      pkg.items.every(item => item.selected)
+    ).length;
+    const openedPackages = packageGroups.filter(pkg => 
+      pkg.items.some(item => item.selected) && 
+      !pkg.items.every(item => item.selected)
+    ).length;
+    const pendingPackages = packageGroups.filter(pkg => 
+      !pkg.items.some(item => item.selected)
+    ).length;
+    
+    // All packages completed
+    if (completedPackages === packageGroups.length) {
+      return 'Completed';
+    }
+    
+    // Any pending packages means overall status is Pending
+    if (pendingPackages > 0) {
+      return 'Pending';
+    }
+    
+    // Only opened packages (no pending, not all completed)
+    if (openedPackages > 0) {
+      return 'Opened';
+    }
+    
+    // Default to Pending if no selections
+    return 'Pending';
+    
+  } else if (!hasFamily && hasAdditional) {
+    // Only additional items exist
+    if (additionalAllSelected) {
+      return 'Completed';
+    } else if (additionalSomeSelected) {
+      return 'Opened';
+    } else {
+      return 'Pending';
+    }
+  }
+
+  // Default fallback
+  return 'Pending';
 };
 
 // Updated getStatusText function with proper translations
@@ -1677,10 +1787,10 @@ const getStatusStyling = (status: 'Pending' | 'Opened' | 'Completed' | 'In Progr
 
 
 const DynamicStatusBadge = () => {
-  // Use the status from route.params instead of orderStatus state
-  const statusFromParams = status || item.status || 'Pending';
-  const styling = getStatusStyling(statusFromParams);
-  const statusText = getStatusText(statusFromParams);
+  // Use the dynamic getDynamicStatus() instead of static route params
+  const currentStatus = getDynamicStatus();
+  const styling = getStatusStyling(currentStatus);
+  const statusText = getStatusText(currentStatus);
   
   return (
     <View className="mx-4 mt-4 mb-3 justify-center items-center">
@@ -1942,7 +2052,9 @@ const calculateAllSelected = () => {
   visible={showCompletionPrompt}
   transparent={true}
   animationType="fade"
-  onRequestClose={handleBackToEdit}
+    onRequestClose={() => {
+    handleBackToEdit();
+  }}
 >
   <View className="flex-1 bg-black/50 justify-center items-center px-6">
     <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
@@ -1967,14 +2079,27 @@ const calculateAllSelected = () => {
       </View>
       
       {/* Primary action button - green */}
-      <TouchableOpacity 
+      {/* <TouchableOpacity 
         className="bg-[#4CAF50] py-4 rounded-full mb-3"
         onPress={handleCompleteOrder}
       >
         <Text className="text-white text-center font-bold text-base">
           {t("PendingOrderScreen.Mark as Completed")}
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+      <TouchableOpacity 
+  className="bg-[#4CAF50] py-4 rounded-full mb-3 flex-row justify-center items-center"
+  onPress={handleCompleteOrder}
+  disabled={completingOrder}
+>
+  {completingOrder ? (
+    <ActivityIndicator size="small" color="#ffffff" />
+  ) : (
+    <Text className="text-white text-center font-bold text-base">
+      {t("PendingOrderScreen.Mark as Completed")}
+    </Text>
+  )}
+</TouchableOpacity>
       
       {/* Secondary action button - light gray */}
       <TouchableOpacity 
@@ -2010,16 +2135,21 @@ return (
     </View>
 
   
-    {isLoading || !isDataLoaded ? (
-        <View className="flex-1 justify-center items-center py-20">
-          <LottieView
-            source={require('../../assets/lottie/newLottie.json')}
-            autoPlay
-            loop
-            style={{ width: 200, height: 200 }}
-          />
-        </View>
-      ) : (
+ {isLoading || !isDataLoaded || completingOrder ? (
+  <View className="flex-1 justify-center items-center py-20">
+    <LottieView
+      source={require('../../assets/lottie/newLottie.json')}
+      autoPlay
+      loop
+      style={{ width: 200, height: 200 }}
+    />
+    {completingOrder && (
+      <Text className="mt-4 text-gray-600 font-medium">
+        {t("PendingOrderScreen.Completing order")}
+      </Text>
+    )}
+  </View>
+) : (
       <>
         <ScrollView 
   className="flex-1" 
@@ -2274,6 +2404,8 @@ return (
             {renderReplaceModal()}
 
             {/* Completion Prompt Modal */}
+            {!completingOrder && (
+
             <Modal
               visible={showCompletionPrompt}
               transparent={true}
@@ -2326,7 +2458,12 @@ return (
                       bgColor="#FFFFFF"
                       backgroundColor="#E5E7EB"
                       showMs={false}
-                      onComplete={handleCompleteOrder}
+                      //onComplete={handleCompleteOrder}
+                       onComplete={() => {
+    if (!completingOrder) {
+      handleCompleteOrder();
+    }
+  }}
                       running={showCompletionPrompt}
                       strokeWidth={6}
                     />
@@ -2368,6 +2505,7 @@ return (
                 </View>
               </View>
             </Modal>
+              )}
           </>
         )}
       </>

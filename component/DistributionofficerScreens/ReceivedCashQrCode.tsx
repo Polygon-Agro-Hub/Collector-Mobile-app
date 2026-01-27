@@ -624,18 +624,20 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
       // Call API to hand over cash
       const result = await handOverCashToOfficer(selectedTransactions, cashOfficerCode);
       
-    if (result.status === "success" || result.success) {
+   if (result.status === "success" || result.success) {
         setModalTitle(t("qrcode.success"));
         setModalMessage(
           <View className="items-center">
-            <Text className="text-center text-[#000000] mb-2">
-              {t("qrcode.cashHandoverSuccess", {
-                amount: totalCash.toFixed(2),
-                officerCode: cashOfficerCode.toUpperCase()
-              })}
+            <Text className="text-center text-[#000000] text-base">
+              
+              <Text className="font-bold">{t("qrcode.Rs")}.{totalCash.toFixed(2)} </Text>
+              {t("qrcode.has been successfully handed over to")}
+              <Text className="font-bold"> {cashOfficerCode.toUpperCase()}</Text>
+              .
             </Text>
           </View>
         );
+       
         setShowSuccessModal(true);
       } else {
         setModalTitle(t("error"));

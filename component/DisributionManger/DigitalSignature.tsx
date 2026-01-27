@@ -227,110 +227,118 @@ export default function DigitalSignature({
     setSignatureDrawn(false);
   };
 
-  const saveSignature = async (signatureBase64: string) => {
-    try {
-      setLoading(true);
+const saveSignature = async (signatureBase64: string) => {
+  try {
+    setLoading(true);
 
-      const token = await AsyncStorage.getItem("token");
+    const token = await AsyncStorage.getItem("token");
 
-      if (!token) {
-        Alert.alert("Error", "Authentication token not found");
-        navigation.navigate("Login");
-        return;
+    if (!token) {
+      Alert.alert("Error", "Authentication token not found");
+      setLoading(false);
+      navigation.navigate("Login");
+      return;
+    }
+
+    if (!orderId) {
+      Alert.alert("Error", "Order ID not provided");
+      setLoading(false);
+      return;
+    }
+
+    // Create FormData
+    const formData = new FormData();
+
+    // Prepare the signature file
+    const base64Data = signatureBase64.includes(",")
+      ? signatureBase64.split(",")[1]
+      : signatureBase64;
+
+    const fileName = `pickup_signature_${Date.now()}.png`;
+
+    // Create file object for React Native
+    const file = {
+      uri: `data:image/png;base64,${base64Data}`,
+      type: "image/png",
+      name: fileName,
+    };
+
+    // Append the signature file to FormData
+    formData.append("signature", file as any);
+
+    // Append the orderId to FormData
+    formData.append("orderId", orderId.toString());
+
+    console.log("Saving pickup signature for order:", orderId);
+
+    const response = await axios.post(
+      `${environment.API_BASE_URL}api/pickup/update-pickup-Details`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 30000,
       }
+    );
 
-      if (!orderId) {
-        Alert.alert("Error", "Order ID not provided");
-        return;
-      }
+    if (response.data.status === "success") {
+      console.log("Pickup signature saved successfully:", response.data);
 
-      // Create FormData
-      const formData = new FormData();
-
-      // Prepare the signature file
-      const base64Data = signatureBase64.includes(",")
-        ? signatureBase64.split(",")[1]
-        : signatureBase64;
-
-      const fileName = `pickup_signature_${Date.now()}.png`;
-
-      // Create file object for React Native
-      const file = {
-        uri: `data:image/png;base64,${base64Data}`,
-        type: "image/png",
-        name: fileName,
-      };
-
-      // Append the signature file to FormData
-      formData.append("signature", file as any);
-
-      // Append the orderId to FormData
-      formData.append("orderId", orderId.toString());
-
-      console.log("Saving pickup signature for order:", orderId);
-
-      const response = await axios.post(
-        `${environment.API_BASE_URL}api/pickup/update-pickup-Details`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-          timeout: 30000,
-        }
+      // Create success message
+      const message = (
+        <View className="items-center">
+          <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
+            Pickup details for order:{" "}
+            <Text className="font-bold text-[#000000]">
+              {String(orderId)}
+            </Text>{" "}
+            has been saved successfully!
+          </Text>
+        </View>
       );
 
-      if (response.data.status === "success") {
-        console.log("Pickup signature saved successfully:", response.data);
-
-        // Create success message
-        const message = (
-          <View className="items-center">
-            <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
-              Pickup details for order:{" "}
-              <Text className="font-bold text-[#000000]">
-                {String(orderId)}
-              </Text>{" "}
-              has been saved successfully!
-            </Text>
-          </View>
-        );
-
-        setSuccessMessage(message);
-        setShowSuccessModal(true);
-
-        // Add backup navigation timeout
-        setTimeout(() => {
-          setShowSuccessModal(false);
-          navigation.navigate("ReadytoPickupOrders");
-        }, 3000);
-      } else {
-        throw new Error(response.data.message || "Failed to save signature");
-      }
-    } catch (error: any) {
-      console.error("Error saving pickup signature:", error);
-
-      let errorMessage = "Failed to save signature. Please try again.";
-
-      if (error.response) {
-        errorMessage = error.response.data?.message || errorMessage;
-        console.error("Server error response:", error.response.data);
-      } else if (error.request) {
-        errorMessage = "No response from server. Please check your connection.";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      Alert.alert("Error", errorMessage);
-    } finally {
+      // Stop loading and show modal
       setLoading(false);
+      setSuccessMessage(message);
+      setShowSuccessModal(true);
+
+      // Navigate after showing modal for 2.5 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        
+  
+       navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
+        
+
+      }, 2500);
+    } else {
+      throw new Error(response.data.message || "Failed to save signature");
     }
-  };
+  } catch (error: any) {
+    console.error("Error saving pickup signature:", error);
+    setLoading(false);
+
+    let errorMessage = "Failed to save signature. Please try again.";
+
+    if (error.response) {
+      errorMessage = error.response.data?.message || errorMessage;
+      console.error("Server error response:", error.response.data);
+    } else if (error.request) {
+      errorMessage = "No response from server. Please check your connection.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    Alert.alert("Error", errorMessage);
+  }
+};
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-    navigation.navigate("ReadytoPickupOrders");
+  //  navigation.navigate("ReadytoPickupOrders" as any);
+    navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
   };
 
   const handleBackPress = () => {
@@ -345,7 +353,7 @@ export default function DigitalSignature({
         {
           text: "Yes, Cancel",
           onPress: () => {
-            navigation.navigate("ReadytoPickupOrders");
+            navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
           },
         },
       ]
@@ -453,7 +461,7 @@ export default function DigitalSignature({
         {/* CENTER - TITLE */}
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-800">
-            Customer's Digital Signature
+            Customer's Digital Signature 
           </Text>
         </View>
 

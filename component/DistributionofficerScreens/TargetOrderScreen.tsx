@@ -369,9 +369,9 @@ const fetchTargets = useCallback(async () => {
       }
     );
 
-     console.log("Response status:", response.status);
+    // console.log("Response status:", response.data);
  //   console.log("Response data:", response.data);
- console.log("sttaus=============",response.data.data.selectedStatus )
+ //console.log("sttaus=============",response.data.data.selectedStatus )
 
     if (response.data.success) {
       const apiData = response.data.data;

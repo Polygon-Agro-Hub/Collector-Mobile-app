@@ -297,7 +297,9 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
                 <Text className="text-sm text-[#848484] mb-1">
                   {t("ReceivedCash.Cash")} : 
                 </Text>
-                <Text className="text-sm text-black font-medium"> Rs.{item.cash.toFixed(2)}</Text>
+              <Text className="text-sm text-black font-medium">
+                  {t("ReceivedCash.Rs")}{item.cash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+             </Text>
               </View>
               <Text className="text-xs text-[#848484]">
                 {t("ReceivedCash.Received Time")} : {item.receivedTime}
@@ -311,7 +313,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
   // Empty state
   const EmptyState = () => (
-    <View className="flex-1 items-center justify-center py-20">
+    <View className="flex-1 items-center justify-center mt-[50%]">
       <View className=" items-center justify-center mb-4">
          <LottieView
                    source={require('../../assets/lottie/NoComplaints.json')}
@@ -351,29 +353,32 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
       </View>
 
       {/* Total Card */}
-      <View className="px-4 py-4">
-        <View 
-          style={{
-            borderStyle: 'dashed',
-            borderWidth: 2,
-            borderColor: '#980775',
-            borderRadius: 12,
-            backgroundColor: 'white',
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            marginHorizontal: 40,
-          }}
-        >
-          <View className="flex-row items-center justify-center">
-            <Text className=" font-medium text-black">
-              {t("ReceivedCash.Full Total")} :   {" "}
-            </Text>
-            <Text className="text-xl font-bold text-[#980775]">
-              Rs.{totalCash.toFixed(2)}
-            </Text>
+     {transactions.length > 0 && (
+        <View className="px-4 py-4">
+          <View 
+            style={{
+              borderStyle: 'dashed',
+              borderWidth: 2,
+              borderColor: '#980775',
+              borderRadius: 12,
+              backgroundColor: 'white',
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              marginHorizontal: 40,
+            }}
+          >
+            <View className="flex-row items-center justify-center">
+              <Text className=" font-medium text-black">
+                {t("ReceivedCash.Full Total")} :   {" "}
+              </Text>
+              <Text className="text-xl font-bold text-[#980775]">
+                {/* Rs.{totalCash.toFixed(2)} */}
+                 {t("ReceivedCash.Rs")}{totalCash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      )}
 
       {transactions.length > 0 && (
         <View className="p-6">
@@ -418,7 +423,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
       )}
 
       {/* Hand Over Button - Only show when items are selected */}
-      {selectedTransactions.size > 0 && (
+      {selectedTransactions.size > 0 && transactions.length > 0 && (
         <View className="absolute bottom-0 left-0 right-0 bg-white px-5 py-4">
           <TouchableOpacity
             onPress={handleHandOver}
@@ -427,7 +432,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           >
             <FontAwesome6 name="hand-holding-hand" size={18} color="white" />
             <Text className="text-white text-base font-semibold ml-4">
-              {t("ReceivedCash.Hand Over")} (Rs.{selectedTotalCash.toFixed(2)})
+              {t("ReceivedCash.Hand Over")} {t("ReceivedCash.Rs")}({selectedTotalCash.toFixed(2)})
             </Text>
           </TouchableOpacity>
         </View>

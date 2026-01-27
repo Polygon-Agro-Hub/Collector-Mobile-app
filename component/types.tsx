@@ -353,6 +353,7 @@ export interface Order {
   regCode: string;
   officerFirstName: string;
   officerLastName: string;
+  fullName:string;
 }
 
 export type OfficerBasicDetailsFormData = {
