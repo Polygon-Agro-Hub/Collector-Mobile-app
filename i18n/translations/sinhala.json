@@ -1039,7 +1039,7 @@
   "ReadytoPickupOrders": {
     "No orders to be picked up": "අත්පත් කර ගැනීමට නියමිත ඇණවුම් නැත",
     "Ready to Pickup Orders": "අත්පත් කර ගැනීමට සූදානම් ඇණවුම්",
-    "Search by phone number": "දුරකථන අංකයෙන් සොයන්න...",
+    "Search by phone number": "දුරකථන අංකය (7XXXXXXXXXX)..",
     "All": "සියල්ල",
     "No orders from this user for pickup": "මෙම පරිශීලකයාගෙන් අත්පත් කර ගැනීමට ඇණවුම් නැත",
     "No registered customer using this phone number": "මෙම දුරකථන අංකය භාවිතා කරන ලියාපදිංචි පාරිභෝගිකයෙකු නැත",
@@ -1077,7 +1077,8 @@
     "Already Paid": "දැනටමත් ගෙවා ඇත!",
     "Rs": "රු",
     "Make Phone Call": "දුරකථන ඇමතුමක් ගන්න",
-    "Scan Order": "ස්කෑන් ඇණවුම"
+    "Scan Order": "ස්කෑන් ඇණවුම",
+    "Cash":"මුදල්"
   },
   "qrcode": {
     "success": "සාර්ථකයි!",

@@ -229,11 +229,17 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       .replace(/^0/, "");
   };
 
-  const handleSearchChange = (text: string) => {
-    setSearchPhone(text);
+ const handleSearchChange = (text: string) => {
+    // Remove ALL non-digit characters
+    const numericText = text.replace(/\D/g, '');
+    
+    // Limit to 9 digits
+    const limitedText = numericText.slice(0, 9);
+    
+    setSearchPhone(limitedText);
 
-    if (text.trim()) {
-      const normalizedSearch = normalizePhone(text);
+    if (limitedText.trim()) {
+      const normalizedSearch = normalizePhone(limitedText);
 
       // First, search for orders with this phone number (exact or partial match)
       const results = orders.filter((order) => {
@@ -290,7 +296,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       setSearchState(orders.length === 0 ? "no-orders-at-all" : "initial");
     }
   };
-
   const handleClearSearch = () => {
     setSearchPhone("");
     setFilteredOrders(orders);
@@ -314,6 +319,8 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       return count.toString();
     }
   };
+
+  
 
   const NoOrdersState = () => {
     return (
@@ -366,13 +373,15 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
       {/* Search Bar */}
       <View className="flex-row items-center mx-4 mt-4 pl-3 border border-[#C0C0C0] rounded-full">
-        <TextInput
-          className="flex-1 text-base text-black py-2"
-          placeholder={t("ReadytoPickupOrders.Search by phone number")}
-          value={searchPhone}
-          onChangeText={handleSearchChange}
-          keyboardType="phone-pad"
-        />
+         <TextInput
+    className="flex-1 text-base text-black py-2"
+    placeholder={t("ReadytoPickupOrders.Search by phone number")}
+    value={searchPhone}
+    onChangeText={handleSearchChange}
+    keyboardType="phone-pad"
+    maxLength={9} // Limit to 9 characters
+    returnKeyType="search"
+  />
         {searchPhone ? (
           <TouchableOpacity
             className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center"
@@ -481,20 +490,37 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   const scheduledDate = new Date(order.sheduleDate).toLocaleDateString("en-US");
   const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
 
+  const getReadyTimeDisplay = () => {
   const readyDate = new Date(order.createdAt);
-  const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
-    hour: "2-digit",
+  
+
+  const timeString = readyDate.toLocaleTimeString("en-US", {
+    hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  })} on ${readyDate.toLocaleDateString("en-US")}`;
+  });
+  
+
+  const year = readyDate.getFullYear();
+  const month = readyDate.getMonth() + 1; 
+  const day = readyDate.getDate();
+  
+  const dateString = `${year}/${month}/${day}`;
+  
+  return `At ${timeString} on ${dateString}`;
+};
+
+ const readyDate = new Date(order.createdAt);
+const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+})} on ${readyDate.getFullYear()}/${readyDate.getMonth() + 1}/${readyDate.getDate()}`;
 
   const shouldShowAmount = !order.isPaid;
-  // const cashAmount = order.fullTotal.toLocaleString("en-US", {
-  //   minimumFractionDigits: 2,
-  //   maximumFractionDigits: 2,
-  // });
+
 const formatCurrency = (amount: number | undefined | null): string => {
-  // Handle undefined, null, or non-numeric values
+
   const numericAmount = Number(amount) || 0;
   
   return numericAmount.toLocaleString("en-US", {
@@ -507,9 +533,20 @@ const formatCurrency = (amount: number | undefined | null): string => {
 const cashAmount = formatCurrency(order.fullTotal);
 
   return (
-    <TouchableOpacity
+   <TouchableOpacity
       onPress={onPress}
-      className="bg-[#ADADAD1A] rounded-2xl p-4 mb-3 "
+      className="rounded-2xl p-4 mb-3"
+      style={{
+        backgroundColor: '#F7F7F7',
+        shadowColor: '#000000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 3, // For Android
+      }}
     >
       <View className="flex-row mb-2">
         <Text className="text-sm font-semibold">
@@ -541,7 +578,7 @@ const cashAmount = formatCurrency(order.fullTotal);
               style={{ marginRight: 8 }}
             />
             <Text className="text-sm text-[#565559]">
-              {t("ReadytoPickupOrders.Cash")} :{" "}
+              {t("ViewPickupOrders.Cash")} :{" "}
             </Text>
             <Text className="text-sm font-semibold ml-1">
               {t("ViewPickupOrders.Rs")}. {cashAmount}
@@ -594,7 +631,7 @@ const cashAmount = formatCurrency(order.fullTotal);
 
 const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
   return (
-    <View className="flex-1 justify-center items-center mt-20 px-4 pb-24">
+    <View className="flex-1 justify-center items-center mt-[-15%] px-4 pb-24">
       <View className="relative">
         <Image
           source={require("../../assets/images/notfound.webp")}
@@ -603,7 +640,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
         />
       </View>
 
-      <Text className="text-base text-[#828282] text-center mb-8 mt-4 italic">
+      <Text className="text-sm text-[#828282] text-center mb-8 mt-4 italic">
         - {message} -
       </Text>
     </View>

@@ -1039,7 +1039,7 @@
   "ReadytoPickupOrders": {
     "No orders to be picked up": "No orders to be picked up",
     "Ready to Pickup Orders": "Ready to Pickup Orders",
-    "Search by phone number": "Search by phone number...",
+    "Search by phone number": "Phone number (7XXXXXXXX)..",
     "All": "All",
     "No orders from this user for pickup": "No orders from this user for pickup",
     "No registered customer using this phone number": "No registered customer using this phone number",
@@ -1076,7 +1076,8 @@
     "Already Paid": "Already Paid!",
     "Rs": "Rs",
     "Make Phone Call": "Make Phone Call",
-    "Scan Order": "Scan Order"
+    "Scan Order": "Scan Order",
+    "Cash":"Cash"
   },
   "qrcode": {
     "success": "Success!",

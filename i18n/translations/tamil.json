@@ -1039,7 +1039,7 @@
   "ReadytoPickupOrders": {
     "No orders to be picked up": "பறிமுதல் செய்ய வேண்டிய ஆர்டர்கள் இல்லை",
     "Ready to Pickup Orders": "பறிமுதல் செய்ய தயாரான ஆர்டர்கள்",
-    "Search by phone number": "தொலைபேசி எண்ணால் தேடு...",
+    "Search by phone number": "தொலைபேசி எண் (7XXXXXXXXXX)..",
     "All": "அனைத்தும்",
     "No orders from this user for pickup": "இந்த பயனரிடமிருந்து பறிமுதல் செய்ய ஆர்டர்கள் இல்லை",
     "No registered customer using this phone number": "இந்த தொலைபேசி எண்ணைப் பயன்படுத்தும் பதிவுசெய்த வாடிக்கையாளர் இல்லை",
@@ -1077,7 +1077,8 @@
     "Already Paid": "ஏற்கனவே பணம் செலுத்தப்பட்டது!",
     "Rs": "ரூ.",
     "Make Phone Call": "தொலைபேசி அழைப்பு செய்",
-    "Scan Order": "ஸ்கேன் ஆர்டர்"
+    "Scan Order": "ஸ்கேன் ஆர்டர்",
+    "Cash":"பணம்"
   },
   "qrcode": {
     "success": "வெற்றி!",
