@@ -17,6 +17,7 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
+import { FontAwesome6 } from "@expo/vector-icons";
 
 
 type DistridutionaDashboardNavigationProps = StackNavigationProp<
@@ -78,7 +79,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
         setEmpId(response.data.data.empId);
         setJobeRole(response.data.data.jobRole)
         setCenterId(response.data.data.centerId); 
-        console.log("data:", response.data.data);
+     //   console.log("data:", response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
@@ -103,7 +104,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-    //  console.log("response for percentage target", response.data);
+     //console.log("response for percentage target", response.data);
       
       if (response.data.success && response.data.data && response.data.data.length > 0) {
         const targets = response.data.data;
@@ -289,7 +290,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
     >
   
       <TouchableOpacity         
-        className="flex-row items-center mb-4 p-4"         
+        className="flex-row items-center  p-4"         
         onPress={() => navigation.navigate("EngProfile")}       
       >         
         <Image           
@@ -327,7 +328,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
     
       {renderTargetStatus()}
 
-      <View className="flex items-center justify-center my-6 mt-[13%]">
+      <View className="flex items-center justify-center  mt-[5%]">
         <View className="relative">
           <CircularProgress
             size={100}
@@ -359,6 +360,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
 
 
       <View className="flex-row flex-wrap justify-between p-6 mt-[-5%]">
+        {/* Conditional First Button - Center Target OR Target Orders */}
         {jobRole === "Distribution Centre Manager" ? (
           <TouchableOpacity           
             className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative border border-[#980775] mb-50"           
@@ -384,6 +386,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
               source={require("../../assets/images/New/packing.png")}
               className="w-8 h-8 absolute top-2 right-2"
             />
+      
             <Text
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
               className="text-[#555464] text-lg absolute bottom-2 left-2"
@@ -392,6 +395,59 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
             </Text>
           </TouchableOpacity>
         )}
+
+        {/* Received Cash Button - For Both Roles */}
+        <TouchableOpacity
+  className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
+  onPress={() => {
+    if (jobRole === "Distribution Centre Manager") {
+      navigation.navigate("ReceivedCash" as any);
+    } else if (jobRole === "Distribution Officer") {
+      navigation.navigate("ReceivedCashOfficer" as any);
+    } else {
+      // Fallback or default navigation
+      navigation.navigate("ReceivedCash" as any);
+    }
+  }}
+>
+          {/* <Image
+            source={require("../../assets/images/New/receivedcash.png")}
+            className="w-8 h-8 absolute top-2 right-2"
+          /> */}
+          <View className="absolute top-2 right-2">
+                <FontAwesome6 name="hand-holding-hand" size={24} color="#980775" 
+              
+                />
+                </View>
+          <Text
+            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            className="text-[#555464] text-lg absolute bottom-2 left-2"
+          >
+            {t("DistridutionaDashboard.Received Cash")}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Pickup Order Scan Button - For Both Roles */}
+        <TouchableOpacity
+          className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
+          onPress={() => navigation.navigate("ReadytoPickupOrders" as any)}
+        >
+          {/* <Image
+            source={require("../../assets/images/New/pickuporder.png")}
+            className="w-8 h-8 absolute top-2 right-2"
+          /> */}
+           <View className="absolute top-2 right-2">
+                <FontAwesome6 name="qrcode" size={24} color="#980775" 
+              
+                />
+                </View>
+          <Text
+            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            className="text-[#555464] text-lg absolute bottom-2 left-2"
+          >
+            {t("DistridutionaDashboard.Pickup Order Scan")}
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
