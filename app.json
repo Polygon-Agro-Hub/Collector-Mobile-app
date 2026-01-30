@@ -24,7 +24,7 @@
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.polygonagro.Collector",
-      "versionCode": 12,
+      "versionCode": 10,
       "compileSdkVersion": 35,
       "targetSdkVersion": 35,
       "minSdkVersion": 24,
