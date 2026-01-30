@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import Signature from "react-native-signature-canvas";
 import { FontAwesome6, Ionicons, Entypo } from "@expo/vector-icons";
@@ -360,6 +361,18 @@ const saveSignature = async (signatureBase64: string) => {
     );
   };
 
+  useFocusEffect(
+  React.useCallback(() => {
+    const onBackPress = () => {
+      handleBackPress();
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    return () => subscription.remove();
+  }, [navigation, handleBackPress]) // Add handleBackPress to dependencies
+);
+
   const handleOK = async (signature: string) => {
     if (!signature) {
       Alert.alert("Warning", "Please draw a signature before submitting");
@@ -470,18 +483,19 @@ const saveSignature = async (signatureBase64: string) => {
       </View>
 
       {/* SIGNATURE AREA */}
-      <View className="flex-1 mx-4 mb-4 mt-2">
-        <DashedBorder
+      <View className="flex-1 mx-10 mb-4 mt-2 rounded rounded-full">
+                <DashedBorder
           style={{
             backgroundColor: "#DFEDFC",
             flex: 1,
-            borderRadius: 16,
+            borderRadius: 10,
             overflow: "hidden",
           }}
           borderColor="#2D7BFF"
-          dashWidth={12}
+          dashWidth={15}
           gapWidth={8}
-          borderWidth={2}
+          borderWidth={3}
+          
         >
           {/* CLEAR BUTTON */}
           <TouchableOpacity
