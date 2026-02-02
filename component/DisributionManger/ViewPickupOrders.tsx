@@ -49,11 +49,11 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   // Auto-scroll animation for customer name (same as schedule time in OrderDetails)
   useEffect(() => {
     const textLength = customerName.length;
-    
+
     // Only animate if text is long enough
     if (textLength > 20) {
       const scrollDistance = textLength * 8; // Approximate pixel width
-      
+
       const animation = Animated.loop(
         Animated.sequence([
           Animated.delay(1000), // Pause before starting
@@ -67,11 +67,11 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
             duration: 0, // Instant reset to start
             useNativeDriver: true,
           }),
-        ])
+        ]),
       );
-      
+
       animation.start();
-      
+
       return () => {
         scrollX.setValue(0);
         animation.stop();
@@ -132,7 +132,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
       // Check for time range like "8AM - 2PM"
       const rangeMatch = timePart.match(
-        /^(\d{1,2})(AM|PM)\s*-\s*(\d{1,2})(AM|PM)$/i
+        /^(\d{1,2})(AM|PM)\s*-\s*(\d{1,2})(AM|PM)$/i,
       );
       if (rangeMatch) {
         const startHour = rangeMatch[1];
@@ -155,11 +155,11 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
   // Format ready time - Keep original structure
   const readyDate = new Date(order.createdAt);
-const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-})} on ${readyDate.getFullYear()}/${readyDate.getMonth() + 1}/${readyDate.getDate()}`;
+  const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })} on ${readyDate.getFullYear()}/${readyDate.getMonth() + 1}/${readyDate.getDate()}`;
 
   // Determine payment status
   const isPaid = order.isPaid;
@@ -177,7 +177,7 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
       Alert.alert(
         t("Error.Error") || "Error",
         t("Error.Phone call is not supported on this device") ||
-          "Phone call is not supported on this device"
+          "Phone call is not supported on this device",
       );
     });
   };
@@ -199,10 +199,10 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress
+        onBackPress,
       );
       return () => subscription.remove();
-    }, [navigation])
+    }, [navigation]),
   );
 
   return (
@@ -235,7 +235,7 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
       </View>
 
       {/* <ScrollView className="flex-1" showsVerticalScrollIndicator={false}> */}
-      <View className="flex-1 " >
+      <View className="flex-1 ">
         <View className="px-4">
           {/* Customer Info */}
           <View className="bg-white rounded-2xl p-4 mb-2 shadow-sm">
@@ -246,18 +246,26 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
                 resizeMode="contain"
               />
               {/* Auto-scrolling customer name - Same as schedule time implementation */}
+              {/* Auto-scrolling customer name - Same as schedule time implementation */}
               <View className="mt-2 w-full px-8">
-              <View className="mt-2  overflow-hidden "
-              style={{ width: '180%' }}
-              >
-                  <Animated.Text 
+                <View
+                  className="mt-2 overflow-hidden"
+                  style={{
+                    width: customerName.length > 20 ? "180%" : "100%",
+                    alignItems: "center",
+                  }}
+                >
+                  <Animated.Text
                     className="text-lg font-bold text-gray-800 text-center"
                     style={{
-                      transform: [{ translateX: scrollX }],
+                      transform:
+                        customerName.length > 20
+                          ? [{ translateX: scrollX }]
+                          : [],
                     }}
                     numberOfLines={1}
                   >
-                   {customerName}
+                    {customerName}
                   </Animated.Text>
                 </View>
               </View>

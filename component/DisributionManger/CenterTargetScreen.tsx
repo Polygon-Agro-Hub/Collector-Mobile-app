@@ -538,30 +538,27 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     return "bg-gray-100 border border-gray-300 text-gray-700";
   };
 
+
   const formatCompletionTime = (dateString: string | null): string | null => {
-    if (!dateString) return null;
+  if (!dateString) return null;
 
-    try {
-      const date = new Date(dateString);
+  try {
+    const date = new Date(dateString);
 
-      // Add 6 hours and 30 minutes (6.5 hours = 6.5 * 60 * 60 * 1000 milliseconds)
-      const offsetMilliseconds = 6.5 * 60 * 60 * 1000;
-      const adjustedDate = new Date(date.getTime() + offsetMilliseconds);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours % 12 || 12;
 
-      const year = adjustedDate.getFullYear();
-      const month = (adjustedDate.getMonth() + 1).toString().padStart(2, "0");
-      const day = adjustedDate.getDate().toString().padStart(2, "0");
-      const hours = adjustedDate.getHours();
-      const minutes = adjustedDate.getMinutes().toString().padStart(2, "0");
-      const ampm = hours >= 12 ? "PM" : "AM";
-      const displayHours = hours % 12 || 12;
-
-      return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return null;
-    }
-  };
+    return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return null;
+  }
+};
 
   // Function to clear all filters for ToDo
   const clearAllFilters = () => {
@@ -1240,27 +1237,47 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     );
   };
 
-  const formatOutTime = (dateString: string | null): string => {
-    if (!dateString) return "N/A";
+  // const formatOutTime = (dateString: string | null): string => {
+  //   if (!dateString) return "N/A";
 
-    try {
-      const date = new Date(dateString);
+  //   try {
+  //     const date = new Date(dateString);
 
-      date.setHours(date.getHours() + 5);
-      date.setMinutes(date.getMinutes() + 30);
+  //     date.setHours(date.getHours() + 5);
+  //     date.setMinutes(date.getMinutes() + 30);
 
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-      const ampm = hours >= 12 ? "PM" : "AM";
-      const displayHours = hours % 12 || 12;
+  //     const hours = date.getHours();
+  //     const minutes = date.getMinutes();
+  //     const ampm = hours >= 12 ? "PM" : "AM";
+  //     const displayHours = hours % 12 || 12;
 
-      return `${displayHours.toString().padStart(2, "0")}.${minutes.toString().padStart(2, "0")}${ampm}`;
-    } catch (error) {
-      console.error("Error formatting out time:", error);
-      return "N/A";
-    }
-  };
+  //     return `${displayHours.toString().padStart(2, "0")}.${minutes.toString().padStart(2, "0")}${ampm}`;
+  //   } catch (error) {
+  //     console.error("Error formatting out time:", error);
+  //     return "N/A";
+  //   }
+  // };
+// REPLACE THIS FUNCTION IN YOUR CODE (around line 1018)
+// Find the formatOutTime function and replace it with this corrected version:
 
+const formatOutTime = (dateString: string | null): string => {
+  if (!dateString) return "N/A";
+
+  try {
+    const date = new Date(dateString);
+
+    // No offset adjustment - server already sends IST time
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours % 12 || 12;
+
+    return `${displayHours.toString().padStart(2, "0")}.${minutes.toString().padStart(2, "0")}${ampm}`;
+  } catch (error) {
+    console.error("Error formatting out time:", error);
+    return "N/A";
+  }
+};
   return (
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
@@ -2021,7 +2038,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 </>
               ) : selectedToggle === "Completed" ? (
                 <>
-                  {/* Completed Time */}
+                  {/* Completed Time */}////////////
                   <View className="flex-[2] items-center justify-center px-2">
                     <Text className="text-center text-gray-600 text-sm">
                       {item.completedTime

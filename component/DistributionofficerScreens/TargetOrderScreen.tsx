@@ -18,7 +18,6 @@ import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
 
 type TargetOrderScreenNavigationProps = StackNavigationProp<
@@ -143,8 +142,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         );
 
         setJobeRole(response.data.data.jobRole);
-
-        //  console.log("data:", response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
@@ -235,39 +232,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
-  // const isScheduleDateToday = (dateString: string): boolean => {
-  //   if (!dateString) return false;
-
-  //   try {
-  //     const scheduleDate = new Date(dateString);
-  //     const today = new Date();
-
-  //     return scheduleDate.getFullYear() === today.getFullYear() &&
-  //            scheduleDate.getMonth() === today.getMonth() &&
-  //            scheduleDate.getDate() === today.getDate();
-  //   } catch (error) {
-  //     console.error('Error checking if date is today:', error);
-  //     return false;
-  //   }
-  // };
-  const isScheduleDateToday = (dateString: string): boolean => {
-    if (!dateString) return false;
-
-    try {
-      const scheduleDate = new Date(dateString);
-      const today = new Date();
-
-      return (
-        scheduleDate.getFullYear() === today.getFullYear() &&
-        scheduleDate.getMonth() === today.getMonth() &&
-        scheduleDate.getDate() === today.getDate()
-      );
-    } catch (error) {
-      console.error("Error checking if date is today:", error);
-      return false;
-    }
-  };
-
   const getScheduleDateColor = (dateString: string): string => {
     if (!dateString) return "#606060";
 
@@ -279,11 +243,11 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
       today.setHours(0, 0, 0, 0);
 
       if (scheduleDate.getTime() === today.getTime()) {
-        return "#FF0000"; // Red for today
+        return "#FF0000";
       } else if (scheduleDate < today) {
-        return "#AC0003"; // Dark red for past dates
+        return "#AC0003";
       } else {
-        return "#606060"; // Gray for future dates
+        return "#606060";
       }
     } catch (error) {
       console.error("Error getting schedule date color:", error);
@@ -303,7 +267,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
       target: item.target,
       complete: item.complete,
       todo: item.target - item.complete,
-      // Use selectedStatus as the primary status
       status: mapSelectedStatusToStatus(item.selectedStatus, item.isComplete),
       createdAt: item.targetCreatedAt,
       updatedAt: item.itemCreatedAt,
@@ -322,7 +285,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
       sheduleDate: item.sheduleDate,
       sheduleTime: item.sheduleTime,
 
-      // FIXED: Properly handle package lock status from API response with null check
       packageIsLock: item.lockedPackages && item.lockedPackages > 0 ? 1 : 0,
     }));
   };
@@ -356,9 +318,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         throw new Error("Authentication token not found. Please login again.");
       }
 
-      // console.log("Making request to:", `${environment.API_BASE_URL}api/distribution/officer-target`);
-      // console.log("Auth token exists:", !!authToken);
-
       const response = await axios.get(
         `${environment.API_BASE_URL}api/distribution/officer-target`,
         {
@@ -369,18 +328,10 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         },
       );
 
-      // console.log("Response status:", response.data);
-      //   console.log("Response data:", response.data);
-      //console.log("sttaus=============",response.data.data.selectedStatus )
-
       if (response.data.success) {
         const apiData = response.data.data;
 
-        // Debug: Log the first item to see its structure
         if (apiData && apiData.length > 0) {
-          // console.log("First API item structure:", JSON.stringify(apiData[0], null, 2));
-          // console.log("Package lock field in first item:", apiData[0].packageIsLock);
-          // console.log("Package data in first item:", apiData[0].packageData);
         }
 
         const mappedData = mapApiDataToTargetData(apiData);
@@ -399,9 +350,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         const completedItems = mappedData.filter(
           (item: TargetData) => item.selectedStatus === "Completed",
         );
-
-        // console.log("Todo Items:", todoItems);
-        // console.log("Completed Items:", completedItems);
 
         setTodoData(sortByVarietyAndGrade(todoItems));
         setCompletedData(sortByVarietyAndGrade(completedItems));
@@ -435,7 +383,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   }, [selectedLanguage, t]);
 
   const handleRowPress = (item: TargetData) => {
-    // Check if package is locked
     if (item.packageIsLock === 1 && jobRole === "Distribution Officer") {
       Alert.alert(
         t("Error.Locked Package"),
@@ -456,7 +403,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
     console.log("=======================", item.selectedStatus);
 
-    // Navigate based on selectedStatus
     switch (item.selectedStatus) {
       case "Pending":
       case "Opened":
@@ -469,29 +415,27 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
+
   const formatCompletionTime = (dateString: string | null): string | null => {
-    if (!dateString) return null;
+  if (!dateString) return null;
 
-    try {
-      const date = new Date(dateString);
+  try {
+    const date = new Date(dateString);
 
-      const offsetMilliseconds = 6.5 * 60 * 60 * 1000;
-      const adjustedDate = new Date(date.getTime() + offsetMilliseconds);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours % 12 || 12;
 
-      const year = adjustedDate.getFullYear();
-      const month = (adjustedDate.getMonth() + 1).toString().padStart(2, "0");
-      const day = adjustedDate.getDate().toString().padStart(2, "0");
-      const hours = adjustedDate.getHours();
-      const minutes = adjustedDate.getMinutes().toString().padStart(2, "0");
-      const ampm = hours >= 12 ? "PM" : "AM";
-      const displayHours = hours % 12 || 12;
-
-      return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return null;
-    }
-  };
+    return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return null;
+  }
+};
 
   useEffect(() => {
     const fetchData = async () => {
@@ -509,21 +453,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   };
 
   const displayedData = selectedToggle === "ToDo" ? todoData : completedData;
-
-  const getStatusColor = (
-    selectedStatus: "Pending" | "Opened" | "Completed",
-  ) => {
-    switch (selectedStatus) {
-      case "Pending":
-        return "bg-[#FF070733] border border-[#FF070733] text-[#FF0700]";
-      case "Opened":
-        return "bg-[#FDFF99] border border-[#FDFF99] text-[#A8A100]";
-      case "Completed":
-        return "bg-[#B7FFB9] border border-[#B7FFB9] text-[#6AD16D]";
-      default:
-        return "bg-gray-100 border border-gray-300 text-gray-700";
-    }
-  };
 
   const getStatusText = (
     selectedStatus: "Pending" | "Opened" | "Completed",
@@ -557,13 +486,13 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   ) => {
     switch (selectedStatus) {
       case "Pending":
-        return "#FF070733"; // Light red background
+        return "#FF070733";
       case "Opened":
-        return "#FDFF99"; // Light yellow background
+        return "#FDFF99";
       case "Completed":
-        return "#B7FFB9"; // Light green background
+        return "#B7FFB9";
       default:
-        return "#F3F4F6"; // Gray background
+        return "#F3F4F6";
     }
   };
 
@@ -594,14 +523,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         return "#B7FFB9";
       default:
         return "#D1D5DB";
-    }
-  };
-
-  const getDetailedStatusDisplay = (item: TargetData) => {
-    if (item.isPackage === 0) {
-      return `Additional: ${item.additionalItemStatus || "N/A"}`;
-    } else {
-      return `Add: ${item.additionalItemStatus || "N/A"} | Pkg: ${item.packageItemStatus || "N/A"}`;
     }
   };
 
@@ -787,7 +708,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 100 }} // Add bottom padding
+        contentContainerStyle={{ paddingBottom: 100 }} 
       >
         {error && (
           <View className="bg-red-100 border border-red-400 px-4 py-3 mx-4 mt-4 rounded">
