@@ -4,12 +4,10 @@ import {
   Text,
   TouchableOpacity,
   Animated,
-  Platform,
-  PermissionsAndroid,
   StatusBar,
   ActivityIndicator,
   Modal,
-  Image
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -22,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 type ReceivedCashQrCodeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -81,7 +79,7 @@ const FailedModal: React.FC<FailedModalProps> = ({
             duration: 800,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
 
       if (autoClose) {
@@ -136,7 +134,7 @@ const FailedModal: React.FC<FailedModalProps> = ({
                 source={require("../../assets/images/New/error.png")}
                 className="h-[100px] w-[100px] rounded-lg"
                 resizeMode="contain"
-              />  
+              />
             </View>
           </Animated.View>
 
@@ -163,7 +161,7 @@ const FailedModal: React.FC<FailedModalProps> = ({
                 style={{
                   width: progressAnim.interpolate({
                     inputRange: [0, 100],
-                    outputRange: ['0%', '100%'],
+                    outputRange: ["0%", "100%"],
                   }),
                   backgroundColor: "#EF4444",
                   borderBottomLeftRadius: 24,
@@ -178,7 +176,6 @@ const FailedModal: React.FC<FailedModalProps> = ({
   );
 };
 
-// Success Modal Component
 interface SuccessModalProps {
   visible: boolean;
   title?: string;
@@ -299,7 +296,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
                 style={{
                   width: progressAnim.interpolate({
                     inputRange: [0, 100],
-                    outputRange: ['0%', '100%'],
+                    outputRange: ["0%", "100%"],
                   }),
                   backgroundColor: "#980775",
                   borderBottomLeftRadius: 24,
@@ -314,23 +311,26 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   );
 };
 
-// Main QR Code Scanner Component
-const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, route }) => {
+const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
+  navigation,
+  route,
+}) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
   const [loading, setLoading] = useState(false);
 
-  // Get data from route params
   const selectedTransactions = route.params?.selectedTransactions || [];
-  const fromScreen = route.params?.fromScreen;
   const { t } = useTranslation();
 
   console.log("Selected Transactions:", selectedTransactions);
-  
+
   // Calculate total cash
-  const totalCash = selectedTransactions.reduce((sum: number, t: any) => sum + t.cash, 0);
-  
+  const totalCash = selectedTransactions.reduce(
+    (sum: number, t: any) => sum + t.cash,
+    0,
+  );
+
   // Timer states for timeout
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -340,8 +340,10 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [showRescanButton, setShowRescanButton] = useState(false);
-  const [modalMessage, setModalMessage] = useState<string | React.ReactElement>("");
-  
+  const [modalMessage, setModalMessage] = useState<string | React.ReactElement>(
+    "",
+  );
+
   // Track if screen is focused
   const isFocusedRef = useRef(true);
 
@@ -349,26 +351,26 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
   useFocusEffect(
     React.useCallback(() => {
       isFocusedRef.current = true;
-      
+
       setScanned(false);
       setLoading(false);
       setShowTimeoutModal(false);
       setShowErrorModal(false);
       setShowSuccessModal(false);
-      
+
       if (permission?.granted) {
         startTimeoutTimer();
       }
 
       return () => {
         isFocusedRef.current = false;
-        
+
         if (timerRef.current) {
           clearTimeout(timerRef.current);
           timerRef.current = null;
         }
       };
-    }, [permission?.granted])
+    }, [permission?.granted]),
   );
 
   useEffect(() => {
@@ -406,7 +408,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
       if (!scanned && !loading && isFocusedRef.current) {
         setModalTitle("Scan Timeout");
         setModalMessage(
-          "The QR code could not be detected within the time limit. Please check and try again."
+          "The QR code could not be detected within the time limit. Please check and try again.",
         );
         setShowRescanButton(true);
         setShowTimeoutModal(true);
@@ -442,7 +444,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
           duration: 2000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   };
 
@@ -451,7 +453,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     try {
       console.log("Raw QR Data for cash officer:", qrData);
 
-      // Method 1: Check if QR contains DCM officer ID pattern
       const dcmOfficerPattern = /DCM\d{5}/gi;
       const dcmMatch = qrData.match(dcmOfficerPattern);
       if (dcmMatch) {
@@ -459,23 +460,22 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
         return dcmMatch[0];
       }
 
-      // Method 2: Check if QR is JSON containing DCM officer info
       if (qrData.startsWith("{") && qrData.endsWith("}")) {
         try {
           const parsed = JSON.parse(qrData);
           console.log("Parsed JSON for officer:", parsed);
-          
+
           const fieldsToCheck = [
-            parsed.officerId, 
-            parsed.officerCode, 
-            parsed.employeeId, 
+            parsed.officerId,
+            parsed.officerCode,
+            parsed.employeeId,
             parsed.id,
             parsed.code,
-            parsed.userId
+            parsed.userId,
           ];
-          
+
           for (const field of fieldsToCheck) {
-            if (field && typeof field === 'string') {
+            if (field && typeof field === "string") {
               const dcmPattern = /DCM\d{5}/gi;
               const match = field.match(dcmPattern);
               if (match) {
@@ -489,7 +489,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
         }
       }
 
-      // Method 3: Try to extract DCM pattern from the entire string
       const dcmPatternGlobal = /DCM\d{5}/gi;
       const allMatches = qrData.match(dcmPatternGlobal);
       if (allMatches && allMatches.length > 0) {
@@ -505,14 +504,15 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     }
   };
 
-  // Validate if the officer code is in correct DCM format
   const validateDCMOfficerCode = (officerCode: string): boolean => {
     const dcmPattern = /^DCM\d{5}$/i;
     return dcmPattern.test(officerCode);
   };
 
-  // API call to hand over cash to officer
-  const handOverCashToOfficer = async (transactions: any[], officerCode: string) => {
+  const handOverCashToOfficer = async (
+    transactions: any[],
+    officerCode: string,
+  ) => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
@@ -522,7 +522,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
       }
 
       console.log("Officer Code:", officerCode);
-      
+
       const apiUrl = `${environment.API_BASE_URL}api/pickup/update-cash-received`;
       console.log("Making API call to:", apiUrl);
       console.log("Transactions:", transactions);
@@ -530,30 +530,26 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
 
       const handoverData = {
         officerCode: officerCode,
-        transactions: transactions.map(t => ({
+        transactions: transactions.map((t) => ({
           transactionId: t.id,
           orderId: t.orderId,
           amount: t.cash,
           receivedTime: t.receivedTime,
-          date: t.date
+          date: t.date,
         })),
         totalAmount: totalCash,
-        handoverDate: new Date().toISOString()
+        handoverDate: new Date().toISOString(),
       };
 
       console.log("Handover Data:", handoverData);
 
-      const response = await axios.post(
-        apiUrl,
-        handoverData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 10000,
-        }
-      );
+      const response = await axios.post(apiUrl, handoverData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      });
 
       console.log("API Response:", response.data);
       return response.data;
@@ -601,43 +597,54 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
     }
 
     try {
-      // Extract the cash officer's ID from QR
       const cashOfficerCode = extractCashOfficerCode(data);
-      
+
       if (!cashOfficerCode) {
         setModalTitle("Failed!");
-        setModalMessage("The QR code is not identified.\nPlease check and try again.");
+        setModalMessage(
+          "The QR code is not identified.\nPlease check and try again.",
+        );
         setShowRescanButton(true);
         setShowErrorModal(true);
         return;
       }
-      
-      // Validate the officer code format
+
       if (!validateDCMOfficerCode(cashOfficerCode)) {
         setModalTitle("Failed!");
-        setModalMessage("Invalid officer code format.\nMust be DCM followed by 5 digits (e.g., DCM00001).");
+        setModalMessage(
+          "Invalid officer code format.\nMust be DCM followed by 5 digits (e.g., DCM00001).",
+        );
         setShowRescanButton(true);
         setShowErrorModal(true);
         return;
       }
-      
-      // Call API to hand over cash
-      const result = await handOverCashToOfficer(selectedTransactions, cashOfficerCode);
-      
-   if (result.status === "success" || result.success) {
+
+      const result = await handOverCashToOfficer(
+        selectedTransactions,
+        cashOfficerCode,
+      );
+
+      if (result.status === "success" || result.success) {
         setModalTitle(t("qrcode.success"));
         setModalMessage(
           <View className="items-center">
             <Text className="text-center text-[#000000] text-base">
-              
-              <Text className="font-bold">{t("qrcode.Rs")}.{totalCash.toFixed(2)} </Text>
+              <Text className="font-bold">
+                {t("qrcode.Rs")}. {totalCash.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{" "}
+              </Text>
               {t("qrcode.has been successfully handed over to")}
-              <Text className="font-bold"> {cashOfficerCode.toUpperCase()}</Text>
+              <Text className="font-bold">
+                {" "}
+                {cashOfficerCode.toUpperCase()}
+              </Text>
               .
             </Text>
-          </View>
+          </View>,
         );
-       
+
         setShowSuccessModal(true);
       } else {
         setModalTitle(t("error"));
@@ -648,17 +655,24 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
       console.error("Error processing QR scan:", error);
 
       let title = "Failed!";
-      let message = "The QR code is not identified.\nPlease check and try again.";
+      let message =
+        "The QR code is not identified.\nPlease check and try again.";
 
       const errorMessage = error.response?.data?.message || error.message;
       const statusCode = error.response?.status || error.status;
 
       console.log("Error details:", { errorMessage, statusCode });
 
-      if (errorMessage.includes("officer") || errorMessage.includes("Officer")) {
+      if (
+        errorMessage.includes("officer") ||
+        errorMessage.includes("Officer")
+      ) {
         title = "Officer Error";
         message = errorMessage;
-      } else if (errorMessage.includes("already handed over") || errorMessage.includes("already processed")) {
+      } else if (
+        errorMessage.includes("already handed over") ||
+        errorMessage.includes("already processed")
+      ) {
         title = "Already Processed!";
         message = "These transactions have already been handed over.";
       } else if (statusCode === 404) {
@@ -712,7 +726,10 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
         <View className="bg-black/50 p-8 rounded-full">
           <ActivityIndicator size="large" color="black" />
         </View>
-        <Text className="text-white text-lg mt-4"> {t("qrcode.Loading camera")}</Text>
+        <Text className="text-white text-lg mt-4">
+          {" "}
+          {t("qrcode.Loading camera")}
+        </Text>
       </SafeAreaView>
     );
   }
@@ -725,17 +742,17 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
           <Ionicons name="camera" size={wp(15)} color="#EF4444" />
         </View>
         <Text className="text-white text-2xl font-bold mb-3 text-center">
-         {t("qrcode.Camera Permission Required")} 
+          {t("qrcode.Camera Permission Required")}
         </Text>
         <Text className="text-gray-400 text-center mb-8 px-4">
-        {t("qrcode.Please grant camera permission to scan QR codes.")}  
+          {t("qrcode.Please grant camera permission to scan QR codes.")}
         </Text>
         <TouchableOpacity
           className="bg-[black] py-4 px-12 rounded-xl"
           onPress={requestPermission}
         >
           <Text className="text-black font-bold text-base">
-           {t("qrcode.Grant Permission")}  
+            {t("qrcode.Grant Permission")}
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -756,7 +773,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({ navigation, rou
           <View className="bg-black/80 p-6 rounded-xl items-center">
             <ActivityIndicator size="large" color="black" />
             <Text className="text-white text-lg font-semibold mt-4">
-              {t("qrcode.Handing Over Cash")} 
+              {t("qrcode.Handing Over Cash")}
             </Text>
           </View>
         </View>

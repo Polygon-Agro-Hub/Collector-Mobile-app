@@ -1069,7 +1069,8 @@
     "Select All": "සියල්ල තෝරන්න",
     "Hand Over": "භාර දෙන්න",
     "No cash was received recently": "මෑතකදී මුදල් ලැබුණේ නැහැ.",
-    "Rs": "රු."
+    "Rs": "රු. ",
+    "Rscash":" රු. "
   },
   "ViewPickupOrders": {
     "Order Details": "ඇණවුම් විස්තර",

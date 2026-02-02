@@ -9,11 +9,7 @@ import {
 } from "react-native";
 import Signature from "react-native-signature-canvas";
 import { FontAwesome6, Ionicons, Entypo } from "@expo/vector-icons";
-import {
-  useNavigation,
-  useFocusEffect,
-  RouteProp,
-} from "@react-navigation/native";
+import { useFocusEffect, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/component/types";
 import * as ScreenOrientation from "expo-screen-orientation";
@@ -83,7 +79,7 @@ const DashedBorder = ({
                 marginRight: gapWidth,
               }}
             />
-          )
+          ),
         )}
       </View>
 
@@ -109,7 +105,7 @@ const DashedBorder = ({
                 marginBottom: gapWidth,
               }}
             />
-          )
+          ),
         )}
       </View>
 
@@ -135,7 +131,7 @@ const DashedBorder = ({
                 marginRight: gapWidth,
               }}
             />
-          )
+          ),
         )}
       </View>
 
@@ -161,7 +157,7 @@ const DashedBorder = ({
                 marginBottom: gapWidth,
               }}
             />
-          )
+          ),
         )}
       </View>
 
@@ -183,42 +179,63 @@ export default function DigitalSignature({
   const [successMessage, setSuccessMessage] = useState<
     string | React.ReactNode
   >("");
+  
+  // KEY FIX: Use state to control if signature component should render
+  const [shouldRenderSignature, setShouldRenderSignature] = useState(false);
 
   console.log("order id in digital sig screen", orderId, fromScreen);
 
-  // Use useFocusEffect to handle orientation changes
+  // Handle screen focus - this is the main fix
   useFocusEffect(
     React.useCallback(() => {
       let isActive = true;
 
-      const setupOrientation = async () => {
+      const setupScreen = async () => {
         if (!isActive) return;
 
-        // Lock to landscape when screen is focused
+        // Reset all states
+        setSignatureDrawn(false);
+        setLoading(false);
+        setShowSuccessModal(false);
+        setSuccessMessage("");
+        
+        // CRITICAL: Unmount signature component first
+        setShouldRenderSignature(false);
+
+        // Lock orientation
         await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT
+          ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
         );
+
+        // Wait for orientation to settle
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        if (!isActive) return;
+        
+        // CRITICAL: Now remount the signature component
+        setShouldRenderSignature(true);
       };
 
-      setupOrientation();
+      setupScreen();
 
       // Cleanup function when screen loses focus
       return () => {
         isActive = false;
+        // Unmount signature when leaving
+        setShouldRenderSignature(false);
         // Unlock orientation when leaving this screen
         ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP
+          ScreenOrientation.OrientationLock.PORTRAIT_UP,
         );
       };
-    }, [])
+    }, []),
   );
 
   // Also handle with useEffect as backup
   useEffect(() => {
     return () => {
-      // Ensure we return to portrait when component unmounts
       ScreenOrientation.lockAsync(
-        ScreenOrientation.OrientationLock.PORTRAIT_UP
+        ScreenOrientation.OrientationLock.PORTRAIT_UP,
       );
     };
   }, []);
@@ -228,117 +245,113 @@ export default function DigitalSignature({
     setSignatureDrawn(false);
   };
 
-const saveSignature = async (signatureBase64: string) => {
-  try {
-    setLoading(true);
+  const saveSignature = async (signatureBase64: string) => {
+    try {
+      setLoading(true);
 
-    const token = await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
-    if (!token) {
-      Alert.alert("Error", "Authentication token not found");
-      setLoading(false);
-      navigation.navigate("Login");
-      return;
-    }
-
-    if (!orderId) {
-      Alert.alert("Error", "Order ID not provided");
-      setLoading(false);
-      return;
-    }
-
-    // Create FormData
-    const formData = new FormData();
-
-    // Prepare the signature file
-    const base64Data = signatureBase64.includes(",")
-      ? signatureBase64.split(",")[1]
-      : signatureBase64;
-
-    const fileName = `pickup_signature_${Date.now()}.png`;
-
-    // Create file object for React Native
-    const file = {
-      uri: `data:image/png;base64,${base64Data}`,
-      type: "image/png",
-      name: fileName,
-    };
-
-    // Append the signature file to FormData
-    formData.append("signature", file as any);
-
-    // Append the orderId to FormData
-    formData.append("orderId", orderId.toString());
-
-    console.log("Saving pickup signature for order:", orderId);
-
-    const response = await axios.post(
-      `${environment.API_BASE_URL}api/pickup/update-pickup-Details`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-        timeout: 30000,
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found");
+        setLoading(false);
+        navigation.navigate("Login");
+        return;
       }
-    );
 
-    if (response.data.status === "success") {
-      console.log("Pickup signature saved successfully:", response.data);
+      if (!orderId) {
+        Alert.alert("Error", "Order ID not provided");
+        setLoading(false);
+        return;
+      }
 
-      // Create success message
-      const message = (
-        <View className="items-center">
-          <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
-            Pickup details for order:{" "}
-            <Text className="font-bold text-[#000000]">
-              {String(orderId)}
-            </Text>{" "}
-            has been saved successfully!
-          </Text>
-        </View>
+      // Create FormData
+      const formData = new FormData();
+
+      // Prepare the signature file
+      const base64Data = signatureBase64.includes(",")
+        ? signatureBase64.split(",")[1]
+        : signatureBase64;
+
+      const fileName = `pickup_signature_${Date.now()}.png`;
+
+      // Create file object for React Native
+      const file = {
+        uri: `data:image/png;base64,${base64Data}`,
+        type: "image/png",
+        name: fileName,
+      };
+
+      // Append the signature file to FormData
+      formData.append("signature", file as any);
+
+      // Append the orderId to FormData
+      formData.append("orderId", orderId.toString());
+
+      console.log("Saving pickup signature for order:", orderId);
+
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/pickup/update-pickup-Details`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          timeout: 30000,
+        },
       );
 
-      // Stop loading and show modal
+      if (response.data.status === "success") {
+        console.log("Pickup signature saved successfully:", response.data);
+
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.PORTRAIT_UP,
+        );
+
+        const message = (
+          <View className="items-center">
+            <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
+              Pickup details for order:{" "}
+              <Text className="font-bold text-[#000000]">
+                {String(orderId)}
+              </Text>{" "}
+              has been saved successfully!
+            </Text>
+          </View>
+        );
+
+        setLoading(false);
+        setSuccessMessage(message);
+        setShowSuccessModal(true);
+
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
+        }, 2500);
+      } else {
+        throw new Error(response.data.message || "Failed to save signature");
+      }
+    } catch (error: any) {
+      console.error("Error saving pickup signature:", error);
       setLoading(false);
-      setSuccessMessage(message);
-      setShowSuccessModal(true);
 
-      // Navigate after showing modal for 2.5 seconds
-      setTimeout(() => {
-        setShowSuccessModal(false);
-        
-  
-       navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
-        
+      let errorMessage = "Failed to save signature. Please try again.";
 
-      }, 2500);
-    } else {
-      throw new Error(response.data.message || "Failed to save signature");
+      if (error.response) {
+        errorMessage = error.response.data?.message || errorMessage;
+        console.error("Server error response:", error.response.data);
+      } else if (error.request) {
+        errorMessage = "No response from server. Please check your connection.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Error", errorMessage);
     }
-  } catch (error: any) {
-    console.error("Error saving pickup signature:", error);
-    setLoading(false);
-
-    let errorMessage = "Failed to save signature. Please try again.";
-
-    if (error.response) {
-      errorMessage = error.response.data?.message || errorMessage;
-      console.error("Server error response:", error.response.data);
-    } else if (error.request) {
-      errorMessage = "No response from server. Please check your connection.";
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    Alert.alert("Error", errorMessage);
-  }
-};
+  };
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
-  //  navigation.navigate("ReadytoPickupOrders" as any);
     navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
   };
 
@@ -357,21 +370,24 @@ const saveSignature = async (signatureBase64: string) => {
             navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
           },
         },
-      ]
+      ],
     );
   };
 
   useFocusEffect(
-  React.useCallback(() => {
-    const onBackPress = () => {
-      handleBackPress();
-      return true;
-    };
+    React.useCallback(() => {
+      const onBackPress = () => {
+        handleBackPress();
+        return true;
+      };
 
-    const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-    return () => subscription.remove();
-  }, [navigation, handleBackPress]) // Add handleBackPress to dependencies
-);
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const handleOK = async (signature: string) => {
     if (!signature) {
@@ -398,16 +414,14 @@ const saveSignature = async (signatureBase64: string) => {
             await saveSignature(signature);
           },
         },
-      ]
+      ],
     );
   };
 
-  // Handle signature change (when user starts drawing)
   const handleSignatureChange = () => {
     setSignatureDrawn(true);
   };
 
-  // CSS style for full canvas in landscape
   const signatureStyle = `
     .m-signature-pad {
       position: absolute;
@@ -451,6 +465,15 @@ const saveSignature = async (signatureBase64: string) => {
     }
   `;
 
+  if (!shouldRenderSignature) {
+    return (
+      <View className="flex-1 bg-white justify-center items-center">
+        <ActivityIndicator size="large" color="#2D7BFF" />
+        <Text className="mt-4 text-gray-600">Preparing signature pad...</Text>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-white">
       {/* HEADER */}
@@ -474,7 +497,7 @@ const saveSignature = async (signatureBase64: string) => {
         {/* CENTER - TITLE */}
         <View className="flex-1 items-center">
           <Text className="text-lg font-bold text-gray-800">
-            Customer's Digital Signature 
+            Customer's Digital Signature
           </Text>
         </View>
 
@@ -484,7 +507,7 @@ const saveSignature = async (signatureBase64: string) => {
 
       {/* SIGNATURE AREA */}
       <View className="flex-1 mx-10 mb-4 mt-2 rounded rounded-full">
-                <DashedBorder
+        <DashedBorder
           style={{
             backgroundColor: "#DFEDFC",
             flex: 1,
@@ -495,7 +518,6 @@ const saveSignature = async (signatureBase64: string) => {
           dashWidth={15}
           gapWidth={8}
           borderWidth={3}
-          
         >
           {/* CLEAR BUTTON */}
           <TouchableOpacity
@@ -554,7 +576,7 @@ const saveSignature = async (signatureBase64: string) => {
               if (!signatureDrawn) {
                 Alert.alert(
                   "Warning",
-                  "Please draw a signature before submitting"
+                  "Please draw a signature before submitting",
                 );
                 return;
               }
@@ -573,7 +595,7 @@ const saveSignature = async (signatureBase64: string) => {
         )}
       </View>
 
-      {/* Success Modal - You can add your custom modal here if needed */}
+      {/* Success Modal - Now displays in portrait mode */}
       {showSuccessModal && (
         <View
           style={{
@@ -592,7 +614,8 @@ const saveSignature = async (signatureBase64: string) => {
               backgroundColor: "white",
               padding: 20,
               borderRadius: 10,
-              width: "35%",
+              width: "80%",
+              maxWidth: 400,
             }}
           >
             {successMessage}
