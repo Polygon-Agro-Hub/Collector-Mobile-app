@@ -1141,6 +1141,8 @@
     "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "ඔබගේ විශ්‍රාම වැටුප් ඉල්ලීම ප්‍රතික්ෂේප කර ඇති බව දැනුම් දෙමින් අපි කණගාටු වෙමු. කරුණාකර අනාගතයේ නැවත උත්සාහ කරන්න.",
     "Go Back": "ආපසු යන්න",
     "View My Pension Account": "මගේ විශ්‍රාම වැටුප් ගිණුම බලන්න",
-    "Loading status...": "තත්ත්වය ලෝඩ් වෙමින් පවතී..."
+    "Loading status...": "තත්ත්වය ලෝඩ් වෙමින් පවතී...",
+      "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "ගොවියා දැනටමත් {{date}} දින විශ්‍රාම වැටුප සඳහා ඉල්ලුම් කර ඇති බව පෙනේ. අයදුම්පත දැනට සමාලෝචනයට ලක්ව ඇත. තීරණයක් ඉක්මනින් බෙදා ගනු ඇත. ගොවියාට GoViCare යෙදුම හරහා ඕනෑම වේලාවක තත්ත්වය නිරීක්ෂණය කළ හැකිය.",
+    "The pension application submitted on {{date}} has been reviewed and was not approved.": "{{date}} දින ඉදිරිපත් කරන ලද විශ්‍රාම වැටුප් අයදුම්පත සමාලෝචනය කර ඇති අතර එය අනුමත කර නොමැත."
   }
 }
