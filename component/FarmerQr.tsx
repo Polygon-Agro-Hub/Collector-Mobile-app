@@ -11,7 +11,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import {  useRoute, RouteProp } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -130,12 +130,14 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       );
 
       setCheckingPensionStatus(false);
+      console.log("pension data",response.data)
 
       if (response.data.status) {
         if (response.data.hasPensionRequest) {
           // Has pension request, navigate to status screen with the status
           navigation.navigate("GoviPensionStatus", {
             status: response.data.reqStatus,
+            creatAt: response.data.requestCreatedAt
           });
         } else {
           // No pension request found, navigate to application form
