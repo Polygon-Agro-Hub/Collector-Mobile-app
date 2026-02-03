@@ -619,12 +619,12 @@
   },
   "EditTargetManager": {
     "LNG": "ta",
-    "TotalTarget": "நிலையத்திற்கான மொத்த இலக்கு",
-    "My Target": "எனது இலக்கு",
+    "TotalTarget": "நிலையத்திற்கான மொத்த இலக்கு (கிலோ)",
+    "My Target": "எனது இலக்கு (கிலோ)",
     "Pass": "கொடுக்க",
     "Receive": "கிடைக்கும்",
-    "Amount": "செய்ய வேண்டிய தொகை",
-    "Assigned Target": "ஒதுக்கப்பட்ட இலக்கு"
+    "Amount": "செய்ய வேண்டிய தொகை (கிலோ)",
+    "Assigned Target": "ஒதுக்கப்பட்ட இலக்கு (கிலோ)"
   },
   "ManagerTransactions": {
     "LNG": "ta",
@@ -1085,6 +1085,7 @@
     "success": "வெற்றி!",
     "error": "பிழை",
     "cashHandoverSuccess": "Rs.{{amount}} {{officerCode}} க்கு வெற்றிகரமாக ஒப்படைக்கப்பட்டது.",
+    "You cannot transfer the maximum amount of":"அதிகபட்ச தொகையை நீங்கள் மாற்ற முடியாது",
     "cashHandoverFailed": "பணம் ஒப்படைப்பு தோல்வியடைந்தது",
     "Loading camera": "கேமராவை ஏற்றுகிறது...",
     "Camera Permission Required": "கேமரா அனுமதி தேவை",

@@ -301,7 +301,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
           <View style={{ minWidth: "100%" }}>
             {/* Table Header */}
-            <View className="flex-row bg-[#980775] h-[50px]">
+            <View className="flex-row bg-[#980775] h-[50px] ">
               <Text className="w-16 p-2 text-center text-white">
                 {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
               </Text>
@@ -322,7 +322,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
             </View>
 
             <ScrollView
-              className="flex-1 bg-white"
+              className="flex-1 bg-white "
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
@@ -342,32 +342,45 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                 displayedData.map((item, index) => (
                   <View
                     key={index}
-                    className={`flex-row ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                    className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                    style={{ minHeight: 48 }}
                   >
-                    <Text className="w-16 p-2 border-r border-gray-300 text-center">
+                    {/* No. */}
+                    <View className="w-16 justify-center items-center border-r border-gray-300">
                       {selectedToggle === "ToDo" ? (
-                        index + 1
+                        <Text className="text-center">{index + 1}</Text>
                       ) : (
                         <Ionicons name="flag" size={20} color="purple" />
                       )}
-                    </Text>
-                    <Text
-                      className="w-40 p-2 border-r border-gray-300 text-center"
-                      numberOfLines={2}
-                    >
-                      {getvarietyName(item)}
-                    </Text>
-                    <Text className="w-32 p-2 border-r border-gray-300 text-center">
-                      {item.grade}
-                    </Text>
-                    <Text className="w-32 p-2 border-r border-gray-300 text-center">
-                      {item.target.toFixed(2)}
-                    </Text>
-                    <Text className="w-32 p-2 text-center">
-                      {selectedToggle === "Completed"
-                        ? item.complete.toFixed(2)
-                        : item.todo.toFixed(2)}
-                    </Text>
+                    </View>
+
+                    {/* Variety */}
+                    <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
+                      <Text className="text-center">
+                        {getvarietyName(item)}
+                      </Text>
+                    </View>
+
+                    {/* Grade */}
+                    <View className="w-32 justify-center items-center border-r border-gray-300">
+                      <Text className="text-center">{item.grade}</Text>
+                    </View>
+
+                    {/* Target */}
+                    <View className="w-32 justify-center items-center border-r border-gray-300">
+                      <Text className="text-center">
+                        {item.target.toFixed(2)}
+                      </Text>
+                    </View>
+
+                    {/* Todo / Completed */}
+                    <View className="w-32 justify-center items-center">
+                      <Text className="text-center">
+                        {selectedToggle === "Completed"
+                          ? item.complete.toFixed(2)
+                          : item.todo.toFixed(2)}
+                      </Text>
+                    </View>
                   </View>
                 ))
               ) : (

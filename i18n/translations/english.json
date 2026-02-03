@@ -26,6 +26,7 @@
     "error": "Sorry",
     "Error": "Error",
     "Failed to fetch empid.": "Failed to fetch Employee ID.",
+    "You cannot transfer the maximum amount of":"You cannot transfer the maximum amount of",
     "This EMP ID is not approved.": "This EMP ID is not approved.",
     "This EMP ID is Rejected": "This EMP ID is Rejected",
     "New password and confirm password do not match.": "New password and confirm password do not match.",
@@ -619,12 +620,12 @@
   },
   "EditTargetManager": {
     "LNG": "en",
-    "TotalTarget": "Total Target for the centre",
-    "My Target": "My Target",
+    "TotalTarget": "Total Target for the centre (kg)",
+    "My Target": "My Target (kg)",
     "Pass": "Pass",
     "Receive": "Receive",
-    "Amount": "To Do Amount",
-    "Assigned Target": "Assigned Target"
+    "Amount": "To Do Amount (kg)",
+    "Assigned Target": "Assigned Target (kg)"
   },
   "ManagerTransactions": {
     "LNG": "en",

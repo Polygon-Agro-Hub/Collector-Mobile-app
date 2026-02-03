@@ -26,6 +26,7 @@
     "error": "සමාවෙන්න",
     "Error": "දෝෂයක්",
     "Failed to fetch empid.": "සේවක හැඳුනුම්පත සොයා ගැනීමට අසමත් විය.",
+    "You cannot transfer the maximum amount of":"ඔබට උපරිම මුදල මාරු කළ නොහැක",
     "This EMP ID is not approved.": "මෙම EMP ID අනුමත කර නැත.",
     "This EMP ID is Rejected": "මෙම EMP ID ප්‍රතික්ෂේප කර ඇත.",
     "New password and confirm password do not match.": "නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය එකිනෙකට නොගැලපේ.",
@@ -619,12 +620,12 @@
   },
   "EditTargetManager": {
     "LNG": "si",
-    "TotalTarget": "මධ්‍යස්ථානයේ සඳහා මුළු ඉලක්කය",
-    "My Target": "මගේ ඉලක්කය",
+    "TotalTarget": "මධ්‍යස්ථානයේ සඳහා මුළු ඉලක්කය (කිලෝග්‍රෑම්)",
+    "My Target": "මගේ ඉලක්කය (කිලෝග්‍රෑම්)",
     "Pass": "ලබාදෙන්න",
     "Receive": "ලබාගන්න",
-    "Amount": "කළ යුතු ප්‍රමාණය (kg)",
-    "Assigned Target": "පවරන ලද ඉලක්කය"
+    "Amount": "කළ යුතු ප්‍රමාණය (කිලෝග්‍රෑම්)",
+    "Assigned Target": "පවරන ලද ඉලක්කය (කිලෝග්‍රෑම්)"
   },
   "ManagerTransactions": {
     "LNG": "si",

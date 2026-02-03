@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  ActivityIndicator,
   StatusBar,
   Platform,
   Dimensions,
+  BackHandler,
 } from "react-native";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
@@ -66,13 +66,17 @@ interface ComplainHistoryProps {
   };
 }
 
-const ComplainHistory: React.FC<ComplainHistoryProps> = ({ navigation, route }) => {
+const ComplainHistory: React.FC<ComplainHistoryProps> = ({
+  navigation,
+  route,
+}) => {
   const [complains, setComplains] = useState<complainItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userToken, setUserToken] = useState<string | null>(null);
   const [language, setLanguage] = useState("en");
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedComplain, setSelectedComplain] = useState<complainItem | null>(null);
+  const [selectedComplain, setSelectedComplain] = useState<complainItem | null>(
+    null,
+  );
   const [userFullName, setUserFullName] = useState<string>("User");
   const [userFullNameSi, setUserFullNameSi] = useState<string>("");
   const [userFullNameTa, setUserFullNameTa] = useState<string>("");
@@ -95,7 +99,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({ navigation, route }) 
   useFocusEffect(
     React.useCallback(() => {
       console.log("Current language:", i18n.language);
-  
+
       if (i18n.language === "en") {
         LanguageSelect("en");
         setSelectedLanguage("en");
@@ -107,7 +111,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({ navigation, route }) 
         setSelectedLanguage("ta");
       }
       fetchSelectedLanguage();
-    }, [i18n.language])
+    }, [i18n.language]),
   );
 
   // Get user's full name from route params or AsyncStorage
@@ -119,7 +123,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({ navigation, route }) 
         const storedName = await AsyncStorage.getItem("fullname");
         const storedNameSi = await AsyncStorage.getItem("fullnameSi");
         const storedNameTa = await AsyncStorage.getItem("fullnameTa");
-        
+
         if (storedName) setUserFullName(storedName);
         if (storedNameSi) setUserFullNameSi(storedNameSi);
         if (storedNameTa) setUserFullNameTa(storedNameTa);
@@ -136,13 +140,13 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({ navigation, route }) 
 
     // Use app language from i18n
     const appLang = i18n.language || selectedLanguage;
-    
-    if (appLang === 'si') {
-      return `${complain.replyByFirstNameSinhala || ''} ${complain.replyByLastNameSinhala || ''}`.trim();
-    } else if (appLang === 'ta') {
-      return `${complain.replyByFirstNameTamil || ''} ${complain.replyByLastNameTamil || ''}`.trim();
+
+    if (appLang === "si") {
+      return `${complain.replyByFirstNameSinhala || ""} ${complain.replyByLastNameSinhala || ""}`.trim();
+    } else if (appLang === "ta") {
+      return `${complain.replyByFirstNameTamil || ""} ${complain.replyByLastNameTamil || ""}`.trim();
     } else {
-      return `${complain.replyByFirstNameEnglish || ''} ${complain.replyByLastNameEnglish || ''}`.trim();
+      return `${complain.replyByFirstNameEnglish || ""} ${complain.replyByLastNameEnglish || ""}`.trim();
     }
   };
 
@@ -154,13 +158,13 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({ navigation, route }) 
 
     // Use app language from i18n
     const appLang = i18n.language || selectedLanguage;
-    
-    if (appLang === 'si') {
-      return complain.companyNameSinhala || '';
-    } else if (appLang === 'ta') {
-      return complain.companyNameTamil || '';
+
+    if (appLang === "si") {
+      return complain.companyNameSinhala || "";
+    } else if (appLang === "ta") {
+      return complain.companyNameTamil || "";
     } else {
-      return complain.companyNameEnglish || '';
+      return complain.companyNameEnglish || "";
     }
   };
 
@@ -168,228 +172,139 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({ navigation, route }) 
   const getOfficerName = (complain: complainItem): string => {
     // Use app language from i18n
     const appLang = i18n.language || selectedLanguage;
-    
-    if (appLang === 'si') {
+
+    if (appLang === "si") {
       return userFullNameSi || userFullName;
-    } else if (appLang === 'ta') {
+    } else if (appLang === "ta") {
       return userFullNameTa || userFullName;
     } else {
       return userFullName;
     }
   };
 
-  // Get signature based on APP language (not complaint language)
-  // const getSignature = (complain: complainItem): string => {
-  //   const replierName = getReplierName(complain);
-  //   const companyName = getCompanyName(complain);
-  //   const centerRegCode = complain.replierCenterRegCode || '';
-    
-  //   // Use app language from i18n
-  //   const appLang = i18n.language || selectedLanguage;
-
-  //   if (complain.complainAssign === 'Admin') {
-  //     const closingWord = (appLang === 'si')
-  //       ? 'මෙයට'
-  //       : (appLang === 'ta')
-  //       ? 'இதற்கு'
-  //       : 'Sincerely';
-      
-  //     const teamName = (appLang === 'si')
-  //       ? 'Polygon පාරිභෝගික සහාය කණ්ඩායම'
-  //       : (appLang === 'ta')
-  //       ? 'Polygon வாடிக்கையாளர் ஆதரவு குழு'
-  //       : 'Polygon Customer Support Team';
-      
-  //     return `${closingWord},\n${teamName}`;
-  //   } else if (complain.complainAssign === 'CCH' || complain.complainAssign === 'DCH') {
-  //     const headTitle = (appLang === 'si')
-  //       ? 'Collection Centre Head'
-  //       : (appLang === 'ta')
-  //       ? 'Collection Centre Head'
-  //       : 'Collection Centre Head';
-      
-  //     const closingWord = (appLang === 'si')
-  //       ? 'මෙයට'
-  //       : (appLang === 'ta')
-  //       ? 'இதற்கு'
-  //       : 'Sincerely';
-      
-  //     // Format: 
-  //     // Line 1: Sincerely, [Name]
-  //     // Line 2: Collection Centre Head
-  //     // Line 3: [Center Code]
-  //     // Line 4: [Company]
-  //     if (companyName && centerRegCode) {
-  //       return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}\n${companyName}`;
-  //     } else if (companyName) {
-  //       return `${closingWord}, ${replierName}\n${headTitle}\n${companyName}`;
-  //     } else if (centerRegCode) {
-  //       return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}`;
-  //     } else {
-  //       return `${closingWord}, ${replierName}\n${headTitle}`;
-  //     }
-  //   } else {
-  //     // CCM or DCM
-  //     const managerTitle = (appLang === 'si')
-  //       ? 'Collection Centre Manager'
-  //       : (appLang === 'ta')
-  //       ? 'Collection Centre Manager'
-  //       : 'Collection Centre Manager';
-      
-  //     const closingWord = (appLang === 'si')
-  //       ? 'මෙයට'
-  //       : (appLang === 'ta')
-  //       ? 'இதற்கු'
-  //       : 'Sincerely';
-      
-  //     // Format: 
-  //     // Line 1: Sincerely, [Name]
-  //     // Line 2: Collection Centre Manager of [center code]
-  //     // Line 3: [Company]
-  //     const line1 = `${closingWord}, ${replierName}`;
-  //     const line2 = centerRegCode 
-  //       ? `${managerTitle} of ${centerRegCode}`
-  //       : `${managerTitle}`;
-      
-  //     if (companyName) {
-  //       return `${line1}\n${line2}\n${companyName}`;
-  //     } else {
-  //       return `${line1}\n${line2}`;
-  //     }
-  //   }
-  // };
-
   const getSignature = (complain: complainItem): string => {
-  const replierName = getReplierName(complain);
-  const companyName = getCompanyName(complain);
-  const centerRegCode = complain.replierCenterRegCode || '';
-  
-  // Use app language from i18n
-  const appLang = i18n.language || selectedLanguage;
+    const replierName = getReplierName(complain);
+    const companyName = getCompanyName(complain);
+    const centerRegCode = complain.replierCenterRegCode || "";
 
-  if (complain.complainAssign === 'Admin') {
-    const closingWord = (appLang === 'si')
-      ? 'මෙයට'
-      : (appLang === 'ta')
-      ? 'இதற்கு'
-      : 'Sincerely';
-    
-    const teamName = (appLang === 'si')
-      ? 'Polygon පාරිභෝගික සහාය කණ්ඩායම'
-      : (appLang === 'ta')
-      ? 'Polygon வாடிக்கையாளர் ஆதரவு குழு'
-      : 'Polygon Customer Support Team';
-    
-    return `${closingWord},\n${teamName}`;
-  } else if (complain.complainAssign === 'CCH') {
-    // Collection Centre Head
-    const headTitle = (appLang === 'si')
-      ? 'Collection Centre Head'
-      : (appLang === 'ta')
-      ? 'Collection Centre Head'
-      : 'Collection Centre Head';
-    
-    const closingWord = (appLang === 'si')
-      ? 'මෙයට'
-      : (appLang === 'ta')
-      ? 'இதற்கு'
-      : 'Sincerely';
-    
-    if (companyName && centerRegCode) {
-      return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}\n${companyName}`;
-    } else if (companyName) {
-      return `${closingWord}, ${replierName}\n${headTitle}\n${companyName}`;
-    } else if (centerRegCode) {
-      return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}`;
+    // Use app language from i18n
+    const appLang = i18n.language || selectedLanguage;
+
+    if (complain.complainAssign === "Admin") {
+      const closingWord =
+        appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
+
+      const teamName =
+        appLang === "si"
+          ? "Polygon පාරිභෝගික සහාය කණ්ඩායම"
+          : appLang === "ta"
+            ? "Polygon வாடிக்கையாளர் ஆதரவு குழு"
+            : "Polygon Customer Support Team";
+
+      return `${closingWord},\n${teamName}`;
+    } else if (complain.complainAssign === "CCH") {
+      // Collection Centre Head
+      const headTitle =
+        appLang === "si"
+          ? "Collection Centre Head"
+          : appLang === "ta"
+            ? "Collection Centre Head"
+            : "Collection Centre Head";
+
+      const closingWord =
+        appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
+
+      if (companyName && centerRegCode) {
+        return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}\n${companyName}`;
+      } else if (companyName) {
+        return `${closingWord}, ${replierName}\n${headTitle}\n${companyName}`;
+      } else if (centerRegCode) {
+        return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}`;
+      } else {
+        return `${closingWord}, ${replierName}\n${headTitle}`;
+      }
+    } else if (complain.complainAssign === "DCH") {
+      // Distribution Centre Head
+      const headTitle =
+        appLang === "si"
+          ? "Distribution Centre Head"
+          : appLang === "ta"
+            ? "Distribution Centre Head"
+            : "Distribution Centre Head";
+
+      const closingWord =
+        appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
+
+      if (companyName && centerRegCode) {
+        return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}\n${companyName}`;
+      } else if (companyName) {
+        return `${closingWord}, ${replierName}\n${headTitle}\n${companyName}`;
+      } else if (centerRegCode) {
+        return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}`;
+      } else {
+        return `${closingWord}, ${replierName}\n${headTitle}`;
+      }
+    } else if (complain.complainAssign === "CCM") {
+      // Collection Centre Manager
+      const managerTitle =
+        appLang === "si"
+          ? "Collection Centre Manager"
+          : appLang === "ta"
+            ? "Collection Centre Manager"
+            : "Collection Centre Manager";
+
+      const closingWord =
+        appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
+
+      const line1 = `${closingWord}, ${replierName}`;
+      const line2 = centerRegCode
+        ? `${managerTitle} of ${centerRegCode}`
+        : `${managerTitle}`;
+
+      if (companyName) {
+        return `${line1}\n${line2}\n${companyName}`;
+      } else {
+        return `${line1}\n${line2}`;
+      }
     } else {
-      return `${closingWord}, ${replierName}\n${headTitle}`;
+      // DCM - Distribution Centre Manager
+      const managerTitle =
+        appLang === "si"
+          ? "Distribution Centre Manager"
+          : appLang === "ta"
+            ? "Distribution Centre Manager"
+            : "Distribution Centre Manager";
+
+      const closingWord =
+        appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
+
+      const line1 = `${closingWord}, ${replierName}`;
+      const line2 = centerRegCode
+        ? `${managerTitle} of ${centerRegCode}`
+        : `${managerTitle}`;
+
+      if (companyName) {
+        return `${line1}\n${line2}\n${companyName}`;
+      } else {
+        return `${line1}\n${line2}`;
+      }
     }
-  } else if (complain.complainAssign === 'DCH') {
-    // Distribution Centre Head
-    const headTitle = (appLang === 'si')
-      ? 'Distribution Centre Head'
-      : (appLang === 'ta')
-      ? 'Distribution Centre Head'
-      : 'Distribution Centre Head';
-    
-    const closingWord = (appLang === 'si')
-      ? 'මෙයට'
-      : (appLang === 'ta')
-      ? 'இதற்கு'
-      : 'Sincerely';
-    
-    if (companyName && centerRegCode) {
-      return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}\n${companyName}`;
-    } else if (companyName) {
-      return `${closingWord}, ${replierName}\n${headTitle}\n${companyName}`;
-    } else if (centerRegCode) {
-      return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}`;
-    } else {
-      return `${closingWord}, ${replierName}\n${headTitle}`;
-    }
-  } else if (complain.complainAssign === 'CCM') {
-    // Collection Centre Manager
-    const managerTitle = (appLang === 'si')
-      ? 'Collection Centre Manager'
-      : (appLang === 'ta')
-      ? 'Collection Centre Manager'
-      : 'Collection Centre Manager';
-    
-    const closingWord = (appLang === 'si')
-      ? 'මෙයට'
-      : (appLang === 'ta')
-      ? 'இதற்கு'
-      : 'Sincerely';
-    
-    const line1 = `${closingWord}, ${replierName}`;
-    const line2 = centerRegCode 
-      ? `${managerTitle} of ${centerRegCode}`
-      : `${managerTitle}`;
-    
-    if (companyName) {
-      return `${line1}\n${line2}\n${companyName}`;
-    } else {
-      return `${line1}\n${line2}`;
-    }
-  } else {
-    // DCM - Distribution Centre Manager
-    const managerTitle = (appLang === 'si')
-      ? 'Distribution Centre Manager'
-      : (appLang === 'ta')
-      ? 'Distribution Centre Manager'
-      : 'Distribution Centre Manager';
-    
-    const closingWord = (appLang === 'si')
-      ? 'මෙයට'
-      : (appLang === 'ta')
-      ? 'இதற்கு'
-      : 'Sincerely';
-    
-    const line1 = `${closingWord}, ${replierName}`;
-    const line2 = centerRegCode 
-      ? `${managerTitle} of ${centerRegCode}`
-      : `${managerTitle}`;
-    
-    if (companyName) {
-      return `${line1}\n${line2}\n${companyName}`;
-    } else {
-      return `${line1}\n${line2}`;
-    }
-  }
-};
+  };
 
   // Reply templates based on APP language (not complaint language)
   const getReplyTemplate = (complain: complainItem): string => {
-    const message = complain.reply || '';
+    const message = complain.reply || "";
     const officerName = getOfficerName(complain);
     const signature = getSignature(complain);
-    const replyTime = complain.replyTime ? `\n\n${formatDateTime(complain.replyTime)}` : '';
+    const replyTime = complain.replyTime
+      ? `\n\n${formatDateTime(complain.replyTime)}`
+      : "";
 
     // Use app language from i18n (NOT complaint language)
     const appLang = i18n.language || selectedLanguage;
-    
-    console.log('Template language:', appLang, '(from i18n.language)');
-    console.log('Complaint backend language:', complain.language, '(IGNORED)');
+
+    console.log("Template language:", appLang, "(from i18n.language)");
+    console.log("Complaint backend language:", complain.language, "(IGNORED)");
 
     const templates = {
       si: `හිතවත් ${officerName},
@@ -401,7 +316,7 @@ ${message}
 ඔබට තවත් ගැටළු හෝ ප්‍රශ්න තිබේ නම්, කරුණාකර අප හා සම්බන්ධ වන්න. ඔබේ ඉවසීම සහ අවබෝධය වෙනුවෙන් ස්තූතියි.
 
 ${signature}${replyTime}`,
-      
+
       en: `Dear ${officerName},
 
 We are pleased to inform you that your complaint has been resolved.
@@ -411,7 +326,7 @@ ${message}
 If you have any further concerns or questions, feel free to reach out. Thank you for your patience and understanding.
 
 ${signature}${replyTime}`,
-      
+
       ta: `அன்புள்ள ${officerName},
 
 நாங்கள் உங்கள் புகாரை தீர்க்கப்பட்டதாக தெரிவித்ததில் மகிழ்ச்சி அடைகிறோம்.
@@ -420,7 +335,7 @@ ${message}
 
 உங்களுக்கு மேலும் ஏதேனும் சிக்கல்கள் அல்லது கேள்விகள் இருந்தால், தயவுசெய்து எங்களைத் தொடர்பு கொள்ளவும். உங்கள் பொறுமைக்கும் புரிதலுக்கும் நன்றி.
 
-${signature}${replyTime}`
+${signature}${replyTime}`,
     };
 
     return templates[appLang as keyof typeof templates] || templates.en;
@@ -438,7 +353,7 @@ ${signature}${replyTime}`
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setComplains(res.data);
     } catch (err) {
@@ -451,7 +366,7 @@ ${signature}${replyTime}`
   useFocusEffect(
     React.useCallback(() => {
       fetchComplaints();
-    }, [])
+    }, []),
   );
 
   const formatDateTime = (isoDate: string) => {
@@ -482,10 +397,26 @@ ${signature}${replyTime}`
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("EngProfile");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   return (
     <View className="flex-1 bg-[#FFFFFF]">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
+
       <View
         className="flex-row justify-between"
         style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
@@ -584,11 +515,12 @@ ${signature}${replyTime}`
       >
         <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
         <View className="flex-1 bg-[#FFFFFF]">
-          <View 
+          <View
             className="flex-1"
-            style={{ 
-              paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0,
-              paddingBottom: Platform.OS === 'android' ? 20 : 0,
+            style={{
+              paddingTop:
+                Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0,
+              paddingBottom: Platform.OS === "android" ? 20 : 0,
             }}
           >
             <View className="flex-1" style={{ padding: wp(4) }}>
@@ -596,9 +528,12 @@ ${signature}${replyTime}`
                 <Text className="text-lg font-bold">{t("Thank You")}</Text>
 
                 {/* <ScrollView className="mt-8" style={{ maxHeight: hp(55) }}> */}
-                 <ScrollView className="mt-8" style={{ maxHeight: Dimensions.get('window').height * 0.7 }}>
+                <ScrollView
+                  className="mt-8"
+                  style={{ maxHeight: Dimensions.get("window").height * 0.7 }}
+                >
                   <Text className="pb-4" style={{ lineHeight: 24 }}>
-                    {selectedComplain 
+                    {selectedComplain
                       ? getReplyTemplate(selectedComplain)
                       : "Loading..."}
                   </Text>

@@ -281,7 +281,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                 displayedData.map((item, index) => (
                   <TouchableOpacity
                     key={index}
-                    className={`flex-row ${
+                    className={`flex-row justify-center items-center ${
                       index % 2 === 0 ? "bg-gray-100" : "bg-white"
                     }`}
                     onPress={() => {

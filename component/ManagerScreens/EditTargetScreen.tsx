@@ -100,7 +100,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
       <View className="mt-6 space-y-6 p-8">
         {/* Total Target */}
         <View>
-          <Text className="text-gray-600 font-medium">
+          <Text className="text-[#475A6A] font-medium">
             {t("EditTargetManager.TotalTarget")}
           </Text>
           <TextInput

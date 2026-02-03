@@ -57,7 +57,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [officers, setOfficers] = useState<{ key: string; value: string }[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingTarget, setFetchingTarget] = useState<boolean>(false);
@@ -118,15 +118,15 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-     // console.log("Officers:", response.data.data);
+      // console.log("Officers:", response.data.data);
 
       if (response.data.status === "success") {
         const formattedOfficers = response.data.data.map((officer: any) => ({
           key: officer.collectionOfficerId.toString(),
-          value: `${getOfficerName(officer)}  (${(officer.empId)})`,
+          value: `${getOfficerName(officer)}  (${officer.empId})`,
         }));
 
         setOfficers([...formattedOfficers]);
@@ -146,7 +146,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
 
   // ✅ Fetch Daily Target when officer is selected
   const fetchDailyTarget = async (officerId: string) => {
-   // console.log("Selected Officer ID:", officerId);
+    // console.log("Selected Officer ID:", officerId);
     if (officerId === "0") {
       setAmount("");
       setMaxAmount(0);
@@ -164,13 +164,13 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-    //  console.log("Daily Target Response:", response.data);
+      //  console.log("Daily Target Response:", response.data);
 
       if (response.data.status === "success" && response.data.data) {
-      //  console.log("Daily Target Data:", response.data.data);
+        //  console.log("Daily Target Data:", response.data.data);
         const { target, complete } = response.data.data;
         const calculatedTodo = parseFloat(target) - parseFloat(complete);
 
@@ -219,8 +219,6 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
   };
 
   const isSaveButtonDisabled = () => {
-   
-
     const numericAmount = parseFloat(amount);
     return (
       !assignee ||
@@ -250,15 +248,15 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     if (numericAmount > maxAmount) {
       Alert.alert(
         t("Error.error"),
-        `${t("Error.You cannot transfer more than")} ${maxAmount}kg.`
+        `${t("Error.You cannot transfer more than")} ${maxAmount}kg.`,
       );
       return;
     }
 
-      const netState = await NetInfo.fetch();
-      if (!netState.isConnected) {
-    return; 
-  }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
 
     try {
       setFetchingTarget(true);
@@ -276,35 +274,35 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Target received successfully.")
+          t("Error.Target received successfully."),
         );
-         navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: "Main",
-                  params: {
-                    screen: "DailyTarget",
-                    params: {
-                      varietyId,
-                      varietyNameEnglish,
-                      grade,
-                      target,
-                      qty,
-                      varietyNameSinhala,
-                      varietyNameTamil,
-                      dailyTarget,
-                    },
-                  },
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Main",
+              params: {
+                screen: "DailyTarget",
+                params: {
+                  varietyId,
+                  varietyNameEnglish,
+                  grade,
+                  target,
+                  qty,
+                  varietyNameSinhala,
+                  varietyNameTamil,
+                  dailyTarget,
                 },
-              ],
-            });
+              },
+            },
+          ],
+        });
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to receive target."));
       }
@@ -312,7 +310,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
       console.error("Receive Target Error:", error);
       Alert.alert(
         t("Error.error"),
-        t("Error.An error occurred while receiving the target.")
+        t("Error.An error occurred while receiving the target."),
       );
     } finally {
       setFetchingTarget(false);
@@ -362,10 +360,10 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
             }}
             className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
           >
-           <AntDesign name="left" size={22} color="white" />
+            <AntDesign name="left" size={22} color="white" />
           </TouchableOpacity>
           {/* <Text className="text-white text-lg font-semibold text-center w-full"> */}
-             <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
+          <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
             {getvarietyName()}
           </Text>
         </View>
@@ -397,16 +395,15 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
                     borderWidth: 1,
                     borderColor: "#F4F4F4",
                     backgroundColor: "#F4F4F4",
-                    borderRadius:25
+                    borderRadius: 25,
                   }}
                   inputStyles={{
-                    color: "#000000",
+                    color: assignee && assignee !== "0" ? "#000000" : "#848484",
                   }}
                   dropdownStyles={{
                     // Fixed: changed from dropDownStyles to dropdownStyles
                     borderColor: "#F4F4F4",
-                    backgroundColor: "#F4F4F4"
-                
+                    backgroundColor: "#F4F4F4",
                   }}
                 />
               </View>

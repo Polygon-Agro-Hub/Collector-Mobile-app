@@ -10,8 +10,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { SelectList } from "react-native-dropdown-select-list";
+import { AntDesign } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
@@ -178,7 +177,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
   const handleAmountChange = (text: string) => {
     setAmount(text);
     const numericValue = parseFloat(text);
-    if (numericValue > maxAmount) {
+    if (numericValue > maxAmount ) {
       setError(t("Error.You have exceeded the maximum amount."));
   
     } else {
@@ -199,7 +198,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
       return;
     }
 
-    if (numericAmount >= maxAmount) {
+    if (numericAmount > maxAmount) {
       Alert.alert(
         t("Error.error"),
         `${t("Error.You cannot transfer the maximum amount of")} ${maxAmount}kg.`
@@ -340,7 +339,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
           <View className="border-b border-gray-300 my-4" />
 
           <View className="p-5">
-            <Text className="text-gray-700 mb-2 mt-[20%]">
+            <Text className="text-gray-700 mb-2 mt-[3%]">
               {t("PassTargetBetweenOfficers.Short Stock Assignee")}
             </Text>
 
@@ -360,7 +359,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
                   placeholder={t("PassTargetBetweenOfficers.Select an officer")}
                   style={{ borderColor: "#F4F4F4",backgroundColor:"#F4F4F4",borderRadius:25, borderWidth: 1 }}
                   dropDownContainerStyle={{ borderColor: "#e5e7eb" }}
-                  placeholderStyle={{ color: "#000000" }}
+                  placeholderStyle={{ color: "#848484" }}
                   zIndex={3000}
                   zIndexInverse={1000}
                   listMode="SCROLLVIEW"
