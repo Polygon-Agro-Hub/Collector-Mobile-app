@@ -663,13 +663,8 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
 
       console.log("Error details:", { errorMessage, statusCode });
 
-      if (
-        errorMessage.includes("officer") ||
-        errorMessage.includes("Officer")
-      ) {
-        title = "Officer Error";
-        message = errorMessage;
-      } else if (
+    
+       if (
         errorMessage.includes("already handed over") ||
         errorMessage.includes("already processed")
       ) {
@@ -678,6 +673,9 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
       } else if (statusCode === 404) {
         title = "Officer Not Found";
         message = "The cash officer code is not recognized.";
+      } else if (statusCode === 403) {
+        title = "Not Valid!";
+        message = "This Manager's ID is not acceptable."
       } else if (statusCode === 400) {
         title = "Invalid Request";
         message = errorMessage || "Invalid request. Please try again.";
