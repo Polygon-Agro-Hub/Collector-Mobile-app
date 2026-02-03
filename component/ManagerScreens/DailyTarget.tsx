@@ -154,7 +154,10 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
           },
         );
 
+       
+
         const allData = response.data.data;
+         console.log('dataaa',allData)
         const todoItems = allData.filter((item: TargetData) => item.todo > 0);
         const completedItems = allData.filter(
           (item: TargetData) => item.complete >= item.officerTarget,
@@ -196,7 +199,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
       {/* Header */}
       <View className="bg-[#282828] px-4 py-3 flex-row justify-between items-center">
         <Text className="text-white text-lg font-bold ml-[35%]">
-          {t("DailyTarget.MyTarget")}
+           {t("DailyTarget.MyTarget")}
         </Text>
       </View>
 
@@ -345,7 +348,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
                 displayedData.map((item, index) => (
                   <TouchableOpacity
                     key={index}
-                    className={`flex-row ${
+                    className={`flex-row justify-center items-center ${
                       index % 2 === 0 ? "bg-gray-100" : "bg-white"
                     }`}
                     onPress={() => {

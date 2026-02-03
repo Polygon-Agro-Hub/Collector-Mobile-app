@@ -337,11 +337,11 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                       officerRole: "COO",
                     })
                   }
-                  className="mt-8 bg-[#000000]  rounded-full px-16 py-3  "
+                  className="mt-8 bg-[#000000]  rounded-full  p-3"
                 >
                   <Text
                     style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                    className="text-center text-white text-lg"
+                    className="text-center text-white font-semibold text-lg mx-[32%]"
                   >
                     {t("SearchFarmer.Set QR Code")}
                   </Text>
