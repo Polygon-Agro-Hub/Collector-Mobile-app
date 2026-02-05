@@ -9,9 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  BackHandler,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "./types";
 import { useTranslation } from "react-i18next";
@@ -25,11 +23,9 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import DropDownPicker from "react-native-dropdown-picker";
-import { use } from "i18next";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -49,12 +45,11 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   const { userId, farmerLanguage } = route.params;
   console.log("User ID:", userId);
   const [complain, setComplain] = useState<string>("");
-  const [authToken, setAuthToken] = useState<string | null>(null);
   const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [Category, setCategory] = useState<{ value: string; label: string }[]>(
-    []
+    [],
   );
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -66,11 +61,8 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       setLoading(false);
     }, 2000);
 
-    return () => clearTimeout(timer); 
+    return () => clearTimeout(timer);
   }, []);
-
-
-
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -101,19 +93,19 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     const fetchComplainCategory = async () => {
       try {
         const response = await axios.get(
-          `${environment.API_BASE_URL}api/complain/get-complain-category/${appName}`
+          `${environment.API_BASE_URL}api/complain/get-complain-category/${appName}`,
         );
         if (response.data.status === "success") {
-      //    console.log(response.data.data);
+          //    console.log(response.data.data);
 
           const categoryField =
             selectedLanguage === "en"
               ? "categoryEnglish"
               : selectedLanguage === "si"
-              ? "categorySinhala"
-              : selectedLanguage === "ta"
-              ? "categoryTamil"
-              : "categoryEnglish";
+                ? "categorySinhala"
+                : selectedLanguage === "ta"
+                  ? "categoryTamil"
+                  : "categoryEnglish";
 
           const mappedCategories = response.data.data
             .map((item: any) => {
@@ -136,105 +128,92 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     fetchComplainCategory();
   }, [t]);
 
-
-
-
   const handleSubmit = async () => {
-
-  if (!complain && !selectedCategory) {
-    Alert.alert(
-      t("Error.error"),
-      t("Error.Please select a category and add your complaint.")
-    );
-    return;
-  }
-
-
-  if (!selectedCategory) {
-    Alert.alert(
-      t("Error.error"),
-      t("Error.Please select a category.")
-    );
-    return;
-  }
-
-
-  if (!complain) {
-    Alert.alert(
-      t("Error.error"),
-      t("Error.Please add your complaint.")
-    );
-    return;
-  }
-
-  const netState = await NetInfo.fetch();
-  if (!netState.isConnected) {
-    return; 
-  }
-
-  try {
-    const storedLanguage = await AsyncStorage.getItem("@user_language");
-    if (storedLanguage) {
-      setLanguage(storedLanguage);
+    if (!complain && !selectedCategory) {
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Please select a category and add your complaint."),
+      );
+      return;
     }
 
-    const token = await AsyncStorage.getItem("token");
-
-    let response;
-
-    if (userId === 0) {
-      response = await api.post(
-        "api/complain/officer-complaint",
-        {
-          complain,
-          language: storedLanguage,
-          category: selectedCategory,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-    } else {
-      response = await api.post(
-        "api/complain/farmer-complaint",
-        {
-          complain,
-          language: farmerLanguage,
-          category: selectedCategory,
-          userId,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+    if (!selectedCategory) {
+      Alert.alert(t("Error.error"), t("Error.Please select a category."));
+      return;
     }
 
-    Alert.alert(
-      t("Error.Success"),
-      t("Error.Your complaint has Submit successfuly")
-    );
-    setComplain("");
-    setSelectedCategory(null);
-    navigation.goBack();
-  } catch (error) {
-    console.error("Error submitting complaint:", error);
-    Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
-  }
-};
+    if (!complain) {
+      Alert.alert(t("Error.error"), t("Error.Please add your complaint."));
+      return;
+    }
+
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
+
+    try {
+      const storedLanguage = await AsyncStorage.getItem("@user_language");
+      if (storedLanguage) {
+        setLanguage(storedLanguage);
+      }
+
+      const token = await AsyncStorage.getItem("token");
+
+      let response;
+
+      if (userId === 0) {
+        response = await api.post(
+          "api/complain/officer-complaint",
+          {
+            complain,
+            language: storedLanguage,
+            category: selectedCategory,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+      } else {
+        response = await api.post(
+          "api/complain/farmer-complaint",
+          {
+            complain,
+            language: farmerLanguage,
+            category: selectedCategory,
+            userId,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+      }
+
+      Alert.alert(
+        t("Error.Success"),
+        t("Error.Your complaint has Submit successfuly"),
+      );
+      setComplain("");
+      setSelectedCategory(null);
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error submitting complaint:", error);
+      Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+    }
+  };
 
   function dismissKeyboard(): void {
     throw new Error("Function not implemented.");
   }
 
   return (
-      <KeyboardAvoidingView
+    <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
       style={{ flex: 1, backgroundColor: "#FFFFFF" }}
     >
       <View className="flex-1 bg-white">
         {loading ? (
-   
           <View className="flex-1 justify-center items-center">
             <LottieView
               source={require("../assets/lottie/newLottie.json")}
@@ -245,18 +224,20 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
           </View>
         ) : (
           <>
-
-            <ScrollView 
-            className="flex-1 bg-white" 
-            keyboardShouldPersistTaps="handled" 
-            style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
-            showsVerticalScrollIndicator={false}
-          >
-                       <TouchableOpacity  onPress={() => navigation.goBack()} className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10" >
-                         <AntDesign name="left" size={24} color="#000502" />
-                       </TouchableOpacity>
+            <ScrollView
+              className="flex-1 bg-white"
+              keyboardShouldPersistTaps="handled"
+              style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
+              showsVerticalScrollIndicator={false}
+            >
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
+              >
+                <AntDesign name="left" size={24} color="#000502" />
+              </TouchableOpacity>
               {/* <View className="items-center p-2 pb-20 -mt-10 bg-white"> */}
-               <View className="items-center bg-white ">
+              <View className="items-center bg-white ">
                 <Image
                   source={require("../assets/images/complain.webp")}
                   className="w-36 h-36 "
@@ -272,58 +253,60 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                       {t("ReportComplaint.Problem")}
                     </Text>
                   </View>
-<View className="w-full rounded-full mb-4 bg-white">
-  {Category.length > 0 && (
-    <DropDownPicker
-      open={open}
-      value={selectedCategory}
-      setOpen={setOpen}
-      setValue={setSelectedCategory}
-      items={Category.map((item) => ({
-        label: t(item.label),
-        value: item.value,
-      }))}
-      placeholder={t("ReportComplaint.selectCategory")}
-      placeholderStyle={{ color: "#434343" }}
-      listMode="SCROLLVIEW"
-      zIndex={3000}
-      zIndexInverse={1000}
-      dropDownContainerStyle={{
-        borderColor: "#ccc",
-        borderWidth: 1,
-        borderRadius: 25,
-      }}
-      style={{
-        borderWidth: 1,
-        borderColor: "#ccc",
-        paddingHorizontal: 8,
-        paddingVertical: 10,
-        borderRadius: 25,
-      }}
-      textStyle={{ fontSize: 12 }}
-      onOpen={dismissKeyboard}
-    />
-  )}
-</View>
+                  <View className="w-full rounded-full mb-4 bg-white">
+                    {Category.length > 0 && (
+                      <DropDownPicker
+                        open={open}
+                        value={selectedCategory}
+                        setOpen={setOpen}
+                        setValue={setSelectedCategory}
+                        items={Category.map((item) => ({
+                          label: t(item.label),
+                          value: item.value,
+                        }))}
+                        placeholder={t("ReportComplaint.selectCategory")}
+                        placeholderStyle={{ color: "#434343" }}
+                        listMode="SCROLLVIEW"
+                        zIndex={3000}
+                        zIndexInverse={1000}
+                        dropDownContainerStyle={{
+                          borderColor: "#ccc",
+                          borderWidth: 1,
+                          borderRadius: 25,
+                        }}
+                        style={{
+                          borderWidth: 1,
+                          borderColor: "#ccc",
+                          paddingHorizontal: 8,
+                          paddingVertical: 10,
+                          borderRadius: 25,
+                        }}
+                        arrowIconContainerStyle={{
+                          paddingRight: 10,
+                        }}
+                        textStyle={{ fontSize: 12 }}
+                        onOpen={dismissKeyboard}
+                      />
+                    )}
+                  </View>
 
                   <Text className="text-sm text-gray-600 text-center mb-4">
                     {t("ReportComplaint.WewilRespond")}
                   </Text>
 
-                 <TextInput
-  className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8"
-  placeholder={t("ReportComplaint.Kindlysubmit")}
-  placeholderTextColor="#434343" 
-  multiline
-  value={complain}
-  onChangeText={(text) => setComplain(text)}
-  onFocus={() => setOpen(false)}
-  style={{
-    textAlignVertical: "top",
-    color: "#424242", 
-  }}
-/>
-
+                  <TextInput
+                    className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8"
+                    placeholder={t("ReportComplaint.Kindlysubmit")}
+                    placeholderTextColor="#434343"
+                    multiline
+                    value={complain}
+                    onChangeText={(text) => setComplain(text)}
+                    onFocus={() => setOpen(false)}
+                    style={{
+                      textAlignVertical: "top",
+                      color: "#424242",
+                    }}
+                  />
 
                   <TouchableOpacity
                     className="w-full bg-[#000000] py-4 rounded-full items-center  mb-20"

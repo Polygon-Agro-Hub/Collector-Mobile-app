@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   StatusBar,
   Image,
   BackHandler,
+  Animated,
 } from "react-native";
 import {
   FontAwesome5,
@@ -40,9 +41,43 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   const { order } = route.params;
   const { t } = useTranslation();
   const [isProcessing, setIsProcessing] = useState(false);
+  const scrollX = useRef(new Animated.Value(0)).current;
 
   // Format customer name
-  const customerName = `${order.fullName}`;
+  const customerName = `${order.title}.${order.fullName}`;
+
+  // Auto-scroll animation for customer name (same as schedule time in OrderDetails)
+  useEffect(() => {
+    const textLength = customerName.length;
+
+    // Only animate if text is long enough
+    if (textLength > 20) {
+      const scrollDistance = textLength * 8; // Approximate pixel width
+
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.delay(1000), // Pause before starting
+          Animated.timing(scrollX, {
+            toValue: -scrollDistance,
+            duration: textLength * 200, // Scroll speed
+            useNativeDriver: true,
+          }),
+          Animated.timing(scrollX, {
+            toValue: 0,
+            duration: 0, // Instant reset to start
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+
+      animation.start();
+
+      return () => {
+        scrollX.setValue(0);
+        animation.stop();
+      };
+    }
+  }, [customerName, scrollX]);
 
   // Format phone numbers
   const formatPhoneNumber = (code: string, number: string) => {
@@ -97,7 +132,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
       // Check for time range like "8AM - 2PM"
       const rangeMatch = timePart.match(
-        /^(\d{1,2})(AM|PM)\s*-\s*(\d{1,2})(AM|PM)$/i
+        /^(\d{1,2})(AM|PM)\s*-\s*(\d{1,2})(AM|PM)$/i,
       );
       if (rangeMatch) {
         const startHour = rangeMatch[1];
@@ -124,14 +159,14 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
-  })} on ${readyDate.toLocaleDateString("en-US")}`;
+  })} on ${readyDate.getFullYear()}/${readyDate.getMonth() + 1}/${readyDate.getDate()}`;
 
   // Determine payment status
   const isPaid = order.isPaid;
- const cashAmount = (Number(order.fullTotal) || 0).toLocaleString("en-US", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+  const cashAmount = (Number(order.fullTotal) || 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   const makePhoneCall = (phoneNumber: string) => {
     const cleanedNumber = phoneNumber.replace(/[^0-9+]/g, "");
@@ -142,7 +177,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
       Alert.alert(
         t("Error.Error") || "Error",
         t("Error.Phone call is not supported on this device") ||
-          "Phone call is not supported on this device"
+          "Phone call is not supported on this device",
       );
     });
   };
@@ -164,10 +199,10 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress
+        onBackPress,
       );
       return () => subscription.remove();
-    }, [navigation])
+    }, [navigation]),
   );
 
   return (
@@ -192,26 +227,48 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
         <View className="flex-row items-center justify-center">
           <View className="px-3 py-1.5 rounded-full flex-row items-center">
             <Text className="text-[#565559] mr-2">
-              {t("ViewPickupOrders.Ready") || "Ready"}
+              {t("ViewPickupOrders.Ready") || "Ready"} :
             </Text>
             <Text className="font-semibold text-[#000000]">{readyTime}</Text>
           </View>
         </View>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      {/* <ScrollView className="flex-1" showsVerticalScrollIndicator={false}> */}
+      <View className="flex-1 ">
         <View className="px-4">
           {/* Customer Info */}
-          <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+          <View className="bg-white rounded-2xl p-4 mb-2 shadow-sm">
             <View className="items-center mb-4">
               <Image
                 source={require("../../assets/images/New/ProfileCustomer.webp")}
                 className="h-[100px] w-[100px] rounded-lg"
                 resizeMode="contain"
               />
-              <Text className="text-lg font-bold text-gray-800 mt-2">
-                {customerName}
-              </Text>
+              {/* Auto-scrolling customer name - Same as schedule time implementation */}
+              {/* Auto-scrolling customer name - Same as schedule time implementation */}
+              <View className="mt-2 w-full px-8">
+                <View
+                  className="mt-2 overflow-hidden"
+                  style={{
+                    width: customerName.length > 20 ? "180%" : "100%",
+                    alignItems: "center",
+                  }}
+                >
+                  <Animated.Text
+                    className="text-lg font-bold text-gray-800 text-center"
+                    style={{
+                      transform:
+                        customerName.length > 20
+                          ? [{ translateX: scrollX }]
+                          : [],
+                    }}
+                    numberOfLines={1}
+                  >
+                    {customerName}
+                  </Animated.Text>
+                </View>
+              </View>
             </View>
 
             {/* Payment Status */}
@@ -250,7 +307,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
           {/* Phone Call Buttons - Dynamic based on number of phone numbers */}
           <View
             className={`px-4 ${
-              phoneNumbers.length === 1 ? "mb-[68px]" : "mb-4"
+              phoneNumbers.length === 1 ? "mb-[60px]" : "mb-4"
             }`}
           >
             {phoneNumbers.map((phoneNumber, index) => (
@@ -294,7 +351,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
             </View>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 };

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
   ScrollView,
   Modal,
@@ -57,6 +56,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
 
   // Calculate total cash
   const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
@@ -165,17 +165,22 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
 
   // Filter transactions by selected date
   const filterTransactionsByDate = useCallback(() => {
-    const selectedDateStr = formatDateForComparison(selectedDate);
-    const filtered = allTransactions.filter(
-      (transaction) => transaction.date === selectedDateStr
-    );
-    setTransactions(filtered);
-    console.log(
-      "Filtered for date:",
-      selectedDateStr,
-      "Found:",
-      filtered.length
-    );
+    setFilterLoading(true);
+    // Add a small delay to show the loading animation
+    setTimeout(() => {
+      const selectedDateStr = formatDateForComparison(selectedDate);
+      const filtered = allTransactions.filter(
+        (transaction) => transaction.date === selectedDateStr
+      );
+      setTransactions(filtered);
+      console.log(
+        "Filtered for date:",
+        selectedDateStr,
+        "Found:",
+        filtered.length
+      );
+      setFilterLoading(false);
+    }, 300); // Small delay to show animation
   }, [selectedDate, allTransactions]);
 
   // Effect to filter transactions when date changes
@@ -266,9 +271,14 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
         </Text>
       </View>
       {/* Content based on transactions */}
-      {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="black" />
+      {loading || filterLoading ? (
+        <View className="flex-1 justify-center items-center">
+          <LottieView
+            source={require("../../assets/lottie/newLottie.json")}
+            autoPlay
+            loop
+            style={{ width: 300, height: 300 }}
+          />
         </View>
       ) : hasTransactions ? (
         // Show transactions when data exists

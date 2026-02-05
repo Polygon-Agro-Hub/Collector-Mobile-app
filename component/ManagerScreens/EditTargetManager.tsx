@@ -120,7 +120,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
         <View className="mt-6 space-y-6 p-8">
           {/* Total Target */}
           <View>
-            <Text className="text-gray-600 font-medium">
+            <Text className="text-[#475A6A] font-medium">
               {t("EditTargetManager.TotalTarget")}
             </Text>
             <TextInput
@@ -132,7 +132,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
 
           {/* My Target */}
           <View>
-            <Text className="text-gray-600 font-medium">
+            <Text className="text-[#475A6A] font-medium">
               {t("EditTargetManager.My Target")}
             </Text>
             <View className="flex-row items-center mt-2 border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2">

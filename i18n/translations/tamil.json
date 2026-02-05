@@ -619,12 +619,12 @@
   },
   "EditTargetManager": {
     "LNG": "ta",
-    "TotalTarget": "நிலையத்திற்கான மொத்த இலக்கு",
-    "My Target": "எனது இலக்கு",
+    "TotalTarget": "நிலையத்திற்கான மொத்த இலக்கு (கிலோ)",
+    "My Target": "எனது இலக்கு (கிலோ)",
     "Pass": "கொடுக்க",
     "Receive": "கிடைக்கும்",
-    "Amount": "செய்ய வேண்டிய தொகை",
-    "Assigned Target": "ஒதுக்கப்பட்ட இலக்கு"
+    "Amount": "செய்ய வேண்டிய தொகை (கிலோ)",
+    "Assigned Target": "ஒதுக்கப்பட்ட இலக்கு (கிலோ)"
   },
   "ManagerTransactions": {
     "LNG": "ta",
@@ -1039,7 +1039,7 @@
   "ReadytoPickupOrders": {
     "No orders to be picked up": "பறிமுதல் செய்ய வேண்டிய ஆர்டர்கள் இல்லை",
     "Ready to Pickup Orders": "பறிமுதல் செய்ய தயாரான ஆர்டர்கள்",
-    "Search by phone number": "தொலைபேசி எண்ணால் தேடு...",
+    "Search by phone number": "தொலைபேசி எண் (7XXXXXXXXXX)..",
     "All": "அனைத்தும்",
     "No orders from this user for pickup": "இந்த பயனரிடமிருந்து பறிமுதல் செய்ய ஆர்டர்கள் இல்லை",
     "No registered customer using this phone number": "இந்த தொலைபேசி எண்ணைப் பயன்படுத்தும் பதிவுசெய்த வாடிக்கையாளர் இல்லை",
@@ -1069,7 +1069,8 @@
     "Select All": "அனைத்தையும் தேர்ந்தெடு",
     "Hand Over": "கையளி",
     "No cash was received recently": "சமீபத்தில் எந்தப் பணமும் பெறப்படவில்லை.",
-    "Rs": "ரூ."
+    "Rs": "ரூ. ",
+    "Rscash":" ரூ. "
   },
   "ViewPickupOrders": {
     "Order Details": "ஆர்டர் விவரங்கள்",
@@ -1077,12 +1078,14 @@
     "Already Paid": "ஏற்கனவே பணம் செலுத்தப்பட்டது!",
     "Rs": "ரூ.",
     "Make Phone Call": "தொலைபேசி அழைப்பு செய்",
-    "Scan Order": "ஸ்கேன் ஆர்டர்"
+    "Scan Order": "ஸ்கேன் ஆர்டர்",
+    "Cash":"பணம்"
   },
   "qrcode": {
     "success": "வெற்றி!",
     "error": "பிழை",
     "cashHandoverSuccess": "Rs.{{amount}} {{officerCode}} க்கு வெற்றிகரமாக ஒப்படைக்கப்பட்டது.",
+    "You cannot transfer the maximum amount of":"அதிகபட்ச தொகையை நீங்கள் மாற்ற முடியாது",
     "cashHandoverFailed": "பணம் ஒப்படைப்பு தோல்வியடைந்தது",
     "Loading camera": "கேமராவை ஏற்றுகிறது...",
     "Camera Permission Required": "கேமரா அனுமதி தேவை",
@@ -1139,6 +1142,8 @@
     "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "உங்கள் பென்ஷன் கோரிக்கை நிராகரிக்கப்பட்டதை தெரிவித்து வருந்துகிறோம். தயவுசெய்து எதிர்காலத்தில் மீண்டும் முயற்சிக்க விருப்பத்தோடு இருங்கள்.",
     "Go Back": "திரும்பிச் செல்லவும்",
     "View My Pension Account": "எனது பென்ஷன் கணக்கைக் காண்க",
-    "Loading status...": "நிலை ஏற்றப்படுகிறது..."
+    "Loading status...": "நிலை ஏற்றப்படுகிறது...",
+      "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": " looks like the farmer has already Itapplied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.விவசாயி ஏற்கனவே {{date}} அன்று ஓய்வூதியத்திற்கு விண்ணப்பித்திருப்பது போல் தெரிகிறது. விண்ணப்பம் தற்போது மதிப்பாய்வில் உள்ளது. விரைவில் ஒரு முடிவு பகிரப்படும். GoViCare செயலி மூலம் விவசாயி எந்த நேரத்திலும் நிலையைக் கண்காணிக்கலாம்.",
+    "The pension application submitted on {{date}} has been reviewed and was not approved.": "{{தேதி}} அன்று சமர்ப்பிக்கப்பட்ட ஓய்வூதிய விண்ணப்பம் மதிப்பாய்வு செய்யப்பட்டு அங்கீகரிக்கப்படவில்லை."
   }
 }

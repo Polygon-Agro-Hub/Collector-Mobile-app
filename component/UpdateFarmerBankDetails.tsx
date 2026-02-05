@@ -393,7 +393,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             ) : (
               <Text
                 style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-center text-xl font-light text-white"
+                className="text-center text-xl font-semibold text-white"
               >
                 {t("UnregisteredFarmerDetails.Submit")}
               </Text>

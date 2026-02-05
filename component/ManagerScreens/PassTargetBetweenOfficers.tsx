@@ -329,7 +329,7 @@ const PassTargetBetweenOfficers: React.FC<
                     backgroundColor: "white",
                   }}
                   inputStyles={{
-                    color: "#000000",
+                    color: assignee && assignee !== "0" ? "#000000" : "#848484",
                   }}
                   dropdownStyles={{
                     // Fixed: changed from dropDownStyles to dropdownStyles
