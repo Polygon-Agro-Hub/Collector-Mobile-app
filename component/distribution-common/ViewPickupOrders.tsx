@@ -43,28 +43,26 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  // Format customer name
-  const customerName = `${order.title}.${order.fullName}`;
+  const customerName = `${order.title}. ${order.fullName}`;
 
-  // Auto-scroll animation for customer name (same as schedule time in OrderDetails)
   useEffect(() => {
     const textLength = customerName.length;
 
-    // Only animate if text is long enough
+    
     if (textLength > 20) {
-      const scrollDistance = textLength * 8; // Approximate pixel width
+      const scrollDistance = textLength * 8; 
 
       const animation = Animated.loop(
         Animated.sequence([
-          Animated.delay(1000), // Pause before starting
+          Animated.delay(1000), 
           Animated.timing(scrollX, {
             toValue: -scrollDistance,
-            duration: textLength * 200, // Scroll speed
+            duration: textLength * 200, 
             useNativeDriver: true,
           }),
           Animated.timing(scrollX, {
             toValue: 0,
-            duration: 0, // Instant reset to start
+            duration: 0, 
             useNativeDriver: true,
           }),
         ]),
@@ -79,7 +77,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     }
   }, [customerName, scrollX]);
 
-  // Format phone numbers
+ 
   const formatPhoneNumber = (code: string, number: string) => {
     return `${code} ${number}`;
   };
@@ -92,7 +90,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
   const phoneNumbers = phone2 ? [phone1, phone2] : [phone1];
 
-  // Format scheduled time in exact format: 2025/01/02 (8:00AM - 2:00PM)
+
   const formatScheduleDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -105,24 +103,24 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     }
   };
 
-  // Remove "Within" from schedule time and format to add :00 for minutes
+ 
   const formatScheduleTime = (timeString: string) => {
     if (!timeString) return "";
 
-    // Remove "Within" and any extra spaces
+   
     const cleanTime = timeString.replace(/within\s*/i, "").trim();
 
-    // Function to format time to include :00 for minutes
+    
     const formatTimeWithMinutes = (timePart: string) => {
-      // Remove any spaces and convert to uppercase for consistent formatting
+     
       timePart = timePart.trim().toUpperCase();
 
-      // Check if time already has minutes (contains :)
+    
       if (timePart.includes(":")) {
         return timePart;
       }
 
-      // Extract hour and AM/PM
+      
       const match = timePart.match(/^(\d{1,2})\s*(AM|PM)$/i);
       if (match) {
         const hour = match[1];
@@ -130,7 +128,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
         return `${hour}:00 ${period}`;
       }
 
-      // Check for time range like "8AM - 2PM"
+
       const rangeMatch = timePart.match(
         /^(\d{1,2})(AM|PM)\s*-\s*(\d{1,2})(AM|PM)$/i,
       );
@@ -142,7 +140,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
         return `${startHour}:00 ${startPeriod} - ${endHour}:00 ${endPeriod}`;
       }
 
-      // If no match, return original
+      
       return timePart;
     };
 
@@ -153,15 +151,15 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   const formattedTime = formatScheduleTime(order.sheduleTime);
   const timeSlot = `${scheduledDate} (${formattedTime})`;
 
-  // Format ready time - Keep original structure
-  const readyDate = new Date(order.createdAt);
-  const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  })} on ${readyDate.getFullYear()}/${readyDate.getMonth() + 1}/${readyDate.getDate()}`;
+  
+ const readyDate = new Date(order.createdAt);
+const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+})} on ${readyDate.getFullYear()}/${String(readyDate.getMonth() + 1).padStart(2, '0')}/${String(readyDate.getDate()).padStart(2, '0')}`;
 
-  // Determine payment status
+
   const isPaid = order.isPaid;
   const cashAmount = (Number(order.fullTotal) || 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -245,8 +243,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
                 className="h-[100px] w-[100px] rounded-lg"
                 resizeMode="contain"
               />
-              {/* Auto-scrolling customer name - Same as schedule time implementation */}
-              {/* Auto-scrolling customer name - Same as schedule time implementation */}
+
               <View className="mt-2 w-full px-8">
                 <View
                   className="mt-2 overflow-hidden"
@@ -310,7 +307,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
               phoneNumbers.length === 1 ? "mb-[60px]" : "mb-4"
             }`}
           >
-            {phoneNumbers.map((phoneNumber, index) => (
+            {[...phoneNumbers].reverse().map((phoneNumber, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => makePhoneCall(phoneNumber)}
@@ -324,7 +321,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
                   <Text className="text-base font-semibold text-black">
                     {`${
                       t("ViewPickupOrders.Make Phone Call") || "Make Phone Call"
-                    } - ${index + 1}`}
+                    } - ${phoneNumbers.length - index}`}
                   </Text>
                 </View>
 

@@ -7,7 +7,6 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
@@ -588,6 +587,8 @@ const AddOfficerAddressDetails: React.FC = () => {
           )}
         </View>
 
+        <View className="h-0.5 bg-[#ADADAD] my-4" />
+
         {/* Bank Details */}
         <View className="px-8 mt-4">
           <TextInput
@@ -623,6 +624,8 @@ const AddOfficerAddressDetails: React.FC = () => {
           {fieldErrors.accountHolderName ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.accountHolderName}</Text>
           ) : <View className="mb-3" />}
+
+          
 
           <TextInput
             placeholder={t("AddOfficerAddressDetails.AccountNum")}

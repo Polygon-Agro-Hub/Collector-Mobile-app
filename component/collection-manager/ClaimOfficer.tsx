@@ -9,10 +9,8 @@ import {
   Keyboard,
   Modal,
   ActivityIndicator,
-  // Picker,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
@@ -20,9 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import { SelectList } from "react-native-dropdown-select-list";
 import { useTranslation } from "react-i18next";
-import DropDownPicker from "react-native-dropdown-picker";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
 
@@ -49,50 +45,52 @@ type ClaimOfficerNavigationProp = StackNavigationProp<
 const ClaimOfficer: React.FC = () => {
   const navigation = useNavigation<ClaimOfficerNavigationProp>();
   const [jobRole, setJobRole] = useState("Collection Officer");
-  // const [jobRole, setJobRole] = useState('Collection Officer');
+
   const [empID, setEmpID] = useState("");
   const [officerFound, setOfficerFound] = useState(false);
   const [officerDetails, setOfficerDetails] = useState<OfficerDetails | null>(
-    null
+    null,
   );
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [open, setOpen] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // const empPrefix = jobRole === 'Collection Officer' ? 'COO' : 'CUO';
   const empPrefix =
     jobRole === "Collection Officer"
       ? "COO"
       : jobRole === "Customer Officer"
-      ? "CUO"
-      : "---";
+        ? "CUO"
+        : "---";
 
   // Function to handle text input and prevent leading spaces
   const handleEmpIDChange = (text: string) => {
     // Remove any leading spaces
-    const trimmedText = text.replace(/^\s+/, '');
+    const trimmedText = text.replace(/^\s+/, "");
     setEmpID(trimmedText);
     setOfficerFound(false);
+    setSearchPerformed(false); // Reset search performed state when input changes
   };
 
   const handleSearch = async () => {
     Keyboard.dismiss();
     setSearchLoading(true);
+    setSearchPerformed(true); // Set this to true when search is clicked
     console.log(empID, jobRole);
 
-      const netState = await NetInfo.fetch();
-      if (!netState.isConnected) {
-    return; 
-  }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
     try {
       const userToken = await AsyncStorage.getItem("token");
 
       if (!userToken) {
         Alert.alert(
           t("Error.error"),
-          t("Error.User token not found. Please log in again.")
+          t("Error.User token not found. Please log in again."),
         );
         return;
       }
@@ -106,11 +104,11 @@ const ClaimOfficer: React.FC = () => {
             Authorization: `Bearer ${userToken}`,
           },
           body: JSON.stringify({ empID: `${empPrefix}${empID}`, jobRole }),
-        }
+        },
       );
 
       const data = await response.json();
-     // console.log("claim pfficer", data);
+      // console.log("claim pfficer", data);
 
       if (response.ok && data.result && data.result.length > 0) {
         const officer = data.result[0];
@@ -130,7 +128,7 @@ const ClaimOfficer: React.FC = () => {
           lastNameSinhala: officer.lastNameSinhala,
           lastNameTamil: officer.lastNameTamil,
         });
-       // console.log("officer details", officerDetails);
+        // console.log("officer details", officerDetails);
         setOfficerFound(true);
         setSearchLoading(false);
       } else {
@@ -152,7 +150,7 @@ const ClaimOfficer: React.FC = () => {
       if (!userToken) {
         Alert.alert(
           t("Error.error"),
-          t("Error.User token not found. Please log in again.")
+          t("Error.User token not found. Please log in again."),
         );
         return;
       }
@@ -167,22 +165,23 @@ const ClaimOfficer: React.FC = () => {
             Authorization: `Bearer ${userToken}`,
           },
           body: JSON.stringify({ officerId: officerDetails?.id }),
-        }
+        },
       );
 
       if (!response.ok) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Failed to claim the officer. Please try again later.")
+          t("Error.Failed to claim the officer. Please try again later."),
         );
       } else {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Officer successfully claimed.")
+          t("Error.Officer successfully claimed."),
         );
         setOfficerFound(false);
         setOfficerDetails(null);
         setEmpID("");
+        setSearchPerformed(false); 
         setModalVisible(false);
         navigation.navigate("Main", { screen: "CollectionOfficersList" });
       }
@@ -195,7 +194,7 @@ const ClaimOfficer: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setModalVisible(false); // Close the modal without taking action
+    setModalVisible(false);
   };
 
   const ConfirmationModal = ({
@@ -253,12 +252,12 @@ const ClaimOfficer: React.FC = () => {
     <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
       {/* Header */}
       <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-        {/* <TouchableOpacity className="" onPress={() => navigation.goBack()}>
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity> */}
-             <TouchableOpacity  onPress={() => navigation.goBack()} className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10" >
-                                 <AntDesign name="left" size={24} color="#000502" />
-                               </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
+        >
+          <AntDesign name="left" size={24} color="#000502" />
+        </TouchableOpacity>
         {/* <Text className="text-lg font-bold ml-[25%]"> {t("ClaimOfficer.ClaimOfficers")}</Text> */}
         <View className="flex-1 ">
           <Text className="text-lg font-bold text-center mr-[5%]">
@@ -267,12 +266,8 @@ const ClaimOfficer: React.FC = () => {
         </View>
       </View>
 
-    
       <View className="px-8 mt-2">
-     
-      <View className="px-8 mt-7">
-      
-        </View>
+        <View className="px-8 mt-7"></View>
 
         {/* EMP ID Input */}
         <Text className="font-semibold text-gray-800  mb-2 text-center">
@@ -310,13 +305,13 @@ const ClaimOfficer: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* No Officer Found */}
-      {!officerFound && empID && (
+ 
+      {!officerFound && searchPerformed && !searchLoading && (
         <View className="flex items-center justify-center mt-24">
           <Image
-            source={require("../../assets/images/dd.webp")} // Replace with your PNG file path
-            className="w-28 h-28" // Adjust width and height as needed
-            resizeMode="contain" // Ensures the image scales proportionally
+            source={require("../../assets/images/dd.webp")} 
+            className="w-28 h-28" 
+            resizeMode="contain" 
           />
           <Text className="text-gray-500 mt-2">
             {t("ClaimOfficer.No Disclaimed")}

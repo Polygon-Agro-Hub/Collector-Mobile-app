@@ -105,7 +105,7 @@ import { RootState } from "../services/reducxStore";
 import ReplaceRequestsApprove from "@/component/disribution-manger/ReplaceRequestsApprove";
 import DistributionOfficerReport from "@/component/disribution-manger/DistributionOfficerReport";
 import ReadytoPickupOrders from "@/component/distribution-common/ReadytoPickupOrders";
-import ViewPickupOrders from "@/component/disribution-manger/ViewPickupOrders";
+import ViewPickupOrders from "@/component/distribution-common/ViewPickupOrders";
 import qrcode from "@/component/disribution-manger/qrcode";
 import DigitalSignature from "@/component/disribution-manger/DigitalSignature";
 import ReceivedCash from "@/component/disribution-manger/ReceivedCash";

@@ -71,7 +71,7 @@ interface Order {
   regCode: string;
   officerFirstName: string;
   officerLastName: string;
-  fullName:string;
+  fullName: string;
 }
 
 interface Customer {
@@ -126,7 +126,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       return () => {
         // Cleanup code here if needed
       };
-    }, [])
+    }, []),
   );
 
   const fetchInitialData = async () => {
@@ -148,7 +148,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       console.log("Customers response:", response.data);
@@ -179,7 +179,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       console.log("Pickup orders response:", response.data);
@@ -199,7 +199,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         setFilteredOrders([]);
         setSearchState("no-orders-at-all");
         setErrorMessage(
-          response.data.message || t("Error.Failed to fetch orders")
+          response.data.message || t("Error.Failed to fetch orders"),
         );
       }
     } catch (error: any) {
@@ -229,27 +229,26 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       .replace(/^0/, "");
   };
 
- const handleSearchChange = (text: string) => {
-    // Remove ALL non-digit characters
-    const numericText = text.replace(/\D/g, '');
-    
-    // Limit to 9 digits
+  const handleSearchChange = (text: string) => {
+    const numericText = text.replace(/\D/g, "");
+
+
     const limitedText = numericText.slice(0, 9);
-    
+
     setSearchPhone(limitedText);
 
     if (limitedText.trim()) {
       const normalizedSearch = normalizePhone(limitedText);
 
-      // First, search for orders with this phone number (exact or partial match)
+   
       const results = orders.filter((order) => {
-        // Check phone number only (without code) for matching
+    
         const phone1 = normalizePhone(order.phoneNumber);
         const phone2 = order.phoneNumber2
           ? normalizePhone(order.phoneNumber2)
           : "";
 
-        // Use exact match or starts with for better accuracy
+  
         return (
           phone1 === normalizedSearch ||
           phone2 === normalizedSearch ||
@@ -259,21 +258,21 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       });
 
       if (results.length > 0) {
-        // Orders found - display them
+   
         setFilteredOrders(results);
         setSearchState("results");
         return;
       }
 
-      // No orders found - now check if customer exists
+  
       const customerExists = customers.some((customer) => {
-        // Check phone number only (without code) for matching
+     
         const phone1 = normalizePhone(customer.phoneNumber);
         const phone2 = customer.phoneNumber2
           ? normalizePhone(customer.phoneNumber2)
           : "";
 
-        // Use exact match or starts with for better accuracy
+      
         return (
           phone1 === normalizedSearch ||
           phone2 === normalizedSearch ||
@@ -283,11 +282,11 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       });
 
       if (customerExists) {
-        // Customer exists but has no pickup orders
+   
         setFilteredOrders([]);
         setSearchState("no-orders");
       } else {
-        // Customer doesn't exist in the system
+   
         setFilteredOrders([]);
         setSearchState("no-user");
       }
@@ -309,7 +308,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
     });
   };
 
-  // Helper function to format count: 0 as "0", 1-9 as "01", "02", etc.
+ 
   const formatCount = (count: number) => {
     if (count === 0) {
       return "0";
@@ -319,8 +318,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       return count.toString();
     }
   };
-
-  
 
   const NoOrdersState = () => {
     return (
@@ -373,15 +370,15 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
       {/* Search Bar */}
       <View className="flex-row items-center mx-4 mt-4 pl-3 border border-[#C0C0C0] rounded-full">
-         <TextInput
-    className="flex-1 text-base text-black py-2"
-    placeholder={t("ReadytoPickupOrders.Search by phone number")}
-    value={searchPhone}
-    onChangeText={handleSearchChange}
-    keyboardType="phone-pad"
-    maxLength={9} // Limit to 9 characters
-    returnKeyType="search"
-  />
+        <TextInput
+          className="flex-1 text-base text-black py-2"
+          placeholder={t("ReadytoPickupOrders.Search by phone number")}
+          value={searchPhone}
+          onChangeText={handleSearchChange}
+          keyboardType="phone-pad"
+          maxLength={9} 
+          returnKeyType="search"
+        />
         {searchPhone ? (
           <TouchableOpacity
             className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center"
@@ -396,21 +393,19 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         )}
       </View>
 
-      {/* Always show the "All (X)" count */}
-        {!isSearching && (
-      <View className="px-4 py-3 flex-row items-center">
-        <Text className="text-sm font-medium text-gray-900">
-          {t("ReadytoPickupOrders.All")} ({formatCount(orders.length)})
-        </Text>
-      </View>
-        )}
-          {isSearching && (
-      <View className="px-4 py-3 flex-row items-center">
-        <Text className="text-sm font-medium text-gray-900">
-         
-        </Text>
-      </View>
-        )}
+
+      {!isSearching && (
+        <View className="px-4 py-3 flex-row items-center">
+          <Text className="text-sm font-medium text-gray-900">
+            {t("ReadytoPickupOrders.All")} ({formatCount(orders.length)})
+          </Text>
+        </View>
+      )}
+      {isSearching && (
+        <View className="px-4 py-3 flex-row items-center">
+          <Text className="text-sm font-medium text-gray-900"></Text>
+        </View>
+      )}
 
       {/* Content Area */}
       <View className="flex-1">
@@ -433,7 +428,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           {searchState === "no-orders" && (
             <EmptyState
               message={t(
-                "ReadytoPickupOrders.No orders from this user for pickup"
+                "ReadytoPickupOrders.No orders from this user for pickup",
               )}
             />
           )}
@@ -441,7 +436,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           {searchState === "no-user" && (
             <EmptyState
               message={t(
-                "ReadytoPickupOrders.No registered customer using this phone number"
+                "ReadytoPickupOrders.No registered customer using this phone number",
               )}
             />
           )}
@@ -473,6 +468,17 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   );
 };
 
+const formatDateYMD = (dateInput: string | Date): string => {
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return "Invalid date";
+  
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Add leading zero
+  const day = String(date.getDate()).padStart(2, '0'); // Add leading zero
+  
+  return `${year}/${month}/${day}`;
+};
+
 const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   const { t } = useTranslation();
 
@@ -487,58 +493,40 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
       : null;
   const phoneDisplay = phone2 ? `${phone1}, ${phone2}` : phone1;
 
-  const scheduledDate = new Date(order.sheduleDate).toLocaleDateString("en-US");
+  const scheduledDate = formatDateYMD(order.sheduleDate);
+
   const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
 
-  const getReadyTimeDisplay = () => {
   const readyDate = new Date(order.createdAt);
-  
-
-  const timeString = readyDate.toLocaleTimeString("en-US", {
+  const readyMonth = String(readyDate.getMonth() + 1).padStart(2, '0');
+  const readyDay = String(readyDate.getDate()).padStart(2, '0');
+  const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
-  });
-  
-
-  const year = readyDate.getFullYear();
-  const month = readyDate.getMonth() + 1; 
-  const day = readyDate.getDate();
-  
-  const dateString = `${year}/${month}/${day}`;
-  
-  return `At ${timeString} on ${dateString}`;
-};
-
- const readyDate = new Date(order.createdAt);
-const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-  hour12: true,
-})} on ${readyDate.getFullYear()}/${readyDate.getMonth() + 1}/${readyDate.getDate()}`;
+  })} on ${readyDate.getFullYear()}/${readyMonth}/${readyDay}`;
 
   const shouldShowAmount = !order.isPaid;
 
-const formatCurrency = (amount: number | undefined | null): string => {
+  const formatCurrency = (amount: number | undefined | null): string => {
+    const numericAmount = Number(amount) || 0;
 
-  const numericAmount = Number(amount) || 0;
-  
-  return numericAmount.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+    return numericAmount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
-// Use in your OrderCard component:
-const cashAmount = formatCurrency(order.fullTotal);
+  // Use in your OrderCard component:
+  const cashAmount = formatCurrency(order.fullTotal);
 
   return (
-   <TouchableOpacity
+    <TouchableOpacity
       onPress={onPress}
       className="rounded-2xl p-4 mb-3"
       style={{
-        backgroundColor: '#F7F7F7',
-        shadowColor: '#000000',
+        backgroundColor: "#F7F7F7",
+        shadowColor: "#000000",
         shadowOffset: {
           width: 0,
           height: 2,

@@ -15,7 +15,7 @@ import { RootStackParamList } from "../types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import LottieView from "lottie-react-native"; 
+import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 
 const { width } = Dimensions.get("window");
@@ -69,7 +69,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       setShowMenu(false);
-    }, [])
+    }, []),
   );
   const getTextStyle = (language: string) => {
     if (language === "si") {
@@ -91,30 +91,28 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       console.log("data", response.data);
 
       if (response.data.status === "success") {
-        
         const approvedOfficers = response.data.data.filter(
-          (officer: Officer) => officer.status === "Approved"
+          (officer: Officer) => officer.status === "Approved",
         );
         const notApprovedOfficers = response.data.data.filter(
-          (officer: Officer) => officer.status === "Not Approved"
+          (officer: Officer) => officer.status === "Not Approved",
         );
 
         const sortedApprovedOfficers = approvedOfficers.sort(
           (a: Officer, b: Officer) =>
-            getOfficerName(a).localeCompare(getOfficerName(b))
+            getOfficerName(a).localeCompare(getOfficerName(b)),
         );
 
         const sortedNotApprovedOfficers = notApprovedOfficers.sort(
           (a: Officer, b: Officer) =>
-            getOfficerName(a).localeCompare(getOfficerName(b))
+            getOfficerName(a).localeCompare(getOfficerName(b)),
         );
 
-   
         setOfficers([...sortedApprovedOfficers, ...sortedNotApprovedOfficers]);
       } else {
         setErrorMessage(t("Error.Failed to fetch officers."));
@@ -133,7 +131,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       fetchOfficers();
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -167,27 +165,28 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
       fetchOfficers();
       setSelectedJobRole(null);
       setShowFilter(false);
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
     if (selectedJobRole) {
       const filtered = officers.filter(
-        (officer) => officer.jobRole === selectedJobRole
+        (officer) => officer.jobRole === selectedJobRole,
       );
       setFilteredOfficers(filtered);
     } else {
-      setFilteredOfficers(officers); 
+      setFilteredOfficers(officers);
     }
   }, [selectedJobRole, officers]);
 
   const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${
-        item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 bg-[#ADADAD1A] ${
+        item.status === "Not Approved"
+          ? "border border-[#FF9797]"
+          : "border border-[#ADADAD1A]"
       }`}
       onPress={() => {
-       
         if (item.status !== "Not Approved") {
           navigation.navigate("OfficerSummary" as any, {
             officerId: item.empId,
@@ -199,10 +198,9 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           });
         }
       }}
-      disabled={item.status === "Not Approved"} 
+      disabled={item.status === "Not Approved"}
     >
       <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
-       
         <Image
           source={
             item.image
@@ -226,13 +224,11 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </Text>
       )}
 
-  
       {item.status !== "Not Approved" && (
         <Ionicons name="chevron-forward" size={scale(20)} color="#9CA3AF" />
       )}
     </TouchableOpacity>
   );
-
 
   <TouchableOpacity
     onPress={async () => {
@@ -251,9 +247,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
   return (
     <View className="flex-1 bg-[#313131]">
       <View className="bg-[#313131] py-6 px-4  relative">
-       
         {showFilter && (
-          <View className="absolute z-50 flex-col top-14 left-6 bg-white shadow-lg rounded-lg">
+          <View className="absolute z-40 flex-col top-14 left-6 bg-white shadow-lg rounded-lg">
             <TouchableOpacity
               className={`px-4 py-2 bg-white rounded-lg  ${
                 selectedJobRole === "Driver" ? "bg-gray-200" : ""
@@ -301,20 +296,29 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </TouchableOpacity>
 
         {showMenu && (
-          <View className="absolute top-14 right-4 bg-white shadow-lg rounded-lg">
+          <View 
+            className="absolute top-14 right-4 bg-white z-50 rounded-lg border border-[#00000040]"
+            style={{
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 5,
+            }}
+          >
             <TouchableOpacity
-              className="px-4 py-2 bg-white rounded-lg shadow-lg"
+              className="px-4 py-2 bg-white rounded-lg"
               onPress={() => navigation.navigate("ClaimOfficer")}
             >
               <Text className="text-gray-700 font-semibold">
-                 {t("CollectionOfficersList.Claim Officer")}
+                {t("CollectionOfficersList.Claim Officer")}
               </Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
 
-      <View className="flex-1  mt-3 rounded-t-2xl bg-white">
+      <View className="flex-1 z-2 mt-3 rounded-t-2xl bg-white">
         <View className="mt-4 px-4">
           {selectedJobRole === "Collection Officer" ? (
             <>
@@ -398,7 +402,9 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             try {
               await AsyncStorage.removeItem("officerFormData"); // Clear stored data
               // navigation.navigate("AddOfficerBasicDetails" as any);
-              navigation.navigate("AddOfficerBasicDetails", {jobRolle:"Collection Officer"});
+              navigation.navigate("AddOfficerBasicDetails", {
+                jobRolle: "Collection Officer",
+              });
             } catch (error) {
               console.error("Error clearing form data:", error);
             }
