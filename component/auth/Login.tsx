@@ -45,7 +45,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [empIdError, setEmpIdError] = useState(""); // New state for error message
+  const [empIdError, setEmpIdError] = useState(""); 
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -177,7 +177,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
     try {
       const trimmedEmpId = empid.trim();
-      // console.log("Employee ID:", trimmedEmpId);
 
       const response = await fetch(
         `${environment.API_BASE_URL}api/collection-officer/login`,
@@ -245,7 +244,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         "collection officer",
         "collection centre manager",
         "distribution officer",
-        "distribution centre manager", // Keep lowercase for consistency
+        "distribution centre manager",
       ];
 
       if (!allowedRoles.includes(jobRole.toLowerCase())) {
