@@ -356,6 +356,7 @@ export interface Order {
   officerFirstName: string;
   officerLastName: string;
   fullName: string;
+  outDlvrDate:string;
 }
 
 export type OfficerBasicDetailsFormData = {

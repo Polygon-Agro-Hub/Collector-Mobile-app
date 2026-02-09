@@ -21,7 +21,6 @@ import { RootStackParamList } from "../types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
-import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -76,6 +75,7 @@ interface TargetData {
   sheduleDate: string;
   sheduleTime: string;
   outDlvrDate: string;
+  isComplete: number;
 }
 
 interface ApiTargetData {
@@ -167,7 +167,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [outData, setOutData] = useState<TargetData[]>([]);
-  const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<
     string | null
   >(null);
@@ -190,7 +189,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  console.log("------centerId--------", centerId);
+  //console.log("------centerId--------", centerId);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -201,7 +200,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Generate 3 days (today, tomorrow, day after tomorrow) with time slots
   const getDateOptions = (): DateOption[] => {
     const today = new Date();
     const tomorrow = new Date(today);
@@ -259,10 +257,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         return t("Status.Unknown");
     }
   };
-
-  const getStatusTextStyle = () => ({
-    fontSize: i18n.language === "si" ? 15 : i18n.language === "ta" ? 12 : 20,
-  });
 
   const getStatusColor = (status: string) => {
     const normalizedStatus = status?.toLowerCase();
@@ -422,6 +416,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       sheduleDate: item.sheduleDate,
       sheduleTime: item.sheduleTime,
       outDlvrDate: item.outDlvrDate,
+      isComplete: Number(item.isComplete),
     }));
   };
 
@@ -446,8 +441,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         },
       );
 
-      // console.log("target [[[[[[[[[[[[[[[[[",response.data)
-
       if (response.data.success) {
         const apiData = response.data.data;
         const mappedData = mapApiDataToTargetData(apiData);
@@ -464,14 +457,11 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           return isPendingOrOpened;
         });
 
-        // Updated completed items filter to exclude "Out For Delivery" status
         const completedItems = mappedData.filter((item: TargetData) => {
           const isCompleted =
-            item.selectedStatus === "Completed" &&
-            item.status !== "Out For Delivery" &&
-            item.status !== "Ready to Pickup";
+            item.isComplete === 1 && item.status === "Processing";
           console.log(
-            `Completed filter - Item ${item.invoiceNo}: selectedStatus="${item.selectedStatus}", status="${item.status}", isCompleted=${isCompleted}`,
+            `Completed filter - Item ${item.invoiceNo}: isComplete=${item.isComplete}, status="${item.status}", isCompleted=${isCompleted}`,
           );
           return isCompleted;
         });
@@ -522,91 +512,44 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   }, [selectedLanguage, t]);
 
-  const getOutStatusColor = (status: string) => {
-    const normalizedStatus = status?.toLowerCase();
+  const formatCompletionTime = (dateString: string | null): string | null => {
+    if (!dateString) return null;
 
-    if (normalizedStatus === "out for delivery") {
-      return "bg-[#FFE6CC] border border-[#FFE6CC] text-[#FF8C00]";
-    }
-    if (normalizedStatus === "processing") {
-      return "bg-[#E6F3FF] border border-[#E6F3FF] text-[#0066CC]";
-    }
-    if (normalizedStatus === "ordered") {
-      return "bg-[#F0E6FF] border border-[#F0E6FF] text-[#6600CC]";
-    }
+    try {
+      const date = new Date(dateString);
 
-    return "bg-gray-100 border border-gray-300 text-gray-700";
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const displayHours = hours % 12 || 12;
+
+      return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return null;
+    }
   };
 
-
-  const formatCompletionTime = (dateString: string | null): string | null => {
-  if (!dateString) return null;
-
-  try {
-    const date = new Date(dateString);
-
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
-
-    return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return null;
-  }
-};
-
-  // Function to clear all filters for ToDo
   const clearAllFilters = () => {
     setSelectedDateFilter(null);
     setSelectedStatusFilter(null);
     setHasActiveFilter(false);
   };
 
-  // Function to clear completed filters
   const clearCompletedFilters = () => {
     setCompletedDateFilter(null);
     setHasCompletedFilter(false);
   };
 
-  // Update hasActiveFilter whenever filters change
   useEffect(() => {
     const isFilterActive =
       selectedDateFilter !== null || selectedStatusFilter !== null;
     setHasActiveFilter(isFilterActive);
   }, [selectedDateFilter, selectedStatusFilter]);
 
-  const getCompletionStatusColor = (
-    status: "on-time" | "late" | "unknown",
-  ): string => {
-    switch (status) {
-      case "on-time":
-        return "text-[#980775]"; // Purple for on time
-      case "late":
-        return "text-[#FF0700]"; // Red for late
-      default:
-        return "text-black"; // Black for unknown/other dates
-    }
-  };
-
-  const getCompletionStatusText = (
-    status: "on-time" | "late" | "unknown",
-  ): string => {
-    switch (status) {
-      case "on-time":
-        return t("CenterTargetScreen.On Time");
-      case "late":
-        return t("CenterTargetScreen.Late");
-      default:
-        return "";
-    }
-  };
-
-  // Helper function to format schedule display for completed items
   const getScheduleDisplayForCompleted = (
     scheduleDate: string,
     scheduleTime: string,
@@ -623,7 +566,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Update hasCompletedFilter whenever completed filters change
   useEffect(() => {
     const isCompletedFilterActive = completedDateFilter !== null;
     setHasCompletedFilter(isCompletedFilterActive);
@@ -673,11 +615,11 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       today.setHours(0, 0, 0, 0);
 
       if (scheduleDate.getTime() === today.getTime()) {
-        return "#FF0000"; // Red for today
+        return "#FF0000";
       } else if (scheduleDate < today) {
-        return "#AC0003"; // Dark red for past dates
+        return "#AC0003";
       } else {
-        return "#606060"; // Gray for future dates
+        return "#606060";
       }
     } catch (error) {
       console.error("Error getting schedule date color:", error);
@@ -685,7 +627,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Fix the getOutingStatus function
   const getOutingStatus = (
     outTime: string | null,
     scheduleTime: string | null,
@@ -693,16 +634,13 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     if (!outTime || !scheduleTime) return "N/A";
 
     try {
-      // Parse outTime (assuming it's in ISO format with timezone)
       const outDate = new Date(outTime);
 
-      // Extract time range from scheduleTime (e.g., "Within 8AM - 2PM")
       const timeRangeMatch = scheduleTime.match(
         /within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i,
       );
 
       if (!timeRangeMatch) {
-        // Try alternative format if the first one doesn't match
         const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
         if (!altMatch) return "N/A";
 
@@ -712,7 +650,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           timeRangeMatch;
       }
 
-      // Convert to 24-hour format
       const convertTo24Hour = (hourStr: string, period: string): number => {
         let hour = parseInt(hourStr);
 
@@ -728,23 +665,20 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       const startHour = convertTo24Hour(startHourStr, startPeriod);
       const endHour = convertTo24Hour(endHourStr, endPeriod);
 
-      // Get the hour from outDate
       const outHour = outDate.getHours();
       const outMinutes = outDate.getMinutes();
       const outTotalMinutes = outHour * 60 + outMinutes;
 
-      // Calculate start and end in minutes
       const startTotalMinutes = startHour * 60;
       const endTotalMinutes = endHour * 60;
 
-      // Determine status
       if (
         outTotalMinutes >= startTotalMinutes &&
         outTotalMinutes <= endTotalMinutes
       ) {
         return t("CenterTargetScreen.On Time");
       } else if (outTotalMinutes < startTotalMinutes) {
-        return t("CenterTargetScreen.On Time"); // Early is also considered On Time
+        return t("CenterTargetScreen.On Time");
       } else {
         return t("CenterTargetScreen.Late");
       }
@@ -754,7 +688,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Also update getCompletionStatus for the Completed section to handle the same format
   const getCompletionStatus = (
     completedTime: string | null | undefined,
     scheduleTime: string | null | undefined,
@@ -768,7 +701,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         completedDate.getTime() + offsetMilliseconds,
       );
 
-      // Check if completion is today
       const today = new Date();
       const isToday =
         adjustedCompletedDate.getDate() === today.getDate() &&
@@ -781,7 +713,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       const completedMinute = adjustedCompletedDate.getMinutes();
       const completedTotalMinutes = completedHour * 60 + completedMinute;
 
-      // Extract time range from scheduleTime
       const timeRangeMatch = scheduleTime.match(
         /within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i,
       );
@@ -796,7 +727,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           timeRangeMatch;
       }
 
-      // Convert to 24-hour format
       const convertTo24Hour = (hourStr: string, period: string): number => {
         let hour = parseInt(hourStr);
 
@@ -815,14 +745,13 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       const startTotalMinutes = startHour * 60;
       const endTotalMinutes = endHour * 60;
 
-      // Check if completion time is within the scheduled time slot
       if (
         completedTotalMinutes >= startTotalMinutes &&
         completedTotalMinutes <= endTotalMinutes
       ) {
         return "on-time";
       } else if (completedTotalMinutes < startTotalMinutes) {
-        return "on-time"; // Early completion is also on-time
+        return "on-time";
       } else {
         return "late";
       }
@@ -832,10 +761,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Helper function to format schedule time for display (if needed)
   const formatScheduleTime = (timeString: string): string => {
     if (!timeString) return "";
-    // Return without "Within" prefix for cleaner display
+
     return timeString.replace(/^within\s*/i, "").trim();
   };
 
@@ -853,7 +781,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Helper functions for date handling
   const formatDateForDisplay = (date: Date): string => {
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
@@ -868,7 +795,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     );
   };
 
-  // Helper function to filter by completion date
   const filterByCompletionDate = (
     item: TargetData,
     dateFilter: string,
@@ -886,7 +812,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         tomorrow.setDate(today.getDate() + 1);
         return isSameDay(itemDate, tomorrow);
       } else if (dateFilter.includes("/")) {
-        // Format like "07/05"
         const filterDate = formatDateForDisplay(itemDate);
         return filterDate === dateFilter;
       }
@@ -898,11 +823,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Enhanced filtering logic for ToDo
   const filteredTodoData = useMemo(() => {
     let filtered = [...todoData];
 
-    // Apply only date filter
     if (selectedDateFilter) {
       filtered = filtered.filter((item) => {
         try {
@@ -918,7 +841,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             tomorrow.setDate(today.getDate() + 1);
             matchDate = isSameDay(itemDate, tomorrow);
           } else if (selectedDateFilter.includes("/")) {
-            // Format like "07/05"
             const filterDate = formatDateForDisplay(itemDate);
             matchDate = filterDate === selectedDateFilter;
           }
@@ -1257,27 +1179,27 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   //     return "N/A";
   //   }
   // };
-// REPLACE THIS FUNCTION IN YOUR CODE (around line 1018)
-// Find the formatOutTime function and replace it with this corrected version:
+  // REPLACE THIS FUNCTION IN YOUR CODE (around line 1018)
+  // Find the formatOutTime function and replace it with this corrected version:
 
-const formatOutTime = (dateString: string | null): string => {
-  if (!dateString) return "N/A";
+  const formatOutTime = (dateString: string | null): string => {
+    if (!dateString) return "N/A";
 
-  try {
-    const date = new Date(dateString);
+    try {
+      const date = new Date(dateString);
 
-    // No offset adjustment - server already sends IST time
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
+      // No offset adjustment - server already sends IST time
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const displayHours = hours % 12 || 12;
 
-    return `${displayHours.toString().padStart(2, "0")}.${minutes.toString().padStart(2, "0")}${ampm}`;
-  } catch (error) {
-    console.error("Error formatting out time:", error);
-    return "N/A";
-  }
-};
+      return `${displayHours.toString().padStart(2, "0")}.${minutes.toString().padStart(2, "0")}${ampm}`;
+    } catch (error) {
+      console.error("Error formatting out time:", error);
+      return "N/A";
+    }
+  };
   return (
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
@@ -2046,7 +1968,6 @@ const formatOutTime = (dateString: string | null): string => {
                         : "N/A"}
                     </Text>
                   </View>
-
                   {/* Schedule Display with Status */}
                   <View className="flex-[2] items-center justify-center px-2">
                     {(() => {

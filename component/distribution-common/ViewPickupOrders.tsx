@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   Alert,
   Linking,
   StatusBar,
@@ -48,21 +47,23 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   useEffect(() => {
     const textLength = customerName.length;
 
-    
     if (textLength > 20) {
-      const scrollDistance = textLength * 8; 
+      // Calculate scroll distance based on character width (approximately 8-10px per character)
+      const scrollDistance = textLength * 9;
 
       const animation = Animated.loop(
         Animated.sequence([
-          Animated.delay(1000), 
+          Animated.delay(1000),
+          // Scroll from right to left
           Animated.timing(scrollX, {
             toValue: -scrollDistance,
-            duration: textLength * 200, 
+            duration: textLength * 200,
             useNativeDriver: true,
           }),
+          // Instantly reset to start position
           Animated.timing(scrollX, {
             toValue: 0,
-            duration: 0, 
+            duration: 0,
             useNativeDriver: true,
           }),
         ]),
@@ -77,7 +78,6 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     }
   }, [customerName, scrollX]);
 
- 
   const formatPhoneNumber = (code: string, number: string) => {
     return `${code} ${number}`;
   };
@@ -89,7 +89,6 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
       : null;
 
   const phoneNumbers = phone2 ? [phone1, phone2] : [phone1];
-
 
   const formatScheduleDate = (dateString: string) => {
     try {
@@ -103,31 +102,24 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     }
   };
 
- 
   const formatScheduleTime = (timeString: string) => {
     if (!timeString) return "";
 
-   
     const cleanTime = timeString.replace(/within\s*/i, "").trim();
 
-    
     const formatTimeWithMinutes = (timePart: string) => {
-     
       timePart = timePart.trim().toUpperCase();
 
-    
       if (timePart.includes(":")) {
         return timePart;
       }
 
-      
       const match = timePart.match(/^(\d{1,2})\s*(AM|PM)$/i);
       if (match) {
         const hour = match[1];
         const period = match[2].toUpperCase();
         return `${hour}:00 ${period}`;
       }
-
 
       const rangeMatch = timePart.match(
         /^(\d{1,2})(AM|PM)\s*-\s*(\d{1,2})(AM|PM)$/i,
@@ -140,7 +132,6 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
         return `${startHour}:00 ${startPeriod} - ${endHour}:00 ${endPeriod}`;
       }
 
-      
       return timePart;
     };
 
@@ -151,14 +142,12 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   const formattedTime = formatScheduleTime(order.sheduleTime);
   const timeSlot = `${scheduledDate} (${formattedTime})`;
 
-  
- const readyDate = new Date(order.createdAt);
-const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-})} on ${readyDate.getFullYear()}/${String(readyDate.getMonth() + 1).padStart(2, '0')}/${String(readyDate.getDate()).padStart(2, '0')}`;
-
+  const readyDate = new Date(order.outDlvrDate);
+  const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  })} on ${readyDate.getFullYear()}/${String(readyDate.getMonth() + 1).padStart(2, "0")}/${String(readyDate.getDate()).padStart(2, "0")}`;
 
   const isPaid = order.isPaid;
   const cashAmount = (Number(order.fullTotal) || 0).toLocaleString("en-US", {
@@ -181,7 +170,7 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
   };
 
   const handleScanOrder = () => {
-    console.log("invoice number--------------", order.invNo);
+    // console.log("invoice number--------------", order.invNo);
     navigation.navigate("qrcode", {
       expectedOrderId: order.invNo,
       fromScreen: "ViewPickupOrders",
@@ -232,11 +221,9 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
         </View>
       </View>
 
-      {/* <ScrollView className="flex-1" showsVerticalScrollIndicator={false}> */}
       <View className="flex-1 ">
         <View className="px-4">
-          {/* Customer Info */}
-          <View className="bg-white rounded-2xl p-4 mb-2 shadow-sm">
+          <View className="bg-white rounded-2xl p-4  shadow-sm">
             <View className="items-center mb-4">
               <Image
                 source={require("../../assets/images/New/ProfileCustomer.webp")}
@@ -244,23 +231,24 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
                 resizeMode="contain"
               />
 
+              {/* Fixed Name Container with Equal Padding */}
               <View className="mt-2 w-full px-8">
-                <View
-                  className="mt-2 overflow-hidden"
+                <View 
+                  className="overflow-hidden"
                   style={{
-                    width: customerName.length > 20 ? "180%" : "100%",
-                    alignItems: "center",
+                    width: "100%",
+                    alignItems: customerName.length > 20 ? "flex-start" : "center",
                   }}
                 >
                   <Animated.Text
-                    className="text-lg font-bold text-gray-800 text-center"
+                    className="text-lg font-bold text-gray-800"
                     style={{
                       transform:
                         customerName.length > 20
                           ? [{ translateX: scrollX }]
                           : [],
+                      minWidth: customerName.length > 20 ? "200%" : "auto",
                     }}
-                    numberOfLines={1}
                   >
                     {customerName}
                   </Animated.Text>
@@ -269,7 +257,7 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
             </View>
 
             {/* Payment Status */}
-            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center mb-4">
+            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center mb-2 mt-[-5%]">
               <View className="mb-2">
                 {isPaid ? (
                   <MaterialIcons
@@ -292,7 +280,6 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
               )}
             </View>
 
-            {/* Time Slot - Format: 2025/01/02 (8:00AM - 2:00PM) */}
             <View className="bg-[#F7F7F7] rounded-xl p-4 items-center">
               <Octicons name="clock-fill" size={28} color="black" />
               <Text className="text-sm font-semibold text-gray-800 mt-2">
@@ -301,7 +288,6 @@ const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
             </View>
           </View>
 
-          {/* Phone Call Buttons - Dynamic based on number of phone numbers */}
           <View
             className={`px-4 ${
               phoneNumbers.length === 1 ? "mb-[60px]" : "mb-4"

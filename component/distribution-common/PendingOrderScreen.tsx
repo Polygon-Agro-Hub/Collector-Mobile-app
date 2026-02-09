@@ -2217,17 +2217,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   style={{
                     color: (() => {
                       const allSelected = calculateAllSelected();
-                      return orderStatus === "Opened"
-                        ? "#FA0000"
-                        : allSelected
-                          ? "#308233"
-                          : "#FA0000";
+                      return allSelected ? "#308233" : "#FA0000";
                     })(),
                   }}
                 >
-                  {orderStatus === "Opened"
-                    ? ""
-                    : getWarningMessage(calculateAllSelected())}
+                  {getWarningMessage(calculateAllSelected())}
                 </Text>
               </View>
             )}
