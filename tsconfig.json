@@ -17,6 +17,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-     "component/DisributionManger/pdf.js" 
+     "component/disribution-manger/pdf.js" 
   ]
 }

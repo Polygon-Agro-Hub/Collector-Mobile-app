@@ -8,20 +8,19 @@ import {
   TextInput,
   ScrollView,
   Alert,
-  Platform,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { environment } from "../../environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import CustomHeader from "../Common/CustomHeader";
+import CustomHeader from "../common/CustomHeader";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import SuccessModal from "../Common/SuccessModal";
-import FailedModal from "../Common/FailedModal";
+import SuccessModal from "../common/SuccessModal";
+import FailedModal from "../common/FailedModal";
 
 interface GoviPensionFormProps {
   navigation: any;
@@ -53,6 +52,195 @@ interface FormData {
   successorBirthCertFrontImage: string | null;
   successorBirthCertBackImage: string | null;
 }
+
+const CustomDatePicker = ({
+  visible,
+  onClose,
+  onSelect,
+  initialDate,
+  maximumDate = new Date(),
+  minimumDate,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onSelect: (date: Date) => void;
+  initialDate?: Date;
+  maximumDate?: Date;
+  minimumDate?: Date;
+}) => {
+  const currentDate = initialDate || new Date();
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedDay, setSelectedDay] = useState(currentDate.getDate());
+
+  const { t } = useTranslation();
+
+  // Generate years array (from 1900 to current year)
+  const startYear = minimumDate ? minimumDate.getFullYear() : 1900;
+  const endYear = maximumDate.getFullYear();
+  const years = Array.from(
+    { length: endYear - startYear + 1 },
+    (_, i) => endYear - i,
+  );
+
+  const months = [
+    { label: t("GoviPensionForm.January") || "January", value: 0 },
+    { label: t("GoviPensionForm.February") || "February", value: 1 },
+    { label: t("GoviPensionForm.March") || "March", value: 2 },
+    { label: t("GoviPensionForm.April") || "April", value: 3 },
+    { label: t("GoviPensionForm.May") || "May", value: 4 },
+    { label: t("GoviPensionForm.June") || "June", value: 5 },
+    { label: t("GoviPensionForm.July") || "July", value: 6 },
+    { label: t("GoviPensionForm.August") || "August", value: 7 },
+    { label: t("GoviPensionForm.September") || "September", value: 8 },
+    { label: t("GoviPensionForm.October") || "October", value: 9 },
+    { label: t("GoviPensionForm.November") || "November", value: 10 },
+    { label: t("GoviPensionForm.December") || "December", value: 11 },
+  ];
+
+  // Get days in selected month
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const daysInMonth = getDaysInMonth(selectedYear, selectedMonth);
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  // Adjust day if it exceeds days in selected month
+  useEffect(() => {
+    if (selectedDay > daysInMonth) {
+      setSelectedDay(daysInMonth);
+    }
+  }, [selectedYear, selectedMonth]);
+
+  const handleConfirm = () => {
+    const selectedDate = new Date(selectedYear, selectedMonth, selectedDay);
+    onSelect(selectedDate);
+    onClose();
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View className="flex-1 justify-end bg-black/50">
+        <View className="bg-white rounded-t-3xl">
+          {/* Header */}
+          <View className="px-5 py-4 border-b border-gray-200">
+            <TouchableOpacity onPress={onClose}>
+              <Text className="text-gray-500 text-base font-medium">
+                {t("GoviPensionForm.Cancel") || "Cancel"}
+              </Text>
+            </TouchableOpacity>
+            <View style={{ width: 60 }} />
+          </View>
+
+          {/* Date Pickers */}
+          <View className="px-5 py-6">
+            {/* Year Picker */}
+            <View className="mb-4">
+              <Text className="text-[#070707] mb-2 font-medium">
+                {t("GoviPensionForm.Year") || "Year"}
+              </Text>
+              <ScrollView
+                className="max-h-32 bg-[#F4F4F4] rounded-2xl"
+                showsVerticalScrollIndicator={true}
+              >
+                {years.map((year) => (
+                  <TouchableOpacity
+                    key={year}
+                    onPress={() => setSelectedYear(year)}
+                    className={`py-3 px-4 ${selectedYear === year ? "bg-[#980775]" : ""}`}
+                  >
+                    <Text
+                      className={`text-center ${selectedYear === year ? "text-white font-semibold" : "text-[#070707]"}`}
+                    >
+                      {year}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Month Picker */}
+            <View className="mb-4">
+              <Text className="text-[#070707] mb-2 font-medium">
+                {t("GoviPensionForm.Month") || "Month"}
+              </Text>
+              <ScrollView
+                className="max-h-32 bg-[#F4F4F4] rounded-2xl"
+                showsVerticalScrollIndicator={true}
+              >
+                {months.map((month) => (
+                  <TouchableOpacity
+                    key={month.value}
+                    onPress={() => setSelectedMonth(month.value)}
+                    className={`py-3 px-4 ${selectedMonth === month.value ? "bg-[#980775]" : ""}`}
+                  >
+                    <Text
+                      className={`text-center ${selectedMonth === month.value ? "text-white font-semibold" : "text-[#070707]"}`}
+                    >
+                      {month.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Day Picker */}
+            <View className="mb-4">
+              <Text className="text-[#070707] mb-2 font-medium">
+                {t("GoviPensionForm.Day") || "Day"}
+              </Text>
+              <ScrollView
+                className="max-h-32 bg-[#F4F4F4] rounded-2xl"
+                showsVerticalScrollIndicator={true}
+              >
+                <View className="flex-row flex-wrap">
+                  {days.map((day) => (
+                    <TouchableOpacity
+                      key={day}
+                      onPress={() => setSelectedDay(day)}
+                      className={`w-1/7 py-3 px-2 ${selectedDay === day ? "bg-[#980775] rounded-xl" : ""}`}
+                      style={{ width: "14.28%" }}
+                    >
+                      <Text
+                        className={`text-center ${selectedDay === day ? "text-white font-semibold" : "text-[#070707]"}`}
+                      >
+                        {day}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+
+            {/* Preview */}
+            <View className="bg-[#F4F4F4] rounded-2xl p-4 mt-2">
+              <Text className="text-center text-[#070707] text-base font-medium">
+                {t("GoviPensionForm.Selected Date") || "Selected Date"}:{" "}
+                {`${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`}
+              </Text>
+            </View>
+            <View className="mt-3">
+              <TouchableOpacity
+                onPress={handleConfirm}
+                className="bg-[#980775] rounded-2xl py-3 px-6"
+              >
+                <Text className="text-white text-center font-semibold text-base">
+                  {t("GoviPensionForm.Save") || "Save"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const [currentSection, setCurrentSection] = useState<1 | 2>(1);
@@ -90,9 +278,10 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     "",
   );
 
-  // Date picker states
-  const [showDobPicker, setShowDobPicker] = useState(false);
-  const [showSuccessorDobPicker, setShowSuccessorDobPicker] = useState(false);
+  // Custom date picker states
+  const [showCustomDobPicker, setShowCustomDobPicker] = useState(false);
+  const [showCustomSuccessorDobPicker, setShowCustomSuccessorDobPicker] =
+    useState(false);
 
   const { t, i18n } = useTranslation();
 
@@ -163,28 +352,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const formatDateForAPI = (date: Date | null): string => {
     if (!date) return "";
     return date.toISOString().slice(0, 19).replace("T", " ");
-  };
-
-  // Handle date change
-  const onDateChange = (
-    event: any,
-    selectedDate?: Date,
-    type: "applicant" | "successor" = "applicant",
-  ) => {
-    if (type === "applicant") {
-      setShowDobPicker(Platform.OS === "ios");
-      if (selectedDate) {
-        setFormData((prev) => ({ ...prev, dateOfBirth: selectedDate }));
-      }
-    } else {
-      setShowSuccessorDobPicker(Platform.OS === "ios");
-      if (selectedDate) {
-        setFormData((prev) => ({
-          ...prev,
-          successorDateOfBirth: selectedDate,
-        }));
-      }
-    }
   };
 
   // Request permission and pick image from gallery
@@ -347,11 +514,9 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     setCurrentSection(1);
   };
 
-  // Handle navigation to FarmerQr page
   const handleNavigateToFarmerQr = () => {
     setShowSuccessModal(false);
 
-    // Navigate to FarmerQr page with ALL required params
     navigation.navigate("FarmerQr", {
       cropCount: 1,
       userId: userId,
@@ -492,7 +657,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         );
       }
 
-      console.log("Submitting pension request...");
+      console.log("Submitting pension request...", formDataToSend);
 
       // Submit form
       const response = await axios.post(
@@ -559,7 +724,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Render Section 1: Applicant Details (same as before)
+  // Render Section 1: Applicant Details
   const renderSection1 = () => (
     <ScrollView
       className="flex-1 px-5"
@@ -587,7 +752,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           {t("GoviPensionForm.Your Date of Birth")} *
         </Text>
         <TouchableOpacity
-          onPress={() => setShowDobPicker(true)}
+          onPress={() => setShowCustomDobPicker(true)}
           className="bg-[#F4F4F4] rounded-2xl px-4 py-3 flex-row justify-between items-center border border-gray-100"
         >
           <Text
@@ -599,16 +764,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           </Text>
           <FontAwesome6 name="calendar-days" size={20} color="black" />
         </TouchableOpacity>
-
-        {showDobPicker && (
-          <DateTimePicker
-            value={formData.dateOfBirth || new Date()}
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={(event, date) => onDateChange(event, date, "applicant")}
-            maximumDate={new Date()}
-          />
-        )}
       </View>
 
       {/* 3. Your NIC Number */}
@@ -695,7 +850,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     </ScrollView>
   );
 
-  // Render Section 2: Successor Details (same as before)
+  // Render Section 2: Successor Details
   const renderSection2 = () => {
     const isOver18 = isSuccessorOver18();
     const age = formData.successorDateOfBirth
@@ -760,7 +915,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
                   >
                     <View className="w-5 h-5 rounded-2xl border-2 border-gray-400 mr-3 justify-center items-center">
                       {formData.successorRelationship === option.value && (
-                        <View className="w-3 h-3 rounded-full bg-[#980775]" />
+                        <View className="w-3 h-3 rounded-full bg-black" />
                       )}
                     </View>
                     <Text className="text-gray-700">{option.label}</Text>
@@ -777,7 +932,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
             {t("GoviPensionForm.Successor's Date of Birth")} *
           </Text>
           <TouchableOpacity
-            onPress={() => setShowSuccessorDobPicker(true)}
+            onPress={() => setShowCustomSuccessorDobPicker(true)}
             className="bg-[#F4F4F4] rounded-2xl px-4 py-3 flex-row justify-between items-center border border-gray-100"
           >
             <Text
@@ -789,16 +944,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
             </Text>
             <FontAwesome6 name="calendar-days" size={20} color="black" />
           </TouchableOpacity>
-
-          {showSuccessorDobPicker && (
-            <DateTimePicker
-              value={formData.successorDateOfBirth || new Date()}
-              mode="date"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={(event, date) => onDateChange(event, date, "successor")}
-              maximumDate={new Date()}
-            />
-          )}
         </View>
 
         {/* Conditionally render NIC or Birth Certificate fields */}
@@ -1006,6 +1151,23 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
+      />
+
+      {/* Custom Date Pickers */}
+      <CustomDatePicker
+        visible={showCustomDobPicker}
+        onClose={() => setShowCustomDobPicker(false)}
+        onSelect={(date) => updateFormData("dateOfBirth", date)}
+        initialDate={formData.dateOfBirth || new Date()}
+        maximumDate={new Date()}
+      />
+
+      <CustomDatePicker
+        visible={showCustomSuccessorDobPicker}
+        onClose={() => setShowCustomSuccessorDobPicker(false)}
+        onSelect={(date) => updateFormData("successorDateOfBirth", date)}
+        initialDate={formData.successorDateOfBirth || new Date()}
+        maximumDate={new Date()}
       />
 
       {/* Modal Components */}
