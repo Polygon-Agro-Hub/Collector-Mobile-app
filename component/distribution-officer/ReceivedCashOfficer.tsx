@@ -198,7 +198,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
   useFocusEffect(
     useCallback(() => {
       fetchReceivedCash();
-       setSelectedTransactions(new Set());
+      setSelectedTransactions(new Set());
     }, []),
   );
 
@@ -295,7 +295,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
                   {t("ReceivedCash.Cash")} :
                 </Text>
                 <Text className="text-sm text-black font-medium">
-                        {t("ReceivedCash.Rscash")}
+                  {t("ReceivedCash.Rscash")}
                   {item.cash.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -443,14 +443,22 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
             onPress={handleHandOver}
             className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center"
             activeOpacity={0.8}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 4,
+            }}
           >
             <FontAwesome6 name="hand-holding-hand" size={18} color="white" />
             <Text className="text-white text-base  ml-4">
               {t("ReceivedCash.Hand Over")} ({t("ReceivedCash.Rs")}
               {selectedTotalCash.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })})
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              )
             </Text>
           </TouchableOpacity>
         </View>

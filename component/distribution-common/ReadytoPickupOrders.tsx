@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -72,6 +72,7 @@ interface Order {
   officerFirstName: string;
   officerLastName: string;
   fullName: string;
+  outDlvrDate:string;
 }
 
 interface Customer {
@@ -109,20 +110,15 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Check if we're in search mode
   const isSearching = searchPhone.trim().length > 0;
 
-  // This hook runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      // Reset search state when screen comes into focus
       setSearchPhone("");
       setErrorMessage("");
 
-      // Fetch fresh data
       fetchInitialData();
 
-      // Optional: Return a cleanup function if needed
       return () => {
         // Cleanup code here if needed
       };
@@ -232,7 +228,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   const handleSearchChange = (text: string) => {
     const numericText = text.replace(/\D/g, "");
 
-
     const limitedText = numericText.slice(0, 9);
 
     setSearchPhone(limitedText);
@@ -240,15 +235,12 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
     if (limitedText.trim()) {
       const normalizedSearch = normalizePhone(limitedText);
 
-   
       const results = orders.filter((order) => {
-    
         const phone1 = normalizePhone(order.phoneNumber);
         const phone2 = order.phoneNumber2
           ? normalizePhone(order.phoneNumber2)
           : "";
 
-  
         return (
           phone1 === normalizedSearch ||
           phone2 === normalizedSearch ||
@@ -258,21 +250,17 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       });
 
       if (results.length > 0) {
-   
         setFilteredOrders(results);
         setSearchState("results");
         return;
       }
 
-  
       const customerExists = customers.some((customer) => {
-     
         const phone1 = normalizePhone(customer.phoneNumber);
         const phone2 = customer.phoneNumber2
           ? normalizePhone(customer.phoneNumber2)
           : "";
 
-      
         return (
           phone1 === normalizedSearch ||
           phone2 === normalizedSearch ||
@@ -282,11 +270,9 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       });
 
       if (customerExists) {
-   
         setFilteredOrders([]);
         setSearchState("no-orders");
       } else {
-   
         setFilteredOrders([]);
         setSearchState("no-user");
       }
@@ -308,7 +294,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
     });
   };
 
- 
   const formatCount = (count: number) => {
     if (count === 0) {
       return "0";
@@ -376,7 +361,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           value={searchPhone}
           onChangeText={handleSearchChange}
           keyboardType="phone-pad"
-          maxLength={9} 
+          maxLength={9}
           returnKeyType="search"
         />
         {searchPhone ? (
@@ -392,7 +377,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           </View>
         )}
       </View>
-
 
       {!isSearching && (
         <View className="px-4 py-3 flex-row items-center">
@@ -471,11 +455,11 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 const formatDateYMD = (dateInput: string | Date): string => {
   const date = new Date(dateInput);
   if (isNaN(date.getTime())) return "Invalid date";
-  
+
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Add leading zero
-  const day = String(date.getDate()).padStart(2, '0'); // Add leading zero
-  
+  const month = String(date.getMonth() + 1).padStart(2, "0"); 
+  const day = String(date.getDate()).padStart(2, "0"); 
+
   return `${year}/${month}/${day}`;
 };
 
@@ -497,9 +481,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
 
   const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
 
-  const readyDate = new Date(order.createdAt);
-  const readyMonth = String(readyDate.getMonth() + 1).padStart(2, '0');
-  const readyDay = String(readyDate.getDate()).padStart(2, '0');
+  const readyDate = new Date(order.outDlvrDate);
+  const readyMonth = String(readyDate.getMonth() + 1).padStart(2, "0");
+  const readyDay = String(readyDate.getDate()).padStart(2, "0");
   const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -517,7 +501,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
     });
   };
 
-  // Use in your OrderCard component:
+
   const cashAmount = formatCurrency(order.fullTotal);
 
   return (
@@ -533,7 +517,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
         },
         shadowOpacity: 0.15,
         shadowRadius: 4,
-        elevation: 3, // For Android
+        elevation: 3, 
       }}
     >
       <View className="flex-row mb-2">

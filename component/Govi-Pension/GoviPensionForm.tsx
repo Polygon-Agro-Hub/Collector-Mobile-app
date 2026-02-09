@@ -8,12 +8,10 @@ import {
   TextInput,
   ScrollView,
   Alert,
-  Platform,
   ActivityIndicator,
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
@@ -516,11 +514,9 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     setCurrentSection(1);
   };
 
-  // Handle navigation to FarmerQr page
   const handleNavigateToFarmerQr = () => {
     setShowSuccessModal(false);
 
-    // Navigate to FarmerQr page with ALL required params
     navigation.navigate("FarmerQr", {
       cropCount: 1,
       userId: userId,
@@ -661,7 +657,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         );
       }
 
-      console.log("Submitting pension request...");
+      console.log("Submitting pension request...", formDataToSend);
 
       // Submit form
       const response = await axios.post(
