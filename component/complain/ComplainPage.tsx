@@ -265,7 +265,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                           value: item.value,
                         }))}
                         placeholder={t("ReportComplaint.selectCategory")}
-                        placeholderStyle={{ color: "#434343" }}
+                        placeholderStyle={{ color: "#434343" ,marginLeft:8}}
                         listMode="SCROLLVIEW"
                         zIndex={3000}
                         zIndexInverse={1000}
@@ -273,6 +273,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                           borderColor: "#ccc",
                           borderWidth: 1,
                           borderRadius: 25,
+                          
                         }}
                         style={{
                           borderWidth: 1,

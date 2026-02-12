@@ -223,9 +223,10 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
     try {
       const date = new Date(dateString);
+      const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
-      return `${month}/${day}`;
+      return `${year}/${month}/${day}`;
     } catch (error) {
       console.error("Error formatting schedule date:", error);
       return "";
@@ -341,8 +342,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           // console.log("Package lock in mapped item:", mappedData[0].packageIsLock);
         }
 
-        // console.log("Mapped data:", mappedData);
-
         const todoItems = mappedData.filter((item: TargetData) =>
           ["Pending", "Opened"].includes(item.selectedStatus),
         );
@@ -352,7 +351,18 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         );
 
         setTodoData(sortByVarietyAndGrade(todoItems));
-        setCompletedData(sortByVarietyAndGrade(completedItems));
+
+        const sortedCompletedItems = [...completedItems].sort((a, b) => {
+          if (!a.completedTime && !b.completedTime) return 0;
+          if (!a.completedTime) return 1;
+          if (!b.completedTime) return -1;
+
+          const dateA = new Date(a.completedTime).getTime();
+          const dateB = new Date(b.completedTime).getTime();
+          return dateB - dateA;
+        });
+
+        setCompletedData(sortedCompletedItems);
         setError(null);
       }
     } catch (err: any) {
@@ -415,28 +425,29 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
+  const formatCompletionTime = (dateString: string | null) => {
+    if (!dateString) return null;
 
-  const formatCompletionTime = (dateString: string | null): string | null => {
-  if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
 
-  try {
-    const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const displayHours = hours % 12 || 12;
 
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
-
-    return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return null;
-  }
-};
-
+      return {
+        date: `${year}/${month}/${day}`,
+        time: `${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`,
+      };
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return null;
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       await fetchSelectedLanguage();
@@ -708,7 +719,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 100 }} 
+        contentContainerStyle={{ paddingBottom: 100 }}
       >
         {error && (
           <View className="bg-red-100 border border-red-400 px-4 py-3 mx-4 mt-4 rounded">
@@ -771,7 +782,12 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                       className="text-center font-medium text-xs"
                       style={{ color: getScheduleDateColor(item.sheduleDate) }}
                     >
-                      {formatScheduleDate(item.sheduleDate)}{" "}
+                      {formatScheduleDate(item.sheduleDate)}
+                    </Text>
+                    <Text
+                      className="text-center font-medium text-xs"
+                      style={{ color: getScheduleDateColor(item.sheduleDate) }}
+                    >
                       {formatScheduleTime(item.sheduleTime) || "N/A"}
                     </Text>
                   </View>
@@ -811,11 +827,20 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                 </>
               ) : (
                 <View className="flex-[2] items-center justify-center px-2">
-                  <Text className="text-center text-gray-600 text-sm">
-                    {item.completedTime
-                      ? formatCompletionTime(item.completedTime)
-                      : "N/A"}
-                  </Text>
+                  {item.completedTime ? (
+                    <>
+                      <Text className="text-center text-gray-600 text-sm">
+                        {formatCompletionTime(item.completedTime)?.date}
+                      </Text>
+                      <Text className="text-center text-gray-600 text-sm">
+                        {formatCompletionTime(item.completedTime)?.time}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text className="text-center text-gray-600 text-sm">
+                      N/A
+                    </Text>
+                  )}
                 </View>
               )}
             </TouchableOpacity>

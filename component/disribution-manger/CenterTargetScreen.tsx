@@ -189,8 +189,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  //console.log("------centerId--------", centerId);
-
   const fetchSelectedLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
@@ -261,7 +259,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   const getStatusColor = (status: string) => {
     const normalizedStatus = status?.toLowerCase();
 
-    // Return only background and border classes
     if (normalizedStatus === "completed") {
       return "bg-[#B7FFB9] border border-[#B7FFB9]";
     }
@@ -767,19 +764,20 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     return timeString.replace(/^within\s*/i, "").trim();
   };
 
-  const formatScheduleDate = (dateString: string): string => {
-    if (!dateString) return "";
+const formatScheduleDate = (dateString: string): string => {
+  if (!dateString) return "";
 
-    try {
-      const date = new Date(dateString);
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      const day = date.getDate().toString().padStart(2, "0");
-      return `${month}/${day}`;
-    } catch (error) {
-      console.error("Error formatting schedule date:", error);
-      return "";
-    }
-  };
+  try {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  } catch (error) {
+    console.error("Error formatting schedule date:", error);
+    return "";
+  }
+};
 
   const formatDateForDisplay = (date: Date): string => {
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -2008,7 +2006,12 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                       className="text-center font-medium text-xs"
                       style={{ color: getScheduleDateColor(item.sheduleDate) }}
                     >
-                      {formatScheduleDate(item.sheduleDate)}{" "}
+                      {formatScheduleDate(item.sheduleDate)}
+                    </Text>
+                    <Text
+                      className="text-center font-medium text-xs"
+                      style={{ color: getScheduleDateColor(item.sheduleDate) }}
+                    >
                       {formatScheduleTime(item.sheduleTime) || "N/A"}
                     </Text>
                   </View>

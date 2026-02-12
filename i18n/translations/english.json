@@ -915,6 +915,7 @@
   },
   "PendingOrderScreen": {
     "Completing order": "Completing order...",
+    "Processing":"Processing...",
     "Custom Selected Items": "Custom Selected Items",
     "Back to Edit": "Back to Edit",
     "Mark as Completed": "Mark as Completed",

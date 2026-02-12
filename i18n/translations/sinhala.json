@@ -915,6 +915,7 @@
   },
   "PendingOrderScreen": {
     "Completing order": "ඇණවුම සම්පූර්ණ කරමින්...",
+    "Processing":"සකසමින්...",
     "Custom Selected Items": "පාරිභෝගික-තෝරාගත් අයිතම",
     "Back to Edit": "සංස්කරණය වෙත ආපසු",
     "Mark as Completed": "සම්පූර්ණ කළ ලෙස ලකුණු කරන්න",

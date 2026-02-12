@@ -127,7 +127,7 @@ const CustomDatePicker = ({
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-end bg-black/50">
-        <View className="bg-white rounded-t-3xl">
+        <View className="bg-white rounded-t-3xl pb-8">
           {/* Header */}
           <View className="px-5 py-4 border-b border-gray-200">
             <TouchableOpacity onPress={onClose}>

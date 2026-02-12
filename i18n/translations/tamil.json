@@ -914,6 +914,7 @@
   },
   "PendingOrderScreen": {
     "Completing order": "ஆர்டரை முடிக்கிறது...",
+    "Processing":"செயலாக்குகிறது...",
     "Custom Selected Items": "வாடிக்கையாளர் தேர்ந்தெடுத்த பொருட்கள்",
     "Back to Edit": "திருத்தத்திற்கு திரும்பவும்",
     "Mark as Completed": "முடிந்ததாக குறிக்கவும்",
