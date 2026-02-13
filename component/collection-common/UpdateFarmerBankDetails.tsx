@@ -94,7 +94,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       const selectedBank = bankNames.find((bank) => bank.name === bankName);
       if (selectedBank) {
         try {
-          const data = require("../assets/jsons/branches.json");
+          const data = require("../../assets/jsons/branches.json");
           const filteredBranches = data[selectedBank.ID] || [];
 
           const sortedBranches = filteredBranches.sort(

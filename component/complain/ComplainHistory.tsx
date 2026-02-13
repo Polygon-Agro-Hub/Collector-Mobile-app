@@ -215,13 +215,13 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
 
       if (companyName && centerRegCode) {
-        return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}\n${companyName}`;
+        return `${closingWord}\n${replierName},\n${headTitle},\n${centerRegCode}\n${companyName}`;
       } else if (companyName) {
-        return `${closingWord}, ${replierName}\n${headTitle}\n${companyName}`;
+        return `${closingWord}\n${replierName},\n${headTitle},\n${companyName}`;
       } else if (centerRegCode) {
-        return `${closingWord}, ${replierName}\n${headTitle}\n${centerRegCode}`;
+        return `${closingWord}\n${replierName},\n${headTitle},\n${centerRegCode}`;
       } else {
-        return `${closingWord}, ${replierName}\n${headTitle}`;
+        return `${closingWord}\n${replierName},\n${headTitle}`;
       }
     } else if (complain.complainAssign === "DCH") {
       // Distribution Centre Head
@@ -377,7 +377,7 @@ ${signature}${replyTime}`,
     const ampm = hours >= 12 ? "PM" : "AM";
     const hour12 = hours % 12 || 12;
     const minuteStr = minutes.toString().padStart(2, "0");
-    const timeStr = `${hour12}.${minuteStr}${ampm}`;
+    const timeStr = `${hour12}.${minuteStr} ${ampm}`;
 
     const day = date.getDate();
     const month = date.toLocaleString("en-US", { month: "short" });
