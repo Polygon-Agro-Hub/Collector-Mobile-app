@@ -1004,6 +1004,7 @@
     "Success": "Success!",
     "order": "order",
     "Time": "Time",
+    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.":"Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.",
     "been sent out": "been sent out",
     "for delivery": "for delivery",
     "Centre Target": "Centre Target",

@@ -1004,6 +1004,7 @@
     "Success": "සාර්ථකයි",
     "order": "ඇණවුම",
     "Time": "කාලය",
+    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.":"පළමු ඇණවුම් 5 පමණක් තෝරාගෙන ඇත. ඔබට බෙදා හැරීම සඳහා වරකට ඇණවුම් 5ක් දක්වා පමණක් තෝරා ගත හැකිය.",
     "been sent out": "යවා ඇත",
     "for delivery": "බෙදා හැරීම සඳහා",
     "Centre Target": "මධ්‍යස්ථාන ඉලක්කය",

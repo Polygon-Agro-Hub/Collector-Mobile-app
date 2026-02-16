@@ -1003,6 +1003,7 @@
     "Success": "வெற்றி!",
     "order": "ஆணை",
     "Time": "நேரம்",
+    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.":"முதல் 5 ஆர்டர்கள் மட்டுமே தேர்ந்தெடுக்கப்பட்டுள்ளன. டெலிவரிக்கு ஒரு நேரத்தில் 5 ஆர்டர்கள் வரை மட்டுமே தேர்ந்தெடுக்க முடியும்.",
     "been sent out": "அனுப்பப்பட்டது",
     "for delivery": "டெலிவரிக்காக",
     "Centre Target": "மைய இலக்கு",
