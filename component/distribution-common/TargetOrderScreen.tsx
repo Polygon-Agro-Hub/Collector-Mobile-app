@@ -1,5 +1,6 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, AppStateStatus } from "react-native";
 import {
   View,
   Text,
@@ -123,6 +124,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [centerCode, setcenterCode] = useState<string | null>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const isInitialLoad = useRef(true);
+  const appState = useRef(AppState.currentState);
   const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
@@ -149,21 +152,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   };
 
   console.log("jobeJole-----------------", jobRole);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchTargets();
-      fetchUserProfile();
-
-      const interval = setInterval(() => {
-        fetchTargets();
-      }, 30000);
-
-      return () => {
-        clearInterval(interval);
-      };
-    }, []),
-  );
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -310,87 +298,123 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
-  const fetchTargets = useCallback(async () => {
-    setLoading(true);
-    try {
-      const authToken = await AsyncStorage.getItem("token");
+  const fetchTargets = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      try {
+        const authToken = await AsyncStorage.getItem("token");
 
-      if (!authToken) {
-        throw new Error("Authentication token not found. Please login again.");
-      }
+        if (!authToken) {
+          throw new Error(
+            "Authentication token not found. Please login again.",
+          );
+        }
 
-      const response = await axios.get(
-        `${environment.API_BASE_URL}api/distribution/officer-target`,
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
+        const response = await axios.get(
+          `${environment.API_BASE_URL}api/distribution/officer-target`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
           },
-        },
+        );
+
+        if (response.data.success) {
+          const apiData = response.data.data;
+
+          if (apiData && apiData.length > 0) {
+          }
+
+          const mappedData = mapApiDataToTargetData(apiData);
+
+          if (mappedData && mappedData.length > 0) {
+            // console.log("First mapped item:", JSON.stringify(mappedData[0], null, 2));
+            // console.log("Package lock in mapped item:", mappedData[0].packageIsLock);
+          }
+
+          const todoItems = mappedData.filter((item: TargetData) =>
+            ["Pending", "Opened"].includes(item.selectedStatus),
+          );
+
+          const completedItems = mappedData.filter(
+            (item: TargetData) => item.selectedStatus === "Completed",
+          );
+
+          setTodoData(sortByVarietyAndGrade(todoItems));
+
+          const sortedCompletedItems = [...completedItems].sort((a, b) => {
+            if (!a.completedTime && !b.completedTime) return 0;
+            if (!a.completedTime) return 1;
+            if (!b.completedTime) return -1;
+
+            const dateA = new Date(a.completedTime).getTime();
+            const dateB = new Date(b.completedTime).getTime();
+            return dateB - dateA;
+          });
+
+          setCompletedData(sortedCompletedItems);
+          setError(null);
+        }
+      } catch (err: any) {
+        console.error("Fetch error:", err);
+        console.error("Error response:", err.response?.data);
+        console.error("Error status:", err.response?.status);
+
+        let errorMessage = t("Error.Failed to fetch data.");
+
+        if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response?.status === 400) {
+          errorMessage = "Bad request - please check your authentication";
+        } else if (err.response?.status === 401) {
+          errorMessage = "Unauthorized - please login again";
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
+
+        setTodoData([]);
+        setCompletedData([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [selectedLanguage, t],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTargets(false);
+      fetchUserProfile();
+
+      const handleAppStateChange = (nextAppState: AppStateStatus) => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          fetchTargets(true);
+        }
+        appState.current = nextAppState;
+      };
+
+      const subscription = AppState.addEventListener(
+        "change",
+        handleAppStateChange,
       );
 
-      if (response.data.success) {
-        const apiData = response.data.data;
+      const interval = setInterval(() => {
+        fetchTargets(true);
+      }, 30000);
 
-        if (apiData && apiData.length > 0) {
-        }
-
-        const mappedData = mapApiDataToTargetData(apiData);
-
-        if (mappedData && mappedData.length > 0) {
-          // console.log("First mapped item:", JSON.stringify(mappedData[0], null, 2));
-          // console.log("Package lock in mapped item:", mappedData[0].packageIsLock);
-        }
-
-        const todoItems = mappedData.filter((item: TargetData) =>
-          ["Pending", "Opened"].includes(item.selectedStatus),
-        );
-
-        const completedItems = mappedData.filter(
-          (item: TargetData) => item.selectedStatus === "Completed",
-        );
-
-        setTodoData(sortByVarietyAndGrade(todoItems));
-
-        const sortedCompletedItems = [...completedItems].sort((a, b) => {
-          if (!a.completedTime && !b.completedTime) return 0;
-          if (!a.completedTime) return 1;
-          if (!b.completedTime) return -1;
-
-          const dateA = new Date(a.completedTime).getTime();
-          const dateB = new Date(b.completedTime).getTime();
-          return dateB - dateA;
-        });
-
-        setCompletedData(sortedCompletedItems);
-        setError(null);
-      }
-    } catch (err: any) {
-      console.error("Fetch error:", err);
-      console.error("Error response:", err.response?.data);
-      console.error("Error status:", err.response?.status);
-
-      let errorMessage = t("Error.Failed to fetch data.");
-
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.response?.status === 400) {
-        errorMessage = "Bad request - please check your authentication";
-      } else if (err.response?.status === 401) {
-        errorMessage = "Unauthorized - please login again";
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-
-      setTodoData([]);
-      setCompletedData([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [selectedLanguage, t]);
+      return () => {
+        clearInterval(interval);
+        subscription.remove();
+      };
+    }, [fetchTargets]),
+  );
 
   const handleRowPress = (item: TargetData) => {
     if (item.packageIsLock === 1 && jobRole === "Distribution Officer") {
