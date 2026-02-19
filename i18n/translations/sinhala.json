@@ -26,6 +26,7 @@
     "error": "සමාවෙන්න",
     "Error": "දෝෂයක්",
     "Failed to fetch empid.": "සේවක හැඳුනුම්පත සොයා ගැනීමට අසමත් විය.",
+    "You cannot transfer the maximum amount of":"ඔබට උපරිම මුදල මාරු කළ නොහැක",
     "This EMP ID is not approved.": "මෙම EMP ID අනුමත කර නැත.",
     "This EMP ID is Rejected": "මෙම EMP ID ප්‍රතික්ෂේප කර ඇත.",
     "New password and confirm password do not match.": "නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය එකිනෙකට නොගැලපේ.",
@@ -619,12 +620,12 @@
   },
   "EditTargetManager": {
     "LNG": "si",
-    "TotalTarget": "මධ්‍යස්ථානයේ සඳහා මුළු ඉලක්කය",
-    "My Target": "මගේ ඉලක්කය",
+    "TotalTarget": "මධ්‍යස්ථානයේ සඳහා මුළු ඉලක්කය (කිලෝග්‍රෑම්)",
+    "My Target": "මගේ ඉලක්කය (කිලෝග්‍රෑම්)",
     "Pass": "ලබාදෙන්න",
     "Receive": "ලබාගන්න",
-    "Amount": "කළ යුතු ප්‍රමාණය (kg)",
-    "Assigned Target": "පවරන ලද ඉලක්කය"
+    "Amount": "කළ යුතු ප්‍රමාණය (කිලෝග්‍රෑම්)",
+    "Assigned Target": "පවරන ලද ඉලක්කය (කිලෝග්‍රෑම්)"
   },
   "ManagerTransactions": {
     "LNG": "si",
@@ -914,6 +915,7 @@
   },
   "PendingOrderScreen": {
     "Completing order": "ඇණවුම සම්පූර්ණ කරමින්...",
+    "Processing":"සකසමින්...",
     "Custom Selected Items": "පාරිභෝගික-තෝරාගත් අයිතම",
     "Back to Edit": "සංස්කරණය වෙත ආපසු",
     "Mark as Completed": "සම්පූර්ණ කළ ලෙස ලකුණු කරන්න",
@@ -1002,6 +1004,7 @@
     "Success": "සාර්ථකයි",
     "order": "ඇණවුම",
     "Time": "කාලය",
+    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.":"පළමු ඇණවුම් 5 පමණක් තෝරාගෙන ඇත. ඔබට බෙදා හැරීම සඳහා වරකට ඇණවුම් 5ක් දක්වා පමණක් තෝරා ගත හැකිය.",
     "been sent out": "යවා ඇත",
     "for delivery": "බෙදා හැරීම සඳහා",
     "Centre Target": "මධ්‍යස්ථාන ඉලක්කය",
@@ -1039,7 +1042,7 @@
   "ReadytoPickupOrders": {
     "No orders to be picked up": "අත්පත් කර ගැනීමට නියමිත ඇණවුම් නැත",
     "Ready to Pickup Orders": "අත්පත් කර ගැනීමට සූදානම් ඇණවුම්",
-    "Search by phone number": "දුරකථන අංකයෙන් සොයන්න...",
+    "Search by phone number": "දුරකථන අංකය (7XXXXXXXXXX)..",
     "All": "සියල්ල",
     "No orders from this user for pickup": "මෙම පරිශීලකයාගෙන් අත්පත් කර ගැනීමට ඇණවුම් නැත",
     "No registered customer using this phone number": "මෙම දුරකථන අංකය භාවිතා කරන ලියාපදිංචි පාරිභෝගිකයෙකු නැත",
@@ -1069,7 +1072,8 @@
     "Select All": "සියල්ල තෝරන්න",
     "Hand Over": "භාර දෙන්න",
     "No cash was received recently": "මෑතකදී මුදල් ලැබුණේ නැහැ.",
-    "Rs": "රු."
+    "Rs": "රු. ",
+    "Rscash":" රු. "
   },
   "ViewPickupOrders": {
     "Order Details": "ඇණවුම් විස්තර",
@@ -1077,7 +1081,8 @@
     "Already Paid": "දැනටමත් ගෙවා ඇත!",
     "Rs": "රු",
     "Make Phone Call": "දුරකථන ඇමතුමක් ගන්න",
-    "Scan Order": "ස්කෑන් ඇණවුම"
+    "Scan Order": "ස්කෑන් ඇණවුම",
+    "Cash":"මුදල්"
   },
   "qrcode": {
     "success": "සාර්ථකයි!",
@@ -1111,7 +1116,7 @@
     "Successor's Date of Birth": "අනුප්‍රාප්තිකයාගේ උපන් දිනය",
     "Successor's NIC Number": "අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් අංකය",
     "Enter successor's NIC number": "අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් අංකය ඇතුළත් කරන්න",
-    "Successor's NIC Front Image": "අනුപ්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් ඉදිරිපස රූපය",
+    "Successor's NIC Front Image": "අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් ඉදිරිපස රූපය",
     "Successor's NIC Back Image": "අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් පිටුපස රූපය",
     "Wife": "බිරිඳ",
     "Husband": "සැමියා",
@@ -1128,7 +1133,25 @@
     "Not required (under 16)": "අවශ්‍ය නැත (වයස අවුරුදු 16ට අඩු)",
     "--Type here--": "--මෙහි යතුරු ලියන්න--",
     "Successor's Birth Certificate (Front)": "අනුප්‍රාප්තිකයාගේ උපත සහතිකපත් (ඉදිරිපස)",
-    "Successor's Birth Certificate (Back)": "අනුප්‍රාප්තිකයාගේ උපත සහතිකපත් (පිටුපස)"
+    "Successor's Birth Certificate (Back)": "අනුප්‍රාප්තිකයාගේ උපත සහතිකපත් (පිටුපස)",
+    "Select Birthday": "උපන් දිනය තෝරන්න",
+    "Save": "සුරකින්න",
+    "Year": "අවුරුද්ද",
+    "Month": "මාසය",
+    "Day": "දිනය",
+    "Selected Date": "තෝරාගත් දිනය",
+    "January": "ජනවාරි",
+    "February": "පෙබරවාරි",
+    "March": "මාර්තු",
+    "April": "අප්‍රේල්",
+    "May": "මැයි",
+    "June": "ජූනි",
+    "July": "ජූලි",
+    "August": "අගෝස්තු",
+    "September": "සැප්තැම්බර්",
+    "October": "ඔක්තෝබර්",
+    "November": "නොවැම්බර්",
+    "December": "දෙසැම්බර්"
   },
   "GoviPensionStatus": {
     "Stay Tuned!": "රැඳී සිටින්න!",
@@ -1139,6 +1162,8 @@
     "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "ඔබගේ විශ්‍රාම වැටුප් ඉල්ලීම ප්‍රතික්ෂේප කර ඇති බව දැනුම් දෙමින් අපි කණගාටු වෙමු. කරුණාකර අනාගතයේ නැවත උත්සාහ කරන්න.",
     "Go Back": "ආපසු යන්න",
     "View My Pension Account": "මගේ විශ්‍රාම වැටුප් ගිණුම බලන්න",
-    "Loading status...": "තත්ත්වය ලෝඩ් වෙමින් පවතී..."
+    "Loading status...": "තත්ත්වය ලෝඩ් වෙමින් පවතී...",
+      "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "ගොවියා දැනටමත් {{date}} දින විශ්‍රාම වැටුප සඳහා ඉල්ලුම් කර ඇති බව පෙනේ. අයදුම්පත දැනට සමාලෝචනයට ලක්ව ඇත. තීරණයක් ඉක්මනින් බෙදා ගනු ඇත. ගොවියාට GoViCare යෙදුම හරහා ඕනෑම වේලාවක තත්ත්වය නිරීක්ෂණය කළ හැකිය.",
+    "The pension application submitted on {{date}} has been reviewed and was not approved.": "{{date}} දින ඉදිරිපත් කරන ලද විශ්‍රාම වැටුප් අයදුම්පත සමාලෝචනය කර ඇති අතර එය අනුමත කර නොමැත."
   }
 }

@@ -26,6 +26,7 @@
     "error": "Sorry",
     "Error": "Error",
     "Failed to fetch empid.": "Failed to fetch Employee ID.",
+    "You cannot transfer the maximum amount of":"You cannot transfer the maximum amount of",
     "This EMP ID is not approved.": "This EMP ID is not approved.",
     "This EMP ID is Rejected": "This EMP ID is Rejected",
     "New password and confirm password do not match.": "New password and confirm password do not match.",
@@ -619,12 +620,12 @@
   },
   "EditTargetManager": {
     "LNG": "en",
-    "TotalTarget": "Total Target for the centre",
-    "My Target": "My Target",
+    "TotalTarget": "Total Target for the centre (kg)",
+    "My Target": "My Target (kg)",
     "Pass": "Pass",
     "Receive": "Receive",
-    "Amount": "To Do Amount",
-    "Assigned Target": "Assigned Target"
+    "Amount": "To Do Amount (kg)",
+    "Assigned Target": "Assigned Target (kg)"
   },
   "ManagerTransactions": {
     "LNG": "en",
@@ -914,6 +915,7 @@
   },
   "PendingOrderScreen": {
     "Completing order": "Completing order...",
+    "Processing":"Processing...",
     "Custom Selected Items": "Custom Selected Items",
     "Back to Edit": "Back to Edit",
     "Mark as Completed": "Mark as Completed",
@@ -1002,6 +1004,7 @@
     "Success": "Success!",
     "order": "order",
     "Time": "Time",
+    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.":"Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.",
     "been sent out": "been sent out",
     "for delivery": "for delivery",
     "Centre Target": "Centre Target",
@@ -1039,7 +1042,7 @@
   "ReadytoPickupOrders": {
     "No orders to be picked up": "No orders to be picked up",
     "Ready to Pickup Orders": "Ready to Pickup Orders",
-    "Search by phone number": "Search by phone number...",
+    "Search by phone number": "Phone number (7XXXXXXXX)..",
     "All": "All",
     "No orders from this user for pickup": "No orders from this user for pickup",
     "No registered customer using this phone number": "No registered customer using this phone number",
@@ -1068,7 +1071,8 @@
     "Select All": "Select All",
     "Hand Over": "Hand Over",
     "No cash was received recently": "No cash was received recently",
-    "Rs": "Rs."
+    "Rs": "Rs. ",
+    "Rscash":" Rs. "
   },
   "ViewPickupOrders": {
     "Order Details": "Order Details",
@@ -1076,7 +1080,8 @@
     "Already Paid": "Already Paid!",
     "Rs": "Rs",
     "Make Phone Call": "Make Phone Call",
-    "Scan Order": "Scan Order"
+    "Scan Order": "Scan Order",
+    "Cash":"Cash"
   },
   "qrcode": {
     "success": "Success!",
@@ -1096,11 +1101,11 @@
     "Section 1 of 2: Applicant Details": "Section 1 of 2: Applicant Details",
     "Section 2 of 2: Successor Details": "Section 2 of 2: Successor Details",
     "Applicant Details": "Applicant Details",
-    "Your Full Name": "Your Full Name",
-    "Your Date of Birth": "Your Date of Birth",
+    "Your Full Name": "Farmer's Full Name",
+    "Your Date of Birth": "Farmer's Date of Birth",
     "Enter your full name": "Enter your full name",
     "--Select Date--": "--Select Date--",
-    "Your NIC Number": "Your NIC Number",
+    "Your NIC Number": "Farmer's NIC Number",
     "Enter NIC number": "Enter NIC number",
     "NIC Front Image": "NIC Front Image",
     "NIC Back Image": "NIC Back Image",
@@ -1127,17 +1132,35 @@
     "Not required (under 16)": "Not required (under 16)",
     "--Type here--": "--Type here--",
     "Successor's Birth Certificate (Front)": "Successor's Birth Certificate (Front)",
-    "Successor's Birth Certificate (Back)": "Successor's Birth Certificate (Back)"
+    "Successor's Birth Certificate (Back)": "Successor's Birth Certificate (Back)",
+    "Select Birthday": "Select Birthday",
+    "Save": "Save",
+    "Year": "Year",
+    "Month": "Month",
+    "Day": "Day",
+    "Selected Date": "Selected Date",
+    "January": "January",
+    "February": "February",
+    "March": "March",
+    "April": "April",
+    "May": "May",
+    "June": "June",
+    "July": "July",
+    "August": "August",
+    "September": "September",
+    "October": "October",
+    "November": "November",
+    "December": "December"
   },
   "GoviPensionStatus": {
     "Application Already Submitted!": "Application Already Submitted!",
-    "It looks like the farmer has already applied for the pension on June 2, 2026. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "It looks like the farmer has already applied for the pension on June 2, 2026. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
     "Application Approved!": "Application Approved!",
     "Advise the farmer to log in to the GoViCare app and check the current pension status.": "Advise the farmer to log in to the GoViCare app and check the current pension status.",
-    "Application Rejected!": "Application Rejected!",
-    "The pension application submitted on June 2, 2026 has been reviewed and was not approved.": "The pension application submitted on June 2, 2026 has been reviewed and was not approved.",
+    "Application Rejected!": "Application Rejected!",  
     "Go Back": "Go Back",
     "View My Pension Account": "View My Pension Account",
-    "Loading status...": "Loading status..."
+    "Loading status...": "Loading status...",
+     "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
+    "The pension application submitted on {{date}} has been reviewed and was not approved.": "The pension application submitted on {{date}} has been reviewed and was not approved."
   }
 }

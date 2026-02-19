@@ -10,7 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import CustomHeader from "../Common/CustomHeader";
+import CustomHeader from "../common/CustomHeader";
 import { RootStackParamList } from "../types";
 
 type GoviPensionStatusScreenNavigationProp = StackNavigationProp<
@@ -30,6 +30,18 @@ interface GoviPensionStatusProps {
 
 type StatusType = "To Review" | "Approved" | "Rejected";
 
+
+const formatDate = (dateString: string | undefined): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
   navigation,
   route,
@@ -37,17 +49,24 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
   const { t } = useTranslation();
 
   // Get status from route params
-  const { status } = route.params || {};
+  const { status, creatAt } = route.params || {};
   const currentStatus = (status as StatusType) || "To Review";
+
+  // Format the createdAt date dynamically → e.g. "January 28, 2026"
+  const formattedDate = formatDate(creatAt);
+
+  console.log("creatAt", creatAt);
+  console.log("formattedDate", formattedDate);
 
   const getStatusConfig = () => {
     switch (currentStatus) {
       case "To Review":
         return {
-          image: require("../../assets/images/govi-pension/stay-tuned.webp"),
+          image: require("../../assets/images/govi-pension/stay-tunedR.webp"),
           title: t("GoviPensionStatus.Application Already Submitted!"),
           content: t(
-            "GoviPensionStatus.It looks like the farmer has already applied for the pension on June 2, 2026. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
+            "GoviPensionStatus.It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
+            { date: formattedDate } 
           ),
           buttonText: t("GoviPensionStatus.Go Back"),
           onPress: () => navigation.goBack(),
@@ -67,12 +86,13 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
           image: require("../../assets/images/govi-pension/try-again.webp"),
           title: t("GoviPensionStatus.Application Rejected!"),
           content: t(
-            "GoviPensionStatus.The pension application submitted on June 2, 2026 has been reviewed and was not approved.",
+            "GoviPensionStatus.The pension application submitted on {{date}} has been reviewed and was not approved.",
+            { date: formattedDate } 
           ),
         };
       default:
         return {
-          image: require("../../assets/images/govi-pension/stay-tuned.webp"),
+          image: require("../../assets/images/govi-pension/stay-tunedR.webp"),
           title: t("GoviPensionStatus.Stay Tuned!"),
           content: t(
             "GoviPensionStatus.We're taking a closer look at your pension application and will update you soon. This process might take a while.",
@@ -100,7 +120,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* Status Image */}
-        <View className="items-center justify-center mt-8 mb-8">
+        <View className="items-center justify-center mt-4 mb-8">
           <View className="w-64 h-64 overflow-hidden">
             <Image
               source={config.image}
@@ -112,7 +132,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
 
         {/* Status Title */}
         <View className="items-center mb-6">
-          <Text className="text-2xl font-bold text-black">{config.title}</Text>
+          <Text className="text-xl font-bold text-black">{config.title}</Text>
         </View>
 
         {/* Status Content */}
