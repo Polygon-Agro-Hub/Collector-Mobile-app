@@ -104,7 +104,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-     //console.log("response for percentage target", response.data);
+     console.log("response for percentage target", response.data);
       
       if (response.data.success && response.data.data && response.data.data.length > 0) {
         const targets = response.data.data;

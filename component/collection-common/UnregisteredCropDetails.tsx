@@ -160,7 +160,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const [donebutton2visibale, setdonebutton2visibale] = useState(false);
   const [donebutton1disabale, setdonebutton1disabale] = useState(true);
   const [donebutton2disabale, setdonebutton2disabale] = useState(false);
-  const [showImageAlert, setShowImageAlert] = useState(false);
   const [showCameraModels, setShowCameraModels] = useState(false);
   const [addbutton, setaddbutton] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -415,22 +414,17 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }
   };
 
-  // UPDATED: Proper decimal handling for quantity input
   const handleQuantityChange = (grade: "A" | "B" | "C", value: string) => {
-    // Allow only numbers and decimal point
     const cleanedValue = value.replace(/[^0-9.]/g, "");
 
-    // Check for multiple decimal points
     const decimalCount = (cleanedValue.match(/\./g) || []).length;
     if (decimalCount > 1) {
-      return; // Don't allow multiple decimal points
+      return;
     }
 
-    // Limit to 2 decimal places after the decimal point
     if (cleanedValue.includes(".")) {
       const parts = cleanedValue.split(".");
       if (parts[1] && parts[1].length > 2) {
-        // If more than 2 decimal places, truncate to 2
         const limitedValue = parts[0] + "." + parts[1].slice(0, 2);
         setQuantities((prev) => ({ ...prev, [grade]: limitedValue }));
         calculateTotal();
@@ -438,14 +432,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       }
     }
 
-    // Update the quantity with the cleaned value (preserving decimal point)
     setQuantities((prev) => ({ ...prev, [grade]: cleanedValue }));
 
-    // Convert to number for validation and calculations
     const numericValue =
       cleanedValue === "" ? 0 : parseFloat(cleanedValue) || 0;
 
-    // If setting quantity to 0, remove the image
     if (numericValue === 0) {
       setImages((prev) => ({
         ...prev,
@@ -453,7 +444,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       }));
     }
 
-    // Check if there are any grades with quantities but no images
     const gradesWithQuantityButNoImage = (["A", "B", "C"] as const).filter(
       (g) => {
         const otherGradeValue =
@@ -1268,7 +1258,7 @@ TID: ${invoiceNumber}
                   editable={false}
                 />
 
-                {/* UPDATED: TextInput for quantity with proper decimal handling */}
+                {/* TextInput for quantity with proper decimal handling */}
                 <TextInput
                   placeholder="kg"
                   keyboardType="decimal-pad"
@@ -1277,6 +1267,9 @@ TID: ${invoiceNumber}
                   onChangeText={(value) => {
                     handleQuantityChange(grade as "A" | "B" | "C", value);
                   }}
+                  autoComplete="off"
+                  importantForAutofill="no"
+                  autoCorrect={false}
                 />
               </View>
             ))}

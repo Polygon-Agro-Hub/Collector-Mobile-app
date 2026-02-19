@@ -189,8 +189,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  //console.log("------centerId--------", centerId);
-
   const fetchSelectedLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
@@ -261,7 +259,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   const getStatusColor = (status: string) => {
     const normalizedStatus = status?.toLowerCase();
 
-    // Return only background and border classes
     if (normalizedStatus === "completed") {
       return "bg-[#B7FFB9] border border-[#B7FFB9]";
     }
@@ -772,9 +769,10 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
     try {
       const date = new Date(dateString);
+      const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
-      return `${month}/${day}`;
+      return `${year}/${month}/${day}`;
     } catch (error) {
       console.error("Error formatting schedule date:", error);
       return "";
@@ -910,16 +908,27 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       </TouchableOpacity>
     );
   };
+  
   const handleSelectAll = () => {
     if (selectAll) {
-      // Unselect all
       setSelectedItems([]);
       setSelectAll(false);
     } else {
-      // Select all
-      const allIds = displayedData.map((item) => item.id);
+      const allIds = displayedData
+        .map((item) => item.id)
+        .slice(0, MAX_SELECTED_ORDERS);
       setSelectedItems(allIds);
       setSelectAll(true);
+
+      if (displayedData.length > MAX_SELECTED_ORDERS) {
+        Alert.alert(
+          t("CenterTargetScreen.Limit Reached"),
+          t(
+            "CenterTargetScreen.Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.",
+          ),
+          [{ text: t("CenterTargetScreen.OK") }],
+        );
+      }
     }
   };
 
@@ -1158,29 +1167,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       </Modal>
     );
   };
-
-  // const formatOutTime = (dateString: string | null): string => {
-  //   if (!dateString) return "N/A";
-
-  //   try {
-  //     const date = new Date(dateString);
-
-  //     date.setHours(date.getHours() + 5);
-  //     date.setMinutes(date.getMinutes() + 30);
-
-  //     const hours = date.getHours();
-  //     const minutes = date.getMinutes();
-  //     const ampm = hours >= 12 ? "PM" : "AM";
-  //     const displayHours = hours % 12 || 12;
-
-  //     return `${displayHours.toString().padStart(2, "0")}.${minutes.toString().padStart(2, "0")}${ampm}`;
-  //   } catch (error) {
-  //     console.error("Error formatting out time:", error);
-  //     return "N/A";
-  //   }
-  // };
-  // REPLACE THIS FUNCTION IN YOUR CODE (around line 1018)
-  // Find the formatOutTime function and replace it with this corrected version:
 
   const formatOutTime = (dateString: string | null): string => {
     if (!dateString) return "N/A";
@@ -2008,7 +1994,12 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                       className="text-center font-medium text-xs"
                       style={{ color: getScheduleDateColor(item.sheduleDate) }}
                     >
-                      {formatScheduleDate(item.sheduleDate)}{" "}
+                      {formatScheduleDate(item.sheduleDate)}
+                    </Text>
+                    <Text
+                      className="text-center font-medium text-xs"
+                      style={{ color: getScheduleDateColor(item.sheduleDate) }}
+                    >
                       {formatScheduleTime(item.sheduleTime) || "N/A"}
                     </Text>
                   </View>

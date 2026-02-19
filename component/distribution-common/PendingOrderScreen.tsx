@@ -35,7 +35,7 @@ interface OrderItem {
   target: number;
   complete: number;
   todo: number;
-  status: "Pending" | "Opened" | "Completed" | "In Progress"; // Add 'In Progress' here
+  status: "Pending" | "Opened" | "Completed" | "In Progress";
   createdAt: string;
   updatedAt: string;
   completedTime?: string | null;
@@ -209,6 +209,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const [packageName, setPackageName] = useState<string>("Family Pack");
   const [packageId, setPackageId] = useState<number | null>(null);
+  const [reloadingAfterReplace, setReloadingAfterReplace] = useState(false);
 
   const [orderCompletionState, setOrderCompletionState] = useState<
     "idle" | "completing" | "completed"
@@ -331,9 +332,16 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }
   };
 
-  const loadOrderData = async (isRefreshing = false) => {
-    if (!isRefreshing) {
+  const loadOrderData = async (isRefreshing = false, afterReplace = false) => {
+    // if (!isRefreshing) {
+    //   setLoading(true);
+    // }
+    if (!isRefreshing && !afterReplace) {
       setLoading(true);
+    }
+
+    if (afterReplace) {
+      setReloadingAfterReplace(true);
     }
 
     const orderData = await fetchOrderData(item.orderId);
@@ -468,8 +476,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       setError(t("Failed to load order data"));
     }
 
-    if (!isRefreshing) {
+    if (!isRefreshing && !afterReplace) {
       setLoading(false);
+    }
+
+    if (afterReplace) {
+      setReloadingAfterReplace(false);
     }
   };
 
@@ -491,7 +503,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
-    await loadOrderData(true);
+    await loadOrderData(true, true);
     setRefreshing(false);
   }, []);
 
@@ -832,7 +844,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     setTimeout(() => {
       const weightKg = parseFloat(item.weight) || 0;
       const itemPrice = parseFloat(item.price) || 0;
-      const totalPrice = itemPrice.toFixed();
+       const totalPrice = itemPrice.toFixed(2);
 
       const numericPrice = itemPrice;
 
@@ -852,6 +864,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }, 100);
   };
 
+  
   const handleReplaceSubmit = async () => {
     if (
       !replaceData.newProduct ||
@@ -887,22 +900,17 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
       const priceValue = (() => {
         if (!replaceData.price) return 0;
-
         const priceString = replaceData.price.toString();
-
         const match = priceString.match(/\d+\.?\d*/);
-
         if (!match) return 0;
-
         const numericValue = match[0];
-
         const parsed = parseFloat(numericValue);
-
         return isNaN(parsed) ? 0 : parsed;
       })();
 
       const replacementRequest = {
-        orderPackageId: packageId,
+       // orderPackageId: packageId,
+       orderPackageId: selectedItemForReplace.packageId,
         replaceId: selectedItemForReplace.originalItemId,
         originalItemId: selectedItemForReplace.originalItemId,
         productType: selectedItemForReplace.productType,
@@ -920,6 +928,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
       const netState = await NetInfo.fetch();
       if (!netState.isConnected) {
+        Alert.alert(t("Error.Error"), t("Error.No internet connection"));
+        setRequestLoading(false);
         return;
       }
 
@@ -940,26 +950,26 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             ? t("Error.Product replacement successful!")
             : t("Error.Replacement request submitted successfully");
 
-        Alert.alert(t("Error.Success"), successMessage, [
-          {
-            text: t("Error.Ok"),
-            onPress: () => {
-              setShowReplaceModal(false);
-              setShowDropdown(false);
-              setSelectedItemForReplace(null);
-              setSearchQuery("");
-              setReplaceData({
-                selectedProduct: "",
-                selectedProductPrice: "",
-                productType: 0,
-                newProduct: "",
-                quantity: "",
-                price: "",
-                productTypeName: "",
-              });
-            },
-          },
-        ]);
+        // Close modal first
+        setShowReplaceModal(false);
+        setShowDropdown(false);
+        setSelectedItemForReplace(null);
+        setSearchQuery("");
+        setReplaceData({
+          selectedProduct: "",
+          selectedProductPrice: "",
+          productType: 0,
+          newProduct: "",
+          quantity: "",
+          price: "",
+          productTypeName: "",
+        });
+
+        
+        await loadOrderData(true);
+
+     
+        Alert.alert(t("Error.Success"), successMessage);
       } else {
         throw new Error(
           response.data.message ||
@@ -971,11 +981,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403) {
-          console.log("403 Error Details:", error.response?.data);
-          const errorMessage =
-            error.response?.data?.message ||
-            "You don't have permission to create replacement requests.";
-
           Alert.alert(t("Error.Error"), t("Error.somethingWentWrong"));
         } else if (error.response?.status === 401) {
           Alert.alert(
@@ -983,7 +988,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             t("Error.Your session has expired"),
           );
         } else if (error.response?.status === 400) {
-          console.log("400 Error Response:", error.response?.data);
           Alert.alert(
             t("Error.Invalid Request"),
             t("Error.Please check your input data and try again"),
@@ -1393,7 +1397,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                 />
               </View>
 
-              {/* Price Display (read-only) */}
+              {/* Price Display */}
               <View className="mb-6">
                 <View className="border border-black rounded-full p-3 bg-gray-100">
                   <Text className="text-black">{replaceData.price}</Text>
@@ -1402,6 +1406,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
               {/* Action Buttons */}
               <View className="space-y-3">
+             
                 <TouchableOpacity
                   className={`py-3 rounded-full px-3 ${
                     isFormComplete && !isReplacementPriceHigher
@@ -1416,11 +1421,16 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   disabled={
                     !isFormComplete ||
                     isReplacementPriceHigher ||
-                    requestLoading == true
+                    requestLoading
                   }
                 >
                   {requestLoading ? (
-                    <ActivityIndicator size="small" color="#fff" />
+                    <View className="flex-row justify-center items-center">
+                      <ActivityIndicator size="small" color="#fff" />
+                      <Text className="text-white font-medium ml-2">
+                        {t("PendingOrderScreen.Processing")}
+                      </Text>
+                    </View>
                   ) : (
                     <Text className="text-white text-center font-medium">
                       {jobRole === "Distribution Centre Manager"
@@ -1456,7 +1466,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
     const packageGroups = getPackageGroups();
 
-    // Count package states
     let completedPackagesCount = 0;
     let openedPackagesCount = 0;
     let pendingPackagesCount = 0;
@@ -1558,7 +1567,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }
   };
 
-  // Get styling based on status
   const getStatusStyling = (
     status: "Pending" | "Opened" | "Completed" | "In Progress",
   ) => {
@@ -1578,7 +1586,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           badge: "bg-[#E3F2FD] border border-[#2196F3]",
           text: "text-[#1565C0]",
         };
-      default: // Pending
+      default:
         return {
           badge: "bg-[#FFB9B7] border border-[#FFB9B7]",
           text: "text-[#D16D6A]",
@@ -1587,7 +1595,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   };
 
   const DynamicStatusBadge = () => {
-    // Use the dynamic getDynamicStatus() instead of static route params
     const currentStatus = getDynamicStatus();
     const styling = getStatusStyling(currentStatus);
     const statusText = getStatusText(currentStatus);
@@ -1610,15 +1617,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       animationType="fade"
       onRequestClose={() => {
         setShowSuccessModal(false);
-        // setOrderCompletionState('idle'); // Reset for next time
         navigation.goBack();
       }}
     >
       <View className="flex-1 bg-black/50 justify-center items-center px-6">
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
-          <View className="items-center mb-4">
-            {/* Success icon can go here */}
-          </View>
+          <View className="items-center mb-4"></View>
           <Text className="text-xl font-bold text-center mb-2">
             {t("PendingOrderScreen.Completed Successfully")}
           </Text>
@@ -1908,7 +1912,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           )}
         </TouchableOpacity>
 
-        {/* Secondary action button - light gray */}
+        {/* Secondary action button */}
         <TouchableOpacity
           className="bg-gray-200 py-4 rounded-full"
           onPress={handleBackToEdit}
@@ -2042,7 +2046,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                               {orderStatus !== "Completed" && (
                                 <View className="w-8 h-8 items-center justify-center mr-3">
                                   {item.selected ? (
-                                    // Show disabled image (not clickable)
+                                    // Show disabled image
                                     <Image
                                       source={disable}
                                       style={{
@@ -2115,7 +2119,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               </View>
             )}
 
-            {/* Additional Items Section - User controls expansion for all order statuses */}
+            {/* Additional Items Section  */}
             {additionalItems.length > 0 && (
               <View className="mx-4 mb-6">
                 <TouchableOpacity
@@ -2247,7 +2251,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             </View>
           )}
 
-          {/* Modals - Only show for non-completed orders */}
           {orderStatus !== "Completed" && (
             <>
               <UnsavedChangesModal />

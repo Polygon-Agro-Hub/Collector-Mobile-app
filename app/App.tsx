@@ -86,7 +86,7 @@ import TransactionReport from "@/component/collection-manager/TransactionReport"
 import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
 import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
 import PrivacyPolicy from "@/component/common/PrivacyPolicy";
-import DistridutionaDashboard from "@/component/distribution-officer/DistridutionaDashboard";
+import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
 import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
 import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
 import Timer from "@/component/distribution-common/TimerContainer ";

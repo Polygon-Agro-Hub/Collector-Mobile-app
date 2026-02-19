@@ -1,5 +1,6 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, AppStateStatus } from "react-native";
 import {
   View,
   Text,
@@ -123,6 +124,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [centerCode, setcenterCode] = useState<string | null>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const isInitialLoad = useRef(true);
+  const appState = useRef(AppState.currentState);
   const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
@@ -149,21 +152,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   };
 
   console.log("jobeJole-----------------", jobRole);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchTargets();
-      fetchUserProfile();
-
-      const interval = setInterval(() => {
-        fetchTargets();
-      }, 30000);
-
-      return () => {
-        clearInterval(interval);
-      };
-    }, []),
-  );
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -223,9 +211,10 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
     try {
       const date = new Date(dateString);
+      const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, "0");
       const day = date.getDate().toString().padStart(2, "0");
-      return `${month}/${day}`;
+      return `${year}/${month}/${day}`;
     } catch (error) {
       console.error("Error formatting schedule date:", error);
       return "";
@@ -309,78 +298,123 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
-  const fetchTargets = useCallback(async () => {
-    setLoading(true);
-    try {
-      const authToken = await AsyncStorage.getItem("token");
+  const fetchTargets = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      try {
+        const authToken = await AsyncStorage.getItem("token");
 
-      if (!authToken) {
-        throw new Error("Authentication token not found. Please login again.");
-      }
+        if (!authToken) {
+          throw new Error(
+            "Authentication token not found. Please login again.",
+          );
+        }
 
-      const response = await axios.get(
-        `${environment.API_BASE_URL}api/distribution/officer-target`,
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
+        const response = await axios.get(
+          `${environment.API_BASE_URL}api/distribution/officer-target`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
           },
-        },
+        );
+
+        if (response.data.success) {
+          const apiData = response.data.data;
+
+          if (apiData && apiData.length > 0) {
+          }
+
+          const mappedData = mapApiDataToTargetData(apiData);
+
+          if (mappedData && mappedData.length > 0) {
+            // console.log("First mapped item:", JSON.stringify(mappedData[0], null, 2));
+            // console.log("Package lock in mapped item:", mappedData[0].packageIsLock);
+          }
+
+          const todoItems = mappedData.filter((item: TargetData) =>
+            ["Pending", "Opened"].includes(item.selectedStatus),
+          );
+
+          const completedItems = mappedData.filter(
+            (item: TargetData) => item.selectedStatus === "Completed",
+          );
+
+          setTodoData(sortByVarietyAndGrade(todoItems));
+
+          const sortedCompletedItems = [...completedItems].sort((a, b) => {
+            if (!a.completedTime && !b.completedTime) return 0;
+            if (!a.completedTime) return 1;
+            if (!b.completedTime) return -1;
+
+            const dateA = new Date(a.completedTime).getTime();
+            const dateB = new Date(b.completedTime).getTime();
+            return dateB - dateA;
+          });
+
+          setCompletedData(sortedCompletedItems);
+          setError(null);
+        }
+      } catch (err: any) {
+        console.error("Fetch error:", err);
+        console.error("Error response:", err.response?.data);
+        console.error("Error status:", err.response?.status);
+
+        let errorMessage = t("Error.Failed to fetch data.");
+
+        if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response?.status === 400) {
+          errorMessage = "Bad request - please check your authentication";
+        } else if (err.response?.status === 401) {
+          errorMessage = "Unauthorized - please login again";
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
+
+        setTodoData([]);
+        setCompletedData([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [selectedLanguage, t],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTargets(false);
+      fetchUserProfile();
+
+      const handleAppStateChange = (nextAppState: AppStateStatus) => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          fetchTargets(true);
+        }
+        appState.current = nextAppState;
+      };
+
+      const subscription = AppState.addEventListener(
+        "change",
+        handleAppStateChange,
       );
 
-      if (response.data.success) {
-        const apiData = response.data.data;
+      const interval = setInterval(() => {
+        fetchTargets(true);
+      }, 30000);
 
-        if (apiData && apiData.length > 0) {
-        }
-
-        const mappedData = mapApiDataToTargetData(apiData);
-
-        if (mappedData && mappedData.length > 0) {
-          // console.log("First mapped item:", JSON.stringify(mappedData[0], null, 2));
-          // console.log("Package lock in mapped item:", mappedData[0].packageIsLock);
-        }
-
-        // console.log("Mapped data:", mappedData);
-
-        const todoItems = mappedData.filter((item: TargetData) =>
-          ["Pending", "Opened"].includes(item.selectedStatus),
-        );
-
-        const completedItems = mappedData.filter(
-          (item: TargetData) => item.selectedStatus === "Completed",
-        );
-
-        setTodoData(sortByVarietyAndGrade(todoItems));
-        setCompletedData(sortByVarietyAndGrade(completedItems));
-        setError(null);
-      }
-    } catch (err: any) {
-      console.error("Fetch error:", err);
-      console.error("Error response:", err.response?.data);
-      console.error("Error status:", err.response?.status);
-
-      let errorMessage = t("Error.Failed to fetch data.");
-
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.response?.status === 400) {
-        errorMessage = "Bad request - please check your authentication";
-      } else if (err.response?.status === 401) {
-        errorMessage = "Unauthorized - please login again";
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-
-      setTodoData([]);
-      setCompletedData([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [selectedLanguage, t]);
+      return () => {
+        clearInterval(interval);
+        subscription.remove();
+      };
+    }, [fetchTargets]),
+  );
 
   const handleRowPress = (item: TargetData) => {
     if (item.packageIsLock === 1 && jobRole === "Distribution Officer") {
@@ -415,28 +449,29 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
+  const formatCompletionTime = (dateString: string | null) => {
+    if (!dateString) return null;
 
-  const formatCompletionTime = (dateString: string | null): string | null => {
-  if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
 
-  try {
-    const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      const displayHours = hours % 12 || 12;
 
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
-
-    return `${year}/${month}/${day} ${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`;
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return null;
-  }
-};
-
+      return {
+        date: `${year}/${month}/${day}`,
+        time: `${displayHours.toString().padStart(2, "0")}:${minutes}${ampm}`,
+      };
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return null;
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       await fetchSelectedLanguage();
@@ -708,7 +743,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 100 }} 
+        contentContainerStyle={{ paddingBottom: 100 }}
       >
         {error && (
           <View className="bg-red-100 border border-red-400 px-4 py-3 mx-4 mt-4 rounded">
@@ -771,7 +806,12 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                       className="text-center font-medium text-xs"
                       style={{ color: getScheduleDateColor(item.sheduleDate) }}
                     >
-                      {formatScheduleDate(item.sheduleDate)}{" "}
+                      {formatScheduleDate(item.sheduleDate)}
+                    </Text>
+                    <Text
+                      className="text-center font-medium text-xs"
+                      style={{ color: getScheduleDateColor(item.sheduleDate) }}
+                    >
                       {formatScheduleTime(item.sheduleTime) || "N/A"}
                     </Text>
                   </View>
@@ -811,11 +851,20 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                 </>
               ) : (
                 <View className="flex-[2] items-center justify-center px-2">
-                  <Text className="text-center text-gray-600 text-sm">
-                    {item.completedTime
-                      ? formatCompletionTime(item.completedTime)
-                      : "N/A"}
-                  </Text>
+                  {item.completedTime ? (
+                    <>
+                      <Text className="text-center text-gray-600 text-sm">
+                        {formatCompletionTime(item.completedTime)?.date}
+                      </Text>
+                      <Text className="text-center text-gray-600 text-sm">
+                        {formatCompletionTime(item.completedTime)?.time}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text className="text-center text-gray-600 text-sm">
+                      N/A
+                    </Text>
+                  )}
                 </View>
               )}
             </TouchableOpacity>
