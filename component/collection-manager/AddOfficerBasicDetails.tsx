@@ -725,7 +725,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             source={
               selectedImage
                 ? { uri: `data:image/png;base64,${selectedImage}` }
-                : require("../../assets/images/user2.png")
+                : require("../../assets/images/collection-manager/user2.webp")
             }
             className="w-24 h-24 rounded-full"
           />

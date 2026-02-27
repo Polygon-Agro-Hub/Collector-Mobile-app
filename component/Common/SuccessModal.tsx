@@ -102,7 +102,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
           >
             <View className="relative">
               <Image
-                source={require("../../assets/images/New/otpsuccess.png")}
+                source={require("../../assets/images/collection-common/otpsuccess.webp")}
                 className="h-[100px] w-[100px] rounded-lg"
                 resizeMode="contain"
               />

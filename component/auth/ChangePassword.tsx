@@ -223,7 +223,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
           }  space-x-[-30%] ml-[5%]`}
         >
           <Image
-            source={require("@/assets/images/cangepassword.png")}
+            source={require("@/assets/images/auth/change-password.webp")}
             resizeMode="contain"
             className="w-30 h-20"
           />

@@ -415,7 +415,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               </Text>
               <View className="mb-4">
                 <Image
-                  source={require("../../assets/images/tick.webp")} // Replace with your own checkmark image
+                  source={require("../../assets/images/collection-common/tick.webp")} // Replace with your own checkmark image
                   className="w-24 h-24"
                 />
               </View>
@@ -444,7 +444,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               </Text>
               <View className="mb-4">
                 <Image
-                  source={require("../../assets/images/error.webp")} // Replace with your own error image
+                  source={require("../../assets/images/collection-common/error-unregister.webp")} // Replace with your own error image
                   className="w-24 h-24"
                 />
               </View>

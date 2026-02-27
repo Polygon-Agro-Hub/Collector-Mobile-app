@@ -309,7 +309,7 @@ const ClaimOfficer: React.FC = () => {
       {!officerFound && searchPerformed && !searchLoading && (
         <View className="flex items-center justify-center mt-24">
           <Image
-            source={require("../../assets/images/dd.webp")} 
+            source={require("../../assets/images/collection-manager/delete-icon.webp")} 
             className="w-28 h-28" 
             resizeMode="contain" 
           />
@@ -328,7 +328,7 @@ const ClaimOfficer: React.FC = () => {
             source={
               officerDetails?.image
                 ? { uri: officerDetails.image }
-                : require("../../assets/images/pcprofile.webp")
+                : require("../../assets/images/collection-manager/pc-profile.webp")
             }
             className="w-20 h-20 rounded-full mb-4"
           />

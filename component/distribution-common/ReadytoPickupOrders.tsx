@@ -606,7 +606,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
     <View className="flex-1 justify-center items-center mt-[-15%] px-4 pb-24">
       <View className="relative">
         <Image
-          source={require("../../assets/images/notfound.webp")}
+          source={require("../../assets/images/collection-common/notfound.webp")}
           className="h-[200px] w-[200px] rounded-lg"
           resizeMode="contain"
         />

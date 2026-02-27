@@ -130,7 +130,7 @@ const Registeredfarmer: React.FC<RegisteredfarmerProps> = ({ navigation }) => {
             style={{ transform: [{ scale: selectedNav === 'first' ? 1.5 : 1 }] }}
           >
             <Image
-              source={require('../../assets/images/first-image.webp')}
+              source={require('../../assets/images/collection-common/first-image.webp')}
               style={{ width: 35, height: 35 }}
               resizeMode="contain"
             />
@@ -140,7 +140,7 @@ const Registeredfarmer: React.FC<RegisteredfarmerProps> = ({ navigation }) => {
             style={{ transform: [{ scale: selectedNav === 'second' ? 1.5 : 1 }] }}
           >
             <Image
-              source={require('../../assets/images/second-image.webp')}
+              source={require('../../assets/images/collection-common/second-image.webp')}
               style={{ width: 35, height: 35 }}
               resizeMode="contain"
             />
@@ -150,7 +150,7 @@ const Registeredfarmer: React.FC<RegisteredfarmerProps> = ({ navigation }) => {
             style={{ transform: [{ scale: selectedNav === 'third' ? 1.5 : 1 }] }}
           >
             <Image
-              source={require('../../assets/images/third-image.webp')}
+              source={require('../../assets/images/collection-common/third-image.webp')}
               style={{ width: 35, height: 35 }}
               resizeMode="contain"
             />

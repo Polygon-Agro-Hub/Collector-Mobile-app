@@ -89,7 +89,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
           {/* Warning Icon */}
           <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg justify-center items-center mb-4">
             <Image
-              source={require("../../assets/images/New/Errorcentertarget.png")}
+              source={require("../../assets/images/collection-common/error-center-target.webp")}
               style={{ width: 20, height: 20 }}
             />
           </View>

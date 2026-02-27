@@ -1117,10 +1117,10 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
           source={
             profileImage && profileImage.uri
               ? { uri: profileImage.uri }
-              : require("../../assets/images/mprofile.webp")
+              : require("../../assets/images/auth/my-profile.webp")
           }
           style={{ width: 100, height: 100, borderRadius: 50 }}
-          defaultSource={require("../../assets/images/mprofile.webp")}
+          defaultSource={require("../../assets/images/auth/my-profile.webp")}
         />
         {/* <View className="absolute right-0 bottom-0 p-1 bg-white rounded-full">
           <Image

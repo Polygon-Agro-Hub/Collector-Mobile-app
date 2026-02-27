@@ -327,7 +327,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
             source={
               profile?.image
                 ? { uri: profile.image }
-                : require("../../assets/images/mprofile.webp")
+                : require("../../assets/images/auth/my-profile.webp")
             }
             className="w-16 h-16 rounded-full mr-3"
           />

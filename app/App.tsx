@@ -56,7 +56,7 @@ import ClaimOfficer from "@/component/collection-manager/ClaimOfficer";
 import TransactionList from "@/component/collection-manager/TransactionList";
 import FarmerReport from "@/component/collection-manager/FarmerReport";
 import DailyTarget from "@/component/collection-manager/DailyTarget";
-import NoCollectionCenterScreen from "@/component/collection-common/NoCollectionCenterScreen ";
+import NoCollectionCenterScreen from "@/component/collection-common/NoCollectionCenterScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import EditTargetScreen from "@/component/collection-manager/EditTargetScreen";
 import PassTargetScreen from "@/component/collection-manager/PassTargetScreen";

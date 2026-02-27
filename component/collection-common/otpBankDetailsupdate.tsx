@@ -86,7 +86,7 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
           </Text>
 
           <Image
-            source={require("../../assets/images/New/otpsuccess.png")}
+            source={require("../../assets/images/collection-common/otpsuccess.webp")}
             style={{ width: 100, height: 100 }}
           />
 
@@ -158,7 +158,7 @@ const ShowFailModal: React.FC<FailModalProps> = ({
           </Text>
 
           <Image
-            source={require("../../assets/images/New/error.png")}
+            source={require("../../assets/images/collection-common/error.webp")}
             style={{ width: 100, height: 100 }}
           />
 
@@ -485,7 +485,7 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
           style={{ marginTop: dynamicStyles.margingTopForImage }}
         >
           <Image
-            source={require("../../assets/images/New/opt.png")}
+            source={require("../../assets/images/collection-common/opt.webp")}
             style={{
               width: dynamicStyles.imageWidth,
               height: dynamicStyles.imageHeight,

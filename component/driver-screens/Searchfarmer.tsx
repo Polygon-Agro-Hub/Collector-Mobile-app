@@ -259,7 +259,7 @@ const SearchFarmerScreen: React.FC<SearchFarmerScreenProps> = ({ navigation }) =
               {!isSearching && !foundFarmer && NICnumber.length === 0 && (
                 <View className="mt-10 items-center">
                   <Image
-                    source={require("../../assets/images/search.webp")}
+                    source={require("../../assets/images/collection-common/search.webp")}
                     className="h-[350px] w-[300px] rounded-lg"
                     resizeMode="contain"
                   />
@@ -344,7 +344,7 @@ const SearchFarmerScreen: React.FC<SearchFarmerScreenProps> = ({ navigation }) =
               {!isSearching && noResults && NICnumber.length > 0 && !ere &&(
                 <View className="mt-6 items-center">
                   <Image
-                    source={require("../../assets/images/notfound.webp")}
+                    source={require("../../assets/images/collection-common/notfound.webp")}
                     className="h-[200px] w-[200px] rounded-lg"
                     resizeMode="contain"
                   />

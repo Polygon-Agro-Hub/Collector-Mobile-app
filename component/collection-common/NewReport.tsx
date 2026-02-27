@@ -861,7 +861,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           onPress={handleDownloadPDF}
         >
           <Image
-            source={require("../../assets/images/download.webp")}
+            source={require("../../assets/images/collection-common/download.webp")}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">
@@ -874,7 +874,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           onPress={handleSharePDF}
         >
           <Image
-            source={require("../../assets/images/Share.webp")}
+            source={require("../../assets/images/collection-common/share.webp")}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>

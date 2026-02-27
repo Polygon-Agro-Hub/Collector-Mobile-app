@@ -205,7 +205,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           source={
             item.image
               ? { uri: item.image }
-              : require("../../assets/images/ava.webp")
+              : require("../../assets/images/collection-manager/avetar.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
         />

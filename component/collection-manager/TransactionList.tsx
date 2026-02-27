@@ -393,7 +393,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   >
                     <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
                       <Image
-                        source={require("../../assets/images/ava.webp")}
+                        source={require("../../assets/images/collection-manager/avetar.webp")}
                         className="w-full h-full"
                         resizeMode="cover"
                       />

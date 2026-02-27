@@ -79,7 +79,7 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
           </Text>
 
           <Image
-            source={require("../../assets/images/New/otpsuccess.png")}
+            source={require("../../assets/images/collection-common/otpsuccess.webp")}
             style={{ width: 100, height: 100 }}
           />
 
@@ -457,7 +457,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         style={{ marginTop: dynamicStyles.margingTopForImage }}
       >
         <Image
-          source={require("../../assets/images/New/opt.png")}
+          source={require("../../assets/images/collection-common/opt.webp")}
           style={{
             width: dynamicStyles.imageWidth,
             height: dynamicStyles.imageHeight,

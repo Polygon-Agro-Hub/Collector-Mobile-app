@@ -234,7 +234,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
           <View className="flex-row justify-center items-center mb-2">
             <Image
-              source={require("../../assets/images/hand.webp")}
+              source={require("../../assets/images/dashboard/hand.webp")}
               className="w-8 h-8 mr-2"
             />
             <Text className="text-center text-[#2AAD7A] font-bold">
@@ -265,7 +265,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           source={
             profile?.image
               ? { uri: profile.image }
-              : require("../../assets/images/mprofile.webp")
+              : require("../../assets/images/auth/my-profile.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
         />
@@ -323,7 +323,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               onPress={() => navigation.navigate("CenterTarget" as any)}
             >
               <Image
-                source={require("../../assets/images/New/centertarget.png")}
+                source={require("../../assets/images/dashboard/center-target.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text
@@ -341,7 +341,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               }
             >
               <Image
-                source={require("../../assets/images/New/collection.png")}
+                source={require("../../assets/images/dashboard/collection.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text
@@ -357,7 +357,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               onPress={() => navigation.navigate("QRScanner" as any)}
             >
               <Image
-                source={require("../../assets/images/New/qr.png")}
+                source={require("../../assets/images/dashboard/qr.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text
@@ -373,7 +373,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               onPress={() => navigation.navigate("SearchFarmer" as any)}
             >
               <Image
-                source={require("../../assets/images/New/searchclient.png")}
+                source={require("../../assets/images/dashboard/search-client.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text

@@ -266,7 +266,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
         >
           <View className="flex-row justify-center items-center mb-2">
             <Image
-              source={require("../../assets/images/New/Applause.png")}
+              source={require("../../assets/images/dashboard/Applause.webp")}
               className="w-8 h-8 mr-2"
             />
             <Text className="text-center text-[#2AAD7A] font-bold">
@@ -297,7 +297,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           source={             
             profile?.image               
               ? { uri: profile.image }               
-              : require("../../assets/images/mprofile.webp")           
+              : require("../../assets/images/auth/my-profile.webp")           
           }           
           className="w-16 h-16 rounded-full mr-3"           
           onError={() => console.log("Failed to load image")}         
@@ -367,7 +367,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
             onPress={() => navigation.navigate("CenterTargetScreen", { centerId: centerId } as any)}         
           >
             <Image
-              source={require("../../assets/images/New/centertarget.png")}
+              source={require("../../assets/images/dashboard/center-target.webp")}
               className="w-8 h-8 absolute top-2 right-2"
             />
             <Text
@@ -383,7 +383,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
             onPress={() => navigation.navigate("TargetOrderScreen" as any)}
           >
             <Image
-              source={require("../../assets/images/New/packing.png")}
+              source={require("../../assets/images/dashboard/packing.webp")}
               className="w-8 h-8 absolute top-2 right-2"
             />
       

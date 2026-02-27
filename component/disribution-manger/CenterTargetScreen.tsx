@@ -1137,7 +1137,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             </Text>
 
             <Image
-              source={require("../../assets/images/New/otpsuccess.png")}
+              source={require("../../assets/images/collection-common/otpsuccess.webp")}
               style={{ width: 100, height: 100 }}
             />
 
@@ -1653,7 +1653,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
               <View className="items-center mb-2">
                 <View className="w-10 h-10 rounded-lg bg-[#F6F7F9] justify-center items-center ">
                   <Image
-                    source={require("../../assets/images/New/Errorcentertarget.png")}
+                    source={require("../../assets/images/collection-common/error-center-target.webp")}
                     style={{ width: 20, height: 20 }}
                   />
                 </View>

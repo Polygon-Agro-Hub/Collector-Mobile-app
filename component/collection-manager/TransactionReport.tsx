@@ -770,7 +770,7 @@ const handleDownloadPDF = async () => {
       <View className="flex-row justify-around w-full mb-7">
         <TouchableOpacity className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center" onPress={handleDownloadPDF}>
           <Image
-            source={require('../../assets/images/download.webp')}
+            source={require('../../assets/images/collection-common/download.webp')}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">{t("NewReport.Download")}</Text>
@@ -778,7 +778,7 @@ const handleDownloadPDF = async () => {
 
         <TouchableOpacity className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center" onPress={handleSharePDF}>
           <Image
-            source={require('../../assets/images/Share.webp')}
+            source={require('../../assets/images/collection-common/share.webp')}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>

@@ -36,9 +36,9 @@ interface LoginProps {
   navigation: LoginNavigationProp;
 }
 
-const loginImage = require("@/assets/images/New/login.png");
-const user = require("@/assets/images/New/user.png");
-const passwordicon = require("@/assets/images/New/password.png");
+const loginImage = require("@/assets/images/auth/login.webp");
+const user = require("@/assets/images/auth/user.webp");
+const passwordicon = require("@/assets/images/auth/password.webp");
 
 const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [empid, setEmpid] = useState("");

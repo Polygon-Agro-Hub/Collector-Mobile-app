@@ -318,7 +318,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
               source={
                 image
                   ? { uri: image }
-                  : require("../../assets/images/mprofile.webp")
+                  : require("../../assets/images/auth/my-profile.webp")
               }
               className="w-24 h-24 rounded-full "
             />

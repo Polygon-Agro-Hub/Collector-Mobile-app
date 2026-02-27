@@ -300,7 +300,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
             {t("SearchPrice.SearchPrice")}
           </Text>
           <Image
-            source={require("../../assets/images/New/Searchcrop.png")}
+            source={require("../../assets/images/collection-common/search-crop.webp")}
             className="w-64 h-40 mb-6 mt-8"
             resizeMode="contain"
           />

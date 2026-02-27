@@ -432,7 +432,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
       <View className="flex-row items-center mb-4">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
-            source={require("../../assets/images/back.webp")} // Path to your back icon
+            source={require("../../assets/images/collection-manager/back.webp")} 
             style={{ width: 24, height: 24 }}
           />
         </TouchableOpacity>
@@ -652,7 +652,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
           onPress={handleDownloadPDF}
         >
           <Image
-            source={require("../../assets/images/download.webp")} // Path to download icon
+            source={require("../../assets/images/collection-common/download.webp")} 
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">
@@ -665,7 +665,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
           onPress={handleSharePDF}
         >
           <Image
-            source={require("../../assets/images/Share.webp")} // Path to share icon
+            source={require("../../assets/images/collection-common/share.webp")} 
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">{t("ReportPage.Share")}</Text>

@@ -370,7 +370,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                   disabled={checkingPensionStatus}
                 >
                   <Image
-                    source={require("../../assets/images/download.webp")}
+                    source={require("../../assets/images/collection-common/download.webp")}
                     style={{ width: 24, height: 24, marginBottom: 8 }}
                   />
                   <Text
@@ -393,7 +393,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                   disabled={checkingPensionStatus}
                 >
                   <Image
-                    source={require("../../assets/images/Share.webp")}
+                    source={require("../../assets/images/collection-common/share.webp")}
                     style={{ width: 24, height: 24, marginBottom: 8 }}
                   />
                   <Text
