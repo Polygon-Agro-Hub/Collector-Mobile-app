@@ -324,7 +324,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             >
               <Text className="text-gray-500">{formatDate(startDate)}</Text>
               <Image
-                source={require("../../assets/images/Rescheduling.webp")}
+                source={require("../../assets/images/collection-manager/rescheduling.webp")}
                 className="w-6 h-6"
                 resizeMode="contain"
               />
@@ -368,7 +368,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           >
             <Text className="text-gray-500">{formatDate(endDate)}</Text>
             <Image
-              source={require("../../assets/images/Rescheduling.webp")}
+              source={require("../../assets/images/collection-manager/rescheduling.webp")}
               className="w-6 h-6"
               resizeMode="contain"
             />
@@ -449,7 +449,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         <View className="items-center justify-center flex-1">
           <View className="w-24 h-24 bg-[#FFE6CB66] rounded-full items-center justify-center mb-4">
             <Image
-              source={require("../../assets/images/document.webp")}
+              source={require("../../assets/images/collection-manager/document.webp")}
               className="w-14 h-14"
             />
           </View>
@@ -512,7 +512,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       ) : (
         <View className="items-center justify-center flex-1">
           <Image
-            source={require("../../assets/images/empty.webp")}
+            source={require("../../assets/images/collection-manager/empty.webp")}
             className="w-20 h-20 mb-4"
             resizeMode="contain"
           />

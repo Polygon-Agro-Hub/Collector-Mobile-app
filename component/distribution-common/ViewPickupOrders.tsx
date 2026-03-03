@@ -226,7 +226,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
           <View className="bg-white rounded-2xl p-4  shadow-sm">
             <View className="items-center mb-4">
               <Image
-                source={require("../../assets/images/New/ProfileCustomer.webp")}
+                source={require("../../assets/images/distribution-common/profile-customer.webp")}
                 className="h-[100px] w-[100px] rounded-lg"
                 resizeMode="contain"
               />

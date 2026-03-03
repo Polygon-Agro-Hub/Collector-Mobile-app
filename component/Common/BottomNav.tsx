@@ -15,11 +15,11 @@ import useUserStore from "@/store/userStore";  // Import the global store
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../services/reducxStore";
 
-const homeIcon = require("../../assets/images/New/navhome.png");
-const searchIcon = require("../../assets/images/New/navsearch.png");
-const qrIcon = require("../../assets/images/New/navtarget.png");
-const adminIcon = require("../../assets/images/New/navusers.png");
-const dataTransfer = require("../../assets/images/New/transfer.png")
+const homeIcon = require("../../assets/images/common/nav-bar/navhome.webp");
+const searchIcon = require("../../assets/images/common/nav-bar/navsearch.webp");
+const qrIcon = require("../../assets/images/common/nav-bar/navtarget.webp");
+const adminIcon = require("../../assets/images/common/nav-bar/navusers.webp");
+const dataTransfer = require("../../assets/images/common/nav-bar/transfer.webp")
 
 const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   // const { userRole, setUserRole, setToken, setEmpId } = useUserStore();

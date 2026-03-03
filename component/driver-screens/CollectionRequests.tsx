@@ -344,7 +344,7 @@ useEffect(() => {
             onChangeText={handleSearch}
           />
           <Image
-            source={require("../../assets/images/Searchicon.webp")}
+            source={require("../../assets/images/driver-screens/search-icon.webp")}
             className="h-[20px] w-[20px]"
             resizeMode="contain"
           />
@@ -365,7 +365,7 @@ useEffect(() => {
               className="flex-row items-center"
             >
               <Image
-                source={require("../../assets/images/Filter.webp")}
+                source={require("../../assets/images/driver-screens/filter.webp")}
                 className="h-[24px] w-[24px]"
                 resizeMode="contain"
               />

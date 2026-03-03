@@ -283,7 +283,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             onPress={() => handleSearch(searchQuery)}
           >
             <Image
-              source={require("../../assets/images/searchhh.webp")}
+              source={require("../../assets/images/collection-manager/search-transaction.webp")}
               className="w-8 h-8"
               resizeMode="contain"
             />

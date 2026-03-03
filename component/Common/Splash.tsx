@@ -14,10 +14,10 @@ interface SplashProps {
   navigation: SplashNavigationProp;
 }
 
-const phone = require('../../assets/images/phone.webp');
-const Center = require('../../assets/images/CODINET expanded logo colored.png');
-const Bottom = require('../../assets/images/Group 35 (1).png');
-const Top = require('../../assets/images/Group 34 (3).png');
+const phone = require('../../assets/images/common/phone.webp');
+const Center = require('../../assets/images/common/codinet.webp');
+const Bottom = require('../../assets/images/common/codinet-back.webp');
+const Top = require('../../assets/images/common/codinet-up.webp');
 const Splash: React.FC<SplashProps> = ({ navigation }) => {
 
   const [progress, setProgress] = useState(0);

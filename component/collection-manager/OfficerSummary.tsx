@@ -400,7 +400,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
           >
             <View className="w-12 h-12 bg-[#FFFFFF66] rounded-full items-center justify-center shadow-md">
               <Image
-                source={require("../../assets/images/lf.webp")}
+                source={require("../../assets/images/collection-manager/lf.webp")}
                 style={{ width: 28, height: 28, resizeMode: "contain" }}
               />
             </View>

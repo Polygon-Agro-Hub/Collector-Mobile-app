@@ -56,7 +56,7 @@ interface UserProfile {
 }
 
 
-const icon = require("@/assets/images/New/engprofileicon.png")
+const icon = require("@/assets/images/common/eng-profile-icon.webp")
 
 
 const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {

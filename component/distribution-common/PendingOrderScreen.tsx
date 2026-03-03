@@ -167,8 +167,8 @@ interface PendingOrderScreenProps {
 }
 
 const { width, height } = Dimensions.get("window");
-const RedIcon = require("@/assets/images/squareMin.webp");
-const disable = require("@/assets/images/squaresolidRed.png");
+const RedIcon = require("@/assets/images/distribution-common/square-min-red.webp");
+const disable = require("@/assets/images/distribution-common/square-min-disable.webp");
 
 const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   navigation,

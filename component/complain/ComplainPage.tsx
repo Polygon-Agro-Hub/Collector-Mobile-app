@@ -239,7 +239,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
               {/* <View className="items-center p-2 pb-20 -mt-10 bg-white"> */}
               <View className="items-center bg-white ">
                 <Image
-                  source={require("../../assets/images/complain.webp")}
+                  source={require("../../assets/images/complain/complain.webp")}
                   className="w-36 h-36 "
                   resizeMode="contain"
                 />

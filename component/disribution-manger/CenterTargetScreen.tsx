@@ -1256,8 +1256,8 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
               <Image
                 source={
                   hasActiveFilter
-                    ? require("../../assets/images/New/filterclear.png")
-                    : require("../../assets/images/New/filter.png")
+                    ? require("../../assets/images/disribution-manger/filterclear.webp")
+                    : require("../../assets/images/disribution-manger/filter.webp")
                 }
                 className="w-4 h-4"
                 resizeMode="contain"
@@ -1271,8 +1271,8 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
               <Image
                 source={
                   hasCompletedFilter
-                    ? require("../../assets/images/New/filterclear.png")
-                    : require("../../assets/images/New/filter.png")
+                    ? require("../../assets/images/disribution-manger/filterclear.webp")
+                    : require("../../assets/images/disribution-manger/filter.webp")
                 }
                 className="w-4 h-4"
                 resizeMode="contain"
