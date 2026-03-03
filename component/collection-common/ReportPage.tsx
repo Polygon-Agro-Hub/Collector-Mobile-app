@@ -15,7 +15,6 @@ import { environment } from "@/environment/environment";
 import { RootStackParamList } from "../types";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-//import * as FileSystem from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { useTranslation } from "react-i18next";
@@ -71,18 +70,17 @@ interface officerDetails {
 const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
   const [officerDetails, setofficerDetails] = useState<officerDetails | null>(
-    null
+    null,
   );
   const route = useRoute<ReportPageRouteProp>();
   const { userId, registeredFarmerId } = route.params || {};
   const [crops, setCrops] = useState<Crop[]>([]);
-  // const qrCodeRef = useRef<any>(null);
   const [qrValue, setQrValue] = useState<string>("");
   const { t } = useTranslation();
 
   const totalSum = crops.reduce(
     (sum: number, crop: any) => sum + parseFloat(crop.total || 0),
-    0
+    0,
   );
 
   const fetchOfficerDetails = async () => {
@@ -100,22 +98,17 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
       });
 
       const data = response.data.data;
-    //  console.log(data);
 
       if (response.data.status === "success") {
         const officerDetails = {
           empId: data.empId,
-          QRCode: data.QRcode, // Ensure case is correct
+          QRCode: data.QRcode,
         };
 
-        console.log("Extracted QR Code:", officerDetails.QRCode);
-
-        // Set the officerDetails state
         setofficerDetails(officerDetails);
 
-        // If you need to store QR code or other details in other states
         const qrData = JSON.stringify(officerDetails);
-        setQrValue(qrData); // Assuming setQrValue is for QR code
+        setQrValue(qrData);
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to fetch details"));
       }
@@ -126,7 +119,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    fetchOfficerDetails(); // Fetch details when the component mounts
+    fetchOfficerDetails();
   }, []);
 
   useEffect(() => {
@@ -144,12 +137,8 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
       const [detailsResponse, cropsResponse] = await Promise.all([
         api.get(`api/farmer/report-user-details/${userId}`),
         api.get(
-          `api/unregisteredfarmercrop/user-crops/today/${userId}/${registeredFarmerId}`
+          `api/unregisteredfarmercrop/user-crops/today/${userId}/${registeredFarmerId}`,
         ),
-        // Commented out officer QR code fetching
-        // api.get(`api/collection-officer/get-officer-Qr`, {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // }),
       ]);
 
       const data = detailsResponse.data;
@@ -169,7 +158,6 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
       });
 
       setCrops(cropsResponse.data);
-   //   console.log("crop response for report", cropsResponse.data);
     } catch (error) {
       console.error("Error fetching details:", error);
       Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
@@ -180,7 +168,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
     if (!details) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Details are missing for generating PDF")
+        t("Error.Details are missing for generating PDF"),
       );
       return "";
     }
@@ -199,20 +187,18 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
             <td>${crop.weightC}</td>
             <td>${crop.total}</td>
           </tr>
-        `
+        `,
       )
       .join("");
 
-    // Calculate total price from the crops array, ensuring total is treated as a number
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
-      return sum + Number(crop.total); // Ensure total is a number
+      return sum + Number(crop.total);
     }, 0);
 
-    // Check if officerDetails exists before accessing QR code
-    const officerQRCode = officerDetails?.QRCode || ""; // Default to empty string if officerDetails is null
+    const officerQRCode = officerDetails?.QRCode || "";
     const farmerQRCode = details?.qrCode
       ? details.qrCode.replace(/^data:image\/png;base64,/, "")
-      : ""; // Default to empty string if details is null
+      : "";
 
     const html = `
     <html>
@@ -320,33 +306,27 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
   };
 
   const handleDownloadPDF = async () => {
-    const uri = await generatePDF(); // Generate the PDF and get its URI
+    const uri = await generatePDF();
 
     if (uri) {
-      // Get the current date in YYYY-MM-DD format
       const date = new Date().toISOString().slice(0, 10);
       const fileName = `PurchaseReport_${
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
       try {
-        // Request permission to access media library
         const { status } = await MediaLibrary.requestPermissionsAsync();
 
         if (status === "granted") {
-          // Define a temporary path in the FileSystem's cache directory with the correct file name
           const tempUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
-          // Copy the file to the new temporary path with the desired file name
           await FileSystem.copyAsync({
-            from: uri, // Original URI
-            to: tempUri, // New URI with the correct name
+            from: uri,
+            to: tempUri,
           });
 
-          // Create an asset with the renamed file
           const asset = await MediaLibrary.createAssetAsync(tempUri);
 
-          // Save to the Downloads album
           const album = await MediaLibrary.getAlbumAsync("Download");
           if (!album) {
             await MediaLibrary.createAlbumAsync("Download", asset, false);
@@ -356,27 +336,25 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
 
           Alert.alert(
             t("Error.Success"),
-            t('Error.Downloaded PDF"', { fileName })
+            t('Error.Downloaded PDF"', { fileName }),
           );
         } else {
           Alert.alert(
             t("Error.Permission Denied"),
-            t("Error.Permission Denied Message")
+            t("Error.Permission Denied Message"),
           );
         }
       } catch (error) {
         console.error("Error saving PDF:", error);
         Alert.alert(
           t("Error.error"),
-          t("Error.Failed to save PDF to Downloads folder.")
+          t("Error.Failed to save PDF to Downloads folder."),
         );
       }
     } else {
       Alert.alert(t("Error.error"), t("Error.PDF was not generated."));
     }
   };
-
-  console.log("QR Code URL:", details?.qrCode);
 
   const handleSharePDF = async () => {
     const uri = await generatePDF();
@@ -401,7 +379,6 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
       {/* Personal Details Section */}
       {details && (
         <View className="mb-4">
-          {/* Selected Date and Invoice Number */}
           <View className="mb-2">
             <Text className="text-sm font-bold">
               {t("ReportPage.INV")}
@@ -562,8 +539,6 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
         </View>
       )}
 
-   
-
       <View className="p-2 border-t border-gray-300">
         <Text className="font-bold">
           {t("ReportPage.TotalSum")} {totalSum.toFixed(2)}
@@ -590,7 +565,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
               source={{
                 uri: officerDetails.QRCode.replace(
                   /^data:image\/png;base64,/,
-                  ""
+                  "",
                 ),
               }}
               style={{ width: 150, height: 150 }}
@@ -622,7 +597,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
           onPress={handleSharePDF}
         >
           <Image
-            source={require("../../assets/images/collection-common/share.webp")} 
+            source={require("../../assets/images/collection-common/share.webp")}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">{t("ReportPage.Share")}</Text>

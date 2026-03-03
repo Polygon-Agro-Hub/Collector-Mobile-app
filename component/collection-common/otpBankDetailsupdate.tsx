@@ -58,19 +58,19 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
   onClose,
   onComplete,
 }) => {
-  const progress = useRef(new Animated.Value(0)).current; // Start from 0
+  const progress = useRef(new Animated.Value(0)).current;
   const { t } = useTranslation();
 
   useEffect(() => {
     if (visible) {
-      progress.setValue(0); // Reset progress
+      progress.setValue(0);
       Animated.timing(progress, {
-        toValue: 100, // Full progress
-        duration: 2000, // Adjust timing
+        toValue: 100,
+        duration: 2000,
         useNativeDriver: false,
       }).start(() => {
         setTimeout(() => {
-          onComplete(); // Trigger navigation or any completion action
+          onComplete();
         }, 500);
       });
     }
@@ -93,18 +93,6 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
           <Text className="text-gray-500 mb-4">
             {t("BankDetailsUpdate.SuccessMessage")}
           </Text>
-
-          {/* <TouchableOpacity
-            className="bg-[#2AAD7A] px-6 py-2 rounded-full mt-6"
-            onPress={() => {
-              onClose();
-              onComplete();
-            }}
-          >
-            <Text className="text-white font-semibold">
-              {t("Otpverification.OK")}
-            </Text>
-          </TouchableOpacity> */}
 
           {/* Progress Bar - Fixed to Bottom */}
           <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
@@ -130,19 +118,19 @@ const ShowFailModal: React.FC<FailModalProps> = ({
   onClose,
   onFail,
 }) => {
-  const progress = useRef(new Animated.Value(0)).current; // Start from 0
+  const progress = useRef(new Animated.Value(0)).current;
   const { t } = useTranslation();
 
   useEffect(() => {
     if (visible) {
-      progress.setValue(0); // Reset progress
+      progress.setValue(0);
       Animated.timing(progress, {
-        toValue: 100, // Full progress
-        duration: 2000, // Adjust timing
+        toValue: 100,
+        duration: 2000,
         useNativeDriver: false,
       }).start(() => {
         setTimeout(() => {
-          onFail(); // Trigger navigation or any completion action
+          onFail();
         }, 500);
       });
     }
@@ -220,9 +208,8 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [isOtpValid, setIsOtpValid] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-const inputRefs = useRef<Array<TextInput | null>>([]);
+  const inputRefs = useRef<Array<TextInput | null>>([]);
   const handleSuccessCompletion = () => {
-    // This function will handle navigation after success
     setModalVisible(false);
 
     if (officerRole === "COO") {
@@ -271,15 +258,12 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
   }, [timer, isVerified]);
 
   const handleOtpChange = (text: string, index: number) => {
-    // Update the OTP code based on input change
     const updatedOtpCode = otpCode.split("");
-    updatedOtpCode[index] = text; // Modify the specific index
+    updatedOtpCode[index] = text;
     setOtpCode(updatedOtpCode.join(""));
 
-    // Check if OTP is valid (all 5 digits filled)
     setIsOtpValid(updatedOtpCode.length === 5 && !updatedOtpCode.includes(""));
 
-    // Move to next input field if text is entered
     if (text && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -297,10 +281,10 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
       return;
     }
 
-      const netState = await NetInfo.fetch();
-       if (!netState.isConnected) {
-      return; 
-       }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
 
     try {
       const refId = referenceId;
@@ -317,14 +301,12 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
       };
 
       const response = await axios.post(url, body, { headers });
-     // console.log("Response from Shoutout:", response.data);
+
       const { statusCode } = response.data;
 
       if (statusCode === "1000") {
         setIsVerified(true);
         setModalVisible(true);
-
-   
 
         const response = await axios.post(
           `${environment.API_BASE_URL}api/farmer/FarmerBankDetails`,
@@ -335,7 +317,7 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
             branchName: branchName,
             userId: farmerId,
             NICnumber: NICnumber,
-          }
+          },
         );
 
         if (response.status === 200) {
@@ -362,11 +344,9 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
     }
   };
 
-  // Resend OTP
-
   const handleResendOTP = async () => {
     await AsyncStorage.removeItem("referenceId");
-    console.log("Phone Number:", phoneNumber); // Log phone number for debugging
+
     try {
       const apiUrl = "https://api.getshoutout.com/otpservice/send";
       const headers = {
@@ -412,7 +392,6 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
   If correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
-      // Prepare the body of the request
       const body = {
         source: "PolygonAgro",
         transport: "sms",
@@ -422,10 +401,8 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
         destination: `${phoneNumber}`,
       };
 
-      console.log("Sending OTP Request Body:", body);
-
       const response = await axios.post(apiUrl, body, { headers });
-      // Check if the response contains a referenceId
+
       if (response.data.referenceId) {
         await AsyncStorage.setItem("referenceId", response.data.referenceId);
         setReferenceId(response.data.referenceId);
@@ -461,7 +438,7 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
       className="bg-white"
-      style={{ flex: 1}}
+      style={{ flex: 1 }}
     >
       <ScrollView
         className="flex-1 "
@@ -469,15 +446,15 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
         style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
       >
         <View>
-         
-          <TouchableOpacity  onPress={() => navigation.goBack()} className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10" >
-                                   <AntDesign name="left" size={24} color="#000502" />
-                                 </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
+          >
+            <AntDesign name="left" size={24} color="#000502" />
+          </TouchableOpacity>
         </View>
         <View className="flex justify-center items-center mt-0 mr-[5%]">
-          <Text className="text-black" style={{ fontSize: wp(8) }}>
-
-          </Text>
+          <Text className="text-black" style={{ fontSize: wp(8) }}></Text>
         </View>
 
         <View
@@ -521,10 +498,9 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
             {Array.from({ length: 5 }).map((_, index) => (
               <TextInput
                 key={index}
-                // ref={(el) => (inputRefs.current[index] = el as TextInput)}
-                   ref={(el: TextInput | null) => {
-        inputRefs.current[index] = el; // assign to array
-      }}
+                ref={(el: TextInput | null) => {
+                  inputRefs.current[index] = el;
+                }}
                 className={`w-12 h-12 text-lg text-center rounded-lg shadow-[#00000040] ${
                   otpCode[index]
                     ? "bg-[#FFFFFF] text-black pb-2"
@@ -536,27 +512,26 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
                 onChangeText={(text) => handleOtpChange(text, index)}
                 placeholder={maskedCode[index] || "_"}
                 placeholderTextColor="lightgray"
-               style={{
-        borderColor: "#FFC738",
-        borderWidth: 1,
-        // Shadow properties for drop shadow effect
-        shadowColor: "#000000",
-        shadowOffset: {
-          width: 0,
-          height: 4,
-        },
-     //   shadowOpacity: 0.25,
-        shadowRadius: 4,
-        // Android elevation for shadow
-        elevation: 4,
-      }}
+                style={{
+                  borderColor: "#FFC738",
+                  borderWidth: 1,
+
+                  shadowColor: "#000000",
+                  shadowOffset: {
+                    width: 0,
+                    height: 4,
+                  },
+
+                  shadowRadius: 4,
+
+                  elevation: 4,
+                }}
               />
             ))}
           </View>
 
           <View className="mt-5">
             <Text className="text-md text-[#707070] pt-1">
-              {/* {t("OtpVerification.OTPCode")} */}
               {t("Otpverification.Didreceive")}
             </Text>
           </View>
@@ -567,16 +542,16 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
               onPress={disabledResend ? undefined : handleResendOTP}
               style={{ color: disabledResend ? "gray" : "black" }}
             >
-                {timer > 0
-              ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
-              : `${t("Otpverification.Resend again")}`}
+              {timer > 0
+                ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
+                : `${t("Otpverification.Resend again")}`}
             </Text>
           </View>
 
           <ShowSuccessModal
             visible={modalVisible}
             onClose={() => setModalVisible(false)}
-            onComplete={handleSuccessCompletion} // Pass the navigation function
+            onComplete={handleSuccessCompletion}
           />
           <View style={{ marginTop: dynamicStyles.margingTopForBtn }}>
             <TouchableOpacity
@@ -588,7 +563,6 @@ const inputRefs = useRef<Array<TextInput | null>>([]);
               disabled={isVerified}
             >
               <Text className="text-white text-lg">
-                {/* {t("OtpVerification.Verify")} */}
                 {t("Otpverification.Verify")}
               </Text>
             </TouchableOpacity>

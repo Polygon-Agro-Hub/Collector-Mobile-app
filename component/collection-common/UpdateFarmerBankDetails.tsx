@@ -35,7 +35,7 @@ type UnregisteredFarmerDetailsNavigationProp = StackNavigationProp<
 
 interface UnregisteredFarmerDetailsProps {
   navigation: UnregisteredFarmerDetailsNavigationProp;
-  route: any; // Add route to the props interface
+  route: any;
 }
 
 interface allBranches {
@@ -50,22 +50,21 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 }) => {
   const { id, NICnumber, phoneNumber, PreferdLanguage, officerRole } =
     route.params;
-  console.log(id);
-  console.log(NICnumber);
+
   const [accNumber, setAccNumber] = useState("");
-  console.log(accNumber);
+
   const [accHolderName, setAccHolderName] = useState("");
   const [bankName, setBankName] = useState("");
-  console.log(bankName);
+
   const [branchName, setBranchName] = useState("");
-  console.log(branchName);
-  const [isModalVisible, setIsModalVisible] = useState(false); // Success modal visibility state
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
-    useState(false); // Unsuccessful modal visibility state
-  const [loading, setLoading] = useState(false); // Loading state for the progress bar
-  const [progress] = useState(new Animated.Value(0)); // Animated value for progress
-  const [unsuccessfulProgress] = useState(new Animated.Value(0)); // Animated value for unsuccessful loading bar
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // State for error messages
+    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [progress] = useState(new Animated.Value(0));
+  const [unsuccessfulProgress] = useState(new Animated.Value(0));
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { t } = useTranslation();
   const [filteredBranches, setFilteredBranches] = useState<allBranches[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -73,7 +72,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [accNumberError, setAccNumberError] = useState("");
 
   const validateAccountNumber = (value: any) => {
-    // Check if the value contains only numbers
     const numericRegex = /^[0-9]*$/;
     if (!numericRegex.test(value)) {
       setAccNumberError(t("UnregisteredFarmerDetails.AccountNumberError"));
@@ -81,12 +79,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     }
     setAccNumberError("");
     return true;
-  };
-
-  const handleAccountNumberChange = (value: any) => {
-    if (validateAccountNumber(value)) {
-      setAccNumber(value);
-    }
   };
 
   useEffect(() => {
@@ -118,12 +110,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   }, [bankName]);
 
   const handleNext = async () => {
-    if (
-      !accNumber ||
-      !accHolderName ||
-      !bankName ||
-      !branchName // Removed trailing comma
-    ) {
+    if (!accNumber || !accHolderName || !bankName || !branchName) {
       Alert.alert(
         t("Error.error"),
         t("Error.Please fill in all required fields."),
@@ -143,8 +130,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
         "Content-Type": "application/json",
       };
-
-      console.log(phoneNumber);
 
       let otpMessage = "";
       let companyName = "";
@@ -194,7 +179,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
       };
 
       const response = await axios.post(apiUrl, body, { headers });
-      console.log("OTP Response:", response.data);
+
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
       navigation.navigate("otpBankDetailsupdate", {
@@ -265,7 +250,6 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
-              // placeholder={t("UnregisteredFarmerDetails.AccountNum")}
               className={`border ${
                 accNumberError
                   ? "border-red-500"
@@ -300,15 +284,12 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               className="border border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full"
               value={accHolderName}
               onChangeText={(text) => {
-                // Only allow letters and spaces - block numbers, dots, and all special characters
                 let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
 
-                // Prevent space at the beginning
                 if (filteredText.startsWith(" ")) {
                   filteredText = filteredText.trimStart();
                 }
 
-                // Capitalize first letter and make rest lowercase, handle multiple words
                 const capitalizedText = filteredText
                   .toLowerCase()
                   .split(" ")
@@ -382,11 +363,11 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             }`}
             onPress={() => {
               if (!loading) {
-                setLoading(true); // Disable the button on click
-                handleNext(); // Your action function
+                setLoading(true);
+                handleNext();
               }
             }}
-            disabled={loading} // Disable button during the operation
+            disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />
@@ -471,8 +452,8 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 className="bg-red-500 p-2 rounded-full mt-4"
                 onPress={() => {
                   setIsUnsuccessfulModalVisible(false);
-                  setErrorMessage(null); // Clear error message when closing
-                  unsuccessfulProgress.setValue(0); // Reset animation value when closing
+                  setErrorMessage(null);
+                  unsuccessfulProgress.setValue(0);
                 }}
               >
                 <Text className="text-white">

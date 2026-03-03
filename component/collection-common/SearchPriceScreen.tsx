@@ -72,7 +72,6 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     fetchLanguage();
   }, []);
 
-  // Fetch job role from AsyncStorage
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
@@ -112,7 +111,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
       setLoading(false);
       resetForm();
       return () => {};
-    }, [resetForm])
+    }, [resetForm]),
   );
 
   useEffect(() => {
@@ -132,7 +131,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const fetchLanguage = async () => {
@@ -195,7 +194,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const formattedData = response.data.map((variety: any) => {
@@ -229,26 +228,24 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     fetchVarieties();
   }, [selectedCrop]);
 
-  // Handle navigation based on job role
   const handleSearch = () => {
     if (selectedCrop && selectedVariety) {
       setLoading(true);
       const cropName =
-        cropOptions.find((option) => option.value === selectedCrop)?.label || "";
+        cropOptions.find((option) => option.value === selectedCrop)?.label ||
+        "";
       const varietyName =
-        varietyOptions.find((option) => option.value === selectedVariety)?.label || "";
+        varietyOptions.find((option) => option.value === selectedVariety)
+          ?.label || "";
 
-      // Navigate based on job role
       if (jobRole === "Collection Centre Manager") {
-     navigation.navigate("PriceChartManager", {
+        navigation.navigate("PriceChartManager", {
           cropName: cropName,
           varietyId: selectedVariety,
           varietyName: varietyName,
         });
       } else {
-        // For Distribution Officer, Distribution Centre Manager, and other roles
-        
-           navigation.navigate("PriceChart", {
+        navigation.navigate("PriceChart", {
           cropName: cropName,
           varietyId: selectedVariety,
           varietyName: varietyName,
@@ -259,7 +256,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
       Alert.alert(
         t("SearchPrice.Selection Required"),
         t("SearchPrice.Please select both Crop and Variety to continue"),
-        [{ text: t("SearchPrice.OK") }]
+        [{ text: t("SearchPrice.OK") }],
       );
     }
   };
@@ -329,7 +326,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                 style={{
                   backgroundColor: "#F4F4F4",
                   borderColor: "#F4F4F4",
-                  borderRadius: 25
+                  borderRadius: 25,
                 }}
                 placeholderStyle={{ color: "#9CA3AF" }}
                 textStyle={{
@@ -369,7 +366,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                 style={{
                   backgroundColor: "#F4F4F4",
                   borderColor: "#F4F4F4",
-                  borderRadius: 25
+                  borderRadius: 25,
                 }}
                 textStyle={{
                   color: "#000",

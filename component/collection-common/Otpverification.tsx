@@ -118,7 +118,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     branchName,
     PreferdLanguage,
   } = route.params;
-  
+
   const [otpCode, setOtpCode] = useState<string>("");
   const [maskedCode, setMaskedCode] = useState<string>("XXXXX");
   const [referenceId, setReferenceId] = useState<string | null>(null);
@@ -162,7 +162,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       return () => clearInterval(interval);
     } else if (timer === 0 && !isVerified) {
       setDisabledResend(false);
-      setIsOtpExpired(true); // Mark OTP as expired when timer reaches 0
+      setIsOtpExpired(true);
     }
   }, [timer, isVerified]);
 
@@ -184,28 +184,23 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const handleVerify = async () => {
     const code = otpCode;
     Keyboard.dismiss();
-    
+
     if (code.length !== 5) {
       Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"));
       return;
     }
 
-    // Check if OTP is expired
     if (isOtpExpired) {
-      Alert.alert(
-        t("Error.Sorry"), 
-        t("Otpverification.OTPExpired"),
-        [
-          {
-            text: t("Otpverification.ResendOTP"),
-            onPress: handleResendOTP
-          },
-          {
-            text: t("Otpverification.Cancel"),
-            style: "cancel"
-          }
-        ]
-      );
+      Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
+        {
+          text: t("Otpverification.ResendOTP"),
+          onPress: handleResendOTP,
+        },
+        {
+          text: t("Otpverification.Cancel"),
+          style: "cancel",
+        },
+      ]);
       return;
     }
 
@@ -241,21 +236,20 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
       const netState = await NetInfo.fetch();
       if (!netState.isConnected) {
-        return; 
+        return;
       }
 
-      // Handle different OTP verification responses
       switch (statusCode) {
-        case "1000": // Success
+        case "1000":
           setIsVerified(true);
           setModalVisible(true);
-          
+
           const response1 = await axios.post(
             `${environment.API_BASE_URL}api/farmer/register-farmer`,
-            data
+            data,
           );
           await AsyncStorage.removeItem("referenceId");
-          
+
           setTimeout(() => {
             navigation.navigate("FarmerQr" as any, {
               NICnumber: response1.data.NICnumber,
@@ -264,75 +258,64 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           }, 2000);
           break;
 
-        case "1001": // Invalid or expired OTP
-          setVerificationAttempts(prev => prev + 1);
-          
+        case "1001":
+          setVerificationAttempts((prev) => prev + 1);
+
           if (verificationAttempts >= 2) {
-            // After multiple failed attempts, suggest resending
             Alert.alert(
               t("Error.Sorry"),
               t("Otpverification.OTPExpiredOrInvalid"),
               [
                 {
                   text: t("Otpverification.ResendOTP"),
-                  onPress: handleResendOTP
+                  onPress: handleResendOTP,
                 },
                 {
                   text: t("Otpverification.TryAgain"),
                   onPress: () => {
                     setOtpCode("");
                     setIsOtpValid(false);
-                    // Focus first input
+
                     if (inputRefs.current[0]) {
                       inputRefs.current[0]?.focus();
                     }
-                  }
-                }
-              ]
+                  },
+                },
+              ],
             );
           } else {
-            Alert.alert(
-              t("Error.Sorry"), 
-              t("Otpverification.invalidOTP")
-            );
+            Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
           }
           break;
 
-        case "1002": // OTP expired
+        case "1002":
           setIsOtpExpired(true);
-          Alert.alert(
-            t("Error.Sorry"),
-            t("Otpverification.OTPExpired"),
-            [
-              {
-                text: t("Otpverification.ResendOTP"),
-                onPress: handleResendOTP
-              }
-            ]
-          );
+          Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
+            {
+              text: t("Otpverification.ResendOTP"),
+              onPress: handleResendOTP,
+            },
+          ]);
           break;
 
         default:
-          Alert.alert(t("Error.Sorry"), message || t("Error.somethingWentWrong"));
+          Alert.alert(
+            t("Error.Sorry"),
+            message || t("Error.somethingWentWrong"),
+          );
       }
     } catch (error: any) {
       console.error("OTP Verification Error:", error);
-      
+
       if (error.response?.data?.statusCode === "1002") {
-        // OTP expired
         setIsOtpExpired(true);
-        Alert.alert(
-          t("Error.Sorry"),
-          t("Otpverification.OTPExpired"),
-          [
-            {
-              text: t("Otpverification.ResendOTP"),
-              onPress: handleResendOTP
-            }
-          ]
-        );
+        Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
+          {
+            text: t("Otpverification.ResendOTP"),
+            onPress: handleResendOTP,
+          },
+        ]);
       } else if (error.response?.data?.statusCode === "1001") {
-        // Invalid OTP
         Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       } else {
         Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
@@ -342,8 +325,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
   const handleResendOTP = async () => {
     await AsyncStorage.removeItem("referenceId");
-    console.log("Phone Number:", phoneNumber);
-    
+
     try {
       const apiUrl = "https://api.getshoutout.com/otpservice/send";
       const headers = {
@@ -399,12 +381,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       };
 
       const response = await axios.post(apiUrl, body, { headers });
-      
+
       if (response.data.referenceId) {
         await AsyncStorage.setItem("referenceId", response.data.referenceId);
         setReferenceId(response.data.referenceId);
-        
-        // Reset states for new OTP
+
         setIsOtpExpired(false);
         setVerificationAttempts(0);
         setOtpCode("");
@@ -445,7 +426,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           <AntDesign name="left" size={22} color="#000" />
         </TouchableOpacity>
       </View>
-      
+
       <View className="flex justify-center items-center mt-0">
         <Text className="text-black" style={{ fontSize: wp(8) }}>
           {/* {t("OtpVerification.OTPVerification")} */}
@@ -484,16 +465,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
         )}
 
-       
-
         <View className="flex-row justify-center gap-3 mt-4 px-4">
           {Array.from({ length: 5 }).map((_, index) => (
             <TextInput
               key={index}
-              // ref={(el) => (inputRefs.current[index] = el as TextInput)}
-                 ref={(el: TextInput | null) => {
-        inputRefs.current[index] = el; // assign to array
-      }}
+              ref={(el: TextInput | null) => {
+                inputRefs.current[index] = el;
+              }}
               className={`w-12 h-12 text-lg text-center rounded-lg ${
                 otpCode[index]
                   ? "bg-[#FFFFFF] text-black pb-2"
@@ -507,7 +485,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
               placeholderTextColor="lightgray"
               style={{
                 borderColor: "#FFC738",
-                borderWidth: 2, // Adjust thickness if needed
+                borderWidth: 2,
               }}
             />
           ))}

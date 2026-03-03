@@ -11,12 +11,11 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import {  useRoute, RouteProp } from "@react-navigation/native";
+import { useRoute, RouteProp } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-//import * as FileSystem from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
@@ -31,7 +30,6 @@ import i18n from "@/i18n/i18n";
 import CustomHeader from "../common/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Create API instance
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
 });
@@ -110,7 +108,6 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     try {
       setCheckingPensionStatus(true);
 
-      // Get token from AsyncStorage
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
@@ -130,17 +127,14 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       );
 
       setCheckingPensionStatus(false);
-      console.log("pension data",response.data)
 
       if (response.data.status) {
         if (response.data.hasPensionRequest) {
-          // Has pension request, navigate to status screen with the status
           navigation.navigate("GoviPensionStatus", {
             status: response.data.reqStatus,
-            creatAt: response.data.requestCreatedAt
+            creatAt: response.data.requestCreatedAt,
           });
         } else {
-          // No pension request found, navigate to application form
           navigation.navigate("GoviPensionForm", {
             farmerNIC: farmerNIC,
             farmerPhone: farmerPhone,
@@ -148,7 +142,6 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
           });
         }
       } else {
-        // API returned error
         Alert.alert(
           t("Error.error"),
           response.data.message || "Failed to check pension status",

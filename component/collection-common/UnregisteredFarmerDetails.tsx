@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { CountryCode } from "react-native-country-picker-modal";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
@@ -75,8 +74,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [NICError, setNICError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [accNumberError, setAccNumberError] = useState("");
-  
-  // New state for field validation errors
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -88,7 +85,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           const filteredBranches = data[selectedBank.ID] || [];
           const sortedBranches = filteredBranches.sort(
             (a: { name: string }, b: { name: any }) =>
-              a.name.localeCompare(b.name)
+              a.name.localeCompare(b.name),
           );
           setFilteredBranches(sortedBranches);
         } catch (error) {
@@ -107,7 +104,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
   const districtOptions = [
     { key: 1, value: "Ampara", translationKey: t("Districts.Ampara") },
-    { key: 2, value: "Anuradhapura", translationKey: t("Districts.Anuradhapura") },
+    {
+      key: 2,
+      value: "Anuradhapura",
+      translationKey: t("Districts.Anuradhapura"),
+    },
     { key: 3, value: "Badulla", translationKey: t("Districts.Badulla") },
     { key: 4, value: "Batticaloa", translationKey: t("Districts.Batticaloa") },
     { key: 5, value: "Colombo", translationKey: t("Districts.Colombo") },
@@ -118,18 +119,34 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     { key: 10, value: "Kalutara", translationKey: t("Districts.Kalutara") },
     { key: 11, value: "Kandy", translationKey: t("Districts.Kandy") },
     { key: 12, value: "Kegalle", translationKey: t("Districts.Kegalle") },
-    { key: 13, value: "Kilinochchi", translationKey: t("Districts.Kilinochchi") },
+    {
+      key: 13,
+      value: "Kilinochchi",
+      translationKey: t("Districts.Kilinochchi"),
+    },
     { key: 14, value: "Kurunegala", translationKey: t("Districts.Kurunegala") },
     { key: 15, value: "Mannar", translationKey: t("Districts.Mannar") },
     { key: 16, value: "Matale", translationKey: t("Districts.Matale") },
     { key: 17, value: "Matara", translationKey: t("Districts.Matara") },
     { key: 18, value: "Moneragala", translationKey: t("Districts.Moneragala") },
     { key: 19, value: "Mullaitivu", translationKey: t("Districts.Mullaitivu") },
-    { key: 20, value: "Nuwara Eliya", translationKey: t("Districts.NuwaraEliya") },
-    { key: 21, value: "Polonnaruwa", translationKey: t("Districts.Polonnaruwa") },
+    {
+      key: 20,
+      value: "Nuwara Eliya",
+      translationKey: t("Districts.NuwaraEliya"),
+    },
+    {
+      key: 21,
+      value: "Polonnaruwa",
+      translationKey: t("Districts.Polonnaruwa"),
+    },
     { key: 22, value: "Puttalam", translationKey: t("Districts.Puttalam") },
     { key: 23, value: "Rathnapura", translationKey: t("Districts.Rathnapura") },
-    { key: 24, value: "Trincomalee", translationKey: t("Districts.Trincomalee") },
+    {
+      key: 24,
+      value: "Trincomalee",
+      translationKey: t("Districts.Trincomalee"),
+    },
     { key: 25, value: "Vavuniya", translationKey: t("Districts.Vavuniya") },
   ];
 
@@ -139,7 +156,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     }
   }, [NIC]);
 
-  // Function to validate all fields
   const validateAllFields = () => {
     const errors: Record<string, string> = {};
 
@@ -194,19 +210,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     return true;
   };
 
-  const handleAccountNumberChange = (value: any) => {
-    if (validateAccountNumber(value)) {
-      setAccNumber(value);
-    }
-  };
-
   const handleNext = async () => {
     Keyboard.dismiss();
-    
-    // Clear previous errors
+
     setFieldErrors({});
-    
-    // Validate all fields
+
     if (!validateAllFields()) {
       setLoading(false);
       return;
@@ -226,13 +234,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         NICnumber: NICnumber,
       };
 
-      console.log("Full API URL:", `${api.defaults.baseURL}${checkApiUrl}`);
       const checkResponse = await api.post(checkApiUrl, checkBody);
 
       if (checkResponse.data.message === "This Phone Number already exists.") {
         Alert.alert(
           t("Error.error"),
-          t("Error.This Phone Number already exists.")
+          t("Error.This Phone Number already exists."),
         );
         setLoading(false);
         return;
@@ -246,7 +253,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       ) {
         Alert.alert(
           t("Error.error"),
-          t("Error.This Phone Number and NIC already exist.")
+          t("Error.This Phone Number and NIC already exist."),
         );
         setLoading(false);
         return;
@@ -306,7 +313,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
       };
 
       const response = await axios.post(apiUrl, body, { headers });
-      console.log("OTP Response:", response.data);
+
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
       navigation.navigate("OTPE", {
@@ -348,56 +355,56 @@ If correct, share OTP only with the ${companyName} representative who contacts y
   };
 
   const handleNameChange = (text: string, setName: (name: string) => void) => {
-    let filteredText = text.replace(/[^a-zA-Z\s]/g, '');
-    if (filteredText.startsWith(' ')) {
+    let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
+    if (filteredText.startsWith(" ")) {
       filteredText = filteredText.trimStart();
     }
     const capitalizedText = filteredText
       .toLowerCase()
-      .split(' ')
-      .map(word => {
+      .split(" ")
+      .map((word) => {
         if (word.length > 0) {
           return word.charAt(0).toUpperCase() + word.slice(1);
         }
         return word;
       })
-      .join(' ');
+      .join(" ");
     setName(capitalizedText);
   };
 
   const handleFirstNameChange = (text: string) => {
     handleNameChange(text, setFirstName);
-    // Clear error when user starts typing
+
     if (fieldErrors.firstName) {
-      setFieldErrors(prev => ({ ...prev, firstName: '' }));
+      setFieldErrors((prev) => ({ ...prev, firstName: "" }));
     }
   };
 
   const handleLastNameChange = (text: string) => {
     handleNameChange(text, setLastName);
     if (fieldErrors.lastName) {
-      setFieldErrors(prev => ({ ...prev, lastName: '' }));
+      setFieldErrors((prev) => ({ ...prev, lastName: "" }));
     }
   };
 
   const handleAccountNameChange = (text: string) => {
-    let filteredText = text.replace(/[^a-zA-Z\s]/g, '');
-    if (filteredText.startsWith(' ')) {
+    let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
+    if (filteredText.startsWith(" ")) {
       filteredText = filteredText.trimStart();
     }
     const capitalizedText = filteredText
       .toLowerCase()
-      .split(' ')
-      .map(word => {
+      .split(" ")
+      .map((word) => {
         if (word.length > 0) {
           return word.charAt(0).toUpperCase() + word.slice(1);
         }
         return word;
       })
-      .join(' ');
+      .join(" ");
     setAccHolderName(capitalizedText);
     if (fieldErrors.accHolderName) {
-      setFieldErrors(prev => ({ ...prev, accHolderName: '' }));
+      setFieldErrors((prev) => ({ ...prev, accHolderName: "" }));
     }
   };
 
@@ -405,11 +412,14 @@ If correct, share OTP only with the ${companyName} representative who contacts y
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1}}
+      style={{ flex: 1 }}
     >
       <View className="flex-1 p-5 bg-white">
         <View className="flex-row items-center mb-4">
-          <TouchableOpacity onPress={() => navigation.goBack()} className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
+          >
             <AntDesign name="left" size={24} color="#000502" />
           </TouchableOpacity>
           <View className="w-full items-center">
@@ -437,7 +447,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               maxLength={50}
             />
             {fieldErrors.firstName ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.firstName}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.firstName}
+              </Text>
             ) : null}
           </View>
 
@@ -458,7 +470,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               maxLength={50}
             />
             {fieldErrors.lastName ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.lastName}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.lastName}
+              </Text>
             ) : null}
           </View>
 
@@ -471,7 +485,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               setSelected={(val: string) => {
                 setPreferdLanguage(val);
                 if (fieldErrors.preferdLanguage) {
-                  setFieldErrors(prev => ({ ...prev, preferdLanguage: '' }));
+                  setFieldErrors((prev) => ({ ...prev, preferdLanguage: "" }));
                 }
               }}
               data={[
@@ -480,16 +494,20 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 { key: "Tamil", value: "தமிழ்" },
               ]}
               placeholder="Select Language"
-              boxStyles={{ 
-                borderColor: fieldErrors.preferdLanguage ? "#red-500" : "#F4F4F4", 
+              boxStyles={{
+                borderColor: fieldErrors.preferdLanguage
+                  ? "#red-500"
+                  : "#F4F4F4",
                 borderRadius: 25,
-                backgroundColor: "#F4F4F4"
+                backgroundColor: "#F4F4F4",
               }}
               dropdownStyles={{ borderColor: "#ccc" }}
               search={false}
             />
             {fieldErrors.preferdLanguage ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.preferdLanguage}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.preferdLanguage}
+              </Text>
             ) : null}
           </View>
 
@@ -501,7 +519,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             <TextInput
               placeholder={t("UnregisteredFarmerDetails.NIC")}
               className={`border ${
-                fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4]"
+                fieldErrors.nic || NICError
+                  ? "border-red-500"
+                  : "border-[#F4F4F4]"
               } bg-[#F4F4F4] p-3 rounded-full`}
               value={NICnumber}
               onChangeText={(text) => {
@@ -511,12 +531,14 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 if (!updatedText) {
                   setNICError("");
                   if (fieldErrors.nic) {
-                    setFieldErrors(prev => ({ ...prev, nic: '' }));
+                    setFieldErrors((prev) => ({ ...prev, nic: "" }));
                   }
                   return;
                 }
 
-                const isValidCharacters = /^(\d+|[\d]+[vV]?)$/.test(updatedText);
+                const isValidCharacters = /^(\d+|[\d]+[vV]?)$/.test(
+                  updatedText,
+                );
                 if (!isValidCharacters) {
                   setNICError(t("UnregisteredFarmerDetails.InvalidNIC"));
                   return;
@@ -533,7 +555,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 if (is12Digits || is9DigitsWithV) {
                   setNICError("");
                   if (fieldErrors.nic) {
-                    setFieldErrors(prev => ({ ...prev, nic: '' }));
+                    setFieldErrors((prev) => ({ ...prev, nic: "" }));
                   }
                 } else {
                   setNICError(t("UnregisteredFarmerDetails.InvalidNIC"));
@@ -541,8 +563,10 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               }}
               maxLength={12}
             />
-            {(fieldErrors.nic || NICError) ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.nic || NICError}</Text>
+            {fieldErrors.nic || NICError ? (
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.nic || NICError}
+              </Text>
             ) : null}
           </View>
 
@@ -553,7 +577,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             </Text>
             <View
               className={`flex-row items-center border ${
-                fieldErrors.phone || phoneError ? "border-red-500" : "border-[#F4F4F4]"
+                fieldErrors.phone || phoneError
+                  ? "border-red-500"
+                  : "border-[#F4F4F4]"
               } bg-[#F4F4F4] p-1  rounded-full`}
             >
               <TextInput
@@ -562,7 +588,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 value={phoneNumber}
                 onChangeText={(text) => {
                   if (!/^\d*$/.test(text)) {
-                    setPhoneError(t("UnregisteredFarmerDetails.OnlyDigitsAllowed"));
+                    setPhoneError(
+                      t("UnregisteredFarmerDetails.OnlyDigitsAllowed"),
+                    );
                     return;
                   }
 
@@ -571,31 +599,37 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                   if (!text) {
                     setPhoneError("");
                     if (fieldErrors.phone) {
-                      setFieldErrors(prev => ({ ...prev, phone: '' }));
+                      setFieldErrors((prev) => ({ ...prev, phone: "" }));
                     }
                     return;
                   }
 
                   if (text.length > 0 && text[0] !== "7") {
-                    setPhoneError(t("UnregisteredFarmerDetails.MustStartWith7"));
+                    setPhoneError(
+                      t("UnregisteredFarmerDetails.MustStartWith7"),
+                    );
                     return;
                   }
 
                   if (text.length === 9) {
                     setPhoneError("");
                     if (fieldErrors.phone) {
-                      setFieldErrors(prev => ({ ...prev, phone: '' }));
+                      setFieldErrors((prev) => ({ ...prev, phone: "" }));
                     }
                   } else {
-                    setPhoneError(t("UnregisteredFarmerDetails.InvalidPhoneLength"));
+                    setPhoneError(
+                      t("UnregisteredFarmerDetails.InvalidPhoneLength"),
+                    );
                   }
                 }}
                 className="flex-1"
                 maxLength={9}
               />
             </View>
-            {(fieldErrors.phone || phoneError) ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.phone || phoneError}</Text>
+            {fieldErrors.phone || phoneError ? (
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.phone || phoneError}
+              </Text>
             ) : null}
           </View>
 
@@ -609,7 +643,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 setSelected={(val: string) => {
                   setDistrict(val);
                   if (fieldErrors.district) {
-                    setFieldErrors(prev => ({ ...prev, district: '' }));
+                    setFieldErrors((prev) => ({ ...prev, district: "" }));
                   }
                 }}
                 data={districtOptions.map((district) => ({
@@ -617,17 +651,19 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                   value: district.translationKey,
                 }))}
                 placeholder="--Select District--"
-                boxStyles={{ 
-                  borderColor: fieldErrors.district ? "red-500" : "#F4F4F4", 
+                boxStyles={{
+                  borderColor: fieldErrors.district ? "red-500" : "#F4F4F4",
                   borderRadius: 25,
-                  backgroundColor: "#F4F4F4"
+                  backgroundColor: "#F4F4F4",
                 }}
                 dropdownStyles={{ borderColor: "#ccc" }}
                 search={true}
               />
             </View>
             {fieldErrors.district ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.district}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.district}
+              </Text>
             ) : null}
           </View>
 
@@ -638,7 +674,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             </Text>
             <TextInput
               className={`border ${
-                fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4]"
+                fieldErrors.accNumber || accNumberError
+                  ? "border-red-500"
+                  : "border-[#F4F4F4]"
               } bg-[#F4F4F4] p-3 rounded-full`}
               keyboardType="numeric"
               value={accNumber}
@@ -647,14 +685,16 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                   setAccNumber(text);
                   setAccNumberError("");
                   if (fieldErrors.accNumber) {
-                    setFieldErrors(prev => ({ ...prev, accNumber: '' }));
+                    setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
                   }
                 } else {
-                  setAccNumberError(t("UnregisteredFarmerDetails.AccountNumberError"));
+                  setAccNumberError(
+                    t("UnregisteredFarmerDetails.AccountNumberError"),
+                  );
                 }
               }}
             />
-            {(fieldErrors.accNumber || accNumberError) ? (
+            {fieldErrors.accNumber || accNumberError ? (
               <Text className="text-red-500 text-sm mt-1">
                 {fieldErrors.accNumber || accNumberError}
               </Text>
@@ -668,7 +708,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             </Text>
             <TextInput
               className={`border ${
-                fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4]"
+                fieldErrors.accHolderName
+                  ? "border-red-500"
+                  : "border-[#F4F4F4]"
               } bg-[#F4F4F4] p-3 rounded-full`}
               value={accHolderName}
               onChangeText={handleAccountNameChange}
@@ -678,7 +720,9 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               maxLength={100}
             />
             {fieldErrors.accHolderName ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.accHolderName}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.accHolderName}
+              </Text>
             ) : null}
           </View>
 
@@ -692,7 +736,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 setSelected={(val: string) => {
                   setBankName(val);
                   if (fieldErrors.bankName) {
-                    setFieldErrors(prev => ({ ...prev, bankName: '' }));
+                    setFieldErrors((prev) => ({ ...prev, bankName: "" }));
                   }
                 }}
                 data={bankNames.map((bank) => ({
@@ -700,17 +744,19 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                   value: bank.name,
                 }))}
                 placeholder="--Select Bank--"
-                boxStyles={{ 
-                  borderColor: fieldErrors.bankName ? "red-500" : "#F4F4F4", 
+                boxStyles={{
+                  borderColor: fieldErrors.bankName ? "red-500" : "#F4F4F4",
                   borderRadius: 25,
-                  backgroundColor: "#F4F4F4"
+                  backgroundColor: "#F4F4F4",
                 }}
                 dropdownStyles={{ borderColor: "#ccc" }}
                 search={true}
               />
             </View>
             {fieldErrors.bankName ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.bankName}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.bankName}
+              </Text>
             ) : null}
           </View>
 
@@ -724,7 +770,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 setSelected={(val: string) => {
                   setBranchName(val);
                   if (fieldErrors.branchName) {
-                    setFieldErrors(prev => ({ ...prev, branchName: '' }));
+                    setFieldErrors((prev) => ({ ...prev, branchName: "" }));
                   }
                 }}
                 data={filteredBranches.map((branch) => ({
@@ -732,17 +778,19 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                   value: branch.name,
                 }))}
                 placeholder="--Select Branch--"
-                boxStyles={{ 
-                  borderColor: fieldErrors.branchName ? "red-500" : "#F4F4F4", 
+                boxStyles={{
+                  borderColor: fieldErrors.branchName ? "red-500" : "#F4F4F4",
                   borderRadius: 25,
-                  backgroundColor: "#F4F4F4"
+                  backgroundColor: "#F4F4F4",
                 }}
                 dropdownStyles={{ borderColor: "#ccc" }}
                 search={true}
               />
             </View>
             {fieldErrors.branchName ? (
-              <Text className="text-red-500 text-sm mt-1">{fieldErrors.branchName}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.branchName}
+              </Text>
             ) : null}
           </View>
         </ScrollView>

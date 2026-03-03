@@ -48,7 +48,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [empId, setEmpId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"Collection" | "Transport">(
-    "Collection"
+    "Collection",
   );
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true); // Add loading state
@@ -73,7 +73,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           `${environment.API_BASE_URL}api/collection-officer/user-profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setProfile(response.data.data);
         setEmpId(response.data.data.empId);
@@ -95,7 +95,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
   };
 
   const fetchTargetPercentage = async () => {
-    setIsLoadingTarget(true); // Set loading to true when starting fetch
+    setIsLoadingTarget(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -107,13 +107,13 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
         `${environment.API_BASE_URL}api/target/officer-task-summary`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
-      console.log("response for percentage target", response.data);
+
       if (response.data.success) {
         const percentage = parseInt(
           response.data.completionPercentage.replace("%", ""),
-          10
+          10,
         );
         setTargetPercentage(percentage);
       } else {
@@ -123,7 +123,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
       console.error("Failed to fetch target percentage:", error);
       setTargetPercentage(0);
     } finally {
-      setIsLoadingTarget(false); // Set loading to false when done
+      setIsLoadingTarget(false);
     }
   };
 
@@ -148,9 +148,12 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
     useCallback(() => {
       const onBackPress = () => true;
       BackHandler.addEventListener("hardwareBackPress", onBackPress);
-         const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
       return () => subscription.remove();
-    }, [])
+    }, []),
   );
 
   const getFullName = () => {
@@ -189,7 +192,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
         if (currentTime < tokenExpiry) {
           console.log("Token is valid");
         } else {
-          console.log("Token expired, clearing storage.");
           await AsyncStorage.multiRemove([
             "token",
             "tokenStoredTime",
@@ -204,9 +206,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
     }
   };
 
-  // Function to render target status
   const renderTargetStatus = () => {
-    // Show loading state while fetching
     if (isLoadingTarget) {
       return (
         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-gray-300">
@@ -217,7 +217,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
       );
     }
 
-    // Show appropriate status based on target percentage
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#DF9301]">
@@ -289,7 +288,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
 
       {activeTab === "Collection" ? (
         <>
-          {/* Render target status using the new function */}
           {renderTargetStatus()}
 
           {/* Target Progress */}
@@ -310,7 +308,11 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               />
               <View className="absolute items-center justify-center h-24 w-24">
                 <Text className="text-2xl font-bold">
-                  {isLoadingTarget ? "..." : (targetPercentage !== null ? `${targetPercentage}%` : "0%")}
+                  {isLoadingTarget
+                    ? "..."
+                    : targetPercentage !== null
+                      ? `${targetPercentage}%`
+                      : "0%"}
                 </Text>
               </View>
             </View>

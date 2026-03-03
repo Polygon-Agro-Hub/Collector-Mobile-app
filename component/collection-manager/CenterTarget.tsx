@@ -12,7 +12,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { Ionicons } from "@expo/vector-icons";
-import LottieView from "lottie-react-native"; // Import LottieView
+import LottieView from "lottie-react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
@@ -41,7 +41,6 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
   const [todoData, setTodoData] = useState<TargetData[]>([]);
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [centerCode, setcenterCode] = useState<string | null>("");
-  console.log("Center Code", centerCode);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
@@ -51,8 +50,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
   const fetchSelectedLanguage = async () => {
     try {
-      const lang = await AsyncStorage.getItem("@user_language"); // Get stored language
-      setSelectedLanguage(lang || "en"); // Default to English if not set
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
@@ -71,7 +70,6 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
     }
   };
 
-  // Helper function to get the variety name based on selected language
   const getVarietyNameForSort = (item: TargetData) => {
     switch (selectedLanguage) {
       case "si":
@@ -83,21 +81,18 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
     }
   };
 
-  // Sort function that first sorts by variety name, then by grade (A, B, C)
   const sortByVarietyAndGrade = (data: TargetData[]) => {
     return [...data].sort((a, b) => {
-      // First sort by variety name
       const nameA = getVarietyNameForSort(a);
       const nameB = getVarietyNameForSort(b);
 
       const nameComparison = nameA.localeCompare(nameB);
 
-      // If variety names are the same, sort by grade (A, B, C)
       if (nameComparison === 0) {
         return getGradePriority(a.grade) - getGradePriority(b.grade);
       }
 
-      return nameComparison; // Return the name comparison if names are different
+      return nameComparison;
     });
   };
 
@@ -115,16 +110,13 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         },
       );
 
-      // Safely process the data
       const allData = response.data.data.map((item: any) => ({
         ...item,
-        // Ensure numeric values with fallback to 0
+
         target: Number(item.target || 0),
         complete: Number(item.complete || 0),
         todo: Number(item.todo || 0),
       }));
-
-      // console.log('Processed data:', allData);
 
       const todoItems = allData.filter((item: TargetData) => item.todo > 0);
       const completedItems = allData.filter(
@@ -158,8 +150,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchTargets(); // Trigger data fetch on refresh
-    setRefreshing(false); // Reset refreshing state after fetching
+    await fetchTargets();
+    setRefreshing(false);
   };
 
   const displayedData = selectedToggle === "ToDo" ? todoData : completedData;
@@ -192,7 +184,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         >
           <AntDesign name="left" size={22} color="white" />
         </TouchableOpacity>
-        {/* <Text className="text-white text-lg font-bold ml-[35%] mt-[3%]">{t("CenterTarget.CenterTarget")}</Text> */}
+
         <Text className="text-white text-lg font-bold mt-[3%]">
           {centerCode}
         </Text>

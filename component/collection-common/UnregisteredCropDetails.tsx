@@ -45,7 +45,6 @@ interface Crop {
   cropNameTamil: string;
 }
 
-// Define navigation and route props
 type UnregisteredCropDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
   "UnregisteredCropDetails"
@@ -142,7 +141,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     [key: string]: number | null;
   }>({ A: null, B: null, C: null });
 
-  // Change quantities to store string values to preserve decimal input
   const [quantities, setQuantities] = useState<{ [key: string]: string }>({
     A: "",
     B: "",
@@ -155,7 +153,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const [selectedVarietyName, setSelectedVarietyName] = useState<string | null>(
     null,
   );
-  console.log("se", selectedVarietyName);
+
   const [donebutton1visibale, setdonebutton1visibale] = useState(true);
   const [donebutton2visibale, setdonebutton2visibale] = useState(false);
   const [donebutton1disabale, setdonebutton1disabale] = useState(true);
@@ -168,10 +166,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [isAtStart, setIsAtStart] = useState(true);
-  console.log(isAtStart);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const [usedVarietyIds, setUsedVarietyIds] = useState<string[]>([]);
-  const [exhaustedCrops, setExhaustedCrops] = useState<string[]>([]);
+  const [resetCameraImage, setResetCameraImage] = useState(false);
   const [deletingVariety, setDeletingVariety] = useState<number | null>(null);
   const [deletingGrade, setDeletingGrade] = useState<{
     cropIndex: number;
@@ -236,7 +233,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const route = useRoute<UnregisteredCropDetailsRouteProp>();
   const { userId, farmerPhone, farmerLanguage } = route.params;
-  console.log(userId, farmerPhone);
 
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
@@ -474,7 +470,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const calculateTotal = () => {
     const totalPrice = Object.keys(unitPrices).reduce((acc, grade) => {
       const price = unitPrices[grade] || 0;
-      // Convert string quantity to number, default to 0 if empty or invalid
       const quantity = quantities[grade] ? parseFloat(quantities[grade]) : 0;
       return acc + price * quantity;
     }, 0);
@@ -484,10 +479,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }
   };
 
-  const [resetCameraImage, setResetCameraImage] = useState(false);
-
   const incrementCropCount = async () => {
-    // Validate images for current quantities
     const missingImages = [];
     if ((quantities.A ? parseFloat(quantities.A) : 0) > 0 && !images.A)
       missingImages.push("Grade A");
@@ -523,7 +515,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setdonebutton1visibale(false);
     setdonebutton2visibale(true);
 
-    // Add variety to used list
     setUsedVarietyIds((prev) => [...prev, selectedVariety]);
 
     const newCrop = {
@@ -561,7 +552,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     base64Image: string | null,
     grade: "A" | "B" | "C",
   ) => {
-    // Check if quantity is entered for this grade
     const quantityValue = quantities[grade] ? parseFloat(quantities[grade]) : 0;
     if (quantityValue <= 0) {
       Alert.alert(
@@ -574,30 +564,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       return;
     }
 
-    // Allow image upload
     setImages((prevImages) => ({
       ...prevImages,
       [grade]: base64Image,
     }));
-
-    if (base64Image) {
-      console.log(`${grade} image is set.`);
-    } else {
-      console.log(`${grade} image has been removed.`);
-    }
-  };
-
-  const canAddCrop = () => {
-    // Check if there are any grades with quantities but no images
-    const missingImages = [];
-    if ((quantities.A ? parseFloat(quantities.A) : 0) > 0 && !images.A)
-      missingImages.push("Grade A");
-    if ((quantities.B ? parseFloat(quantities.B) : 0) > 0 && !images.B)
-      missingImages.push("Grade B");
-    if ((quantities.C ? parseFloat(quantities.C) : 0) > 0 && !images.C)
-      missingImages.push("Grade C");
-
-    return missingImages.length === 0;
   };
 
   const hasUnsavedCropDetails = () => {
@@ -639,7 +609,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           {
             text: t("Error.No"),
             style: "cancel",
-            onPress: () => console.log("User cancelled submission"),
           },
           {
             text: t("Error.Yes"),
@@ -687,7 +656,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         totalPrice += crop.gradeCprice * crop.gradeCquan || 0;
       });
 
-      console.log("Total Price:", totalPrice);
       setLoading(true);
 
       const payload = {
@@ -746,18 +714,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     totalPrice: number,
     invoiceNumber: string,
   ) => {
-    console.log("Sending SMS with details:", {
-      language,
-      farmerPhone,
-      totalPrice,
-      invoiceNumber,
-    });
     const formattedPrice = new Intl.NumberFormat("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(totalPrice);
 
-    console.log("Formatted Price:", formattedPrice);
     try {
       const apiUrl = "https://api.getshoutout.com/coreservice/messages";
       const headers = {
@@ -801,20 +762,14 @@ TID: ${invoiceNumber}
       };
 
       const response = await axios.post(apiUrl, body, { headers });
-
-      if (response.data.referenceId) {
-        // Alert.alert("Success", "SMS notification sent successfully!");
-      }
     } catch (error) {
       console.error("Error sending SMS:", error);
     }
   };
 
-  // UPDATED: Camera enabled logic to work with string quantities
   const isGradeACameraEnabled = !quantities.A || parseFloat(quantities.A) == 0;
   const isGradeBCameraEnabled = !quantities.B || parseFloat(quantities.B) == 0;
   const isGradeCCameraEnabled = !quantities.C || parseFloat(quantities.C) == 0;
-  console.log("isGradeACameraEnabled:", isGradeACameraEnabled);
 
   const deleteVariety = (index: number) => {
     const varietyName = crops[index].varietyName;
@@ -973,7 +928,6 @@ TID: ${invoiceNumber}
         <View className="flex-row items-center mb-6">
           <TouchableOpacity
             onPress={() => {
-              console.log("Direct navigation to FarmerQr with userId:", userId);
               navigation.navigate("FarmerQr", {
                 userId: userId,
               } as any);

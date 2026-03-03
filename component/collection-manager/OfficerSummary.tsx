@@ -123,7 +123,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
     );
   };
 
-  // Fetch task summary and completion percentage
   const fetchTaskSummary = async () => {
     try {
       const res = await axios.get(
@@ -142,8 +141,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
           totalTarget > 0 ? Math.round((totalComplete / totalTarget) * 100) : 0;
 
         setTaskPercentage(percentageFromAPI);
-
-        console.log("Target percentage set to:", percentageFromAPI);
       } else {
         Alert.alert(
           t("Error.error"),
@@ -158,7 +155,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
     }
   };
 
-  // Refreshing function
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchTaskSummary();
@@ -212,7 +208,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
       }
 
       const data = await res.json();
-      console.log(data);
 
       if (data.status === "success") {
         setModalVisible(false);
@@ -256,11 +251,9 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
         if (OnlineStatus === 1) {
           setOfficerStatus("online");
           setIsOnline(true);
-          console.log("Officer is online");
         } else {
           setOfficerStatus("offline");
           setIsOnline(false);
-          console.log("Officer is offline");
         }
       } else {
         console.error("Failed to get officer status");

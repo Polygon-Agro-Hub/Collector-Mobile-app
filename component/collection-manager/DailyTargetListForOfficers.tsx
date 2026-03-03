@@ -36,8 +36,8 @@ interface TargetData {
   varietyId: any;
   centerTarget: any;
   varietyNameEnglish: string;
-  varietyNameSinhala: string; // ✅ Added this
-  varietyNameTamil: string; // ✅ Added this
+  varietyNameSinhala: string;
+  varietyNameTamil: string;
   grade: string;
   officerTarget: number;
   todo: number;
@@ -61,8 +61,8 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
 
   const fetchSelectedLanguage = async () => {
     try {
-      const lang = await AsyncStorage.getItem("@user_language"); // Get stored language
-      setSelectedLanguage(lang || "en"); // Default to English if not set
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
@@ -96,7 +96,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     });
   };
 
-  // Helper function to get the variety name based on selected language
   const getVarietyNameForSort = (item: TargetData) => {
     switch (selectedLanguage) {
       case "si":
@@ -108,7 +107,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     }
   };
 
-  // ✅ Fetch Targets API (Runs every time the page is visited or refreshed)
   const fetchTargets = async () => {
     setLoading(true);
     const startTime = Date.now();
@@ -124,13 +122,11 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
       );
 
       const allData = response.data.data;
-      // console.log("hell", allData);
+
       const todoItems = allData.filter((item: TargetData) => item.todo > 0);
       const completedItems = allData.filter(
         (item: TargetData) => item.todo === 0 && item.complete !== 0,
       );
-      // console.log("todoItems", todoItems);
-      // console.log("completedItems", completedItems);
 
       setTodoData(sortByVarietyAndGrade(todoItems));
       setCompletedData(sortByVarietyAndGrade(completedItems));

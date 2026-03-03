@@ -10,13 +10,12 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
-import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 
@@ -31,15 +30,15 @@ interface PassTargetBetweenOfficersScreenProps {
     params: {
       varietyId: number;
       varietyNameEnglish: string;
-      varietyNameSinhala: string; // ✅ Added this
-      varietyNameTamil: string; // ✅ Added this
+      varietyNameSinhala: string;
+      varietyNameTamil: string;
       grade: string;
       target: string;
       todo: string;
       qty: string;
       collectionOfficerId: number;
       dailyTarget: number;
-      officerId:string
+      officerId: string;
     };
   };
 }
@@ -59,7 +58,7 @@ const PassTargetBetweenOfficers: React.FC<
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [officers, setOfficers] = useState<{ key: string; value: string }[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -77,12 +76,11 @@ const PassTargetBetweenOfficers: React.FC<
     varietyNameSinhala,
     varietyNameTamil,
     dailyTarget,
-    officerId
+    officerId,
   } = route.params;
-  console.log(collectionOfficerId);
+
   const maxAmount = parseFloat(todo);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  console.log("officer id........................",officerId)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,9 +96,6 @@ const PassTargetBetweenOfficers: React.FC<
     fetchData();
   }, []);
 
- // console.log("Max Amount:", maxAmount);
-
-  // ✅ Set initial amount as max amount (`todo`)
   useEffect(() => {
     setAmount(maxAmount.toString());
   }, [maxAmount]);
@@ -116,22 +111,22 @@ const PassTargetBetweenOfficers: React.FC<
     }
   };
 
-  // ✅ Fixed: Enhanced save button disabling logic
   const isSaveDisabled = () => {
     const numericAmount = parseFloat(amount);
-    
-    return !assignee || 
-           assignee === "0" || 
-           submitting ||
-           loading ||
-           !amount || 
-           isNaN(numericAmount) || 
-           numericAmount <= 0 || 
-           numericAmount > maxAmount ||
-           error !== ""; // Also disable if there's an error
+
+    return (
+      !assignee ||
+      assignee === "0" ||
+      submitting ||
+      loading ||
+      !amount ||
+      isNaN(numericAmount) ||
+      numericAmount <= 0 ||
+      numericAmount > maxAmount ||
+      error !== ""
+    );
   };
 
-  // Fetch officers from API
   const fetchOfficers = async () => {
     try {
       setLoading(true);
@@ -144,20 +139,17 @@ const PassTargetBetweenOfficers: React.FC<
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-
-     // console.log("Officers:", response.data.data);
 
       if (response.data.status === "success") {
         const filteredOfficers = response.data.data.filter(
-          (officer: any) => officer.collectionOfficerId !== collectionOfficerId
+          (officer: any) => officer.collectionOfficerId !== collectionOfficerId,
         );
 
-        // Format the officers to be displayed
         const formattedOfficers = filteredOfficers.map((officer: any) => ({
           key: officer.collectionOfficerId.toString(),
-          value: `${getOfficerName(officer)}  (${(officer.empId)})`,
+          value: `${getOfficerName(officer)}  (${officer.empId})`,
         }));
         setOfficers([...formattedOfficers]);
       } else {
@@ -174,11 +166,10 @@ const PassTargetBetweenOfficers: React.FC<
     }
   };
 
-  // Reload the officers list every time the screen is focused
   useFocusEffect(
     React.useCallback(() => {
       fetchOfficers();
-    }, [])
+    }, []),
   );
 
   const handleAmountChange = (text: string) => {
@@ -191,7 +182,6 @@ const PassTargetBetweenOfficers: React.FC<
     }
   };
 
-  // ✅ Function to Pass Target
   const passTarget = async () => {
     if (!assignee || assignee === "0") {
       Alert.alert(t("Error.error"), t("Error.Please select an officer."));
@@ -207,16 +197,16 @@ const PassTargetBetweenOfficers: React.FC<
     if (numericAmount > maxAmount) {
       Alert.alert(
         t("Error.error"),
-        `${t("Error.You cannot transfer more than")} ${maxAmount}kg.`
+        `${t("Error.You cannot transfer more than")} ${maxAmount}kg.`,
       );
 
       return;
     }
 
-      const netState = await NetInfo.fetch();
-      if (!netState.isConnected) {
-    return; 
-  }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -235,17 +225,18 @@ const PassTargetBetweenOfficers: React.FC<
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-      
 
       if (response.status === 200) {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Target transferred successfully.")
+          t("Error.Target transferred successfully."),
         );
-        navigation.navigate('DailyTargetListForOfficers'as any,{officerId:  officerId  , collectionOfficerId: collectionOfficerId});
-     //   navigation.goBack();
+        navigation.navigate("DailyTargetListForOfficers" as any, {
+          officerId: officerId,
+          collectionOfficerId: collectionOfficerId,
+        });
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
       }
@@ -253,7 +244,7 @@ const PassTargetBetweenOfficers: React.FC<
       console.error("Transfer Target Error:", error);
       Alert.alert(
         t("Error.error"),
-        t("Error.An error occurred while transferring the target.")
+        t("Error.An error occurred while transferring the target."),
       );
     } finally {
       setSubmitting(false);
@@ -273,21 +264,20 @@ const PassTargetBetweenOfficers: React.FC<
 
   return (
     <View className="flex-1 bg-white">
-      {/* ✅ Fixed Header */}
       <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
-        <TouchableOpacity 
-        onPress={() => navigation.goBack()}
-        className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
         >
           <AntDesign name="left" size={22} color="white" />
         </TouchableOpacity>
-        {/* <Text className="text-white text-lg font-semibold text-center w-full"> */}
-          <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
+
+        <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
           {getvarietyName()}
         </Text>
       </View>
 
-      {/* ✅ Scrollable Content */}
+      {/*  Scrollable Content */}
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 20 }}
@@ -332,7 +322,6 @@ const PassTargetBetweenOfficers: React.FC<
                     color: assignee && assignee !== "0" ? "#000000" : "#848484",
                   }}
                   dropdownStyles={{
-                    // Fixed: changed from dropDownStyles to dropdownStyles
                     borderColor: "#CFCFCF",
                     backgroundColor: "white",
                   }}

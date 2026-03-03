@@ -69,7 +69,7 @@ interface officerDetails {
 const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
   const [officerDetails, setofficerDetails] = useState<officerDetails | null>(
-    null
+    null,
   );
   const route = useRoute<FarmerReportRouteProp>();
   const [qrValue, setQrValue] = useState<string>("");
@@ -90,11 +90,10 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
     selectedDate,
   } = route.params;
 
-//  console.log("Farmer Report:", route.params);
   const [crops, setCrops] = useState<Crop[]>([]);
   const totalSum = crops.reduce(
     (sum: number, crop: any) => sum + parseFloat(crop.total || 0),
-    0
+    0,
   );
   const { t } = useTranslation();
 
@@ -113,26 +112,21 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
       });
 
       const data = response.data.data;
-    //  console.log(data);
 
       if (response.data.status === "success") {
         const officerDetails = {
           empId: data.empId,
-          QRCode: data.QRcode, // Ensure case is correct
+          QRCode: data.QRcode,
         };
 
-       // console.log("Extracted QR Code:", officerDetails.QRCode);
-
-        // Set the officerDetails state
         setofficerDetails(officerDetails);
 
-        // If you need to store QR code or other details in other states
         const qrData = JSON.stringify(officerDetails);
-        setQrValue(qrData); // Assuming setQrValue is for QR code
+        setQrValue(qrData);
       } else {
         Alert.alert(
           t("Error.error"),
-          t("Error.Failed to fetch officer details")
+          t("Error.Failed to fetch officer details"),
         );
       }
     } catch (error) {
@@ -142,21 +136,20 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    fetchOfficerDetails(); // Fetch details when the component mounts
+    fetchOfficerDetails();
   }, []);
 
   const fetchCropDetails = async (
     userId: number,
     createdAt: string,
-    farmerId: number
+    farmerId: number,
   ) => {
     try {
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/collection-manager/transaction-details/${userId}/${selectedDate}/${registeredFarmerId}`
+        `${environment.API_BASE_URL}api/collection-manager/transaction-details/${userId}/${selectedDate}/${registeredFarmerId}`,
       );
 
       if (response.status === 200) {
-      //  console.log("Crop Details:", response.data);
         return response.data;
       } else {
         console.error("Failed to fetch crop details:", response.statusText);
@@ -183,9 +176,8 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
       const [detailsResponse, cropsResponse] = await Promise.all([
         api.get(`api/farmer/report-user-details/${userId}`),
         api.get(
-          `api/unregisteredfarmercrop/user-crops/today/${userId}/${registeredFarmerId}`
+          `api/unregisteredfarmercrop/user-crops/today/${userId}/${registeredFarmerId}`,
         ),
-
       ]);
 
       const data = detailsResponse.data;
@@ -205,7 +197,6 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
       });
 
       setCrops(cropsResponse.data);
-   //   console.log("crop response for report", cropsResponse.data);
     } catch (error) {
       console.error("Error fetching details:", error);
       Alert.alert(t("Error.error"), t("Error.Failed to load details"));
@@ -218,16 +209,16 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
         const data = await fetchCropDetails(
           userId,
           selectedDate,
-          registeredFarmerId
+          registeredFarmerId,
         );
-        setCrops(data); // Populate the `crops` state with fetched data
+        setCrops(data);
       } catch (error) {
         Alert.alert(t("Error.error"), t("Error.Failed to load crop details"));
       }
     };
 
     loadCropDetails();
-  }, [userId, selectedDate, registeredFarmerId]); // Dependencies trigger re-fetch when changed
+  }, [userId, selectedDate, registeredFarmerId]);
 
   const generatePDF = async () => {
     try {
@@ -245,20 +236,20 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
               <td>${crop.weightC}</td>
               <td>${crop.total}</td>
             </tr>
-          `
+          `,
         )
         .join("");
 
       const totalSum = crops.reduce(
         (sum: number, crop: Crop) => sum + Number(crop.total),
-        0
+        0,
       );
       const officerQRCode = officerDetails
         ? officerDetails.QRCode.replace(/^data:image\/png;base64,/, "")
-        : ""; // Default to empty string if officerDetails is null
+        : "";
       const farmerQRCode = details?.qrCode
         ? details.qrCode.replace(/^data:image\/png;base64,/, "")
-        : ""; // Default to empty string if details is null
+        : "";
 
       const html = `
       <html>
@@ -359,33 +350,27 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
   };
 
   const handleDownloadPDF = async () => {
-    const uri = await generatePDF(); // Generate the PDF and get its URI
+    const uri = await generatePDF();
 
     if (uri) {
-      // Get the current date in YYYY-MM-DD format
       const date = new Date().toISOString().slice(0, 10);
       const fileName = `PurchaseReport_${
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
       try {
-        // Request permission to access media library
         const { status } = await MediaLibrary.requestPermissionsAsync();
 
         if (status === "granted") {
-          // Define a temporary path in the FileSystem's cache directory with the correct file name
           const tempUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
-          // Copy the file to the new temporary path with the desired file name
           await FileSystem.copyAsync({
-            from: uri, // Original URI
-            to: tempUri, // New URI with the correct name
+            from: uri,
+            to: tempUri,
           });
 
-          // Create an asset with the renamed file
           const asset = await MediaLibrary.createAssetAsync(tempUri);
 
-          // Save to the Downloads album
           const album = await MediaLibrary.getAlbumAsync("Download");
           if (!album) {
             await MediaLibrary.createAlbumAsync("Download", asset, false);
@@ -395,19 +380,19 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
 
           Alert.alert(
             t("Error.Success"),
-            t('Error.Downloaded PDF"', { fileName })
+            t('Error.Downloaded PDF"', { fileName }),
           );
         } else {
           Alert.alert(
             t("Error.Permission Denied"),
-            t("Error.Permission Denied Message")
+            t("Error.Permission Denied Message"),
           );
         }
       } catch (error) {
         console.error("Error saving PDF:", error);
         Alert.alert(
           t("Error.error"),
-          t("Error.Failed to save PDF to Downloads folder.")
+          t("Error.Failed to save PDF to Downloads folder."),
         );
       }
     } else {
@@ -422,7 +407,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
     } else {
       Alert.alert(
         t("Error.error"),
-        t("Error.Sharing is not available on this device")
+        t("Error.Sharing is not available on this device"),
       );
     }
   };
@@ -432,7 +417,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
       <View className="flex-row items-center mb-4">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
-            source={require("../../assets/images/collection-manager/back.webp")} 
+            source={require("../../assets/images/collection-manager/back.webp")}
             style={{ width: 24, height: 24 }}
           />
         </TouchableOpacity>
@@ -633,7 +618,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
               source={{
                 uri: officerDetails.QRCode.replace(
                   /^data:image\/png;base64,/,
-                  ""
+                  "",
                 ),
               }}
               style={{ width: 150, height: 150 }}
@@ -652,7 +637,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
           onPress={handleDownloadPDF}
         >
           <Image
-            source={require("../../assets/images/collection-common/download.webp")} 
+            source={require("../../assets/images/collection-common/download.webp")}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">
@@ -665,7 +650,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
           onPress={handleSharePDF}
         >
           <Image
-            source={require("../../assets/images/collection-common/share.webp")} 
+            source={require("../../assets/images/collection-common/share.webp")}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">{t("ReportPage.Share")}</Text>

@@ -1,13 +1,11 @@
-import * as Print from 'expo-print';
-//import * as FileSystem from 'expo-file-system';
+import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system/legacy";
-import axios from 'axios';
-import {environment }from '@/environment/environment';
-
+import axios from "axios";
+import { environment } from "@/environment/environment";
 
 const normalizeResponseDate = (dateString: string): string => {
-  const [month, day, year] = dateString.split('/');
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const [month, day, year] = dateString.split("/");
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 };
 
 interface PaymentDataItem {
@@ -16,11 +14,8 @@ interface PaymentDataItem {
   total: number;
 }
 
-
-
 const normalizeDate = (dateString: string): string => {
-  
-  return dateString.replace(/\//g, '-');
+  return dateString.replace(/\//g, "-");
 };
 
 const validateAndFormatDate = (dateString: string): string | null => {
@@ -30,23 +25,19 @@ const validateAndFormatDate = (dateString: string): string | null => {
     console.error(`Invalid date: ${dateString}`);
     return null;
   }
-  return date.toISOString().split('T')[0]; 
+  return date.toISOString().split("T")[0];
 };
 
-
-
-const reportCounters: { [key: string]: number } = {}; 
+const reportCounters: { [key: string]: number } = {};
 
 const generateReportId = (officerId: string): string => {
- 
   if (!reportCounters[officerId]) {
     reportCounters[officerId] = 1;
   } else {
-    reportCounters[officerId] += 1; 
+    reportCounters[officerId] += 1;
   }
 
- 
-  const paddedCount = reportCounters[officerId].toString().padStart(3, '0'); // Pads the count to 3 digits
+  const paddedCount = reportCounters[officerId].toString().padStart(3, "0");
   return `${officerId}M${paddedCount}`;
 };
 
@@ -54,63 +45,76 @@ export const handleGeneratePDF = async (
   fromDate: string,
   toDate: string,
   officerId: string,
-  collectionOfficerId: number
+  collectionOfficerId: number,
 ) => {
   try {
     const formattedFromDate = validateAndFormatDate(fromDate);
     const formattedToDate = validateAndFormatDate(toDate);
-    
+
     if (!formattedFromDate || !formattedToDate) {
-      console.error('Invalid date input. Unable to generate PDF.');
+      console.error("Invalid date input. Unable to generate PDF.");
       return null;
     }
 
-    // Generate the report ID
     const reportId = generateReportId(officerId);
 
-    // Fetch officer details
-    const officerResponse = await axios.get(`${environment.API_BASE_URL}api/collection-manager/employee/${officerId}`);
-    if (officerResponse.data.status !== 'success') {
-      console.error('Failed to fetch officer details:', officerResponse.data.message);
+    const officerResponse = await axios.get(
+      `${environment.API_BASE_URL}api/collection-manager/employee/${officerId}`,
+    );
+    if (officerResponse.data.status !== "success") {
+      console.error(
+        "Failed to fetch officer details:",
+        officerResponse.data.message,
+      );
       return null;
     }
     const { firstName, lastName, jobRole } = officerResponse.data.data;
 
-    
     const farmerPaymentsResponse = await axios.get(
-      `${environment.API_BASE_URL}api/collection-manager/farmer-payments-summary`, {
-        params: { collectionOfficerId, fromDate: formattedFromDate, toDate: formattedToDate },
-      }
+      `${environment.API_BASE_URL}api/collection-manager/farmer-payments-summary`,
+      {
+        params: {
+          collectionOfficerId,
+          fromDate: formattedFromDate,
+          toDate: formattedToDate,
+        },
+      },
     );
 
-    if (farmerPaymentsResponse.data.status !== 'success') {
-      console.error('Failed to fetch farmer payments summary:', farmerPaymentsResponse.data.message);
+    if (farmerPaymentsResponse.data.status !== "success") {
+      console.error(
+        "Failed to fetch farmer payments summary:",
+        farmerPaymentsResponse.data.message,
+      );
       return null;
     }
 
     const paymentData: PaymentDataItem[] = farmerPaymentsResponse.data.data;
 
-   
     const formattedData = paymentData.map((item: PaymentDataItem) => ({
       ...item,
       date: normalizeResponseDate(item.date),
     }));
 
-   // console.log('Formatted Payment Data:', formattedData);
+    const totalWeight = paymentData.reduce(
+      (sum: number, item: { total: number }) => sum + item.total,
+      0,
+    );
+    const totalFarmers = paymentData.reduce(
+      (sum: number, item: { TCount: number }) => sum + item.TCount,
+      0,
+    );
 
+    const tableRows = formattedData.length
+      ? formattedData
+          .map(
+            (item) =>
+              `<tr><td>${item.date}</td><td>${item.total}kg</td><td>${item.TCount}</td></tr>`,
+          )
+          .join("")
+      : `<tr><td colspan="3" style="text-align: center; font-style: italic;">No transactions occurred between ${fromDate} and ${toDate}</td></tr>`;
 
-    const totalWeight = paymentData.reduce((sum: number, item: { total: number }) => sum + item.total, 0);
-    const totalFarmers = paymentData.reduce((sum: number, item: { TCount: number }) => sum + item.TCount, 0);
-
-  
-   const tableRows = formattedData.length
-   ? formattedData.map(
-       item =>
-         `<tr><td>${item.date}</td><td>${item.total}kg</td><td>${item.TCount}</td></tr>`
-     ).join('')
-   : `<tr><td colspan="3" style="text-align: center; font-style: italic;">No transactions occurred between ${fromDate} and ${toDate}</td></tr>`;
-
-  const htmlContent = `
+    const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -205,23 +209,21 @@ export const handleGeneratePDF = async (
       </body>
       </html>
     `;
- // Generate PDF
- const { uri } = await Print.printToFileAsync({
-  html: htmlContent,
-  base64: false,
-});
 
-// Move the file to app document directory for easier access
-const fileUri = `${(FileSystem as any).documentDirectory}report_${officerId}.pdf`;
-await FileSystem.moveAsync({
-  from: uri,
-  to: fileUri,
-});
+    const { uri } = await Print.printToFileAsync({
+      html: htmlContent,
+      base64: false,
+    });
 
-console.log('PDF generated at:', fileUri);
-return fileUri;
-} catch (error) {
-console.error('Failed to generate PDF:', error);
-return null;
-}
+    const fileUri = `${(FileSystem as any).documentDirectory}report_${officerId}.pdf`;
+    await FileSystem.moveAsync({
+      from: uri,
+      to: fileUri,
+    });
+
+    return fileUri;
+  } catch (error) {
+    console.error("Failed to generate PDF:", error);
+    return null;
+  }
 };

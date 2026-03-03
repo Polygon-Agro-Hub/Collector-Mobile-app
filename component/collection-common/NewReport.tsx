@@ -16,7 +16,6 @@ import { environment } from "@/environment/environment";
 import { RootStackParamList } from "../types";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-//import * as FileSystem from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
 import { useTranslation } from "react-i18next";
 import { AntDesign } from "@expo/vector-icons";
@@ -47,8 +46,8 @@ interface PersonalAndBankDetails {
   accHolderName: string | null;
   bankName: string | null;
   branchName: string | null;
-  companyNameEnglish: string | null; // Added company name field
-  collectionCenterName: string | null; // Added collection center field
+  companyNameEnglish: string | null;
+  collectionCenterName: string | null;
 }
 
 interface Crop {
@@ -76,17 +75,14 @@ interface officerDetails {
 
 const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
-  const [officerDetails, setOfficerDetails] = useState<officerDetails | null>(
-    null
-  );
+
   const route = useRoute<ReportPageRouteProp>();
   const { userId, registeredFarmerId } = route.params || {};
   const [crops, setCrops] = useState<Crop[]>([]);
-  const [qrValue, setQrValue] = useState<string>("");
+
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en");
-  console.log(";;;;;;;;", selectedLanguage);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -94,7 +90,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       if (lang === "en" || lang === "si" || lang === "ta") {
         setSelectedLanguage(lang);
       } else {
-        setSelectedLanguage("en"); // Default to English if not found or invalid
+        setSelectedLanguage("en");
       }
     } catch (error) {
       console.error("Error fetching language preference:", error);
@@ -108,8 +104,8 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
-        fontSize: 14, // Smaller text size for Sinhala
-        lineHeight: 20, // Space between lines
+        fontSize: 14,
+        lineHeight: 20,
       };
     }
   };
@@ -140,7 +136,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     }
   };
 
-  // Safe reduce with proper type handling
   const totalSum = (crops || []).reduce((sum: number, crop: Crop) => {
     const subTotal =
       typeof crop.subTotal === "string"
@@ -149,19 +144,15 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     return sum + subTotal;
   }, 0);
 
-  
   const formatNumberWithCommas = (value: number | string): string => {
-    // Convert to number if it's a string
     const numValue = typeof value === "string" ? parseFloat(value) : value;
 
-    // Format with 2 decimal places and add commas for thousands
     return numValue.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
   };
 
-  // Replace the current formatNumber function with this one
   const formatNumber = (value: number | string): string => {
     if (typeof value === "string") {
       return formatNumberWithCommas(parseFloat(value));
@@ -181,30 +172,18 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         return;
       }
 
-      console.log(
-        "Fetching details for userId:",
-        userId,
-        "and registeredFarmerId:",
-        registeredFarmerId
-      );
-
       const headers = {
         Authorization: `Bearer ${token}`,
       };
 
-      // Make requests separately to identify which one is failing
       try {
-        console.log("aftre");
         const detailsResponse = await api.get(
           `api/farmer/report-user-details/${userId}`,
           {
             headers,
-          }
+          },
         );
-        //console.log("/////////",detailsResponse)
-      //  console.log("Details response successful:", detailsResponse.data);
 
-        // Process details response...
         const data = detailsResponse.data;
         setDetails({
           userId: data.userId ?? "",
@@ -235,13 +214,11 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           `api/unregisteredfarmercrop/user-crops/today/${userId}/${registeredFarmerId}`,
           {
             headers,
-          }
+          },
         );
-       // console.log("Crops response successful:", cropsResponse.data);
 
-        // Process crops response...
         const cropsData = cropsResponse.data?.data || cropsResponse.data || [];
-       // console.log("Crops data:", cropsData);
+
         setCrops(Array.isArray(cropsData) ? cropsData : []);
       } catch (cropsError) {
         console.error("Error fetching crops:", cropsError);
@@ -265,7 +242,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     if (!details) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Details are missing for generating PDF")
+        t("Error.Details are missing for generating PDF"),
       );
       return "";
     }
@@ -275,10 +252,10 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         (crop) => `
           <tr>
             <td style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">${getCropName(
-              crop
+              crop,
             )}</td>
             <td style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">${getVarietyName(
-              crop
+              crop,
             )}</td>
             <td style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">${
               crop.grade
@@ -293,7 +270,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               crop.subTotal
             }</td>
           </tr>
-        `
+        `,
       )
       .join("");
 
@@ -472,21 +449,21 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="header-row">
           <div class="header-item">
             <strong>${t("NewReport.GRN No")}</strong> ${
-      crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-    }
+              crops.length > 0 ? crops[0].invoiceNumber : "N/A"
+            }
           </div>
           <div class="header-item">
             <strong>${t("NewReport.Date")}</strong> ${new Date()
-      .toLocaleDateString("en-GB")
-      .split("/")
-      .reverse()
-      .join("/")} ${new Date()
-      .toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })
-      .toUpperCase()}
+              .toLocaleDateString("en-GB")
+              .split("/")
+              .reverse()
+              .join("/")} ${new Date()
+              .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })
+              .toUpperCase()}
           </div>
         </div>
         
@@ -494,8 +471,8 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           <div>
             <div class="section-title">${t("NewReport.Supplier Details")}</div>
             <div>${t("NewReport.Name")} ${details.firstName} ${
-      details.lastName
-    }</div>
+              details.lastName
+            }</div>
           </div>
           <div>
             <div>&nbsp;</div>
@@ -507,14 +484,14 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           <div>
             <div class="section-title">${t("NewReport.Received By")}</div>
             <div>${t("NewReport.Company Name")} ${
-      details.companyNameEnglish || ""
-    }</div>
+              details.companyNameEnglish || ""
+            }</div>
           </div>
           <div>
             <div>&nbsp;</div>
             <div>${t("NewReport.Centre")} ${
-      details.collectionCenterName || "Collection Centre"
-    }</div>
+              details.collectionCenterName || "Collection Centre"
+            }</div>
           </div>
         </div>
         
@@ -542,7 +519,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
                 <td>${formatNumberWithCommas(parseFloat(crop.quantity))}</td>
                 <td>${formatNumberWithCommas(parseFloat(crop.subTotal))}</td>
               </tr>
-            `
+            `,
               )
               .join("")}
           </tbody>
@@ -551,10 +528,10 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="total-row">
           <div class="total-box">
             <div class="total-label">${t(
-              "NewReport.Full Total (Rs.) Rs."
+              "NewReport.Full Total (Rs.) Rs.",
             )}</div>
             <div class="total-value">Rs.${formatNumberWithCommas(
-              totalSum
+              totalSum,
             )}</div>
           </div>
         </div>
@@ -583,7 +560,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       if (!uri) {
         Alert.alert(
           t("Error.error"),
-          t("NewReport.Failed to save PDF to Downloads folder.")
+          t("NewReport.Failed to save PDF to Downloads folder."),
         );
         return;
       }
@@ -593,20 +570,16 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
-      // Define tempFilePath here, outside the if block so it's available throughout the function
-      let tempFilePath = uri; // Default to the original URI
+      let tempFilePath = uri;
 
       if (Platform.OS === "android") {
-        // Create a temporary file in cache
         tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
-        // Copy the PDF to the temp location
         await FileSystem.copyAsync({
           from: uri,
           to: tempFilePath,
         });
 
-        // Use the sharing API - this works in Expo Go
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(tempFilePath, {
             dialogTitle: t("NewReport.Save GRN Report"),
@@ -616,42 +589,39 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           Alert.alert(
             t("NewReport.PDF Ready"),
             t("NewReport.To save to Downloads"),
-            [{ text: "OK" }]
+            [{ text: "OK" }],
           );
         } else {
           Alert.alert(
             t("Error.error"),
-            t("NewReport.Sharing is not available on this device")
+            t("NewReport.Sharing is not available on this device"),
           );
         }
       } else if (Platform.OS === "ios") {
-        // iOS approach: Use sharing dialog to let user save to Files app
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(tempFilePath, {
-            // Using tempFilePath which is uri for iOS
             dialogTitle: t("NewReport.Save GRN Report"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
           Alert.alert(
             t("NewReport.Info"),
-            t("NewReport.Use the 'Save to Files' option to save to Downloads")
+            t("NewReport.Use the 'Save to Files' option to save to Downloads"),
           );
         } else {
           Alert.alert(
             t("Error.error"),
-            t("NewReport.Sharing is not available on this device")
+            t("NewReport.Sharing is not available on this device"),
           );
         }
       }
 
-      // Log success - tempFilePath is now accessible here
       console.log(`GRN report prepared for sharing: ${tempFilePath}`);
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(
         t("Error.error"),
-        t("NewReport.Failed to prepare PDF for download")
+        t("NewReport.Failed to prepare PDF for download"),
       );
     }
   };
@@ -659,24 +629,20 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      // Create a descriptive filename by renaming the file before sharing
       const date = new Date().toISOString().slice(0, 10);
       const fileName = `PurchaseReport_${
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
-      // Create a new file with the desired name
       const fileInfo = await FileSystem.getInfoAsync(uri);
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
       try {
-        // Copy the file to a new location with the desired name
         await FileSystem.copyAsync({
           from: uri,
           to: newUri,
         });
 
-        // Share the renamed file
         await Sharing.shareAsync(newUri, {
           mimeType: "application/pdf",
           dialogTitle: "Share Purchase Report",
@@ -684,7 +650,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         });
       } catch (error) {
         console.error("Error sharing PDF with custom name:", error);
-        // Fallback to sharing with original uri if renaming fails
+
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
           dialogTitle: "Share Purchase Report",

@@ -57,7 +57,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [officers, setOfficers] = useState<{ label: string; value: string }[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -81,34 +81,29 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
 
-  // Determine if the Save button should be disabled
   const isSaveDisabled = () => {
     const numericAmount = parseFloat(amount);
-    
-    // Disable if: no assignee, dropdown is open, submitting, or amount equals max amount
+
     return (
-      !assignee || 
-      dropdownOpen || 
-      submitting || 
+      !assignee ||
+      dropdownOpen ||
+      submitting ||
       numericAmount > maxAmount ||
       isNaN(numericAmount) ||
       numericAmount <= 0
     );
   };
 
-  // Reset dropdown selection when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      // Reset assignee
       setAssignee("");
-      // Fetch officers
+
       fetchOfficers();
-      // Close dropdown if open
+
       setDropdownOpen(false);
 
-      // Set amount to max amount
       setAmount(maxAmount.toString());
-    }, [maxAmount])
+    }, [maxAmount]),
   );
 
   useEffect(() => {
@@ -136,7 +131,6 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
     }
   };
 
-  // Fetch officers from API
   const fetchOfficers = async () => {
     try {
       setLoading(true);
@@ -149,9 +143,8 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-      console.log("---------------------------",response.data)
 
       if (response.data.status === "success") {
         const formattedOfficers = response.data.data.map((officer: any) => ({
@@ -177,15 +170,13 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
   const handleAmountChange = (text: string) => {
     setAmount(text);
     const numericValue = parseFloat(text);
-    if (numericValue > maxAmount ) {
+    if (numericValue > maxAmount) {
       setError(t("Error.You have exceeded the maximum amount."));
-  
     } else {
       setError("");
     }
   };
 
-  // Function to Pass Target
   const passTarget = async () => {
     if (!assignee) {
       Alert.alert(t("Error.error"), t("Error.Please select an officer."));
@@ -201,14 +192,14 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
     if (numericAmount > maxAmount) {
       Alert.alert(
         t("Error.error"),
-        `${t("Error.You cannot transfer the maximum amount of")} ${maxAmount}kg.`
+        `${t("Error.You cannot transfer the maximum amount of")} ${maxAmount}kg.`,
       );
       return;
     }
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
-      return; 
+      return;
     }
 
     try {
@@ -227,36 +218,36 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Target transferred successfully.")
+          t("Error.Target transferred successfully."),
         );
         navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: "Main",
-                  params: {
-                    screen: "DailyTarget",
-                    params: {
-                      varietyId,
-                      varietyNameEnglish,
-                      grade,
-                      target,
-                      todo,
-                      qty,
-                      varietyNameSinhala,
-                      varietyNameTamil,
-                      dailyTarget,
-                    },
-                  },
+          index: 0,
+          routes: [
+            {
+              name: "Main",
+              params: {
+                screen: "DailyTarget",
+                params: {
+                  varietyId,
+                  varietyNameEnglish,
+                  grade,
+                  target,
+                  todo,
+                  qty,
+                  varietyNameSinhala,
+                  varietyNameTamil,
+                  dailyTarget,
                 },
-              ],
-            });
+              },
+            },
+          ],
+        });
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
       }
@@ -264,7 +255,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
       console.error("Transfer Target Error:", error);
       Alert.alert(
         t("Error.error"),
-        t("Error.An error occurred while transferring the target.")
+        t("Error.An error occurred while transferring the target."),
       );
     } finally {
       setSubmitting(false);
@@ -311,9 +302,9 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
               ],
             });
           }}
-           className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
+          className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
         >
-         <AntDesign name="left" size={22} color="white" />
+          <AntDesign name="left" size={22} color="white" />
         </TouchableOpacity>
 
         <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
@@ -357,7 +348,12 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
                   setValue={setAssignee}
                   setItems={setOfficers}
                   placeholder={t("PassTargetBetweenOfficers.Select an officer")}
-                  style={{ borderColor: "#F4F4F4",backgroundColor:"#F4F4F4",borderRadius:25, borderWidth: 1 }}
+                  style={{
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                    borderRadius: 25,
+                    borderWidth: 1,
+                  }}
                   dropDownContainerStyle={{ borderColor: "#e5e7eb" }}
                   placeholderStyle={{ color: "#848484" }}
                   zIndex={3000}

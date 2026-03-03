@@ -19,8 +19,8 @@ interface EditTargetManagerProps {
     params: {
       varietyId: number;
       varietyNameEnglish: string;
-      varietyNameSinhala: string; // ✅ Added this
-      varietyNameTamil: string; // ✅ Added this
+      varietyNameSinhala: string;
+      varietyNameTamil: string;
       grade: string;
       target: number;
       todo: string;
@@ -33,7 +33,6 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
   navigation,
   route,
 }) => {
-  const [myTarget, setMyTarget] = useState("100kg");
   const [isEditing, setIsEditing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -63,7 +62,6 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
     varietyNameTamil,
   } = route.params;
 
-//  console.log("officers edit details", route.params);
   const getvarietyName = () => {
     switch (selectedLanguage) {
       case "si":
@@ -80,7 +78,6 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
       <View className="flex-1 bg-white">
         {/* Header */}
         <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
-         
           <TouchableOpacity
             onPress={() => {
               navigation.reset({
@@ -110,7 +107,6 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
             <AntDesign name="left" size={22} color="white" />
           </TouchableOpacity>
 
-         
           <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
             {getvarietyName()}
           </Text>
@@ -136,7 +132,6 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
               {t("EditTargetManager.My Target")}
             </Text>
             <View className="flex-row items-center mt-2 border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2">
-             
               <Text className="flex-1 text-gray-800">
                 {" "}
                 {target ? target.toString() : "0"}{" "}
@@ -171,16 +166,16 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
                       },
                     })
                   }
-                 
                 >
-                  <Text className="text-white font-medium"
-                                                     style={[
-  i18n.language === "si"
-    ? { fontSize: 13 }
-    : i18n.language === "ta"
-    ? { fontSize: 12 }
-    : { fontSize: 14 }
-]}
+                  <Text
+                    className="text-white font-medium"
+                    style={[
+                      i18n.language === "si"
+                        ? { fontSize: 13 }
+                        : i18n.language === "ta"
+                          ? { fontSize: 12 }
+                          : { fontSize: 14 },
+                    ]}
                   >
                     {t("EditTargetManager.Pass")}
                   </Text>
@@ -202,17 +197,16 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
                       },
                     })
                   }
-
-                
                 >
-                  <Text className="text-white font-medium"
-                                                     style={[
-  i18n.language === "si"
-    ? { fontSize: 13 }
-    : i18n.language === "ta"
-    ? { fontSize: 12 }
-    : { fontSize: 14 }
-]}
+                  <Text
+                    className="text-white font-medium"
+                    style={[
+                      i18n.language === "si"
+                        ? { fontSize: 13 }
+                        : i18n.language === "ta"
+                          ? { fontSize: 12 }
+                          : { fontSize: 14 },
+                    ]}
                   >
                     {t("EditTargetManager.Receive")}
                   </Text>

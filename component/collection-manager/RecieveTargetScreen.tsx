@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,7 +18,6 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 
-// Define the navigation prop type
 type RecieveTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   "RecieveTargetScreen"
@@ -29,8 +28,8 @@ interface RecieveTargetScreenProps {
   route: {
     params: {
       varietyNameEnglish: string;
-      varietyNameSinhala: string; // ✅ Added this
-      varietyNameTamil: string; // ✅ Added this
+      varietyNameSinhala: string;
+      varietyNameTamil: string;
       grade: string;
       target: string;
       todo: string;
@@ -75,8 +74,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     varietyNameSinhala,
     varietyNameTamil,
   } = route.params;
-  // console.log("Hittt the page 2");
-  // console.log("Initial Max Amount:", maxAmount);
+
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
   useEffect(() => {
@@ -104,7 +102,6 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     }
   };
 
-  // ✅ Fetch officers dynamically
   const fetchOfficers = async () => {
     try {
       setLoading(true);
@@ -112,7 +109,6 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
 
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
-        //`${environment.API_BASE_URL}api/collection-manager/collection-officers`,
         `${environment.API_BASE_URL}api/collection-manager/collection-officers-recieve/${varietyId}/${grade}`,
         {
           headers: {
@@ -120,8 +116,6 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
           },
         },
       );
-
-      // console.log("Officers:", response.data.data);
 
       if (response.data.status === "success") {
         const formattedOfficers = response.data.data.map((officer: any) => ({
@@ -144,9 +138,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     }
   };
 
-  // ✅ Fetch Daily Target when officer is selected
   const fetchDailyTarget = async (officerId: string) => {
-    // console.log("Selected Officer ID:", officerId);
     if (officerId === "0") {
       setAmount("");
       setMaxAmount(0);
@@ -167,19 +159,15 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
         },
       );
 
-      //  console.log("Daily Target Response:", response.data);
-
       if (response.data.status === "success" && response.data.data) {
-        //  console.log("Daily Target Data:", response.data.data);
         const { target, complete } = response.data.data;
         const calculatedTodo = parseFloat(target) - parseFloat(complete);
 
-        setMaxAmount(calculatedTodo > 0 ? calculatedTodo : 0); // Ensure todo is not negative
-        setAmount(calculatedTodo.toString()); // Set default value
+        setMaxAmount(calculatedTodo > 0 ? calculatedTodo : 0);
+        setAmount(calculatedTodo.toString());
       } else {
         setErrorMessage(t("Error.No target data found for selected officer."));
 
-        // ✅ Auto-refresh fields after 3 seconds
         setTimeout(() => {
           setErrorMessage(null);
           setMaxAmount(0);
@@ -190,7 +178,6 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     } catch (error: any) {
       setErrorMessage(t("Error.Failed to fetch daily target."));
 
-      // ✅ Auto-refresh fields after 3 seconds
       setTimeout(() => {
         setErrorMessage(null);
         setMaxAmount(0);
@@ -265,7 +252,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
       const response = await axios.put(
         `${environment.API_BASE_URL}api/target/manager/recieve-target`,
         {
-          fromOfficerId: assignee, // The officer transferring the target
+          fromOfficerId: assignee,
           varietyId: varietyId,
           grade,
           amount: numericAmount,
@@ -331,7 +318,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 bg-white">
-        {/* ✅ Fixed Header */}
+        {/* Fixed Header */}
         <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
           <TouchableOpacity
             onPress={() => {
@@ -362,7 +349,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
           >
             <AntDesign name="left" size={22} color="white" />
           </TouchableOpacity>
-          {/* <Text className="text-white text-lg font-semibold text-center w-full"> */}
+
           <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
             {getvarietyName()}
           </Text>
@@ -383,7 +370,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
                 <SelectList
                   setSelected={(value: string) => {
                     setAssignee(value);
-                    fetchDailyTarget(value); // Fetch daily target when an officer is selected
+                    fetchDailyTarget(value);
                   }}
                   data={officers}
                   save="key"
@@ -401,7 +388,6 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
                     color: assignee && assignee !== "0" ? "#000000" : "#848484",
                   }}
                   dropdownStyles={{
-                    // Fixed: changed from dropDownStyles to dropdownStyles
                     borderColor: "#F4F4F4",
                     backgroundColor: "#F4F4F4",
                   }}

@@ -44,10 +44,9 @@ type District = {
 };
 
 const Profile: React.FC<ProfileProps> = ({ navigation }) => {
-    const route =
-      useRoute<RouteProp<RootStackParamList, "Profile">>();
-  const {jobRole} = route.params
-  console.log("josfefd", jobRole)
+  const route = useRoute<RouteProp<RootStackParamList, "Profile">>();
+  const { jobRole } = route.params;
+
   const [profileData, setProfileData] = useState({
     firstNameEnglish: "",
     lastNameEnglish: "",
@@ -83,9 +82,9 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const [errorMessage2, setErrorMessage2] = useState<string | null>(null);
   const { t } = useTranslation();
   const [profileImage, setProfileImage] = useState({ uri: "" });
-  // const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "si" | "ta">(
-    "en"
+    "en",
   );
 
   const fetchSelectedLanguage = async () => {
@@ -94,7 +93,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       if (lang === "en" || lang === "si" || lang === "ta") {
         setSelectedLanguage(lang);
       } else {
-        setSelectedLanguage("en"); // Default to English if not found or invalid
+        setSelectedLanguage("en");
       }
     } catch (error) {
       console.error("Error fetching language preference:", error);
@@ -106,9 +105,8 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   }, []);
   const checkPhoneExists = async (
     newPhoneNumber: string,
-    phoneCode1: string
+    phoneCode1: string,
   ) => {
-    console.log("Checking phone number:", newPhoneNumber, phoneCode1);
     try {
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
@@ -117,12 +115,12 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data.exists && newPhoneNumber !== profileData.phoneNumber) {
         setErrorMessage(
-          t("Error.This phone number is already registered in the system.")
+          t("Error.This phone number is already registered in the system."),
         );
       } else {
         setErrorMessage("");
@@ -133,14 +131,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     }
   };
   const handlePhoneNumberChange = (text: string) => {
-   // console.log("Phone number changed:", text);
-   if (text.startsWith("0")) {
-    text = text.replace(/^0+/, ""); // remove all leading zeros
-  }
-      setNewPhoneNumber(text);
+    if (text.startsWith("0")) {
+      text = text.replace(/^0+/, "");
+    }
+    setNewPhoneNumber(text);
 
     if (text.length < 9) {
-      setErrorMessage(t("Error.Phone number 1 must be at least 9 digits.")); // Tamil error message
+      setErrorMessage(t("Error.Phone number 1 must be at least 9 digits."));
     } else if (text.length > 9) {
       setErrorMessage(t("Error.Phone number cannot exceed 9 digits."));
     } else {
@@ -151,12 +148,12 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   };
 
   const handlePhoneNumber2Change = (text: string) => {
-       if (text.startsWith("0")) {
-    text = text.replace(/^0+/, ""); // remove all leading zeros
-  }
+    if (text.startsWith("0")) {
+      text = text.replace(/^0+/, "");
+    }
     setNewPhoneNumber2(text);
     if (text.length < 9 && text.length > 0) {
-      setErrorMessage2(t("Error.Phone number 2 must be at least 9 digits.")); // Tamil error message
+      setErrorMessage2(t("Error.Phone number 2 must be at least 9 digits."));
     } else if (text.length > 9) {
       setErrorMessage2(t("Error.Phone number cannot exceed 9 digits."));
     } else {
@@ -168,39 +165,37 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
   const checkPhone2Exists = async (
     newPhoneNumber2: string,
-    phoneCode02: string
+    phoneCode02: string,
   ) => {
-    console.log("Checking phone number:", newPhoneNumber2, phoneCode02);
-    if(newPhoneNumber2.length !== 0) {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      const response = await axios.get(
-
-        `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode02}${newPhoneNumber2}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+    if (newPhoneNumber2.length !== 0) {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const response = await axios.get(
+          `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode02}${newPhoneNumber2}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        }
-      );
-
-      if (response.data.exists && newPhoneNumber2 !== "0") {
-        setErrorMessage2(
-          t("Error.This phone number is already registered in the system.")
         );
-      } else {
-        setErrorMessage2("");
+
+        if (response.data.exists && newPhoneNumber2 !== "0") {
+          setErrorMessage2(
+            t("Error.This phone number is already registered in the system."),
+          );
+        } else {
+          setErrorMessage2("");
+        }
+      } catch (error) {
+        console.error("Error checking phone number 2:", error);
+      } finally {
       }
-    } catch (error) {
-      console.error("Error checking phone number 2:", error);
-    } finally {
     }
-  }
   };
   const toggleUpdateButton = (phone1: string, phone2: string) => {
     setShowUpdateButton(
       (phone1 !== "" && phone1 !== profileData.phoneNumber) ||
-        (phone2 !== "" && phone2 !== profileData.phoneNumber2)
+        (phone2 !== "" && phone2 !== profileData.phoneNumber2),
     );
   };
 
@@ -211,8 +206,8 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
-        fontSize: 13, // Smaller text size for Sinhala
-        lineHeight: 20, // Space between lines
+        fontSize: 13,
+        lineHeight: 20,
       };
     }
   };
@@ -225,27 +220,22 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         return;
       }
 
-      
-      // const response = await api.get("api/collection-officer/user-profile", {
-      //   headers: { Authorization: `Bearer ${token}` },
-      // });
+      let response;
 
-      // const data = response.data.data;
-      // console.log(data);
-          let response;
-    // Check jobRole before making the API call
-    if (jobRole === "Distribution Centre Manager" || jobRole === "Distribution Officer") {
-      response = await api.get("api/distribution-manager/user-profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    } else {
-      response = await api.get("api/collection-officer/user-profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    }
+      if (
+        jobRole === "Distribution Centre Manager" ||
+        jobRole === "Distribution Officer"
+      ) {
+        response = await api.get("api/distribution-manager/user-profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        response = await api.get("api/collection-officer/user-profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
 
-    const data = response.data.data;
-//    console.log(data);
+      const data = response.data.data;
 
       setProfileData({
         firstNameEnglish: data.firstNameEnglish,
@@ -284,8 +274,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
   const handleUpdatePhoneNumber = async () => {
     Keyboard.dismiss();
-    console.log("Updating phone number...");
-    console.log("rrror 2", errorMessage2)
+
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -295,34 +284,32 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       if (newPhoneNumber.length === 0) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Phone number 1 cannot be empty")
+          t("Error.Phone number 1 cannot be empty"),
         );
         return;
       }
       if (newPhoneNumber.length < 9) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Phone number 1 must be at least 9 digits.")
+          t("Error.Phone number 1 must be at least 9 digits."),
         );
         return;
-      } 
-      else if (newPhoneNumber.length > 9) {
+      } else if (newPhoneNumber.length > 9) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Phone number 1 must be at most 9 digits.")
+          t("Error.Phone number 1 must be at most 9 digits."),
         );
         return;
-      } 
-      else if (newPhoneNumber2.length > 9) {
+      } else if (newPhoneNumber2.length > 9) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Phone number 2 must be at most 9 digits.")
+          t("Error.Phone number 2 must be at most 9 digits."),
         );
         return;
       } else if (newPhoneNumber === newPhoneNumber2) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Phone numbers cannot be the same.")
+          t("Error.Phone numbers cannot be the same."),
         );
         return;
       } else if (errorMessage) {
@@ -332,21 +319,16 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         Alert.alert(t("Error.error"), errorMessage2);
         return;
       }
-      // Always send both phone numbers
+
       const payload = {
         phoneNumber: newPhoneNumber,
         phoneNumber2: newPhoneNumber2,
       };
 
-      console.log(payload);
-
       await api.put("api/collection-officer/update-phone", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log(payload);
-
-      // Update local state with the new values
       setProfileData((prevData) => ({
         ...prevData,
         phoneNumber: newPhoneNumber,
@@ -355,7 +337,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       setShowUpdateButton(false);
       Alert.alert(
         t("Error.Success"),
-        t("Error.Phone numbers updated successfully")
+        t("Error.Phone numbers updated successfully"),
       );
       setErrorMessage("");
       setErrorMessage2("");
@@ -365,124 +347,52 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     }
   };
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(t("Error.error"), t("Error.Permission required"));
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      let imageUri = result.assets[0].uri;
-
-      const resizedImage = await ImageManipulator.manipulateAsync(
-        imageUri,
-        [{ resize: { width: 500 } }],
-        { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
-      );
-      console.log("Resized and compressed image:", resizedImage);
-      setProfileImage({ uri: resizedImage.uri });
-      await uploadImage(resizedImage.uri);
-    }
-  };
-
-  const uploadImage = async (imageUri: string) => {
-    console.log("Uploading image...");
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
-        return;
-      }
-      const formData = new FormData();
-      if (imageUri) {
-        const fileName = imageUri.split("/").pop();
-        const fileType = fileName?.split(".").pop()
-          ? `image/${fileName.split(".").pop()}`
-          : "image/jpeg";
-
-        formData.append("profileImage", {
-          uri: imageUri,
-          name: fileName,
-          type: fileType,
-        } as any);
-      }
-    //  console.log(formData);
-      const response = await fetch(
-        `${environment.API_BASE_URL}api/collection-officer/upload-profile-image`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-          body: formData,
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.status === "success") {
-      } else {
-        Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
-      }
-    } catch (error) {
-      Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
-    }
-  };
-
   const getTranslatedDistrict = (
     district: string,
-    language: "en" | "si" | "ta"
+    language: "en" | "si" | "ta",
   ) => {
     for (const province of jsonData.provinces) {
       const districtObj = province.districts.find((d) => d.en === district);
       if (districtObj) {
-        return districtObj[language]; // Return translated district name
+        return districtObj[language];
       }
     }
-    return district; // Return original if not found
+    return district;
   };
 
   const getTranslatedProvince = (
     province: string,
-    language: "en" | "si" | "ta"
+    language: "en" | "si" | "ta",
   ) => {
     const provinceObj = jsonData.provinces.find((p) => p.name.en === province);
-    return provinceObj ? provinceObj.name[language] : province; // Return translated province name
+    return provinceObj ? provinceObj.name[language] : province;
   };
 
   const getTranslatedCity = (
     city: string,
     district: string,
-    language: "en" | "si" | "ta"
+    language: "en" | "si" | "ta",
   ) => {
     for (const province of jsonData.provinces) {
       const districtObj = province.districts.find((d) => d.en === district);
       if (districtObj) {
         const cityObj = districtObj.cities.find((c) => c.en === city);
         if (cityObj) {
-          return cityObj[language]; // Return translated city name
+          return cityObj[language];
         }
       }
     }
-    return city; // Return original if not found
+    return city;
   };
   const getTranslatedJobRole = (
     jobRole: string,
-    language: "en" | "si" | "ta"
+    language: "en" | "si" | "ta",
   ) => {
     const jobRoleObj = jsonData1.jobRoles.find((role) => role.en === jobRole);
     if (jobRoleObj) {
-      return jobRoleObj[language]; // Return translated job role
+      return jobRoleObj[language];
     }
-    return jobRole; // Return original if not found
+    return jobRole;
   };
 
   const getcompanyName = () => {
@@ -1097,13 +1007,16 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     ],
   };
 
- return (
+  return (
     <View
       className="flex-1 bg-white"
       style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
     >
       <View className="flex-row items-center mb-6">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="bg-[#F6F6F680] rounded-full p-2">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="bg-[#F6F6F680] rounded-full p-2"
+        >
           <AntDesign name="left" size={24} color="#000" />
         </TouchableOpacity>
         <Text className="flex-1 text-center text-xl font-bold text-black mr-[6%]">
@@ -1111,25 +1024,19 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         </Text>
       </View>
 
-     <View className="items-center mb-6">
-      <View className="items-center mb-6 relative">
-        <Image
-          source={
-            profileImage && profileImage.uri
-              ? { uri: profileImage.uri }
-              : require("../../assets/images/auth/my-profile.webp")
-          }
-          style={{ width: 100, height: 100, borderRadius: 50 }}
-          defaultSource={require("../../assets/images/auth/my-profile.webp")}
-        />
-        {/* <View className="absolute right-0 bottom-0 p-1 bg-white rounded-full">
+      <View className="items-center mb-6">
+        <View className="items-center mb-6 relative">
           <Image
-            source={require("../assets/images/Pencil.webp")}
-            style={{ width: 17, height: 17, tintColor: "black" }}
+            source={
+              profileImage && profileImage.uri
+                ? { uri: profileImage.uri }
+                : require("../../assets/images/auth/my-profile.webp")
+            }
+            style={{ width: 100, height: 100, borderRadius: 50 }}
+            defaultSource={require("../../assets/images/auth/my-profile.webp")}
           />
-        </View> */}
+        </View>
       </View>
-    </View>
 
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 16 }}
@@ -1150,7 +1057,10 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   className="px-4 py-2 text-black min-w-full"
                   value={getfirstName()}
                   editable={false}
-                  style={[{ fontSize: 16, minWidth: 250 }, getTextStyle(selectedLanguage)]}
+                  style={[
+                    { fontSize: 16, minWidth: 250 },
+                    getTextStyle(selectedLanguage),
+                  ]}
                   scrollEnabled={false}
                 />
               </ScrollView>
@@ -1170,7 +1080,10 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   className="px-4 py-2 text-black min-w-full"
                   value={getlastName()}
                   editable={false}
-                  style={[{ fontSize: 16, minWidth: 250 }, getTextStyle(selectedLanguage)]}
+                  style={[
+                    { fontSize: 16, minWidth: 250 },
+                    getTextStyle(selectedLanguage),
+                  ]}
                   scrollEnabled={false}
                 />
               </ScrollView>
@@ -1189,7 +1102,10 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   className="px-4 py-2 text-black min-w-full"
                   value={getcompanyName()}
                   editable={false}
-                  style={[{ fontSize: 16, minWidth: 250 }, getTextStyle(selectedLanguage)]}
+                  style={[
+                    { fontSize: 16, minWidth: 250 },
+                    getTextStyle(selectedLanguage),
+                  ]}
                   scrollEnabled={false}
                 />
               </ScrollView>
@@ -1223,7 +1139,10 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   className="px-4 py-2 text-black min-w-full"
                   value={profileData.collectionCenterName}
                   editable={false}
-                  style={[{ fontSize: 16, minWidth: 250 }, getTextStyle(selectedLanguage)]}
+                  style={[
+                    { fontSize: 16, minWidth: 250 },
+                    getTextStyle(selectedLanguage),
+                  ]}
                   scrollEnabled={false}
                 />
               </ScrollView>
@@ -1241,7 +1160,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={getTranslatedJobRole(
                 profileData.jobRole,
-                selectedLanguage
+                selectedLanguage,
               )}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1346,7 +1265,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               value={getTranslatedCity(
                 profileData.city,
                 profileData.district,
-                selectedLanguage
+                selectedLanguage,
               )}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1364,7 +1283,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
               value={getTranslatedDistrict(
                 profileData.district,
-                selectedLanguage
+                selectedLanguage,
               )}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1382,26 +1301,28 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
               value={getTranslatedProvince(
                 profileData.province,
-                selectedLanguage
+                selectedLanguage,
               )}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             />
           </View>
 
-          {showUpdateButton  && (newPhoneNumber !== profileData.phoneNumber || newPhoneNumber2 !== profileData.phoneNumber2) && (
-            <TouchableOpacity
-              onPress={handleUpdatePhoneNumber}
-              className="bg-[#000000] py-3 rounded-[30px] mb-4"
-            >
-              <Text
-                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-center text-white font-semibold"
+          {showUpdateButton &&
+            (newPhoneNumber !== profileData.phoneNumber ||
+              newPhoneNumber2 !== profileData.phoneNumber2) && (
+              <TouchableOpacity
+                onPress={handleUpdatePhoneNumber}
+                className="bg-[#000000] py-3 rounded-[30px] mb-4"
               >
-                {t("Profile.Update")}
-              </Text>
-            </TouchableOpacity>
-          )}
+                <Text
+                  style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                  className="text-center text-white font-semibold"
+                >
+                  {t("Profile.Update")}
+                </Text>
+              </TouchableOpacity>
+            )}
         </View>
       </ScrollView>
     </View>

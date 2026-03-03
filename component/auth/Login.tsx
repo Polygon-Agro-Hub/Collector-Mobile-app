@@ -45,7 +45,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [empIdError, setEmpIdError] = useState(""); 
+  const [empIdError, setEmpIdError] = useState("");
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -66,7 +66,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
     const trimmedEmpId = empId.trim();
 
-    // First validate format
     if (trimmedEmpId !== trimmedEmpId.toUpperCase()) {
       setEmpIdError(t("Error.Please enter Employee ID in uppercase letters"));
       return;
@@ -129,7 +128,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const handleLogin = async () => {
     Keyboard.dismiss();
 
-    // Clear any existing errors
     setEmpIdError("");
 
     if (!empid && !password) {
@@ -193,12 +191,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       );
 
       const data = await response.json();
-      console.log("Login response:", data);
 
       if (response.status === 403) {
         setLoading(false);
 
-        // Handle different account statuses
         let errorMessage = t("Error.This EMP ID is not approved.");
 
         if (data.accountStatus === "Rejected") {
@@ -221,7 +217,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             t("Error.Invalid Password. Please try again."),
           );
         } else if (data.status === "error") {
-          console.log("Login error:", data);
           Alert.alert(t("Error.error"), t("Error.Invalid EMP ID"));
         } else {
           Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
@@ -253,7 +248,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         return;
       }
 
-      // Continue with normal login flow
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("jobRole", jobRole);
       await AsyncStorage.setItem("companyNameEnglish", companyNameEnglish);
@@ -273,7 +267,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         ]);
       }
 
-      //   console.log("Password update required:", passwordUpdateRequired);
       await status(empId, true);
 
       setTimeout(() => {
@@ -282,7 +275,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         if (passwordUpdateRequired) {
           navigation.navigate("ChangePassword");
         } else {
-          // Fixed: Check for both Distribution roles individually
           if (
             jobRole === "Distribution Officer" ||
             jobRole === "Distribution Centre Manager"
@@ -430,7 +422,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               />
             </View>
 
-            {/* Error message for Employee ID */}
             {empIdError ? (
               <View className="mb-4">
                 <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>

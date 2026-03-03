@@ -59,18 +59,17 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
   const [loadingVarieties, setLoadingVarieties] = useState(false);
   const { t } = useTranslation();
 
-  // Function to fetch crop names
   const fetchCropNames = async () => {
     setLoadingCrops(true);
     try {
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/unregisteredfarmercrop/get-crop-names`
+        `${environment.API_BASE_URL}api/unregisteredfarmercrop/get-crop-names`,
       );
       const formattedData = response.data.map(
         (crop: { id: string; cropNameEnglish: string }) => ({
           key: crop.id,
           value: crop.cropNameEnglish,
-        })
+        }),
       );
       setCropOptions(formattedData);
     } catch (error) {
@@ -80,20 +79,19 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
     }
   };
 
-  // Function to fetch varieties based on the selected crop
   const fetchVarieties = async () => {
     if (!selectedCrop) return;
 
     setLoadingVarieties(true);
     try {
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/unregisteredfarmercrop/crops/varieties/${selectedCrop}`
+        `${environment.API_BASE_URL}api/unregisteredfarmercrop/crops/varieties/${selectedCrop}`,
       );
       const formattedData = response.data.map(
         (variety: { id: string; varietyNameEnglish: string }) => ({
           key: variety.id,
           value: variety.varietyNameEnglish,
-        })
+        }),
       );
       setVarietyOptions(formattedData);
     } catch (error) {
@@ -103,12 +101,10 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
     }
   };
 
-  // Fetch crop names on component mount
   useEffect(() => {
     fetchCropNames();
   }, []);
 
-  // Fetch varieties when a crop is selected
   useEffect(() => {
     fetchVarieties();
   }, [selectedCrop]);
@@ -130,15 +126,15 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
     }
 
     const selectedVarietyObject = varietyOptions.find(
-      (v) => v.key === selectedVariety
+      (v) => v.key === selectedVariety,
     );
     const selectedVarietyName = selectedVarietyObject?.value;
 
     setTargets((prev) => [
       ...prev,
       {
-        varietyId: selectedVariety, // Save the variety ID
-        varietyName: selectedVarietyName, // Save the variety name for display purposes
+        varietyId: selectedVariety,
+        varietyName: selectedVarietyName,
         gradeA: weights.gradeA,
         gradeB: weights.gradeB,
         gradeC: weights.gradeC,
@@ -154,10 +150,9 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
   const formatDateToMySQL = (dateString: string): string | null => {
     if (!dateString) {
       console.error("Invalid date string:", dateString);
-      return null; // Return null for invalid date
+      return null;
     }
 
-    // Parse date string in "MMM DD, YYYY" format
     const [month, day, year] = dateString.split(" ");
     const months: { [key: string]: string } = {
       Jan: "01",
@@ -185,7 +180,7 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
     }
 
     const formattedDate = `${year}/${monthNumber}/${String(
-      day.replace(",", "")
+      day.replace(",", ""),
     ).padStart(2, "0")}`;
     return formattedDate;
   };
@@ -196,24 +191,24 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
       return null;
     }
 
-    const [time, modifier] = timeString.split(" "); // Split into time and AM/PM
+    const [time, modifier] = timeString.split(" ");
     if (!time || !modifier) {
       console.error("Failed to parse time:", timeString);
       return null;
     }
 
-    let [hours, minutes] = time.split(":").map(Number); // Split hours and minutes
+    let [hours, minutes] = time.split(":").map(Number);
     if (modifier.toUpperCase() === "PM" && hours < 12) {
-      hours += 12; // Convert PM to 24-hour format
+      hours += 12;
     }
     if (modifier.toUpperCase() === "AM" && hours === 12) {
-      hours = 0; // Convert midnight to 00
+      hours = 0;
     }
 
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
       2,
-      "0"
-    )}:00`; // Add seconds
+      "0",
+    )}:00`;
   };
 
   const handleSave = async () => {
@@ -235,7 +230,7 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
     ) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Invalid date or time values provided.")
+        t("Error.Invalid date or time values provided."),
       );
       return;
     }
@@ -246,24 +241,24 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
       fromTime: formattedFromTime,
       toTime: formattedToTime,
       TargetItems: targets.map((target) => ({
-        varietyId: target.varietyId, // Send the variety ID
+        varietyId: target.varietyId,
         qtyA: target.gradeA,
         qtyB: target.gradeB,
         qtyC: target.gradeC,
       })),
     };
 
-      const netState = await NetInfo.fetch();
-      if (!netState.isConnected) {
-    return; 
-  }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
 
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Authentication token is missing.")
+          t("Error.Authentication token is missing."),
         );
         return;
       }
@@ -275,26 +270,26 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.data.status) {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Daily target created successfully")
+          t("Error.Daily target created successfully"),
         );
         navigation.goBack();
       } else {
         Alert.alert(
           t("Error.error"),
-          response.data.message || "Failed to save target."
+          response.data.message || "Failed to save target.",
         );
       }
     } catch (error) {
       console.error("Error saving target:", error);
       Alert.alert(
         t("Error.error"),
-        t("Error.An error occurred while saving the target.")
+        t("Error.An error occurred while saving the target."),
       );
     }
   };
@@ -324,7 +319,7 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
           <SelectList
             setSelected={(value: string) => {
               const selectedCropObject = cropOptions.find(
-                (crop) => crop.value === value
+                (crop) => crop.value === value,
               );
               setSelectedCrop(selectedCropObject?.key || "");
             }}
@@ -347,7 +342,7 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
           <SelectList
             setSelected={(value: string) => {
               const selectedVarietyObject = varietyOptions.find(
-                (variety) => variety.value === value
+                (variety) => variety.value === value,
               );
               setSelectedVariety(selectedVarietyObject?.key || "");
             }}
@@ -373,7 +368,7 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
             {Object.entries(weights).map(([grade, value], index) => (
               <View key={index} className="flex-row items-center mb-3">
                 <Text className="w-32 text-gray-600">{`Grade ${grade.slice(
-                  -1
+                  -1,
                 )}`}</Text>
                 <TextInput
                   placeholder="0.00"
@@ -463,8 +458,8 @@ const SetTargetScreen: React.FC<SetTargetScreenProps> = ({
                             (t) =>
                               parseFloat(t.gradeA) ||
                               parseFloat(t.gradeB) ||
-                              parseFloat(t.gradeC)
-                          )
+                              parseFloat(t.gradeC),
+                          ),
                         );
                       }}
                     >

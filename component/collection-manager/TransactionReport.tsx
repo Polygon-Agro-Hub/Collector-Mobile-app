@@ -1,31 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import {environment} from '@/environment/environment';
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import { RootStackParamList } from '../types';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-//import * as FileSystem from 'expo-file-system';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Alert,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { environment } from "@/environment/environment";
+import { RootStackParamList } from "../types";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
-import * as MediaLibrary from 'expo-media-library';
-import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from "react-i18next";
-import { AntDesign } from '@expo/vector-icons';
-import { File, Paths, Directory } from 'expo-file-system/next';
-import { Platform } from 'react-native';
-
-
+import { AntDesign } from "@expo/vector-icons";
+import { Platform } from "react-native";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
 });
 
-type TransactionReportNavigationProps = StackNavigationProp<RootStackParamList, 'TransactionReport'>;
-type TransactionReportRouteProp = RouteProp<RootStackParamList, 'TransactionReport'>;
+type TransactionReportNavigationProps = StackNavigationProp<
+  RootStackParamList,
+  "TransactionReport"
+>;
+type TransactionReportRouteProp = RouteProp<
+  RootStackParamList,
+  "TransactionReport"
+>;
 
 interface TransactionReportProps {
   navigation: TransactionReportNavigationProps;
@@ -43,8 +49,8 @@ interface PersonalAndBankDetails {
   accHolderName: string | null;
   bankName: string | null;
   branchName: string | null;
-  companyNameEnglish: string | null; // Added company name field
-  collectionCenterName: string | null; // Added collection center field
+  companyNameEnglish: string | null;
+  collectionCenterName: string | null;
 }
 
 interface Crop {
@@ -70,9 +76,13 @@ interface officerDetails {
   phoneNumber: string;
 }
 
-const TransactionReport: React.FC<TransactionReportProps> = ({ navigation }) => {
+const TransactionReport: React.FC<TransactionReportProps> = ({
+  navigation,
+}) => {
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
-  const [officerDetails, setOfficerDetails] = useState<officerDetails | null>(null);
+  const [officerDetails, setOfficerDetails] = useState<officerDetails | null>(
+    null,
+  );
   const route = useRoute<TransactionReportRouteProp>();
   const {
     registeredFarmerId,
@@ -89,25 +99,24 @@ const TransactionReport: React.FC<TransactionReportProps> = ({ navigation }) => 
     bankName,
     branchName,
     selectedDate,
-    selectedTime
+    selectedTime,
   } = route.params;
-  
-//  console.log('Farmer Report:', route.params);
+
   const [crops, setCrops] = useState<Crop[]>([]);
   const [qrValue, setQrValue] = useState<string>("");
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-   const [selectedLanguage, setSelectedLanguage] = useState("en");
-    console.log(";;;;;;;;",selectedLanguage)
-const formattedDate = selectedDate.replace(/-/g, "/");
-//console.log(formattedDate); 
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+
+  const formattedDate = selectedDate.replace(/-/g, "/");
+
   const fetchSelectedLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
       if (lang === "en" || lang === "si" || lang === "ta") {
         setSelectedLanguage(lang);
       } else {
-        setSelectedLanguage("en"); // Default to English if not found or invalid
+        setSelectedLanguage("en");
       }
     } catch (error) {
       console.error("Error fetching language preference:", error);
@@ -115,22 +124,12 @@ const formattedDate = selectedDate.replace(/-/g, "/");
   };
 
   useEffect(() => {
-    fetchSelectedLanguage(); 
+    fetchSelectedLanguage();
   }, []);
-
-  const getTextStyle = (language: string) => {
-    if (language === "si") {
-      return {
-        fontSize: 14, // Smaller text size for Sinhala
-        lineHeight: 20, // Space between lines
-      };
-    }
-   
-  };
 
   const getCropName = (crop: Crop) => {
     if (!crop) return "Loading...";
-  
+
     switch (selectedLanguage) {
       case "si":
         return `${crop.cropNameSinhala} `;
@@ -143,7 +142,7 @@ const formattedDate = selectedDate.replace(/-/g, "/");
 
   const getVarietyName = (crop: Crop) => {
     if (!crop) return "Loading...";
-  
+
     switch (selectedLanguage) {
       case "si":
         return `${crop.varietyNameSinhala} `;
@@ -153,29 +152,26 @@ const formattedDate = selectedDate.replace(/-/g, "/");
         return `${crop.variety} `;
     }
   };
-  
-  // Safe reduce with proper type handling
+
   const totalSum = (crops || []).reduce((sum: number, crop: Crop) => {
-    const subTotal = typeof crop.subTotal === 'string' 
-      ? parseFloat(crop.subTotal) 
-      : crop.subTotal || 0;
+    const subTotal =
+      typeof crop.subTotal === "string"
+        ? parseFloat(crop.subTotal)
+        : crop.subTotal || 0;
     return sum + subTotal;
   }, 0);
 
   const formatNumberWithCommas = (value: number | string): string => {
-    // Convert to number if it's a string
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    
-    // Format with 2 decimal places and add commas for thousands
-    return numValue.toLocaleString('en-US', {
+    const numValue = typeof value === "string" ? parseFloat(value) : value;
+
+    return numValue.toLocaleString("en-US", {
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     });
   };
-  
-  // Replace the current formatNumber function with this one
+
   const formatNumber = (value: number | string): string => {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return formatNumberWithCommas(parseFloat(value));
     }
     return formatNumberWithCommas(value);
@@ -196,7 +192,6 @@ const formattedDate = selectedDate.replace(/-/g, "/");
       });
 
       const data = response.data.data;
-     // console.log(data);
 
       if (response.data.status === "success") {
         const officerDetails = {
@@ -204,7 +199,7 @@ const formattedDate = selectedDate.replace(/-/g, "/");
           QRCode: data.QRcode,
           firstName: data.firstName,
           lastName: data.lastName,
-          phoneNumber: data.phoneNumber
+          phoneNumber: data.phoneNumber,
         };
 
         setOfficerDetails(officerDetails);
@@ -223,32 +218,27 @@ const formattedDate = selectedDate.replace(/-/g, "/");
     fetchOfficerDetails();
     fetchDetails();
   }, []);
-  
-  
-
 
   const fetchDetails = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.No token found"));
         return;
       }
-      
-     // console.log('Fetching details for userId:', userId, 'and registeredFarmerId:', registeredFarmerId);
-      
+
       const headers = {
         Authorization: `Bearer ${token}`,
       };
-      
-      // Make requests separately to identify which one is failing
+
       try {
-        const detailsResponse = await api.get(`api/farmer/report-user-details/${userId}`, {
-          headers
-        });
-       // console.log('Details response successful:', detailsResponse.data);
-        
-        // Process details response...
+        const detailsResponse = await api.get(
+          `api/farmer/report-user-details/${userId}`,
+          {
+            headers,
+          },
+        );
+
         const data = detailsResponse.data;
         setDetails({
           userId: data.userId ?? "",
@@ -266,36 +256,36 @@ const formattedDate = selectedDate.replace(/-/g, "/");
           collectionCenterName: data.centerName ?? "Collection Centre",
         });
       } catch (detailsError) {
-        console.error('Error fetching user details:', detailsError);
+        console.error("Error fetching user details:", detailsError);
         if (axios.isAxiosError(detailsError)) {
-    //      console.log('Details error response:', detailsError.response?.data);
+          console.log("Details error response:", detailsError.response?.data);
         } else {
-     //     console.log('Details error:', detailsError);
+          console.log("Details error:", detailsError);
         }
       }
-      
+
       try {
-        const cropsResponse = await api.get(`api/collection-manager/transaction-details/${userId}/${selectedDate}/${registeredFarmerId}`, {
-          headers
-        });
-      //  console.log('Crops response successful:', cropsResponse.data);
-        
-        // Process crops response...
+        const cropsResponse = await api.get(
+          `api/collection-manager/transaction-details/${userId}/${selectedDate}/${registeredFarmerId}`,
+          {
+            headers,
+          },
+        );
+
         const cropsData = cropsResponse.data?.data || cropsResponse.data || [];
-        console.log('Crops data:', cropsData);
+
         setCrops(Array.isArray(cropsData) ? cropsData : []);
       } catch (cropsError) {
-        console.error('Error fetching crops:', cropsError);
+        console.error("Error fetching crops:", cropsError);
         if (axios.isAxiosError(cropsError)) {
-          console.log('Crops error response:', cropsError.response?.data);
+          console.log("Crops error response:", cropsError.response?.data);
         } else {
-          console.log('Crops error response:', cropsError);
+          console.log("Crops error response:", cropsError);
         }
         setCrops([]);
       }
-      
     } catch (error) {
-      console.error('Error in fetchDetails:', error);
+      console.error("Error in fetchDetails:", error);
       Alert.alert(t("Error.error"), t("Error.Failed to load details"));
       setCrops([]);
     } finally {
@@ -305,15 +295,17 @@ const formattedDate = selectedDate.replace(/-/g, "/");
 
   const generatePDF = async () => {
     if (!details || !officerDetails) {
-      Alert.alert(t("Error.error"), t("Error.Details are missing for generating PDF"));
-      return '';
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Details are missing for generating PDF"),
+      );
+      return "";
     }
-  
+
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
       return sum + Number(crop.subTotal);
     }, 0);
 
-  
     const html = `
     <html>
       <head>
@@ -495,7 +487,7 @@ const formattedDate = selectedDate.replace(/-/g, "/");
         
         <div class="header-row">
           <div class="header-item">
-            <strong>${t("NewReport.GRN No")}</strong> ${crops.length > 0 ? crops[0].invoiceNumber : 'N/A'}
+            <strong>${t("NewReport.GRN No")}</strong> ${crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
           </div>
           <div class="header-item">
             <strong>${t("NewReport.Date")}</strong> ${formattedDate} ${selectedTime}
@@ -516,11 +508,11 @@ const formattedDate = selectedDate.replace(/-/g, "/");
         <div class="received-by-section">
           <div>
             <div class="section-title">${t("NewReport.Received By")}</div>
-            <div>${t("NewReport.Company Name")} ${details.companyNameEnglish || ''}</div>
+            <div>${t("NewReport.Company Name")} ${details.companyNameEnglish || ""}</div>
           </div>
           <div>
             <div>&nbsp;</div>
-            <div>${t("NewReport.Centre")} ${details.collectionCenterName || 'Collection Centre'}</div>
+            <div>${t("NewReport.Centre")} ${details.collectionCenterName || "Collection Centre"}</div>
           </div>
         </div>
         
@@ -537,16 +529,20 @@ const formattedDate = selectedDate.replace(/-/g, "/");
             </tr>
           </thead>
           <tbody>
-            ${crops.map(crop => `
+            ${crops
+              .map(
+                (crop) => `
               <tr>
                <td>${getCropName(crop)}</td>
                 <td>${getVarietyName(crop)}</td>
-                <td>${crop.grade || '-'}</td>
+                <td>${crop.grade || "-"}</td>
                 <td>${formatNumberWithCommas(parseFloat(crop.unitPrice))}</td>
                 <td>${formatNumberWithCommas(parseFloat(crop.quantity))}</td>
                 <td>${formatNumberWithCommas(parseFloat(crop.subTotal))}</td>
               </tr>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </tbody>
         </table>
         
@@ -565,147 +561,164 @@ const formattedDate = selectedDate.replace(/-/g, "/");
     `;
     try {
       const { uri } = await Print.printToFileAsync({ html });
-      console.log('PDF generated at:', uri);
+
       return uri;
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error("Error generating PDF:", error);
       Alert.alert(t("Error.error"), t("Error.PDF was not generated."));
-      return '';
+      return "";
     }
   };
 
-const handleDownloadPDF = async () => {
-  try {
-    const uri = await generatePDF();
+  const handleDownloadPDF = async () => {
+    try {
+      const uri = await generatePDF();
 
-    if (!uri) {
-      Alert.alert("Error", "PDF was not generated.");
-      return;
-    }
-
-    const date = new Date().toISOString().slice(0, 10);
-    const fileName = `GRN_${crops.length > 0 ? crops[0].invoiceNumber : 'N/A'}_${date}.pdf`;
-    
-  
-    let tempFilePath = uri; // Default to the original URI
-
-    if (Platform.OS === 'android') {
-     
-      tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
-      
-     
-      await FileSystem.copyAsync({
-        from: uri,
-        to: tempFilePath
-      });
-      
-    
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(tempFilePath, {
-          dialogTitle: 'Save PDF',
-          mimeType: 'application/pdf',
-          UTI: 'com.adobe.pdf'
-        });
-        Alert.alert(
-          "PDF Ready", 
-          "To save to Downloads, select 'Save to device' or similar option from the share menu",
-          [{ text: "OK" }]
-        );
-      } else {
-        Alert.alert("Error", "Sharing is not available on this device");
+      if (!uri) {
+        Alert.alert("Error", "PDF was not generated.");
+        return;
       }
-    } else if (Platform.OS === 'ios') {
-    
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(tempFilePath, { 
-          dialogTitle: 'Save PDF',
-          mimeType: 'application/pdf',
-          UTI: 'com.adobe.pdf'
+
+      const date = new Date().toISOString().slice(0, 10);
+      const fileName = `GRN_${crops.length > 0 ? crops[0].invoiceNumber : "N/A"}_${date}.pdf`;
+
+      let tempFilePath = uri;
+
+      if (Platform.OS === "android") {
+        tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
+
+        await FileSystem.copyAsync({
+          from: uri,
+          to: tempFilePath,
         });
-        Alert.alert("Info", "Use the 'Save to Files' option to save to Downloads");
-      } else {
-        Alert.alert("Error", "Sharing is not available on this device");
+
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(tempFilePath, {
+            dialogTitle: "Save PDF",
+            mimeType: "application/pdf",
+            UTI: "com.adobe.pdf",
+          });
+          Alert.alert(
+            "PDF Ready",
+            "To save to Downloads, select 'Save to device' or similar option from the share menu",
+            [{ text: "OK" }],
+          );
+        } else {
+          Alert.alert("Error", "Sharing is not available on this device");
+        }
+      } else if (Platform.OS === "ios") {
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(tempFilePath, {
+            dialogTitle: "Save PDF",
+            mimeType: "application/pdf",
+            UTI: "com.adobe.pdf",
+          });
+          Alert.alert(
+            "Info",
+            "Use the 'Save to Files' option to save to Downloads",
+          );
+        } else {
+          Alert.alert("Error", "Sharing is not available on this device");
+        }
       }
+    } catch (error) {
+      console.error("Download error:", error);
+      Alert.alert("Error", "Failed to prepare PDF for download.");
     }
-    
+  };
 
-    console.log(`PDF prepared for sharing: ${tempFilePath}`);
-    
-  } catch (error) {
-    console.error("Download error:", error);
-    Alert.alert("Error", "Failed to prepare PDF for download.");
-  }
-};
-
-  
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      // Create a descriptive filename by renaming the file before sharing
-      const fileName = `PurchaseReport_${crops.length > 0 ? crops[0].invoiceNumber : 'N/A'}_${selectedDate}.pdf`;
-      
-      // Create a new file with the desired name
+      const fileName = `PurchaseReport_${crops.length > 0 ? crops[0].invoiceNumber : "N/A"}_${selectedDate}.pdf`;
+
       const fileInfo = await FileSystem.getInfoAsync(uri);
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
-      
+
       try {
-        // Copy the file to a new location with the desired name
         await FileSystem.copyAsync({
           from: uri,
-          to: newUri
+          to: newUri,
         });
-        
-        // Share the renamed file
+
         await Sharing.shareAsync(newUri, {
-          mimeType: 'application/pdf',
-          dialogTitle: 'Share Purchase Report',
-          UTI: 'com.adobe.pdf'
+          mimeType: "application/pdf",
+          dialogTitle: "Share Purchase Report",
+          UTI: "com.adobe.pdf",
         });
       } catch (error) {
-        console.error('Error sharing PDF with custom name:', error);
-        // Fallback to sharing with original uri if renaming fails
+        console.error("Error sharing PDF with custom name:", error);
+
         await Sharing.shareAsync(uri, {
-          mimeType: 'application/pdf',
-          dialogTitle: 'Share Purchase Report',
-          UTI: 'com.adobe.pdf'
+          mimeType: "application/pdf",
+          dialogTitle: "Share Purchase Report",
+          UTI: "com.adobe.pdf",
         });
       }
     } else {
-      Alert.alert(t("Error.error"), t("Error.Sharing is not available on this device"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Sharing is not available on this device"),
+      );
     }
   };
 
   return (
     <ScrollView className="flex-1 bg-white p-4">
       <View className="flex-row items-center mb-4">
-       
-        <TouchableOpacity  onPress={() => navigation.goBack()} className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10" >
-                                                               <AntDesign name="left" size={24} color="#000502" />
-                                                             </TouchableOpacity>
-        <Text className="flex-1 text-center text-xl font-bold text-black mr-[6%]">{t("NewReport.Goods Received Note")}</Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
+        >
+          <AntDesign name="left" size={24} color="#000502" />
+        </TouchableOpacity>
+        <Text className="flex-1 text-center text-xl font-bold text-black mr-[6%]">
+          {t("NewReport.Goods Received Note")}
+        </Text>
       </View>
 
       {/* GRN Header */}
       <View className="mb-4">
-        <Text className="text-sm font-bold">{t("NewReport.GRN No")}: {crops.length > 0 ? crops[0].invoiceNumber : 'N/A'}</Text>
-        <Text className="text-sm">{t("NewReport.Date")} {formattedDate} {selectedTime}</Text>
+        <Text className="text-sm font-bold">
+          {t("NewReport.GRN No")}:{" "}
+          {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
+        </Text>
+        <Text className="text-sm">
+          {t("NewReport.Date")} {formattedDate} {selectedTime}
+        </Text>
       </View>
 
       {/* Supplier Details */}
       <View className="mb-4">
-        <Text className="font-bold text-sm mb-1">{t("NewReport.Supplier Details")}</Text>
+        <Text className="font-bold text-sm mb-1">
+          {t("NewReport.Supplier Details")}
+        </Text>
         <View className="border border-gray-300 rounded-lg p-2">
-          <Text><Text className="">{t("NewReport.Name")}</Text> {details?.firstName} {details?.lastName}</Text>
-          <Text><Text className="">{t("NewReport.Phone")}</Text> {details?.phoneNumber}</Text>
+          <Text>
+            <Text className="">{t("NewReport.Name")}</Text> {details?.firstName}{" "}
+            {details?.lastName}
+          </Text>
+          <Text>
+            <Text className="">{t("NewReport.Phone")}</Text>{" "}
+            {details?.phoneNumber}
+          </Text>
         </View>
       </View>
 
       {/* Received By */}
       <View className="mb-4">
-        <Text className="font-bold text-sm mb-1">{t("NewReport.Received By")}</Text>
+        <Text className="font-bold text-sm mb-1">
+          {t("NewReport.Received By")}
+        </Text>
         <View className="border border-gray-300 rounded-lg p-2">
-          <Text><Text className="">{t("NewReport.Company Name")}</Text> {details?.companyNameEnglish || ''}</Text>
-          <Text><Text className="">{t("NewReport.Centre")}</Text> {details?.collectionCenterName || 'Collection Centre'}</Text>
+          <Text>
+            <Text className="">{t("NewReport.Company Name")}</Text>{" "}
+            {details?.companyNameEnglish || ""}
+          </Text>
+          <Text>
+            <Text className="">{t("NewReport.Centre")}</Text>{" "}
+            {details?.collectionCenterName || "Collection Centre"}
+          </Text>
         </View>
       </View>
 
@@ -714,38 +727,59 @@ const handleDownloadPDF = async () => {
 
       {/* Received Items */}
       <View className="mb-4">
-        <Text className="font-bold text-sm mb-2">{t("NewReport.Received Items")}</Text>
-       <ScrollView horizontal className="border border-gray-300 rounded-lg">
-  <View>
-    {/* Table Header */}
-    <View className="flex-row bg-gray-200">
-      <Text className="w-24 p-2 font-bold border-r border-gray-300">{t("NewReport.Crop Name")}</Text>
-      <Text className="w-24 p-2 font-bold border-r border-gray-300">{t("NewReport.Variety")}</Text>
-      <Text className="w-20 p-2 font-bold border-r border-gray-300">{t("NewReport.Grade")}</Text>
-      <Text className="w-24 p-2 font-bold border-r border-gray-300">{t("NewReport.Unit Price(Rs.)")}</Text>
-      <Text className="w-24 p-2 font-bold border-r border-gray-300">{t("NewReport.Quantity(kg)")}</Text>
-      <Text className="w-24 p-2 font-bold">{t("NewReport.Sub Total(Rs.)")}</Text>
-    </View>
-    
-    {/* Table Rows */}
-    {crops.map((crop, index) => (
-      <View key={`${crop.id}-${index}`} className="flex-row">
-       <Text className="w-24 p-2 border-b border-gray-300"> {getCropName(crop)}</Text>
-               <Text className="w-24 p-2 border-b border-gray-300">{getVarietyName(crop)}</Text>
-        <Text className="w-20 p-2 border-b border-gray-300">{crop.grade || '-'}</Text>
-        <Text className="w-24 p-2 border-b border-gray-300 text-right">
-          {formatNumber(crop.unitPrice)}
+        <Text className="font-bold text-sm mb-2">
+          {t("NewReport.Received Items")}
         </Text>
-        <Text className="w-24 p-2 border-b border-gray-300 text-right">
-          {formatNumber(crop.quantity)}
-        </Text>
-        <Text className="w-24 p-2 border-b border-gray-300 text-right">
-          {formatNumberWithCommas(crop.subTotal)}
-        </Text>
-      </View>
-    ))}
-  </View>
-</ScrollView>
+        <ScrollView horizontal className="border border-gray-300 rounded-lg">
+          <View>
+            {/* Table Header */}
+            <View className="flex-row bg-gray-200">
+              <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                {t("NewReport.Crop Name")}
+              </Text>
+              <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                {t("NewReport.Variety")}
+              </Text>
+              <Text className="w-20 p-2 font-bold border-r border-gray-300">
+                {t("NewReport.Grade")}
+              </Text>
+              <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                {t("NewReport.Unit Price(Rs.)")}
+              </Text>
+              <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                {t("NewReport.Quantity(kg)")}
+              </Text>
+              <Text className="w-24 p-2 font-bold">
+                {t("NewReport.Sub Total(Rs.)")}
+              </Text>
+            </View>
+
+            {/* Table Rows */}
+            {crops.map((crop, index) => (
+              <View key={`${crop.id}-${index}`} className="flex-row">
+                <Text className="w-24 p-2 border-b border-gray-300">
+                  {" "}
+                  {getCropName(crop)}
+                </Text>
+                <Text className="w-24 p-2 border-b border-gray-300">
+                  {getVarietyName(crop)}
+                </Text>
+                <Text className="w-20 p-2 border-b border-gray-300">
+                  {crop.grade || "-"}
+                </Text>
+                <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                  {formatNumber(crop.unitPrice)}
+                </Text>
+                <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                  {formatNumber(crop.quantity)}
+                </Text>
+                <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                  {formatNumberWithCommas(crop.subTotal)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       </View>
 
       {/* Divider */}
@@ -753,7 +787,10 @@ const handleDownloadPDF = async () => {
 
       {/* Total */}
       <View className="mb-4 items-end">
-        <Text className="font-bold">{t("NewReport.Full Total (Rs.) Rs.")}{totalSum.toFixed(2)}</Text>
+        <Text className="font-bold">
+          {t("NewReport.Full Total (Rs.) Rs.")}
+          {totalSum.toFixed(2)}
+        </Text>
       </View>
 
       {/* Divider */}
@@ -762,23 +799,32 @@ const handleDownloadPDF = async () => {
       {/* Note */}
       <View className="mb-4">
         <Text className="text-xs">
-          <Text className="font-bold">{t("NewReport.Note")}</Text> {t("NewReport.GRNnote")}
+          <Text className="font-bold">{t("NewReport.Note")}</Text>{" "}
+          {t("NewReport.GRNnote")}
         </Text>
       </View>
 
       {/* Action Buttons */}
       <View className="flex-row justify-around w-full mb-7">
-        <TouchableOpacity className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center" onPress={handleDownloadPDF}>
+        <TouchableOpacity
+          className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
+          onPress={handleDownloadPDF}
+        >
           <Image
-            source={require('../../assets/images/collection-common/download.webp')}
+            source={require("../../assets/images/collection-common/download.webp")}
             style={{ width: 24, height: 24 }}
           />
-          <Text className="text-sm text-cyan-50">{t("NewReport.Download")}</Text>
+          <Text className="text-sm text-cyan-50">
+            {t("NewReport.Download")}
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center" onPress={handleSharePDF}>
+        <TouchableOpacity
+          className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
+          onPress={handleSharePDF}
+        >
           <Image
-            source={require('../../assets/images/collection-common/share.webp')}
+            source={require("../../assets/images/collection-common/share.webp")}
             style={{ width: 24, height: 24 }}
           />
           <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>

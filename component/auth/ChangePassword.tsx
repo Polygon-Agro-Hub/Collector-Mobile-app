@@ -13,7 +13,7 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // Import the icon library
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import axios from "axios";
 import { ScrollView } from "react-native-gesture-handler";
 import { environment } from "@/environment/environment";
@@ -44,23 +44,19 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
   const [secureNew, setSecureNew] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
   const [passwordUpdate, setPasswordUpdate] = useState<number | null>(null);
-  console.log(passwordUpdate);
   const { t } = useTranslation();
 
   const validatePassword = () => {
-    // Check if all fields are filled
     if (!currentPassword || !newPassword || !confirmPassword) {
       Alert.alert(t("Error.error"), t("Error.All fields are required"));
       return false;
     }
 
-    // Check if new password meets format requirements
     if (newPassword.length < 8) {
       Alert.alert(t("Error.error"), t("Error.Your password must contain"));
       return false;
     }
 
-    // Check for at least 1 uppercase letter
     if (!/[A-Z]/.test(newPassword)) {
       Alert.alert(
         t("Error.error"),
@@ -69,13 +65,11 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       return false;
     }
 
-    // Check for at least 1 number
     if (!/[0-9]/.test(newPassword)) {
       Alert.alert(t("Error.error"), t("Error.Your password must contain"));
       return false;
     }
 
-    // Check for at least 1 special character
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
       Alert.alert(
         t("Error.error"),
@@ -84,7 +78,6 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       return false;
     }
 
-    // Check if new password and confirm password match
     if (newPassword !== confirmPassword) {
       Alert.alert(
         t("Error.error"),
@@ -102,7 +95,6 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
         const response = await axios.get(
           `${environment.API_BASE_URL}api/collection-officer/empid/`,
         );
-        //  console.log("Empid response:", response.data);
       } catch (error) {
         Alert.alert(t("Error.error"), t("Error.Failed to fetch empid."));
       }
@@ -111,7 +103,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
 
   const handleChangePassword = async () => {
     Keyboard.dismiss();
-    // Validate inputs before proceeding
+
     if (!validatePassword()) {
       return;
     }
@@ -136,11 +128,9 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
         },
       );
 
-      //  console.log("Password update response:", response.data);
       Alert.alert(t("Error.Success"), t("Error.Password updated successfully"));
       navigation.navigate("Login");
     } catch (error) {
-      // Alert.alert(t("Error.error"), t("Error.Failed to update password."));
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 401) {
           Alert.alert(t("Error.error"), t("Error.Invalid current password"));
@@ -167,8 +157,6 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       );
 
       setPasswordUpdate(response.data.data.passwordUpdated);
-
-      console.log("update password status", response.data.data.passwordUpdated);
     } catch (error) {
       console.error("Error fetching password update status:", error);
     }
@@ -181,13 +169,11 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        // If passwordUpdate is 0, prevent back navigation
         if (passwordUpdate === 0) {
-          console.log("hitt");
-          return true; // Prevent back navigation
+          return true;
         }
-        // If passwordUpdate is 1, allow back navigation
-        return false; // Allow back navigation
+
+        return false;
       };
 
       const subscription = BackHandler.addEventListener(
@@ -195,7 +181,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
         onBackPress,
       );
       return () => subscription.remove();
-    }, [passwordUpdate]), // Added passwordUpdate as dependency
+    }, [passwordUpdate]),
   );
 
   return (

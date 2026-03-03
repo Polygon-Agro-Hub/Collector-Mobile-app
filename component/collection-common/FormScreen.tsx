@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, ScrollView } from 'react-native';
-import { RouteProp } from '@react-navigation/native';
-import { RootStackParamList } from '../types';
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, ScrollView } from "react-native";
+import { RouteProp } from "@react-navigation/native";
+import { RootStackParamList } from "../types";
 
-type FormScreenRouteProp = RouteProp<RootStackParamList, 'FormScreen'>;
+type FormScreenRouteProp = RouteProp<RootStackParamList, "FormScreen">;
 
 interface FormScreenProps {
   navigation: FormScreenRouteProp;
 }
 
 const FormScreen: React.FC<FormScreenProps> = ({ navigation }) => {
-    const scannedData = navigation.params?.scannedData || {}; // Default to empty object if undefined
+  const scannedData = navigation.params?.scannedData || {};
 
-   
   const [formData, setFormData] = useState<any>(scannedData);
 
   const handleInputChange = (field: string, value: string) => {
@@ -20,7 +19,6 @@ const FormScreen: React.FC<FormScreenProps> = ({ navigation }) => {
   };
 
   const handleSubmit = () => {
-   // console.log('Form submitted:', formData);
     // Handle form submission logic here
   };
 
@@ -33,7 +31,7 @@ const FormScreen: React.FC<FormScreenProps> = ({ navigation }) => {
             <TextInput
               style={{
                 borderWidth: 1,
-                borderColor: 'gray',
+                borderColor: "gray",
                 padding: 8,
                 borderRadius: 4,
               }}
@@ -49,5 +47,3 @@ const FormScreen: React.FC<FormScreenProps> = ({ navigation }) => {
 };
 
 export default FormScreen;
-
-  

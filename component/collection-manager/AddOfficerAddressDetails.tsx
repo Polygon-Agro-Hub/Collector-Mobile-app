@@ -46,7 +46,7 @@ const AddOfficerAddressDetails: React.FC = () => {
     preferredLanguages,
     jobRole,
   } = route.params;
-  
+
   const [filteredBranches, setFilteredBranches] = useState<any[]>([]);
   const [bankName, setBankName] = useState<string>("");
   const [branchName, setBranchName] = useState<string>("");
@@ -96,14 +96,13 @@ const AddOfficerAddressDetails: React.FC = () => {
     try {
       await AsyncStorage.setItem(
         "officerFormData",
-        JSON.stringify(updatedData)
+        JSON.stringify(updatedData),
       );
     } catch (error) {
       console.error("Error saving form data:", error);
     }
   };
 
-  // Clear specific field error when user starts typing
   const clearFieldError = (fieldName: string) => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev };
@@ -113,7 +112,7 @@ const AddOfficerAddressDetails: React.FC = () => {
   };
 
   const handleInputChange = (key: string, value: string) => {
-    clearFieldError(key); // Clear error when user types
+    clearFieldError(key);
     setFormData((prevData) => {
       const updatedData = { ...prevData, [key]: value };
       saveDataToStorage(updatedData);
@@ -122,9 +121,9 @@ const AddOfficerAddressDetails: React.FC = () => {
   };
 
   const handleValidation = (key: string, value: string) => {
-    const numbersOnly = value.replace(/[^0-9]/g, '');
-    clearFieldError(key); // Clear error when user types
-    
+    const numbersOnly = value.replace(/[^0-9]/g, "");
+    clearFieldError(key);
+
     setFormData((prevState) => {
       const updatedFormData = { ...prevState, [key]: numbersOnly };
       const { accountNumber, confirmAccountNumber } = updatedFormData;
@@ -163,7 +162,6 @@ const AddOfficerAddressDetails: React.FC = () => {
     setCountries(countryCodes);
   }, []);
 
-  // Validate all required fields
   const validateFields = () => {
     const errors: Record<string, string> = {};
 
@@ -189,7 +187,9 @@ const AddOfficerAddressDetails: React.FC = () => {
       errors.accountNumber = t("Error.Account number is required");
     }
     if (!formData.confirmAccountNumber.trim()) {
-      errors.confirmAccountNumber = t("Error.Confirm account number is required");
+      errors.confirmAccountNumber = t(
+        "Error.Confirm account number is required",
+      );
     } else if (formData.accountNumber !== formData.confirmAccountNumber) {
       errors.confirmAccountNumber = t("Error.Account numbers do not match.");
     }
@@ -205,7 +205,6 @@ const AddOfficerAddressDetails: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    // Validate all fields
     if (!validateFields()) {
       return;
     }
@@ -217,7 +216,7 @@ const AddOfficerAddressDetails: React.FC = () => {
       empType: type,
       languages: Object.keys(preferredLanguages)
         .filter(
-          (lang) => preferredLanguages[lang as keyof typeof preferredLanguages]
+          (lang) => preferredLanguages[lang as keyof typeof preferredLanguages],
         )
         .join(", "),
       profileImage: basicDetails.profileImage || "",
@@ -239,13 +238,13 @@ const AddOfficerAddressDetails: React.FC = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 201) {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Officer created successfully")
+          t("Error.Officer created successfully"),
         );
         setLoading(false);
         await AsyncStorage.removeItem("officerFormData");
@@ -267,7 +266,7 @@ const AddOfficerAddressDetails: React.FC = () => {
       } else {
         Alert.alert(
           t("Error.error"),
-          t("Error.An error occurred while creating the officer.")
+          t("Error.An error occurred while creating the officer."),
         );
       }
     } finally {
@@ -351,11 +350,11 @@ const AddOfficerAddressDetails: React.FC = () => {
   const [districts, setDistricts] = useState<District[]>([]);
 
   const handleProvinceChange = (provinceName: string) => {
-    clearFieldError('province');
-    clearFieldError('district');
-    
+    clearFieldError("province");
+    clearFieldError("district");
+
     const selectedProvince = jsonData.provinces.find(
-      (p) => p.name.en === provinceName
+      (p) => p.name.en === provinceName,
     );
 
     if (selectedProvince) {
@@ -372,13 +371,13 @@ const AddOfficerAddressDetails: React.FC = () => {
           en: d.en,
           si: d.si,
           ta: d.ta,
-        }))
+        })),
       );
     }
   };
 
   const handleDistrictChange = (district: string) => {
-    clearFieldError('district');
+    clearFieldError("district");
     setFormData({ ...formData, district });
   };
 
@@ -392,7 +391,7 @@ const AddOfficerAddressDetails: React.FC = () => {
 
           const sortedBranches = filteredBranches.sort(
             (a: { name: string }, b: { name: any }) =>
-              a.name.localeCompare(b.name)
+              a.name.localeCompare(b.name),
           );
 
           setFilteredBranches(sortedBranches);
@@ -410,25 +409,26 @@ const AddOfficerAddressDetails: React.FC = () => {
   }, [bankName]);
 
   const formatText = (text: string) => {
-    let formattedText = text.replace(/^\s+/, '');
-    
+    let formattedText = text.replace(/^\s+/, "");
+
     if (formattedText.length > 0) {
-      formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
+      formattedText =
+        formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
     }
-    
+
     return formattedText;
   };
 
   const handleBankSelection = (selectedBank: string) => {
-    clearFieldError('bankName');
-    clearFieldError('branchName');
+    clearFieldError("bankName");
+    clearFieldError("branchName");
     setBankName(selectedBank);
     setBranchName("");
     setFormData((prevData) => {
       const updatedData = {
         ...prevData,
         bankName: selectedBank,
-        branchName: ""
+        branchName: "",
       };
       saveDataToStorage(updatedData);
       return updatedData;
@@ -436,7 +436,7 @@ const AddOfficerAddressDetails: React.FC = () => {
   };
 
   const handleBranchSelection = (selectedBranch: string) => {
-    clearFieldError('branchName');
+    clearFieldError("branchName");
     setBranchName(selectedBranch);
     setFormData((prevData) => {
       const updatedData = { ...prevData, branchName: selectedBranch };
@@ -482,8 +482,12 @@ const AddOfficerAddressDetails: React.FC = () => {
             } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
           />
           {fieldErrors.houseNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.houseNumber}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.houseNumber}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
           <TextInput
             placeholder={t("AddOfficerAddressDetails.Street Name")}
@@ -498,8 +502,12 @@ const AddOfficerAddressDetails: React.FC = () => {
             autoCorrect={false}
           />
           {fieldErrors.streetName ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.streetName}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.streetName}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
           <TextInput
             placeholder={t("AddOfficerAddressDetails.City")}
@@ -514,8 +522,12 @@ const AddOfficerAddressDetails: React.FC = () => {
             autoCorrect={false}
           />
           {fieldErrors.city ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.city}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.city}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
           <TextInput
             placeholder={t("AddOfficerAddressDetails.Country")}
@@ -551,8 +563,12 @@ const AddOfficerAddressDetails: React.FC = () => {
             />
           </View>
           {fieldErrors.province ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.province}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.province}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
           {/* District Dropdown */}
           {formData.province && (
@@ -581,8 +597,12 @@ const AddOfficerAddressDetails: React.FC = () => {
                 />
               </View>
               {fieldErrors.district ? (
-                <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.district}</Text>
-              ) : <View className="mb-3" />}
+                <Text className="text-red-500 text-sm mb-3 ml-3">
+                  {fieldErrors.district}
+                </Text>
+              ) : (
+                <View className="mb-3" />
+              )}
             </>
           )}
         </View>
@@ -595,22 +615,22 @@ const AddOfficerAddressDetails: React.FC = () => {
             placeholder={t("AddOfficerAddressDetails.AccountName")}
             value={formData.accountHolderName}
             onChangeText={(text) => {
-              let filteredText = text.replace(/[^a-zA-Z\s]/g, '');
+              let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
 
-              if (filteredText.startsWith(' ')) {
+              if (filteredText.startsWith(" ")) {
                 filteredText = filteredText.trimStart();
               }
 
               const capitalizedText = filteredText
                 .toLowerCase()
-                .split(' ')
-                .map(word => {
+                .split(" ")
+                .map((word) => {
                   if (word.length > 0) {
                     return word.charAt(0).toUpperCase() + word.slice(1);
                   }
                   return word;
                 })
-                .join(' ');
+                .join(" ");
 
               handleInputChange("accountHolderName", capitalizedText);
             }}
@@ -618,14 +638,18 @@ const AddOfficerAddressDetails: React.FC = () => {
             autoCapitalize="words"
             autoCorrect={false}
             className={`border ${
-              fieldErrors.accountHolderName ? "border-red-500" : "border-[#F4F4F4]"
+              fieldErrors.accountHolderName
+                ? "border-red-500"
+                : "border-[#F4F4F4]"
             } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
           />
           {fieldErrors.accountHolderName ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.accountHolderName}</Text>
-          ) : <View className="mb-3" />}
-
-          
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.accountHolderName}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
           <TextInput
             placeholder={t("AddOfficerAddressDetails.AccountNum")}
@@ -637,23 +661,33 @@ const AddOfficerAddressDetails: React.FC = () => {
             } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
           />
           {fieldErrors.accountNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.accountNumber}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.accountNumber}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
           <TextInput
             placeholder={t("AddOfficerAddressDetails.Confirm AccountNum")}
             keyboardType="numeric"
             value={formData.confirmAccountNumber}
-            onChangeText={(text) => handleValidation("confirmAccountNumber", text)}
+            onChangeText={(text) =>
+              handleValidation("confirmAccountNumber", text)
+            }
             className={`border ${
-              error || fieldErrors.confirmAccountNumber ? "border-red-500" : "border-[#F4F4F4]"
+              error || fieldErrors.confirmAccountNumber
+                ? "border-red-500"
+                : "border-[#F4F4F4]"
             } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
           />
-          {(error || fieldErrors.confirmAccountNumber) ? (
+          {error || fieldErrors.confirmAccountNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
               {fieldErrors.confirmAccountNumber || error}
             </Text>
-          ) : <View className="mb-3" />}
+          ) : (
+            <View className="mb-3" />
+          )}
 
           <View className="">
             <View className="mb-1">
@@ -686,8 +720,12 @@ const AddOfficerAddressDetails: React.FC = () => {
               />
             </View>
             {fieldErrors.bankName ? (
-              <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.bankName}</Text>
-            ) : <View className="mb-3" />}
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.bankName}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
 
             <View>
               {filteredBranches.length > 0 && (
@@ -704,7 +742,9 @@ const AddOfficerAddressDetails: React.FC = () => {
                     }}
                     placeholder={t("AddOfficerAddressDetails.BranchName")}
                     boxStyles={{
-                      borderColor: fieldErrors.branchName ? "#ef4444" : "#F4F4F4",
+                      borderColor: fieldErrors.branchName
+                        ? "#ef4444"
+                        : "#F4F4F4",
                       borderRadius: 25,
                       width: "100%",
                       height: 50,
@@ -718,7 +758,9 @@ const AddOfficerAddressDetails: React.FC = () => {
                     search={true}
                   />
                   {fieldErrors.branchName ? (
-                    <Text className="text-red-500 text-sm mt-1 ml-3">{fieldErrors.branchName}</Text>
+                    <Text className="text-red-500 text-sm mt-1 ml-3">
+                      {fieldErrors.branchName}
+                    </Text>
                   ) : null}
                 </>
               )}
@@ -738,8 +780,8 @@ const AddOfficerAddressDetails: React.FC = () => {
                 i18n.language === "si"
                   ? { fontSize: 13 }
                   : i18n.language === "ta"
-                  ? { fontSize: 10 }
-                  : { fontSize: 14 }
+                    ? { fontSize: 10 }
+                    : { fontSize: 14 },
               ]}
             >
               {t("AddOfficerAddressDetails.Go")}
@@ -761,8 +803,8 @@ const AddOfficerAddressDetails: React.FC = () => {
                   i18n.language === "si"
                     ? { fontSize: 13 }
                     : i18n.language === "ta"
-                    ? { fontSize: 10 }
-                    : { fontSize: 14 }
+                      ? { fontSize: 10 }
+                      : { fontSize: 14 },
                 ]}
               >
                 {t("AddOfficerAddressDetails.Submit")}

@@ -46,7 +46,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [empId, setEmpId] = useState<string | null>(null);
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
-  const [isLoadingTarget, setIsLoadingTarget] = useState(true); // Add loading state
+  const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -68,11 +68,10 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
           `${environment.API_BASE_URL}api/collection-officer/user-profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setProfile(response.data.data);
         setEmpId(response.data.data.empId);
-    //    console.log("data:", response.data.data);
       }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
@@ -80,7 +79,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
   };
 
   const fetchTargetPercentage = async () => {
-    setIsLoadingTarget(true); // Set loading to true when starting fetch
+    setIsLoadingTarget(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -92,13 +91,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
         `${environment.API_BASE_URL}api/target/officer-task-summary`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
-     console.log("response for percentage target", response.data);
+
       if (response.data.success) {
         const percentage = parseInt(
           response.data.completionPercentage.replace("%", ""),
-          10
+          10,
         );
         setTargetPercentage(percentage);
       } else {
@@ -108,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
       console.error("Failed to fetch target percentage:", error);
       setTargetPercentage(0);
     } finally {
-      setIsLoadingTarget(false); // Set loading to false when done
+      setIsLoadingTarget(false);
     }
   };
 
@@ -131,9 +130,12 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
     useCallback(() => {
       const onBackPress = () => true;
       BackHandler.addEventListener("hardwareBackPress", onBackPress);
-   const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
       return () => subscription.remove();
-    }, [])
+    }, []),
   );
 
   const checkTokenExpiration = async () => {
@@ -148,7 +150,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
         if (currentTime < tokenExpiry) {
           console.log("Token is valid");
         } else {
-          console.log("Token expired, clearing storage.");
           await AsyncStorage.multiRemove([
             "token",
             "tokenStoredTime",
@@ -196,15 +197,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
     }
   };
 
-  // Function to render target status
   const renderTargetStatus = () => {
-    // Show loading state while fetching
     if (isLoadingTarget) {
       return (
-        <View 
+        <View
           className="bg-white ml-[20px] w-[90%] rounded-[15px] mt-3 p-4"
           style={{
-            shadowColor: '#000',
+            shadowColor: "#000",
             shadowOffset: {
               width: 0,
               height: 2,
@@ -221,13 +220,12 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
       );
     }
 
-    // Show appropriate status based on target percentage
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View 
+        <View
           className="bg-white ml-[20px] w-[90%] rounded-[15px] mt-3 p-4"
           style={{
-            shadowColor: '#000',
+            shadowColor: "#000",
             shadowOffset: {
               width: 0,
               height: 2,
@@ -247,10 +245,10 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
       );
     } else {
       return (
-        <View 
+        <View
           className="bg-white ml-[20px] w-[90%] rounded-[15px] mt-3 p-4"
           style={{
-            shadowColor: '#000',
+            shadowColor: "#000",
             shadowOffset: {
               width: 0,
               height: 2,
@@ -300,7 +298,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
               : require("../../assets/images/auth/my-profile.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
-          onError={() => console.log("Failed to load image")}
         />
 
         <View>
@@ -333,7 +330,11 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
           />
           <View className="absolute items-center justify-center h-24 w-24">
             <Text className="text-2xl font-bold">
-              {isLoadingTarget ? "..." : (targetPercentage !== null ? `${targetPercentage}%` : "0%")}
+              {isLoadingTarget
+                ? "..."
+                : targetPercentage !== null
+                  ? `${targetPercentage}%`
+                  : "0%"}
             </Text>
           </View>
         </View>
@@ -358,10 +359,10 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
           className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative border border-[#FFE300]"
           onPress={() => navigation.navigate("QRScanner" as any)}
         >
-           <Image
-                          source={require("../../assets/images/dashboard/qr.webp")}
-                          className="w-8 h-8 absolute top-2 right-2"
-                        />
+          <Image
+            source={require("../../assets/images/dashboard/qr.webp")}
+            className="w-8 h-8 absolute top-2 right-2"
+          />
           <Text
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             className="text-gray-700 text-lg absolute bottom-2 left-2"
@@ -375,9 +376,9 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
           onPress={() => navigation.navigate("SearchFarmer" as any)}
         >
           <Image
-                         source={require("../../assets/images/dashboard/search-client.webp")}
-                         className="w-8 h-8 absolute top-2 right-2"
-                       />
+            source={require("../../assets/images/dashboard/search-client.webp")}
+            className="w-8 h-8 absolute top-2 right-2"
+          />
           <Text
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             className="text-gray-700 text-lg absolute bottom-2 left-2"
