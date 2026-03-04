@@ -19,6 +19,7 @@ import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import { useTranslation } from "react-i18next";
 import { AntDesign } from "@expo/vector-icons";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -544,7 +545,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     `;
     try {
       const { uri } = await Print.printToFileAsync({ html });
-      console.log("PDF generated at:", uri);
+      
       return uri;
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -616,7 +617,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         }
       }
 
-      console.log(`GRN report prepared for sharing: ${tempFilePath}`);
+      
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(
@@ -663,21 +664,14 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white p-4">
-      <View className="flex-row items-center mb-4">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <View className="flex-1 items-center">
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-xl font-bold"
-          >
-            {t("NewReport.Goods Received Note")}
-          </Text>
-        </View>
-      </View>
+    <ScrollView className="flex-1 bg-white">
+       <CustomHeader
+        title={t("NewReport.Goods Received Note")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
+      <View className="p-4">
 
       {/* GRN Header */}
       <View className="mb-4">
@@ -845,6 +839,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           />
           <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </ScrollView>
   );

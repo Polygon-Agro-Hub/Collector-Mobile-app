@@ -43,7 +43,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "ComplainPage">>();
   const { userId, farmerLanguage } = route.params;
-  console.log("User ID:", userId);
+
   const [complain, setComplain] = useState<string>("");
   const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
@@ -69,7 +69,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       try {
         const role = await AsyncStorage.getItem("jobRole");
         setUserRole(role);
-        console.log("User role:", role);
       } catch (error) {
         console.error("Error fetching user role:", error);
       }
@@ -86,18 +85,15 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       appName = "PlantCare";
     }
 
-    console.log("appName", appName);
     const selectedLanguage = t("ReportComplaint.LNG");
     setLanguage(selectedLanguage);
-    console.log("slect", selectedLanguage);
+
     const fetchComplainCategory = async () => {
       try {
         const response = await axios.get(
           `${environment.API_BASE_URL}api/complain/get-complain-category/${appName}`,
         );
         if (response.data.status === "success") {
-          //    console.log(response.data.data);
-
           const categoryField =
             selectedLanguage === "en"
               ? "categoryEnglish"
@@ -236,7 +232,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
               >
                 <AntDesign name="left" size={24} color="#000502" />
               </TouchableOpacity>
-              {/* <View className="items-center p-2 pb-20 -mt-10 bg-white"> */}
+
               <View className="items-center bg-white ">
                 <Image
                   source={require("../../assets/images/complain/complain.webp")}
@@ -265,7 +261,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                           value: item.value,
                         }))}
                         placeholder={t("ReportComplaint.selectCategory")}
-                        placeholderStyle={{ color: "#434343" ,marginLeft:8}}
+                        placeholderStyle={{ color: "#434343", marginLeft: 8 }}
                         listMode="SCROLLVIEW"
                         zIndex={3000}
                         zIndexInverse={1000}
@@ -273,7 +269,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                           borderColor: "#ccc",
                           borderWidth: 1,
                           borderRadius: 25,
-                          
                         }}
                         style={{
                           borderWidth: 1,

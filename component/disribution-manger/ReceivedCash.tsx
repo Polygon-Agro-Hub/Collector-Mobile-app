@@ -58,13 +58,10 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
   const [loading, setLoading] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
-  // Calculate total cash
   const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
 
-  // Check if there are transactions
   const hasTransactions = transactions.length > 0;
 
-  // Format date for display
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -72,7 +69,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     return `${year}/${month}/${day}`;
   };
 
-  // Format date for comparison
   const formatDateForComparison = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -80,7 +76,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  // Format datetime from API
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -94,7 +89,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     return `${year}/${month}/${day} ${displayHours}:${minutes} ${ampm}`;
   };
 
-  // Extract date only from datetime string
   const extractDate = (dateString: string) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -103,7 +97,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  // Fetch received cash data
   const fetchReceivedCash = async () => {
     try {
       setLoading(true);
@@ -120,13 +113,10 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      console.log("oooooooooooooo", response.data);
-
       if (response.data.success) {
-        // Map API data to Transaction format
         const mappedData: Transaction[] = response.data.data.map(
           (item: any) => ({
             id:
@@ -144,11 +134,10 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
             invoiceNo: item.invNo,
             paymentMethod: item.paymentMethod,
             transactionId: item.transactionId,
-          })
+          }),
         );
 
         setAllTransactions(mappedData);
-        console.log("Fetched transactions:", mappedData.length);
       } else {
         Alert.alert("Error", response.data.message || "Failed to fetch data");
       }
@@ -156,54 +145,43 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
       console.error("Error fetching received cash:", error);
       Alert.alert(
         "Error",
-        error.response?.data?.message || "Failed to fetch received cash data"
+        error.response?.data?.message || "Failed to fetch received cash data",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter transactions by selected date
   const filterTransactionsByDate = useCallback(() => {
     setFilterLoading(true);
-    // Add a small delay to show the loading animation
+
     setTimeout(() => {
       const selectedDateStr = formatDateForComparison(selectedDate);
       const filtered = allTransactions.filter(
-        (transaction) => transaction.date === selectedDateStr
+        (transaction) => transaction.date === selectedDateStr,
       );
       setTransactions(filtered);
-      console.log(
-        "Filtered for date:",
-        selectedDateStr,
-        "Found:",
-        filtered.length
-      );
+
       setFilterLoading(false);
-    }, 300); // Small delay to show animation
+    }, 300);
   }, [selectedDate, allTransactions]);
 
-  // Effect to filter transactions when date changes
   useEffect(() => {
     filterTransactionsByDate();
   }, [filterTransactionsByDate]);
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchReceivedCash();
   }, []);
 
-  // Refresh data and reset date when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      // Reset to current date
       setSelectedDate(new Date());
-      // Refetch data
+
       fetchReceivedCash();
-    }, [])
+    }, []),
   );
 
-  // Handle date change
   const onDateChange = (event: any, date?: Date) => {
     if (Platform.OS === "android") {
       setShowDatePicker(false);
@@ -214,22 +192,18 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
-  // Show calendar
   const handleCalendarPress = () => {
     setShowDatePicker(true);
   };
 
-  // Close calendar (iOS)
   const handleCalendarClose = () => {
     setShowDatePicker(false);
   };
 
-  // Confirm date selection for iOS
   const handleDateConfirm = () => {
     setShowDatePicker(false);
   };
 
-  // Refresh handler
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchReceivedCash();
@@ -263,14 +237,13 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Filter Tabs - Always show even when no transactions */}
       <View className="bg-white px-4 py-3 flex-row items-center ">
         <Text className="text-sm font-medium text-gray-900">
           {t("ReceivedCash.All")} (
           {transactions.length.toString().padStart(2, "0")})
         </Text>
       </View>
-      {/* Content based on transactions */}
+
       {loading || filterLoading ? (
         <View className="flex-1 justify-center items-center">
           <LottieView
@@ -281,9 +254,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
           />
         </View>
       ) : hasTransactions ? (
-        // Show transactions when data exists
         <>
-          {/* Total Card - Only show when there are transactions */}
           <View className="px-4 py-4">
             <View
               style={{
@@ -302,7 +273,11 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   {t("ReceivedCash.Full Total")} :{" "}
                 </Text>
                 <Text className="text-xl font-bold text-[#980775]">
-                  {t("ReceivedCash.Rs")}{totalCash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {t("ReceivedCash.Rs")}
+                  {totalCash.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </Text>
               </View>
             </View>
@@ -339,7 +314,11 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   </Text>
                   <Text className="text-sm text-black font-medium">
                     {" "}
-                    {t("ReceivedCash.Rs")}{item.cash.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {t("ReceivedCash.Rs")}
+                    {item.cash.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </Text>
                 </View>
                 <Text className="text-xs text-[#848484]">
@@ -347,12 +326,11 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                 </Text>
               </View>
             ))}
-            {/* Add extra space at bottom if needed */}
+
             <View className="h-20" />
           </ScrollView>
         </>
       ) : (
-        // Show empty state when no transactions (but still show the Filter Tabs above)
         <ScrollView
           className="flex-1"
           refreshControl={

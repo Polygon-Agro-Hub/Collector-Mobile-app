@@ -48,19 +48,18 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     const textLength = customerName.length;
 
     if (textLength > 20) {
-      // Calculate scroll distance based on character width (approximately 8-10px per character)
       const scrollDistance = textLength * 9;
 
       const animation = Animated.loop(
         Animated.sequence([
           Animated.delay(1000),
-          // Scroll from right to left
+
           Animated.timing(scrollX, {
             toValue: -scrollDistance,
             duration: textLength * 200,
             useNativeDriver: true,
           }),
-          // Instantly reset to start position
+
           Animated.timing(scrollX, {
             toValue: 0,
             duration: 0,
@@ -170,7 +169,6 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   };
 
   const handleScanOrder = () => {
-    // console.log("invoice number--------------", order.invNo);
     navigation.navigate("qrcode", {
       expectedOrderId: order.invNo,
       fromScreen: "ViewPickupOrders",
@@ -233,11 +231,12 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
               {/* Fixed Name Container with Equal Padding */}
               <View className="mt-2 w-full px-8">
-                <View 
+                <View
                   className="overflow-hidden"
                   style={{
                     width: "100%",
-                    alignItems: customerName.length > 20 ? "flex-start" : "center",
+                    alignItems:
+                      customerName.length > 20 ? "flex-start" : "center",
                   }}
                 >
                   <Animated.Text

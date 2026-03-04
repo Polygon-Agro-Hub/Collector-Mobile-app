@@ -32,7 +32,6 @@ interface ReceivedCashQrCodeProps {
   route: RouteProp<RootStackParamList, "ReceivedCashQrCode">;
 }
 
-// Failed Modal Component
 interface FailedModalProps {
   visible: boolean;
   title?: string;
@@ -323,19 +322,14 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
   const selectedTransactions = route.params?.selectedTransactions || [];
   const { t } = useTranslation();
 
-  console.log("Selected Transactions:", selectedTransactions);
-
-  // Calculate total cash
   const totalCash = selectedTransactions.reduce(
     (sum: number, t: any) => sum + t.cash,
     0,
   );
 
-  // Timer states for timeout
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Modal states
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -344,10 +338,8 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
     "",
   );
 
-  // Track if screen is focused
   const isFocusedRef = useRef(true);
 
-  // Handle screen focus/blur
   useFocusEffect(
     React.useCallback(() => {
       isFocusedRef.current = true;
@@ -448,22 +440,17 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
     ).start();
   };
 
-  // Extract cash officer code from QR data - must be DCM followed by 5 digits
   const extractCashOfficerCode = (qrData: string): string | null => {
     try {
-      console.log("Raw QR Data for cash officer:", qrData);
-
       const dcmOfficerPattern = /DCM\d{5}/gi;
       const dcmMatch = qrData.match(dcmOfficerPattern);
       if (dcmMatch) {
-        console.log("Found DCM officer pattern:", dcmMatch[0]);
         return dcmMatch[0];
       }
 
       if (qrData.startsWith("{") && qrData.endsWith("}")) {
         try {
           const parsed = JSON.parse(qrData);
-          console.log("Parsed JSON for officer:", parsed);
 
           const fieldsToCheck = [
             parsed.officerId,
@@ -479,7 +466,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
               const dcmPattern = /DCM\d{5}/gi;
               const match = field.match(dcmPattern);
               if (match) {
-                console.log("Found DCM officer ID in JSON:", match[0]);
                 return match[0];
               }
             }
@@ -492,11 +478,9 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
       const dcmPatternGlobal = /DCM\d{5}/gi;
       const allMatches = qrData.match(dcmPatternGlobal);
       if (allMatches && allMatches.length > 0) {
-        console.log("Found DCM pattern in string:", allMatches[0]);
         return allMatches[0];
       }
 
-      console.log("No valid DCM officer code found in QR data");
       return null;
     } catch (error) {
       console.error("Error extracting cash officer code:", error);
@@ -521,12 +505,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
         throw new Error("Authentication token not found");
       }
 
-      console.log("Officer Code:", officerCode);
-
       const apiUrl = `${environment.API_BASE_URL}api/pickup/update-cash-received`;
-      console.log("Making API call to:", apiUrl);
-      console.log("Transactions:", transactions);
-      console.log("Total Cash:", totalCash);
 
       const handoverData = {
         officerCode: officerCode,
@@ -541,8 +520,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
         handoverDate: new Date().toISOString(),
       };
 
-      console.log("Handover Data:", handoverData);
-
       const response = await axios.post(apiUrl, handoverData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -551,7 +528,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
         timeout: 10000,
       });
 
-      console.log("API Response:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("Error details:", {
@@ -630,7 +606,8 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
           <View className="items-center">
             <Text className="text-center text-[#000000] text-base">
               <Text className="font-bold">
-                {t("qrcode.Rs")}. {totalCash.toLocaleString("en-US", {
+                {t("qrcode.Rs")}.{" "}
+                {totalCash.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}{" "}
@@ -661,10 +638,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
       const errorMessage = error.response?.data?.message || error.message;
       const statusCode = error.response?.status || error.status;
 
-      console.log("Error details:", { errorMessage, statusCode });
-
-    
-       if (
+      if (
         errorMessage.includes("already handed over") ||
         errorMessage.includes("already processed")
       ) {
@@ -675,7 +649,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
         message = "The cash officer code is not recognized.";
       } else if (statusCode === 403) {
         title = "Not Valid!";
-        message = "This Manager's ID is not acceptable."
+        message = "This Manager's ID is not acceptable.";
       } else if (statusCode === 400) {
         title = "Invalid Request";
         message = errorMessage || "Invalid request. Please try again.";

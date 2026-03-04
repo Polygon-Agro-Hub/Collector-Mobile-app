@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { handleGeneratePDF } from "./ReportPDF";
 import * as Sharing from "expo-sharing";
 import { RouteProp } from "@react-navigation/native";
 import { Platform } from "react-native";
-//import * as FileSystem from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
-import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 type DistributionOfficerReportNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -40,28 +39,25 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [generatedReportId, setGeneratedReportId] = useState<string | null>(
-    null
+    null,
   );
   const [generateAgain, setGenerateAgain] = useState(false);
   const { t } = useTranslation();
 
   const { officerId, collectionOfficerId } = route.params;
-  console.log(officerId);
 
   const getTodayInColombo = () => {
     const now = new Date();
-    const colomboOffset = 330; 
+    const colomboOffset = 330;
     const utcOffset = now.getTimezoneOffset();
     const colomboTime = new Date(
-      now.getTime() + (colomboOffset - utcOffset) * 60 * 1000
+      now.getTime() + (colomboOffset - utcOffset) * 60 * 1000,
     );
-    colomboTime.setHours(0, 0, 0, 0); 
+    colomboTime.setHours(0, 0, 0, 0);
     return colomboTime;
   };
 
   const reportCounters: { [key: string]: number } = {};
-
-//  console.log("...........................................................")
 
   const handleGenerate = async () => {
     setReportGenerated(false);
@@ -69,7 +65,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     if (!startDate || !endDate) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Please select both start and end dates.")
+        t("Error.Please select both start and end dates."),
       );
       return;
     }
@@ -77,31 +73,28 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     if (endDate < startDate) {
       Alert.alert(
         t("Error.error"),
-        t("Error.End date cannot be earlier than the start date.")
+        t("Error.End date cannot be earlier than the start date."),
       );
       return;
     }
 
-  
     const fileUri = await handleGeneratePDF(
       formatDate(startDate),
       formatDate(endDate),
       officerId,
-      collectionOfficerId
+      collectionOfficerId,
     );
     if (fileUri) {
       const reportIdMatch = fileUri.match(/report_(.+)\.pdf/);
       const reportId = reportIdMatch ? reportIdMatch[1] : null;
 
       const generateReportId = (officerId: string): string => {
-    
         if (!reportCounters[officerId]) {
           reportCounters[officerId] = 1;
         } else {
-          reportCounters[officerId] += 1; 
+          reportCounters[officerId] += 1;
         }
 
-   
         const paddedCount = reportCounters[officerId]
           .toString()
           .padStart(3, "0");
@@ -109,10 +102,9 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
       };
 
       const reportIdno = generateReportId(officerId);
-      setGeneratedReportId(reportIdno); 
+      setGeneratedReportId(reportIdno);
       setReportGenerated(true);
       setGenerateAgain(false);
-     
     } else {
       Alert.alert(t("Error.error"), t("Error.Failed to generate PDF"));
       setGenerateAgain(false);
@@ -124,7 +116,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
       if (!startDate || !endDate) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Please select both start and end dates.")
+          t("Error.Please select both start and end dates."),
         );
         return;
       }
@@ -133,7 +125,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
         formatDate(startDate),
         formatDate(endDate),
         officerId,
-        collectionOfficerId
+        collectionOfficerId,
       );
 
       if (!uri) {
@@ -141,62 +133,50 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
         return;
       }
 
-      
-      const date = new Date().toISOString().slice(0, 10); 
-      const fileName = `Report_${officerId}_${date}.pdf`; 
+      const date = new Date().toISOString().slice(0, 10);
+      const fileName = `Report_${officerId}_${date}.pdf`;
 
-    
-      let tempFilePath = uri; 
+      let tempFilePath = uri;
 
       if (Platform.OS === "android") {
-     
         tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
-       
         await FileSystem.copyAsync({
           from: uri,
           to: tempFilePath,
         });
 
-      
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(tempFilePath, {
             dialogTitle: t("Save PDF"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-         
         } else {
           Alert.alert(
             t("Error.error"),
-            t("Error.Failed to save PDF to Downloads folder.")
+            t("Error.Failed to save PDF to Downloads folder."),
           );
         }
       } else if (Platform.OS === "ios") {
-       
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(tempFilePath, {
-           
             dialogTitle: t("Save PDF"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-         
         } else {
           Alert.alert(
             t("Error.error"),
-            t("Error.Failed to save PDF to Downloads folder.")
+            t("Error.Failed to save PDF to Downloads folder."),
           );
         }
       }
-
- 
-      console.log(`PDF prepared for sharing: ${tempFilePath}`);
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(
         t("Error.error"),
-        t("Error.Failed to prepare PDF for download.")
+        t("Error.Failed to prepare PDF for download."),
       );
     }
   };
@@ -205,7 +185,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     if (!startDate || !endDate) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Please select both start and end dates.")
+        t("Error.Please select both start and end dates."),
       );
       return;
     }
@@ -214,14 +194,14 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
       formatDate(startDate),
       formatDate(endDate),
       officerId,
-      collectionOfficerId
+      collectionOfficerId,
     );
     if (fileUri && (await Sharing.isAvailableAsync())) {
       await Sharing.shareAsync(fileUri, { mimeType: "application/pdf" });
     } else {
       Alert.alert(
         t("Error.error"),
-        t("Error.Sharing is not available on this device.")
+        t("Error.Sharing is not available on this device."),
       );
     }
   };
@@ -236,17 +216,16 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     if (!date) return "Select Date";
     return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(
       2,
-      "0"
+      "0",
     )}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
   const handleDateChange = (
     event: any,
     selectedDate: Date | undefined,
-    type: string
+    type: string,
   ) => {
     if (event.type === "set") {
-      // User confirmed
       if (type === "start") {
         setStartDate(selectedDate || startDate);
         setShowStartPicker(false);
@@ -255,7 +234,6 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
         setShowEndPicker(false);
       }
     } else {
-      // User cancelled
       if (type === "start") setShowStartPicker(false);
       else setShowEndPicker(false);
     }
@@ -263,18 +241,12 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="flex-row items-center  p-6 rounded-b-lg">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute top-4 left-4 bg-[#F6F6F680] rounded-full p-2 z-50"
-        >
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <Text className="text-black text-lg font-semibold text-center w-full">
-          {officerId}
-        </Text>
-      </View>
+      <CustomHeader
+        title={officerId}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       {/* Form Section */}
       <View className="px-8 mt-8">
@@ -301,7 +273,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
               value={startDate || new Date()}
               mode="date"
               display="default"
-              maximumDate={getTodayInColombo()} // Disallow future dates
+              maximumDate={getTodayInColombo()}
               onChange={(event, date) => handleDateChange(event, date, "start")}
             />
           )}
@@ -313,7 +285,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
                   mode="date"
                   display="inline"
                   style={{ width: 320, height: 260 }}
-                  maximumDate={getTodayInColombo()} // Disallow future dates
+                  maximumDate={getTodayInColombo()}
                   onChange={(event, date) =>
                     handleDateChange(event, date, "start")
                   }
@@ -344,7 +316,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
               value={endDate || new Date()}
               mode="date"
               display="default"
-              maximumDate={getTodayInColombo()} 
+              maximumDate={getTodayInColombo()}
               minimumDate={startDate}
               onChange={(event, date) => handleDateChange(event, date, "end")}
             />
@@ -357,8 +329,8 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
                   mode="date"
                   display="inline"
                   style={{ width: 320, height: 260 }}
-                  maximumDate={getTodayInColombo()} 
-                  minimumDate={startDate} 
+                  maximumDate={getTodayInColombo()}
+                  minimumDate={startDate}
                   onChange={(event, date) =>
                     handleDateChange(event, date, "end")
                   }
@@ -417,17 +389,15 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
             />
           </View>
 
-       
           <Text className="text-sm text-gray-500 italic mb-6">
             {t("ReportGenerator.Report has been generated")}
           </Text>
-
 
           <View className="flex-row space-x-8">
             <TouchableOpacity
               onPress={handleDownload}
               className="bg-[#000000] rounded-lg items-center justify-center"
-              style={{ width: 100, height: 70 }} 
+              style={{ width: 100, height: 70 }}
             >
               <Ionicons name="download" size={24} color="white" />
               <Text className="text-sm text-white mt-1">

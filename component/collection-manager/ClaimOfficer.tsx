@@ -21,6 +21,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 interface OfficerDetails {
   id: number;
@@ -244,21 +245,13 @@ const ClaimOfficer: React.FC = () => {
 
   return (
     <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000502" />
-        </TouchableOpacity>
-
-        <View className="flex-1 ">
-          <Text className="text-lg font-bold text-center mr-[5%]">
-            {t("ClaimOfficer.ClaimOfficers")}
-          </Text>
-        </View>
-      </View>
+     
+       <CustomHeader
+        title={t("ClaimOfficer.ClaimOfficers")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       <View className="px-8 mt-2">
         <View className="px-8 mt-7"></View>

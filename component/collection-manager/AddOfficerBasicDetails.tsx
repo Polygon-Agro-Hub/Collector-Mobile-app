@@ -16,7 +16,6 @@ import { RootStackParamList } from "../types";
 import { RouteProp } from "@react-navigation/native";
 import { OfficerBasicDetailsFormData } from "../types";
 import { environment } from "@/environment/environment";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
@@ -26,6 +25,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
 import DropDownPicker from "react-native-dropdown-picker";
 import countryData from "../../assets/jsons/countryflag.json";
+import CustomHeader from "../common/CustomHeader";
 
 type AddOfficerBasicDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -619,28 +619,20 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         className="flex-1 bg-white"
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-          <TouchableOpacity
-            onPress={async () => {
-              try {
-                await AsyncStorage.removeItem("officerFormData");
-                navigation.goBack();
-              } catch (error) {
-                console.error("Error clearing form data:", error);
-              }
-            }}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
-
-          <View className="flex-1 justify-center items-center mr-[8%]">
-            <Text className="text-lg font-bold text-center">
-              {t("AddOfficerBasicDetails.AddOfficer")}
-            </Text>
-          </View>
-        </View>
+      
+        <CustomHeader
+          title={t("AddOfficerBasicDetails.AddOfficer")}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={async () => {
+            try {
+              await AsyncStorage.removeItem("officerFormData");
+              navigation.goBack();
+            } catch (error) {
+              console.error("Error clearing form data:", error);
+            }
+          }}
+        />
 
         {/* Profile Avatar */}
         <View className="justify-center items-center my-4 relative">

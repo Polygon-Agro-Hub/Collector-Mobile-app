@@ -426,8 +426,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         throw new Error("Authentication token not found. Please login again.");
       }
 
-      // console.log("Making request to:", `${environment.API_BASE_URL}api/distribution-manager/get-dcenter-target`);
-
       const response = await axios.get(
         `${environment.API_BASE_URL}api/distribution-manager/get-dcenter-target`,
         {
@@ -442,24 +440,18 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         const apiData = response.data.data;
         const mappedData = mapApiDataToTargetData(apiData);
 
-        console.log("Mapped data sample:", mappedData.slice(0, 2));
-
         const todoItems = mappedData.filter((item: TargetData) => {
           const isPendingOrOpened = ["Pending", "Opened"].includes(
             item.selectedStatus,
           );
-          console.log(
-            `ToDo filter - Item ${item.invoiceNo}: selectedStatus="${item.selectedStatus}", isPendingOrOpened=${isPendingOrOpened}`,
-          );
+
           return isPendingOrOpened;
         });
 
         const completedItems = mappedData.filter((item: TargetData) => {
           const isCompleted =
             item.isComplete === 1 && item.status === "Processing";
-          console.log(
-            `Completed filter - Item ${item.invoiceNo}: isComplete=${item.isComplete}, status="${item.status}", isCompleted=${isCompleted}`,
-          );
+
           return isCompleted;
         });
 
@@ -467,15 +459,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           const isOutStatus =
             item.status === "Out For Delivery" ||
             item.status === "Ready to Pickup";
-          console.log(
-            `Out filter - Item ${item.invoiceNo}: status="${item.status}", isOutStatus=${isOutStatus}`,
-          );
+
           return isOutStatus;
         });
-
-        console.log("Todo Items count:", todoItems.length);
-        console.log("Completed Items count:", completedItems.length);
-        console.log("Out Items count:", outItems.length);
 
         setTodoData(sortByVarietyAndGrade(todoItems));
         setCompletedData(sortByVarietyAndGrade(completedItems));
@@ -908,7 +894,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       </TouchableOpacity>
     );
   };
-  
+
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedItems([]);
@@ -953,7 +939,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     setSelectedItems([]);
   };
 
-  // Function to handle right header icon press
   const handleRightIconPress = () => {
     if (selectedToggle === "ToDo") {
       if (hasActiveFilter) {
@@ -972,7 +957,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  // Function to handle correct/close icons for completed section
   const handleCompletedActionPress = (action: "correct" | "close") => {
     if (action === "correct") {
       handleCorrectIconPress();
@@ -990,7 +974,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         throw new Error("Authentication token not found. Please login again.");
       }
 
-      // Get selected order items with full data - Add null check
       const selectedOrdersData = selectedItems
         .map((itemId) => {
           const item = [...todoData, ...completedData, ...outData].find(
@@ -1004,7 +987,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         throw new Error("No valid order items found for selection");
       }
 
-      // Prepare order IDs for status update
       const orderIds = selectedOrdersData
         .map((item) => item.orderId)
         .filter((id): id is string => id !== undefined && id !== null);
@@ -1012,8 +994,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       if (orderIds.length === 0) {
         throw new Error("No valid order IDs found for selected items");
       }
-
-      console.log("Updating orders to Out For Delivery:", orderIds);
 
       const statusUpdateResponse = await axios.put(
         `${environment.API_BASE_URL}api/distribution/update-outForDelivery`,
@@ -1032,10 +1012,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         );
       }
 
-      // console.log("Status updated successfully:", statusUpdateResponse.data);
-
-      console.log("Fetching complete order details for:", orderIds);
-
       const orderDetailsResult = await fetchOrderDetailsByIds(
         orderIds,
         authToken,
@@ -1053,8 +1029,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         orderDetailsResult.successful,
         authToken,
       );
-
-      console.log("Email processing result:", emailResult);
 
       let successMessage = `Successfully processed ${orderIds.length} orders.`;
 
@@ -1174,7 +1148,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     try {
       const date = new Date(dateString);
 
-      // No offset adjustment - server already sends IST time
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const ampm = hours >= 12 ? "PM" : "AM";
@@ -1193,7 +1166,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="absolute left-4 bg-white/10 rounded-full  justify-center items-center"
-          style={{ width: 40, height: 40 }} // Set fixed dimensions for perfect circle
+          style={{ width: 40, height: 40 }}
         >
           <AntDesign name="left" size={22} color="white" />
         </TouchableOpacity>
@@ -1768,16 +1741,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         </View>
       ) : (
         <View className="flex-row bg-[#980775] py-3">
-          {/* <Text 
-                  style={[
-  i18n.language === "si"
-    ? { fontSize: 12 }
-    : i18n.language === "ta"
-    ? { fontSize: 12 }
-    : { fontSize: 15 }
-]}
-      className="flex-1 text-center text-white font-bold">{selectedToggle === 'ToDo' ? t("TargetOrderScreen.No") : ''}</Text> */}
-
           {selectedToggle === "ToDo" ? (
             <Text
               style={[
@@ -1891,10 +1854,8 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 )}
               </View>
 
-              {/* Invoice Number */}
               <View className="flex-[2] items-center justify-center px-2">
                 <Text className="text-center font-medium text-gray-800">
-                  {/* {item.invoiceNo || `INV${item.id || (index + 1).toString().padStart(6, '0')}`} */}
                   {item.invoiceNo}
                 </Text>
               </View>
@@ -1915,13 +1876,13 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                       className={`px-3 py-2 rounded-full ${
                         getOutingStatus(item.outDlvrDate, item.sheduleTime) ===
                         "On Time"
-                          ? "bg-" // Add background color if needed
+                          ? "bg-"
                           : getOutingStatus(
                                 item.outDlvrDate,
                                 item.sheduleTime,
                               ) === "On Time"
-                            ? "bg-" // Add background color if needed
-                            : "bg-" // Add background color if needed
+                            ? "bg-"
+                            : "bg-"
                       }`}
                     >
                       <Text
@@ -1946,7 +1907,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 </>
               ) : selectedToggle === "Completed" ? (
                 <>
-                  {/* Completed Time */}////////////
                   <View className="flex-[2] items-center justify-center px-2">
                     <Text className="text-center text-gray-600 text-sm">
                       {item.completedTime
@@ -1954,7 +1914,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                         : "N/A"}
                     </Text>
                   </View>
-                  {/* Schedule Display with Status */}
+
                   <View className="flex-[2] items-center justify-center px-2">
                     {(() => {
                       const status = getCompletionStatus(
@@ -1970,7 +1930,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                         <View className="items-center">
                           <Text
                             className={`text-center font-medium text-xs ${
-                              // Only show red/purple for TODAY's scheduled date, everything else black
                               isScheduleDateToday(item.sheduleDate)
                                 ? status === "on-time"
                                   ? "text-[#980775]"

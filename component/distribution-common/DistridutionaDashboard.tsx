@@ -19,7 +19,6 @@ import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
 import { FontAwesome6 } from "@expo/vector-icons";
 
-
 type DistridutionaDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
   "DistridutionaDashboard"
@@ -41,17 +40,19 @@ interface ProfileData {
   companyNameSinhala: string;
   companyNameEnglish: string;
   companyNameTamil: string;
-  jobRole:string;
+  jobRole: string;
   centerId: number;
 }
 
-const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigation }) => {
+const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
+  navigation,
+}) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [empId, setEmpId] = useState<string | null>(null);
   const [jobRole, setJobeRole] = useState<string | null>(null);
   const [centerId, setCenterId] = useState<string | null>(null);
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
-  const [isLoadingTarget, setIsLoadingTarget] = useState(true); 
+  const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -73,24 +74,20 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           `${environment.API_BASE_URL}api/distribution-manager/user-profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setProfile(response.data.data);
         setEmpId(response.data.data.empId);
-        setJobeRole(response.data.data.jobRole)
-        setCenterId(response.data.data.centerId); 
-     //   console.log("data:", response.data.data);
+        setJobeRole(response.data.data.jobRole);
+        setCenterId(response.data.data.centerId);
       }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
     }
   };
 
-  console.log("jobeJole-----------------",jobRole)
-  console.log("centerId--------",centerId)
-
   const fetchTargetPercentage = async () => {
-    setIsLoadingTarget(true); 
+    setIsLoadingTarget(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -102,16 +99,19 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
         `${environment.API_BASE_URL}api/distribution/get-distribution-target`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
-     console.log("response for percentage target", response.data);
-      
-      if (response.data.success && response.data.data && response.data.data.length > 0) {
+
+      if (
+        response.data.success &&
+        response.data.data &&
+        response.data.data.length > 0
+      ) {
         const targets = response.data.data;
         const firstTarget = targets[0];
         const percentage = parseInt(
           firstTarget.completionPercentage.replace("%", ""),
-          10
+          10,
         );
         setTargetPercentage(percentage);
       } else {
@@ -121,7 +121,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
       console.error("Failed to fetch target percentage:", error);
       setTargetPercentage(0);
     } finally {
-      setIsLoadingTarget(false); // Set loading to false when done
+      setIsLoadingTarget(false);
     }
   };
 
@@ -144,9 +144,12 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
     useCallback(() => {
       const onBackPress = () => true;
       BackHandler.addEventListener("hardwareBackPress", onBackPress);
-       const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
       return () => subscription.remove();
-    }, [])
+    }, []),
   );
 
   const checkTokenExpiration = async () => {
@@ -209,15 +212,13 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
     }
   };
 
-  
   const renderTargetStatus = () => {
-  
     if (isLoadingTarget) {
       return (
-        <View 
+        <View
           className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4"
           style={{
-            shadowColor: '#000000',
+            shadowColor: "#000000",
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -231,13 +232,12 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
       );
     }
 
-   
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View 
+        <View
           className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4"
           style={{
-            shadowColor: '#000000',
+            shadowColor: "#000000",
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -254,10 +254,10 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
       );
     } else {
       return (
-        <View 
+        <View
           className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4"
           style={{
-            shadowColor: '#000000',
+            shadowColor: "#000000",
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -288,44 +288,38 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-  
-      <TouchableOpacity         
-        className="flex-row items-center  p-4"         
-        onPress={() => navigation.navigate("EngProfile")}       
-      >         
-        <Image           
-          source={             
-            profile?.image               
-              ? { uri: profile.image }               
-              : require("../../assets/images/auth/my-profile.webp")           
-          }           
-          className="w-16 h-16 rounded-full mr-3"           
-          onError={() => console.log("Failed to load image")}         
-        />          
+      <TouchableOpacity
+        className="flex-row items-center  p-4"
+        onPress={() => navigation.navigate("EngProfile")}
+      >
+        <Image
+          source={
+            profile?.image
+              ? { uri: profile.image }
+              : require("../../assets/images/auth/my-profile.webp")
+          }
+          className="w-16 h-16 rounded-full mr-3"
+        />
 
-        <View style={{ flex: 1 }}>           
-          <Text             
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}             
-            className="text-lg font-bold"           
-          >             
-            {getFullName()}           
-          </Text>           
-          
-          <Text             
-            style={[
-              { fontSize: 16 }, 
-              getTextStyle(selectedLanguage)
-            ]}             
+        <View style={{ flex: 1 }}>
+          <Text
+            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            className="text-lg font-bold"
+          >
+            {getFullName()}
+          </Text>
+
+          <Text
+            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             className="text-gray-500"
             numberOfLines={1}
-            ellipsizeMode="tail"           
-          >             
-            {getcompanyName()}           
-          </Text>         
-        </View>       
+            ellipsizeMode="tail"
+          >
+            {getcompanyName()}
+          </Text>
+        </View>
       </TouchableOpacity>
 
-    
       {renderTargetStatus()}
 
       <View className="flex items-center justify-center  mt-[5%]">
@@ -339,7 +333,11 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           />
           <View className="absolute items-center justify-center h-24 w-24">
             <Text className="text-2xl font-bold ml-3  mt-1">
-              {isLoadingTarget ? "..." : (targetPercentage !== null ? `${targetPercentage}%` : "0%")}
+              {isLoadingTarget
+                ? "..."
+                : targetPercentage !== null
+                  ? `${targetPercentage}%`
+                  : "0%"}
             </Text>
           </View>
         </View>
@@ -358,13 +356,15 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
         </Text>
       </View>
 
-
       <View className="flex-row flex-wrap justify-between p-6 mt-[-5%]">
-        {/* Conditional First Button - Center Target OR Target Orders */}
         {jobRole === "Distribution Centre Manager" ? (
-          <TouchableOpacity           
-            className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative border border-[#980775] mb-50"           
-            onPress={() => navigation.navigate("CenterTargetScreen", { centerId: centerId } as any)}         
+          <TouchableOpacity
+            className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative border border-[#980775] mb-50"
+            onPress={() =>
+              navigation.navigate("CenterTargetScreen", {
+                centerId: centerId,
+              } as any)
+            }
           >
             <Image
               source={require("../../assets/images/dashboard/center-target.webp")}
@@ -386,7 +386,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
               source={require("../../assets/images/dashboard/packing.webp")}
               className="w-8 h-8 absolute top-2 right-2"
             />
-      
+
             <Text
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
               className="text-[#555464] text-lg absolute bottom-2 left-2"
@@ -396,29 +396,21 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           </TouchableOpacity>
         )}
 
-        {/* Received Cash Button - For Both Roles */}
         <TouchableOpacity
-  className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
-  onPress={() => {
-    if (jobRole === "Distribution Centre Manager") {
-      navigation.navigate("ReceivedCash" as any);
-    } else if (jobRole === "Distribution Officer") {
-      navigation.navigate("ReceivedCashOfficer" as any);
-    } else {
-      // Fallback or default navigation
-      navigation.navigate("ReceivedCash" as any);
-    }
-  }}
->
-          {/* <Image
-            source={require("../../assets/images/New/receivedcash.png")}
-            className="w-8 h-8 absolute top-2 right-2"
-          /> */}
+          className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
+          onPress={() => {
+            if (jobRole === "Distribution Centre Manager") {
+              navigation.navigate("ReceivedCash" as any);
+            } else if (jobRole === "Distribution Officer") {
+              navigation.navigate("ReceivedCashOfficer" as any);
+            } else {
+              navigation.navigate("ReceivedCash" as any);
+            }
+          }}
+        >
           <View className="absolute top-2 right-2">
-                <FontAwesome6 name="hand-holding-hand" size={24} color="#980775" 
-              
-                />
-                </View>
+            <FontAwesome6 name="hand-holding-hand" size={24} color="#980775" />
+          </View>
           <Text
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             className="text-[#555464] text-lg absolute bottom-2 left-2"
@@ -427,20 +419,13 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({ navigat
           </Text>
         </TouchableOpacity>
 
-        {/* Pickup Order Scan Button - For Both Roles */}
         <TouchableOpacity
           className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
           onPress={() => navigation.navigate("ReadytoPickupOrders" as any)}
         >
-          {/* <Image
-            source={require("../../assets/images/New/pickuporder.png")}
-            className="w-8 h-8 absolute top-2 right-2"
-          /> */}
-           <View className="absolute top-2 right-2">
-                <FontAwesome6 name="qrcode" size={24} color="#980775" 
-              
-                />
-                </View>
+          <View className="absolute top-2 right-2">
+            <FontAwesome6 name="qrcode" size={24} color="#980775" />
+          </View>
           <Text
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             className="text-[#555464] text-lg absolute bottom-2 left-2"

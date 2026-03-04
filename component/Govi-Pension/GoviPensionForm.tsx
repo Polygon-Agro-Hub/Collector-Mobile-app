@@ -75,7 +75,6 @@ const CustomDatePicker = ({
 
   const { t } = useTranslation();
 
-  // Generate years array (from 1900 to current year)
   const startYear = minimumDate ? minimumDate.getFullYear() : 1900;
   const endYear = maximumDate.getFullYear();
   const years = Array.from(
@@ -98,7 +97,6 @@ const CustomDatePicker = ({
     { label: t("GoviPensionForm.December") || "December", value: 11 },
   ];
 
-  // Get days in selected month
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
   };
@@ -106,7 +104,6 @@ const CustomDatePicker = ({
   const daysInMonth = getDaysInMonth(selectedYear, selectedMonth);
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // Adjust day if it exceeds days in selected month
   useEffect(() => {
     if (selectedDay > daysInMonth) {
       setSelectedDay(daysInMonth);
@@ -247,19 +244,16 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get route params
   const route = useRoute<GoviPensionFormProps["route"]>();
   const { farmerNIC, farmerName, farmerPhone, userId } = route.params || {};
 
   const [formData, setFormData] = useState<FormData>({
-    // Section 1
     fullName: "",
     dateOfBirth: null,
     nicNumber: "",
     nicFrontImage: null,
     nicBackImage: null,
 
-    // Section 2
     successorFullName: "",
     successorRelationship: "",
     successorDateOfBirth: null,
@@ -270,7 +264,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     successorBirthCertBackImage: null,
   });
 
-  // Modal states
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -278,14 +271,12 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     "",
   );
 
-  // Custom date picker states
   const [showCustomDobPicker, setShowCustomDobPicker] = useState(false);
   const [showCustomSuccessorDobPicker, setShowCustomSuccessorDobPicker] =
     useState(false);
 
   const { t, i18n } = useTranslation();
 
-  // Relationship options
   const relationshipOptions = [
     { label: t("GoviPensionForm.Wife"), value: "Wife" },
     { label: t("GoviPensionForm.Husband"), value: "Husband" },
@@ -293,11 +284,9 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     { label: t("GoviPensionForm.Daughter"), value: "Daughter" },
   ];
 
-  // Split relationship options into columns
   const leftColumnOptions = relationshipOptions.slice(0, 2);
   const rightColumnOptions = relationshipOptions.slice(2);
 
-  // Initialize form with farmer data from params
   useEffect(() => {
     if (farmerNIC) {
       setFormData((prev) => ({
@@ -309,7 +298,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     setIsLoading(false);
   }, [farmerNIC, farmerName]);
 
-  // Calculate age from date
   const calculateAge = (birthDate: Date): number => {
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -325,13 +313,11 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     return age;
   };
 
-  // Check if successor is 18 or older
   const isSuccessorOver18 = (): boolean => {
     if (!formData.successorDateOfBirth) return false;
     return calculateAge(formData.successorDateOfBirth) >= 18;
   };
 
-  // NIC validation function
   const validateNIC = (nic: string): boolean => {
     const cleanNIC = nic.trim();
     const oldNICPattern = /^[0-9]{9}[Vv]$/;
@@ -339,7 +325,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     return oldNICPattern.test(cleanNIC) || newNICPattern.test(cleanNIC);
   };
 
-  // Format date for display
   const formatDate = (date: Date | null): string => {
     if (!date) return "";
     const day = date.getDate().toString().padStart(2, "0");
@@ -348,13 +333,11 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     return `${year}-${month}-${day}`;
   };
 
-  // Format date for API (MySQL timestamp format)
   const formatDateForAPI = (date: Date | null): string => {
     if (!date) return "";
     return date.toISOString().slice(0, 19).replace("T", " ");
   };
 
-  // Request permission and pick image from gallery
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -433,7 +416,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     }
   };
 
-  // Validation functions
   const isSection1Valid = () => {
     return (
       formData.fullName.trim() &&
@@ -448,7 +430,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const isSection2Valid = () => {
     const isOver18 = isSuccessorOver18();
 
-    // Check basic fields
     const basicFieldsValid =
       formData.successorFullName.trim() &&
       formData.successorRelationship &&
@@ -456,7 +437,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
     if (!basicFieldsValid) return false;
 
-    // If over 18, validate NIC fields
     if (isOver18) {
       const nicValid =
         formData.successorNicNumber.trim() &&
@@ -465,7 +445,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         formData.successorNicFrontImage && formData.successorNicBackImage;
       return nicValid && nicImagesValid;
     } else {
-      // Under 18, validate birth certificate fields
       return (
         formData.successorBirthCertFrontImage &&
         formData.successorBirthCertBackImage
@@ -527,7 +506,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const handleSubmit = async () => {
     const isOver18 = isSuccessorOver18();
 
-    // Validate basic fields
     if (!formData.successorFullName.trim()) {
       Alert.alert("Validation Error", "Please enter successor's full name");
       return;
@@ -572,7 +550,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         return;
       }
     } else {
-      // Validate birth certificate for under 18
       if (!formData.successorBirthCertFrontImage) {
         Alert.alert(
           "Validation Error",
@@ -597,7 +574,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     setIsSubmitting(true);
 
     try {
-      // Create FormData for multipart/form-data request
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         setModalTitle("Session Expired");
@@ -609,7 +585,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
       const formDataToSend = new FormData();
 
-      // Add text fields - NIC is automatically filled from backend, but we send it anyway
       formDataToSend.append("fullName", formData.fullName);
       formDataToSend.append("nic", formData.nicNumber);
       formDataToSend.append("dob", formatDateForAPI(formData.dateOfBirth));
@@ -624,7 +599,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         formDataToSend.append("sucNic", formData.successorNicNumber);
       }
 
-      // Helper function to add images to FormData
       const addImageToFormData = (uri: string | null, fieldName: string) => {
         if (uri) {
           const uriParts = uri.split(".");
@@ -638,11 +612,9 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         }
       };
 
-      // Add applicant NIC images
       addImageToFormData(formData.nicFrontImage, "nicFront");
       addImageToFormData(formData.nicBackImage, "nicBack");
 
-      // Add successor images based on age
       if (isOver18) {
         addImageToFormData(formData.successorNicFrontImage, "sucNicFront");
         addImageToFormData(formData.successorNicBackImage, "sucNicBack");
@@ -657,9 +629,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         );
       }
 
-      console.log("Submitting pension request...", formDataToSend);
-
-      // Submit form
       const response = await axios.post(
         `${environment.API_BASE_URL}api/pension/pension-request/submit`,
         formDataToSend,
@@ -671,8 +640,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           timeout: 30000,
         },
       );
-
-      console.log("Response:", response.data);
 
       if (response.data.status || response.data.success) {
         setModalTitle("Success!");
@@ -724,7 +691,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Render Section 1: Applicant Details
   const renderSection1 = () => (
     <ScrollView
       className="flex-1 px-5"
@@ -850,7 +816,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     </ScrollView>
   );
 
-  // Render Section 2: Successor Details
   const renderSection2 = () => {
     const isOver18 = isSuccessorOver18();
     const age = formData.successorDateOfBirth
@@ -950,7 +915,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         {formData.successorDateOfBirth ? (
           isOver18 ? (
             <>
-              {/* Successor's NIC Number */}
               <View className="mb-5">
                 <Text className="text-[#070707] mb-2">
                   {t("GoviPensionForm.Successor's NIC Number")} *

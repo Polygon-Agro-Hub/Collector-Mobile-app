@@ -21,9 +21,9 @@ import { useTranslation } from "react-i18next";
 import { Dimensions } from "react-native";
 import { Modal } from "react-native";
 import { Animated } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -445,17 +445,12 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         keyboardShouldPersistTaps="handled"
         style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
       >
-        <View>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
-        </View>
-        <View className="flex justify-center items-center mt-0 mr-[5%]">
-          <Text className="text-black" style={{ fontSize: wp(8) }}></Text>
-        </View>
+        <CustomHeader
+          title={t("")}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => navigation.goBack()}
+        />
 
         <View
           className="flex justify-center items-center"

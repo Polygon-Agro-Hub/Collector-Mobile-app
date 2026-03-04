@@ -151,8 +151,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
-  console.log("jobeJole-----------------", jobRole);
-
   const fetchSelectedLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
@@ -328,11 +326,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
           const mappedData = mapApiDataToTargetData(apiData);
 
-          if (mappedData && mappedData.length > 0) {
-            // console.log("First mapped item:", JSON.stringify(mappedData[0], null, 2));
-            // console.log("Package lock in mapped item:", mappedData[0].packageIsLock);
-          }
-
           const todoItems = mappedData.filter((item: TargetData) =>
             ["Pending", "Opened"].includes(item.selectedStatus),
           );
@@ -434,8 +427,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
       invoiceNo: item.invoiceNo,
       allData: selectedToggle === "ToDo" ? todoData : completedData,
     };
-
-    console.log("=======================", item.selectedStatus);
 
     switch (item.selectedStatus) {
       case "Pending":

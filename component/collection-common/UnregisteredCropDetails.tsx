@@ -33,6 +33,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -921,430 +922,434 @@ TID: ${invoiceNumber}
       style={{ flex: 1 }}
     >
       <ScrollView
-        className="flex-1 bg-gray-50 px-6 py-4 mb-8"
-        style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+        className="flex-1 bg-white  mb-8"
+        style={{ paddingVertical: hp(2) }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-row items-center mb-6">
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("FarmerQr", {
-                userId: userId,
-              } as any);
-            }}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
-          <Text className="flex-1 text-center text-xl font-bold text-black mr-[5%]">
-            {t("UnregisteredCropDetails.FillDetails")}
-          </Text>
-        </View>
-        <View className="-mb-4">
-          <View className="justify-center items-center">
-            {crops.length > 1 && (
-              <TouchableOpacity
-                onPress={scrollToPrevious}
-                style={{
-                  position: "absolute",
-                  left: 1,
-                  zIndex: 10,
-                  opacity: isAtStart ? 0.3 : 1,
-                }}
-                disabled={isAtStart}
-              >
-                <Entypo name="chevron-left" size={34} color="#374151" />
-              </TouchableOpacity>
-            )}
-
-            {crops.length > 0 && (
-              <ScrollView
-                ref={scrollViewRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ marginBottom: 20 }}
-                contentContainerStyle={{
-                  paddingHorizontal: wp(6),
-                  alignItems: "center",
-                }}
-                className="flex-row"
-                onScroll={onScroll}
-                snapToInterval={wp(70) + 10}
-                decelerationRate="fast"
-                snapToAlignment="center"
-              >
-                {crops.map((crop, index) => {
-                  const availableGrades = ["A", "B", "C"].filter(
-                    (grade) => crop[`grade${grade}quan`] > 0,
-                  );
-
-                  const isVarietyDeleting = deletingVariety === index;
-
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        width: wp(70),
-                        marginHorizontal: 10,
-                        padding: 12,
-                        opacity: isVarietyDeleting ? 0.6 : 1,
-                        backgroundColor: isVarietyDeleting
-                          ? "#f5f5f5"
-                          : "transparent",
-                      }}
-                    >
-                      <View className="flex-row items-center mb-2">
-                        <Text className="font-bold text-base mr-2 flex-1">
-                          ({index + 1}){" "}
-                          {crop.varietyName.length > 20
-                            ? `${crop.varietyName.slice(0, 20)}...`
-                            : crop.varietyName}
-                        </Text>
-
-                        {isVarietyDeleting ? (
-                          <View className="w-6 h-6 justify-center items-center">
-                            <ActivityIndicator size="small" color="#ff0000" />
-                          </View>
-                        ) : (
-                          <TouchableOpacity
-                            onPress={() => deleteVariety(index)}
-                          >
-                            <MdIcons
-                              name="delete"
-                              size={22}
-                              style={{ color: "red" }}
-                            />
-                          </TouchableOpacity>
-                        )}
-                      </View>
-
-                      <View className="border border-[#d4d4d4] rounded-lg">
-                        {availableGrades.map((grade, gIndex) => {
-                          const isGradeDeleting =
-                            deletingGrade?.cropIndex === index &&
-                            deletingGrade?.grade === grade;
-
-                          return (
-                            <View
-                              key={grade}
-                              style={{
-                                marginTop: 6,
-                                borderBottomWidth:
-                                  gIndex !== availableGrades.length - 1 ? 1 : 0,
-                                borderBottomColor: "#d4d4d4",
-                                paddingBottom:
-                                  gIndex !== availableGrades.length - 1 ? 6 : 0,
-                                opacity: isGradeDeleting ? 0.6 : 1,
-                                backgroundColor: isGradeDeleting
-                                  ? "#f5f5f5"
-                                  : "transparent",
-                              }}
-                              className="flex-row items-center justify-between p-1 mb-1"
-                            >
-                              <Text className="font-bold ml-2">{grade}</Text>
-                              <Text className="font-bold">
-                                {crop[`grade${grade}quan`]}kg
-                              </Text>
-
-                              {isGradeDeleting ? (
-                                <View className="w-6 h-6 justify-center items-center mr-2">
-                                  <ActivityIndicator
-                                    size="small"
-                                    color="#ff0000"
-                                  />
-                                </View>
-                              ) : (
-                                <TouchableOpacity
-                                  onPress={() =>
-                                    deleteGrade(
-                                      index,
-                                      grade as "A" | "B" | "C",
-                                      crop.varietyName,
-                                    )
-                                  }
-                                  className="mr-2"
-                                >
-                                  <MdIcons
-                                    name="delete"
-                                    size={22}
-                                    style={{ color: "red" }}
-                                  />
-                                </TouchableOpacity>
-                              )}
-                            </View>
-                          );
-                        })}
-                      </View>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            )}
-
-            {crops.length > 1 && (
-              <TouchableOpacity
-                onPress={scrollToNext}
-                style={{
-                  position: "absolute",
-                  right: 1,
-                  zIndex: 10,
-                  opacity: isAtEnd ? 0.3 : 1,
-                }}
-                disabled={isAtEnd}
-              >
-                <Entypo name="chevron-right" size={34} color="#000000" />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-
-        {crops.length > 0 && (
-          <View className="mt-2 mb-2">
-            <DashedLine dashLength={5} dashGap={4} dashColor="#980775" />
-          </View>
-        )}
-
-        <Text className="text-center text-md font-medium mt-2">
-          {t("UnregisteredCropDetails.Crop")} {cropCount}
-        </Text>
-
-        <View className="mb-6 border-b p-2 border-gray-200 pb-6">
-          <Text className="text-gray-600 mt-4">
-            {t("UnregisteredCropDetails.CropName")}
-          </Text>
-          <View className="mt-2">
-            <SelectList
-              key={selectedCrop ? selectedCrop.id : Math.random()}
-              defaultOption={
-                selectedCrop
-                  ? { key: selectedCrop.id, value: selectedCrop.name }
-                  : undefined
-              }
-              setSelected={(val: string) => {
-                const selectedCropObj = cropNames.find((crop) =>
-                  selectedLanguage === "en"
-                    ? crop.cropNameEnglish === val
-                    : selectedLanguage === "si"
-                      ? crop.cropNameSinhala === val
-                      : crop.cropNameTamil === val,
-                );
-                if (selectedCropObj) {
-                  handleCropChange(selectedCropObj);
-                }
-              }}
-              boxStyles={{
-                height: 50,
-                width: "100%",
-                borderColor: "#FFFFFF",
-                paddingLeft: 14,
-                paddingRight: 8,
-                backgroundColor: "#F4F4F4",
-                borderRadius: 50,
-              }}
-              data={cropNames.map((crop) => ({
-                key: crop.id,
-                value:
-                  selectedLanguage === "en"
-                    ? crop.cropNameEnglish
-                    : selectedLanguage === "si"
-                      ? crop.cropNameSinhala
-                      : crop.cropNameTamil,
-              }))}
-              save="value"
-              placeholder={t("UnregisteredCropDetails.Select Crop")}
-              searchPlaceholder={t("search")}
-            />
-          </View>
-
-          <Text className="text-gray-600 mt-4">
-            {t("UnregisteredCropDetails.Variety")}
-          </Text>
-          <View className="mt-2">
-            <SelectList
-              key={selectedVariety ? selectedVariety : Math.random()}
-              setSelected={(itemValue: string) =>
-                selectedCrop ? handleVarietyChange(itemValue) : null
-              }
-              data={[
-                ...varieties
-                  .filter((variety) => !usedVarietyIds.includes(variety.id))
-                  .map((variety) => ({
-                    key: variety.id,
-                    value: variety.variety,
-                  })),
-              ]}
-              save="key"
-              defaultOption={
-                selectedVariety
-                  ? {
-                      key: selectedVariety,
-                      value:
-                        varieties.find((v) => v.id === selectedVariety)
-                          ?.variety || "Select Variety",
-                    }
-                  : undefined
-              }
-              placeholder={t("UnregisteredCropDetails.Select Variety")}
-              boxStyles={{
-                height: 50,
-                width: "100%",
-                borderColor: "#FFFFFF",
-                paddingLeft: 14,
-                paddingRight: 8,
-                backgroundColor: "#F4F4F4",
-                borderRadius: 50,
-              }}
-            />
-          </View>
-
-          <Text className="text-gray-600 mt-4">
-            {t("UnregisteredCropDetails.UnitGrades")}
-          </Text>
-          <View className="border border-gray-300 rounded-lg mt-2 p-4">
-            {["A", "B", "C"].map((grade) => (
-              <View key={grade} className="flex-row items-center mb-3">
-                <Text className="w-8 text-gray-600">{grade}</Text>
-                <TextInput
-                  placeholder="Rs."
-                  keyboardType="numeric"
-                  className="flex-1  rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
-                  value={unitPrices[grade]?.toString() || ""}
-                  editable={false}
-                />
-
-                {/* TextInput for quantity with proper decimal handling */}
-                <TextInput
-                  placeholder="kg"
-                  keyboardType="decimal-pad"
-                  className="flex-1 rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
-                  value={quantities[grade]}
-                  onChangeText={(value) => {
-                    handleQuantityChange(grade as "A" | "B" | "C", value);
+        <CustomHeader
+          title={t("UnregisteredCropDetails.FillDetails")}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() =>
+            navigation.navigate("FarmerQr", {
+              userId: userId,
+            } as any)
+          }
+        />
+        <View
+          className="px-6 py-4"
+          style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+        >
+          <View className="-mb-4">
+            <View className="justify-center items-center">
+              {crops.length > 1 && (
+                <TouchableOpacity
+                  onPress={scrollToPrevious}
+                  style={{
+                    position: "absolute",
+                    left: 1,
+                    zIndex: 10,
+                    opacity: isAtStart ? 0.3 : 1,
                   }}
-                  autoComplete="off"
-                  importantForAutofill="no"
-                  autoCorrect={false}
-                />
-              </View>
-            ))}
+                  disabled={isAtStart}
+                >
+                  <Entypo name="chevron-left" size={34} color="#374151" />
+                </TouchableOpacity>
+              )}
+
+              {crops.length > 0 && (
+                <ScrollView
+                  ref={scrollViewRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{ marginBottom: 20 }}
+                  contentContainerStyle={{
+                    paddingHorizontal: wp(6),
+                    alignItems: "center",
+                  }}
+                  className="flex-row"
+                  onScroll={onScroll}
+                  snapToInterval={wp(70) + 10}
+                  decelerationRate="fast"
+                  snapToAlignment="center"
+                >
+                  {crops.map((crop, index) => {
+                    const availableGrades = ["A", "B", "C"].filter(
+                      (grade) => crop[`grade${grade}quan`] > 0,
+                    );
+
+                    const isVarietyDeleting = deletingVariety === index;
+
+                    return (
+                      <View
+                        key={index}
+                        style={{
+                          width: wp(70),
+                          marginHorizontal: 10,
+                          padding: 12,
+                          opacity: isVarietyDeleting ? 0.6 : 1,
+                          backgroundColor: isVarietyDeleting
+                            ? "#f5f5f5"
+                            : "transparent",
+                        }}
+                      >
+                        <View className="flex-row items-center mb-2">
+                          <Text className="font-bold text-base mr-2 flex-1">
+                            ({index + 1}){" "}
+                            {crop.varietyName.length > 20
+                              ? `${crop.varietyName.slice(0, 20)}...`
+                              : crop.varietyName}
+                          </Text>
+
+                          {isVarietyDeleting ? (
+                            <View className="w-6 h-6 justify-center items-center">
+                              <ActivityIndicator size="small" color="#ff0000" />
+                            </View>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => deleteVariety(index)}
+                            >
+                              <MdIcons
+                                name="delete"
+                                size={22}
+                                style={{ color: "red" }}
+                              />
+                            </TouchableOpacity>
+                          )}
+                        </View>
+
+                        <View className="border border-[#d4d4d4] rounded-lg">
+                          {availableGrades.map((grade, gIndex) => {
+                            const isGradeDeleting =
+                              deletingGrade?.cropIndex === index &&
+                              deletingGrade?.grade === grade;
+
+                            return (
+                              <View
+                                key={grade}
+                                style={{
+                                  marginTop: 6,
+                                  borderBottomWidth:
+                                    gIndex !== availableGrades.length - 1
+                                      ? 1
+                                      : 0,
+                                  borderBottomColor: "#d4d4d4",
+                                  paddingBottom:
+                                    gIndex !== availableGrades.length - 1
+                                      ? 6
+                                      : 0,
+                                  opacity: isGradeDeleting ? 0.6 : 1,
+                                  backgroundColor: isGradeDeleting
+                                    ? "#f5f5f5"
+                                    : "transparent",
+                                }}
+                                className="flex-row items-center justify-between p-1 mb-1"
+                              >
+                                <Text className="font-bold ml-2">{grade}</Text>
+                                <Text className="font-bold">
+                                  {crop[`grade${grade}quan`]}kg
+                                </Text>
+
+                                {isGradeDeleting ? (
+                                  <View className="w-6 h-6 justify-center items-center mr-2">
+                                    <ActivityIndicator
+                                      size="small"
+                                      color="#ff0000"
+                                    />
+                                  </View>
+                                ) : (
+                                  <TouchableOpacity
+                                    onPress={() =>
+                                      deleteGrade(
+                                        index,
+                                        grade as "A" | "B" | "C",
+                                        crop.varietyName,
+                                      )
+                                    }
+                                    className="mr-2"
+                                  >
+                                    <MdIcons
+                                      name="delete"
+                                      size={22}
+                                      style={{ color: "red" }}
+                                    />
+                                  </TouchableOpacity>
+                                )}
+                              </View>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              )}
+
+              {crops.length > 1 && (
+                <TouchableOpacity
+                  onPress={scrollToNext}
+                  style={{
+                    position: "absolute",
+                    right: 1,
+                    zIndex: 10,
+                    opacity: isAtEnd ? 0.3 : 1,
+                  }}
+                  disabled={isAtEnd}
+                >
+                  <Entypo name="chevron-right" size={34} color="#000000" />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
-          {showCameraModels && (
-            <View className="flex-row items-center justify-between">
-              <CameraComponent
-                onImagePicked={(image) => handleImagePick(image, "A")}
-                grade={"A"}
-                resetImage={resetImage}
-                disabled={isGradeACameraEnabled}
-              />
-              <CameraComponent
-                onImagePicked={(image) => handleImagePick(image, "B")}
-                grade={"B"}
-                resetImage={resetImage}
-                disabled={isGradeBCameraEnabled}
-              />
-              <CameraComponent
-                onImagePicked={(image) => handleImagePick(image, "C")}
-                grade={"C"}
-                resetImage={resetImage}
-                disabled={isGradeCCameraEnabled}
-              />
+          {crops.length > 0 && (
+            <View className="mt-2 mb-2">
+              <DashedLine dashLength={5} dashGap={4} dashColor="#980775" />
             </View>
           )}
 
-          <Text className="text-gray-600 mt-4">
-            {t("UnregisteredCropDetails.Total")}
+          <Text className="text-center text-md font-medium mt-2">
+            {t("UnregisteredCropDetails.Crop")} {cropCount}
           </Text>
-          <View className="bg-[#F4F4F4] rounded-full mt-2 p-2">
-            <TextInput
-              placeholder="--Auto Fill--"
-              editable={false}
-              value={` ${total.toLocaleString("en-IN", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`}
-              className="text-gray-600 text-center"
-            />
-          </View>
 
-          <TouchableOpacity
-            onPress={incrementCropCount}
-            disabled={addbutton || loading}
-            className={`bg-[#000000] rounded-full p-4 mt-2 ${
-              addbutton || loading ? "opacity-25" : ""
-            }`}
-          >
-            <Text className="text-center text-white font-semibold text-base">
-              {t("UnregisteredCropDetails.Add")}
+          <View className="mb-6 border-b p-2 border-gray-200 pb-6">
+            <Text className="text-gray-600 mt-4">
+              {t("UnregisteredCropDetails.CropName")}
             </Text>
-          </TouchableOpacity>
+            <View className="mt-2">
+              <SelectList
+                key={selectedCrop ? selectedCrop.id : Math.random()}
+                defaultOption={
+                  selectedCrop
+                    ? { key: selectedCrop.id, value: selectedCrop.name }
+                    : undefined
+                }
+                setSelected={(val: string) => {
+                  const selectedCropObj = cropNames.find((crop) =>
+                    selectedLanguage === "en"
+                      ? crop.cropNameEnglish === val
+                      : selectedLanguage === "si"
+                        ? crop.cropNameSinhala === val
+                        : crop.cropNameTamil === val,
+                  );
+                  if (selectedCropObj) {
+                    handleCropChange(selectedCropObj);
+                  }
+                }}
+                boxStyles={{
+                  height: 50,
+                  width: "100%",
+                  borderColor: "#FFFFFF",
+                  paddingLeft: 14,
+                  paddingRight: 8,
+                  backgroundColor: "#F4F4F4",
+                  borderRadius: 50,
+                }}
+                data={cropNames.map((crop) => ({
+                  key: crop.id,
+                  value:
+                    selectedLanguage === "en"
+                      ? crop.cropNameEnglish
+                      : selectedLanguage === "si"
+                        ? crop.cropNameSinhala
+                        : crop.cropNameTamil,
+                }))}
+                save="value"
+                placeholder={t("UnregisteredCropDetails.Select Crop")}
+                searchPlaceholder={t("search")}
+              />
+            </View>
 
-          {donebutton2visibale && (
+            <Text className="text-gray-600 mt-4">
+              {t("UnregisteredCropDetails.Variety")}
+            </Text>
+            <View className="mt-2">
+              <SelectList
+                key={selectedVariety ? selectedVariety : Math.random()}
+                setSelected={(itemValue: string) =>
+                  selectedCrop ? handleVarietyChange(itemValue) : null
+                }
+                data={[
+                  ...varieties
+                    .filter((variety) => !usedVarietyIds.includes(variety.id))
+                    .map((variety) => ({
+                      key: variety.id,
+                      value: variety.variety,
+                    })),
+                ]}
+                save="key"
+                defaultOption={
+                  selectedVariety
+                    ? {
+                        key: selectedVariety,
+                        value:
+                          varieties.find((v) => v.id === selectedVariety)
+                            ?.variety || "Select Variety",
+                      }
+                    : undefined
+                }
+                placeholder={t("UnregisteredCropDetails.Select Variety")}
+                boxStyles={{
+                  height: 50,
+                  width: "100%",
+                  borderColor: "#FFFFFF",
+                  paddingLeft: 14,
+                  paddingRight: 8,
+                  backgroundColor: "#F4F4F4",
+                  borderRadius: 50,
+                }}
+              />
+            </View>
+
+            <Text className="text-gray-600 mt-4">
+              {t("UnregisteredCropDetails.UnitGrades")}
+            </Text>
+            <View className="border border-gray-300 rounded-lg mt-2 p-4">
+              {["A", "B", "C"].map((grade) => (
+                <View key={grade} className="flex-row items-center mb-3">
+                  <Text className="w-8 text-gray-600">{grade}</Text>
+                  <TextInput
+                    placeholder="Rs."
+                    keyboardType="numeric"
+                    className="flex-1  rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
+                    value={unitPrices[grade]?.toString() || ""}
+                    editable={false}
+                  />
+
+                  {/* TextInput for quantity with proper decimal handling */}
+                  <TextInput
+                    placeholder="kg"
+                    keyboardType="decimal-pad"
+                    className="flex-1 rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
+                    value={quantities[grade]}
+                    onChangeText={(value) => {
+                      handleQuantityChange(grade as "A" | "B" | "C", value);
+                    }}
+                    autoComplete="off"
+                    importantForAutofill="no"
+                    autoCorrect={false}
+                  />
+                </View>
+              ))}
+            </View>
+
+            {showCameraModels && (
+              <View className="flex-row items-center justify-between">
+                <CameraComponent
+                  onImagePicked={(image) => handleImagePick(image, "A")}
+                  grade={"A"}
+                  resetImage={resetImage}
+                  disabled={isGradeACameraEnabled}
+                />
+                <CameraComponent
+                  onImagePicked={(image) => handleImagePick(image, "B")}
+                  grade={"B"}
+                  resetImage={resetImage}
+                  disabled={isGradeBCameraEnabled}
+                />
+                <CameraComponent
+                  onImagePicked={(image) => handleImagePick(image, "C")}
+                  grade={"C"}
+                  resetImage={resetImage}
+                  disabled={isGradeCCameraEnabled}
+                />
+              </View>
+            )}
+
+            <Text className="text-gray-600 mt-4">
+              {t("UnregisteredCropDetails.Total")}
+            </Text>
+            <View className="bg-[#F4F4F4] rounded-full mt-2 p-2">
+              <TextInput
+                placeholder="--Auto Fill--"
+                editable={false}
+                value={` ${total.toLocaleString("en-IN", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`}
+                className="text-gray-600 text-center"
+              />
+            </View>
+
             <TouchableOpacity
-              onPress={handleSubmit}
-              disabled={donebutton2disabale || loading}
-              className={`bg-[#980775] rounded-full p-4 mt-4 mb-10 ${
-                donebutton2disabale || loading ? "opacity-50" : ""
+              onPress={incrementCropCount}
+              disabled={addbutton || loading}
+              className={`bg-[#000000] rounded-full p-4 mt-2 ${
+                addbutton || loading ? "opacity-25" : ""
               }`}
             >
-              {loading ? (
-                <View className="flex-row justify-center items-center">
-                  <LottieView
-                    source={require("../../assets/lottie/newLottie.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 30, height: 30 }}
-                  />
-                  <Text className="text-center text-white font-semibold ml-2 text-base">
-                    {t("UnregisteredCropDetails.Processing...")}
-                  </Text>
-                </View>
-              ) : (
-                <Text className="text-center text-white font-semibold text-base">
-                  {t("UnregisteredCropDetails.Done")}{" "}
-                </Text>
-              )}
+              <Text className="text-center text-white font-semibold text-base">
+                {t("UnregisteredCropDetails.Add")}
+              </Text>
             </TouchableOpacity>
-          )}
+
+            {donebutton2visibale && (
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={donebutton2disabale || loading}
+                className={`bg-[#980775] rounded-full p-4 mt-4 mb-10 ${
+                  donebutton2disabale || loading ? "opacity-50" : ""
+                }`}
+              >
+                {loading ? (
+                  <View className="flex-row justify-center items-center">
+                    <LottieView
+                      source={require("../../assets/lottie/newLottie.json")}
+                      autoPlay
+                      loop
+                      style={{ width: 30, height: 30 }}
+                    />
+                    <Text className="text-center text-white font-semibold ml-2 text-base">
+                      {t("UnregisteredCropDetails.Processing...")}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text className="text-center text-white font-semibold text-base">
+                    {t("UnregisteredCropDetails.Done")}{" "}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <DeleteModal
+            visible={deleteVarietyModal.visible}
+            title="Confirm Delete"
+            message={t(
+              "UnregisteredCropDetails.Are you sure you want to delete previously added",
+              { varietyName: deleteVarietyModal.varietyName },
+            )}
+            onCancel={() =>
+              setDeleteVarietyModal({
+                visible: false,
+                index: -1,
+                varietyName: "",
+              })
+            }
+            onDelete={handleDeleteVariety}
+          />
+
+          <DeleteModal
+            visible={deleteGradeModal.visible}
+            title={t("UnregisteredCropDetails.ConfirmDelete")}
+            message={t(
+              "UnregisteredCropDetails.Are you sure you want to delete grade",
+              {
+                varietyName: deleteGradeModal.varietyName,
+                grade: deleteGradeModal.grade,
+              },
+            )}
+            onCancel={() =>
+              setDeleteGradeModal({
+                visible: false,
+                cropIndex: -1,
+                grade: "A",
+                varietyName: "",
+              })
+            }
+            onDelete={handleDeleteGrade}
+          />
         </View>
-
-        <DeleteModal
-          visible={deleteVarietyModal.visible}
-          title="Confirm Delete"
-          message={t(
-            "UnregisteredCropDetails.Are you sure you want to delete previously added",
-            { varietyName: deleteVarietyModal.varietyName },
-          )}
-          onCancel={() =>
-            setDeleteVarietyModal({
-              visible: false,
-              index: -1,
-              varietyName: "",
-            })
-          }
-          onDelete={handleDeleteVariety}
-        />
-
-        <DeleteModal
-          visible={deleteGradeModal.visible}
-          title={t("UnregisteredCropDetails.ConfirmDelete")}
-          message={t(
-            "UnregisteredCropDetails.Are you sure you want to delete grade",
-            {
-              varietyName: deleteGradeModal.varietyName,
-              grade: deleteGradeModal.grade,
-            },
-          )}
-          onCancel={() =>
-            setDeleteGradeModal({
-              visible: false,
-              cropIndex: -1,
-              grade: "A",
-              varietyName: "",
-            })
-          }
-          onDelete={handleDeleteGrade}
-        />
       </ScrollView>
     </KeyboardAvoidingView>
   );

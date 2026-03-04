@@ -2,11 +2,11 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import React, { useState, useEffect } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
 import * as ImagePicker from "react-native-image-picker";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "../common/CustomHeader";
 
 type UfarmercropdetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -82,17 +82,12 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row pt-[7%] pl-[3%] pb-[5%]">
-        <AntDesign
-          name="left"
-          size={24}
-          color="#000502"
-          onPress={() => navigation.goBack()}
-        />
-        <Text className="text-xl pl-[22%] text-center">
-          {t("Ufarmercropdetails.FillCropDetails")}{" "}
-        </Text>
-      </View>
+      <CustomHeader
+        title={t("Ufarmercropdetails.FillCropDetails")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       <View className="ml-[10%] mr-[10%] flex-1">
         <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>

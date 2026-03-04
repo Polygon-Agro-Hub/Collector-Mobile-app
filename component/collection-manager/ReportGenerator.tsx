@@ -8,7 +8,7 @@ import {
   BackHandler,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { handleGeneratePDF } from "./ReportPDFGenerator";
@@ -20,6 +20,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type ReportGeneratorNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -285,26 +286,20 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="flex-row items-center  p-6 rounded-b-lg">
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("OfficerSummary" as any, {
-              collectionOfficerId,
-              officerId,
-              phoneNumber1,
-              phoneNumber2,
-              officerName,
-            })
-          }
-          className="bg-[#FFFFFF1A] rounded-full  justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <Text className="text-black text-lg pr-[20%] font-semibold text-center w-full ">
-          {officerId}
-        </Text>
-      </View>
+      <CustomHeader
+        title={officerId}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.navigate("OfficerSummary" as any, {
+            collectionOfficerId,
+            officerId,
+            phoneNumber1,
+            phoneNumber2,
+            officerName,
+          })
+        }
+      />
 
       {/* Form Section */}
       <View className="px-8 mt-8">

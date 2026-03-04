@@ -12,7 +12,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { CameraView, Camera } from "expo-camera";
 import { useTranslation } from "react-i18next";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import CustomHeader from "../common/CustomHeader";
 
 type QRScannerNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -172,20 +172,12 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, position: "relative" }}>
-      <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-        <TouchableOpacity
-          className="bg-[#F6F6F680] rounded-full p-2 justify-center w-10 z-20 "
-          onPress={() => navigation.goBack()}
-        >
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <View className="flex-1 ">
-          <Text className="text-lg font-bold text-center -ml-8">
-            {t("QRScanner.ScantheQR")}
-          </Text>
-        </View>
-      </View>
+      <CustomHeader
+        title={t("QRScanner.ScantheQR")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
       <CameraView
         className="flex-1 "
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}

@@ -9,10 +9,9 @@ import {
   Alert,
   Keyboard,
 } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as ImagePicker from "expo-image-picker";
+import CustomHeader from "../common/CustomHeader";
 import { environment } from "@/environment/environment";
 import {
   widthPercentageToDP as wp,
@@ -20,7 +19,6 @@ import {
 } from "react-native-responsive-screen";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import * as ImageManipulator from "expo-image-manipulator";
 import { useTranslation } from "react-i18next";
 import { RouteProp, useRoute } from "@react-navigation/native";
 
@@ -1010,19 +1008,14 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   return (
     <View
       className="flex-1 bg-white"
-      style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+      style={{ paddingHorizontal: wp(3), paddingVertical: hp(2) }}
     >
-      <View className="flex-row items-center mb-6">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="bg-[#F6F6F680] rounded-full p-2"
-        >
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text className="flex-1 text-center text-xl font-bold text-black mr-[6%]">
-          {t("Profile.MyProfile")}
-        </Text>
-      </View>
+      <CustomHeader
+        title={t("Profile.MyProfile")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       <View className="items-center mb-6">
         <View className="items-center mb-6 relative">

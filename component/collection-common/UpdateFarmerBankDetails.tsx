@@ -19,10 +19,10 @@ import bankNames from "../../assets/jsons/banks.json";
 import { ActivityIndicator } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { SelectList } from "react-native-dropdown-select-list";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -70,16 +70,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
   const [accNumberError, setAccNumberError] = useState("");
-
-  const validateAccountNumber = (value: any) => {
-    const numericRegex = /^[0-9]*$/;
-    if (!numericRegex.test(value)) {
-      setAccNumberError(t("UnregisteredFarmerDetails.AccountNumberError"));
-      return false;
-    }
-    setAccNumberError("");
-    return true;
-  };
 
   useEffect(() => {
     if (bankName) {
@@ -224,25 +214,13 @@ If correct, share OTP only with the ${companyName} representative who contacts y
       enabled
       style={{ flex: 1 }}
     >
-      <View className="flex-1 p-5 bg-white">
-        {/* Header with Back Icon */}
-        <View className="flex-row items-center mb-4">
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
-          <View className="w-full items-center">
-            <Text
-              className="text-xl font-bold text-center mr-[14%]"
-              style={{ fontSize: 18 }}
-            >
-              {t("UnregisteredFarmerDetails.FillDetails")}
-            </Text>
-          </View>
-        </View>
-
+      <CustomHeader
+        title={t("UnregisteredFarmerDetails.FillDetails")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
+      <View className="flex-1 px-5 bg-white">
         {/* Scrollable Form */}
         <ScrollView className="flex-1 p-3 mt-4">
           <View className="mb-4">

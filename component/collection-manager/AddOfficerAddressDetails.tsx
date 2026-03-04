@@ -13,7 +13,6 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import countryCodes from "./countryCodes.json";
 import { SelectList } from "react-native-dropdown-select-list";
 import { ActivityIndicator } from "react-native";
@@ -23,6 +22,7 @@ import bankNames from "../../assets/jsons/banks.json";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type AddOfficerAddressDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -455,21 +455,12 @@ const AddOfficerAddressDetails: React.FC = () => {
         className="flex-1 bg-white"
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
-
-          <View className="flex-1 justify-center items-center mr-[8%]">
-            <Text className="text-lg font-bold">
-              {t("AddOfficerAddressDetails.AddOfficer")}
-            </Text>
-          </View>
-        </View>
+        <CustomHeader
+          title={t("AddOfficerAddressDetails.AddOfficer")}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => navigation.goBack()}
+        />
 
         {/* Address Details */}
         <View className="px-8 mt-4">

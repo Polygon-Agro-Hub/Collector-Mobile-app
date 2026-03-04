@@ -226,9 +226,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const [additionalItems, setAdditionalItems] = useState<AdditionalItem[]>([]);
 
-  console.log("pending order status", status);
-
-  console.log("ordreid", item.orderId);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
@@ -276,8 +273,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   useEffect(() => {
     fetchUserProfile();
   }, []);
-
-  console.log("Current job role:", jobRole);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -333,9 +328,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   };
 
   const loadOrderData = async (isRefreshing = false, afterReplace = false) => {
-    // if (!isRefreshing) {
-    //   setLoading(true);
-    // }
     if (!isRefreshing && !afterReplace) {
       setLoading(true);
     }
@@ -524,8 +516,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   const toggleFamilyPackItem = (id: string) => {
     if (orderStatus === "Completed") return;
 
-    console.log("Toggling item ID:", id);
-
     setFamilyPackItems((prev) => {
       const updated = prev.map((item) => {
         if (item.id === id) {
@@ -578,10 +568,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       allSelected = areAllFamilyPackItemsSelected();
     } else if (!hasFamily && hasAdditional) {
       allSelected = areAllAdditionalItemsSelected();
-    }
-
-    if (allSelected) {
-      console.log("All items selected - updating status only");
     }
   }, [familyPackItems, additionalItems, orderStatus]);
 
@@ -642,14 +628,9 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const handleCompleteOrder = async () => {
     if (orderCompletionState !== "idle") {
-      console.log(
-        "handleCompleteOrder blocked - state is:",
-        orderCompletionState,
-      );
       return;
     }
 
-    console.log("Starting order completion...");
     setCompletingOrder(true);
     setOrderCompletionState("completing");
 
@@ -715,7 +696,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               },
             },
           );
-          console.log("Distributed target updated successfully");
         } catch (distributedTargetError) {
           console.error(
             "Error updating distributed target:",
@@ -844,7 +824,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     setTimeout(() => {
       const weightKg = parseFloat(item.weight) || 0;
       const itemPrice = parseFloat(item.price) || 0;
-       const totalPrice = itemPrice.toFixed(2);
+      const totalPrice = itemPrice.toFixed(2);
 
       const numericPrice = itemPrice;
 
@@ -864,7 +844,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }, 100);
   };
 
-  
   const handleReplaceSubmit = async () => {
     if (
       !replaceData.newProduct ||
@@ -909,8 +888,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       })();
 
       const replacementRequest = {
-       // orderPackageId: packageId,
-       orderPackageId: selectedItemForReplace.packageId,
+        orderPackageId: selectedItemForReplace.packageId,
         replaceId: selectedItemForReplace.originalItemId,
         originalItemId: selectedItemForReplace.originalItemId,
         productType: selectedItemForReplace.productType,
@@ -965,10 +943,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           productTypeName: "",
         });
 
-        
         await loadOrderData(true);
 
-     
         Alert.alert(t("Error.Success"), successMessage);
       } else {
         throw new Error(
@@ -1172,19 +1148,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       {selected && <AntDesign name="check" size={14} color="white" />}
     </View>
   );
-
-  const statusText = () => {
-    switch (orderStatus) {
-      case "Completed":
-        return t("Completed");
-      case "Opened":
-        return t("Opened");
-      case "In Progress":
-        return t("InProgress");
-      default:
-        return t("Pending");
-    }
-  };
 
   const fetchRetailItems = async () => {
     try {
@@ -1406,7 +1369,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
               {/* Action Buttons */}
               <View className="space-y-3">
-             
                 <TouchableOpacity
                   className={`py-3 rounded-full px-3 ${
                     isFormComplete && !isReplacementPriceHigher
@@ -2046,7 +2008,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                               {orderStatus !== "Completed" && (
                                 <View className="w-8 h-8 items-center justify-center mr-3">
                                   {item.selected ? (
-                                    // Show disabled image
                                     <Image
                                       source={disable}
                                       style={{
@@ -2056,7 +2017,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                                       }}
                                     />
                                   ) : (
-                                    // Show clickable red icon
                                     <TouchableOpacity
                                       onPress={() => handleReplaceProduct(item)}
                                     >
@@ -2086,7 +2046,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                               </View>
                             </View>
 
-                            {/* Show different indicators for completed vs active orders */}
                             {orderStatus === "Completed" ? (
                               <View className="w-6 h-6 items-center justify-center">
                                 {item.selected ? (
@@ -2309,12 +2268,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                         <Timer
                           size={150}
                           fontSize={24}
-                          minutes={0.5} // 30 seconds
+                          minutes={0.5}
                           fillColor="#000000"
                           bgColor="#FFFFFF"
                           backgroundColor="#E5E7EB"
                           showMs={false}
-                          //onComplete={handleCompleteOrder}
                           onComplete={() => {
                             if (!completingOrder) {
                               handleCompleteOrder();

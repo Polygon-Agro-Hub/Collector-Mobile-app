@@ -24,6 +24,7 @@ import {
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
+import CustomHeader from "../common/CustomHeader";
 
 interface complainItem {
   id: number;
@@ -98,8 +99,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("Current language:", i18n.language);
-
       if (i18n.language === "en") {
         LanguageSelect("en");
         setSelectedLanguage("en");
@@ -114,7 +113,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
     }, [i18n.language]),
   );
 
-  // Get user's full name from route params or AsyncStorage
   useEffect(() => {
     const getUserName = async () => {
       if (route?.params?.fullname) {
@@ -132,13 +130,11 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
     getUserName();
   }, [route?.params?.fullname]);
 
-  // Get replier name based on APP language (not complaint language)
   const getReplierName = (complain: complainItem): string => {
     if (!complain.replyByFirstNameEnglish) {
       return "";
     }
 
-    // Use app language from i18n
     const appLang = i18n.language || selectedLanguage;
 
     if (appLang === "si") {
@@ -150,13 +146,11 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
     }
   };
 
-  // Get company name based on APP language (not complaint language)
   const getCompanyName = (complain: complainItem): string => {
     if (!complain.companyNameEnglish) {
       return "";
     }
 
-    // Use app language from i18n
     const appLang = i18n.language || selectedLanguage;
 
     if (appLang === "si") {
@@ -168,9 +162,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
     }
   };
 
-  // Get officer name (recipient) based on APP language (not complaint language)
   const getOfficerName = (complain: complainItem): string => {
-    // Use app language from i18n
     const appLang = i18n.language || selectedLanguage;
 
     if (appLang === "si") {
@@ -187,7 +179,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
     const companyName = getCompanyName(complain);
     const centerRegCode = complain.replierCenterRegCode || "";
 
-    // Use app language from i18n
     const appLang = i18n.language || selectedLanguage;
 
     if (complain.complainAssign === "Admin") {
@@ -203,7 +194,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
 
       return `${closingWord},\n${teamName}`;
     } else if (complain.complainAssign === "CCH") {
-      // Collection Centre Head
       const headTitle =
         appLang === "si"
           ? "Collection Centre Head"
@@ -224,7 +214,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         return `${closingWord}\n${replierName},\n${headTitle}`;
       }
     } else if (complain.complainAssign === "DCH") {
-      // Distribution Centre Head
       const headTitle =
         appLang === "si"
           ? "Distribution Centre Head"
@@ -245,7 +234,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         return `${closingWord}, ${replierName}\n${headTitle}`;
       }
     } else if (complain.complainAssign === "CCM") {
-      // Collection Centre Manager
       const managerTitle =
         appLang === "si"
           ? "Collection Centre Manager"
@@ -267,7 +255,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         return `${line1}\n${line2}`;
       }
     } else {
-      // DCM - Distribution Centre Manager
       const managerTitle =
         appLang === "si"
           ? "Distribution Centre Manager"
@@ -291,7 +278,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
     }
   };
 
-  // Reply templates based on APP language (not complaint language)
   const getReplyTemplate = (complain: complainItem): string => {
     const message = complain.reply || "";
     const officerName = getOfficerName(complain);
@@ -300,11 +286,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
       ? `\n\n${formatDateTime(complain.replyTime)}`
       : "";
 
-    // Use app language from i18n (NOT complaint language)
     const appLang = i18n.language || selectedLanguage;
-
-    console.log("Template language:", appLang, "(from i18n.language)");
-    console.log("Complaint backend language:", complain.language, "(IGNORED)");
 
     const templates = {
       si: `හිතවත් ${officerName},
@@ -345,7 +327,6 @@ ${signature}${replyTime}`,
     try {
       setLanguage(t("MyCrop.LNG"));
       const token = await AsyncStorage.getItem("token");
-      console.log(token);
 
       const res = await axios.get<complainItem[]>(
         `${environment.API_BASE_URL}api/complain/get-complains`,
@@ -388,8 +369,6 @@ ${signature}${replyTime}`,
 
   const handleViewReply = (complain: complainItem) => {
     if (complain.reply) {
-      console.log("App language:", i18n.language);
-      console.log("Complaint backend language (ignored):", complain.language);
       setSelectedComplain(complain);
       setModalVisible(true);
     } else {
@@ -417,22 +396,12 @@ ${signature}${replyTime}`,
     <View className="flex-1 bg-[#FFFFFF]">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      <View
-        className="flex-row justify-between"
-        style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.navigate("EngProfile")}
-          className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000502" />
-        </TouchableOpacity>
-
-        <Text className="font-bold text-lg mt-2">
-          {t("ReportHistory.Complaints")}
-        </Text>
-        <View style={{ width: 24 }} />
-      </View>
+      <CustomHeader
+        title={t("ReportHistory.Complaints")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.navigate("EngProfile")}
+      />
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -527,7 +496,6 @@ ${signature}${replyTime}`,
               <View className="p-4 bg-white rounded-xl w-full mb-4">
                 <Text className="text-lg font-bold">{t("Thank You")}</Text>
 
-                {/* <ScrollView className="mt-8" style={{ maxHeight: hp(55) }}> */}
                 <ScrollView
                   className="mt-8"
                   style={{ maxHeight: Dimensions.get("window").height * 0.7 }}

@@ -24,6 +24,7 @@ import { Platform } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import NetInfo from "@react-native-community/netinfo";
 import { SelectList } from "react-native-dropdown-select-list";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -414,21 +415,13 @@ If correct, share OTP only with the ${companyName} representative who contacts y
       enabled
       style={{ flex: 1 }}
     >
+      <CustomHeader
+        title={t("UnregisteredFarmerDetails.FillDetails")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
       <View className="flex-1 p-5 bg-white">
-        <View className="flex-row items-center mb-4">
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
-          <View className="w-full items-center">
-            <Text className="text-xl font-bold text-center mr-[11%]">
-              {t("UnregisteredFarmerDetails.FillDetails")}
-            </Text>
-          </View>
-        </View>
-
         <ScrollView className="flex-1 p-3">
           {/* First Name */}
           <View className="mb-4">

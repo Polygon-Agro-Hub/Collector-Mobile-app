@@ -37,7 +37,6 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   const { t } = useTranslation();
   const [language, setLanguage] = useState<string>("en");
   const [profile, setProfile] = useState<any>(null);
-  console.log("Language:", language);
 
   useEffect(() => {
     const fetchLanguage = async () => {
@@ -63,12 +62,11 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       });
 
       const data = response.data.data;
-      //  console.log(data);
 
       if (response.data.status === "success") {
         setProfile(data);
         setJobRole(data.jobRole || "");
-        setQR(data.QRcode || ""); // Store QR Code URL
+        setQR(data.QRcode || "");
       } else {
         Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
       }
@@ -123,10 +121,8 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
 
       const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
 
-      // Download the QR code image from the URL
       const response = await FileSystem.downloadAsync(QR, fileUri);
 
-      // Save to media library
       const asset = await MediaLibrary.createAssetAsync(response.uri);
       await MediaLibrary.createAlbumAsync("Download", asset, false);
 

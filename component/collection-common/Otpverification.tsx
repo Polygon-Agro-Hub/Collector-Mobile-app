@@ -19,9 +19,9 @@ import { useTranslation } from "react-i18next";
 import { Dimensions } from "react-native";
 import { Modal } from "react-native";
 import { Animated } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -421,17 +421,12 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       className="flex-1 bg-white"
       style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
     >
-      <View>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <AntDesign name="left" size={22} color="#000" />
-        </TouchableOpacity>
-      </View>
-
-      <View className="flex justify-center items-center mt-0">
-        <Text className="text-black" style={{ fontSize: wp(8) }}>
-          {/* {t("OtpVerification.OTPVerification")} */}
-        </Text>
-      </View>
+      <CustomHeader
+        title={t("")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       <View
         className="flex justify-center items-center"

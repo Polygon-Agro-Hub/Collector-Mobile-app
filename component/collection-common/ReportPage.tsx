@@ -19,6 +19,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { useTranslation } from "react-i18next";
 import { AntDesign } from "@expo/vector-icons";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -366,15 +367,14 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white p-4">
-      <View className="flex-row items-center mb-4">
-        <TouchableOpacity onPress={() => navigation.navigate("Main" as any)}>
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold ml-[25%]">
-          {t("ReportPage.PurchaseReport")}
-        </Text>
-      </View>
+    <ScrollView className="flex-1 bg-white ">
+      <CustomHeader
+        title={t("ReportPage.PurchaseReport")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.navigate("Main" as any)}
+      />
+      <View className="p-4">
 
       {/* Personal Details Section */}
       {details && (
@@ -602,6 +602,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
           />
           <Text className="text-sm text-cyan-50">{t("ReportPage.Share")}</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </ScrollView>
   );

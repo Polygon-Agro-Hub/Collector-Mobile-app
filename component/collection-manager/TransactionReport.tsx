@@ -19,6 +19,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useTranslation } from "react-i18next";
 import { AntDesign } from "@expo/vector-icons";
 import { Platform } from "react-native";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -664,18 +665,15 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
   };
 
   return (
-    <ScrollView className="flex-1 bg-white p-4">
-      <View className="flex-row items-center mb-4">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000502" />
-        </TouchableOpacity>
-        <Text className="flex-1 text-center text-xl font-bold text-black mr-[6%]">
-          {t("NewReport.Goods Received Note")}
-        </Text>
-      </View>
+    <ScrollView className="flex-1 bg-white ">
+     
+      <CustomHeader
+        title={t("NewReport.Goods Received Note")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
+      <View className="p-4">
 
       {/* GRN Header */}
       <View className="mb-4">
@@ -829,6 +827,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
           />
           <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </ScrollView>
   );

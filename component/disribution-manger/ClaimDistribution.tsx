@@ -1,4 +1,4 @@
-import React, { useState , useCallback} from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,9 @@ import {
   Alert,
   Keyboard,
   Modal,
-  ActivityIndicator
-
+  ActivityIndicator,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
@@ -20,9 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import { SelectList } from "react-native-dropdown-select-list";
 import { useTranslation } from "react-i18next";
-import DropDownPicker from "react-native-dropdown-picker";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
 
@@ -49,24 +45,21 @@ type ClaimOfficerNavigationProp = StackNavigationProp<
 const ClaimOfficer: React.FC = () => {
   const navigation = useNavigation<ClaimOfficerNavigationProp>();
   const [jobRole, setJobRole] = useState("Distribution Officer");
-   const [empID, setEmpID] = useState("");
+  const [empID, setEmpID] = useState("");
   const [officerFound, setOfficerFound] = useState(false);
   const [officerDetails, setOfficerDetails] = useState<OfficerDetails | null>(
-    null
+    null,
   );
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [open, setOpen] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
 
- 
   const empPrefix = "DIO";
 
-  // Function to handle text input and prevent leading spaces
   const handleEmpIDChange = (text: string) => {
-    // Remove any leading spaces
-    const trimmedText = text.replace(/^\s+/, '');
+    const trimmedText = text.replace(/^\s+/, "");
     setEmpID(trimmedText);
     setOfficerFound(false);
   };
@@ -74,20 +67,18 @@ const ClaimOfficer: React.FC = () => {
   const handleSearch = async () => {
     Keyboard.dismiss();
     setSearchLoading(true);
-    console.log(empID, jobRole);
 
-
-      const netState = await NetInfo.fetch();
-      if (!netState.isConnected) {
-    return; 
-  }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
     try {
       const userToken = await AsyncStorage.getItem("token");
 
       if (!userToken) {
         Alert.alert(
           t("Error.error"),
-          t("Error.User token not found. Please log in again.")
+          t("Error.User token not found. Please log in again."),
         );
         return;
       }
@@ -101,16 +92,14 @@ const ClaimOfficer: React.FC = () => {
             Authorization: `Bearer ${userToken}`,
           },
           body: JSON.stringify({ empID: `${empPrefix}${empID}`, jobRole }),
-        }
+        },
       );
 
       const data = await response.json();
-     // console.log("claim pfficer", data);
 
       if (response.ok && data.result && data.result.length > 0) {
         const officer = data.result[0];
         setOfficerDetails({
-         
           companyNameEnglish: officer.companyNameEnglish,
           companyNameSinhala: officer.companyNameSinhala,
           companyNameTamil: officer.companyNameTamil,
@@ -125,7 +114,7 @@ const ClaimOfficer: React.FC = () => {
           lastNameSinhala: officer.lastNameSinhala,
           lastNameTamil: officer.lastNameTamil,
         });
-     //   console.log("officer details", officerDetails);
+
         setOfficerFound(true);
         setSearchLoading(false);
       } else {
@@ -147,7 +136,7 @@ const ClaimOfficer: React.FC = () => {
       if (!userToken) {
         Alert.alert(
           t("Error.error"),
-          t("Error.User token not found. Please log in again.")
+          t("Error.User token not found. Please log in again."),
         );
         return;
       }
@@ -162,19 +151,19 @@ const ClaimOfficer: React.FC = () => {
             Authorization: `Bearer ${userToken}`,
           },
           body: JSON.stringify({ officerId: officerDetails?.id }),
-        }
+        },
       );
 
       if (!response.ok) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Failed to claim the officer. Please try again later.")
+          t("Error.Failed to claim the officer. Please try again later."),
         );
-        setModalVisible(false)
+        setModalVisible(false);
       } else {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Officer successfully claimed.")
+          t("Error.Officer successfully claimed."),
         );
         setOfficerFound(false);
         setOfficerDetails(null);
@@ -191,7 +180,7 @@ const ClaimOfficer: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setModalVisible(false); // Close the modal without taking action
+    setModalVisible(false);
   };
 
   const ConfirmationModal = ({
@@ -228,8 +217,7 @@ const ClaimOfficer: React.FC = () => {
 
               <TouchableOpacity
                 onPress={onConfirm}
-             
-                disabled={onLoading} // Disable the button when loading is true
+                disabled={onLoading}
                 className={`p-2 py-2 rounded-lg ${
                   onLoading ? "bg-gray-400" : "bg-black"
                 }`}
@@ -246,13 +234,20 @@ const ClaimOfficer: React.FC = () => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator= {false}>
+    <ScrollView
+      className="flex-1 bg-white"
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       {/* Header */}
       <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-        <TouchableOpacity className="bg-[#F6F6F680] rounded-full p-2" onPress={() => navigation.navigate("DistributionOfficersList")} >
+        <TouchableOpacity
+          className="bg-[#F6F6F680] rounded-full p-2"
+          onPress={() => navigation.navigate("DistributionOfficersList")}
+        >
           <AntDesign name="left" size={24} color="#000" />
         </TouchableOpacity>
-   
+
         <View className="flex-1 ">
           <Text className="text-lg font-bold text-center">
             {t("ClaimOfficer.ClaimOfficers")}
@@ -262,7 +257,6 @@ const ClaimOfficer: React.FC = () => {
 
       {/* Form */}
       <View className="px-8 mt-7">
-       
         <Text className="font-semibold text-gray-800  mb-2 text-center">
           {t("ClaimOfficer.EMPID")}
         </Text>
@@ -285,18 +279,17 @@ const ClaimOfficer: React.FC = () => {
               ? "bg-[#ABABAB]"
               : "bg-[#980775]"
           }`}
-           style={{
-    // iOS Shadow
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 2,
-    shadowRadius: 3.84,
-    // Android Shadow
-    elevation: 5,
-  }}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 2,
+            shadowRadius: 3.84,
+
+            elevation: 5,
+          }}
           disabled={!empID || officerFound}
           onPress={handleSearch}
         >
@@ -314,9 +307,9 @@ const ClaimOfficer: React.FC = () => {
       {!officerFound && empID && (
         <View className="flex items-center justify-center mt-24">
           <Image
-            source={require("../../assets/images/collection-manager/delete-icon.webp")} 
+            source={require("../../assets/images/collection-manager/delete-icon.webp")}
             className="w-28 h-28"
-            resizeMode="contain" 
+            resizeMode="contain"
           />
           <Text className="text-gray-500 mt-2">
             {t("ClaimOfficer.No Disclaimed")}
@@ -324,11 +317,8 @@ const ClaimOfficer: React.FC = () => {
         </View>
       )}
 
-
       {officerFound && (
         <View className=" mt-10 items-center">
-    
-
           <Image
             source={
               officerDetails?.image
@@ -387,22 +377,20 @@ const ClaimOfficer: React.FC = () => {
             </>
           )}
 
-      
           <TouchableOpacity
             className="mt-6 mb-10 bg-[#000000]    py-4 rounded-full"
             onPress={() => setModalVisible(true)}
-                     style={{
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.25,
+              shadowRadius: 3.84,
 
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
- 
-    elevation: 5,
-  }}
+              elevation: 5,
+            }}
           >
             <Text
               className={`text-white text-lg ${

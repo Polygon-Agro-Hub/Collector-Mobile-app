@@ -20,9 +20,9 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -177,20 +177,14 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
       >
         <View
           className="flex-1 bg-white"
-          style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+          style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
         >
-          {/* Header */}
-          <View className="flex-row items-center mb-6">
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-            >
-              <AntDesign name="left" size={24} color="#000502" />
-            </TouchableOpacity>
-            <Text className="flex-1 text-center text-xl font-bold text-black mr-[5%]">
-              {t("SearchFarmer.Search")}
-            </Text>
-          </View>
+          <CustomHeader
+            title={t("SearchFarmer.Search")}
+            showBackButton={true}
+            navigation={navigation}
+            onBackPress={() => navigation.goBack()}
+          />
 
           {/* Search Form */}
           <View className="p-4">

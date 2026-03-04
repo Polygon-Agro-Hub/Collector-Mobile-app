@@ -8,7 +8,7 @@ import {
   BackHandler,
 } from "react-native";
 import Signature from "react-native-signature-canvas";
-import { FontAwesome6, Ionicons, Entypo } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/component/types";
@@ -21,6 +21,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import CustomHeader from "../common/CustomHeader";
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -37,7 +38,6 @@ interface DigitalSignatureProps {
   route: DigitalSignatureRouteProp;
 }
 
-// Custom DashedBorder component
 interface DashedBorderProps {
   children: React.ReactNode;
   style?: any;
@@ -179,13 +179,9 @@ export default function DigitalSignature({
   const [successMessage, setSuccessMessage] = useState<
     string | React.ReactNode
   >("");
-  
-  // KEY FIX: Use state to control if signature component should render
+
   const [shouldRenderSignature, setShouldRenderSignature] = useState(false);
 
-  console.log("order id in digital sig screen", orderId, fromScreen);
-
-  // Handle screen focus - this is the main fix
   useFocusEffect(
     React.useCallback(() => {
       let isActive = true;
@@ -193,37 +189,31 @@ export default function DigitalSignature({
       const setupScreen = async () => {
         if (!isActive) return;
 
-        // Reset all states
         setSignatureDrawn(false);
         setLoading(false);
         setShowSuccessModal(false);
         setSuccessMessage("");
-        
-        // CRITICAL: Unmount signature component first
+
         setShouldRenderSignature(false);
 
-        // Lock orientation
         await ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
         );
 
-        // Wait for orientation to settle
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         if (!isActive) return;
-        
-        // CRITICAL: Now remount the signature component
+
         setShouldRenderSignature(true);
       };
 
       setupScreen();
 
-      // Cleanup function when screen loses focus
       return () => {
         isActive = false;
-        // Unmount signature when leaving
+
         setShouldRenderSignature(false);
-        // Unlock orientation when leaving this screen
+
         ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.PORTRAIT_UP,
         );
@@ -231,7 +221,6 @@ export default function DigitalSignature({
     }, []),
   );
 
-  // Also handle with useEffect as backup
   useEffect(() => {
     return () => {
       ScreenOrientation.lockAsync(
@@ -264,30 +253,23 @@ export default function DigitalSignature({
         return;
       }
 
-      // Create FormData
       const formData = new FormData();
 
-      // Prepare the signature file
       const base64Data = signatureBase64.includes(",")
         ? signatureBase64.split(",")[1]
         : signatureBase64;
 
       const fileName = `pickup_signature_${Date.now()}.png`;
 
-      // Create file object for React Native
       const file = {
         uri: `data:image/png;base64,${base64Data}`,
         type: "image/png",
         name: fileName,
       };
 
-      // Append the signature file to FormData
       formData.append("signature", file as any);
 
-      // Append the orderId to FormData
       formData.append("orderId", orderId.toString());
-
-      console.log("Saving pickup signature for order:", orderId);
 
       const response = await axios.post(
         `${environment.API_BASE_URL}api/pickup/update-pickup-Details`,
@@ -302,8 +284,6 @@ export default function DigitalSignature({
       );
 
       if (response.data.status === "success") {
-        console.log("Pickup signature saved successfully:", response.data);
-
         await ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.PORTRAIT_UP,
         );
@@ -478,34 +458,16 @@ export default function DigitalSignature({
     <View className="flex-1 bg-white">
       {/* HEADER */}
       <View className="flex-row items-center justify-between px-4 pb-3">
-        {/* LEFT - BACK BUTTON */}
-        <View style={{ width: wp(15) }}>
-          <TouchableOpacity onPress={handleBackPress} className="items-start">
-            <Entypo
-              name="chevron-left"
-              size={25}
-              color="black"
-              style={{
-                backgroundColor: "#F7FAFF",
-                borderRadius: 50,
-                padding: wp(2.5),
-              }}
-            />
-          </TouchableOpacity>
-        </View>
+        <CustomHeader
+          title={"Customer's Digital Signature"}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={handleBackPress}
+        />
 
-        {/* CENTER - TITLE */}
-        <View className="flex-1 items-center">
-          <Text className="text-lg font-bold text-gray-800">
-            Customer's Digital Signature
-          </Text>
-        </View>
-
-        {/* RIGHT - EMPTY SPACE FOR BALANCE */}
         <View style={{ width: wp(15) }} />
       </View>
 
-      {/* SIGNATURE AREA */}
       <View className="flex-1 mx-10 mb-4 mt-2 rounded rounded-full">
         <DashedBorder
           style={{
@@ -519,7 +481,6 @@ export default function DigitalSignature({
           gapWidth={8}
           borderWidth={3}
         >
-          {/* CLEAR BUTTON */}
           <TouchableOpacity
             onPress={handleClear}
             className="absolute top-4 right-4 bg-white px-4 py-2 rounded-lg flex-row items-center z-10"
@@ -536,7 +497,6 @@ export default function DigitalSignature({
             <Text className="ml-2 text-[#2D7BFF] font-semibold">Clear</Text>
           </TouchableOpacity>
 
-          {/* SIGNATURE CANVAS */}
           <View style={{ flex: 1 }}>
             <Signature
               ref={signatureRef}
@@ -554,7 +514,6 @@ export default function DigitalSignature({
         </DashedBorder>
       </View>
 
-      {/* BOTTOM BUTTONS */}
       <View className="flex-row justify-between items-center px-4 pb-4">
         <TouchableOpacity
           onPress={handleBackPress}
@@ -595,7 +554,6 @@ export default function DigitalSignature({
         )}
       </View>
 
-      {/* Success Modal - Now displays in portrait mode */}
       {showSuccessModal && (
         <View
           style={{
