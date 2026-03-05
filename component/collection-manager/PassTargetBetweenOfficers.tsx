@@ -18,6 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 type PassTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -264,18 +265,15 @@ const PassTargetBetweenOfficers: React.FC<
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={22} color="white" />
-        </TouchableOpacity>
-
-        <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
-          {getvarietyName()}
-        </Text>
-      </View>
+      <CustomHeader
+        title={getvarietyName() || ""}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       {/*  Scrollable Content */}
       <ScrollView

@@ -17,6 +17,7 @@ import { environment } from "@/environment/environment";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 type RecieveTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -319,7 +320,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 bg-white">
         {/* Fixed Header */}
-        <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
+        {/* <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
           <TouchableOpacity
             onPress={() => {
               navigation.reset({
@@ -353,7 +354,39 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
           <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
             {getvarietyName()}
           </Text>
-        </View>
+        </View> */}
+        <CustomHeader
+          title={getvarietyName() || ""}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() =>
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "Main",
+                  params: {
+                    screen: "EditTargetManager",
+                    params: {
+                      varietyId,
+                      varietyNameEnglish,
+                      grade,
+                      target,
+                      todo: route.params.todo,
+                      qty,
+                      varietyNameSinhala,
+                      varietyNameTamil,
+                      dailyTarget,
+                    },
+                  },
+                },
+              ],
+            })
+          }
+          textColor="white"
+          bgColor="#282828"
+          iconBgColor="#FFFFFF1A"
+        />
 
         <View className="bg-white rounded-lg p-4">
           <View className="p-5">

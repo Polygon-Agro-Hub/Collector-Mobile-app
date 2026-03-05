@@ -22,6 +22,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "../common/CustomHeader";
 
 type ViewPickupOrdersNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -195,20 +196,14 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header */}
-      <View className="px-4 py-3 mt-2">
-        <View className="flex-row items-center justify-center relative">
-          <TouchableOpacity
-            className="absolute left-0 bg-[#F6F6F680] rounded-full p-2 z-50"
-            onPress={() => navigation.navigate("ReadytoPickupOrders")}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-800">
-            ID : #{order.invNo}
-          </Text>
-        </View>
 
-        {/* Ready Time Badge - Keep original structure */}
+      <CustomHeader
+        title={`${t("ViewPickupOrders.ID")} ${order.invNo}`}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.navigate("ReadytoPickupOrders")}
+      />
+      <View className="px-4 ">
         <View className="flex-row items-center justify-center">
           <View className="px-3 py-1.5 rounded-full flex-row items-center">
             <Text className="text-[#565559] mr-2">

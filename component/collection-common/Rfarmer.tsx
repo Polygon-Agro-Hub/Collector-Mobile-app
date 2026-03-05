@@ -5,6 +5,7 @@ import { RootStackParamList } from "../types";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "../common/CustomHeader";
 
 type RegisteredfarmerNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -30,17 +31,12 @@ const Registeredfarmer: React.FC<RegisteredfarmerProps> = ({ navigation }) => {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-row pt-[7%]">
-        <AntDesign
-          name="left"
-          size={24}
-          color="#000502"
-          onPress={() => navigation.goBack()}
-        />
-        <Text className="text-xl pl-[28%] text-center">
-          {t("Registeredfarmer.FarmerDetails")}
-        </Text>
-      </View>
+      <CustomHeader
+        title={t("Registeredfarmer.FarmerDetails")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       <View className="ml-[10%] mr-[10%] flex-1">
         <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>

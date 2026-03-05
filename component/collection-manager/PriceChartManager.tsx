@@ -22,6 +22,7 @@ import {
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -305,22 +306,18 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
   return (
     <View className="flex-1 bg-whitegray-100">
       {/* Header */}
-      <View
-        className="bg-[#313131] h-20 flex-row items-center"
-        style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
-      >
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
-          }
-          className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000502" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-bold text-center flex-1 mr-[5%]">
-          {t("PriceChart.PriceChart")}
-        </Text>
-      </View>
+
+      <CustomHeader
+        title={t("PriceChart.PriceChart")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
+        }
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       {/* Content */}
       <ScrollView

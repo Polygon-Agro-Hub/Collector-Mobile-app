@@ -17,6 +17,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import { Animated } from "react-native";
+import CustomHeader from "../common/CustomHeader";
 
 type CenterTargetNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -177,18 +178,16 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
   return (
     <View className="flex-1 bg-[#282828] ">
       {/* Header */}
-      <View className="bg-[#282828] px-4 py-3 flex-row justify-center items-center">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute top-4 left-4 bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={22} color="white" />
-        </TouchableOpacity>
 
-        <Text className="text-white text-lg font-bold mt-[3%]">
-          {centerCode}
-        </Text>
-      </View>
+      <CustomHeader
+        title={centerCode || ""}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
         {/* To Do Button */}

@@ -99,9 +99,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     }
   };
 
-  const handleError = (err: any) => {
-    console.error("QR Reader Error:", err);
-  };
+
 
   if (hasPermission === null) {
     return (

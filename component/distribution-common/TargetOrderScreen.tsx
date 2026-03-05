@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type TargetOrderScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -554,17 +555,15 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
   return (
     <View className="flex-1 bg-[#282828]">
-      <View className="bg-[#282828] px-4 py-6 flex-row justify-center items-center">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute left-4 bg-white/10 rounded-full p-2"
-        >
-          <AntDesign name="left" size={22} color="white" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-bold">
-          {t("TargetOrderScreen.My Daily Target")}
-        </Text>
-      </View>
+      <CustomHeader
+        title={t("TargetOrderScreen.My Daily Target")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
         <Animated.View

@@ -1075,6 +1075,7 @@
     "Rscash":" Rs. "
   },
   "ViewPickupOrders": {
+    "ID":"ID",
     "Order Details": "Order Details",
     "Ready": "Ready",
     "Already Paid": "Already Paid!",

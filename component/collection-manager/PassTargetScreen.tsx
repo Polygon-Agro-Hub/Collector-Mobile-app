@@ -18,6 +18,7 @@ import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import DropDownPicker from "react-native-dropdown-picker";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 type PassTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -276,7 +277,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
   return (
     <View className="flex-1 bg-white">
       {/* Fixed Header */}
-      <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
+      {/* <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
         <TouchableOpacity
           onPress={() => {
             navigation.reset({
@@ -310,7 +311,39 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
         <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
           {getvarietyName()}
         </Text>
-      </View>
+      </View> */}
+      <CustomHeader
+        title={getvarietyName() || ""}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Main",
+                params: {
+                  screen: "EditTargetManager",
+                  params: {
+                    varietyId,
+                    varietyNameEnglish,
+                    grade,
+                    target,
+                    todo,
+                    qty,
+                    varietyNameSinhala,
+                    varietyNameTamil,
+                    dailyTarget,
+                  },
+                },
+              },
+            ],
+          })
+        }
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       {/* Scrollable Content */}
       <ScrollView

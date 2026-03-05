@@ -7,6 +7,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type EditTargetManagerNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -77,40 +78,38 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
     <ScrollView className="bg-white">
       <View className="flex-1 bg-white">
         {/* Header */}
-        <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
-          <TouchableOpacity
-            onPress={() => {
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: "Main",
+
+        <CustomHeader
+          title={getvarietyName() || ""}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() =>
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "Main",
+                  params: {
+                    screen: "DailyTarget",
                     params: {
-                      screen: "DailyTarget",
-                      params: {
-                        varietyId,
-                        varietyNameEnglish,
-                        grade,
-                        target,
-                        todo,
-                        dailyTarget,
-                        varietyNameSinhala,
-                        varietyNameTamil,
-                      },
+                      varietyId,
+                      varietyNameEnglish,
+                      grade,
+                      target,
+                      todo,
+                      dailyTarget,
+                      varietyNameSinhala,
+                      varietyNameTamil,
                     },
                   },
-                ],
-              });
-            }}
-            className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={22} color="white" />
-          </TouchableOpacity>
-
-          <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
-            {getvarietyName()}
-          </Text>
-        </View>
+                },
+              ],
+            })
+          }
+          textColor="white"
+          bgColor="#282828"
+          iconBgColor="#FFFFFF1A"
+        />
 
         {/* Content */}
         <View className="mt-6 space-y-6 p-8">

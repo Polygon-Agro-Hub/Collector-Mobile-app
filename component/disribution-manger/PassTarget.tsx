@@ -15,6 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 interface PassTargetProps {
   navigation: any;
@@ -362,17 +363,15 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="bg-[#282828] px-4 py-6 flex-row justify-center items-center">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute left-4"
-        >
-          <AntDesign name="left" size={24} color="white" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-bold">
-          {t("PassTarget.EMP ID")} : {officerId}
-        </Text>
-      </View>
+      <CustomHeader
+        title={`${t("PassTarget.EMP ID")} : ${officerId}`}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       <ScrollView
         refreshControl={

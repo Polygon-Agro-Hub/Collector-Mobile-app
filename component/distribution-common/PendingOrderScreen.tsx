@@ -24,6 +24,7 @@ import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import Timer from "@/component/distribution-common/TimerContainer ";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 interface OrderItem {
   id: string;
@@ -1889,20 +1890,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header */}
-      <View className="bg-white px-4 py-4 flex-row items-center ">
-        <TouchableOpacity
-          onPress={handleBackPress}
-          className="absolute left-4 bg-[#F6F6F680] rounded-full p-2 z-10"
-        >
-          <AntDesign name="left" size={24} color="#333" />
-        </TouchableOpacity>
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-800 text-lg font-medium">
-            {t("OpenedOrderScreen.INV No")} {orderData.invoiceNo}
-          </Text>
-        </View>
-      </View>
+      <CustomHeader
+        title={`${t("OpenedOrderScreen.INV No")} ${orderData.invoiceNo}`}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={handleBackPress}
+      />
 
       {isLoading || !isDataLoaded || completingOrder ? (
         <View className="flex-1 justify-center items-center py-20">

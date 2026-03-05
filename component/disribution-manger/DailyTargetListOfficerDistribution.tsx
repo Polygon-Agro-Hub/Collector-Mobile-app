@@ -18,6 +18,7 @@ import { RootStackParamList } from "../types";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type DailyTargetListOfficerDistributiontNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -394,16 +395,18 @@ const DailyTargetListOfficerDistribution: React.FC<
   return (
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
-      <View className="bg-[#282828] px-4 py-6 flex-row justify-center items-center">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute left-4 bg-white/10 rounded-full p-2"
-        >
-          <AntDesign name="left" size={22} color="white" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-bold">{officerId}</Text>
 
-        {/* Selection Mode Actions */}
+      <View className="bg-[#282828] px-4  flex-row justify-center items-center">
+        <CustomHeader
+          title={officerId || ""}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => navigation.goBack()}
+          textColor="white"
+          bgColor="#282828"
+          iconBgColor="#FFFFFF1A"
+        />
+
         {isSelectionMode && (
           <View className="absolute right-4 flex-row">
             <TouchableOpacity onPress={clearSelection} className="mr-3 p-2">
