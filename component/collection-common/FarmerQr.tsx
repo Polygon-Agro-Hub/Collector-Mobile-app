@@ -49,7 +49,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
   const [farmerName, setFarmerName] = useState("");
   const [farmerNIC, setFarmerNIC] = useState("");
   const [farmerQRCode, setFarmerQRCode] = useState<string | null>(null);
-  const [permissionsGranted, setPermissionsGranted] = useState(false);
+
   const [farmerPhone, setFarmerPhone] = useState("");
   const [farmerLanguage, setFarmerLanguage] = useState("");
   const [loading, setLoading] = useState<boolean>(true);
@@ -98,7 +98,6 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
     const getPermissions = async () => {
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      setPermissionsGranted(status === "granted");
     };
 
     getPermissions();

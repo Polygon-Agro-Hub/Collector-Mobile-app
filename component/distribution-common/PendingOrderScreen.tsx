@@ -9,7 +9,6 @@ import {
   TextInput,
   Alert,
   Modal,
-  Dimensions,
   Image,
   ActivityIndicator,
 } from "react-native";
@@ -56,14 +55,6 @@ interface FamilyPackItem {
   originalItemId: number;
 }
 
-interface PackageGroup {
-  packageId: number;
-  packageName: string;
-  items: FamilyPackItem[];
-  allSelected: boolean;
-  someSelected: boolean;
-}
-
 interface AdditionalItem {
   id: string;
   name: string;
@@ -95,40 +86,6 @@ interface PackageItem {
   productTypeName: string;
 }
 
-interface BackendAdditionalItem {
-  id: number;
-  productId: number;
-  qty: string;
-  unit: string;
-  price: string;
-  discount: string;
-  isPacked: number;
-  productName: string;
-  category: string;
-  normalPrice: string;
-}
-
-interface PackageData {
-  id: number;
-  packageId: number;
-  packageQty: number;
-  packingStatus: string;
-  createdAt: string;
-  items: PackageItem[];
-}
-
-interface OrderInfo {
-  orderId: number;
-  isPackage: number;
-  orderUserId: number;
-  orderApp: string;
-  buildingType: string;
-  sheduleType: string;
-  sheduleDate: string;
-  sheduleTime: string;
-  orderCreatedAt: string;
-}
-
 interface RetailItem {
   id: number;
   varietyId: string;
@@ -147,12 +104,6 @@ interface RetailItem {
   maxQuantity: number;
 }
 
-interface BackendOrderData {
-  orderInfo: OrderInfo;
-  additionalItems: BackendAdditionalItem[];
-  packageData: PackageData;
-}
-
 type PendingOrderScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   "PendingOrderScreen"
@@ -167,7 +118,6 @@ interface PendingOrderScreenProps {
   route: PendingOrderScreenRouteProp;
 }
 
-const { width, height } = Dimensions.get("window");
 const RedIcon = require("@/assets/images/distribution-common/square-min-red.webp");
 const disable = require("@/assets/images/distribution-common/square-min-disable.webp");
 
@@ -175,7 +125,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   navigation,
   route,
 }) => {
-  const { item, centerCode, status } = route.params;
+  const { item, status } = route.params;
   const { t } = useTranslation();
 
   const [orderData, setOrderData] = useState<OrderItem>(
@@ -194,7 +144,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     [key: number]: boolean;
   }>({});
   const [showWarning, setShowWarning] = useState(false);
-  const [completedTime, setCompletedTime] = useState<string | null>(null); // Track completion time
+
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const [countdownInterval, setCountdownInterval] =
@@ -208,16 +158,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   const [isReplacementPriceHigher, setIsReplacementPriceHigher] =
     useState(false);
 
-  const [packageName, setPackageName] = useState<string>("Family Pack");
   const [packageId, setPackageId] = useState<number | null>(null);
-  const [reloadingAfterReplace, setReloadingAfterReplace] = useState(false);
 
   const [orderCompletionState, setOrderCompletionState] = useState<
     "idle" | "completing" | "completed"
   >("idle");
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-
-  const [typeName, setTypeeName] = useState<string>("");
 
   const [familyPackItems, setFamilyPackItems] = useState<FamilyPackItem[]>([]);
   const [retailItems, setRetailItems] = useState<RetailItem[]>([]);
@@ -227,8 +173,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const [additionalItems, setAdditionalItems] = useState<AdditionalItem[]>([]);
 
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [jobRole, setJobRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -246,7 +190,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const fetchUserProfile = async () => {
     setIsLoading(true);
-    setError(null);
 
     try {
       const token = await AsyncStorage.getItem("token");
@@ -265,7 +208,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       setJobRole(role);
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
-      setError("Failed to load profile data");
     } finally {
       setIsLoading(false);
     }
@@ -329,14 +271,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   };
 
   const loadOrderData = async (isRefreshing = false, afterReplace = false) => {
-    if (!isRefreshing && !afterReplace) {
-      setLoading(true);
-    }
-
-    if (afterReplace) {
-      setReloadingAfterReplace(true);
-    }
-
     const orderData = await fetchOrderData(item.orderId);
 
     if (orderData) {
@@ -428,14 +362,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           };
         }) || [];
 
-      if (packageNames.length > 0) {
-        setPackageName(packageNames.join(" + "));
-      }
-
-      if (typeNames.length > 0) {
-        setTypeeName(typeNames.join(", "));
-      }
-
       setFamilyPackItems(allFamilyPackItems);
       setAdditionalItems(mappedAdditionalItems);
 
@@ -457,24 +383,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         setOrderStatus("Pending");
       } else if (allFamilyPacked && allAdditionalPacked) {
         setOrderStatus("Completed");
-        setCompletedTime(new Date().toLocaleString());
       } else if (someFamilyPacked || someAdditionalPacked) {
         setOrderStatus("Opened");
       } else {
         setOrderStatus("Pending");
       }
-
-      setError(null);
     } else {
-      setError(t("Failed to load order data"));
-    }
-
-    if (!isRefreshing && !afterReplace) {
-      setLoading(false);
-    }
-
-    if (afterReplace) {
-      setReloadingAfterReplace(false);
+      console.log(t("Failed to load order data"));
     }
   };
 
@@ -536,9 +451,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     setAdditionalItems((prev) => {
       const updated = prev.map((item) => {
         if (item.id === id) {
-          console.log(
-            `Toggling ${item.name} from ${item.selected} to ${!item.selected}`,
-          );
           return { ...item, selected: !item.selected };
         }
         return item;
@@ -643,7 +555,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
     try {
       setOrderStatus("Completed");
-      setCompletedTime(new Date().toLocaleString());
+
       setShowCompletionPrompt(false);
       resetCountdown();
 
@@ -721,7 +633,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       setCompletingOrder(false);
       setOrderCompletionState("idle");
       setOrderStatus("Opened");
-      setCompletedTime(null);
 
       Alert.alert(t("Error.Error"), t("Error.Failed to complete order"), [
         {
@@ -1047,8 +958,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       if (response.data.success) {
         setOrderStatus(newStatus);
         if (newStatus === "Completed") {
-          setCompletedTime(new Date().toLocaleString());
-
           try {
             const distributedTargetResponse = await axios.put(
               `${environment.API_BASE_URL}api/distribution/update-distributed-target/${item.orderId}`,

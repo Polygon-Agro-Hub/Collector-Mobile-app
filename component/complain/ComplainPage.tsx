@@ -45,7 +45,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   const { userId, farmerLanguage } = route.params;
 
   const [complain, setComplain] = useState<string>("");
-  const [language, setLanguage] = useState("en");
+
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [Category, setCategory] = useState<{ value: string; label: string }[]>(
@@ -53,7 +53,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,7 +68,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     const fetchUserRole = async () => {
       try {
         const role = await AsyncStorage.getItem("jobRole");
-        setUserRole(role);
       } catch (error) {
         console.error("Error fetching user role:", error);
       }
@@ -86,7 +85,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     }
 
     const selectedLanguage = t("ReportComplaint.LNG");
-    setLanguage(selectedLanguage);
 
     const fetchComplainCategory = async () => {
       try {
@@ -150,9 +148,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
 
     try {
       const storedLanguage = await AsyncStorage.getItem("@user_language");
-      if (storedLanguage) {
-        setLanguage(storedLanguage);
-      }
 
       const token = await AsyncStorage.getItem("token");
 

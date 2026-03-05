@@ -14,7 +14,6 @@ import {
   FontAwesome5,
   FontAwesome6,
   Foundation,
-  Ionicons,
   MaterialIcons,
   Octicons,
 } from "@expo/vector-icons";

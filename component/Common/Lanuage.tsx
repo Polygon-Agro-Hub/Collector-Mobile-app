@@ -2,7 +2,6 @@ import React, { useEffect, useContext, useCallback } from "react";
 import { View, Text, Image, TouchableOpacity, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-const lg = require("../../assets/images/common/language.webp");
 import { RootStackParamList } from "../types";
 import { LanguageContext } from "@/context/LanguageContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,6 +15,8 @@ type LanuageScreenNavigationProp = StackNavigationProp<
 interface LanuageProps {
   navigation: LanuageScreenNavigationProp;
 }
+
+const lg = require("../../assets/images/common/language.webp");
 
 const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   const { changeLanguage } = useContext(LanguageContext);

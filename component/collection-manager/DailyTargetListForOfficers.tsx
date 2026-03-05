@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -52,7 +52,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
   const [todoData, setTodoData] = useState<TargetData[]>([]);
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
   const { collectionOfficerId, officerId } = route.params;
@@ -131,9 +130,8 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
 
       setTodoData(sortByVarietyAndGrade(todoItems));
       setCompletedData(sortByVarietyAndGrade(completedItems));
-      setError(null);
     } catch (err) {
-      setError(t("Error.Failed to fetch data."));
+      console.log(t("Error.Failed to fetch data."));
     } finally {
       const elapsedTime = Date.now() - startTime;
       const remainingTime = 3000 - elapsedTime;

@@ -59,8 +59,6 @@ export const handleGeneratePDF = async (
       return null;
     }
 
-    const reportId = generateReportId(officerId);
-
     const officerResponse = await axios.get(
       `${environment.API_BASE_URL}api/distribution-manager/employee/${officerId}`,
     );

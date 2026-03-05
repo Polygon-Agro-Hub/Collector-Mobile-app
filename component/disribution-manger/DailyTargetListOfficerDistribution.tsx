@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -83,21 +83,10 @@ const DailyTargetListOfficerDistribution: React.FC<
   const [refreshing, setRefreshing] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [invNo, setInvoNo] = useState("");
+
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const { collectionOfficerId, officerId } = route.params;
   const { t } = useTranslation();
-
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-
-  const fetchSelectedLanguage = async () => {
-    try {
-      const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
-    } catch (error) {
-      console.error("Error fetching language preference:", error);
-    }
-  };
 
   const getStatusColor = (status: string) => {
     const normalizedStatus = status?.toLowerCase();
@@ -329,10 +318,6 @@ const DailyTargetListOfficerDistribution: React.FC<
       setTodoData(todoItems);
       setCompletedData(completedItems);
 
-      if (allData && allData.length > 0) {
-        setInvoNo(allData[0].invNo || "");
-      }
-
       setError(null);
     } catch (err) {
       console.error("Error fetching targets:", err);
@@ -371,13 +356,6 @@ const DailyTargetListOfficerDistribution: React.FC<
   const pendingItemsCount = todoData.filter((item) =>
     canSelectItem(item),
   ).length;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchSelectedLanguage();
-    };
-    fetchData();
-  }, []);
 
   const getStatusTextColor = (status: string) => {
     switch (status?.toLowerCase()) {

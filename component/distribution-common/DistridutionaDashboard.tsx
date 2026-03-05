@@ -48,7 +48,6 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
   navigation,
 }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [empId, setEmpId] = useState<string | null>(null);
   const [jobRole, setJobeRole] = useState<string | null>(null);
   const [centerId, setCenterId] = useState<string | null>(null);
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
@@ -77,7 +76,6 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
           },
         );
         setProfile(response.data.data);
-        setEmpId(response.data.data.empId);
         setJobeRole(response.data.data.jobRole);
         setCenterId(response.data.data.centerId);
       }

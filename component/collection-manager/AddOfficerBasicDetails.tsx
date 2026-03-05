@@ -71,6 +71,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [error1, setError1] = useState("");
+  const [error2, setError2] = useState("");
+  const [error3, setError3] = useState("");
+  const [errorEmail, setErrorEmail] = useState("");
 
   const [formData, setFormData] = useState<OfficerBasicDetailsFormData>({
     userId: "",
@@ -125,8 +129,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       return newErrors;
     });
   };
-
-  const nicRegex = /^\d{9}[Vv]?$|^\d{10}$/;
 
   const validateNicNumber = (input: string) =>
     /^[0-9]{9}V$|^[0-9]{12}$/.test(input);
@@ -313,11 +315,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
       updatedFormData.profileImage = selectedImage || "";
 
-      const prefixedUserId =
-        jobRole === "Collection Officer"
-          ? `COO${formData.userId}`
-          : `DIO${formData.userId}`;
-
       navigation.navigate("AddOfficerAddressDetails", {
         formData: { ...updatedFormData },
         type,
@@ -331,13 +328,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       setIsValidating(false);
     }
   };
-
-  const [error1, setError1] = useState("");
-  const [error2, setError2] = useState("");
-  const [error3, setError3] = useState("");
-  const [errorEmail, setErrorEmail] = useState("");
-
-  const jobRoles = [{ key: "2", value: "Collection Officer" }];
 
   const handleEnglishNameChange = (text: string, fieldName: string) => {
     clearFieldError(fieldName);
@@ -619,7 +609,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         className="flex-1 bg-white"
         keyboardShouldPersistTaps="handled"
       >
-      
         <CustomHeader
           title={t("AddOfficerBasicDetails.AddOfficer")}
           showBackButton={true}

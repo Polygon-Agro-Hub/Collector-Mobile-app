@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { AntDesign } from "@expo/vector-icons";
 import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,7 +18,6 @@ import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../common/CustomHeader";
 
-// Define the navigation prop type
 type RecieveTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   "RecieveTargetBetweenOfficers"
@@ -68,14 +66,11 @@ const RecieveTargetBetweenOfficers: React.FC<
   const { t } = useTranslation();
 
   const {
-    varietyNameEnglish,
     grade,
-    target,
-    qty,
+
     varietyId,
     collectionOfficerId,
-    varietyNameSinhala,
-    varietyNameTamil,
+
     officerId,
   } = route.params;
 

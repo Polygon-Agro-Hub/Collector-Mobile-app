@@ -41,7 +41,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
@@ -115,9 +115,8 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
 
       setTodoData(sortData(todoItems));
       setCompletedData(sortData(completedItems));
-      setError(null);
     } catch (err) {
-      setError(t("Error.Failed to fetch data."));
+      console.log(t("Error.Failed to fetch data."));
     } finally {
       setLoading(false);
       setRefreshing(false);

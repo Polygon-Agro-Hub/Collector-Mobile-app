@@ -112,8 +112,6 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     CurrentReplaceRequest[]
   >([]);
   const [submitting, setSubmitting] = useState(false);
-  const [ordreId, setOrdreId] = useState("");
-  const [id, setId] = useState("");
 
   const replaceRequestData = route.params
     ?.replaceRequestData as ReplaceRequestData;
@@ -136,11 +134,6 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   useEffect(() => {
     loadCurrentReplaceRequest();
     loadRetailItems();
-  }, []);
-
-  useEffect(() => {
-    setOrdreId(replaceRequestData.orderId);
-    setId(replaceRequestData.id);
   }, []);
 
   const loadCurrentReplaceRequest = async () => {

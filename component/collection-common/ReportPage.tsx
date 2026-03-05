@@ -18,7 +18,6 @@ import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { useTranslation } from "react-i18next";
-import { AntDesign } from "@expo/vector-icons";
 import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
@@ -76,7 +75,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
   const route = useRoute<ReportPageRouteProp>();
   const { userId, registeredFarmerId } = route.params || {};
   const [crops, setCrops] = useState<Crop[]>([]);
-  const [qrValue, setQrValue] = useState<string>("");
+
   const { t } = useTranslation();
 
   const totalSum = crops.reduce(
@@ -107,9 +106,6 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
         };
 
         setofficerDetails(officerDetails);
-
-        const qrData = JSON.stringify(officerDetails);
-        setQrValue(qrData);
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to fetch details"));
       }
@@ -375,234 +371,252 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
         onBackPress={() => navigation.navigate("Main" as any)}
       />
       <View className="p-4">
-
-      {/* Personal Details Section */}
-      {details && (
-        <View className="mb-4">
-          <View className="mb-2">
-            <Text className="text-sm font-bold">
-              {t("ReportPage.INV")}
-              {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
-            </Text>
-          </View>
-          <Text className="font-bold text-sm mb-2">
-            {t("ReportPage.PersonalDetails")}
-          </Text>
-          <ScrollView horizontal className="border border-gray-300 rounded-lg">
-            <View>
-              {/* Table Header */}
-              <View className="flex-row bg-gray-200">
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.FirstName")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.LastName")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.NIC")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Phone")}
-                </Text>
-                <Text className="w-32 p-2 font-bold">
-                  {t("ReportPage.Address")}
-                </Text>
-              </View>
-              {/* Table Rows */}
-              <View className="flex-row">
-                <Text className="w-32 p-2 border-r border-gray-300">
-                  {details.firstName}
-                </Text>
-                <Text className="w-32 p-2 border-r border-gray-300">
-                  {details.lastName}
-                </Text>
-                <Text className="w-32 p-2 border-r border-gray-300">
-                  {details.NICnumber}
-                </Text>
-                <Text className="w-32 p-2 border-r border-gray-300">
-                  {details.phoneNumber}
-                </Text>
-                <Text className="w-32 p-2">{details.address}</Text>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Bank Details Section */}
-      {details && (
-        <View className="mb-4">
-          <Text className="font-bold text-sm mb-2">{t("ReportPage.Bank")}</Text>
-          <ScrollView horizontal className="border border-gray-300 rounded-lg">
-            <View>
-              {/* Table Header */}
-              <View className="flex-row bg-gray-200">
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.AccountNum")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.AccountName")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.BankName")}
-                </Text>
-                <Text className="w-32 p-2">{t("ReportPage.BranchName")}</Text>
-              </View>
-              {/* Table Rows */}
-              <View className="flex-row">
-                <Text className="w-32 p-2 border-r border-gray-300">
-                  {details.accNumber}
-                </Text>
-                <Text className="w-32 p-2 border-r border-gray-300">
-                  {details.accHolderName}
-                </Text>
-                <Text className="w-32 p-2 border-r border-gray-300">
-                  {details.bankName}
-                </Text>
-                <Text className="w-32 p-2">{details.branchName}</Text>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Crop Details Section */}
-      {crops.length > 0 && (
-        <View className="mb-4">
-          <Text className="font-bold text-sm mb-2">
-            {t("ReportPage.CropDetails")}
-          </Text>
-          <ScrollView horizontal className="border border-gray-300 rounded-lg">
-            <View>
-              {/* Table Header */}
-              <View className="flex-row bg-gray-200">
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.CropName")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Variety")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Unit Price A")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Weight A")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Unit Price B")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Weight B")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Unit Price C")}
-                </Text>
-                <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                  {t("ReportPage.Weight C")}
-                </Text>
-                <Text className="w-32 p-2">{t("ReportPage.Total")}</Text>
-              </View>
-              {/* Table Rows */}
-              {crops.map((crop) => (
-                <View key={crop.id} className="flex-row">
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.cropName}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.variety}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.unitPriceA}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.weightA}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.unitPriceB}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.weightB}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.unitPriceC}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.weightC}
-                  </Text>
-                  <Text className="w-32 p-2 border-b border-gray-300">
-                    {crop.total}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      )}
-
-      <View className="p-2 border-t border-gray-300">
-        <Text className="font-bold">
-          {t("ReportPage.TotalSum")} {totalSum.toFixed(2)}
-        </Text>
-      </View>
-
-      {details && details.qrCode && officerDetails && officerDetails.QRCode && (
-        <View className="mb-4 flex-row items-center justify-start">
-          <View className="mr-4">
-            <View>
-              <Image
-                source={{
-                  uri: details.qrCode.replace(/^data:image\/png;base64,/, ""),
-                }}
-                style={{ width: 150, height: 150 }}
-              />
-              <Text className="font-bold ml-5 text-sm mb-2">
-                {t("ReportPage.FarmerQR")}
+        {/* Personal Details Section */}
+        {details && (
+          <View className="mb-4">
+            <View className="mb-2">
+              <Text className="text-sm font-bold">
+                {t("ReportPage.INV")}
+                {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
               </Text>
             </View>
-          </View>
-          <View>
-            <Image
-              source={{
-                uri: officerDetails.QRCode.replace(
-                  /^data:image\/png;base64,/,
-                  "",
-                ),
-              }}
-              style={{ width: 150, height: 150 }}
-            />
-
-            <Text className="font-bold ml-5 text-sm mb-2">
-              {t("ReportPage.OfficerQR")}
+            <Text className="font-bold text-sm mb-2">
+              {t("ReportPage.PersonalDetails")}
             </Text>
+            <ScrollView
+              horizontal
+              className="border border-gray-300 rounded-lg"
+            >
+              <View>
+                {/* Table Header */}
+                <View className="flex-row bg-gray-200">
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.FirstName")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.LastName")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.NIC")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Phone")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold">
+                    {t("ReportPage.Address")}
+                  </Text>
+                </View>
+                {/* Table Rows */}
+                <View className="flex-row">
+                  <Text className="w-32 p-2 border-r border-gray-300">
+                    {details.firstName}
+                  </Text>
+                  <Text className="w-32 p-2 border-r border-gray-300">
+                    {details.lastName}
+                  </Text>
+                  <Text className="w-32 p-2 border-r border-gray-300">
+                    {details.NICnumber}
+                  </Text>
+                  <Text className="w-32 p-2 border-r border-gray-300">
+                    {details.phoneNumber}
+                  </Text>
+                  <Text className="w-32 p-2">{details.address}</Text>
+                </View>
+              </View>
+            </ScrollView>
           </View>
-        </View>
-      )}
+        )}
 
-      <View className="flex-row justify-around w-full mb-7">
-        <TouchableOpacity
-          className="bg-[#2AAD7A] p-4 h-[80px] w-[120px] rounded-lg items-center"
-          onPress={handleDownloadPDF}
-        >
-          <Image
-            source={require("../../assets/images/collection-common/download.webp")}
-            style={{ width: 24, height: 24 }}
-          />
-          <Text className="text-sm text-cyan-50">
-            {t("ReportPage.Download")}
+        {/* Bank Details Section */}
+        {details && (
+          <View className="mb-4">
+            <Text className="font-bold text-sm mb-2">
+              {t("ReportPage.Bank")}
+            </Text>
+            <ScrollView
+              horizontal
+              className="border border-gray-300 rounded-lg"
+            >
+              <View>
+                {/* Table Header */}
+                <View className="flex-row bg-gray-200">
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.AccountNum")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.AccountName")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.BankName")}
+                  </Text>
+                  <Text className="w-32 p-2">{t("ReportPage.BranchName")}</Text>
+                </View>
+                {/* Table Rows */}
+                <View className="flex-row">
+                  <Text className="w-32 p-2 border-r border-gray-300">
+                    {details.accNumber}
+                  </Text>
+                  <Text className="w-32 p-2 border-r border-gray-300">
+                    {details.accHolderName}
+                  </Text>
+                  <Text className="w-32 p-2 border-r border-gray-300">
+                    {details.bankName}
+                  </Text>
+                  <Text className="w-32 p-2">{details.branchName}</Text>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Crop Details Section */}
+        {crops.length > 0 && (
+          <View className="mb-4">
+            <Text className="font-bold text-sm mb-2">
+              {t("ReportPage.CropDetails")}
+            </Text>
+            <ScrollView
+              horizontal
+              className="border border-gray-300 rounded-lg"
+            >
+              <View>
+                {/* Table Header */}
+                <View className="flex-row bg-gray-200">
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.CropName")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Variety")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Unit Price A")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Weight A")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Unit Price B")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Weight B")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Unit Price C")}
+                  </Text>
+                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                    {t("ReportPage.Weight C")}
+                  </Text>
+                  <Text className="w-32 p-2">{t("ReportPage.Total")}</Text>
+                </View>
+                {/* Table Rows */}
+                {crops.map((crop) => (
+                  <View key={crop.id} className="flex-row">
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.cropName}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.variety}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.unitPriceA}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.weightA}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.unitPriceB}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.weightB}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.unitPriceC}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.weightC}
+                    </Text>
+                    <Text className="w-32 p-2 border-b border-gray-300">
+                      {crop.total}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        )}
+
+        <View className="p-2 border-t border-gray-300">
+          <Text className="font-bold">
+            {t("ReportPage.TotalSum")} {totalSum.toFixed(2)}
           </Text>
-        </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity
-          className="bg-[#2AAD7A] p-4 h-[80px] w-[120px] rounded-lg items-center"
-          onPress={handleSharePDF}
-        >
-          <Image
-            source={require("../../assets/images/collection-common/share.webp")}
-            style={{ width: 24, height: 24 }}
-          />
-          <Text className="text-sm text-cyan-50">{t("ReportPage.Share")}</Text>
-        </TouchableOpacity>
-      </View>
+        {details &&
+          details.qrCode &&
+          officerDetails &&
+          officerDetails.QRCode && (
+            <View className="mb-4 flex-row items-center justify-start">
+              <View className="mr-4">
+                <View>
+                  <Image
+                    source={{
+                      uri: details.qrCode.replace(
+                        /^data:image\/png;base64,/,
+                        "",
+                      ),
+                    }}
+                    style={{ width: 150, height: 150 }}
+                  />
+                  <Text className="font-bold ml-5 text-sm mb-2">
+                    {t("ReportPage.FarmerQR")}
+                  </Text>
+                </View>
+              </View>
+              <View>
+                <Image
+                  source={{
+                    uri: officerDetails.QRCode.replace(
+                      /^data:image\/png;base64,/,
+                      "",
+                    ),
+                  }}
+                  style={{ width: 150, height: 150 }}
+                />
+
+                <Text className="font-bold ml-5 text-sm mb-2">
+                  {t("ReportPage.OfficerQR")}
+                </Text>
+              </View>
+            </View>
+          )}
+
+        <View className="flex-row justify-around w-full mb-7">
+          <TouchableOpacity
+            className="bg-[#2AAD7A] p-4 h-[80px] w-[120px] rounded-lg items-center"
+            onPress={handleDownloadPDF}
+          >
+            <Image
+              source={require("../../assets/images/collection-common/download.webp")}
+              style={{ width: 24, height: 24 }}
+            />
+            <Text className="text-sm text-cyan-50">
+              {t("ReportPage.Download")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="bg-[#2AAD7A] p-4 h-[80px] w-[120px] rounded-lg items-center"
+            onPress={handleSharePDF}
+          >
+            <Image
+              source={require("../../assets/images/collection-common/share.webp")}
+              style={{ width: 24, height: 24 }}
+            />
+            <Text className="text-sm text-cyan-50">
+              {t("ReportPage.Share")}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );

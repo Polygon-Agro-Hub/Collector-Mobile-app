@@ -44,7 +44,7 @@ interface ProfileData {
 
 const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [empId, setEmpId] = useState<string | null>(null);
+
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -71,7 +71,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
           },
         );
         setProfile(response.data.data);
-        setEmpId(response.data.data.empId);
       }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);

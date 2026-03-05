@@ -57,7 +57,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   const [loading, setLoading] = useState(false);
   const [jobRole, setJobRole] = useState<string | null>(null);
 
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   useEffect(() => {

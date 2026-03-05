@@ -172,7 +172,7 @@ export default function DigitalSignature({
   navigation,
 }: DigitalSignatureProps) {
   const signatureRef = useRef<any>(null);
-  const { orderId, fromScreen } = route.params;
+  const { orderId } = route.params;
   const [loading, setLoading] = useState(false);
   const [signatureDrawn, setSignatureDrawn] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);

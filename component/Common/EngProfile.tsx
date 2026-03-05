@@ -4,7 +4,6 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  Linking,
   Alert,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -187,20 +186,6 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
         HanldeAsynStorage("si");
       }
     } catch (error) {}
-  };
-
-  const handleCall = () => {
-    const phoneNumber = "+1234567890";
-    const url = `tel:${phoneNumber}`;
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(url);
-        } else {
-          Alert.alert(t("Error.error"), t("Error.Unable to open dialer."));
-        }
-      })
-      .catch((err) => console.error("An error occurred", err));
   };
 
   const handleLogout = async () => {

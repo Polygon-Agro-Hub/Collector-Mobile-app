@@ -120,45 +120,14 @@ interface DateOption {
   label: string;
   timeSlots: string[];
 }
-interface DetailedOrderResponse {
-  orderId: string;
-  customerEmail?: string;
-  email?: string;
-  customerName?: string;
-  name?: string;
-  customerPhone?: string;
-  phone?: string;
-  customerAddress?: string;
-  address?: string;
-  totalAmount?: number;
-  items?: OrderItem[];
-}
-
-interface OrderItem {
-  name: string;
-  grade: string;
-  quantity: string;
-  unitPrice: number;
-  total: number;
-}
-
-interface EnhancedTargetData extends TargetData {
-  customerEmail?: string;
-  customerName?: string;
-  customerPhone?: string;
-  customerAddress?: string;
-  totalAmount?: number;
-  items?: OrderItem[];
-}
 
 const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   navigation,
   route,
 }) => {
-  const { centerId } = route.params;
   const [todoData, setTodoData] = useState<TargetData[]>([]);
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
-  const [centerCode, setcenterCode] = useState<string | null>("");
+
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
@@ -184,7 +153,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successCount, setSuccessCount] = useState(0);
   const MAX_SELECTED_ORDERS = 5;
-  const [selectionLimitReached, setSelectionLimitReached] = useState(false);
+
   const [selectAll, setSelectAll] = useState(false);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -558,7 +527,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     const fetchData = async () => {
       await fetchSelectedLanguage();
       const centerCode = await AsyncStorage.getItem("centerCode");
-      setcenterCode(centerCode);
+
       await fetchTargets();
     };
     fetchData();
@@ -862,11 +831,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   const handleCheckboxToggle = (itemId: string) => {
     setSelectedItems((prev) => {
       if (prev.includes(itemId)) {
-        setSelectionLimitReached(false);
         return prev.filter((id) => id !== itemId);
       } else {
         if (prev.length >= MAX_SELECTED_ORDERS) {
-          setSelectionLimitReached(true);
           Alert.alert(
             t("CenterTargetScreen.Limit Reached"),
             t(
@@ -876,7 +843,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           );
           return prev;
         }
-        setSelectionLimitReached(false);
+
         return [...prev, itemId];
       }
     });

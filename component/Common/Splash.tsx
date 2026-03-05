@@ -14,7 +14,6 @@ interface SplashProps {
   navigation: SplashNavigationProp;
 }
 
-const phone = require("../../assets/images/common/phone.webp");
 const Center = require("../../assets/images/common/codinet.webp");
 const Bottom = require("../../assets/images/common/codinet-back.webp");
 const Top = require("../../assets/images/common/codinet-up.webp");

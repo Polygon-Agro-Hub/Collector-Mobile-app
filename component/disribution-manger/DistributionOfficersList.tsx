@@ -51,7 +51,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
-  const [showFilter, setShowFilter] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -154,7 +153,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const onRefresh = async () => {
     setSelectedJobRole(null);
-    setShowFilter(false);
     setRefreshing(true);
     await fetchOfficers();
     setRefreshing(false);
@@ -164,7 +162,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     React.useCallback(() => {
       fetchOfficers();
       setSelectedJobRole(null);
-      setShowFilter(false);
     }, []),
   );
 
@@ -262,7 +259,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           className="absolute top-6 right-4"
           onPress={() => {
             setShowMenu((prev) => !prev);
-            setShowFilter(false);
           }}
         >
           <Ionicons name="ellipsis-vertical" size={24} color="#fff" />

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -31,8 +31,6 @@ interface OfficerQrProps {
 }
 
 const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
-  const qrCodeRef = useRef<any>(null);
-  const [jobRole, setJobRole] = useState<string>("");
   const [QR, setQR] = useState<string>("");
   const { t } = useTranslation();
   const [language, setLanguage] = useState<string>("en");
@@ -65,7 +63,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
 
       if (response.data.status === "success") {
         setProfile(data);
-        setJobRole(data.jobRole || "");
+
         setQR(data.QRcode || "");
       } else {
         Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
@@ -142,7 +140,6 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
 
       const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
 
-      // Download the QR code image from the URL
       const response = await FileSystem.downloadAsync(QR, fileUri);
 
       if (await Sharing.isAvailableAsync()) {

@@ -32,16 +32,6 @@ type RootStackParamList = {
   NextScreen: undefined;
 };
 
-interface userItem {
-  phoneNumber: number;
-  NICnumber: string;
-  accNumber: string;
-  accHolderName: string;
-  bankName: string;
-  branchName: string;
-  PreferdLanguage: string;
-  farmerId: number;
-}
 interface SuccessModalProps {
   visible: boolean;
   onClose: () => void;
@@ -471,9 +461,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
           {language === "en" ? (
             <View className="mt-4">
-              <Text className="text-md text-gray-400">
-                {/* {t("OtpVerification.OTPCode")} */}
-              </Text>
               <Text className="text-md text-[#0085FF] text-center pt-1 ">
                 {phoneNumber}
               </Text>
@@ -482,10 +469,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             <View className="mt-5">
               <Text className="text-md text-[#0085FF] text-center ">
                 {phoneNumber}
-              </Text>
-
-              <Text className="text-md text-gray-400 pt-1">
-                {/* {t("OtpVerification.OTPCode")} */}
               </Text>
             </View>
           )}

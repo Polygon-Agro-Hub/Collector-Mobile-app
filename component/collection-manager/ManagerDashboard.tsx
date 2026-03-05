@@ -17,9 +17,7 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
-import TransportComponent, {
-  GenericNavigationProp,
-} from "../driver-screens/TransportComponent";
+import TransportComponent from "../driver-screens/TransportComponent";
 
 type ManagerDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -51,7 +49,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
     "Collection",
   );
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
-  const [isLoadingTarget, setIsLoadingTarget] = useState(true); // Add loading state
+  const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");

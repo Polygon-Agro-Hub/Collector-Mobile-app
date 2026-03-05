@@ -48,7 +48,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
     image,
   } = route.params;
   const [showMenu, setShowMenu] = useState(false);
-  const [officerStatus, setOfficerStatus] = useState("offline");
+
   const [taskPercentage, setTaskPercentage] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
@@ -249,10 +249,8 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
         const { OnlineStatus } = data.result;
 
         if (OnlineStatus === 1) {
-          setOfficerStatus("online");
           setIsOnline(true);
         } else {
-          setOfficerStatus("offline");
           setIsOnline(false);
         }
       } else {

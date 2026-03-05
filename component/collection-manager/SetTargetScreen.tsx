@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  FlatList,
   ScrollView,
 } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";

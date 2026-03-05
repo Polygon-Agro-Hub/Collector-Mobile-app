@@ -21,7 +21,6 @@ import { environment } from "@/environment/environment";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 
 type OfficerSummaryNavigationProp = StackNavigationProp<
@@ -52,7 +51,6 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
     image,
   } = route.params;
   const [showMenu, setShowMenu] = useState(false);
-  const [officerStatus, setOfficerStatus] = useState("offline");
   const [taskPercentage, setTaskPercentage] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
@@ -240,10 +238,8 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
         const { OnlineStatus } = data.result;
 
         if (OnlineStatus === 1) {
-          setOfficerStatus("online");
           setIsOnline(true);
         } else {
-          setOfficerStatus("offline");
           setIsOnline(false);
         }
       } else {

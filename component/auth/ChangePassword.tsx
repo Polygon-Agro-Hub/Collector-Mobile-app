@@ -89,18 +89,6 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     return true;
   };
 
-  useEffect(() => {
-    const fetchEmpid = async () => {
-      try {
-        const response = await axios.get(
-          `${environment.API_BASE_URL}api/collection-officer/empid/`,
-        );
-      } catch (error) {
-        Alert.alert(t("Error.error"), t("Error.Failed to fetch empid."));
-      }
-    };
-  }, []);
-
   const handleChangePassword = async () => {
     Keyboard.dismiss();
 

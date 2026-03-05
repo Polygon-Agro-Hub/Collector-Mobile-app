@@ -17,7 +17,6 @@ import { RootStackParamList } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
@@ -245,8 +244,7 @@ const ClaimOfficer: React.FC = () => {
 
   return (
     <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
-     
-       <CustomHeader
+      <CustomHeader
         title={t("ClaimOfficer.ClaimOfficers")}
         showBackButton={true}
         navigation={navigation}

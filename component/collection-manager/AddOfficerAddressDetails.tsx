@@ -13,7 +13,6 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import countryCodes from "./countryCodes.json";
 import { SelectList } from "react-native-dropdown-select-list";
 import { ActivityIndicator } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
@@ -49,7 +48,6 @@ const AddOfficerAddressDetails: React.FC = () => {
 
   const [filteredBranches, setFilteredBranches] = useState<any[]>([]);
   const [bankName, setBankName] = useState<string>("");
-  const [branchName, setBranchName] = useState<string>("");
   const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
@@ -69,9 +67,6 @@ const AddOfficerAddressDetails: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [countries, setCountries] = useState<
-    { name: string; dial_code: string; code: string }[]
-  >([]);
 
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -156,10 +151,6 @@ const AddOfficerAddressDetails: React.FC = () => {
     };
 
     loadStoredData();
-  }, []);
-
-  useEffect(() => {
-    setCountries(countryCodes);
   }, []);
 
   const validateFields = () => {
@@ -423,7 +414,7 @@ const AddOfficerAddressDetails: React.FC = () => {
     clearFieldError("bankName");
     clearFieldError("branchName");
     setBankName(selectedBank);
-    setBranchName("");
+
     setFormData((prevData) => {
       const updatedData = {
         ...prevData,
@@ -437,7 +428,7 @@ const AddOfficerAddressDetails: React.FC = () => {
 
   const handleBranchSelection = (selectedBranch: string) => {
     clearFieldError("branchName");
-    setBranchName(selectedBranch);
+
     setFormData((prevData) => {
       const updatedData = { ...prevData, branchName: selectedBranch };
       saveDataToStorage(updatedData);

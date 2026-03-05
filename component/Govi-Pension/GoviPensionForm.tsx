@@ -35,14 +35,12 @@ interface GoviPensionFormProps {
 }
 
 interface FormData {
-  // Section 1: Applicant Details
   fullName: string;
   dateOfBirth: Date | null;
   nicNumber: string;
   nicFrontImage: string | null;
   nicBackImage: string | null;
 
-  // Section 2: Successor Details
   successorFullName: string;
   successorRelationship: string;
   successorDateOfBirth: Date | null;

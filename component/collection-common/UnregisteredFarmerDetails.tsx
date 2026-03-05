@@ -21,7 +21,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import NetInfo from "@react-native-community/netinfo";
 import { SelectList } from "react-native-dropdown-select-list";
 import CustomHeader from "../common/CustomHeader";
@@ -199,16 +198,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
-  };
-
-  const validateAccountNumber = (value: any) => {
-    const numericRegex = /^[0-9]*$/;
-    if (!numericRegex.test(value)) {
-      setAccNumberError(t("UnregisteredFarmerDetails.AccountNumberError"));
-      return false;
-    }
-    setAccNumberError("");
-    return true;
   };
 
   const handleNext = async () => {

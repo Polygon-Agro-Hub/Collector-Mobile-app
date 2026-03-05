@@ -11,10 +11,10 @@ import {
   BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { s, scale } from "react-native-size-matters";
+import { scale } from "react-native-size-matters";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RootStackParamList } from "../types";
 import { environment } from "@/environment/environment";

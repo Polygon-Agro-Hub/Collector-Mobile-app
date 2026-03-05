@@ -31,7 +31,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   const [scanned, setScanned] = useState<boolean>(false);
   const [showPermissionModal, setShowPermissionModal] =
     useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const { t } = useTranslation();
 
   const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
@@ -50,7 +50,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
     const unsubscribe = navigation.addListener("focus", () => {
       setScanned(false);
-      setErrorMessage(null);
+
       setIsUnsuccessfulModalVisible(false);
     });
 
@@ -77,11 +77,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
       navigation.navigate("FarmerQr" as any, { userId });
     } catch (error) {
       console.error("QR Parsing Error:", error);
-      setErrorMessage(
-        t(
-          "Error.The scanned QR code does not contain a valid user ID or is damaged.",
-        ),
-      );
+
       setIsUnsuccessfulModalVisible(true);
 
       unsuccessfulLoadingBarWidth.setValue(100);
@@ -93,13 +89,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
       setTimeout(() => {
         setIsUnsuccessfulModalVisible(false);
-        setErrorMessage(null);
+
         navigation.navigate("SearchFarmer" as any);
       }, 5000);
     }
   };
-
-
 
   if (hasPermission === null) {
     return (

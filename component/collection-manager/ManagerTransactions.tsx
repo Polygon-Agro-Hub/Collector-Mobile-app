@@ -63,7 +63,6 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[]
   >([]);
-  const { empId } = route.params;
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
@@ -116,7 +115,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Add the token here
+            Authorization: `Bearer ${token}`,
           },
         },
       );
@@ -362,7 +361,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                           hour12: true,
                         })
                         .toUpperCase(),
-                      empId: item.empId, // Pass empId to the FarmerReport screen
+                      empId: item.empId,
                     });
                   }}
                 >

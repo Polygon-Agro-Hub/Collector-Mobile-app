@@ -21,7 +21,6 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import CustomHeader from "../common/CustomHeader";
@@ -73,7 +72,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
 }) => {
   const [complains, setComplains] = useState<complainItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [language, setLanguage] = useState("en");
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComplain, setSelectedComplain] = useState<complainItem | null>(
     null,
@@ -83,35 +82,6 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
   const [userFullNameTa, setUserFullNameTa] = useState<string>("");
   const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-
-  const LanguageSelect = (lang: string) => {
-    setLanguage(lang);
-  };
-
-  const fetchSelectedLanguage = async () => {
-    try {
-      const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
-    } catch (error) {
-      console.error("Error fetching language preference:", error);
-    }
-  };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      if (i18n.language === "en") {
-        LanguageSelect("en");
-        setSelectedLanguage("en");
-      } else if (i18n.language === "si") {
-        LanguageSelect("si");
-        setSelectedLanguage("si");
-      } else if (i18n.language === "ta") {
-        LanguageSelect("ta");
-        setSelectedLanguage("ta");
-      }
-      fetchSelectedLanguage();
-    }, [i18n.language]),
-  );
 
   useEffect(() => {
     const getUserName = async () => {
@@ -325,7 +295,6 @@ ${signature}${replyTime}`,
 
   const fetchComplaints = async () => {
     try {
-      setLanguage(t("MyCrop.LNG"));
       const token = await AsyncStorage.getItem("token");
 
       const res = await axios.get<complainItem[]>(

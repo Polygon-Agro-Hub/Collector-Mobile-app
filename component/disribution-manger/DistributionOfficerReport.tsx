@@ -38,9 +38,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
   const [reportGenerated, setReportGenerated] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [generatedReportId, setGeneratedReportId] = useState<string | null>(
-    null,
-  );
+
   const [generateAgain, setGenerateAgain] = useState(false);
   const { t } = useTranslation();
 
@@ -57,7 +55,6 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     return colomboTime;
   };
 
-  const reportCounters: { [key: string]: number } = {};
 
   const handleGenerate = async () => {
     setReportGenerated(false);
@@ -88,21 +85,6 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
       const reportIdMatch = fileUri.match(/report_(.+)\.pdf/);
       const reportId = reportIdMatch ? reportIdMatch[1] : null;
 
-      const generateReportId = (officerId: string): string => {
-        if (!reportCounters[officerId]) {
-          reportCounters[officerId] = 1;
-        } else {
-          reportCounters[officerId] += 1;
-        }
-
-        const paddedCount = reportCounters[officerId]
-          .toString()
-          .padStart(3, "0");
-        return `${officerId}M${paddedCount}`;
-      };
-
-      const reportIdno = generateReportId(officerId);
-      setGeneratedReportId(reportIdno);
       setReportGenerated(true);
       setGenerateAgain(false);
     } else {

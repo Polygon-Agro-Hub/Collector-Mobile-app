@@ -15,7 +15,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -125,7 +124,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [centerCode, setcenterCode] = useState<string | null>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const isInitialLoad = useRef(true);
   const appState = useRef(AppState.currentState);
   const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");

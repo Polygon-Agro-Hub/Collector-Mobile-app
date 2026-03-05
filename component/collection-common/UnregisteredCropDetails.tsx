@@ -11,12 +11,10 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-
 import { Modal } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
 import MdIcons from "react-native-vector-icons/MaterialIcons";
 import axios from "axios";
@@ -149,15 +147,14 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   });
 
   const [total, setTotal] = useState<number>(0);
-  const [image, setImage] = useState<string | null>(null);
+
   const [crops, setCrops] = useState<any[]>([]);
   const [selectedVarietyName, setSelectedVarietyName] = useState<string | null>(
     null,
   );
 
-  const [donebutton1visibale, setdonebutton1visibale] = useState(true);
   const [donebutton2visibale, setdonebutton2visibale] = useState(false);
-  const [donebutton1disabale, setdonebutton1disabale] = useState(true);
+
   const [donebutton2disabale, setdonebutton2disabale] = useState(false);
   const [showCameraModels, setShowCameraModels] = useState(false);
   const [addbutton, setaddbutton] = useState(true);
@@ -169,7 +166,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const [isAtStart, setIsAtStart] = useState(true);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const [usedVarietyIds, setUsedVarietyIds] = useState<string[]>([]);
-  const [resetCameraImage, setResetCameraImage] = useState(false);
   const [deletingVariety, setDeletingVariety] = useState<number | null>(null);
   const [deletingGrade, setDeletingGrade] = useState<{
     cropIndex: number;
@@ -513,7 +509,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setSelectedCrop(null);
     setSelectedVariety(null);
     setdonebutton2disabale(false);
-    setdonebutton1visibale(false);
+
     setdonebutton2visibale(true);
 
     setUsedVarietyIds((prev) => [...prev, selectedVariety]);
@@ -535,7 +531,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
     setCrops((prevCrops) => [...prevCrops, newCrop]);
     resetCropEntry();
-    setResetCameraImage((prev) => !prev);
+
     setCropCount((prevCount) => prevCount + 1);
   };
 
@@ -546,7 +542,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setImages({ A: null, B: null, C: null });
     setQuantities({ A: "", B: "", C: "" });
     setShowCameraModels(false);
-    setImage(null);
   };
 
   const handleImagePick = (
@@ -590,15 +585,14 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setImages({ A: null, B: null, C: null });
     setResetImage(true);
     setTotal(0);
-    setImage(null);
+
     setCrops([]);
-    setdonebutton1visibale(true);
+
     setdonebutton2visibale(false);
-    setdonebutton1disabale(true);
+
     setdonebutton2disabale(false);
     setaddbutton(true);
     setCropCount(1);
-    setResetCameraImage((prev) => !prev);
   };
 
   const handleSubmit = async () => {
@@ -819,7 +813,6 @@ TID: ${invoiceNumber}
       }
 
       if (newCrops.length === 0) {
-        setdonebutton1visibale(true);
         setdonebutton2visibale(false);
         setaddbutton(true);
         setScrollPosition(0);
@@ -903,7 +896,6 @@ TID: ${invoiceNumber}
       }
 
       if (newCrops.length === 0) {
-        setdonebutton1visibale(true);
         setdonebutton2visibale(false);
         setaddbutton(true);
         setScrollPosition(0);

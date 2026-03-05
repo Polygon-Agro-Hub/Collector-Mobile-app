@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { View, TouchableOpacity, Image, Keyboard } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { AppState } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import type { RootState } from "../../services/reducxStore";
 
 const homeIcon = require("../../assets/images/common/nav-bar/navhome.webp");
@@ -14,10 +14,8 @@ const adminIcon = require("../../assets/images/common/nav-bar/navusers.webp");
 const dataTransfer = require("../../assets/images/common/nav-bar/transfer.webp");
 
 const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
-  const [token, setToken] = useState("");
   const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
-  const [showBottomNav, setShowBottomNav] = useState(true);
-  const dispatch = useDispatch();
+
   const [tabs, setTabs] = useState<any[]>([]);
 
   const userRole = useSelector((state: RootState) => state.auth.jobRole);
@@ -46,7 +44,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     const checkClaimStatus = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-        setToken(token ?? "");
+
         const response = await axios.get(
           `${environment.API_BASE_URL}api/collection-officer/get-claim-status`,
           {
@@ -71,7 +69,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     if (userRole === "Distribution Officer") {
       checkClaimStatus();
     }
-  }, [userRole, setToken, navigation]);
+  }, [userRole, navigation]);
 
   useEffect(() => {
     let tabs = [

@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { AntDesign } from "@expo/vector-icons";
 import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -67,16 +66,10 @@ const PassTargetBetweenOfficers: React.FC<
   const { t } = useTranslation();
 
   const {
-    varietyNameEnglish,
     grade,
-    target,
     todo,
-    qty,
     varietyId,
     collectionOfficerId,
-    varietyNameSinhala,
-    varietyNameTamil,
-    dailyTarget,
     officerId,
   } = route.params;
 

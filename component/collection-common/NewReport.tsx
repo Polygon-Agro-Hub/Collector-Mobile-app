@@ -18,7 +18,6 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import { useTranslation } from "react-i18next";
-import { AntDesign } from "@expo/vector-icons";
 import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
@@ -66,14 +65,6 @@ interface Crop {
   invoiceNumber: string;
 }
 
-interface officerDetails {
-  QRCode: string;
-  empId: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-}
-
 const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
 
@@ -82,7 +73,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const [crops, setCrops] = useState<Crop[]>([]);
 
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   const fetchSelectedLanguage = async () => {
@@ -101,15 +92,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   useEffect(() => {
     fetchSelectedLanguage();
   }, []);
-
-  const getTextStyle = (language: string) => {
-    if (language === "si") {
-      return {
-        fontSize: 14,
-        lineHeight: 20,
-      };
-    }
-  };
 
   const getCropName = (crop: Crop) => {
     if (!crop) return "Loading...";
@@ -235,7 +217,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
       setCrops([]);
     } finally {
-      setIsLoading(false);
+      console.error("Error in fetchDetails");
     }
   };
 
@@ -278,10 +260,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
       return sum + Number(crop.subTotal);
     }, 0);
-
-    const farmerQRCode = details?.qrCode
-      ? details.qrCode.replace(/^data:image\/png;base64,/, "")
-      : "";
 
     const html = `
     <html>
@@ -545,7 +523,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     `;
     try {
       const { uri } = await Print.printToFileAsync({ html });
-      
+
       return uri;
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -616,8 +594,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           );
         }
       }
-
-      
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(
@@ -635,7 +611,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
-      const fileInfo = await FileSystem.getInfoAsync(uri);
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
       try {
@@ -665,181 +640,180 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
 
   return (
     <ScrollView className="flex-1 bg-white">
-       <CustomHeader
+      <CustomHeader
         title={t("NewReport.Goods Received Note")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
       <View className="p-4">
-
-      {/* GRN Header */}
-      <View className="mb-4">
-        <Text className="text-sm font-bold">
-          {t("NewReport.GRN No")}{" "}
-          {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
-        </Text>
-        <Text className="text-sm">
-          {t("NewReport.Date")}{" "}
-          {new Date()
-            .toLocaleDateString("en-GB")
-            .split("/")
-            .reverse()
-            .join("/")}{" "}
-          {new Date()
-            .toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })
-            .toUpperCase()}
-        </Text>
-      </View>
-
-      {/* Supplier Details */}
-      <View className="mb-4">
-        <Text className="font-bold text-sm mb-1">
-          {t("NewReport.Supplier Details")}
-        </Text>
-        <View className="border border-gray-300 rounded-lg p-2">
-          <Text>
-            <Text className="">{t("NewReport.Name")}</Text> {details?.firstName}{" "}
-            {details?.lastName}
+        {/* GRN Header */}
+        <View className="mb-4">
+          <Text className="text-sm font-bold">
+            {t("NewReport.GRN No")}{" "}
+            {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
           </Text>
-          <Text>
-            <Text className="">{t("NewReport.Phone")}</Text>{" "}
-            {details?.phoneNumber}
+          <Text className="text-sm">
+            {t("NewReport.Date")}{" "}
+            {new Date()
+              .toLocaleDateString("en-GB")
+              .split("/")
+              .reverse()
+              .join("/")}{" "}
+            {new Date()
+              .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })
+              .toUpperCase()}
           </Text>
         </View>
-      </View>
 
-      {/* Received By */}
-      <View className="mb-4">
-        <Text className="font-bold text-sm mb-1">
-          {t("NewReport.Received By")}
-        </Text>
-        <View className="border border-gray-300 rounded-lg p-2">
-          <Text>
-            <Text className="">{t("NewReport.Company Name")}</Text>{" "}
-            {details?.companyNameEnglish || ""}
+        {/* Supplier Details */}
+        <View className="mb-4">
+          <Text className="font-bold text-sm mb-1">
+            {t("NewReport.Supplier Details")}
           </Text>
-          <Text>
-            <Text className="">{t("NewReport.Centre")}</Text>{" "}
-            {details?.collectionCenterName || "Collection Centre"}
-          </Text>
+          <View className="border border-gray-300 rounded-lg p-2">
+            <Text>
+              <Text className="">{t("NewReport.Name")}</Text>{" "}
+              {details?.firstName} {details?.lastName}
+            </Text>
+            <Text>
+              <Text className="">{t("NewReport.Phone")}</Text>{" "}
+              {details?.phoneNumber}
+            </Text>
+          </View>
         </View>
-      </View>
 
-      {/* Divider */}
-      <View className="border-t border-gray-400 my-2"></View>
+        {/* Received By */}
+        <View className="mb-4">
+          <Text className="font-bold text-sm mb-1">
+            {t("NewReport.Received By")}
+          </Text>
+          <View className="border border-gray-300 rounded-lg p-2">
+            <Text>
+              <Text className="">{t("NewReport.Company Name")}</Text>{" "}
+              {details?.companyNameEnglish || ""}
+            </Text>
+            <Text>
+              <Text className="">{t("NewReport.Centre")}</Text>{" "}
+              {details?.collectionCenterName || "Collection Centre"}
+            </Text>
+          </View>
+        </View>
 
-      {/* Received Items */}
-      <View className="mb-4">
-        <Text className="font-bold text-sm mb-2">
-          {t("NewReport.Received Items")};
-        </Text>
-        <ScrollView horizontal className="border border-gray-300 rounded-lg">
-          <View>
-            {/* Table Header */}
-            <View className="flex-row bg-gray-200">
-              <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                {t("NewReport.Crop Name")}
-              </Text>
-              <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                {t("NewReport.Variety")}
-              </Text>
-              <Text className="w-20 p-2 font-bold border-r border-gray-300">
-                {t("NewReport.Grade")}
-              </Text>
-              <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                {t("NewReport.Unit Price(Rs.)")}
-              </Text>
-              <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                {t("NewReport.Quantity(kg)")}
-              </Text>
-              <Text className="w-24 p-2 font-bold">
-                {t("NewReport.Sub Total(Rs.)")}
-              </Text>
-            </View>
+        {/* Divider */}
+        <View className="border-t border-gray-400 my-2"></View>
 
-            {/* Table Rows */}
-            {crops.map((crop, index) => (
-              <View key={`${crop.id}-${index}`} className="flex-row">
-                <Text className="w-24 p-2 border-b border-gray-300">
-                  {" "}
-                  {getCropName(crop)}
+        {/* Received Items */}
+        <View className="mb-4">
+          <Text className="font-bold text-sm mb-2">
+            {t("NewReport.Received Items")};
+          </Text>
+          <ScrollView horizontal className="border border-gray-300 rounded-lg">
+            <View>
+              {/* Table Header */}
+              <View className="flex-row bg-gray-200">
+                <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                  {t("NewReport.Crop Name")}
                 </Text>
-                <Text className="w-24 p-2 border-b border-gray-300">
-                  {getVarietyName(crop)}
+                <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                  {t("NewReport.Variety")}
                 </Text>
-                <Text className="w-20 p-2 border-b border-gray-300">
-                  {crop.grade || "-"}
+                <Text className="w-20 p-2 font-bold border-r border-gray-300">
+                  {t("NewReport.Grade")}
                 </Text>
-                <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                  {formatNumber(crop.unitPrice)}
+                <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                  {t("NewReport.Unit Price(Rs.)")}
                 </Text>
-                <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                  {formatNumber(crop.quantity)}
+                <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                  {t("NewReport.Quantity(kg)")}
                 </Text>
-                <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                  {formatNumber(crop.subTotal)}
+                <Text className="w-24 p-2 font-bold">
+                  {t("NewReport.Sub Total(Rs.)")}
                 </Text>
               </View>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
 
-      {/* Divider */}
-      <View className="border-t border-gray-400 my-2"></View>
+              {/* Table Rows */}
+              {crops.map((crop, index) => (
+                <View key={`${crop.id}-${index}`} className="flex-row">
+                  <Text className="w-24 p-2 border-b border-gray-300">
+                    {" "}
+                    {getCropName(crop)}
+                  </Text>
+                  <Text className="w-24 p-2 border-b border-gray-300">
+                    {getVarietyName(crop)}
+                  </Text>
+                  <Text className="w-20 p-2 border-b border-gray-300">
+                    {crop.grade || "-"}
+                  </Text>
+                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                    {formatNumber(crop.unitPrice)}
+                  </Text>
+                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                    {formatNumber(crop.quantity)}
+                  </Text>
+                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                    {formatNumber(crop.subTotal)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
 
-      <View className="mb-4 items-end">
-        <Text className="font-bold">
-          {t("NewReport.Full Total (Rs.) Rs.")}
-          {totalSum.toLocaleString("en-IN", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </Text>
-      </View>
+        {/* Divider */}
+        <View className="border-t border-gray-400 my-2"></View>
 
-      {/* Divider */}
-      <View className="border-t border-gray-400 my-2"></View>
-
-      {/* Note */}
-      <View className="mb-4">
-        <Text className="text-xs italic">
-          <Text className="font-bold">{t("NewReport.Note")}</Text>{" "}
-          {t("NewReport.GRNnote")}
-        </Text>
-      </View>
-
-      {/* Action Buttons */}
-      <View className="flex-row justify-around w-full mb-7">
-        <TouchableOpacity
-          className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
-          onPress={handleDownloadPDF}
-        >
-          <Image
-            source={require("../../assets/images/collection-common/download.webp")}
-            style={{ width: 24, height: 24 }}
-          />
-          <Text className="text-sm text-cyan-50">
-            {t("NewReport.Download")}
+        <View className="mb-4 items-end">
+          <Text className="font-bold">
+            {t("NewReport.Full Total (Rs.) Rs.")}
+            {totalSum.toLocaleString("en-IN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </Text>
-        </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity
-          className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
-          onPress={handleSharePDF}
-        >
-          <Image
-            source={require("../../assets/images/collection-common/share.webp")}
-            style={{ width: 24, height: 24 }}
-          />
-          <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Divider */}
+        <View className="border-t border-gray-400 my-2"></View>
+
+        {/* Note */}
+        <View className="mb-4">
+          <Text className="text-xs italic">
+            <Text className="font-bold">{t("NewReport.Note")}</Text>{" "}
+            {t("NewReport.GRNnote")}
+          </Text>
+        </View>
+
+        {/* Action Buttons */}
+        <View className="flex-row justify-around w-full mb-7">
+          <TouchableOpacity
+            className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
+            onPress={handleDownloadPDF}
+          >
+            <Image
+              source={require("../../assets/images/collection-common/download.webp")}
+              style={{ width: 24, height: 24 }}
+            />
+            <Text className="text-sm text-cyan-50">
+              {t("NewReport.Download")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
+            onPress={handleSharePDF}
+          >
+            <Image
+              source={require("../../assets/images/collection-common/share.webp")}
+              style={{ width: 24, height: 24 }}
+            />
+            <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );

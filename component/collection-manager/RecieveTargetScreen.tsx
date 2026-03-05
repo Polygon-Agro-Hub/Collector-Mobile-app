@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { AntDesign } from "@expo/vector-icons";
 import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -319,42 +318,6 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="flex-1 bg-white">
-        {/* Fixed Header */}
-        {/* <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
-          <TouchableOpacity
-            onPress={() => {
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: "Main",
-                    params: {
-                      screen: "EditTargetManager",
-                      params: {
-                        varietyId,
-                        varietyNameEnglish,
-                        grade,
-                        target,
-                        todo: route.params.todo,
-                        qty,
-                        varietyNameSinhala,
-                        varietyNameTamil,
-                        dailyTarget,
-                      },
-                    },
-                  },
-                ],
-              });
-            }}
-            className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={22} color="white" />
-          </TouchableOpacity>
-
-          <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
-            {getvarietyName()}
-          </Text>
-        </View> */}
         <CustomHeader
           title={getvarietyName() || ""}
           showBackButton={true}

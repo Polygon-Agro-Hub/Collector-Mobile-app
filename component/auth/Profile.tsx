@@ -35,12 +35,6 @@ interface ProfileProps {
   navigation: ProfileNavigationProps;
 }
 
-type District = {
-  en: string;
-  si: string;
-  ta: string;
-};
-
 const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const route = useRoute<RouteProp<RootStackParamList, "Profile">>();
   const { jobRole } = route.params;

@@ -2,7 +2,6 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import React, { useState } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../common/CustomHeader";

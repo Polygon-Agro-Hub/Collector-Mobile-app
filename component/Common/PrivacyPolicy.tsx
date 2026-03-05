@@ -1,14 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  BackHandler,
-} from "react-native";
+import { View, Text, ScrollView, BackHandler } from "react-native";
 import { RootStackParamList } from "../types";
-import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import {
   widthPercentageToDP as wp,

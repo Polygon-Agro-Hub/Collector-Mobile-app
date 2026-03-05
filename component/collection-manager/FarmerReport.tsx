@@ -73,7 +73,6 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
     null,
   );
   const route = useRoute<FarmerReportRouteProp>();
-  const [qrValue, setQrValue] = useState<string>("");
   const {
     registeredFarmerId,
     userId,
@@ -82,8 +81,6 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
     phoneNumber,
     address,
     NICnumber,
-    totalAmount,
-    bankAddress,
     accountNumber,
     accountHolderName,
     bankName,
@@ -121,9 +118,6 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
         };
 
         setofficerDetails(officerDetails);
-
-        const qrData = JSON.stringify(officerDetails);
-        setQrValue(qrData);
       } else {
         Alert.alert(
           t("Error.error"),

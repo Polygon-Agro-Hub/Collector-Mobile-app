@@ -13,9 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-
 import { Animated } from "react-native";
 import CustomHeader from "../common/CustomHeader";
 
@@ -43,7 +41,6 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [centerCode, setcenterCode] = useState<string | null>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
@@ -126,10 +123,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
       setTodoData(sortByVarietyAndGrade(todoItems));
       setCompletedData(sortByVarietyAndGrade(completedItems));
-      setError(null);
     } catch (err) {
       console.error("Fetch error:", err);
-      setError(t("Error.Failed to fetch data."));
     } finally {
       const elapsedTime = Date.now() - startTime;
       const remainingTime = 4000 - elapsedTime;

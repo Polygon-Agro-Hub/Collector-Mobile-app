@@ -24,10 +24,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../common/CustomHeader";
 
-const api = axios.create({
-  baseURL: environment.API_BASE_URL,
-});
-
 type UnregisteredFarmerDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
   "UpdateFarmerBankDetails"
@@ -48,8 +44,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   navigation,
   route,
 }) => {
-  const { id, NICnumber, phoneNumber, PreferdLanguage, officerRole } =
-    route.params;
+  const { id, phoneNumber, PreferdLanguage, officerRole } = route.params;
 
   const [accNumber, setAccNumber] = useState("");
 

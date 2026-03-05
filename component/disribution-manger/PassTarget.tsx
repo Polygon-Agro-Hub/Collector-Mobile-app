@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
 import { SelectList } from "react-native-dropdown-select-list";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
