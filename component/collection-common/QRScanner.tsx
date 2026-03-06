@@ -8,12 +8,11 @@ import {
   Image,
   Dimensions,
 } from "react-native";
-// import { BarCodeScanner } from 'expo-barcode-scanner';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { CameraView, Camera } from "expo-camera";
 import { useTranslation } from "react-i18next";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import CustomHeader from "../common/CustomHeader";
 
 type QRScannerNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -32,14 +31,14 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   const [scanned, setScanned] = useState<boolean>(false);
   const [showPermissionModal, setShowPermissionModal] =
     useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const { t } = useTranslation();
 
   const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
     useState<boolean>(false);
 
   const [unsuccessfulLoadingBarWidth, setUnsuccessfulLoadingBarWidth] =
-    useState(new Animated.Value(100)); // Start with 100%
+    useState(new Animated.Value(100));
 
   useEffect(() => {
     const getCameraPermissions = async () => {
@@ -49,76 +48,51 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
     getCameraPermissions();
 
-
     const unsubscribe = navigation.addListener("focus", () => {
       setScanned(false);
-      setErrorMessage(null); 
-      setIsUnsuccessfulModalVisible(false); 
-    });
 
+      setIsUnsuccessfulModalVisible(false);
+    });
 
     return unsubscribe;
   }, [navigation]);
 
-  // Handle QR scan
   const handleBarCodeScanned = async ({
     data,
   }: {
     type: string;
     data: string;
   }) => {
-    setScanned(true); // Set the scanned flag to true
+    setScanned(true);
 
     try {
-      // console.log("Scanned Data:", data);
-      // console.log("Data Type:", typeof data);
+      const qrData = JSON.parse(data);
 
-
-      const qrData = JSON.parse(data); 
-
-      console.log("Parsed QR Code Data:", qrData);
-      console.log("Parsed Type:", typeof qrData);
-
-    
-      const userId = qrData.userInfo?.id; 
-
-    //  console.log("User ID:", userId);
+      const userId = qrData.userInfo?.id;
 
       if (!userId) {
         throw new Error(t("Error.User ID not found in QR code"));
       }
 
-      // Navigate to the desired screen and pass the userId
       navigation.navigate("FarmerQr" as any, { userId });
     } catch (error) {
       console.error("QR Parsing Error:", error);
-      setErrorMessage(
-        t(
-          "Error.The scanned QR code does not contain a valid user ID or is damaged."
-        )
-      );
+
       setIsUnsuccessfulModalVisible(true);
 
-    
-      unsuccessfulLoadingBarWidth.setValue(100); // Reset width to 100%
+      unsuccessfulLoadingBarWidth.setValue(100);
       Animated.timing(unsuccessfulLoadingBarWidth, {
-        toValue: 0, // Animate to 0 (empty bar)
-        duration: 5000, // 5 seconds duration
+        toValue: 0,
+        duration: 5000,
         useNativeDriver: false,
       }).start();
 
-      // After 5 seconds (for the bar animation), close the modal and navigate
       setTimeout(() => {
         setIsUnsuccessfulModalVisible(false);
-        setErrorMessage(null);
-        navigation.navigate("SearchFarmer" as any); // Navigate to SearchFarmer
-        console.log("hit");
+
+        navigation.navigate("SearchFarmer" as any);
       }, 5000);
     }
-  };
-
-  const handleError = (err: any) => {
-    console.error("QR Reader Error:", err);
   };
 
   if (hasPermission === null) {
@@ -190,19 +164,14 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, position: "relative" }}>
-                    <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-                      <TouchableOpacity  className="bg-[#F6F6F680] rounded-full p-2 justify-center w-10 z-20 " onPress={() => navigation.goBack()}>
-                        <AntDesign name="left" size={24} color="#000" />
-                      </TouchableOpacity>
-       
-                      <View className="flex-1 ">
-                        <Text className="text-lg font-bold text-center -ml-8">
-                          {t("QRScanner.ScantheQR")}
-                        </Text>
-                      </View>
-                    </View>
+      <CustomHeader
+        title={t("QRScanner.ScantheQR")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
       <CameraView
-      className="flex-1 "
+        className="flex-1 "
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
           barcodeTypes: ["qr", "pdf417"],
@@ -243,7 +212,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
               borderRadius: 8,
             }}
             onPress={() => {
-              setScanned(false); // Reset the scanned state
+              setScanned(false);
             }}
           >
             <Text style={{ color: "#fff", fontSize: 16 }}>
@@ -253,40 +222,37 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
         </View>
       )}
 
+      <Modal
+        transparent={true}
+        visible={isUnsuccessfulModalVisible}
+        animationType="slide"
+      >
+        <View className="flex-1 justify-center items-center bg-black bg-opacity-70">
+          <View className="bg-white rounded-lg w-72 h-80 items-center relative overflow-hidden">
+            <View className="p-6 items-center">
+              <Text className="text-xl font-bold mb-4">
+                {t("QRScanner.Failed")}
+              </Text>
+              <View className="mb-4">
+                <Image
+                  source={require("../../assets/images/collection-common/error.webp")}
+                  className="w-32 h-32"
+                  resizeMode="contain"
+                />
+              </View>
+              <Text className="text-gray-700">{t("QRScanner.SearchNIC")}</Text>
+            </View>
 
-<Modal
-  transparent={true}
-  visible={isUnsuccessfulModalVisible}
-  animationType="slide"
->
-  <View className="flex-1 justify-center items-center bg-black bg-opacity-70">
-    <View className="bg-white rounded-lg w-72 h-80 items-center relative overflow-hidden">
-      <View className="p-6 items-center">
-        <Text className="text-xl font-bold mb-4">
-          {t("QRScanner.Failed")}
-        </Text>
-        <View className="mb-4">
-          <Image
-            source={require("../../assets/images/New/error.png")} // Replace with your own error image
-            className="w-32 h-32"
-            resizeMode="contain"
-          />
+            {/* Red Loading Bar at bottom */}
+            <View className="absolute bottom-0 left-0 w-full h-2 bg-gray-300">
+              <Animated.View
+                className="h-full bg-red-500"
+                style={{ width: unsuccessfulLoadingBarWidth }}
+              />
+            </View>
+          </View>
         </View>
-        <Text className="text-gray-700">{t("QRScanner.SearchNIC")}</Text>
-      </View>
-      
-      {/* Red Loading Bar at bottom */}
-      <View className="absolute bottom-0 left-0 w-full h-2 bg-gray-300">
-        <Animated.View
-          className="h-full bg-red-500"
-          style={{ width: unsuccessfulLoadingBarWidth }}
-        />
-      </View>
-      
-    
-    </View>
-  </View>
-</Modal>
+      </Modal>
     </View>
   );
 };

@@ -458,7 +458,7 @@ const RegisterDriver: React.FC = () => {
             source={
               selectedImage
                 ? { uri: `data:image/png;base64,${selectedImage}` }
-                : require("../../assets/images/user1.webp")
+                : require("../../assets/images/driver-screens/user1.webp")
             }
             className="w-24 h-24 rounded-full"
           />

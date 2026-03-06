@@ -17,10 +17,10 @@ import { RootStackParamList } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 interface OfficerDetails {
   id: number;
@@ -65,20 +65,17 @@ const ClaimOfficer: React.FC = () => {
         ? "CUO"
         : "---";
 
-  // Function to handle text input and prevent leading spaces
   const handleEmpIDChange = (text: string) => {
-    // Remove any leading spaces
     const trimmedText = text.replace(/^\s+/, "");
     setEmpID(trimmedText);
     setOfficerFound(false);
-    setSearchPerformed(false); // Reset search performed state when input changes
+    setSearchPerformed(false);
   };
 
   const handleSearch = async () => {
     Keyboard.dismiss();
     setSearchLoading(true);
-    setSearchPerformed(true); // Set this to true when search is clicked
-    console.log(empID, jobRole);
+    setSearchPerformed(true);
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
@@ -108,12 +105,10 @@ const ClaimOfficer: React.FC = () => {
       );
 
       const data = await response.json();
-      // console.log("claim pfficer", data);
 
       if (response.ok && data.result && data.result.length > 0) {
         const officer = data.result[0];
         setOfficerDetails({
-          // name: `${officer.firstNameEnglish} ${officer.lastNameEnglish}`,
           companyNameEnglish: officer.companyNameEnglish,
           companyNameSinhala: officer.companyNameSinhala,
           companyNameTamil: officer.companyNameTamil,
@@ -128,7 +123,7 @@ const ClaimOfficer: React.FC = () => {
           lastNameSinhala: officer.lastNameSinhala,
           lastNameTamil: officer.lastNameTamil,
         });
-        // console.log("officer details", officerDetails);
+
         setOfficerFound(true);
         setSearchLoading(false);
       } else {
@@ -181,7 +176,7 @@ const ClaimOfficer: React.FC = () => {
         setOfficerFound(false);
         setOfficerDetails(null);
         setEmpID("");
-        setSearchPerformed(false); 
+        setSearchPerformed(false);
         setModalVisible(false);
         navigation.navigate("Main", { screen: "CollectionOfficersList" });
       }
@@ -231,8 +226,7 @@ const ClaimOfficer: React.FC = () => {
 
               <TouchableOpacity
                 onPress={onConfirm}
-                // className="p-2 py-2 bg-[#2AAD7A] rounded-lg"
-                disabled={onLoading} // Disable the button when loading is true
+                disabled={onLoading}
                 className={`p-2 py-2 rounded-lg ${
                   onLoading ? "bg-gray-400" : "bg-[#313131]"
                 }`}
@@ -250,21 +244,12 @@ const ClaimOfficer: React.FC = () => {
 
   return (
     <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000502" />
-        </TouchableOpacity>
-        {/* <Text className="text-lg font-bold ml-[25%]"> {t("ClaimOfficer.ClaimOfficers")}</Text> */}
-        <View className="flex-1 ">
-          <Text className="text-lg font-bold text-center mr-[5%]">
-            {t("ClaimOfficer.ClaimOfficers")}
-          </Text>
-        </View>
-      </View>
+      <CustomHeader
+        title={t("ClaimOfficer.ClaimOfficers")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       <View className="px-8 mt-2">
         <View className="px-8 mt-7"></View>
@@ -305,13 +290,12 @@ const ClaimOfficer: React.FC = () => {
         </TouchableOpacity>
       </View>
 
- 
       {!officerFound && searchPerformed && !searchLoading && (
         <View className="flex items-center justify-center mt-24">
           <Image
-            source={require("../../assets/images/dd.webp")} 
-            className="w-28 h-28" 
-            resizeMode="contain" 
+            source={require("../../assets/images/collection-manager/delete-icon.webp")}
+            className="w-28 h-28"
+            resizeMode="contain"
           />
           <Text className="text-gray-500 mt-2">
             {t("ClaimOfficer.No Disclaimed")}
@@ -328,7 +312,7 @@ const ClaimOfficer: React.FC = () => {
             source={
               officerDetails?.image
                 ? { uri: officerDetails.image }
-                : require("../../assets/images/pcprofile.webp")
+                : require("../../assets/images/collection-manager/pc-profile.webp")
             }
             className="w-20 h-20 rounded-full mb-4"
           />

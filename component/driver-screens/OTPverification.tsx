@@ -75,7 +75,7 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({ visible, onClose , onCo
         <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center"> {t("Otpverification.Success")}</Text>
 
-          <Image source={require("../../assets/images/success.webp")} style={{ width: 100, height: 100 }} />
+          <Image source={require("../../assets/images/driver-screens/success.webp")} style={{ width: 100, height: 100 }} />
 
           <Text className="text-gray-500 mb-4">{t("Otpverification.Registration")}</Text>
 
@@ -378,7 +378,7 @@ ${branchName}
         style={{ marginTop: dynamicStyles.margingTopForImage }}
       >
         <Image
-          source={require("../../assets/images/otp.webp")}
+          source={require("../../assets/images/driver-screens/otp.webp")}
           style={{
             width: dynamicStyles.imageWidth,
             height: dynamicStyles.imageHeight,

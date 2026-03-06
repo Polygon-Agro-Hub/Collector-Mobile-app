@@ -10,12 +10,12 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp ,  useFocusEffect} from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { environment } from '@/environment/environment';
-import LottieView from 'lottie-react-native';
+import { environment } from "@/environment/environment";
+import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
@@ -28,7 +28,10 @@ interface ReplaceRequestsProps {
   route: ReplaceRequestsRouteProp;
 }
 
-type ReplaceRequestsRouteProp = RouteProp<RootStackParamList, "ReplaceRequestsScreen">;
+type ReplaceRequestsRouteProp = RouteProp<
+  RootStackParamList,
+  "ReplaceRequestsScreen"
+>;
 
 interface ReplaceRequestItem {
   id: string;
@@ -57,14 +60,16 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   navigation,
 }) => {
   const { t } = useTranslation();
-  const [replaceRequests, setReplaceRequests] = useState<ReplaceRequestItem[]>([]);
+  const [replaceRequests, setReplaceRequests] = useState<ReplaceRequestItem[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchReplaceRequests = useCallback(async () => {
     try {
       const authToken = await AsyncStorage.getItem("token");
-      
+
       if (!authToken) {
         throw new Error("Authentication token not found. Please login again.");
       }
@@ -74,18 +79,15 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        }
+        },
       );
 
-    //  console.log("bhdjaovm", response.data);
-
       if (response.data.success) {
-   
         const mappedData = response.data.data.map((item: any) => ({
           id: item.id.toString(),
-          orderId: item.orderId ? item.orderId.toString() : '',
+          orderId: item.orderId ? item.orderId.toString() : "",
           orderPackageId: item.orderPackageId.toString(),
           productDisplayName: item.productDisplayName,
           createdAt: new Date(item.createdAt).toLocaleString(),
@@ -102,9 +104,9 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
           productDiscountedPrice: item.productDiscountedPrice,
           replaceProductDisplayName: item.replaceProductDisplayName,
           replaceQty: item.replaceQty,
-          replacePrice: item.replacePrice
+          replacePrice: item.replacePrice,
         }));
-        
+
         setReplaceRequests(mappedData);
       }
     } catch (error) {
@@ -122,7 +124,7 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   useFocusEffect(
     useCallback(() => {
       fetchReplaceRequests();
-    }, [fetchReplaceRequests])
+    }, [fetchReplaceRequests]),
   );
 
   const onRefresh = useCallback(() => {
@@ -131,12 +133,10 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   }, [fetchReplaceRequests]);
 
   const handleNavigateToApprove = (item: ReplaceRequestItem) => {
-     console.log("price================",   item.qty)
     navigation.navigate("ReplaceRequestsApprove" as any, {
-     
       replaceRequestData: {
         id: item.id,
-        orderId: item.orderId || item.invNo, 
+        orderId: item.orderId || item.invNo,
         orderPackageId: item.orderPackageId,
         productDisplayName: item.productDisplayName,
         productTypeName: item.productTypeName,
@@ -154,44 +154,32 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
         qty: item.qty,
         replaceProductDisplayName: item.replaceProductDisplayName,
         replaceQty: item.replaceQty,
-        replacePrice: item.replacePrice
-      }
-      
+        replacePrice: item.replacePrice,
+      },
     });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'text-orange-500';
-      case 'approved':
-        return 'text-green-500';
-      case 'rejected':
-        return 'text-red-500';
-      default:
-        return 'text-gray-500';
-    }
   };
 
   const renderRequestItem = ({ item }: { item: ReplaceRequestItem }) => (
     <TouchableOpacity onPress={() => handleNavigateToApprove(item)}>
       <View className="flex-row items-center bg-[#ADADAD1A] p-3 px-4 mb-4 rounded-xl mx-3">
         <View className="flex-1">
-          <Text 
+          <Text
             style={[
               i18n.language === "si"
                 ? { fontSize: 14 }
                 : i18n.language === "ta"
-                ? { fontSize: 12 }
-                : { fontSize: 15 }
+                  ? { fontSize: 12 }
+                  : { fontSize: 15 },
             ]}
-            className="font-bold text-base text-gray-900">
+            className="font-bold text-base text-gray-900"
+          >
             {t("ReplaceRequestsScreen.Order ID")} {item.invNo}
           </Text>
           <Text className="text-gray-700 text-sm">
-            {t("ReplaceRequestsScreen.Replacing Item")} {item.replaceProductDisplayName}
+            {t("ReplaceRequestsScreen.Replacing Item")}{" "}
+            {item.replaceProductDisplayName}
           </Text>
-         
+
           <Text className="text-gray-500 text-sm">
             {t("ReplaceRequestsScreen.Requested Time")} : {item.createdAt}
           </Text>
@@ -219,7 +207,7 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   const renderEmptyComponent = () => (
     <View className="items-center justify-center py-10 mt-[40%]">
       <LottieView
-        source={require('../../assets/lottie/NoComplaints.json')}
+        source={require("../../assets/lottie/NoComplaints.json")}
         autoPlay
         loop
         style={{ width: 150, height: 150 }}
@@ -240,7 +228,7 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-      <FlatList 
+      <FlatList
         data={replaceRequests}
         keyExtractor={(item) => item.id}
         renderItem={renderRequestItem}

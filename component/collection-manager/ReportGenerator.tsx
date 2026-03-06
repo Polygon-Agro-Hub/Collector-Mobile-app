@@ -1,20 +1,26 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, TouchableOpacity, Image, Alert, BackHandler } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Alert,
+  BackHandler,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { handleGeneratePDF } from "./ReportPDFGenerator";
 import * as Sharing from "expo-sharing";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
-import * as MediaLibrary from "expo-media-library";
 import { Platform } from "react-native";
-//import * as FileSystem from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type ReportGeneratorNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -40,27 +46,28 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   const [reportGenerated, setReportGenerated] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [generatedReportId, setGeneratedReportId] = useState<string | null>(
-    null
-  );
+
   const [generateAgain, setGenerateAgain] = useState(false);
   const { t } = useTranslation();
 
-  const { officerId, collectionOfficerId ,phoneNumber1,officerName ,phoneNumber2} = route.params;
-  console.log(officerId);
+  const {
+    officerId,
+    collectionOfficerId,
+    phoneNumber1,
+    officerName,
+    phoneNumber2,
+  } = route.params;
 
   const getTodayInColombo = () => {
     const now = new Date();
-    const colomboOffset = 330; // Colombo is UTC+5:30
+    const colomboOffset = 330;
     const utcOffset = now.getTimezoneOffset();
     const colomboTime = new Date(
-      now.getTime() + (colomboOffset - utcOffset) * 60 * 1000
+      now.getTime() + (colomboOffset - utcOffset) * 60 * 1000,
     );
-    colomboTime.setHours(0, 0, 0, 0); // Normalize to midnight
+    colomboTime.setHours(0, 0, 0, 0);
     return colomboTime;
   };
-
-  const reportCounters: { [key: string]: number } = {};
 
   const handleGenerate = async () => {
     setReportGenerated(false);
@@ -68,7 +75,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     if (!startDate || !endDate) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Please select both start and end dates.")
+        t("Error.Please select both start and end dates."),
       );
       return;
     }
@@ -76,42 +83,23 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     if (endDate < startDate) {
       Alert.alert(
         t("Error.error"),
-        t("Error.End date cannot be earlier than the start date.")
+        t("Error.End date cannot be earlier than the start date."),
       );
       return;
     }
 
-    // Proceed with PDF generation
     const fileUri = await handleGeneratePDF(
       formatDate(startDate),
       formatDate(endDate),
       officerId,
-      collectionOfficerId
+      collectionOfficerId,
     );
     if (fileUri) {
       const reportIdMatch = fileUri.match(/report_(.+)\.pdf/);
       const reportId = reportIdMatch ? reportIdMatch[1] : null;
 
-      const generateReportId = (officerId: string): string => {
-        // Initialize the counter for the officer if not already present
-        if (!reportCounters[officerId]) {
-          reportCounters[officerId] = 1;
-        } else {
-          reportCounters[officerId] += 1; // Increment the counter
-        }
-
-        // Format the report ID
-        const paddedCount = reportCounters[officerId]
-          .toString()
-          .padStart(3, "0"); // Pads the count to 3 digits
-        return `${officerId}M${paddedCount}`;
-      };
-
-      const reportIdno = generateReportId(officerId);
-      setGeneratedReportId(reportIdno); // Store the report ID to display in the UI
       setReportGenerated(true);
       setGenerateAgain(false);
-      // Alert.alert(t("Error.Success"), t("Error.PDF Generated Successfully"));
     } else {
       Alert.alert(t("Error.error"), t("Error.Failed to generate PDF"));
       setGenerateAgain(false);
@@ -123,17 +111,16 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       if (!startDate || !endDate) {
         Alert.alert(
           t("Error.error"),
-          t("Error.Please select both start and end dates.")
+          t("Error.Please select both start and end dates."),
         );
         return;
       }
 
-      // Generate the PDF
       const uri = await handleGeneratePDF(
         formatDate(startDate),
         formatDate(endDate),
         officerId,
-        collectionOfficerId
+        collectionOfficerId,
       );
 
       if (!uri) {
@@ -141,62 +128,50 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         return;
       }
 
-      // Define the new file name
-      const date = new Date().toISOString().slice(0, 10); 
-      const fileName = `Report_${officerId}_${date}.pdf`; 
+      const date = new Date().toISOString().slice(0, 10);
+      const fileName = `Report_${officerId}_${date}.pdf`;
 
-   
-      let tempFilePath = uri; 
+      let tempFilePath = uri;
 
       if (Platform.OS === "android") {
-      
         tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
-       
         await FileSystem.copyAsync({
           from: uri,
           to: tempFilePath,
         });
 
-        // Use the sharing API - this works in Expo Go
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(tempFilePath, {
             dialogTitle: t("Save PDF"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-       
         } else {
           Alert.alert(
             t("Error.error"),
-            t("Error.Failed to save PDF to Downloads folder.")
+            t("Error.Failed to save PDF to Downloads folder."),
           );
         }
       } else if (Platform.OS === "ios") {
-      
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(tempFilePath, {
-            // Using tempFilePath which is uri for iOS
             dialogTitle: t("Save PDF"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-          // Alert.alert(t("Error.Info"), t("Error.Use the 'Save to Files' option to save to Downloads"));
         } else {
           Alert.alert(
             t("Error.error"),
-            t("Error.Failed to save PDF to Downloads folder.")
+            t("Error.Failed to save PDF to Downloads folder."),
           );
         }
       }
-
- 
-    //  console.log(`PDF prepared for sharing: ${tempFilePath}`);
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(
         t("Error.error"),
-        t("Error.Failed to prepare PDF for download.")
+        t("Error.Failed to prepare PDF for download."),
       );
     }
   };
@@ -205,7 +180,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     if (!startDate || !endDate) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Please select both start and end dates.")
+        t("Error.Please select both start and end dates."),
       );
       return;
     }
@@ -214,14 +189,14 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       formatDate(startDate),
       formatDate(endDate),
       officerId,
-      collectionOfficerId
+      collectionOfficerId,
     );
     if (fileUri && (await Sharing.isAvailableAsync())) {
       await Sharing.shareAsync(fileUri, { mimeType: "application/pdf" });
     } else {
       Alert.alert(
         t("Error.error"),
-        t("Error.Sharing is not available on this device.")
+        t("Error.Sharing is not available on this device."),
       );
     }
   };
@@ -236,17 +211,16 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     if (!date) return "Select Date";
     return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(
       2,
-      "0"
+      "0",
     )}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
   const handleDateChange = (
     event: any,
     selectedDate: Date | undefined,
-    type: string
+    type: string,
   ) => {
     if (event.type === "set") {
-      // User confirmed
       if (type === "start") {
         setStartDate(selectedDate || startDate);
         setShowStartPicker(false);
@@ -255,13 +229,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         setShowEndPicker(false);
       }
     } else {
-      // User cancelled
       if (type === "start") setShowStartPicker(false);
       else setShowEndPicker(false);
     }
   };
 
-   const handleBackPress = useCallback(() => {
+  const handleBackPress = useCallback(() => {
     navigation.navigate("OfficerSummary" as any, {
       collectionOfficerId,
       officerId,
@@ -269,47 +242,45 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       phoneNumber2,
       officerName,
     });
-    return true; // Prevent default back behavior
-  }, [navigation, collectionOfficerId, officerId, phoneNumber1, phoneNumber2, officerName]);
+    return true;
+  }, [
+    navigation,
+    collectionOfficerId,
+    officerId,
+    phoneNumber1,
+    phoneNumber2,
+    officerName,
+  ]);
 
-   useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       const onBackPress = () => handleBackPress();
 
-      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
 
       return () => subscription.remove();
-    }, [handleBackPress])
+    }, [handleBackPress]),
   );
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="flex-row items-center  p-6 rounded-b-lg">
-        {/* <TouchableOpacity
-        //  onPress={() => navigation.goBack()}
-        
-          className="absolute top-5 left-4 bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-        > */}
-       <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate("OfficerSummary" as any, {
-                        collectionOfficerId,
-                        officerId,
-                        phoneNumber1,
-                        phoneNumber2,
-                        officerName,
-                      })
-                    }
-                    className="bg-[#FFFFFF1A] rounded-full  justify-center w-10"
-                  >
-
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <Text className="text-black text-lg pr-[20%] font-semibold text-center w-full ">
-          {officerId}
-        </Text>
-      </View>
+      <CustomHeader
+        title={officerId}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.navigate("OfficerSummary" as any, {
+            collectionOfficerId,
+            officerId,
+            phoneNumber1,
+            phoneNumber2,
+            officerName,
+          })
+        }
+      />
 
       {/* Form Section */}
       <View className="px-8 mt-8">
@@ -324,7 +295,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             >
               <Text className="text-gray-500">{formatDate(startDate)}</Text>
               <Image
-                source={require("../../assets/images/Rescheduling.webp")}
+                source={require("../../assets/images/collection-manager/rescheduling.webp")}
                 className="w-6 h-6"
                 resizeMode="contain"
               />
@@ -336,7 +307,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               value={startDate || new Date()}
               mode="date"
               display="default"
-              maximumDate={getTodayInColombo()} // Disallow future dates
+              maximumDate={getTodayInColombo()}
               onChange={(event, date) => handleDateChange(event, date, "start")}
             />
           )}
@@ -348,7 +319,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
                   mode="date"
                   display="inline"
                   style={{ width: 320, height: 260 }}
-                  maximumDate={getTodayInColombo()} // Disallow future dates
+                  maximumDate={getTodayInColombo()}
                   onChange={(event, date) =>
                     handleDateChange(event, date, "start")
                   }
@@ -368,7 +339,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           >
             <Text className="text-gray-500">{formatDate(endDate)}</Text>
             <Image
-              source={require("../../assets/images/Rescheduling.webp")}
+              source={require("../../assets/images/collection-manager/rescheduling.webp")}
               className="w-6 h-6"
               resizeMode="contain"
             />
@@ -379,8 +350,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               value={endDate || new Date()}
               mode="date"
               display="default"
-              maximumDate={getTodayInColombo()} // Disallow future dates
-              minimumDate={startDate} // End date must not be earlier than the start date
+              maximumDate={getTodayInColombo()}
+              minimumDate={startDate}
               onChange={(event, date) => handleDateChange(event, date, "end")}
             />
           )}
@@ -392,8 +363,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
                   mode="date"
                   display="inline"
                   style={{ width: 320, height: 260 }}
-                  maximumDate={getTodayInColombo()} 
-                  minimumDate={startDate} 
+                  maximumDate={getTodayInColombo()}
+                  minimumDate={startDate}
                   onChange={(event, date) =>
                     handleDateChange(event, date, "end")
                   }
@@ -412,7 +383,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               className="text-gray-700 text-center"
               numberOfLines={1}
               ellipsizeMode="tail"
-          
             >
               {t("ReportGenerator.Reset")}
             </Text>
@@ -426,7 +396,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               className="text-white font-semibold text-center"
               numberOfLines={1}
               ellipsizeMode="tail"
-
             >
               {t("ReportGenerator.Generate")}
             </Text>
@@ -449,12 +418,11 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         <View className="items-center justify-center flex-1">
           <View className="w-24 h-24 bg-[#FFE6CB66] rounded-full items-center justify-center mb-4">
             <Image
-              source={require("../../assets/images/document.webp")}
+              source={require("../../assets/images/collection-manager/document.webp")}
               className="w-14 h-14"
             />
           </View>
 
-      
           <Text className="text-sm text-gray-500 italic mb-6">
             {t("ReportGenerator.Report has been generated")}
           </Text>
@@ -464,17 +432,18 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             <TouchableOpacity
               onPress={handleDownload}
               className="bg-[#000000] rounded-lg items-center justify-center"
-              style={{ width: 100, height: 70 }} // Explicit width and height
+              style={{ width: 100, height: 70 }}
             >
               <Ionicons name="download" size={24} color="white" />
-              <Text className="text-sm text-white mt-1"
-                                                                                       style={[
-  i18n.language === "si"
-    ? { fontSize: 13 }
-    : i18n.language === "ta"
-    ? { fontSize: 12 }
-    : { fontSize: 14 }
-]}
+              <Text
+                className="text-sm text-white mt-1"
+                style={[
+                  i18n.language === "si"
+                    ? { fontSize: 13 }
+                    : i18n.language === "ta"
+                      ? { fontSize: 12 }
+                      : { fontSize: 14 },
+                ]}
               >
                 {t("ReportGenerator.Download")}
               </Text>
@@ -483,17 +452,18 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             <TouchableOpacity
               onPress={handleShare}
               className="bg-[#000000] rounded-lg items-center justify-center"
-              style={{ width: 100, height: 70 }} // Explicit width and height
+              style={{ width: 100, height: 70 }}
             >
               <Ionicons name="share-social" size={24} color="white" />
-              <Text className="text-sm text-white mt-1"
-                                                                                       style={[
-  i18n.language === "si"
-    ? { fontSize: 13 }
-    : i18n.language === "ta"
-    ? { fontSize: 12 }
-    : { fontSize: 14 }
-]}
+              <Text
+                className="text-sm text-white mt-1"
+                style={[
+                  i18n.language === "si"
+                    ? { fontSize: 13 }
+                    : i18n.language === "ta"
+                      ? { fontSize: 12 }
+                      : { fontSize: 14 },
+                ]}
               >
                 {t("ReportGenerator.Share")}
               </Text>
@@ -512,7 +482,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       ) : (
         <View className="items-center justify-center flex-1">
           <Image
-            source={require("../../assets/images/empty.webp")}
+            source={require("../../assets/images/collection-manager/empty.webp")}
             className="w-20 h-20 mb-4"
             resizeMode="contain"
           />

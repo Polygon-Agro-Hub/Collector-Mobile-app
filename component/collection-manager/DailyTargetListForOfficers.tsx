@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,6 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "../common/CustomHeader";
 
 type DailyTargetListForOfficerstNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -36,8 +37,8 @@ interface TargetData {
   varietyId: any;
   centerTarget: any;
   varietyNameEnglish: string;
-  varietyNameSinhala: string; // ✅ Added this
-  varietyNameTamil: string; // ✅ Added this
+  varietyNameSinhala: string;
+  varietyNameTamil: string;
   grade: string;
   officerTarget: number;
   todo: number;
@@ -51,7 +52,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
   const [todoData, setTodoData] = useState<TargetData[]>([]);
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
   const { collectionOfficerId, officerId } = route.params;
@@ -61,8 +61,8 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
 
   const fetchSelectedLanguage = async () => {
     try {
-      const lang = await AsyncStorage.getItem("@user_language"); // Get stored language
-      setSelectedLanguage(lang || "en"); // Default to English if not set
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
@@ -96,7 +96,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     });
   };
 
-  // Helper function to get the variety name based on selected language
   const getVarietyNameForSort = (item: TargetData) => {
     switch (selectedLanguage) {
       case "si":
@@ -108,7 +107,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     }
   };
 
-  // ✅ Fetch Targets API (Runs every time the page is visited or refreshed)
   const fetchTargets = async () => {
     setLoading(true);
     const startTime = Date.now();
@@ -124,19 +122,16 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
       );
 
       const allData = response.data.data;
-      // console.log("hell", allData);
+
       const todoItems = allData.filter((item: TargetData) => item.todo > 0);
       const completedItems = allData.filter(
         (item: TargetData) => item.todo === 0 && item.complete !== 0,
       );
-      // console.log("todoItems", todoItems);
-      // console.log("completedItems", completedItems);
 
       setTodoData(sortByVarietyAndGrade(todoItems));
       setCompletedData(sortByVarietyAndGrade(completedItems));
-      setError(null);
     } catch (err) {
-      setError(t("Error.Failed to fetch data."));
+      console.log(t("Error.Failed to fetch data."));
     } finally {
       const elapsedTime = Date.now() - startTime;
       const remainingTime = 3000 - elapsedTime;
@@ -182,15 +177,16 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
   return (
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
-      <View className="bg-[#282828] px-4 py-3 flex-row justify-center items-center">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute top-2 left-4 bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000502" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-bold">{officerId}</Text>
-      </View>
+
+      <CustomHeader
+        title={officerId || ""}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       {/* Toggle Buttons */}
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">

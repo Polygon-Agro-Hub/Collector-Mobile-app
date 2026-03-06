@@ -40,16 +40,16 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   const [todoData, setTodoData] = useState<TargetData[]>([]);
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false); // State for refresh control
-  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
   const fetchSelectedLanguage = async () => {
     try {
-      const lang = await AsyncStorage.getItem("@user_language"); // Get stored language
-      setSelectedLanguage(lang || "en"); // Default to English if not set
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
@@ -66,7 +66,6 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
     }
   };
 
-  // Function to get grade priority for sorting
   const getGradePriority = (grade: string): number => {
     switch (grade) {
       case "A":
@@ -76,20 +75,17 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
       case "C":
         return 3;
       default:
-        return 4; // Any other grades come after A, B, C
+        return 4;
     }
   };
 
-  // Sort function for data - first by variety name, then by grade (A, B, C)
   const sortData = (data: TargetData[]): TargetData[] => {
     return [...data].sort((a, b) => {
-      // First sort by variety name alphabetically
       const nameA = getVarietyNameForSort(a);
       const nameB = getVarietyNameForSort(b);
 
       const nameComparison = nameA.localeCompare(nameB);
 
-      // If variety names are the same, sort by grade (A, B, C)
       if (nameComparison === 0) {
         return getGradePriority(a.grade) - getGradePriority(b.grade);
       }
@@ -98,7 +94,6 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
     });
   };
 
-  // Function to fetch targets
   const fetchTargets = useCallback(async () => {
     setLoading(true);
     try {
@@ -117,27 +112,21 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
       const completedItems = allData.filter(
         (item: TargetData) => item.todo === 0 && item.complete !== 0,
       );
-      // console.log("completedItems", completedItems);
-      // console.log(allData);
 
-      // Sort data by variety name and grade
       setTodoData(sortData(todoItems));
       setCompletedData(sortData(completedItems));
-      setError(null);
     } catch (err) {
-      setError(t("Error.Failed to fetch data."));
+      console.log(t("Error.Failed to fetch data."));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedLanguage]); // Re-fetch when language changes
+  }, [selectedLanguage]);
 
-  // Initial data load
   useEffect(() => {
     fetchTargets();
   }, [fetchTargets]);
 
-  // Function for refreshing the list
   const onRefresh = () => {
     setRefreshing(true);
     fetchTargets();

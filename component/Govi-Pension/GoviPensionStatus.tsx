@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StatusBar,
   Image,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -30,7 +30,6 @@ interface GoviPensionStatusProps {
 
 type StatusType = "To Review" | "Approved" | "Rejected";
 
-
 const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -48,15 +47,10 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // Get status from route params
   const { status, creatAt } = route.params || {};
   const currentStatus = (status as StatusType) || "To Review";
 
-  // Format the createdAt date dynamically → e.g. "January 28, 2026"
   const formattedDate = formatDate(creatAt);
-
-  console.log("creatAt", creatAt);
-  console.log("formattedDate", formattedDate);
 
   const getStatusConfig = () => {
     switch (currentStatus) {
@@ -66,7 +60,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
           title: t("GoviPensionStatus.Application Already Submitted!"),
           content: t(
             "GoviPensionStatus.It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
-            { date: formattedDate } 
+            { date: formattedDate },
           ),
           buttonText: t("GoviPensionStatus.Go Back"),
           onPress: () => navigation.goBack(),
@@ -87,7 +81,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
           title: t("GoviPensionStatus.Application Rejected!"),
           content: t(
             "GoviPensionStatus.The pension application submitted on {{date}} has been reviewed and was not approved.",
-            { date: formattedDate } 
+            { date: formattedDate },
           ),
         };
       default:

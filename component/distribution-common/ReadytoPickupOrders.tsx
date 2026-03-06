@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import CustomHeader from "../common/CustomHeader";
 
 type CollectionOfficersListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -72,7 +73,7 @@ interface Order {
   officerFirstName: string;
   officerLastName: string;
   fullName: string;
-  outDlvrDate:string;
+  outDlvrDate: string;
 }
 
 interface Customer {
@@ -118,10 +119,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       setErrorMessage("");
 
       fetchInitialData();
-
-      return () => {
-        // Cleanup code here if needed
-      };
     }, []),
   );
 
@@ -146,8 +143,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           },
         },
       );
-
-      console.log("Customers response:", response.data);
 
       if (response.data.status === "success" && response.data.data) {
         setCustomers(response.data.data);
@@ -177,8 +172,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           },
         },
       );
-
-      console.log("Pickup orders response:", response.data);
 
       if (response.data.success && response.data.data) {
         const ordersData = response.data.data;
@@ -340,18 +333,13 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center justify-center px-4 py-3 relative mt-2">
-        <TouchableOpacity
-          className="absolute left-4 bg-[#F6F6F680] rounded-full p-2 z-50"
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text className="text-lg font-semibold">
-          {t("ReadytoPickupOrders.Ready to Pickup Orders")}
-        </Text>
-      </View>
+
+      <CustomHeader
+        title={t("ReadytoPickupOrders.Ready to Pickup Orders")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       {/* Search Bar */}
       <View className="flex-row items-center mx-4 mt-4 pl-3 border border-[#C0C0C0] rounded-full">
@@ -457,8 +445,8 @@ const formatDateYMD = (dateInput: string | Date): string => {
   if (isNaN(date.getTime())) return "Invalid date";
 
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0"); 
-  const day = String(date.getDate()).padStart(2, "0"); 
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}/${month}/${day}`;
 };
@@ -501,7 +489,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
     });
   };
 
-
   const cashAmount = formatCurrency(order.fullTotal);
 
   return (
@@ -517,7 +504,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
         },
         shadowOpacity: 0.15,
         shadowRadius: 4,
-        elevation: 3, 
+        elevation: 3,
       }}
     >
       <View className="flex-row mb-2">
@@ -606,7 +593,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
     <View className="flex-1 justify-center items-center mt-[-15%] px-4 pb-24">
       <View className="relative">
         <Image
-          source={require("../../assets/images/notfound.webp")}
+          source={require("../../assets/images/collection-common/notfound.webp")}
           className="h-[200px] w-[200px] rounded-lg"
           resizeMode="contain"
         />

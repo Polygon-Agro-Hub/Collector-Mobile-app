@@ -11,10 +11,10 @@ import {
   BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { s, scale } from "react-native-size-matters";
+import { scale } from "react-native-size-matters";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RootStackParamList } from "../types";
 import { environment } from "@/environment/environment";
@@ -88,20 +88,19 @@ const TransactionList: React.FC<TransactionListProps> = ({
       setShowDatePicker(false);
 
       return () => {};
-    }, [])
+    }, []),
   );
   const fetchTransactions = async (date: string) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${environment.API_BASE_URL}api/collection-manager/transaction-list?collectionOfficerId=${collectionOfficerId}&date=${date}`
+        `${environment.API_BASE_URL}api/collection-manager/transaction-list?collectionOfficerId=${collectionOfficerId}&date=${date}`,
       );
       const data = await response.json();
-   //   console.log("Transactions:", data);
 
       if (response.ok) {
         const formattedData = data.map((transaction: any) => ({
-          id: transaction.registeredFarmerId ?? Math.random(), // Unique ID (fallback to random)
+          id: transaction.registeredFarmerId ?? Math.random(),
           registeredFarmerId: transaction.registeredFarmerId || 0,
           userId: transaction.userId || 0,
           firstName: transaction.firstName || "",
@@ -130,62 +129,35 @@ const TransactionList: React.FC<TransactionListProps> = ({
     }
   };
 
-  // const handleSearch = (query: string) => {
-  //   setSearchQuery(query);
-  //   const normalizedQuery = query.trim().toLowerCase();
-  //   const filtered = transactions.filter((transaction: any) => {
-  //     const firstNameMatch = transaction.firstName
-  //       ?.toLowerCase()
-  //       .includes(normalizedQuery);
-  //     const lastNameMatch = transaction.lastName
-  //       ?.toLowerCase()
-  //       .includes(normalizedQuery);
-
-  //     const nicMatch = transaction.NICnumber?.replace(/[^\w\s]/gi, "")
-  //       .toLowerCase()
-  //       .includes(normalizedQuery);
-
-  //     return firstNameMatch || lastNameMatch || nicMatch;
-  //   });
-
-  //   setFilteredTransactions(filtered);
-  // };
-
   const handleSearch = (query: string) => {
-  setSearchQuery(query);
-  // Normalize query: trim and replace multiple spaces with single space
-  const normalizedQuery = query.trim().toLowerCase().replace(/\s+/g, ' ');
-  
-  // If query is empty, show all transactions
-  if (!normalizedQuery) {
-    setFilteredTransactions(transactions);
-    return;
-  }
-  
-  const filtered = transactions.filter((transaction: any) => {
-    // Get individual fields with fallbacks and normalize whitespace
-    const firstName = (transaction.firstName || "").trim().toLowerCase();
-    const lastName = (transaction.lastName || "").trim().toLowerCase();
-    const nicNumber = (transaction.NICnumber || "").replace(/[^\w\s]/gi, "").toLowerCase();
-    
-    // Create full name and normalize multiple spaces to single space
-    const fullName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ');
-    
-    // Check if query matches any of these:
-    // 1. First name alone
-    // 2. Last name alone  
-    // 3. Full name (first + last)
-    // 4. NIC number
-    const firstNameMatch = firstName.includes(normalizedQuery);
-    const lastNameMatch = lastName.includes(normalizedQuery);
-    const fullNameMatch = fullName.includes(normalizedQuery);
-    const nicMatch = nicNumber.includes(normalizedQuery);
+    setSearchQuery(query);
 
-    return firstNameMatch || lastNameMatch || fullNameMatch || nicMatch;
-  });
+    const normalizedQuery = query.trim().toLowerCase().replace(/\s+/g, " ");
 
-  setFilteredTransactions(filtered);
-};
+    if (!normalizedQuery) {
+      setFilteredTransactions(transactions);
+      return;
+    }
+
+    const filtered = transactions.filter((transaction: any) => {
+      const firstName = (transaction.firstName || "").trim().toLowerCase();
+      const lastName = (transaction.lastName || "").trim().toLowerCase();
+      const nicNumber = (transaction.NICnumber || "")
+        .replace(/[^\w\s]/gi, "")
+        .toLowerCase();
+
+      const fullName = `${firstName} ${lastName}`.trim().replace(/\s+/g, " ");
+
+      const firstNameMatch = firstName.includes(normalizedQuery);
+      const lastNameMatch = lastName.includes(normalizedQuery);
+      const fullNameMatch = fullName.includes(normalizedQuery);
+      const nicMatch = nicNumber.includes(normalizedQuery);
+
+      return firstNameMatch || lastNameMatch || fullNameMatch || nicMatch;
+    });
+
+    setFilteredTransactions(filtered);
+  };
 
   useEffect(() => {
     fetchTransactions(getCurrentDate());
@@ -198,37 +170,46 @@ const TransactionList: React.FC<TransactionListProps> = ({
     }
   }, [selectedDate]);
 
-    useFocusEffect(
-      React.useCallback(() => {
-        const fetchData = async () => {
-          fetchTransactions(getCurrentDate());
-          setSearchQuery("");
-        };
-        fetchData();
-      }, [])
-    );
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        fetchTransactions(getCurrentDate());
+        setSearchQuery("");
+      };
+      fetchData();
+    }, []),
+  );
 
-     const handleBackPress = useCallback(() => {
-        navigation.navigate("OfficerSummary" as any, {
-          collectionOfficerId,
-          officerId,
-          phoneNumber1,
-          phoneNumber2,
-          officerName,
-        });
-        return true; // Prevent default back behavior
-      }, [navigation, collectionOfficerId, officerId, phoneNumber1, phoneNumber2, officerName]);
-    
-       useFocusEffect(
-        useCallback(() => {
-          const onBackPress = () => handleBackPress();
-    
-          const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-    
-          return () => subscription.remove();
-        }, [handleBackPress])
+  const handleBackPress = useCallback(() => {
+    navigation.navigate("OfficerSummary" as any, {
+      collectionOfficerId,
+      officerId,
+      phoneNumber1,
+      phoneNumber2,
+      officerName,
+    });
+    return true;
+  }, [
+    navigation,
+    collectionOfficerId,
+    officerId,
+    phoneNumber1,
+    phoneNumber2,
+    officerName,
+  ]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => handleBackPress();
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
       );
-    
+
+      return () => subscription.remove();
+    }, [handleBackPress]),
+  );
 
   return (
     <KeyboardAvoidingView
@@ -290,11 +271,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
               value={searchQuery}
               onChangeText={handleSearch}
             />
-            <TouchableOpacity
-              onPress={() => handleSearch(searchQuery)}
-            >
+            <TouchableOpacity onPress={() => handleSearch(searchQuery)}>
               <Image
-                source={require("../../assets/images/searchhh.webp")}
+                source={require("../../assets/images/collection-manager/search-transaction.webp")}
                 className="w-8 h-8"
                 resizeMode="contain"
               />
@@ -393,7 +372,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   >
                     <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
                       <Image
-                        source={require("../../assets/images/ava.webp")}
+                        source={require("../../assets/images/collection-manager/avetar.webp")}
                         className="w-full h-full"
                         resizeMode="cover"
                       />

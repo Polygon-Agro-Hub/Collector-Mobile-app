@@ -10,12 +10,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import {  useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import LottieView from "lottie-react-native"; 
+import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 
@@ -51,7 +51,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
-  const [showFilter, setShowFilter] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -60,8 +59,8 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const fetchSelectedLanguage = async () => {
     try {
-      const lang = await AsyncStorage.getItem("@user_language"); 
-      setSelectedLanguage(lang || "en"); 
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
@@ -70,13 +69,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       setShowMenu(false);
-    }, [])
+    }, []),
   );
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
-        fontSize: 14, 
-        lineHeight: 20, 
+        fontSize: 14,
+        lineHeight: 20,
       };
     }
   };
@@ -92,30 +91,27 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-      //console.log("data", response.data);
 
       if (response.data.status === "success") {
-    
         const approvedOfficers = response.data.data.filter(
-          (officer: Officer) => officer.status === "Approved"
+          (officer: Officer) => officer.status === "Approved",
         );
         const notApprovedOfficers = response.data.data.filter(
-          (officer: Officer) => officer.status === "Not Approved"
+          (officer: Officer) => officer.status === "Not Approved",
         );
 
         const sortedApprovedOfficers = approvedOfficers.sort(
           (a: Officer, b: Officer) =>
-            getOfficerName(a).localeCompare(getOfficerName(b))
+            getOfficerName(a).localeCompare(getOfficerName(b)),
         );
 
         const sortedNotApprovedOfficers = notApprovedOfficers.sort(
           (a: Officer, b: Officer) =>
-            getOfficerName(a).localeCompare(getOfficerName(b))
+            getOfficerName(a).localeCompare(getOfficerName(b)),
         );
 
-       
         setOfficers([...sortedApprovedOfficers, ...sortedNotApprovedOfficers]);
       } else {
         setErrorMessage(t("Error.Failed to fetch officers."));
@@ -134,7 +130,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       fetchOfficers();
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -157,7 +153,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const onRefresh = async () => {
     setSelectedJobRole(null);
-    setShowFilter(false);
     setRefreshing(true);
     await fetchOfficers();
     setRefreshing(false);
@@ -167,14 +162,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     React.useCallback(() => {
       fetchOfficers();
       setSelectedJobRole(null);
-      setShowFilter(false);
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
     if (selectedJobRole) {
       const filtered = officers.filter(
-        (officer) => officer.jobRole === selectedJobRole
+        (officer) => officer.jobRole === selectedJobRole,
       );
       setFilteredOfficers(filtered);
     } else {
@@ -188,7 +182,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
       }`}
       onPress={() => {
-   
         if (item.status !== "Not Approved") {
           navigation.navigate("DistributionOfficerSummary" as any, {
             officerId: item.empId,
@@ -203,59 +196,58 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
       disabled={item.status === "Not Approved"}
     >
       <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
-     
         <Image
           source={
             item.image
               ? { uri: item.image }
-              : require("../../assets/images/ava.webp")
+              : require("../../assets/images/collection-manager/avetar.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
         />
       </View>
 
       <View className="flex-1">
-          
-           {item.status === "Not Approved" && (
-        <Text className="text-red-500 text-xs font-semibold mr-2 self-end"
-              style={[
-  i18n.language === "si"
-    ? { fontSize: 12 }
-    : i18n.language === "ta"
-    ? { fontSize: 9 }
-    : { fontSize: 12 }
-]}
-        >
-          {t("CollectionOfficersList.Not Approved")}
-        </Text>
-      )}
-        <Text className="text-[18px] font-semibold text-gray-900"
-         style={[
-  i18n.language === "si"
-    ? { fontSize: 16 }
-    : i18n.language === "ta"
-    ? { fontSize: 14 }
-    : { fontSize: 17 }
-]}
+        {item.status === "Not Approved" && (
+          <Text
+            className="text-red-500 text-xs font-semibold mr-2 self-end"
+            style={[
+              i18n.language === "si"
+                ? { fontSize: 12 }
+                : i18n.language === "ta"
+                  ? { fontSize: 9 }
+                  : { fontSize: 12 },
+            ]}
+          >
+            {t("CollectionOfficersList.Not Approved")}
+          </Text>
+        )}
+        <Text
+          className="text-[18px] font-semibold text-gray-900"
+          style={[
+            i18n.language === "si"
+              ? { fontSize: 16 }
+              : i18n.language === "ta"
+                ? { fontSize: 14 }
+                : { fontSize: 17 },
+          ]}
         >
           {getOfficerName(item)}
         </Text>
-        <Text className="text-sm text-gray-500"> {t("DistributionOfficersList.EMPID")}  {item.empId}</Text>
+        <Text className="text-sm text-gray-500">
+          {" "}
+          {t("DistributionOfficersList.EMPID")} {item.empId}
+        </Text>
       </View>
 
-    
       {item.status !== "Not Approved" && (
         <Ionicons name="chevron-forward" size={scale(20)} color="#9CA3AF" />
       )}
     </TouchableOpacity>
   );
 
- 
-
   return (
     <View className="flex-1 bg-[#313131]">
       <View className="bg-[#313131] py-6 px-4  relative">
-    
         <Text
           style={{ fontSize: 18 }}
           className="text-white text-center font-bold"
@@ -267,7 +259,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           className="absolute top-6 right-4"
           onPress={() => {
             setShowMenu((prev) => !prev);
-            setShowFilter(false);
           }}
         >
           <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
@@ -334,7 +325,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         {loading ? (
           <View className="flex-1 justify-center items-center -mt-[25%]">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")} 
+              source={require("../../assets/lottie/newLottie.json")}
               autoPlay
               loop
               style={{ width: 350, height: 350 }}
@@ -368,11 +359,11 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         <TouchableOpacity
           onPress={async () => {
             try {
-              await AsyncStorage.removeItem("officerFormData"); 
-           
-                            navigation.navigate("AddOfficerBasicDetails", {jobRolle:"Distribution Officer"});
+              await AsyncStorage.removeItem("officerFormData");
 
-console.log("hirt")
+              navigation.navigate("AddOfficerBasicDetails", {
+                jobRolle: "Distribution Officer",
+              });
             } catch (error) {
               console.error("Error clearing form data:", error);
             }

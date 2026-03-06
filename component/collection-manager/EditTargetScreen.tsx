@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type EditTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -17,15 +18,15 @@ interface EditTargetScreenProps {
   route: {
     params: {
       varietyNameEnglish: string;
-      varietyNameSinhala: string; // ✅ Added this
-      varietyNameTamil: string; // ✅ Added this
+      varietyNameSinhala: string;
+      varietyNameTamil: string;
       grade: string;
       varietyId: string;
       target: string;
       todo: string;
       qty: string;
       collectionOfficerId: number;
-      officerId:string;
+      officerId: string;
     };
   };
 }
@@ -34,9 +35,8 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
   navigation,
   route,
 }) => {
-  const [myTarget, setMyTarget] = useState("100kg");
   const [isEditing, setIsEditing] = useState(false);
-  const [toDoAmount] = useState("50kg");
+
   const { t } = useTranslation();
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -65,11 +65,9 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
     collectionOfficerId,
     varietyNameSinhala,
     varietyNameTamil,
-    officerId
+    officerId,
   } = route.params;
-  console.log("managers target edit details", route.params);
 
-  console.log("officers edit details", route.params);
   const getvarietyName = () => {
     switch (selectedLanguage) {
       case "si":
@@ -84,17 +82,16 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="flex-row items-center bg-[#313131] p-6 rounded-b-lg">
-        <TouchableOpacity onPress={() => navigation.goBack()}
-          className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-          >
-         <AntDesign name="left" size={22} color="white" />
-        </TouchableOpacity>
-      
-         <Text className="flex-1 text-center text-xl font-semibold text-white mr-[6%]">
-          {getvarietyName()}
-        </Text>
-      </View>
+
+      <CustomHeader
+        title={getvarietyName() || ""}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       {/* Content */}
       <View className="mt-6 space-y-6 p-8">
@@ -145,18 +142,19 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                     collectionOfficerId,
                     varietyNameSinhala,
                     varietyNameTamil,
-                    officerId
+                    officerId,
                   })
-                } // Save and exit edit mode
+                }
               >
-                <Text className="text-white font-medium"
-                                                                     style={[
-  i18n.language === "si"
-    ? { fontSize: 13 }
-    : i18n.language === "ta"
-    ? { fontSize: 12 }
-    : { fontSize: 14 }
-]}
+                <Text
+                  className="text-white font-medium"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 12 }
+                        : { fontSize: 14 },
+                  ]}
                 >
                   {t("EditTargetManager.Pass")}
                 </Text>
@@ -174,18 +172,19 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                     collectionOfficerId,
                     varietyNameSinhala,
                     varietyNameTamil,
-                    officerId
+                    officerId,
                   })
-                } // Save and exit edit mode
+                }
               >
-                <Text className="text-white font-medium"
-                                                                     style={[
-  i18n.language === "si"
-    ? { fontSize: 13 }
-    : i18n.language === "ta"
-    ? { fontSize: 12 }
-    : { fontSize: 14 }
-]}
+                <Text
+                  className="text-white font-medium"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 12 }
+                        : { fontSize: 14 },
+                  ]}
                 >
                   {t("EditTargetManager.Receive")}
                 </Text>

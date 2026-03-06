@@ -15,11 +15,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
 
 type TargetOrderScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -124,7 +124,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [centerCode, setcenterCode] = useState<string | null>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const isInitialLoad = useRef(true);
   const appState = useRef(AppState.currentState);
   const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
@@ -150,8 +149,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
       console.error("Failed to fetch user profile:", error);
     }
   };
-
-  console.log("jobeJole-----------------", jobRole);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -328,11 +325,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
           const mappedData = mapApiDataToTargetData(apiData);
 
-          if (mappedData && mappedData.length > 0) {
-            // console.log("First mapped item:", JSON.stringify(mappedData[0], null, 2));
-            // console.log("Package lock in mapped item:", mappedData[0].packageIsLock);
-          }
-
           const todoItems = mappedData.filter((item: TargetData) =>
             ["Pending", "Opened"].includes(item.selectedStatus),
           );
@@ -434,8 +426,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
       invoiceNo: item.invoiceNo,
       allData: selectedToggle === "ToDo" ? todoData : completedData,
     };
-
-    console.log("=======================", item.selectedStatus);
 
     switch (item.selectedStatus) {
       case "Pending":
@@ -563,17 +553,15 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
   return (
     <View className="flex-1 bg-[#282828]">
-      <View className="bg-[#282828] px-4 py-6 flex-row justify-center items-center">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute left-4 bg-white/10 rounded-full p-2"
-        >
-          <AntDesign name="left" size={22} color="white" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-bold">
-          {t("TargetOrderScreen.My Daily Target")}
-        </Text>
-      </View>
+      <CustomHeader
+        title={t("TargetOrderScreen.My Daily Target")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
         <Animated.View

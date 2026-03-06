@@ -17,6 +17,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
+import CustomHeader from "../common/CustomHeader";
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -103,28 +104,12 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         const isCash = item.paymentMethod?.toLowerCase() === "cash";
         const notHandedOver = item.handOverOfficer === null;
 
-        console.log("Filtering item:", {
-          invNo: item.invNo,
-          paymentMethod: item.paymentMethod,
-          isCash,
-          handOverOfficer: item.handOverOfficer,
-          notHandedOver,
-          shouldInclude: isCash && notHandedOver,
-        });
-
         return isCash && notHandedOver;
       })
       .map((item) => {
         const { date, time } = formatApiDate(item.pickupCreatedAt);
         const cashAmount =
           item.handOverPrice ?? parseFloat(item.fullTotal.toString()) ?? 0;
-
-        console.log("Transforming item:", {
-          invNo: item.invNo,
-          handOverPrice: item.handOverPrice,
-          fullTotal: item.fullTotal,
-          cashAmount,
-        });
 
         return {
           id: item.pickupOrderId.toString(),
@@ -161,13 +146,9 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         },
       );
 
-      console.log("API Response:", response.data);
-
       if (response.data.success) {
         const transformedData = transformApiData(response.data.data);
         setTransactions(transformedData);
-        console.log("Fetched transactions:", transformedData.length);
-        console.log("Transformed data:", transformedData);
       } else {
         Alert.alert("Error", response.data.message || "Failed to fetch data");
       }
@@ -234,11 +215,6 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
   };
 
   const handleHandOver = () => {
-    console.log(
-      "Hand over selected transactions:",
-      Array.from(selectedTransactions),
-    );
-
     const selectedTransactionsData = transactions
       .filter((t) => selectedTransactions.has(t.id))
       .map((t) => ({
@@ -312,7 +288,6 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
     );
   };
 
-  // Empty state
   const EmptyState = () => (
     <View className="flex-1 items-center justify-center mt-[50%]">
       <View className=" items-center justify-center mb-4">
@@ -331,20 +306,12 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header */}
-      <View className="bg-white px-4 py-4 flex-row items-center ">
-        <TouchableOpacity
-          className="absolute left-4 bg-[#F6F6F680] rounded-full p-2 z-50"
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <View className="flex-1 items-center justofy-center ml-2">
-          <Text className="text-lg font-semibold text-gray-900">
-            {t("ReceivedCash.Received Cash")}
-          </Text>
-        </View>
-      </View>
+      <CustomHeader
+        title={t("ReceivedCash.Received Cash")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
 
       {/* Filter Tabs */}
       <View className="bg-white px-4 py-3 flex-row items-center justify-between">
@@ -374,7 +341,6 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
                 {t("ReceivedCash.Full Total")} :{" "}
               </Text>
               <Text className="text-xl font-bold text-[#980775]">
-                {/* Rs.{totalCash.toFixed(2)} */}
                 {t("ReceivedCash.Rs")}
                 {totalCash.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
@@ -436,7 +402,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         />
       )}
 
-      {/* Hand Over Button - Only show when items are selected */}
+      {/* Hand Over Button */}
       {selectedTransactions.size > 0 && transactions.length > 0 && (
         <View className="absolute bottom-0 left-0 right-0 bg-white px-5 py-4">
           <TouchableOpacity

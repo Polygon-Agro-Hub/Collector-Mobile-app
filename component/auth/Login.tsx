@@ -19,16 +19,12 @@ import { ScrollView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import LottieView from "lottie-react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "../../store/authSlice";
 import { useDispatch } from "react-redux";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -36,16 +32,16 @@ interface LoginProps {
   navigation: LoginNavigationProp;
 }
 
-const loginImage = require("@/assets/images/New/login.png");
-const user = require("@/assets/images/New/user.png");
-const passwordicon = require("@/assets/images/New/password.png");
+const loginImage = require("@/assets/images/auth/login.webp");
+const user = require("@/assets/images/auth/user.webp");
+const passwordicon = require("@/assets/images/auth/password.webp");
 
 const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [empid, setEmpid] = useState("");
   const [password, setPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [empIdError, setEmpIdError] = useState(""); 
+  const [empIdError, setEmpIdError] = useState("");
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -66,7 +62,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
     const trimmedEmpId = empId.trim();
 
-    // First validate format
     if (trimmedEmpId !== trimmedEmpId.toUpperCase()) {
       setEmpIdError(t("Error.Please enter Employee ID in uppercase letters"));
       return;
@@ -129,7 +124,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const handleLogin = async () => {
     Keyboard.dismiss();
 
-    // Clear any existing errors
     setEmpIdError("");
 
     if (!empid && !password) {
@@ -193,12 +187,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       );
 
       const data = await response.json();
-      console.log("Login response:", data);
 
       if (response.status === 403) {
         setLoading(false);
 
-        // Handle different account statuses
         let errorMessage = t("Error.This EMP ID is not approved.");
 
         if (data.accountStatus === "Rejected") {
@@ -221,7 +213,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             t("Error.Invalid Password. Please try again."),
           );
         } else if (data.status === "error") {
-          console.log("Login error:", data);
           Alert.alert(t("Error.error"), t("Error.Invalid EMP ID"));
         } else {
           Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
@@ -237,7 +228,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         companyNameEnglish,
         companyNameSinhala,
         companyNameTamil,
-        accountStatus,
       } = data;
 
       const allowedRoles = [
@@ -253,7 +243,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         return;
       }
 
-      // Continue with normal login flow
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("jobRole", jobRole);
       await AsyncStorage.setItem("companyNameEnglish", companyNameEnglish);
@@ -273,7 +262,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         ]);
       }
 
-      //   console.log("Password update required:", passwordUpdateRequired);
       await status(empId, true);
 
       setTimeout(() => {
@@ -282,7 +270,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         if (passwordUpdateRequired) {
           navigation.navigate("ChangePassword");
         } else {
-          // Fixed: Check for both Distribution roles individually
           if (
             jobRole === "Distribution Officer" ||
             jobRole === "Distribution Centre Manager"
@@ -363,25 +350,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
         className=" bg-white"
       >
-        <View
-          className="flex-row items-center justify-between "
-          style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
-        >
-          <TouchableOpacity onPress={() => handleNavBack()}>
-            <AntDesign
-              name="left"
-              size={22}
-              color="black"
-              style={{
-                paddingHorizontal: wp(3),
-                paddingVertical: hp(1.5),
-                backgroundColor: "#F6F6F680",
-                borderRadius: 50,
-              }}
-            />
-          </TouchableOpacity>
-          <View style={{ width: 22 }} />
-        </View>
+        <CustomHeader
+          title=""
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => handleNavBack()}
+        />
 
         <View className="items-center ">
           <Image
@@ -413,7 +387,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               {t("SignIn.Employee")}
             </Text>
             <View
-              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl w-[95%] h-[53px] mb-2 px-3 ${
+              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl h-[53px] mb-2 px-3 ${
                 empIdError ? "border-red-500" : "border-[#F4F4F4]"
               }`}
             >
@@ -430,7 +404,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               />
             </View>
 
-            {/* Error message for Employee ID */}
             {empIdError ? (
               <View className="mb-4">
                 <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>
@@ -442,7 +415,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             <Text className="text-base pb-[2%] font-light">
               {t("SignIn.Password")}
             </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl w-[95%] h-[53px] mb-8 px-3">
+            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl h-[53px] mb-8 px-3">
               <Image
                 source={passwordicon}
                 style={{ width: 24, height: 24 }}
