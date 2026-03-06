@@ -13,9 +13,6 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import countryCodes from "./countryCodes.json";
-import { SelectList } from "react-native-dropdown-select-list";
 import { ActivityIndicator } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
@@ -23,17 +20,35 @@ import bankNames from "../../assets/jsons/banks.json";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
+import CustomHeader from "../common/CustomHeader";
+import GlobalSearchModal from "../common/GlobalSearchModal";
+import provincesData from "../../assets/jsons/sri-lanka-provinces.json";
+import { Entypo } from "@expo/vector-icons";
 
 type AddOfficerAddressDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
   "AddOfficerAddressDetails"
 >;
 
-type District = {
+type City = {
   en: string;
   si: string;
   ta: string;
 };
+
+type District = {
+  en: string;
+  si: string;
+  ta: string;
+  cities: City[];
+};
+
+type Province = {
+  name: { en: string; si: string; ta: string };
+  districts: District[];
+};
+
+type ModalKey = "province" | "district" | "bank" | "branch" | null;
 
 const AddOfficerAddressDetails: React.FC = () => {
   const navigation = useNavigation<AddOfficerAddressDetailsNavigationProp>();
@@ -46,10 +61,9 @@ const AddOfficerAddressDetails: React.FC = () => {
     preferredLanguages,
     jobRole,
   } = route.params;
-  
+
   const [filteredBranches, setFilteredBranches] = useState<any[]>([]);
   const [bankName, setBankName] = useState<string>("");
-  const [branchName, setBranchName] = useState<string>("");
   const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
@@ -69,41 +83,56 @@ const AddOfficerAddressDetails: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [countries, setCountries] = useState<
-    { name: string; dial_code: string; code: string }[]
-  >([]);
-
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const fetchSelectedLanguage = async () => {
-    try {
-      const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
-    } catch (error) {
-      console.error("Error fetching language preference:", error);
-    }
-  };
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [activeModal, setActiveModal] = useState<ModalKey>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchSelectedLanguage();
+    const fetchSelectedLanguage = async () => {
+      try {
+        const lang = await AsyncStorage.getItem("@user_language");
+        setSelectedLanguage(lang || "en");
+      } catch (error) {
+        console.error("Error fetching language preference:", error);
+      }
     };
-    fetchData();
+    fetchSelectedLanguage();
+  }, []);
+
+  useEffect(() => {
+    const loadStoredData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem("officerFormData");
+        if (storedData) {
+          const parsed = JSON.parse(storedData);
+          setFormData(parsed);
+          if (parsed.bankName) setBankName(parsed.bankName);
+          if (parsed.province) {
+            const found = (provincesData.provinces as Province[]).find(
+              (p) => p.name.en === parsed.province,
+            );
+            if (found) setDistricts(found.districts);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading form data:", error);
+      }
+    };
+    loadStoredData();
   }, []);
 
   const saveDataToStorage = async (updatedData: any) => {
     try {
       await AsyncStorage.setItem(
         "officerFormData",
-        JSON.stringify(updatedData)
+        JSON.stringify(updatedData),
       );
     } catch (error) {
       console.error("Error saving form data:", error);
     }
   };
 
-  // Clear specific field error when user starts typing
   const clearFieldError = (fieldName: string) => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev };
@@ -113,7 +142,7 @@ const AddOfficerAddressDetails: React.FC = () => {
   };
 
   const handleInputChange = (key: string, value: string) => {
-    clearFieldError(key); // Clear error when user types
+    clearFieldError(key);
     setFormData((prevData) => {
       const updatedData = { ...prevData, [key]: value };
       saveDataToStorage(updatedData);
@@ -122,9 +151,9 @@ const AddOfficerAddressDetails: React.FC = () => {
   };
 
   const handleValidation = (key: string, value: string) => {
-    const numbersOnly = value.replace(/[^0-9]/g, '');
-    clearFieldError(key); // Clear error when user types
-    
+    const numbersOnly = value.replace(/[^0-9]/g, "");
+    clearFieldError(key);
+
     setFormData((prevState) => {
       const updatedFormData = { ...prevState, [key]: numbersOnly };
       const { accountNumber, confirmAccountNumber } = updatedFormData;
@@ -144,71 +173,126 @@ const AddOfficerAddressDetails: React.FC = () => {
     });
   };
 
+  const formatText = (text: string) => {
+    let formattedText = text.replace(/^\s+/, "");
+    if (formattedText.length > 0) {
+      formattedText =
+        formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
+    }
+    return formattedText;
+  };
+
+  const handleProvinceSelect = (items: string[]) => {
+    const provinceName = items[0];
+    if (!provinceName) return;
+
+    clearFieldError("province");
+    clearFieldError("district");
+
+    const selectedProvince = (provincesData.provinces as Province[]).find(
+      (p) => p.name.en === provinceName,
+    );
+
+    if (selectedProvince) {
+      setDistricts(selectedProvince.districts);
+      const updatedData = {
+        ...formData,
+        province: selectedProvince.name.en,
+        district: "",
+      };
+      setFormData(updatedData);
+      saveDataToStorage(updatedData);
+    }
+  };
+
+  const handleDistrictSelect = (items: string[]) => {
+    const districtName = items[0];
+    if (!districtName) return;
+
+    clearFieldError("district");
+    const updatedData = { ...formData, district: districtName };
+    setFormData(updatedData);
+    saveDataToStorage(updatedData);
+  };
+
   useEffect(() => {
-    const loadStoredData = async () => {
-      try {
-        const storedData = await AsyncStorage.getItem("officerFormData");
-        if (storedData) {
-          setFormData(JSON.parse(storedData));
+    if (bankName) {
+      const selectedBank = bankNames.find((bank) => bank.name === bankName);
+      if (selectedBank) {
+        try {
+          const data = require("../../assets/jsons/branches.json");
+          const branches = data[selectedBank.ID] || [];
+          setFilteredBranches(
+            branches.sort((a: { name: string }, b: { name: string }) =>
+              a.name.localeCompare(b.name),
+            ),
+          );
+        } catch (err) {
+          console.error("Error loading branches", err);
+          setFilteredBranches([]);
         }
-      } catch (error) {
-        console.error("Error loading form data:", error);
+      } else {
+        setFilteredBranches([]);
       }
-    };
+    } else {
+      setFilteredBranches([]);
+    }
+  }, [bankName]);
 
-    loadStoredData();
-  }, []);
+  const handleBankSelect = (items: string[]) => {
+    const selected = items[0];
+    if (!selected) return;
 
-  useEffect(() => {
-    setCountries(countryCodes);
-  }, []);
+    clearFieldError("bankName");
+    clearFieldError("branchName");
+    setBankName(selected);
 
-  // Validate all required fields
+    const updatedData = { ...formData, bankName: selected, branchName: "" };
+    setFormData(updatedData);
+    saveDataToStorage(updatedData);
+  };
+
+  const handleBranchSelect = (items: string[]) => {
+    const selected = items[0];
+    if (!selected) return;
+
+    clearFieldError("branchName");
+    const updatedData = { ...formData, branchName: selected };
+    setFormData(updatedData);
+    saveDataToStorage(updatedData);
+  };
+
   const validateFields = () => {
     const errors: Record<string, string> = {};
 
-    if (!formData.houseNumber.trim()) {
+    if (!formData.houseNumber.trim())
       errors.houseNumber = t("Error.House number is required");
-    }
-    if (!formData.streetName.trim()) {
+    if (!formData.streetName.trim())
       errors.streetName = t("Error.Street name is required");
-    }
-    if (!formData.city.trim()) {
-      errors.city = t("Error.City is required");
-    }
-    if (!formData.province) {
-      errors.province = t("Error.Province is required");
-    }
-    if (!formData.district) {
-      errors.district = t("Error.District is required");
-    }
-    if (!formData.accountHolderName.trim()) {
+    if (!formData.city.trim()) errors.city = t("Error.City is required");
+    if (!formData.province) errors.province = t("Error.Province is required");
+    if (!formData.district) errors.district = t("Error.District is required");
+    if (!formData.accountHolderName.trim())
       errors.accountHolderName = t("Error.Account holder name is required");
-    }
-    if (!formData.accountNumber.trim()) {
+    if (!formData.accountNumber.trim())
       errors.accountNumber = t("Error.Account number is required");
-    }
     if (!formData.confirmAccountNumber.trim()) {
-      errors.confirmAccountNumber = t("Error.Confirm account number is required");
+      errors.confirmAccountNumber = t(
+        "Error.Confirm account number is required",
+      );
     } else if (formData.accountNumber !== formData.confirmAccountNumber) {
       errors.confirmAccountNumber = t("Error.Account numbers do not match.");
     }
-    if (!formData.bankName) {
-      errors.bankName = t("Error.Bank name is required");
-    }
-    if (!formData.branchName) {
+    if (!formData.bankName) errors.bankName = t("Error.Bank name is required");
+    if (!formData.branchName)
       errors.branchName = t("Error.Branch name is required");
-    }
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async () => {
-    // Validate all fields
-    if (!validateFields()) {
-      return;
-    }
+    if (!validateFields()) return;
 
     const combinedData = {
       ...basicDetails,
@@ -217,16 +301,14 @@ const AddOfficerAddressDetails: React.FC = () => {
       empType: type,
       languages: Object.keys(preferredLanguages)
         .filter(
-          (lang) => preferredLanguages[lang as keyof typeof preferredLanguages]
+          (lang) => preferredLanguages[lang as keyof typeof preferredLanguages],
         )
         .join(", "),
       profileImage: basicDetails.profileImage || "",
     };
 
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
+    if (!netState.isConnected) return;
 
     try {
       setLoading(true);
@@ -239,13 +321,13 @@ const AddOfficerAddressDetails: React.FC = () => {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 201) {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Officer created successfully")
+          t("Error.Officer created successfully"),
         );
         setLoading(false);
         await AsyncStorage.removeItem("officerFormData");
@@ -258,16 +340,12 @@ const AddOfficerAddressDetails: React.FC = () => {
     } catch (error) {
       console.error("Error submitting officer data:", error);
       setLoading(false);
-      if (
-        axios.isAxiosError(error) &&
-        error.response &&
-        error.response.status === 400
-      ) {
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
         Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
       } else {
         Alert.alert(
           t("Error.error"),
-          t("Error.An error occurred while creating the officer.")
+          t("Error.An error occurred while creating the officer."),
         );
       }
     } finally {
@@ -275,175 +353,56 @@ const AddOfficerAddressDetails: React.FC = () => {
     }
   };
 
-  const jsonData = {
-    provinces: [
-      {
-        name: { en: "Western", si: "බටහිර", ta: "மேற்கு" },
-        districts: [
-          { en: "Colombo", si: "කොළඹ", ta: "கொழும்பு" },
-          { en: "Gampaha", si: "ගම්පහ", ta: "கம்பஹா" },
-          { en: "Kalutara", si: "කළුතර", ta: "களுத்துறை" },
-        ],
-      },
-      {
-        name: { en: "Central", si: "මධ්‍යම", ta: "மத்திய" },
-        districts: [
-          { en: "Kandy", si: "මහනුවර", ta: "கண்டி" },
-          { en: "Matale", si: "මාතලේ", ta: "மாதளை" },
-          { en: "Nuwara Eliya", si: "නුවරඑළිය", ta: "நுவரேலியா" },
-        ],
-      },
-      {
-        name: { en: "Southern", si: "දකුණ", ta: "தெற்கு" },
-        districts: [
-          { en: "Galle", si: "ගාල්ල", ta: "காலி" },
-          { en: "Matara", si: "මාතර", ta: "மாத்தறை" },
-          { en: "Hambantota", si: "හම්බන්තොට", ta: "ஹம்பாந்தோட்டை" },
-        ],
-      },
-      {
-        name: { en: "Eastern", si: "නැගෙනහිර", ta: "கிழக்கு" },
-        districts: [
-          { en: "Ampara", si: "අම්පාර", ta: "அம்பாறை" },
-          { en: "Batticaloa", si: "මඩකලපුව", ta: "பாட்டிக்கோடை" },
-          { en: "Trincomalee", si: "ත්‍රිකුණාමලය", ta: "திருகோணமலை" },
-        ],
-      },
-      {
-        name: { en: "Northern", si: " උතුරු", ta: "வடக்கு" },
-        districts: [
-          { en: "Jaffna", si: "යාපනය", ta: "யாழ்ப்பாணம்" },
-          { en: "Kilinochchi", si: "කිලිනොච්චි", ta: "கில்லினோச்சி" },
-          { en: "Mullaitivu", si: "මුල්ලිතිවු", ta: "முல்லைத்தீவு" },
-        ],
-      },
-      {
-        name: { en: "North Western", si: "උතුරු මැද", ta: "வடமேல்" },
-        districts: [
-          { en: "Kurunegala", si: "කුරුණෑගල", ta: "குருநாகல்" },
-          { en: "Puttalam", si: "පුත්තලම", ta: "புத்தளம்" },
-        ],
-      },
-      {
-        name: { en: "North Central", si: "උතුරු මධ්‍යම", ta: "வட மத்திய" },
-        districts: [
-          { en: "Anuradhapura", si: "අනුරාධපුර", ta: "அனுராதபுரம்" },
-          { en: "Polonnaruwa", si: "පොලොන්නරුව", ta: "பொலன்னருவ" },
-        ],
-      },
-      {
-        name: { en: "Uva", si: "උව", ta: "உவா" },
-        districts: [
-          { en: "Badulla", si: "බදුල්ල", ta: "பதுளை" },
-          { en: "Moneragala", si: "මොනරාගල", ta: "முனரகலை" },
-        ],
-      },
-      {
-        name: { en: "Sabaragamuwa", si: "සබරගමුව", ta: "சபரகமுவ" },
-        districts: [
-          { en: "Ratnapura", si: "රත්නපුර", ta: "ரத்நாபுர" },
-          { en: "Kegalle", si: "කැගල්ල", ta: "கெகலே" },
-        ],
-      },
-    ],
-  };
+  const provinceModalData = (provincesData.provinces as Province[]).map(
+    (p) => ({
+      label: p.name[selectedLanguage as keyof typeof p.name] || p.name.en,
+      value: p.name.en,
+    }),
+  );
 
-  const [districts, setDistricts] = useState<District[]>([]);
+  const districtModalData = districts.map((d) => ({
+    label: (d[selectedLanguage as keyof typeof d] as string) || d.en,
+    value: d.en,
+  }));
 
-  const handleProvinceChange = (provinceName: string) => {
-    clearFieldError('province');
-    clearFieldError('district');
-    
-    const selectedProvince = jsonData.provinces.find(
-      (p) => p.name.en === provinceName
-    );
+  const bankModalData = bankNames
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((bank) => ({ label: bank.name, value: bank.name }));
 
-    if (selectedProvince) {
-      setFormData({
-        ...formData,
-        province: selectedProvince.name.en,
-        district: "",
-      });
+  const branchModalData = filteredBranches.map((b) => ({
+    label: b.name,
+    value: b.name,
+  }));
 
-      if (!selectedLanguage) return;
-
-      setDistricts(
-        selectedProvince.districts.map((d) => ({
-          en: d.en,
-          si: d.si,
-          ta: d.ta,
-        }))
-      );
-    }
-  };
-
-  const handleDistrictChange = (district: string) => {
-    clearFieldError('district');
-    setFormData({ ...formData, district });
-  };
-
-  useEffect(() => {
-    if (bankName) {
-      const selectedBank = bankNames.find((bank) => bank.name === bankName);
-      if (selectedBank) {
-        try {
-          const data = require("../../assets/jsons/branches.json");
-          const filteredBranches = data[selectedBank.ID] || [];
-
-          const sortedBranches = filteredBranches.sort(
-            (a: { name: string }, b: { name: any }) =>
-              a.name.localeCompare(b.name)
-          );
-
-          setFilteredBranches(sortedBranches);
-        } catch (error) {
-          console.error("Error loading branches", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setFilteredBranches([]);
-      }
-    } else {
-      setFilteredBranches([]);
-    }
-  }, [bankName]);
-
-  const formatText = (text: string) => {
-    let formattedText = text.replace(/^\s+/, '');
-    
-    if (formattedText.length > 0) {
-      formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
-    }
-    
-    return formattedText;
-  };
-
-  const handleBankSelection = (selectedBank: string) => {
-    clearFieldError('bankName');
-    clearFieldError('branchName');
-    setBankName(selectedBank);
-    setBranchName("");
-    setFormData((prevData) => {
-      const updatedData = {
-        ...prevData,
-        bankName: selectedBank,
-        branchName: ""
-      };
-      saveDataToStorage(updatedData);
-      return updatedData;
-    });
-  };
-
-  const handleBranchSelection = (selectedBranch: string) => {
-    clearFieldError('branchName');
-    setBranchName(selectedBranch);
-    setFormData((prevData) => {
-      const updatedData = { ...prevData, branchName: selectedBranch };
-      saveDataToStorage(updatedData);
-      return updatedData;
-    });
-  };
+  const DropdownButton = ({
+    placeholder,
+    value,
+    hasError,
+    onPress,
+    disabled,
+  }: {
+    placeholder: string;
+    value: string;
+    hasError: boolean;
+    onPress: () => void;
+    disabled?: boolean;
+  }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      className={`border ${
+        hasError ? "border-red-500" : "border-[#F4F4F4]"
+      } bg-[#F4F4F4] rounded-full px-4 h-[46px] flex-row items-center justify-between ${
+        disabled ? "opacity-50" : ""
+      }`}
+    >
+      <Text className={value ? "text-gray-700" : "text-gray-400"}>
+        {value || placeholder}
+      </Text>
+      <Entypo name="chevron-small-down" size={20} color="#666" />
+    </TouchableOpacity>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -455,178 +414,179 @@ const AddOfficerAddressDetails: React.FC = () => {
         className="flex-1 bg-white"
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
-        <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
+        <CustomHeader
+          title={t("AddOfficerAddressDetails.AddOfficer")}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => navigation.goBack()}
+        />
 
-          <View className="flex-1 justify-center items-center mr-[8%]">
-            <Text className="text-lg font-bold">
-              {t("AddOfficerAddressDetails.AddOfficer")}
-            </Text>
-          </View>
-        </View>
-
-        {/* Address Details */}
+        {/* ── Address Details ── */}
         <View className="px-8 mt-4">
+          {/* House Number */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.House")}
             value={formData.houseNumber}
             onChangeText={(text) => handleInputChange("houseNumber", text)}
             className={`border ${
               fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.houseNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.houseNumber}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.houseNumber}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
+          {/* Street Name */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.Street Name")}
             value={formData.streetName}
-            onChangeText={(text) => {
-              const formattedText = formatText(text);
-              handleInputChange("streetName", formattedText);
-            }}
+            onChangeText={(text) =>
+              handleInputChange("streetName", formatText(text))
+            }
             className={`border ${
               fieldErrors.streetName ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
             autoCorrect={false}
           />
           {fieldErrors.streetName ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.streetName}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.streetName}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
+          {/* City */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.City")}
             value={formData.city}
-            onChangeText={(text) => {
-              const formattedText = formatText(text);
-              handleInputChange("city", formattedText);
-            }}
+            onChangeText={(text) => handleInputChange("city", formatText(text))}
             className={`border ${
               fieldErrors.city ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
             autoCorrect={false}
           />
           {fieldErrors.city ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.city}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.city}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
+          {/* Country (read-only) */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.Country")}
             value={t("AddOfficerAddressDetails.Country")}
             editable={false}
-            className="border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 mb-4 text-gray-700"
+            className="border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-3 mb-4 text-gray-700"
           />
 
-          <View style={{ marginBottom: 1 }}>
-            <SelectList
-              setSelected={(province: any) => handleProvinceChange(province)}
-              data={jsonData.provinces.map((province) => ({
-                key: province.name.en,
-                value:
-                  province.name[
-                    selectedLanguage as keyof typeof province.name
-                  ] || province.name.en,
-              }))}
-              boxStyles={{
-                borderColor: fieldErrors.province ? "#ef4444" : "#F4F4F4",
-                borderRadius: 25,
-                width: "100%",
-                height: 50,
-                backgroundColor: "#F4F4F4",
-              }}
-              dropdownStyles={{
-                borderRadius: 5,
-                borderWidth: 1,
-                borderColor: "#cccccc",
-              }}
-              search={true}
+          {/* Province */}
+          <View className="mb-1">
+            <DropdownButton
               placeholder={t("AddOfficerAddressDetails.Select Province")}
+              value={
+                formData.province
+                  ? (() => {
+                      const p = (provincesData.provinces as Province[]).find(
+                        (pr) => pr.name.en === formData.province,
+                      );
+                      return p
+                        ? p.name[selectedLanguage as keyof typeof p.name] ||
+                            p.name.en
+                        : formData.province;
+                    })()
+                  : ""
+              }
+              hasError={!!fieldErrors.province}
+              onPress={() => setActiveModal("province")}
             />
           </View>
           {fieldErrors.province ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.province}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.province}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
-          {/* District Dropdown */}
+          {/* District */}
           {formData.province && (
             <>
-              <View style={{ marginBottom: 1 }}>
-                <SelectList
-                  setSelected={handleDistrictChange}
-                  data={districts.map((district) => ({
-                    key: district.en,
-                    value: district[selectedLanguage as keyof typeof district],
-                  }))}
-                  boxStyles={{
-                    borderColor: fieldErrors.district ? "#ef4444" : "#F4F4F4",
-                    borderRadius: 25,
-                    width: "100%",
-                    height: 50,
-                    backgroundColor: "#F4F4F4",
-                  }}
-                  dropdownStyles={{
-                    borderRadius: 5,
-                    borderWidth: 1,
-                    borderColor: "#cccccc",
-                  }}
-                  search={true}
+              <View className="mb-1">
+                <DropdownButton
                   placeholder={t("AddOfficerAddressDetails.Select District")}
+                  value={
+                    formData.district
+                      ? (() => {
+                          const d = districts.find(
+                            (dis) => dis.en === formData.district,
+                          );
+                          return d
+                            ? (d[
+                                selectedLanguage as keyof typeof d
+                              ] as string) || d.en
+                            : formData.district;
+                        })()
+                      : ""
+                  }
+                  hasError={!!fieldErrors.district}
+                  onPress={() => setActiveModal("district")}
                 />
               </View>
               {fieldErrors.district ? (
-                <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.district}</Text>
-              ) : <View className="mb-3" />}
+                <Text className="text-red-500 text-sm mb-3 ml-3">
+                  {fieldErrors.district}
+                </Text>
+              ) : (
+                <View className="mb-3" />
+              )}
             </>
           )}
         </View>
 
         <View className="h-0.5 bg-[#ADADAD] my-4" />
 
-        {/* Bank Details */}
+        {/* ── Bank Details ── */}
         <View className="px-8 mt-4">
+          {/* Account Holder Name */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.AccountName")}
             value={formData.accountHolderName}
             onChangeText={(text) => {
-              let filteredText = text.replace(/[^a-zA-Z\s]/g, '');
-
-              if (filteredText.startsWith(' ')) {
-                filteredText = filteredText.trimStart();
-              }
-
-              const capitalizedText = filteredText
+              let filtered = text.replace(/[^a-zA-Z\s]/g, "").trimStart();
+              const capitalized = filtered
                 .toLowerCase()
-                .split(' ')
-                .map(word => {
-                  if (word.length > 0) {
-                    return word.charAt(0).toUpperCase() + word.slice(1);
-                  }
-                  return word;
-                })
-                .join(' ');
-
-              handleInputChange("accountHolderName", capitalizedText);
+                .split(" ")
+                .map((w) =>
+                  w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w,
+                )
+                .join(" ");
+              handleInputChange("accountHolderName", capitalized);
             }}
             keyboardType="default"
             autoCapitalize="words"
             autoCorrect={false}
             className={`border ${
-              fieldErrors.accountHolderName ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
+              fieldErrors.accountHolderName
+                ? "border-red-500"
+                : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.accountHolderName ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.accountHolderName}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.accountHolderName}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
-          
-
+          {/* Account Number */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.AccountNum")}
             keyboardType="numeric"
@@ -634,99 +594,76 @@ const AddOfficerAddressDetails: React.FC = () => {
             onChangeText={(text) => handleValidation("accountNumber", text)}
             className={`border ${
               fieldErrors.accountNumber ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.accountNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.accountNumber}</Text>
-          ) : <View className="mb-3" />}
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.accountNumber}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
 
+          {/* Confirm Account Number */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.Confirm AccountNum")}
             keyboardType="numeric"
             value={formData.confirmAccountNumber}
-            onChangeText={(text) => handleValidation("confirmAccountNumber", text)}
+            onChangeText={(text) =>
+              handleValidation("confirmAccountNumber", text)
+            }
             className={`border ${
-              error || fieldErrors.confirmAccountNumber ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
+              error || fieldErrors.confirmAccountNumber
+                ? "border-red-500"
+                : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
           />
-          {(error || fieldErrors.confirmAccountNumber) ? (
+          {error || fieldErrors.confirmAccountNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
               {fieldErrors.confirmAccountNumber || error}
             </Text>
-          ) : <View className="mb-3" />}
+          ) : (
+            <View className="mb-3" />
+          )}
 
-          <View className="">
-            <View className="mb-1">
-              <SelectList
-                setSelected={handleBankSelection}
-                data={bankNames
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((bank) => ({
-                    key: bank.name,
-                    value: bank.name,
-                  }))}
-                defaultOption={{
-                  key: formData.bankName,
-                  value: formData.bankName,
-                }}
-                placeholder={t("AddOfficerAddressDetails.BankName")}
-                boxStyles={{
-                  borderColor: fieldErrors.bankName ? "#ef4444" : "#F4F4F4",
-                  borderRadius: 25,
-                  width: "100%",
-                  height: 50,
-                  backgroundColor: "#F4F4F4",
-                }}
-                dropdownStyles={{
-                  borderRadius: 5,
-                  borderWidth: 1,
-                  borderColor: "#cccccc",
-                }}
-                search={true}
-              />
-            </View>
-            {fieldErrors.bankName ? (
-              <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors.bankName}</Text>
-            ) : <View className="mb-3" />}
-
-            <View>
-              {filteredBranches.length > 0 && (
-                <>
-                  <SelectList
-                    setSelected={handleBranchSelection}
-                    data={filteredBranches.map((branch) => ({
-                      key: branch.name,
-                      value: branch.name,
-                    }))}
-                    defaultOption={{
-                      key: formData.branchName,
-                      value: formData.branchName,
-                    }}
-                    placeholder={t("AddOfficerAddressDetails.BranchName")}
-                    boxStyles={{
-                      borderColor: fieldErrors.branchName ? "#ef4444" : "#F4F4F4",
-                      borderRadius: 25,
-                      width: "100%",
-                      height: 50,
-                      backgroundColor: "#F4F4F4",
-                    }}
-                    dropdownStyles={{
-                      borderRadius: 5,
-                      borderWidth: 1,
-                      borderColor: "#cccccc",
-                    }}
-                    search={true}
-                  />
-                  {fieldErrors.branchName ? (
-                    <Text className="text-red-500 text-sm mt-1 ml-3">{fieldErrors.branchName}</Text>
-                  ) : null}
-                </>
-              )}
-            </View>
+          {/* Bank Name */}
+          <View className="mb-1">
+            <DropdownButton
+              placeholder={t("AddOfficerAddressDetails.BankName")}
+              value={formData.bankName}
+              hasError={!!fieldErrors.bankName}
+              onPress={() => setActiveModal("bank")}
+            />
           </View>
+          {fieldErrors.bankName ? (
+            <Text className="text-red-500 text-sm mb-3 ml-3">
+              {fieldErrors.bankName}
+            </Text>
+          ) : (
+            <View className="mb-3" />
+          )}
+
+          {/* Branch Name */}
+          {filteredBranches.length > 0 && (
+            <>
+              <View className="mb-1">
+                <DropdownButton
+                  placeholder={t("AddOfficerAddressDetails.BranchName")}
+                  value={formData.branchName}
+                  hasError={!!fieldErrors.branchName}
+                  onPress={() => setActiveModal("branch")}
+                />
+              </View>
+              {fieldErrors.branchName ? (
+                <Text className="text-red-500 text-sm mt-1 ml-3">
+                  {fieldErrors.branchName}
+                </Text>
+              ) : null}
+            </>
+          )}
         </View>
 
-        {/* Buttons */}
+        {/* ── Buttons ── */}
         <View className="flex-row justify-center space-x-4 px-4 mt-8 mb-4">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -738,8 +675,8 @@ const AddOfficerAddressDetails: React.FC = () => {
                 i18n.language === "si"
                   ? { fontSize: 13 }
                   : i18n.language === "ta"
-                  ? { fontSize: 10 }
-                  : { fontSize: 14 }
+                    ? { fontSize: 10 }
+                    : { fontSize: 14 },
               ]}
             >
               {t("AddOfficerAddressDetails.Go")}
@@ -761,8 +698,8 @@ const AddOfficerAddressDetails: React.FC = () => {
                   i18n.language === "si"
                     ? { fontSize: 13 }
                     : i18n.language === "ta"
-                    ? { fontSize: 10 }
-                    : { fontSize: 14 }
+                      ? { fontSize: 10 }
+                      : { fontSize: 14 },
                 ]}
               >
                 {t("AddOfficerAddressDetails.Submit")}
@@ -771,6 +708,54 @@ const AddOfficerAddressDetails: React.FC = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Province Modal */}
+      <GlobalSearchModal
+        visible={activeModal === "province"}
+        onClose={() => setActiveModal(null)}
+        title={t("AddOfficerAddressDetails.Select Province")}
+        data={provinceModalData}
+        selectedItems={formData.province ? [formData.province] : []}
+        onSelect={handleProvinceSelect}
+        searchPlaceholder={t("AddOfficerAddressDetails.Select Province")}
+        multiSelect={false}
+      />
+
+      {/* District Modal */}
+      <GlobalSearchModal
+        visible={activeModal === "district"}
+        onClose={() => setActiveModal(null)}
+        title={t("AddOfficerAddressDetails.Select District")}
+        data={districtModalData}
+        selectedItems={formData.district ? [formData.district] : []}
+        onSelect={handleDistrictSelect}
+        searchPlaceholder={t("AddOfficerAddressDetails.Select District")}
+        multiSelect={false}
+      />
+
+      {/* Bank Modal */}
+      <GlobalSearchModal
+        visible={activeModal === "bank"}
+        onClose={() => setActiveModal(null)}
+        title={t("AddOfficerAddressDetails.BankName")}
+        data={bankModalData}
+        selectedItems={formData.bankName ? [formData.bankName] : []}
+        onSelect={handleBankSelect}
+        searchPlaceholder={t("AddOfficerAddressDetails.BankName")}
+        multiSelect={false}
+      />
+
+      {/* Branch Modal */}
+      <GlobalSearchModal
+        visible={activeModal === "branch"}
+        onClose={() => setActiveModal(null)}
+        title={t("AddOfficerAddressDetails.BranchName")}
+        data={branchModalData}
+        selectedItems={formData.branchName ? [formData.branchName] : []}
+        onSelect={handleBranchSelect}
+        searchPlaceholder={t("AddOfficerAddressDetails.BranchName")}
+        multiSelect={false}
+      />
     </KeyboardAvoidingView>
   );
 };

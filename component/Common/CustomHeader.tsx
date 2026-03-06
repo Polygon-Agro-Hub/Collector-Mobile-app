@@ -9,6 +9,9 @@ interface CustomHeaderProps {
   showBackButton?: boolean;
   navigation?: StackNavigationProp<any>;
   onBackPress?: () => void;
+  textColor?: string;
+  bgColor?: string;
+  iconBgColor?: string;
 }
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -16,10 +19,14 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   showBackButton = true,
   navigation,
   onBackPress,
+  textColor = "black",
+  bgColor = "white",
+  iconBgColor = "#F6F6F680",
 }) => {
   return (
     <View
-      className={`flex-row items-center justify-between px-4 py-3 relative bg-white`}
+      className="flex-row items-center justify-between px-4 py-3 relative"
+      style={{ backgroundColor: bgColor }}
     >
       {/* LEFT - BACK BUTTON */}
       <View style={{ width: wp(15) }}>
@@ -31,9 +38,9 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
             <Entypo
               name="chevron-left"
               size={25}
-              color={"black"}
+              color={textColor}
               style={{
-                backgroundColor: "#F6F6F680",
+                backgroundColor: iconBgColor,
                 borderRadius: 50,
                 padding: wp(2.5),
               }}
@@ -44,7 +51,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
       {/* CENTER - TITLE */}
       <View className="flex-1 items-center">
-        <Text className={`text-xl font-semibold text-center text-black`}>
+        <Text
+          style={{ color: textColor }}
+          className="text-xl font-semibold text-center"
+        >
           {title}
         </Text>
       </View>

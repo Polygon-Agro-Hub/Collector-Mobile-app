@@ -20,16 +20,17 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
-import DropDownPicker from "react-native-dropdown-picker";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import GlobalSearchModal from "../common/GlobalSearchModal";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
 });
+
 type ComplainPageNavigationProps = StackNavigationProp<
   RootStackParamList,
   "ComplainPage"
@@ -43,61 +44,43 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "ComplainPage">>();
   const { userId, farmerLanguage } = route.params;
-  console.log("User ID:", userId);
+
   const [complain, setComplain] = useState<string>("");
-  const [language, setLanguage] = useState("en");
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const [Category, setCategory] = useState<{ value: string; label: string }[]>(
     [],
   );
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
+    const timer = setTimeout(() => setLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
-        setUserRole(role);
-        console.log("User role:", role);
+        await AsyncStorage.getItem("jobRole");
       } catch (error) {
         console.error("Error fetching user role:", error);
       }
     };
-
     fetchUserRole();
   }, []);
 
   useEffect(() => {
-    let appName = "";
-    if (userId === 0) {
-      appName = "CollectionOfficer";
-    } else {
-      appName = "PlantCare";
-    }
-
-    console.log("appName", appName);
+    let appName = userId === 0 ? "CollectionOfficer" : "PlantCare";
     const selectedLanguage = t("ReportComplaint.LNG");
-    setLanguage(selectedLanguage);
-    console.log("slect", selectedLanguage);
+
     const fetchComplainCategory = async () => {
       try {
         const response = await axios.get(
           `${environment.API_BASE_URL}api/complain/get-complain-category/${appName}`,
         );
         if (response.data.status === "success") {
-          //    console.log(response.data.data);
-
           const categoryField =
             selectedLanguage === "en"
               ? "categoryEnglish"
@@ -111,10 +94,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
             .map((item: any) => {
               const categoryValue =
                 item[categoryField] || item["categoryEnglish"];
-              return {
-                value: item.id,
-                label: categoryValue,
-              };
+              return { value: item.id, label: categoryValue };
             })
             .filter((item: { value: any }) => item.value);
 
@@ -136,46 +116,30 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       );
       return;
     }
-
     if (!selectedCategory) {
       Alert.alert(t("Error.error"), t("Error.Please select a category."));
       return;
     }
-
     if (!complain) {
       Alert.alert(t("Error.error"), t("Error.Please add your complaint."));
       return;
     }
 
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
+    if (!netState.isConnected) return;
 
     try {
       const storedLanguage = await AsyncStorage.getItem("@user_language");
-      if (storedLanguage) {
-        setLanguage(storedLanguage);
-      }
-
       const token = await AsyncStorage.getItem("token");
 
-      let response;
-
       if (userId === 0) {
-        response = await api.post(
+        await api.post(
           "api/complain/officer-complaint",
-          {
-            complain,
-            language: storedLanguage,
-            category: selectedCategory,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { complain, language: storedLanguage, category: selectedCategory },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       } else {
-        response = await api.post(
+        await api.post(
           "api/complain/farmer-complaint",
           {
             complain,
@@ -183,9 +147,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
             category: selectedCategory,
             userId,
           },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
       }
 
@@ -202,28 +164,33 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     }
   };
 
-  function dismissKeyboard(): void {
-    throw new Error("Function not implemented.");
-  }
+  const selectedCategoryLabel =
+    Category.find((c) => c.value === selectedCategory)?.label || null;
+
+  // Build modal data with translated labels
+  const categoryModalData = Category.map((item) => ({
+    label: t(item.label),
+    value: item.value,
+  }));
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      enabled
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
-    >
-      <View className="flex-1 bg-white">
-        {loading ? (
-          <View className="flex-1 justify-center items-center">
-            <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
-              autoPlay
-              loop
-              style={{ width: 300, height: 300 }}
-            />
-          </View>
-        ) : (
-          <>
+    <>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        enabled
+        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      >
+        <View className="flex-1 bg-white">
+          {loading ? (
+            <View className="flex-1 justify-center items-center">
+              <LottieView
+                source={require("../../assets/lottie/newLottie.json")}
+                autoPlay
+                loop
+                style={{ width: 300, height: 300 }}
+              />
+            </View>
+          ) : (
             <ScrollView
               className="flex-1 bg-white"
               keyboardShouldPersistTaps="handled"
@@ -236,16 +203,16 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
               >
                 <AntDesign name="left" size={24} color="#000502" />
               </TouchableOpacity>
-              {/* <View className="items-center p-2 pb-20 -mt-10 bg-white"> */}
-              <View className="items-center bg-white ">
+
+              <View className="items-center bg-white">
                 <Image
-                  source={require("../../assets/images/complain.webp")}
-                  className="w-36 h-36 "
+                  source={require("../../assets/images/complain/complain.webp")}
+                  className="w-36 h-36"
                   resizeMode="contain"
                 />
 
                 <View className="w-[100%] items-center p-6 shadow-2xl bg-white rounded-xl">
-                  <View className="flex-row ">
+                  <View className="flex-row">
                     <Text className="text-2xl font-semibold text-center mb-4 color-[#424242]">
                       {t("ReportComplaint.Tellus")}
                     </Text>
@@ -253,42 +220,45 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                       {t("ReportComplaint.Problem")}
                     </Text>
                   </View>
-                  <View className="w-full rounded-full mb-4 bg-white">
-                    {Category.length > 0 && (
-                      <DropDownPicker
-                        open={open}
-                        value={selectedCategory}
-                        setOpen={setOpen}
-                        setValue={setSelectedCategory}
-                        items={Category.map((item) => ({
-                          label: t(item.label),
-                          value: item.value,
-                        }))}
-                        placeholder={t("ReportComplaint.selectCategory")}
-                        placeholderStyle={{ color: "#434343" ,marginLeft:8}}
-                        listMode="SCROLLVIEW"
-                        zIndex={3000}
-                        zIndexInverse={1000}
-                        dropDownContainerStyle={{
-                          borderColor: "#ccc",
-                          borderWidth: 1,
-                          borderRadius: 25,
-                          
-                        }}
+
+                  {/* Category Selector */}
+                  <View className="w-full mb-4">
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (Category.length > 0) setCategoryModalVisible(true);
+                      }}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#ccc",
+                        borderRadius: 25,
+                        paddingHorizontal: 16,
+                        paddingVertical: 12,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        backgroundColor: "white",
+                      }}
+                    >
+                      <Text
                         style={{
-                          borderWidth: 1,
-                          borderColor: "#ccc",
-                          paddingHorizontal: 8,
-                          paddingVertical: 10,
-                          borderRadius: 25,
+                          color: selectedCategoryLabel ? "#424242" : "#434343",
+                          fontSize: 12,
+                          flex: 1,
+                          marginLeft: 8,
                         }}
-                        arrowIconContainerStyle={{
-                          paddingRight: 10,
-                        }}
-                        textStyle={{ fontSize: 12 }}
-                        onOpen={dismissKeyboard}
+                        numberOfLines={1}
+                      >
+                        {selectedCategoryLabel
+                          ? t(selectedCategoryLabel)
+                          : t("ReportComplaint.selectCategory")}
+                      </Text>
+                      <MaterialIcons
+                        name="keyboard-arrow-down"
+                        size={22}
+                        color="#9CA3AF"
+                        style={{ paddingRight: 10 }}
                       />
-                    )}
+                    </TouchableOpacity>
                   </View>
 
                   <Text className="text-sm text-gray-600 text-center mb-4">
@@ -302,15 +272,11 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     multiline
                     value={complain}
                     onChangeText={(text) => setComplain(text)}
-                    onFocus={() => setOpen(false)}
-                    style={{
-                      textAlignVertical: "top",
-                      color: "#424242",
-                    }}
+                    style={{ textAlignVertical: "top", color: "#424242" }}
                   />
 
                   <TouchableOpacity
-                    className="w-full bg-[#000000] py-4 rounded-full items-center  mb-20"
+                    className="w-full bg-[#000000] py-4 rounded-full items-center mb-20"
                     onPress={handleSubmit}
                   >
                     {isLoading ? (
@@ -324,10 +290,22 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 </View>
               </View>
             </ScrollView>
-          </>
-        )}
-      </View>
-    </KeyboardAvoidingView>
+          )}
+        </View>
+      </KeyboardAvoidingView>
+
+      {/* Category Modal */}
+      <GlobalSearchModal
+        visible={categoryModalVisible}
+        onClose={() => setCategoryModalVisible(false)}
+        title={t("ReportComplaint.selectCategory")}
+        data={categoryModalData}
+        selectedItems={selectedCategory ? [selectedCategory] : []}
+        onSelect={(items) => setSelectedCategory(items[0] ?? null)}
+        multiSelect={false}
+        showSearch={false}
+      />
+    </>
   );
 };
 

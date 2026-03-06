@@ -14,7 +14,6 @@ import {
   FontAwesome5,
   FontAwesome6,
   Foundation,
-  Ionicons,
   MaterialIcons,
   Octicons,
 } from "@expo/vector-icons";
@@ -22,6 +21,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "../common/CustomHeader";
 
 type ViewPickupOrdersNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -48,19 +48,18 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     const textLength = customerName.length;
 
     if (textLength > 20) {
-      // Calculate scroll distance based on character width (approximately 8-10px per character)
       const scrollDistance = textLength * 9;
 
       const animation = Animated.loop(
         Animated.sequence([
           Animated.delay(1000),
-          // Scroll from right to left
+
           Animated.timing(scrollX, {
             toValue: -scrollDistance,
             duration: textLength * 200,
             useNativeDriver: true,
           }),
-          // Instantly reset to start position
+
           Animated.timing(scrollX, {
             toValue: 0,
             duration: 0,
@@ -170,7 +169,6 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   };
 
   const handleScanOrder = () => {
-    // console.log("invoice number--------------", order.invNo);
     navigation.navigate("qrcode", {
       expectedOrderId: order.invNo,
       fromScreen: "ViewPickupOrders",
@@ -197,20 +195,14 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header */}
-      <View className="px-4 py-3 mt-2">
-        <View className="flex-row items-center justify-center relative">
-          <TouchableOpacity
-            className="absolute left-0 bg-[#F6F6F680] rounded-full p-2 z-50"
-            onPress={() => navigation.navigate("ReadytoPickupOrders")}
-          >
-            <Ionicons name="chevron-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-800">
-            ID : #{order.invNo}
-          </Text>
-        </View>
 
-        {/* Ready Time Badge - Keep original structure */}
+      <CustomHeader
+        title={`${t("ViewPickupOrders.ID")} ${order.invNo}`}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.navigate("ReadytoPickupOrders")}
+      />
+      <View className="px-4 ">
         <View className="flex-row items-center justify-center">
           <View className="px-3 py-1.5 rounded-full flex-row items-center">
             <Text className="text-[#565559] mr-2">
@@ -226,18 +218,19 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
           <View className="bg-white rounded-2xl p-4  shadow-sm">
             <View className="items-center mb-4">
               <Image
-                source={require("../../assets/images/New/ProfileCustomer.webp")}
+                source={require("../../assets/images/distribution-common/profile-customer.webp")}
                 className="h-[100px] w-[100px] rounded-lg"
                 resizeMode="contain"
               />
 
               {/* Fixed Name Container with Equal Padding */}
               <View className="mt-2 w-full px-8">
-                <View 
+                <View
                   className="overflow-hidden"
                   style={{
                     width: "100%",
-                    alignItems: customerName.length > 20 ? "flex-start" : "center",
+                    alignItems:
+                      customerName.length > 20 ? "flex-start" : "center",
                   }}
                 >
                   <Animated.Text

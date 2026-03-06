@@ -1076,6 +1076,7 @@
     "Rscash":" රු. "
   },
   "ViewPickupOrders": {
+    "ID":"අංකය",
     "Order Details": "ඇණවුම් විස්තර",
     "Ready": "සූදානම්",
     "Already Paid": "දැනටමත් ගෙවා ඇත!",

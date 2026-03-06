@@ -29,7 +29,7 @@ type ManagerTransactionsNavigationProp = StackNavigationProp<
 
 interface ManagerTransactionsProps {
   navigation: ManagerTransactionsNavigationProp;
-  route: any; // Add route to the props
+  route: any;
 }
 
 interface Transaction {
@@ -63,15 +63,13 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
   const [filteredTransactions, setFilteredTransactions] = useState<
     Transaction[]
   >([]);
-  const { empId } = route.params;
-  console.log("empId:", empId);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
   const fetchSelectedLanguage = async () => {
     try {
-      const lang = await AsyncStorage.getItem("@user_language"); // Get stored language
-      setSelectedLanguage(lang || "en"); // Default to English if not set
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
@@ -92,47 +90,41 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  // Function to sort transactions alphabetically by name (A-Z)
   const sortTransactionsByName = (data: Transaction[]) => {
     return [...data].sort((a, b) => {
       const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
       const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-      return nameA.localeCompare(nameB); // A to Z order
+      return nameA.localeCompare(nameB);
     });
   };
 
   const fetchTransactions = async (date: string) => {
     try {
-      setLoading(true); // Start loading
-      // Get the token from AsyncStorage or from wherever it's stored
+      setLoading(true);
       const token = await AsyncStorage.getItem("token");
 
-      // Check if the token exists before making the request
       if (!token) {
         console.error("No token found. Please log in again.");
-        setLoading(false); // End loading on error
+        setLoading(false);
         return;
       }
 
-      // Make the fetch request with Authorization header
       const response = await fetch(
         `${environment.API_BASE_URL}api/collection-manager/my-collection?date=${date}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Add the token here
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const data = await response.json();
 
-   //   console.log("Transactions:", data);
-
       if (response.ok) {
         const formattedData = data.map((transaction: any) => ({
-          id: transaction.registeredFarmerId ?? Math.random(), // Unique ID (fallback to random)
+          id: transaction.registeredFarmerId ?? Math.random(),
           registeredFarmerId: transaction.registeredFarmerId || 0,
           userId: transaction.userId || 0,
           firstName: transaction.firstName || "",
@@ -146,11 +138,10 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           accountHolderName: transaction.accountHolderName || null,
           bankName: transaction.bankName || null,
           branchName: transaction.branchName || null,
-          empId: transaction.empId || "", // Added empId from the response
-          image: transaction.profileImage || null, // Added image from the response
+          empId: transaction.empId || "",
+          image: transaction.profileImage || null,
         }));
 
-        // Sort the data alphabetically by name (A-Z)
         const sortedData = sortTransactionsByName(formattedData);
 
         setTransactions(formattedData);
@@ -158,27 +149,25 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
       } else {
         console.error("Error fetching transactions:", data.error);
       }
-      setLoading(false); // End loading after data is processed
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching transactions:", error);
-      setLoading(false); // End loading on error
+      setLoading(false);
     }
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     const filtered = transactions.filter((transaction) => {
-      // Convert to lowercase for case-insensitive search
       const searchTerm = query.toLowerCase();
       const firstName = transaction.firstName?.toLowerCase() || "";
       const lastName = transaction.lastName?.toLowerCase() || "";
       const fullName = `${firstName} ${lastName}`;
-      // const nicNumber = transaction.NICnumber || "";
 
       const nicNumberMatch = transaction.NICnumber?.replace(/[^\w\s]/gi, "")
         .toLowerCase()
         .includes(searchTerm);
-      // Check if the search term is found in first name, last name, full name, or NIC number
+
       return (
         firstName.includes(searchTerm) ||
         lastName.includes(searchTerm) ||
@@ -187,7 +176,6 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
       );
     });
 
-    // Always sort alphabetically after filtering
     setFilteredTransactions(sortTransactionsByName(filtered));
   };
 
@@ -203,7 +191,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
         setSearchQuery("");
       };
       fetchData();
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -216,8 +204,8 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
-        fontSize: 14, // Smaller text size for Sinhala
-        lineHeight: 20, // Space between lines
+        fontSize: 14,
+        lineHeight: 20,
       };
     }
   };
@@ -231,7 +219,6 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               className=" bg-[#FFFFFF1A] rounded-full  p-2 justify-center w-10"
-              
             >
               <AntDesign name="left" size={22} color="white" />
             </TouchableOpacity>
@@ -268,22 +255,17 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             placeholderTextColor="grey"
             className="flex-1 text-sm text-gray-800"
             value={searchQuery}
-           // onChangeText={handleSearch}
             onChangeText={(text) => {
-      // Remove special characters (allow only letters, numbers, and spaces)
-      const cleanedText = text.replace(/[^a-zA-Z0-9\s]/g, '');
-      
-      // Prevent leading space
-      const finalText = cleanedText.replace(/^\s+/, '');
-      
-      handleSearch(finalText);
-    }}
+              const cleanedText = text.replace(/[^a-zA-Z0-9\s]/g, "");
+
+              const finalText = cleanedText.replace(/^\s+/, "");
+
+              handleSearch(finalText);
+            }}
           />
-          <TouchableOpacity
-            onPress={() => handleSearch(searchQuery)}
-          >
+          <TouchableOpacity onPress={() => handleSearch(searchQuery)}>
             <Image
-              source={require("../../assets/images/searchhh.webp")}
+              source={require("../../assets/images/collection-manager/search-transaction.webp")}
               className="w-8 h-8"
               resizeMode="contain"
             />
@@ -379,7 +361,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                           hour12: true,
                         })
                         .toUpperCase(),
-                      empId: item.empId, // Pass empId to the FarmerReport screen
+                      empId: item.empId,
                     });
                   }}
                 >
@@ -388,7 +370,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                       source={
                         item.image
                           ? { uri: item.image }
-                          : require("../../assets/images/ava.webp")
+                          : require("../../assets/images/collection-manager/avetar.webp")
                       }
                       className="w-16 h-16 rounded-full mr-3"
                     />

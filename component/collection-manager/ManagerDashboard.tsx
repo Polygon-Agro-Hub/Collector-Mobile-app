@@ -17,9 +17,7 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
-import TransportComponent, {
-  GenericNavigationProp,
-} from "../driver-screens/TransportComponent";
+import TransportComponent from "../driver-screens/TransportComponent";
 
 type ManagerDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -48,10 +46,10 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [empId, setEmpId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"Collection" | "Transport">(
-    "Collection"
+    "Collection",
   );
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
-  const [isLoadingTarget, setIsLoadingTarget] = useState(true); // Add loading state
+  const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -73,7 +71,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           `${environment.API_BASE_URL}api/collection-officer/user-profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setProfile(response.data.data);
         setEmpId(response.data.data.empId);
@@ -95,7 +93,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
   };
 
   const fetchTargetPercentage = async () => {
-    setIsLoadingTarget(true); // Set loading to true when starting fetch
+    setIsLoadingTarget(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -107,13 +105,13 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
         `${environment.API_BASE_URL}api/target/officer-task-summary`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
-      console.log("response for percentage target", response.data);
+
       if (response.data.success) {
         const percentage = parseInt(
           response.data.completionPercentage.replace("%", ""),
-          10
+          10,
         );
         setTargetPercentage(percentage);
       } else {
@@ -123,7 +121,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
       console.error("Failed to fetch target percentage:", error);
       setTargetPercentage(0);
     } finally {
-      setIsLoadingTarget(false); // Set loading to false when done
+      setIsLoadingTarget(false);
     }
   };
 
@@ -148,9 +146,12 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
     useCallback(() => {
       const onBackPress = () => true;
       BackHandler.addEventListener("hardwareBackPress", onBackPress);
-         const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
       return () => subscription.remove();
-    }, [])
+    }, []),
   );
 
   const getFullName = () => {
@@ -189,7 +190,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
         if (currentTime < tokenExpiry) {
           console.log("Token is valid");
         } else {
-          console.log("Token expired, clearing storage.");
           await AsyncStorage.multiRemove([
             "token",
             "tokenStoredTime",
@@ -204,9 +204,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
     }
   };
 
-  // Function to render target status
   const renderTargetStatus = () => {
-    // Show loading state while fetching
     if (isLoadingTarget) {
       return (
         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-gray-300">
@@ -217,7 +215,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
       );
     }
 
-    // Show appropriate status based on target percentage
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#DF9301]">
@@ -234,7 +231,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
           <View className="flex-row justify-center items-center mb-2">
             <Image
-              source={require("../../assets/images/hand.webp")}
+              source={require("../../assets/images/dashboard/hand.webp")}
               className="w-8 h-8 mr-2"
             />
             <Text className="text-center text-[#2AAD7A] font-bold">
@@ -265,7 +262,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           source={
             profile?.image
               ? { uri: profile.image }
-              : require("../../assets/images/mprofile.webp")
+              : require("../../assets/images/auth/my-profile.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
         />
@@ -289,7 +286,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
 
       {activeTab === "Collection" ? (
         <>
-          {/* Render target status using the new function */}
           {renderTargetStatus()}
 
           {/* Target Progress */}
@@ -310,7 +306,11 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               />
               <View className="absolute items-center justify-center h-24 w-24">
                 <Text className="text-2xl font-bold">
-                  {isLoadingTarget ? "..." : (targetPercentage !== null ? `${targetPercentage}%` : "0%")}
+                  {isLoadingTarget
+                    ? "..."
+                    : targetPercentage !== null
+                      ? `${targetPercentage}%`
+                      : "0%"}
                 </Text>
               </View>
             </View>
@@ -323,7 +323,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               onPress={() => navigation.navigate("CenterTarget" as any)}
             >
               <Image
-                source={require("../../assets/images/New/centertarget.png")}
+                source={require("../../assets/images/dashboard/center-target.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text
@@ -341,7 +341,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               }
             >
               <Image
-                source={require("../../assets/images/New/collection.png")}
+                source={require("../../assets/images/dashboard/collection.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text
@@ -357,7 +357,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               onPress={() => navigation.navigate("QRScanner" as any)}
             >
               <Image
-                source={require("../../assets/images/New/qr.png")}
+                source={require("../../assets/images/dashboard/qr.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text
@@ -373,7 +373,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               onPress={() => navigation.navigate("SearchFarmer" as any)}
             >
               <Image
-                source={require("../../assets/images/New/searchclient.png")}
+                source={require("../../assets/images/dashboard/search-client.webp")}
                 className="w-8 h-8 absolute top-2 right-2"
               />
               <Text

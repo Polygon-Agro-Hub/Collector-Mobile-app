@@ -48,7 +48,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
     image,
   } = route.params;
   const [showMenu, setShowMenu] = useState(false);
-  const [officerStatus, setOfficerStatus] = useState("offline");
+
   const [taskPercentage, setTaskPercentage] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
@@ -123,7 +123,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
     );
   };
 
-  // Fetch task summary and completion percentage
   const fetchTaskSummary = async () => {
     try {
       const res = await axios.get(
@@ -142,8 +141,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
           totalTarget > 0 ? Math.round((totalComplete / totalTarget) * 100) : 0;
 
         setTaskPercentage(percentageFromAPI);
-
-        console.log("Target percentage set to:", percentageFromAPI);
       } else {
         Alert.alert(
           t("Error.error"),
@@ -158,7 +155,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
     }
   };
 
-  // Refreshing function
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchTaskSummary();
@@ -212,7 +208,6 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
       }
 
       const data = await res.json();
-      console.log(data);
 
       if (data.status === "success") {
         setModalVisible(false);
@@ -254,13 +249,9 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
         const { OnlineStatus } = data.result;
 
         if (OnlineStatus === 1) {
-          setOfficerStatus("online");
           setIsOnline(true);
-          console.log("Officer is online");
         } else {
-          setOfficerStatus("offline");
           setIsOnline(false);
-          console.log("Officer is offline");
         }
       } else {
         console.error("Failed to get officer status");
@@ -318,7 +309,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
               source={
                 image
                   ? { uri: image }
-                  : require("../../assets/images/mprofile.webp")
+                  : require("../../assets/images/auth/my-profile.webp")
               }
               className="w-24 h-24 rounded-full "
             />
@@ -400,7 +391,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
           >
             <View className="w-12 h-12 bg-[#FFFFFF66] rounded-full items-center justify-center shadow-md">
               <Image
-                source={require("../../assets/images/lf.webp")}
+                source={require("../../assets/images/collection-manager/lf.webp")}
                 style={{ width: 28, height: 28, resizeMode: "contain" }}
               />
             </View>

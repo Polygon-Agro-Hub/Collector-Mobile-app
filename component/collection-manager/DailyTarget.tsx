@@ -4,15 +4,11 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { CircularProgress } from "react-native-circular-progress";
+import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -48,7 +44,6 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
   const [todoData, setTodoData] = useState<TargetData[]>([]);
   const [completedData, setCompletedData] = useState<TargetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
@@ -124,9 +119,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
 
         setTodoData(sortByVarietyAndGrade(todoItems));
         setCompletedData(sortByVarietyAndGrade(completedItems));
-        setError(null);
       } catch (err) {
-        setError(t("Error.Failed to fetch data."));
+        console.log(t("Error.Failed to fetch data."));
       } finally {
         const elapsedTime = Date.now() - startTime;
         const remainingTime = 3000 - elapsedTime;
@@ -154,10 +148,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
           },
         );
 
-       
-
         const allData = response.data.data;
-         console.log('dataaa',allData)
+
         const todoItems = allData.filter((item: TargetData) => item.todo > 0);
         const completedItems = allData.filter(
           (item: TargetData) => item.complete >= item.officerTarget,
@@ -167,7 +159,6 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
         setCompletedData(sortByVarietyAndGrade(completedItems));
         setRefreshing(false);
       } catch (err) {
-        setError(t("Error.Failed to fetch data."));
         setRefreshing(false);
       }
     };
@@ -199,7 +190,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
       {/* Header */}
       <View className="bg-[#282828] px-4 py-3 flex-row justify-between items-center">
         <Text className="text-white text-lg font-bold ml-[35%]">
-           {t("DailyTarget.MyTarget")}
+          {t("DailyTarget.MyTarget")}
         </Text>
       </View>
 

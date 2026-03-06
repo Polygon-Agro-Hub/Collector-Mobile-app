@@ -1,5 +1,4 @@
-// store/authSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface AuthState {
   token: string | null;
@@ -14,16 +13,16 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setUser: (
       state,
-      action: PayloadAction<{ token: string; jobRole: string; empId: string }>
+      action: PayloadAction<{ token: string; jobRole: string; empId: string }>,
     ) => {
- const { token, jobRole, empId } = action.payload;
-         console.log("Dispatching setUser action:");
-          console.log("jobRole redux:", jobRole);
+      const { token, jobRole, empId } = action.payload;
+      console.log("Dispatching setUser action:");
+      console.log("jobRole redux:", jobRole);
       state.token = action.payload.token;
       state.jobRole = action.payload.jobRole;
       state.empId = action.payload.empId;

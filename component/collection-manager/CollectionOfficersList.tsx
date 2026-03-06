@@ -59,8 +59,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const fetchSelectedLanguage = async () => {
     try {
-      const lang = await AsyncStorage.getItem("@user_language"); // Get stored language
-      setSelectedLanguage(lang || "en"); // Default to English if not set
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
@@ -74,8 +74,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
-        fontSize: 14, // Smaller text size for Sinhala
-        lineHeight: 20, // Space between lines
+        fontSize: 14,
+        lineHeight: 20,
       };
     }
   };
@@ -93,7 +93,6 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           },
         },
       );
-      console.log("data", response.data);
 
       if (response.data.status === "success") {
         const approvedOfficers = response.data.data.filter(
@@ -205,7 +204,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           source={
             item.image
               ? { uri: item.image }
-              : require("../../assets/images/ava.webp")
+              : require("../../assets/images/collection-manager/avetar.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
         />
@@ -233,7 +232,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
   <TouchableOpacity
     onPress={async () => {
       try {
-        await AsyncStorage.removeItem("officerFormData"); // Clear stored data
+        await AsyncStorage.removeItem("officerFormData");
         navigation.navigate("AddOfficerBasicDetails" as any);
       } catch (error) {
         console.error("Error clearing form data:", error);
@@ -255,7 +254,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               }`}
               onPress={() => {
                 setSelectedJobRole("Driver");
-                setShowFilter(false); // Close the filter
+                setShowFilter(false);
               }}
             >
               <Text className="text-gray-700 font-semibold">
@@ -268,7 +267,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               }`}
               onPress={() => {
                 setSelectedJobRole("Collection Officer");
-                setShowFilter(false); // Close the filter
+                setShowFilter(false);
               }}
             >
               <Text className="text-gray-700 font-semibold">
@@ -296,10 +295,10 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </TouchableOpacity>
 
         {showMenu && (
-          <View 
+          <View
             className="absolute top-14 right-4 bg-white z-50 rounded-lg border border-[#00000040]"
             style={{
-              shadowColor: '#000000',
+              shadowColor: "#000000",
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.25,
               shadowRadius: 4,
@@ -363,10 +362,9 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </View>
 
         {loading ? (
-          // Lottie Loader for 4 seconds
           <View className="flex-1 justify-center items-center -mt-[25%]">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")} // Ensure JSON file is correct
+              source={require("../../assets/lottie/newLottie.json")}
               autoPlay
               loop
               style={{ width: 350, height: 350 }}
@@ -400,8 +398,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         <TouchableOpacity
           onPress={async () => {
             try {
-              await AsyncStorage.removeItem("officerFormData"); // Clear stored data
-              // navigation.navigate("AddOfficerBasicDetails" as any);
+              await AsyncStorage.removeItem("officerFormData");
+
               navigation.navigate("AddOfficerBasicDetails", {
                 jobRolle: "Collection Officer",
               });

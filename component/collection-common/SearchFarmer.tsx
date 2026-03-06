@@ -20,9 +20,9 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -56,7 +56,6 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   const { t } = useTranslation();
 
   const validateNic = (nic: string) => {
-    console.log("Validating NIC:", nic);
     const regex = /^(\d{12}|\d{9}V|\d{9}X|\d{9}v|\d{9}x)$/;
     if (!regex.test(nic)) {
       setEre(t("SearchFarmer.Enter Valide NIC"));
@@ -67,39 +66,33 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
     }
   };
 
- const handleNicChange = (text: string) => {
-  // Only allow numbers (0-9) and the letter V/v - block ALL other letters including X
-  const filteredText = text.replace(/[^0-9Vv]/g, '');
-  
-  // Then normalize v to uppercase V (for NIC format)
-  const normalizedText = filteredText.replace(/[vV]/g, "V");
-  
-  setNICnumber(normalizedText);
+  const handleNicChange = (text: string) => {
+    const filteredText = text.replace(/[^0-9Vv]/g, "");
 
-  // Clear error message when input changes
-  if (ere) {
-    setEre("");
-  }
+    const normalizedText = filteredText.replace(/[vV]/g, "V");
 
+    setNICnumber(normalizedText);
 
-  if (searchButtonClicked && normalizedText.length === 0) {
-    setSearchButtonClicked(false);
-  }
+    if (ere) {
+      setEre("");
+    }
 
-  if (noResults || newQr) {
-    setNoResults(false);
-    setNewQr(false);
-    setFarmers(null);
-  }
-};
+    if (searchButtonClicked && normalizedText.length === 0) {
+      setSearchButtonClicked(false);
+    }
+
+    if (noResults || newQr) {
+      setNoResults(false);
+      setNewQr(false);
+      setFarmers(null);
+    }
+  };
   const handleSearch = async () => {
-   
     setSearchButtonClicked(true);
 
     Keyboard.dismiss();
     if (NICnumber.trim().length === 0) return;
 
-    
     const isValid = validateNic(NICnumber);
     if (!isValid) {
       return;
@@ -112,11 +105,10 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
 
     try {
       const response = await api.get(`api/auth/get-users/${NICnumber}`);
-      //console.log("farmerdata", response.data);
 
       if (response.status === 200) {
         const farmer = response.data;
-       // console.log("Farmer data-----:", farmer);
+
         if (farmer.farmerQr === null || farmer.farmerQr === "") {
           setIsSearching(false);
           setNewQr(true);
@@ -137,7 +129,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
         } else {
           Alert.alert(
             t("Error.error"),
-            t("Error.Failed to search for farmer.")
+            t("Error.Failed to search for farmer."),
           );
         }
       } else {
@@ -155,26 +147,19 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
       setFarmers(null);
       setIsSearching(false);
       setSearchButtonClicked(false);
-    }, [])
+    }, []),
   );
-
-  const DismisKeyboard = () => {
-    Keyboard.dismiss();
-  };
 
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
-        fontSize: 12, 
-        lineHeight: 20, // Space between lines
+        fontSize: 12,
+        lineHeight: 20,
       };
     }
     return {};
   };
 
-
-
-  // Calculate what to display based on current state
   const shouldShowSearchImage = !searchButtonClicked;
   const shouldShowNoResults =
     !isSearching && noResults && NICnumber.length > 0 && !ere;
@@ -192,18 +177,14 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
       >
         <View
           className="flex-1 bg-white"
-          style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+          style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
         >
-          {/* Header */}
-          <View className="flex-row items-center mb-6">
- 
-            <TouchableOpacity  onPress={() => navigation.goBack()} className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10" >
-                         <AntDesign name="left" size={24} color="#000502" />
-                       </TouchableOpacity>
-            <Text className="flex-1 text-center text-xl font-bold text-black mr-[5%]">
-              {t("SearchFarmer.Search")}
-            </Text>
-          </View>
+          <CustomHeader
+            title={t("SearchFarmer.Search")}
+            showBackButton={true}
+            navigation={navigation}
+            onBackPress={() => navigation.goBack()}
+          />
 
           {/* Search Form */}
           <View className="p-4">
@@ -214,29 +195,29 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
               {t("SearchFarmer.EnterFarmer")}
             </Text>
 
-          <View className="flex-row items-center border border-[#A7A7A7] rounded-full mt-4 px-1 bg-white">
-  <TextInput
-    value={NICnumber}
-    onChangeText={handleNicChange}
-    placeholder={t("SearchFarmer.EnterNIC")}
-    className="flex-1"
-    maxLength={12}
-    keyboardType="default" // Allows alphanumeric input
-    autoCapitalize="characters" // Auto-capitalizes V/X
-    autoCorrect={false} // Prevents auto-correction
-    spellCheck={false} // Disables spell check
-    style={{
-      color: "#000",
-      fontSize: 16,
-    }}
-  />
-  <TouchableOpacity 
-    className="w-12 h-12 bg-[#F3F3F3] rounded-full items-center justify-center" 
-    onPress={handleSearch}
-  >
-    <FontAwesome name="search" size={16} color="black" />
-  </TouchableOpacity>
-</View>
+            <View className="flex-row items-center border border-[#A7A7A7] rounded-full mt-4 px-1 bg-white">
+              <TextInput
+                value={NICnumber}
+                onChangeText={handleNicChange}
+                placeholder={t("SearchFarmer.EnterNIC")}
+                className="flex-1"
+                maxLength={12}
+                keyboardType="default"
+                autoCapitalize="characters"
+                autoCorrect={false}
+                spellCheck={false}
+                style={{
+                  color: "#000",
+                  fontSize: 16,
+                }}
+              />
+              <TouchableOpacity
+                className="w-12 h-12 bg-[#F3F3F3] rounded-full items-center justify-center"
+                onPress={handleSearch}
+              >
+                <FontAwesome name="search" size={16} color="black" />
+              </TouchableOpacity>
+            </View>
             {ere ? (
               <Text className="text-red-500 mt-2 justify-center text-center ">
                 {ere}
@@ -247,7 +228,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
             {shouldShowSearchImage && (
               <View className="mt-10 items-center">
                 <Image
-                  source={require("../../assets/images/search.webp")}
+                  source={require("../../assets/images/collection-common/search.webp")}
                   className="h-[350px] w-[300px] rounded-lg"
                   resizeMode="contain"
                 />
@@ -262,13 +243,11 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
               </View>
             )}
 
-            {/* Searching status - removed as it's now part of the search image section */}
-
             {/* No Results Found */}
             {shouldShowNoResults && (
               <View className="mt-6 items-center">
                 <Image
-                  source={require("../../assets/images/notfound.webp")}
+                  source={require("../../assets/images/collection-common/notfound.webp")}
                   className="h-[200px] w-[200px] rounded-lg"
                   resizeMode="contain"
                 />

@@ -38,13 +38,11 @@ const TargetValidPeriod: React.FC<TargetValidPeriodProps> = ({
     date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 
   const handleAddTarget = () => {
-    // Extract and format components
     const fromDateStr = formatDate(fromDate);
     const fromTimeStr = formatTime(fromDate);
     const toDateStr = formatDate(toDate);
     const toTimeStr = formatTime(toDate);
 
-    // Navigate to the target screen with the separate components
     navigation.navigate("SetTargetScreen", {
       fromDate: fromDateStr,
       fromTime: fromTimeStr,

@@ -618,7 +618,7 @@ const CollectionRequestForm: React.FC<CollectionRequestFormProps> = ({
             />
        
               <Image
-                source={require("../../assets/images/Rescheduling.webp")}
+                source={require("../../assets/images/collection-manager/rescheduling.webp")}
                 className="h-[24px] w-[24px] ml-2"
                 resizeMode="contain"
               />

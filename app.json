@@ -4,11 +4,11 @@
     "slug": "CoDi-Net",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/adaptive-icon2.png",
+    "icon": "./assets/images/app/adaptive-icon.webp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/adaptive-icon2.png",
+      "image": "./assets/images/app/adaptive-icon.webp",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon2.png",
+        "foregroundImage": "./assets/images/app/adaptive-icon.webp",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -49,7 +49,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/app/favicon.webp"
     },
     "plugins": [
       "expo-router",

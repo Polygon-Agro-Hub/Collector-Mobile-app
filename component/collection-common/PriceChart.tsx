@@ -68,17 +68,15 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           },
         );
 
-        // Deep clone the data to avoid reference issues
         const originalData = response.data.map((item: any) => ({
           ...item,
           price: String(item.price).trim(),
         }));
 
         setPriceData(originalData);
-        setEditedPrices(JSON.parse(JSON.stringify(originalData))); // Deep clone
+        setEditedPrices(JSON.parse(JSON.stringify(originalData)));
       } else {
         setError(t("Error.Failed to fetch prices"));
-        console.log("Token not found");
       }
     } catch (error) {
       setError(t("Error.Failed to fetch prices"));
@@ -100,24 +98,17 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
     setEditedPrices(updatedPrices);
   };
 
-  console.log("cropp", cropName);
-  console.log("verity", varietyName);
-
-  // Add this to reset the state when the component is focused
   useFocusEffect(
     useCallback(() => {
-      // Reset button states
       setIsEditable(false);
       setButtonText(t("PriceChart.Request Price Update"));
 
-      // Fetch prices (your existing code)
       fetchPrices();
     }, [varietyId]),
   );
 
   const handleButtonClick = async () => {
     if (isEditable) {
-      // Check if any price fields are empty
       const hasEmptyPrices = editedPrices.some(
         (item) => !item.price || item.price.trim() === "" || item.price === "0",
       );
@@ -141,16 +132,13 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           throw new Error("No authentication token found.");
         }
 
-        // Only send prices that have been changed
         const requestData = editedPrices
           .filter((editedItem, index) => {
             const originalItem = priceData[index];
-            // Convert both to strings and trim to ensure proper comparison
+
             const editedPrice = String(editedItem.price).trim();
             const originalPrice = String(originalItem.price).trim();
-            console.log(
-              `Comparing Grade ${editedItem.grade}: edited="${editedPrice}" vs original="${originalPrice}"`,
-            );
+
             return editedPrice !== originalPrice;
           })
           .map((priceItem) => ({
@@ -159,15 +147,11 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             requestPrice: priceItem.price,
           }));
 
-        console.log("request data", requestData);
-        console.log("Number of changed prices:", requestData.length);
-
         if (requestData.length === 0) {
           Alert.alert(t("Error.error"), t("Error.No prices to update"));
           return;
         }
 
-        // Send the price update request
         const response = await api.post(
           "api/auth/marketpricerequest",
           { prices: requestData },
@@ -178,18 +162,16 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           },
         );
 
-        // Handle success response
         if (response.status === 201) {
           Alert.alert(
             t("Error.Success"),
             t("Error.The price request was sent successfully"),
           );
-          await fetchPrices(); // Refetch prices after submitting
+          await fetchPrices();
           setIsEditable(false);
           setButtonText(t("PriceChart.Request Price Update"));
         }
       } catch (error) {
-        // Check if error status is 400 and show the message to update prices
         if (
           axios.isAxiosError(error) &&
           error.response &&
@@ -201,7 +183,6 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
               "Error.You must change the prices before submitting. Please update the values.",
             ),
           );
-          console.log("Error:", error.response.data.message);
         } else {
           console.error("Error submitting price request:", error);
           setError("Failed to submit price update.");
@@ -220,8 +201,8 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
-        fontSize: 14, // Smaller text size for Sinhala
-        lineHeight: 20, // Space between lines
+        fontSize: 14,
+        lineHeight: 20,
       };
     }
   };
@@ -309,7 +290,6 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             <View className="border border-[#E7E7E7] rounded-lg p-4">
               {priceData.map((priceItem, index) => (
                 <View key={index} className="flex-row items-center mb-3">
-                  {/* <Text className="w-32 text-gray-600">{`Grade ${priceItem.grade}`}</Text> */}
                   <Text className="w-32 text-gray-600">
                     {`${t("PriceChart.Grade")} ${priceItem.grade}`} Rs.
                   </Text>
@@ -350,12 +330,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           className="border border-[#606060] mt-4 py-3 h-12 rounded-full items-center w-3/4 mx-auto"
           onPress={() => {
             if (isEditable) {
-              // If in edit mode, this acts as "Cancel"
               setIsEditable(false);
               setButtonText(t("PriceChart.Request Price Update"));
               fetchPrices();
             } else {
-              // If not in edit mode, this acts as "Go Back"
               navigation.navigate("Main" as any, {
                 screen: "SearchPriceScreen",
               });

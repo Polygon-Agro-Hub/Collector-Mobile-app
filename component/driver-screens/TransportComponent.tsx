@@ -46,7 +46,7 @@ const TransportComponent: React.FC<TransportComponentProps> = ({ navigation }) =
           onPress={() => navigation.navigate("RegisterDriver" as any)}
         >
           <Image
-            source={require('../../assets/images/pick.png')}
+            source={require('../../assets/images/driver-screens/pick.webp')}
             className="w-8 h-8 absolute top-2 right-2"
           />
           <Text className="text-gray-700 text-lg absolute bottom-2 left-2" style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}>{t("Transport.Register Drivers")}</Text>
@@ -58,7 +58,7 @@ const TransportComponent: React.FC<TransportComponentProps> = ({ navigation }) =
           onPress={() => navigation.navigate("SearchFarmerScreen" as any)}
         >
           <Image
-            source={require('../../assets/images/brief.png')}
+            source={require('../../assets/images/driver-screens/brief.webp')}
             className="w-8 h-8 absolute top-2 right-2"
           />
           <Text className="text-gray-700 text-lg absolute bottom-2 left-2" style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}>{t("Transport.Add Farmer Requests")}</Text>
@@ -73,7 +73,7 @@ const TransportComponent: React.FC<TransportComponentProps> = ({ navigation }) =
           onPress={() => navigation.navigate("CollectionRequests" as any)}
         >
           <Image
-            source={require('../../assets/images/help.png')}
+            source={require('../../assets/images/driver-screens/help.webp')}
             className="w-8 h-8 absolute top-2 right-2"
           />
           <Text className="text-gray-700 text-lg absolute bottom-2 left-2" style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}>{t("Transport.View Farmer Requests")}</Text>
