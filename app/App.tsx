@@ -327,7 +327,7 @@ function AppContent() {
         }}
         edges={["top", "right", "left"]}
       >
-        <StatusBar barStyle="dark-content" />
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         <NavigationContainer ref={navigationRef}>
           <Stack.Navigator
             screenOptions={{

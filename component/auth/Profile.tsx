@@ -21,6 +21,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import provincesData from "@/assets/jsons/sri-lanka-provinces.json";
+import jobRolesData from "@/assets/jsons/job-roles.json";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -42,7 +44,6 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const [profileData, setProfileData] = useState({
     firstNameEnglish: "",
     lastNameEnglish: "",
-
     regcode: "",
     jobRole: "",
     nicNumber: "",
@@ -66,15 +67,12 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     collectionCenterName: "",
   });
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
-
   const [newPhoneNumber2, setNewPhoneNumber2] = useState("");
-
   const [showUpdateButton, setShowUpdateButton] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [errorMessage2, setErrorMessage2] = useState<string | null>(null);
   const { t } = useTranslation();
   const [profileImage, setProfileImage] = useState({ uri: "" });
-
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "si" | "ta">(
     "en",
   );
@@ -95,6 +93,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   useEffect(() => {
     fetchSelectedLanguage();
   }, []);
+
   const checkPhoneExists = async (
     newPhoneNumber: string,
     phoneCode1: string,
@@ -122,6 +121,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     } finally {
     }
   };
+
   const handlePhoneNumberChange = (text: string) => {
     if (text.startsWith("0")) {
       text = text.replace(/^0+/, "");
@@ -184,6 +184,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       }
     }
   };
+
   const toggleUpdateButton = (phone1: string, phone2: string) => {
     setShowUpdateButton(
       (phone1 !== "" && phone1 !== profileData.phoneNumber) ||
@@ -232,7 +233,6 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       setProfileData({
         firstNameEnglish: data.firstNameEnglish,
         lastNameEnglish: data.lastNameEnglish,
-
         regcode: data.regCode,
         jobRole: data.jobRole,
         nicNumber: data.nic,
@@ -343,7 +343,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     district: string,
     language: "en" | "si" | "ta",
   ) => {
-    for (const province of jsonData.provinces) {
+    for (const province of provincesData.provinces) {
       const districtObj = province.districts.find((d) => d.en === district);
       if (districtObj) {
         return districtObj[language];
@@ -356,7 +356,9 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     province: string,
     language: "en" | "si" | "ta",
   ) => {
-    const provinceObj = jsonData.provinces.find((p) => p.name.en === province);
+    const provinceObj = provincesData.provinces.find(
+      (p) => p.name.en === province,
+    );
     return provinceObj ? provinceObj.name[language] : province;
   };
 
@@ -365,7 +367,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     district: string,
     language: "en" | "si" | "ta",
   ) => {
-    for (const province of jsonData.provinces) {
+    for (const province of provincesData.provinces) {
       const districtObj = province.districts.find((d) => d.en === district);
       if (districtObj) {
         const cityObj = districtObj.cities.find((c) => c.en === city);
@@ -376,11 +378,14 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     }
     return city;
   };
+
   const getTranslatedJobRole = (
     jobRole: string,
     language: "en" | "si" | "ta",
   ) => {
-    const jobRoleObj = jsonData1.jobRoles.find((role) => role.en === jobRole);
+    const jobRoleObj = jobRolesData.jobRoles.find(
+      (role) => role.en === jobRole,
+    );
     if (jobRoleObj) {
       return jobRoleObj[language];
     }
@@ -398,6 +403,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         return `${profileData.companyNameEnglish} `;
     }
   };
+
   const getfirstName = () => {
     if (!profileData) return "Loading...";
     switch (selectedLanguage) {
@@ -409,6 +415,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         return `${profileData.firstNameEnglish} `;
     }
   };
+
   const getlastName = () => {
     if (!profileData) return "Loading...";
     switch (selectedLanguage) {
@@ -421,588 +428,9 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     }
   };
 
-  const jsonData = {
-    provinces: [
-      {
-        name: { en: "Western", si: "බටහිර", ta: "மேற்கு" },
-        districts: [
-          {
-            en: "Colombo",
-            si: "කොළඹ",
-            ta: "கொழும்பு",
-            cities: [
-              {
-                en: "Colombo",
-                si: "කොළඹ",
-                ta: "கொழும்பு",
-              },
-              {
-                en: "Dehiwala",
-                si: "දෙහිවල",
-                ta: "தேவிவளை",
-              },
-              {
-                en: "Moratuwa",
-                si: "මොරටුව",
-                ta: "மோரட்டுவ",
-              },
-            ],
-          },
-          {
-            en: "Gampaha",
-            si: "ගම්පහ",
-            ta: "கம்பஹா",
-            cities: [
-              {
-                en: "Gampaha",
-                si: "ගම්පහ",
-                ta: "கம்பஹா",
-              },
-              {
-                en: "Negombo",
-                si: "මීගමුව",
-                ta: "நெகொம்போ",
-              },
-              {
-                en: "Kelaniya",
-                si: "කැලණිය",
-                ta: "கெளலாணிய",
-              },
-            ],
-          },
-          {
-            en: "Kalutara",
-            si: "කළුතර",
-            ta: "களுத்துறை",
-            cities: [
-              {
-                en: "Kalutara",
-                si: "කළුතර",
-                ta: "களுத்துறை",
-              },
-              {
-                en: "Beruwala",
-                si: "බෙරුවල",
-                ta: "பெருவளை",
-              },
-              {
-                en: "Aluthgama",
-                si: "අලුත්ගම",
-                ta: "அலுத்த்கம",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        name: { en: "Central", si: "මධ්‍යම", ta: "மத்திய" },
-        districts: [
-          {
-            en: "Kandy",
-            si: "මහනුවර",
-            ta: "கண்டி",
-            cities: [
-              {
-                en: "Kandy",
-                si: "මහනුවර",
-                ta: "கண்டி",
-              },
-              {
-                en: "Peradeniya",
-                si: "පේරාදෙණිය",
-                ta: "பேரடினியா",
-              },
-              {
-                en: "Gampola",
-                si: "ගම්පොල",
-                ta: "கம்போலா",
-              },
-            ],
-          },
-          {
-            en: "Matale",
-            si: "මාතලේ",
-            ta: "மாதளை",
-            cities: [
-              {
-                en: "Matale",
-                si: "මාතලේ",
-                ta: "மாதளை",
-              },
-              {
-                en: "Dambulla",
-                si: "දඹුල්ල",
-                ta: "தம்புள்ள",
-              },
-              {
-                en: "Rattota",
-                si: "රත්තොට",
-                ta: "ரத்தொட்டா",
-              },
-            ],
-          },
-          {
-            en: "Nuwara Eliya",
-            si: "නුවරඑළිය",
-            ta: "நுவரேலியா",
-            cities: [
-              {
-                en: "Nuwara Eliya",
-                si: "නුවරඑළිය",
-                ta: "நுவரேலியா",
-              },
-              {
-                en: "Hatton",
-                si: "හැටන්",
-                ta: "ஹாட்டன்",
-              },
-              {
-                en: "Balangoda",
-                si: "බලංගොඩ",
-                ta: "பலங்கோடா",
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        name: { en: "Southern", si: "දකුණ", ta: "தெற்கு" },
-        districts: [
-          {
-            en: "Galle",
-            si: "ගාල්ල",
-            ta: "காலி",
-            cities: [
-              {
-                en: "Galle",
-                si: "ගාල්ල",
-                ta: "காலி",
-              },
-              {
-                en: "Unawatuna",
-                si: "උණවටුන",
-                ta: "உணவதுனா",
-              },
-              {
-                en: "Hikkaduwa",
-                si: "හික්කඩුව",
-                ta: "ஹிக்கடுவா",
-              },
-            ],
-          },
-          {
-            en: "Matara",
-            si: "මාතර",
-            ta: "மாத்தறை",
-            cities: [
-              {
-                en: "Matara",
-                si: "මාතර",
-                ta: "மாத்தறை",
-              },
-              {
-                en: "Tangalle",
-                si: "තංගල්ල",
-                ta: "தங்கல்ல",
-              },
-              {
-                en: "Dikwella",
-                si: "දික්වැල්ල",
-                ta: "டிக்வேல்ல",
-              },
-            ],
-          },
-          {
-            en: "Hambantota",
-            si: "හම්බන්තොට",
-            ta: "ஹம்பாந்தோட்டை",
-            cities: [
-              {
-                en: "Hambantota",
-                si: "හම්බන්තොට",
-                ta: "ஹம்பாந்தோட்டை",
-              },
-              {
-                en: "Tissamaharama",
-                si: "තිස්සමහාරාම",
-                ta: "திச்ஸமஹாராமா",
-              },
-              {
-                en: "Kataragama",
-                si: "කතරගම",
-                ta: "கடாரகாம",
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        name: { en: "Eastern", si: "නැගෙනහිර", ta: "கிழக்கு" },
-        districts: [
-          {
-            en: "Ampara",
-            si: "අම්පාර",
-            ta: "அம்பாறை",
-            cities: [
-              {
-                en: "Ampara",
-                si: "අම්පාර",
-                ta: "அம்பாறை",
-              },
-              {
-                en: "Kalmunai",
-                si: "කල්මුණේ",
-                ta: "கல்முனை",
-              },
-              {
-                en: "Pottuvil",
-                si: "පොතුවිල්",
-                ta: "பொத்துவில்",
-              },
-            ],
-          },
-          {
-            en: "Batticaloa",
-            si: "මඩකලපුව",
-            ta: "பாட்டிக்கோடை",
-            cities: [
-              {
-                en: "Batticaloa",
-                si: "මඩකලපුව",
-                ta: "பாட்டிக்கோடை",
-              },
-              {
-                en: "Kallady",
-                si: "කල්ලඩි",
-                ta: "கல்லாடி",
-              },
-              {
-                en: "Eravur",
-                si: "එරාවුර්",
-                ta: "இராவூர்",
-              },
-            ],
-          },
-          {
-            en: "Trincomalee",
-            si: "ත්‍රිකුණාමලය",
-            ta: "திருகோணமலை",
-            cities: [
-              {
-                en: "Trincomalee",
-                si: "ත්‍රිකුණාමලය",
-                ta: "திருகோணமலை",
-              },
-              {
-                en: "Nilaveli",
-                si: "නිලාවේලි",
-                ta: "நிலவேலி",
-              },
-              {
-                en: "Kuchchaveli",
-                si: "කුච්චවේලි",
-                ta: "குச்சவெலி",
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        name: { en: "Northern", si: " උතුරු", ta: "வடக்கு" },
-        districts: [
-          {
-            en: "Jaffna",
-            si: "යාපනය",
-            ta: "யாழ்ப்பாணம்",
-            cities: [
-              {
-                en: "Jaffna",
-                si: "යාපනය",
-                ta: "யாழ்ப்பாணம்",
-              },
-              {
-                en: "Chavakachcheri",
-                si: "චාවකච්චේරි",
-                ta: "சாவகச்சேரி",
-              },
-              {
-                en: "Point Pedro",
-                si: "පේදුරුතුඩුව",
-                ta: "பாயிண்ட் பேட்ரோ",
-              },
-            ],
-          },
-          {
-            en: "Kilinochchi",
-            si: "කිලිනොච්චි",
-            ta: "கில்லினோச்சி",
-            cities: [
-              {
-                en: "Kilinochchi",
-                si: "කිලිනොච්චි",
-                ta: "கில்லினோச்சி",
-              },
-              {
-                en: "Pooneryn",
-                si: "පුනරීන්",
-                ta: "பூனேரின்",
-              },
-              {
-                en: "Vavuniya",
-                si: "වවුනියාව",
-                ta: "வவுனியா",
-              },
-            ],
-          },
-          {
-            en: "Mullaitivu",
-            si: "මුලතිව්",
-            ta: "முல்லைத்தீவு",
-            cities: [
-              {
-                en: "Mullaitivu",
-                si: "මුලතිව්",
-                ta: "முல்லைத்தீவு",
-              },
-              {
-                en: "Puthukudiyiruppu",
-                si: "පුදුකුඩිඉරිප්පු",
-                ta: "புத்துக்குடியிருப்பு",
-              },
-              {
-                en: "Vallipunam",
-                si: "වල්ලිපුනම්",
-                ta: "வல்லிபுணம்",
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        name: { en: "North Western", si: "උතුරු මැද", ta: "வடமேல்" },
-        districts: [
-          {
-            en: "Kurunegala",
-            si: "කුරුණෑගල",
-            ta: "குருநாகல்",
-            cities: [
-              {
-                en: "Kurunegala",
-                si: "කුරුණෑගල",
-                ta: "குருநாகல்",
-              },
-              {
-                en: "Maho",
-                si: "මහෝ",
-                ta: "மாஹோ",
-              },
-              {
-                en: "Dambulla",
-                si: "දඹුල්ල",
-                ta: "தம்புள்ளா",
-              },
-            ],
-          },
-          {
-            en: "Puttalam",
-            si: "පුත්තලම",
-            ta: "புத்தளம்",
-            cities: [
-              {
-                en: "Puttalam",
-                si: "පුත්තලම",
-                ta: "புத்தளம்",
-              },
-              {
-                en: "Chilaw",
-                si: "හලාවත",
-                ta: "சிலவ்",
-              },
-              {
-                en: "Mannar",
-                si: "මන්නාරම",
-                ta: "மன்னார்",
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        name: { en: "North Central", si: "උතුරු මධ්‍යම", ta: "வட மத்திய" },
-        districts: [
-          {
-            en: "Anuradhapura",
-            si: "අනුරාධපුර",
-            ta: "அனுராதபுரம்",
-            cities: [
-              {
-                en: "Anuradhapura",
-                si: "අනුරාධපුර",
-                ta: "அனுராதபுரம்",
-              },
-              {
-                en: "Rambawewa",
-                si: "රඹවැව",
-                ta: "ரம்பாவேவ",
-              },
-              {
-                en: "Tissa",
-                si: "තිස්ස",
-                ta: "திசா",
-              },
-            ],
-          },
-          {
-            en: "Polonnaruwa",
-            si: "පොලොන්නරුව",
-            ta: "பொலன்னருவ",
-            cities: [
-              {
-                en: "Polonnaruwa",
-                si: "පොලොන්නරුව",
-                ta: "பொலன்னருவ",
-              },
-              {
-                en: "Dimbulagala",
-                si: "දිඹුලාගල",
-                ta: "டிம்புலகல",
-              },
-              {
-                en: "Giritale",
-                si: "ගිරිතලේ",
-                ta: "கிரிதலே",
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        name: { en: "Uva", si: "උව", ta: "உவா" },
-        districts: [
-          {
-            en: "Badulla",
-            si: "බදුල්ල",
-            ta: "பதுளை",
-            cities: [
-              {
-                en: "Badulla",
-                si: "බදුල්ල",
-                ta: "பதுளை",
-              },
-              {
-                en: "Ella",
-                si: "ඇල්ල",
-                ta: "எல்லா",
-              },
-              {
-                en: "Haputale",
-                si: "හපුතලේ",
-                ta: "ஹபுதலை",
-              },
-            ],
-          },
-          {
-            en: "Moneragala",
-            si: "මොනරාගල",
-            ta: "முனரகலை",
-            cities: [
-              {
-                en: "Moneragala",
-                si: "මොණරාගල",
-                ta: "முனரகலை",
-              },
-              {
-                en: "Bibile",
-                si: "බිබිල",
-                ta: "பிபிலே",
-              },
-              {
-                en: "Medagama",
-                si: "මැදගම",
-                ta: "மேதகம",
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        name: { en: "Sabaragamuwa", si: "සබරගමුව", ta: "சபரகமுவ" },
-        districts: [
-          {
-            en: "Rathnapura",
-            si: "රත්නපුර",
-            ta: "ரத்நாபுர",
-            cities: [
-              {
-                en: "Rathnapura",
-                si: "රත්නපුර",
-                ta: "ரத்நாபுர",
-              },
-              {
-                en: "Elapatha",
-                si: "ඇලපාත",
-                ta: "எலபத",
-              },
-              {
-                en: "Opanayaka",
-                si: "ඕපනායක",
-                ta: "ஒபனயக",
-              },
-            ],
-          },
-          {
-            en: "Kegalle",
-            si: "කැගල්ල",
-            ta: "கெகலே",
-            cities: [
-              {
-                en: "Kegalle",
-                si: "කැගල්ල",
-                ta: "கெகலே",
-              },
-              {
-                en: "Rambukkana",
-                si: "රඹුක්කන",
-                ta: "ரம்புக்கன",
-              },
-              {
-                en: "Mawanella",
-                si: "මාවනැල්ල",
-                ta: "மாவனெல்ல",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  };
-
-  const jsonData1 = {
-    jobRoles: [
-      {
-        en: "Collection Centre Manager",
-        si: "එකතු කිරීමේ මධ්‍යස්ථාන කළමනාකරු",
-        ta: "சேகரிப்பு மைய மேலாளர்",
-      },
-      {
-        en: "Collection Officer",
-        si: "එකතු කිරීමේ නිලධාරී",
-        ta: "வசூல் அதிகாரி",
-      },
-    ],
-  };
-
   return (
     <View
       className="flex-1 bg-white"
-      style={{ paddingHorizontal: wp(3), paddingVertical: hp(2) }}
     >
       <CustomHeader
         title={t("Profile.MyProfile")}
@@ -1026,10 +454,9 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="space-y-4">
+        <View className="space-y-4 px-6 pb-6">
           <View>
             <Text
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1038,7 +465,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {" "}
               {t("Profile.FirstName")}
             </Text>
-            <View className="rounded-[35px] border border-[#F4F4F4] bg-[#F4F4F4]">
+            <View className="rounded-2xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
                   className="px-4 py-2 text-black min-w-full"
@@ -1061,7 +488,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {" "}
               {t("Profile.LastName")}
             </Text>
-            <View className="rounded-[35px] border border-[#F4F4F4] bg-[#F4F4F4]">
+            <View className="rounded-2xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
                   className="px-4 py-2 text-black min-w-full"
@@ -1083,7 +510,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
             >
               {t("Profile.Company")}
             </Text>
-            <View className="rounded-[35px] border border-[#F4F4F4] bg-[#F4F4F4]">
+            <View className="rounded-2xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
                   className="px-4 py-2 text-black min-w-full"
@@ -1106,7 +533,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.CenterCode")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={profileData.regcode}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1120,7 +547,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
             >
               {t("Profile.CenterName")}
             </Text>
-            <View className="rounded-[35px] border border-[#F4F4F4] bg-[#F4F4F4]">
+            <View className="rounded-2xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
                   className="px-4 py-2 text-black min-w-full"
@@ -1144,7 +571,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.Job")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={getTranslatedJobRole(
                 profileData.jobRole,
                 selectedLanguage,
@@ -1162,7 +589,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.NIC")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={profileData.nicNumber}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1176,7 +603,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.Phone1")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={newPhoneNumber}
               placeholder="7XXXXXXXX"
               keyboardType="numeric"
@@ -1198,7 +625,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.Phone2")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={newPhoneNumber2}
               placeholder="7XXXXXXXX"
               keyboardType="numeric"
@@ -1219,7 +646,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.House")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={profileData.houseNumber}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1233,7 +660,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.Street")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4]"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
               value={profileData.streetName}
               editable={false}
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -1248,7 +675,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.City")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
               value={getTranslatedCity(
                 profileData.city,
                 profileData.district,
@@ -1267,7 +694,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.District")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
               value={getTranslatedDistrict(
                 profileData.district,
                 selectedLanguage,
@@ -1285,7 +712,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               {t("Profile.Province")}
             </Text>
             <TextInput
-              className="px-4 py-2 rounded-[35px] border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
+              className="px-4 py-2 rounded-2xl border border-[#F4F4F4] text-black bg-[#F4F4F4] mb-2"
               value={getTranslatedProvince(
                 profileData.province,
                 selectedLanguage,

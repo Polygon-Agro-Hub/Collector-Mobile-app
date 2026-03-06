@@ -6,22 +6,13 @@ export type RootStackParamList = {
   Registeredfarmer: undefined;
   Ufarmercropdetails: undefined;
   Dashboard: undefined;
-  QRScanner: { userId: any };
-  FormScreen: { scannedData: any };
   EngProfile: undefined;
-  UnregisteredFarmerDetails: { cropCount: 1; userId: number };
-  UnregisteredCropDetails: {
-    userId: number;
-    cropCount: number;
-    farmerPhone: number;
-    farmerLanguage: string;
-  };
+  ReadytoPickupOrders: undefined;
   SinChangePassword: undefined;
   SinLogin: undefined;
   Lanuage: undefined;
   SinDashboard: undefined;
   SinUfarmercropdetails: undefined;
-  SinUnregisteredCropDetails: { cropCount: number };
   SinUnregisteredFarmerDetails: undefined;
   SinRegisteredfarmer: undefined;
   TamChangePassword: undefined;
@@ -30,38 +21,98 @@ export type RootStackParamList = {
   TamRegisteredfarmer: undefined;
   TamUfarmercropdetails: undefined;
   TamUnregisteredFarmerDetails: undefined;
-  TamUnregisteredCropDetails: { cropCount: number; userId: any };
   TransportComponent: undefined;
   SinProfile: undefined;
+  OfficerQr: undefined;
   TamProfile: undefined;
-  SearchFarmer: { NICnumber: string; userId: any };
-  FarmerQr: { cropCount: number; userId: any; NICnumber: string };
+  SearchPriceScreen: undefined;
+  PrivacyPolicy: undefined;
+  CollectionOfficersList: undefined;
+  RegisterDriver: undefined;
+  DailyTargetList: undefined;
+  ComplainHistory: undefined;
+  ClaimOfficer: undefined;
+  ClaimDistribution: undefined;
+  TransactionList: undefined;
+  DailyTarget: undefined;
+  TargetValidPeriod: undefined;
+  NoCollectionCenterScreen: undefined;
+  EditTargetScreen: undefined;
+  PassTargetScreen: undefined;
+  RecieveTargetScreen: undefined;
+  EditTargetManager: undefined;
+  PassTargetBetweenOfficers: undefined;
+  RecieveTargetBetweenOfficers: undefined;
+  ManagerDashboard: undefined;
+  CenterTarget: undefined;
+  ManagerTransactions: undefined;
+  SearchFarmerScreen: undefined;
+  DistridutionaDashboard: undefined;
+  TargetOrderScreen: undefined;
+  PassTarget: undefined;
+  DistributionOfficersList: undefined;
+  ReplaceRequestsScreen: undefined;
+  ReceivedCash: undefined;
+  ReceivedCashOfficer: undefined;
+  QRScanner: {
+    userId: any;
+  };
+  FormScreen: {
+    scannedData: any;
+  };
+  UnregisteredFarmerDetails: {
+    cropCount: 1;
+    userId: number;
+  };
+  UnregisteredCropDetails: {
+    userId: number;
+    cropCount: number;
+    farmerPhone: number;
+    farmerLanguage: string;
+  };
+  SinUnregisteredCropDetails: {
+    cropCount: number;
+  };
+  TamUnregisteredCropDetails: {
+    cropCount: number;
+    userId: any;
+  };
+  SearchFarmer: {
+    NICnumber: string;
+    userId: any;
+  };
+  FarmerQr: {
+    cropCount: number;
+    userId: any;
+    NICnumber: string;
+  };
   ComplainPage: {
     farmerName: any;
     farmerPhone: any;
     userId: number;
     farmerLanguage: string;
   };
-  OfficerQr: undefined;
-  Profile: { jobRole: string };
-  ReportPage: { userId: string; registeredFarmerId: Number };
-  SearchPriceScreen: undefined;
-  PrivacyPolicy: undefined;
+  Profile: {
+    jobRole: string;
+  };
+  ReportPage: {
+    userId: string;
+    registeredFarmerId: Number;
+  };
   PriceChart: {
     varietyId: string;
     cropName: string;
     varietyName: string;
   };
-
   PriceChartManager: {
     varietyId: string;
     cropName: string;
     varietyName: string;
   };
-  // Main:{screen: keyof RootStackParamList};
-  Main: { screen: keyof RootStackParamList; params?: any };
-  CollectionOfficersList: undefined;
-  RegisterDriver: undefined;
+  Main: {
+    screen: keyof RootStackParamList;
+    params?: any;
+  };
   AddVehicleDetails: {
     basicDetails: OfficerBasicDetailsFormData;
     jobRole: string;
@@ -72,14 +123,12 @@ export type RootStackParamList = {
   };
   AddDriverAddressDetails: {
     formData: {
-      // Basic details from previous screen, type inferred from the route.params destructuring
       [key: string]: any;
     };
     type: string;
     preferredLanguages: string[];
     jobRole: string;
   };
-
   OfficerSummary: {
     officerId: string;
     officerName: string;
@@ -88,7 +137,6 @@ export type RootStackParamList = {
     collectionOfficerId: number;
     image: string;
   };
-
   DistributionOfficerSummary: {
     officerId: string;
     officerName: string;
@@ -104,9 +152,9 @@ export type RootStackParamList = {
     officerName: string;
     phoneNumber1: number;
   };
-  DailyTargetList: undefined;
-  ComplainHistory: undefined;
-  AddOfficerBasicDetails: { jobRolle: String };
+  AddOfficerBasicDetails: {
+    jobRolle: String;
+  };
   AddOfficerAddressDetails: {
     formData: OfficerBasicDetailsFormData;
     type: "Permanent" | "Temporary";
@@ -117,9 +165,6 @@ export type RootStackParamList = {
     };
     jobRole: string;
   };
-  ClaimOfficer: undefined;
-  ClaimDistribution: undefined;
-  TransactionList: undefined;
   FarmerReport: {
     registeredFarmerId: number;
     userId: number;
@@ -143,13 +188,6 @@ export type RootStackParamList = {
     fromTime: string;
     toTime: string;
   };
-  DailyTarget: undefined;
-  TargetValidPeriod: undefined;
-  NoCollectionCenterScreen: undefined;
-  EditTargetScreen: undefined;
-  PassTargetScreen: undefined;
-  RecieveTargetScreen: undefined;
-
   OTPE: {
     firstName: string;
     lastName: string;
@@ -162,8 +200,10 @@ export type RootStackParamList = {
     branchName: string;
     PreferdLanguage: string;
   };
-
-  NewReport: { userId: any; registeredFarmerId: number };
+  NewReport: {
+    userId: any;
+    registeredFarmerId: number;
+  };
   TransactionReport: {
     registeredFarmerId: number;
     userId: number;
@@ -182,17 +222,10 @@ export type RootStackParamList = {
     selectedTime: string;
     empId: string;
   };
-
   DailyTargetListForOfficers: {
     officerId: string;
     collectionOfficerId: number;
   };
-  EditTargetManager: undefined;
-  PassTargetBetweenOfficers: undefined;
-  RecieveTargetBetweenOfficers: undefined;
-  ManagerDashboard: undefined;
-  CenterTarget: undefined;
-  ManagerTransactions: undefined;
   ReplaceRequestsApprove: {
     replaceRequestData: {
       id: string;
@@ -213,10 +246,9 @@ export type RootStackParamList = {
       productDiscountedPrice?: string;
     };
   };
-
-  SearchFarmerScreen: undefined;
-  //RegisterFarmer:undefined;
-  RegisterFarmer: { NIC: string };
+  RegisterFarmer: {
+    NIC: string;
+  };
   OTPverification: {
     firstName: string;
     lastName: string;
@@ -229,10 +261,22 @@ export type RootStackParamList = {
     district: string;
     PreferdLanguage: string;
   };
-  CollectionRequestForm: { NICnumber: string; id: number };
-  CollectionRequests: { requestId: number; crops: string }; // expect requestId in CollectionRequests
-  ViewScreen: { requestId: number; crops: string }; // expect requestId in ViewScreen
-  Cancelreson: { requestId: number; status: string };
+  CollectionRequestForm: {
+    NICnumber: string;
+    id: number;
+  };
+  CollectionRequests: {
+    requestId: number;
+    crops: string;
+  };
+  ViewScreen: {
+    requestId: number;
+    crops: string;
+  };
+  Cancelreson: {
+    requestId: number;
+    status: string;
+  };
   UpdateFarmerBankDetails: {
     id: number;
     NICnumber: string;
@@ -258,24 +302,19 @@ export type RootStackParamList = {
     farmerId: number;
     officerRole: string;
   };
-
-  DistridutionaDashboard: undefined;
-  TargetOrderScreen: undefined;
-  CenterTargetScreen: { centerId: number };
-  //OpenedOrderScreen:{item: string ,centerCode:string};
+  CenterTargetScreen: {
+    centerId: number;
+  };
   PendingOrderScreen: {
-    item: any; // or define proper OrderItem interface
+    item: any;
     centerCode: string;
     status?: "Pending" | "Opened" | "Completed" | "In Progress";
     orderId: string;
   };
-
-  CompletedOrderScreen: { item: string; centerCode: string };
-  DistributionOfficersList: undefined;
-  ReplaceRequestsScreen: undefined;
-  ReceivedCash: undefined;
-  ReceivedCashOfficer: undefined;
-  // Update in RootStackParamList
+  CompletedOrderScreen: {
+    item: string;
+    centerCode: string;
+  };
   ReceivedCashQrCode: {
     selectedTransactions?: Array<{
       id: string;
@@ -288,10 +327,14 @@ export type RootStackParamList = {
     officerId: string;
     collectionOfficerId: number;
   };
-  PassTarget: undefined;
-  DigitalSignature: { orderId: Number; fromScreen: string };
-  DistributionOfficerReport: { officerId: string; collectionOfficerId: number };
-  ReadytoPickupOrders: undefined;
+  DigitalSignature: {
+    orderId: Number;
+    fromScreen: string;
+  };
+  DistributionOfficerReport: {
+    officerId: string;
+    collectionOfficerId: number;
+  };
   qrcode: {
     expectedOrderId?: string;
     fromScreen?: string;
@@ -300,8 +343,15 @@ export type RootStackParamList = {
     order: Order;
     orderId: string;
   };
-  GoviPensionForm: { farmerNIC: string , farmerPhone: string, userId: any};
-  GoviPensionStatus: { status: string ,creatAt: string};
+  GoviPensionForm: {
+    farmerNIC: string;
+    farmerPhone: string;
+    userId: any;
+  };
+  GoviPensionStatus: {
+    status: string;
+    creatAt: string;
+  };
 };
 
 export interface OrderItem {
@@ -313,7 +363,6 @@ export interface OrderItem {
   todo: number;
   status: string;
   completedTime?: string | null;
-  // Add any other properties that your order item has
 }
 
 export interface Order {
@@ -356,7 +405,7 @@ export interface Order {
   officerFirstName: string;
   officerLastName: string;
   fullName: string;
-  outDlvrDate:string;
+  outDlvrDate: string;
 }
 
 export type OfficerBasicDetailsFormData = {

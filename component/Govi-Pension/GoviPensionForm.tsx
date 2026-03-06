@@ -273,7 +273,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const [showCustomSuccessorDobPicker, setShowCustomSuccessorDobPicker] =
     useState(false);
 
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const relationshipOptions = [
     { label: t("GoviPensionForm.Wife"), value: "Wife" },

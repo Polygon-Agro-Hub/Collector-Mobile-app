@@ -19,16 +19,12 @@ import { ScrollView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import LottieView from "lottie-react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "../../store/authSlice";
 import { useDispatch } from "react-redux";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../common/CustomHeader";
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -232,7 +228,6 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         companyNameEnglish,
         companyNameSinhala,
         companyNameTamil,
-        accountStatus,
       } = data;
 
       const allowedRoles = [
@@ -355,25 +350,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
         className=" bg-white"
       >
-        <View
-          className="flex-row items-center justify-between "
-          style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
-        >
-          <TouchableOpacity onPress={() => handleNavBack()}>
-            <AntDesign
-              name="left"
-              size={22}
-              color="black"
-              style={{
-                paddingHorizontal: wp(3),
-                paddingVertical: hp(1.5),
-                backgroundColor: "#F6F6F680",
-                borderRadius: 50,
-              }}
-            />
-          </TouchableOpacity>
-          <View style={{ width: 22 }} />
-        </View>
+        <CustomHeader
+          title=""
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => handleNavBack()}
+        />
 
         <View className="items-center ">
           <Image
@@ -405,7 +387,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               {t("SignIn.Employee")}
             </Text>
             <View
-              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl w-[95%] h-[53px] mb-2 px-3 ${
+              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl h-[53px] mb-2 px-3 ${
                 empIdError ? "border-red-500" : "border-[#F4F4F4]"
               }`}
             >
@@ -433,7 +415,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             <Text className="text-base pb-[2%] font-light">
               {t("SignIn.Password")}
             </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl w-[95%] h-[53px] mb-8 px-3">
+            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl h-[53px] mb-8 px-3">
               <Image
                 source={passwordicon}
                 style={{ width: 24, height: 24 }}
