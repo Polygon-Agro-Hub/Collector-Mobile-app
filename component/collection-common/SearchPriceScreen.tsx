@@ -18,8 +18,9 @@ import { environment } from "../../environment/environment";
 import { ScrollView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import DropDownPicker from "react-native-dropdown-picker";
 import LottieView from "lottie-react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import GlobalSearchModal from "../common/GlobalSearchModal";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -51,8 +52,8 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   const [selectedVariety, setSelectedVariety] = useState<string | null>(null);
   const [loadingCrops, setLoadingCrops] = useState(false);
   const [loadingVarieties, setLoadingVarieties] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [vopen, setVopen] = useState(false);
+  const [cropModalVisible, setCropModalVisible] = useState(false);
+  const [varietyModalVisible, setVarietyModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [jobRole, setJobRole] = useState<string | null>(null);
@@ -88,8 +89,8 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     setSelectedCrop(null);
     setSelectedVariety(null);
     setVarietyOptions([]);
-    setOpen(false);
-    setVopen(false);
+    setCropModalVisible(false);
+    setVarietyModalVisible(false);
     fetchCropNames();
   }, []);
 
@@ -172,11 +173,13 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (vopen && !selectedCrop) {
+  const handleVarietyModalOpen = () => {
+    if (!selectedCrop) {
       Alert.alert(t("Error.error"), "Please select crop first");
+      return;
     }
-  }, [vopen]);
+    setVarietyModalVisible(true);
+  };
 
   const fetchVarieties = async () => {
     if (!selectedCrop) {
@@ -261,6 +264,11 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     }
   };
 
+  const selectedCropLabel =
+    cropOptions.find((o) => o.value === selectedCrop)?.label || null;
+  const selectedVarietyLabel =
+    varietyOptions.find((o) => o.value === selectedVariety)?.label || null;
+
   if (loadingCrops) {
     return (
       <View className="flex-1 bg-white items-center justify-center">
@@ -302,86 +310,58 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
             resizeMode="contain"
           />
 
-          {/* Crop Name Dropdown */}
-          <View className="w-full mb-4" style={{ zIndex: 3000 }}>
+          {/* Crop Name Selector */}
+          <View className="w-full mb-4">
             <Text className="text-base mb-2 text-center">
               {t("SearchPrice.Crop")}
             </Text>
-            {loadingCrops ? (
-              <ActivityIndicator size="small" color="#2AAD7A" />
-            ) : (
-              <DropDownPicker
-                open={open}
-                value={selectedCrop}
-                items={cropOptions}
-                setOpen={setOpen}
-                setValue={(value) => {
-                  setSelectedCrop(value);
-                  if (!value) {
-                    setSelectedVariety(null);
-                  }
-                }}
-                setItems={setCropOptions}
-                placeholder={t("SearchPrice.SelectCrop")}
-                style={{
-                  backgroundColor: "#F4F4F4",
-                  borderColor: "#F4F4F4",
-                  borderRadius: 25,
-                }}
-                placeholderStyle={{ color: "#9CA3AF" }}
-                textStyle={{
-                  color: "#000",
-                }}
-                dropDownContainerStyle={{
-                  borderColor: "#CFCFCF",
-                  maxHeight: 200,
-                }}
-                listMode="SCROLLVIEW"
-                scrollViewProps={{
-                  nestedScrollEnabled: true,
-                }}
-                zIndex={3000}
-                zIndexInverse={1000}
+            <TouchableOpacity
+              onPress={() => setCropModalVisible(true)}
+              className="w-full flex-row items-center justify-between px-4 py-3 rounded-[25px]"
+              style={{ backgroundColor: "#F4F4F4" }}
+            >
+              <Text
+                className={`text-base ${selectedCropLabel ? "text-black" : "text-gray-400"}`}
+              >
+                {selectedCropLabel || t("SearchPrice.SelectCrop")}
+              </Text>
+              <MaterialIcons
+                name="keyboard-arrow-down"
+                size={22}
+                color="#9CA3AF"
               />
-            )}
+            </TouchableOpacity>
           </View>
 
-          {/* Variety Dropdown */}
-          <View className="w-full mb-8" style={{ zIndex: 1000 }}>
+          {/* Variety Selector */}
+          <View className="w-full mb-8">
             <Text className="text-base mb-2 text-center">
               {t("SearchPrice.Variety")}
             </Text>
             {loadingVarieties ? (
-              <ActivityIndicator size="small" color="#2AAD7A" />
+              <View
+                className="w-full flex-row items-center justify-center px-4 py-3 rounded-[25px]"
+                style={{ backgroundColor: "#F4F4F4" }}
+              >
+                <ActivityIndicator size="small" color="#2AAD7A" />
+              </View>
             ) : (
-              <DropDownPicker
-                open={vopen}
-                value={selectedVariety}
-                items={varietyOptions}
-                setOpen={setVopen}
-                setValue={setSelectedVariety}
-                setItems={setVarietyOptions}
-                placeholder={t("SearchPrice.SelectVariety")}
-                placeholderStyle={{ color: "#9CA3AF" }}
-                style={{
-                  backgroundColor: "#F4F4F4",
-                  borderColor: "#F4F4F4",
-                  borderRadius: 25,
-                }}
-                textStyle={{
-                  color: "#000",
-                }}
-                dropDownContainerStyle={{
-                  borderColor: "#CFCFCF",
-                  maxHeight: 200,
-                }}
-                listMode="SCROLLVIEW"
-                scrollViewProps={{
-                  nestedScrollEnabled: true,
-                }}
-                zIndex={1000}
-                zIndexInverse={3000}
-              />
+              <TouchableOpacity
+                onPress={handleVarietyModalOpen}
+                className="w-full flex-row items-center justify-between px-4 py-3 rounded-[25px]"
+                style={{ backgroundColor: "#F4F4F4" }}
+              >
+                <Text
+                  className={`text-base ${selectedVarietyLabel ? "text-black" : "text-gray-400"}`}
+                >
+                  {selectedVarietyLabel || t("SearchPrice.SelectVariety")}
+                </Text>
+                <MaterialIcons
+                  name="keyboard-arrow-down"
+                  size={22}
+                  color="#9CA3AF"
+                />
+              </TouchableOpacity>
             )}
           </View>
 
@@ -400,6 +380,39 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Crop Modal */}
+      <GlobalSearchModal
+        visible={cropModalVisible}
+        onClose={() => setCropModalVisible(false)}
+        title={t("SearchPrice.Crop")}
+        data={cropOptions}
+        selectedItems={selectedCrop ? [selectedCrop] : []}
+        onSelect={(items) => {
+          const newCrop = items[0] ?? null;
+          if (newCrop !== selectedCrop) {
+            setSelectedCrop(newCrop);
+            setSelectedVariety(null);
+          }
+        }}
+        searchPlaceholder={t("SearchPrice.SelectCrop")}
+        multiSelect={false}
+      />
+
+      {/* Variety Modal */}
+      <GlobalSearchModal
+        visible={varietyModalVisible}
+        onClose={() => setVarietyModalVisible(false)}
+        title={t("SearchPrice.Variety")}
+        data={varietyOptions}
+        selectedItems={selectedVariety ? [selectedVariety] : []}
+        onSelect={(items) => {
+          setSelectedVariety(items[0] ?? null);
+        }}
+        searchPlaceholder={t("SearchPrice.SelectVariety")}
+        multiSelect={false}
+        isLoading={loadingVarieties}
+      />
     </KeyboardAvoidingView>
   );
 };

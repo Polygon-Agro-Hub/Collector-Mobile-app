@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import axios from "axios";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { RouteProp } from "@react-navigation/native";
@@ -23,9 +23,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
-import DropDownPicker from "react-native-dropdown-picker";
 import countryData from "../../assets/jsons/countryflag.json";
 import CustomHeader from "../common/CustomHeader";
+import GlobalSearchModal from "../common/GlobalSearchModal"; 
 
 type AddOfficerBasicDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -95,11 +95,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const [countryItems1, setCountryItems1] = useState<CountryItem[]>([]);
-  const [countryItems2, setCountryItems2] = useState<CountryItem[]>([]);
-  const [open1, setOpen1] = useState(false);
-  const [open2, setOpen2] = useState(false);
+  const [countryItems, setCountryItems] = useState<CountryItem[]>([]);
+  const [phoneCode1ModalVisible, setPhoneCode1ModalVisible] = useState(false);
+  const [phoneCode2ModalVisible, setPhoneCode2ModalVisible] = useState(false);
 
   useMemo(() => {
     const initialItems = countryData.map((country) => ({
@@ -109,17 +107,12 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       flag: country.emoji,
       dialCode: country.dial_code,
     }));
-
-    setCountryItems1(initialItems);
-    setCountryItems2(initialItems);
+    setCountryItems(initialItems);
   }, []);
 
   const toggleLanguage = (language: keyof typeof preferredLanguages) => {
     clearFieldError("preferredLanguages");
-    setPreferredLanguages((prev) => ({
-      ...prev,
-      [language]: !prev[language],
-    }));
+    setPreferredLanguages((prev) => ({ ...prev, [language]: !prev[language] }));
   };
 
   const clearFieldError = (fieldName: string) => {
@@ -137,15 +130,12 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     clearFieldError("nicNumber");
     const filteredInput = input.replace(/[^0-9Vv]/g, "");
     const normalizedInput = filteredInput.replace(/[vV]/g, "V");
-
     setFormData({ ...formData, nicNumber: normalizedInput });
 
     if (normalizedInput.length === 0) {
       setError3("");
     } else if (!validateNicNumber(normalizedInput)) {
-      setError3(
-        t("Error.NIC Number must be 9 digits followed by 'V' or 12 digits."),
-      );
+      setError3(t("Error.NIC Number must be 9 digits followed by 'V' or 12 digits."));
     } else {
       setError3("");
       checkNicExists(normalizedInput);
@@ -153,22 +143,15 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const checkNicExists = async (nic: string) => {
-    if (!validateNicNumber(nic)) return;
-    if (nic.length === 0) return;
+    if (!validateNicNumber(nic) || nic.length === 0) return;
 
     try {
       setIsValidating(true);
       const token = await AsyncStorage.getItem("token");
-
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-nic/${nic}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-
       if (response.data.exists) {
         setError3(t("Error.This NIC is already registered in the system."));
       } else {
@@ -176,11 +159,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       }
     } catch (error: any) {
       console.error("Error checking NIC:", error);
-
-      if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Data:", error.response.data);
-      }
     } finally {
       setIsValidating(false);
     }
@@ -192,10 +170,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         `${environment.API_BASE_URL}api/collection-manager/generate-empId/${role}`,
       );
       if (response.data.status) {
-        setFormData((prev) => ({
-          ...prev,
-          userId: response.data.result.empId,
-        }));
+        setFormData((prev) => ({ ...prev, userId: response.data.result.empId }));
       }
     } catch (error) {
       console.error("Error fetching empId:", error);
@@ -203,11 +178,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchEmpId(jobRole);
-    }, [jobRole]),
-  );
+  useFocusEffect(useCallback(() => { fetchEmpId(jobRole); }, [jobRole]));
 
   useFocusEffect(
     useCallback(() => {
@@ -218,13 +189,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   );
 
   const handleImagePick = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
-      Alert.alert(
-        t("Error.Permission required"),
-        t("Error.Permission required message"),
-      );
+      Alert.alert(t("Error.Permission required"), t("Error.Permission required message"));
       return;
     }
 
@@ -233,54 +200,26 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       base64: true,
     });
 
-    if (!result.canceled) {
-      if (result.assets && result.assets.length > 0) {
-        if (result.assets[0].base64) {
-          setSelectedImage(result.assets[0].base64);
-        }
-      }
+    if (!result.canceled && result.assets?.[0]?.base64) {
+      setSelectedImage(result.assets[0].base64);
     }
   };
 
   const validateFields = () => {
     const errors: Record<string, string> = {};
 
-    if (!formData.firstNameEnglish.trim()) {
-      errors.firstNameEnglish = t("Error.First name in English is required");
-    }
-    if (!formData.lastNameEnglish.trim()) {
-      errors.lastNameEnglish = t("Error.Last name in English is required");
-    }
-
-    if (!formData.firstNameSinhala?.trim()) {
-      errors.firstNameSinhala = t("Error.First name in Sinhala is required");
-    }
-    if (!formData.lastNameSinhala?.trim()) {
-      errors.lastNameSinhala = t("Error.Last name in Sinhala is required");
-    }
-
-    if (!formData.firstNameTamil?.trim()) {
-      errors.firstNameTamil = t("Error.First name in Tamil is required");
-    }
-    if (!formData.lastNameTamil?.trim()) {
-      errors.lastNameTamil = t("Error.Last name in Tamil is required");
-    }
-    if (!phoneNumber1.trim()) {
-      errors.phoneNumber1 = t("Error.Phone number is required");
-    }
-    if (!formData.nicNumber.trim()) {
-      errors.nicNumber = t("Error.NIC number is required");
-    }
-    if (!formData.email.trim()) {
-      errors.email = t("Error.Email is required");
-    }
-    if (!jobRole) {
-      errors.jobRole = t("Error.Job role is required");
-    }
+    if (!formData.firstNameEnglish.trim()) errors.firstNameEnglish = t("Error.First name in English is required");
+    if (!formData.lastNameEnglish.trim()) errors.lastNameEnglish = t("Error.Last name in English is required");
+    if (!formData.firstNameSinhala?.trim()) errors.firstNameSinhala = t("Error.First name in Sinhala is required");
+    if (!formData.lastNameSinhala?.trim()) errors.lastNameSinhala = t("Error.Last name in Sinhala is required");
+    if (!formData.firstNameTamil?.trim()) errors.firstNameTamil = t("Error.First name in Tamil is required");
+    if (!formData.lastNameTamil?.trim()) errors.lastNameTamil = t("Error.Last name in Tamil is required");
+    if (!phoneNumber1.trim()) errors.phoneNumber1 = t("Error.Phone number is required");
+    if (!formData.nicNumber.trim()) errors.nicNumber = t("Error.NIC number is required");
+    if (!formData.email.trim()) errors.email = t("Error.Email is required");
+    if (!jobRole) errors.jobRole = t("Error.Job role is required");
     if (Object.values(preferredLanguages).every((val) => !val)) {
-      errors.preferredLanguages = t(
-        "Error.Please select at least one preferred language",
-      );
+      errors.preferredLanguages = t("Error.Please select at least one preferred language");
     }
 
     setFieldErrors(errors);
@@ -288,32 +227,22 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const handleNext = () => {
-    if (error1) {
-      return;
-    } else if (error2 && phoneNumber2.length > 0) {
-      return;
-    } else if (errorEmail) {
-      return;
-    } else if (error3) {
-      return;
-    }
-
-    if (!validateFields()) {
-      return;
-    }
+    if (error1) return;
+    if (error2 && phoneNumber2.length > 0) return;
+    if (errorEmail) return;
+    if (error3) return;
+    if (!validateFields()) return;
 
     try {
       setIsValidating(true);
-
       const updatedFormData = {
         ...formData,
-        phoneCode1: phoneCode1,
-        phoneNumber1: phoneNumber1,
-        phoneCode2: phoneCode2,
-        phoneNumber2: phoneNumber2,
+        phoneCode1,
+        phoneNumber1,
+        phoneCode2,
+        phoneNumber2,
+        profileImage: selectedImage || "",
       };
-
-      updatedFormData.profileImage = selectedImage || "";
 
       navigation.navigate("AddOfficerAddressDetails", {
         formData: { ...updatedFormData },
@@ -332,59 +261,32 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const handleEnglishNameChange = (text: string, fieldName: string) => {
     clearFieldError(fieldName);
     let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
-
-    if (filteredText.startsWith(" ")) {
-      filteredText = filteredText.trimStart();
-    }
-
-    const capitalizedText = filteredText
-      .toLowerCase()
-      .split(" ")
-      .map((word) => {
-        if (word.length > 0) {
-          return word.charAt(0).toUpperCase() + word.slice(1);
-        }
-        return word;
-      })
+    if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
+    const capitalizedText = filteredText.toLowerCase().split(" ")
+      .map((word) => word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word)
       .join(" ");
-
     setFormData({ ...formData, [fieldName]: capitalizedText });
   };
 
   const handleSinhalaNameChange = (text: string, fieldName: string) => {
     clearFieldError(fieldName);
     let filteredText = text;
-
-    if (filteredText.startsWith(" ")) {
-      filteredText = filteredText.trimStart();
-    }
-
+    if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
     setFormData({ ...formData, [fieldName]: filteredText });
   };
 
   const handleTamilNameChange = (text: string, fieldName: string) => {
     clearFieldError(fieldName);
     let filteredText = text;
-
-    if (filteredText.startsWith(" ")) {
-      filteredText = filteredText.trimStart();
-    }
-
+    if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
     setFormData({ ...formData, [fieldName]: filteredText });
   };
 
-  const validatePhoneNumber = (input: string) => {
-    return /^7[0-9]{8}$/.test(input);
-  };
+  const validatePhoneNumber = (input: string) => /^7[0-9]{8}$/.test(input);
 
   const handlePhoneNumber1Change = (input: string) => {
     clearFieldError("phoneNumber1");
-    let numbersOnly = input.replace(/[^0-9]/g, "");
-
-    if (numbersOnly.startsWith("0")) {
-      numbersOnly = numbersOnly.replace(/^0+/, "");
-    }
-
+    let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
     setPhoneNumber1(numbersOnly);
 
     if (numbersOnly.length === 0) {
@@ -403,23 +305,15 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
   const checkPhoneExists = async (phoneNumber: string) => {
     if (!validatePhoneNumber(phoneNumber)) return;
-
     try {
       setIsValidating(true);
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${phoneNumber}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-
       if (response.data.exists) {
-        setError1(
-          t("Error.This phone number is already registered in the system."),
-        );
+        setError1(t("Error.This phone number is already registered in the system."));
       } else {
         setError1("");
       }
@@ -431,12 +325,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const handlePhoneNumber2Change = (input: string) => {
-    let numbersOnly = input.replace(/[^0-9]/g, "");
-
-    if (numbersOnly.startsWith("0")) {
-      numbersOnly = numbersOnly.replace(/^0+/, "");
-    }
-
+    let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
     setPhoneNumber2(numbersOnly);
 
     if (numbersOnly.length === 0) {
@@ -455,23 +344,15 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
   const checkPhone2Exists = async (phoneNumber: string) => {
     if (!validatePhoneNumber(phoneNumber)) return;
-
     try {
       setIsValidating(true);
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode2}${phoneNumber}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-
       if (response.data.exists) {
-        setError2(
-          t("Error.This phone number is already registered in the system."),
-        );
+        setError2(t("Error.This phone number is already registered in the system."));
       } else {
         setError2("");
       }
@@ -483,54 +364,26 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const validateEmail = (email: string): boolean => {
-    const generalEmailRegex =
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    if (!generalEmailRegex.test(email)) {
-      return false;
-    }
+    const generalEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!generalEmailRegex.test(email)) return false;
 
     const emailLower = email.toLowerCase();
     const [localPart, domain] = emailLower.split("@");
-
-    const allowedSpecificDomains = ["gmail.com", "googlemail.com", "yahoo.com"];
     const allowedTLDs = [".com", ".gov", ".lk"];
 
-    if (domain === "gmail.com" || domain === "googlemail.com") {
-      return validateGmailLocalPart(localPart);
-    }
-
-    if (domain === "yahoo.com") {
-      return true;
-    }
-
+    if (domain === "gmail.com" || domain === "googlemail.com") return validateGmailLocalPart(localPart);
+    if (domain === "yahoo.com") return true;
     for (const tld of allowedTLDs) {
-      if (domain.endsWith(tld)) {
-        return true;
-      }
+      if (domain.endsWith(tld)) return true;
     }
-
     return false;
   };
 
   const validateGmailLocalPart = (localPart: string): boolean => {
-    const validCharsRegex = /^[a-zA-Z0-9.+]+$/;
-    if (!validCharsRegex.test(localPart)) {
-      return false;
-    }
-
-    if (localPart.startsWith(".") || localPart.endsWith(".")) {
-      return false;
-    }
-
-    if (localPart.includes("..")) {
-      return false;
-    }
-
-    if (localPart.length === 0) {
-      return false;
-    }
-
+    if (!/^[a-zA-Z0-9.+]+$/.test(localPart)) return false;
+    if (localPart.startsWith(".") || localPart.endsWith(".")) return false;
+    if (localPart.includes("..")) return false;
+    if (localPart.length === 0) return false;
     return true;
   };
 
@@ -539,20 +392,15 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     const trimmedInput = input.trim();
     setFormData({ ...formData, email: trimmedInput });
 
-    if (!trimmedInput) {
-      setErrorEmail(t("Error.Email is required"));
-      return;
-    }
+    if (!trimmedInput) { setErrorEmail(t("Error.Email is required")); return; }
 
     if (!validateEmail(trimmedInput)) {
-      const emailLower = trimmedInput.toLowerCase();
-      const domain = emailLower.split("@")[1];
-
-      if (domain === "gmail.com" || domain === "googlemail.com") {
-        setErrorEmail(t("Error.Invalid Gmail address"));
-      } else {
-        setErrorEmail(t("Error.Invalid email address Example"));
-      }
+      const domain = trimmedInput.toLowerCase().split("@")[1];
+      setErrorEmail(
+        domain === "gmail.com" || domain === "googlemail.com"
+          ? t("Error.Invalid Gmail address")
+          : t("Error.Invalid email address Example"),
+      );
       return;
     }
 
@@ -561,531 +409,366 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const checkEmailExists = async (email: string) => {
-    if (!validateEmail(email)) {
-      setErrorEmail(t("Error.Invalid email address Example"));
-      return;
-    }
+    if (!validateEmail(email)) { setErrorEmail(t("Error.Invalid email address Example")); return; }
 
     try {
       setIsValidating(true);
       const token = await AsyncStorage.getItem("token");
-
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-email/${email}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-
       if (response.data.exists) {
-        setErrorEmail(
-          t("Error.This Email is already registered in the system."),
-        );
+        setErrorEmail(t("Error.This Email is already registered in the system."));
       } else {
         setErrorEmail("");
       }
     } catch (error: any) {
       console.error("Error checking Email:", error);
-      if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Data:", error.response.data);
-      }
-
       setErrorEmail(t("Error.somethingWentWrong"));
     } finally {
       setIsValidating(false);
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      enabled
-      style={{ flex: 1 }}
+  // Phone code selector pill component
+  const PhoneCodeSelector = ({
+    value,
+    onPress,
+    hasError,
+  }: {
+    value: string;
+    onPress: () => void;
+    hasError?: boolean;
+  }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        width: 90,
+        height: 46,
+        backgroundColor: "#F4F4F4",
+        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: hasError ? "#ef4444" : "#F4F4F4",
+        paddingHorizontal: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
     >
-      <ScrollView
-        className="flex-1 bg-white"
-        keyboardShouldPersistTaps="handled"
-      >
-        <CustomHeader
-          title={t("AddOfficerBasicDetails.AddOfficer")}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={async () => {
-            try {
-              await AsyncStorage.removeItem("officerFormData");
-              navigation.goBack();
-            } catch (error) {
-              console.error("Error clearing form data:", error);
-            }
-          }}
-        />
+      <Text style={{ fontSize: 13, color: "#374151" }} numberOfLines={1}>
+        {value}
+      </Text>
+      <MaterialIcons name="keyboard-arrow-down" size={16} color="#9CA3AF" />
+    </TouchableOpacity>
+  );
 
-        {/* Profile Avatar */}
-        <View className="justify-center items-center my-4 relative">
-          <Image
-            source={
-              selectedImage
-                ? { uri: `data:image/png;base64,${selectedImage}` }
-                : require("../../assets/images/collection-manager/user2.webp")
-            }
-            className="w-24 h-24 rounded-full"
+  return (
+    <>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        enabled
+        style={{ flex: 1 }}
+      >
+        <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
+          <CustomHeader
+            title={t("AddOfficerBasicDetails.AddOfficer")}
+            showBackButton={true}
+            navigation={navigation}
+            onBackPress={async () => {
+              try {
+                await AsyncStorage.removeItem("officerFormData");
+                navigation.goBack();
+              } catch (error) {
+                console.error("Error clearing form data:", error);
+              }
+            }}
           />
 
-          <TouchableOpacity
-            onPress={handleImagePick}
-            className="absolute bottom-0 right-4 bg-[#980775] p-1 rounded-full mr-[35%] shadow-md"
-            style={{
-              elevation: 5,
-            }}
-          >
-            <Ionicons name="pencil" size={18} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Type Selector */}
-        <View className="px-8 flex-row items-center mb-4 ">
-          <Text className="font-semibold text-sm mr-4">
-            {t("AddOfficerBasicDetails.Type")}
-          </Text>
-          <TouchableOpacity
-            className="flex-row items-center mr-6"
-            onPress={() => setType("Permanent")}
-          >
-            <Ionicons
-              name={
-                type === "Permanent" ? "radio-button-on" : "radio-button-off"
+          {/* Profile Avatar */}
+          <View className="justify-center items-center my-4 relative">
+            <Image
+              source={
+                selectedImage
+                  ? { uri: `data:image/png;base64,${selectedImage}` }
+                  : require("../../assets/images/collection-manager/user2.webp")
               }
-              size={20}
-              color="#980775"
+              className="w-24 h-24 rounded-full"
             />
-            <Text
-              className="ml-2 text-gray-700"
-              style={[
-                i18n.language === "si"
-                  ? { fontSize: 13 }
-                  : i18n.language === "ta"
-                    ? { fontSize: 10 }
-                    : { fontSize: 14 },
-              ]}
+            <TouchableOpacity
+              onPress={handleImagePick}
+              className="absolute bottom-0 right-4 bg-[#980775] p-1 rounded-full mr-[35%] shadow-md"
+              style={{ elevation: 5 }}
             >
-              {t("AddOfficerBasicDetails.Permanent")}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-row items-center"
-            onPress={() => setType("Temporary")}
-          >
-            <Ionicons
-              name={
-                type === "Temporary" ? "radio-button-on" : "radio-button-off"
-              }
-              size={20}
-              color="#980775"
-            />
-            <Text
-              className="ml-2 text-gray-700"
-              style={[
-                i18n.language === "si"
-                  ? { fontSize: 13 }
-                  : i18n.language === "ta"
-                    ? { fontSize: 10 }
-                    : { fontSize: 14 },
-              ]}
-            >
-              {t("AddOfficerBasicDetails.Temporary")}
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <Ionicons name="pencil" size={18} color="white" />
+            </TouchableOpacity>
+          </View>
 
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: "#ADADAD",
-            marginVertical: 10,
-          }}
-        />
-
-        {/* Preferred Languages */}
-        <View className="px-8 mb-1">
-          <Text className="font-semibold text-sm mb-2">
-            {t("AddOfficerBasicDetails.PreferredLanguages")}
-          </Text>
-          <View className="flex-row items-center">
-            {["සිංහල", "English", "தமிழ்"].map((lang) => (
+          {/* Type Selector */}
+          <View className="px-8 flex-row items-center mb-4">
+            <Text className="font-semibold text-sm mr-4">
+              {t("AddOfficerBasicDetails.Type")}
+            </Text>
+            {(["Permanent", "Temporary"] as const).map((t_type) => (
               <TouchableOpacity
-                key={lang}
-                className="flex-row items-center mr-6"
-                onPress={() =>
-                  toggleLanguage(lang as keyof typeof preferredLanguages)
-                }
+                key={t_type}
+                className={`flex-row items-center ${t_type === "Permanent" ? "mr-6" : ""}`}
+                onPress={() => setType(t_type)}
               >
                 <Ionicons
-                  name={
-                    preferredLanguages[lang as keyof typeof preferredLanguages]
-                      ? "checkbox"
-                      : "square-outline"
-                  }
+                  name={type === t_type ? "radio-button-on" : "radio-button-off"}
                   size={20}
                   color="#980775"
                 />
-                <Text className="ml-2 text-gray-700">{lang}</Text>
+                <Text
+                  className="ml-2 text-gray-700"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 10 }
+                        : { fontSize: 14 },
+                  ]}
+                >
+                  {t_type === "Permanent"
+                    ? t("AddOfficerBasicDetails.Permanent")
+                    : t("AddOfficerBasicDetails.Temporary")}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
-        </View>
-        {fieldErrors.preferredLanguages ? (
-          <Text className="text-red-500 text-sm mb-3 ml-8">
-            {fieldErrors.preferredLanguages}
-          </Text>
-        ) : (
-          <View className="mb-3" />
-        )}
 
-        <View
-          style={{
-            borderBottomWidth: 1,
-            borderColor: "#ADADAD",
-            marginVertical: 10,
-          }}
-        />
+          <View style={{ borderBottomWidth: 1, borderColor: "#ADADAD", marginVertical: 10 }} />
 
-        {/* Input Fields */}
-        <View className="px-8">
-          <TextInput
-            placeholder={t("AddOfficerBasicDetails.FirstNameEnglish")}
-            value={formData.firstNameEnglish}
-            onChangeText={(text) =>
-              handleEnglishNameChange(text, "firstNameEnglish")
-            }
-            className={`border ${
-              fieldErrors.firstNameEnglish
-                ? "border-red-500"
-                : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-            keyboardType="default"
-            autoCapitalize="words"
-            autoCorrect={false}
-          />
-          {fieldErrors.firstNameEnglish ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.firstNameEnglish}
+          {/* Preferred Languages */}
+          <View className="px-8 mb-1">
+            <Text className="font-semibold text-sm mb-2">
+              {t("AddOfficerBasicDetails.PreferredLanguages")}
             </Text>
+            <View className="flex-row items-center">
+              {["සිංහල", "English", "தமிழ்"].map((lang) => (
+                <TouchableOpacity
+                  key={lang}
+                  className="flex-row items-center mr-6"
+                  onPress={() => toggleLanguage(lang as keyof typeof preferredLanguages)}
+                >
+                  <Ionicons
+                    name={
+                      preferredLanguages[lang as keyof typeof preferredLanguages]
+                        ? "checkbox"
+                        : "square-outline"
+                    }
+                    size={20}
+                    color="#980775"
+                  />
+                  <Text className="ml-2 text-gray-700">{lang}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+          {fieldErrors.preferredLanguages ? (
+            <Text className="text-red-500 text-sm mb-3 ml-8">{fieldErrors.preferredLanguages}</Text>
           ) : (
             <View className="mb-3" />
           )}
 
-          <TextInput
-            placeholder={t("AddOfficerBasicDetails.LastNameEnglish")}
-            value={formData.lastNameEnglish}
-            onChangeText={(text) =>
-              handleEnglishNameChange(text, "lastNameEnglish")
-            }
-            className={`border ${
-              fieldErrors.lastNameEnglish
-                ? "border-red-500"
-                : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-            keyboardType="default"
-            autoCapitalize="words"
-            autoCorrect={false}
-          />
-          {fieldErrors.lastNameEnglish ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.lastNameEnglish}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
+          <View style={{ borderBottomWidth: 1, borderColor: "#ADADAD", marginVertical: 10 }} />
 
-          <TextInput
-            placeholder={t("AddOfficerBasicDetails.FirstNameinSinhala")}
-            value={formData.firstNameSinhala}
-            onChangeText={(text) =>
-              handleSinhalaNameChange(text, "firstNameSinhala")
-            }
-            className={`border ${
-              fieldErrors.firstNameSinhala
-                ? "border-red-500"
-                : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-            autoCorrect={false}
-          />
-          {fieldErrors.firstNameSinhala ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.firstNameSinhala}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
+          {/* Input Fields */}
+          <View className="px-8">
+            {/* Name fields */}
+            {[
+              { placeholder: t("AddOfficerBasicDetails.FirstNameEnglish"), key: "firstNameEnglish", handler: handleEnglishNameChange },
+              { placeholder: t("AddOfficerBasicDetails.LastNameEnglish"), key: "lastNameEnglish", handler: handleEnglishNameChange },
+              { placeholder: t("AddOfficerBasicDetails.FirstNameinSinhala"), key: "firstNameSinhala", handler: handleSinhalaNameChange },
+              { placeholder: t("AddOfficerBasicDetails.LastNameSinhala"), key: "lastNameSinhala", handler: handleSinhalaNameChange },
+              { placeholder: t("AddOfficerBasicDetails.FirstNameTamil"), key: "firstNameTamil", handler: handleTamilNameChange },
+              { placeholder: t("AddOfficerBasicDetails.LastNameTamil"), key: "lastNameTamil", handler: handleTamilNameChange },
+            ].map(({ placeholder, key, handler }) => (
+              <View key={key}>
+                <TextInput
+                  placeholder={placeholder}
+                  value={(formData as any)[key]}
+                  onChangeText={(text) => handler(text, key)}
+                  className={`border ${fieldErrors[key] ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+                  keyboardType="default"
+                  autoCapitalize={key.includes("English") ? "words" : "none"}
+                  autoCorrect={false}
+                />
+                {fieldErrors[key] ? (
+                  <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors[key]}</Text>
+                ) : (
+                  <View className="mb-3" />
+                )}
+              </View>
+            ))}
 
-          <TextInput
-            placeholder={t("AddOfficerBasicDetails.LastNameSinhala")}
-            value={formData.lastNameSinhala}
-            onChangeText={(text) =>
-              handleSinhalaNameChange(text, "lastNameSinhala")
-            }
-            className={`border ${
-              fieldErrors.lastNameSinhala
-                ? "border-red-500"
-                : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-            autoCorrect={false}
-          />
-          {fieldErrors.lastNameSinhala ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.lastNameSinhala}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          <TextInput
-            placeholder={t("AddOfficerBasicDetails.FirstNameTamil")}
-            value={formData.firstNameTamil}
-            onChangeText={(text) =>
-              handleTamilNameChange(text, "firstNameTamil")
-            }
-            className={`border ${
-              fieldErrors.firstNameTamil ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-            autoCorrect={false}
-          />
-          {fieldErrors.firstNameTamil ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.firstNameTamil}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          <TextInput
-            placeholder={t("AddOfficerBasicDetails.LastNameTamil")}
-            value={formData.lastNameTamil}
-            onChangeText={(text) =>
-              handleTamilNameChange(text, "lastNameTamil")
-            }
-            className={`border ${
-              fieldErrors.lastNameTamil ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-            autoCorrect={false}
-          />
-          {fieldErrors.lastNameTamil ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.lastNameTamil}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Phone Number 1 */}
-          <View className="mb-1">
-            <View className="flex-row items-center gap-2 rounded-lg">
-              <View style={{ flex: 4, alignItems: "center" }} className="">
-                <DropDownPicker
-                  open={open1}
+            {/* Phone Number 1 */}
+            <View className="mb-1">
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <PhoneCodeSelector
                   value={phoneCode1}
-                  items={countryItems1}
-                  setOpen={setOpen1}
-                  setValue={setPhoneCode1}
-                  placeholder={phoneCode1}
+                  onPress={() => setPhoneCode1ModalVisible(true)}
+                  hasError={!!fieldErrors.phoneNumber1}
+                />
+                <View
                   style={{
-                    borderColor: "#F4F4F4",
-                    borderRadius: 25,
-                    height: 45,
+                    flex: 1,
+                    height: 46,
+                    borderWidth: 1,
+                    borderColor: fieldErrors.phoneNumber1 ? "#ef4444" : "#F4F4F4",
                     backgroundColor: "#F4F4F4",
+                    borderRadius: 25,
+                    justifyContent: "center",
                   }}
-                  dropDownContainerStyle={{
-                    borderColor: "#ccc",
-                    backgroundColor: "white",
-                    borderRadius: 10,
-                    maxHeight: 200,
-                  }}
-                  textStyle={{
-                    fontSize: 14,
-                  }}
-                  listMode="SCROLLVIEW"
-                  scrollViewProps={{
-                    nestedScrollEnabled: true,
-                  }}
-                  zIndex={5000}
-                  zIndexInverse={1000}
-                  onOpen={() => setOpen2(false)}
-                />
-              </View>
-              <View
-                style={{ flex: 6 }}
-                className={`border ${
-                  fieldErrors.phoneNumber1
-                    ? "border-red-500"
-                    : "border-[#F4F4F4]"
-                } bg-[#F4F4F4] rounded-full text-gray-700`}
-              >
-                <TextInput
-                  placeholder="7X-XXX-XXXX"
-                  keyboardType="phone-pad"
-                  value={phoneNumber1}
-                  onChangeText={handlePhoneNumber1Change}
-                  className="px-3 py-3 text-gray-700 border-[#F4F4F4] bg-[#F4F4F4] rounded-full"
-                  maxLength={9}
-                />
+                >
+                  <TextInput
+                    placeholder="7X-XXX-XXXX"
+                    keyboardType="phone-pad"
+                    value={phoneNumber1}
+                    onChangeText={handlePhoneNumber1Change}
+                    style={{ paddingHorizontal: 14, fontSize: 14, color: "#374151" }}
+                    maxLength={9}
+                  />
+                </View>
               </View>
             </View>
-          </View>
-          {error1 || fieldErrors.phoneNumber1 ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.phoneNumber1 || error1}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Phone Number 2 */}
-          <View className="mb-1">
-            <View className="flex-row items-center gap-2 rounded-lg">
-              <View style={{ flex: 4, alignItems: "center" }}>
-                <DropDownPicker
-                  open={open2}
-                  value={phoneCode2}
-                  items={countryItems2}
-                  setOpen={setOpen2}
-                  setValue={setPhoneCode2}
-                  placeholder={phoneCode2}
-                  style={{
-                    borderColor: "#F4F4F4",
-                    borderRadius: 25,
-                    height: 45,
-                    backgroundColor: "#F4F4F4",
-                  }}
-                  dropDownContainerStyle={{
-                    borderColor: "#ccc",
-                    backgroundColor: "white",
-                    borderRadius: 10,
-                    maxHeight: 200,
-                  }}
-                  textStyle={{
-                    fontSize: 14,
-                  }}
-                  listMode="SCROLLVIEW"
-                  scrollViewProps={{
-                    nestedScrollEnabled: true,
-                  }}
-                  zIndex={4000}
-                  zIndexInverse={2000}
-                  onOpen={() => setOpen1(false)}
-                />
-              </View>
-              <View
-                style={{ flex: 6 }}
-                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full text-gray-700"
-              >
-                <TextInput
-                  placeholder="7X-XXX-XXXX"
-                  keyboardType="phone-pad"
-                  value={phoneNumber2}
-                  onChangeText={handlePhoneNumber2Change}
-                  className="px-3 py-3 text-gray-700"
-                  maxLength={9}
-                />
-              </View>
-            </View>
-          </View>
-          {error2 ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">{error2}</Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          <TextInput
-            placeholder={t("AddOfficerBasicDetails.NIC")}
-            value={formData.nicNumber}
-            onChangeText={handleNicNumberChange}
-            maxLength={12}
-            keyboardType="default"
-            autoCapitalize="characters"
-            autoCorrect={false}
-            className={`border ${
-              fieldErrors.nicNumber || error3
-                ? "border-red-500"
-                : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-          />
-          {error3 || fieldErrors.nicNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.nicNumber || error3}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          <View>
-            <TextInput
-              placeholder={t("AddOfficerBasicDetails.Email")}
-              value={formData.email}
-              onChangeText={handleEmailChange}
-              className={`border ${
-                fieldErrors.email || errorEmail
-                  ? "border-red-500"
-                  : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] rounded-full px-3 py-2 mb-1 text-gray-700`}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!isValidating}
-            />
-            {isValidating && (
-              <Text
-                style={{
-                  color: "#666",
-                  fontSize: 12,
-                  marginBottom: 4,
-                  marginLeft: 12,
-                }}
-              >
-                {t("Validating email...")}
-              </Text>
-            )}
-            {errorEmail || fieldErrors.email ? (
+            {error1 || fieldErrors.phoneNumber1 ? (
               <Text className="text-red-500 text-sm mb-3 ml-3">
-                {fieldErrors.email || errorEmail}
+                {fieldErrors.phoneNumber1 || error1}
               </Text>
             ) : (
               <View className="mb-3" />
             )}
-          </View>
-        </View>
 
-        {/* Buttons */}
-        <View className="flex-row justify-center space-x-4 px-4 mt-8 mb-4">
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="bg-gray-300 px-8 py-3 rounded-full"
-          >
-            <Text className="text-gray-800 text-center">
-              {t("AddOfficerBasicDetails.Cancel")}
-            </Text>
-          </TouchableOpacity>
+            {/* Phone Number 2 */}
+            <View className="mb-1">
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <PhoneCodeSelector
+                  value={phoneCode2}
+                  onPress={() => setPhoneCode2ModalVisible(true)}
+                />
+                <View
+                  style={{
+                    flex: 1,
+                    height: 46,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                    borderRadius: 25,
+                    justifyContent: "center",
+                  }}
+                >
+                  <TextInput
+                    placeholder="7X-XXX-XXXX"
+                    keyboardType="phone-pad"
+                    value={phoneNumber2}
+                    onChangeText={handlePhoneNumber2Change}
+                    style={{ paddingHorizontal: 14, fontSize: 14, color: "#374151" }}
+                    maxLength={9}
+                  />
+                </View>
+              </View>
+            </View>
+            {error2 ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">{error2}</Text>
+            ) : (
+              <View className="mb-3" />
+            )}
 
-          <TouchableOpacity
-            onPress={handleNext}
-            disabled={isValidating}
-            className={`${
-              isValidating ? "bg-gray-400" : "bg-[#000000]"
-            } px-8 py-3 rounded-full`}
-          >
-            <Text className="text-white text-center">
-              {isValidating ? (
-                <ActivityIndicator />
-              ) : (
-                t("AddOfficerBasicDetails.Next")
+            {/* NIC */}
+            <TextInput
+              placeholder={t("AddOfficerBasicDetails.NIC")}
+              value={formData.nicNumber}
+              onChangeText={handleNicNumberChange}
+              maxLength={12}
+              keyboardType="default"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              className={`border ${fieldErrors.nicNumber || error3 ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+            />
+            {error3 || fieldErrors.nicNumber ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.nicNumber || error3}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* Email */}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.Email")}
+                value={formData.email}
+                onChangeText={handleEmailChange}
+                className={`border ${fieldErrors.email || errorEmail ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isValidating}
+              />
+              {isValidating && (
+                <Text style={{ color: "#666", fontSize: 12, marginBottom: 4, marginLeft: 12 }}>
+                  {t("Validating email...")}
+                </Text>
               )}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+              {errorEmail || fieldErrors.email ? (
+                <Text className="text-red-500 text-sm mb-3 ml-3">
+                  {fieldErrors.email || errorEmail}
+                </Text>
+              ) : (
+                <View className="mb-3" />
+              )}
+            </View>
+          </View>
+
+          {/* Buttons */}
+          <View className="flex-row justify-center space-x-3 px-2 mt-8 mb-4">
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              className="bg-gray-300 px-10 py-3 rounded-full"
+            >
+              <Text className="text-gray-800 text-center">
+                {t("AddOfficerBasicDetails.Cancel")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleNext}
+              disabled={isValidating}
+              className={`${isValidating ? "bg-gray-400" : "bg-[#000000]"} px-12 py-3 rounded-full`}
+            >
+              <Text className="text-white text-center">
+                {isValidating ? <ActivityIndicator /> : t("AddOfficerBasicDetails.Next")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Phone Code 1 Modal */}
+      <GlobalSearchModal
+        visible={phoneCode1ModalVisible}
+        onClose={() => setPhoneCode1ModalVisible(false)}
+        title="Select Country Code"
+        data={countryItems}
+        selectedItems={[phoneCode1]}
+        onSelect={(items) => setPhoneCode1(items[0] ?? "+94")}
+        searchPlaceholder="Search country or code..."
+        multiSelect={false}
+      />
+
+      {/* Phone Code 2 Modal */}
+      <GlobalSearchModal
+        visible={phoneCode2ModalVisible}
+        onClose={() => setPhoneCode2ModalVisible(false)}
+        title="Select Country Code"
+        data={countryItems}
+        selectedItems={[phoneCode2]}
+        onSelect={(items) => setPhoneCode2(items[0] ?? "+94")}
+        searchPlaceholder="Search country or code..."
+        multiSelect={false}
+      />
+    </>
   );
 };
 

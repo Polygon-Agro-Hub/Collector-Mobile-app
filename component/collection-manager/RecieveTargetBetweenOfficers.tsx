@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { SelectList } from "react-native-dropdown-select-list";
+import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../common/CustomHeader";
+import GlobalSearchModal from "../common/GlobalSearchModal";
 
 type RecieveTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -49,31 +50,22 @@ interface Officer {
   fullNameTamil: string;
 }
 
-const RecieveTargetBetweenOfficers: React.FC<
-  RecieveTargetBetweenOfficersScreenProps
-> = ({ navigation, route }) => {
+const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenProps> = ({
+  navigation,
+  route,
+}) => {
   const [assignee, setAssignee] = useState("");
-
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
-  const [officers, setOfficers] = useState<{ key: string; value: string }[]>(
-    [],
-  );
+  const [officers, setOfficers] = useState<{ label: string; value: string }[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingTarget, setFetchingTarget] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [maxAmount, setMaxAmount] = useState<number>(0);
+  const [officerModalVisible, setOfficerModalVisible] = useState(false);
   const { t } = useTranslation();
 
-  const {
-    grade,
-
-    varietyId,
-    collectionOfficerId,
-
-    officerId,
-  } = route.params;
-
+  const { grade, varietyId, collectionOfficerId, officerId } = route.params;
   const toOfficerId = collectionOfficerId;
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -82,9 +74,7 @@ const RecieveTargetBetweenOfficers: React.FC<
     const fetchData = async () => {
       try {
         const lang = await AsyncStorage.getItem("@user_language");
-        if (lang) {
-          setSelectedLanguage(lang);
-        }
+        if (lang) setSelectedLanguage(lang);
       } catch (error) {
         console.error("Error fetching language preference:", error);
       }
@@ -94,12 +84,9 @@ const RecieveTargetBetweenOfficers: React.FC<
 
   const getOfficerName = (officer: Officer) => {
     switch (selectedLanguage) {
-      case "si":
-        return officer.fullNameSinhala;
-      case "ta":
-        return officer.fullNameTamil;
-      default:
-        return officer.fullNameEnglish;
+      case "si": return officer.fullNameSinhala;
+      case "ta": return officer.fullNameTamil;
+      default: return officer.fullNameEnglish;
     }
   };
 
@@ -111,11 +98,7 @@ const RecieveTargetBetweenOfficers: React.FC<
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/collection-officers-recieve/${varietyId}/${grade}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data.status === "success") {
@@ -124,8 +107,8 @@ const RecieveTargetBetweenOfficers: React.FC<
         );
 
         const formattedOfficers = filteredOfficers.map((officer: any) => ({
-          key: officer.collectionOfficerId.toString(),
-          value: `${getOfficerName(officer)}  (${officer.empId})`,
+          label: `${getOfficerName(officer)}  (${officer.empId})`,
+          value: officer.collectionOfficerId.toString(),
         }));
 
         setOfficers([...formattedOfficers]);
@@ -153,22 +136,16 @@ const RecieveTargetBetweenOfficers: React.FC<
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/get-daily-todo-byvariety/${officerId}/${varietyId}/${grade}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data.status === "success" && response.data.data) {
         const { target, complete } = response.data.data;
         const calculatedTodo = parseFloat(target) - parseFloat(complete);
-
         setMaxAmount(calculatedTodo > 0 ? calculatedTodo : 0);
         setAmount(calculatedTodo.toString());
       } else {
         setErrorMessage(t("Error.No target data found for selected officer."));
-
         setTimeout(() => {
           setErrorMessage(null);
           setMaxAmount(0);
@@ -178,7 +155,6 @@ const RecieveTargetBetweenOfficers: React.FC<
       }
     } catch (error: any) {
       setErrorMessage(t("Error.Failed to fetch daily target."));
-
       setTimeout(() => {
         setErrorMessage(null);
         setMaxAmount(0);
@@ -189,11 +165,10 @@ const RecieveTargetBetweenOfficers: React.FC<
       setFetchingTarget(false);
     }
   };
+
   useEffect(() => {
     fetchOfficers();
-    if (assignee == "0") {
-      setAmount("");
-    }
+    if (assignee === "0") setAmount("");
   }, []);
 
   const handleAmountChange = (text: string) => {
@@ -208,7 +183,6 @@ const RecieveTargetBetweenOfficers: React.FC<
 
   const isSaveDisabled = () => {
     const numericAmount = parseFloat(amount);
-
     return (
       !assignee ||
       assignee === "0" ||
@@ -243,9 +217,7 @@ const RecieveTargetBetweenOfficers: React.FC<
     }
 
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
+    if (!netState.isConnected) return;
 
     try {
       setFetchingTarget(true);
@@ -256,36 +228,25 @@ const RecieveTargetBetweenOfficers: React.FC<
         {
           fromOfficerId: assignee,
           toOfficerId: toOfficerId,
-          varietyId: varietyId,
+          varietyId,
           grade,
           amount: numericAmount,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.status === 200) {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Target received successfully."),
-        );
-
+        Alert.alert(t("Error.Success"), t("Error.Target received successfully."));
         navigation.navigate("DailyTargetListForOfficers" as any, {
-          officerId: officerId,
-          collectionOfficerId: collectionOfficerId,
+          officerId,
+          collectionOfficerId,
         });
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
       }
     } catch (error: any) {
       console.error("Receive Target Error:", error);
-      Alert.alert(
-        t("Error.error"),
-        t("Error.An error occurred while transferring the target."),
-      );
+      Alert.alert(t("Error.error"), t("Error.An error occurred while transferring the target."));
     } finally {
       setFetchingTarget(false);
     }
@@ -293,119 +254,132 @@ const RecieveTargetBetweenOfficers: React.FC<
 
   const getvarietyName = () => {
     switch (selectedLanguage) {
-      case "si":
-        return route.params.varietyNameSinhala;
-      case "ta":
-        return route.params.varietyNameTamil;
-      default:
-        return route.params.varietyNameEnglish;
+      case "si": return route.params.varietyNameSinhala;
+      case "ta": return route.params.varietyNameTamil;
+      default: return route.params.varietyNameEnglish;
     }
   };
 
+  const selectedOfficerLabel = officers.find((o) => o.value === assignee)?.label || null;
+
   return (
-    <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
-      <View className="flex-1 bg-white mb-4">
-        {/* Fixed Header */}
+    <>
+      <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
+        <View className="flex-1 bg-white mb-4">
+          <CustomHeader
+            title={getvarietyName() || ""}
+            showBackButton={true}
+            navigation={navigation}
+            onBackPress={() => navigation.goBack()}
+            textColor="white"
+            bgColor="#282828"
+            iconBgColor="#FFFFFF1A"
+          />
 
-        <CustomHeader
-          title={getvarietyName() || ""}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() => navigation.goBack()}
-          textColor="white"
-          bgColor="#282828"
-          iconBgColor="#FFFFFF1A"
-        />
+          <View className="bg-white rounded-lg p-4">
+            <View className="p-5">
+              <Text className="text-gray-700 mb-2">
+                {t("PassTargetBetweenOfficers.Short Stock Assignee")}
+              </Text>
 
-        <View className="bg-white rounded-lg p-4">
-          <View className="p-5">
-            <Text className="text-gray-700 mb-2">
-              {t("PassTargetBetweenOfficers.Short Stock Assignee")}
-            </Text>
-
-            {loading ? (
-              <ActivityIndicator size="large" color="#313131" />
-            ) : errorMessage ? (
-              <Text className="text-red-500">{errorMessage}</Text>
-            ) : (
-              <View className=" rounded-lg mb-4">
-                <SelectList
-                  setSelected={(value: string) => {
-                    setAssignee(value);
-                    fetchDailyTarget(value);
-                  }}
-                  data={officers}
-                  save="key"
-                  defaultOption={{
-                    key: "0",
-                    value: t("PassTargetBetweenOfficers.Select an officer"),
-                  }}
-                  boxStyles={{
+              {loading ? (
+                <ActivityIndicator size="large" color="#313131" />
+              ) : errorMessage ? (
+                <Text className="text-red-500 mb-4">{errorMessage}</Text>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setOfficerModalVisible(true)}
+                  style={{
+                    height: 50,
                     borderWidth: 1,
                     borderColor: "#CFCFCF",
+                    borderRadius: 8,
                     backgroundColor: "white",
+                    paddingHorizontal: 14,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 16,
                   }}
-                  inputStyles={{
-                    color: assignee && assignee !== "0" ? "#000000" : "#848484",
-                  }}
-                  dropdownStyles={{
-                    borderColor: "#CFCFCF",
-                    backgroundColor: "white",
-                  }}
-                />
-              </View>
-            )}
+                >
+                  <Text
+                    style={{
+                      color: selectedOfficerLabel ? "#000000" : "#848484",
+                      fontSize: 14,
+                      flex: 1,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {selectedOfficerLabel || t("PassTargetBetweenOfficers.Select an officer")}
+                  </Text>
+                  <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+                </TouchableOpacity>
+              )}
 
-            <View className="border-b border-gray-300 my-4" />
+              <View className="border-b border-gray-300 my-4" />
 
-            <Text className="text-gray text-sm mb-2 text-center mt-4">
-              {t("PassTargetBetweenOfficers.maximum amount receive")}
-            </Text>
-            {fetchingTarget ? (
-              <ActivityIndicator size="small" color="#313131" />
-            ) : (
-              <Text className="text-xl font-bold text-center text-black mb-4">
-                {" "}
-                {maxAmount
-                  ? `${maxAmount} ${t("PassTargetBetweenOfficers.kg")}`
-                  : "--"}
+              <Text className="text-gray text-sm mb-2 text-center mt-4">
+                {t("PassTargetBetweenOfficers.maximum amount receive")}
               </Text>
-            )}
+              {fetchingTarget ? (
+                <ActivityIndicator size="small" color="#313131" />
+              ) : (
+                <Text className="text-xl font-bold text-center text-black mb-4">
+                  {maxAmount ? `${maxAmount} ${t("PassTargetBetweenOfficers.kg")}` : "--"}
+                </Text>
+              )}
+            </View>
+
+            <View className="p-5">
+              <Text className="text-gray-700 mb-2">
+                {t("PassTargetBetweenOfficers.Amount")}
+              </Text>
+              <TextInput
+                className="border border-gray-300 rounded-lg p-2 text-gray-800"
+                keyboardType="numeric"
+                value={amount}
+                onChangeText={handleAmountChange}
+                placeholder="--"
+                editable={assignee === "0" || !!errorMessage ? false : true}
+              />
+              {error ? <Text className="text-red-500 mt-2">{error}</Text> : null}
+            </View>
           </View>
 
-          <View className="p-5">
-            <Text className="text-gray-700 mb-2">
-              {t("PassTargetBetweenOfficers.Amount")}
-            </Text>
-            <TextInput
-              className="border border-gray-300 rounded-lg p-2 text-gray-800"
-              keyboardType="numeric"
-              value={amount}
-              onChangeText={handleAmountChange}
-              placeholder="--"
-              editable={assignee === "0" || errorMessage ? false : true}
-            />
-            {error ? <Text className="text-red-500 mt-2">{error}</Text> : null}
+          <View className="mt-6 items-center">
+            <TouchableOpacity
+              className={`rounded-full w-64 py-3 ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
+              onPress={receiveTarget}
+              disabled={isSaveDisabled()}
+            >
+              {fetchingTarget ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="text-white text-center font-medium">
+                  {t("PassTargetBetweenOfficers.Save")}
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
+      </ScrollView>
 
-        <View className="mt-6 items-center">
-          <TouchableOpacity
-            className={`rounded-full w-64 py-3 ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
-            onPress={receiveTarget}
-            disabled={isSaveDisabled()}
-          >
-            {fetchingTarget ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text className="text-white text-center font-medium">
-                {t("PassTargetBetweenOfficers.Save")}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+      {/* Officer Modal */}
+      <GlobalSearchModal
+        visible={officerModalVisible}
+        onClose={() => setOfficerModalVisible(false)}
+        title={t("PassTargetBetweenOfficers.Short Stock Assignee")}
+        data={officers}
+        selectedItems={assignee ? [assignee] : []}
+        onSelect={(items) => {
+          const val = items[0] ?? "";
+          setAssignee(val);
+          if (val) fetchDailyTarget(val);
+        }}
+        searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
+        multiSelect={false}
+      />
+    </>
   );
 };
 

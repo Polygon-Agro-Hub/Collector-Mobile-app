@@ -19,10 +19,11 @@ import bankNames from "../../assets/jsons/banks.json";
 import { ActivityIndicator } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
-import { SelectList } from "react-native-dropdown-select-list";
+import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../common/CustomHeader";
+import GlobalSearchModal from "../common/GlobalSearchModal"; 
 
 type UnregisteredFarmerDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -47,24 +48,33 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const { id, phoneNumber, PreferdLanguage, officerRole } = route.params;
 
   const [accNumber, setAccNumber] = useState("");
-
   const [accHolderName, setAccHolderName] = useState("");
   const [bankName, setBankName] = useState("");
-
   const [branchName, setBranchName] = useState("");
-
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
-    useState(false);
+  const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [progress] = useState(new Animated.Value(0));
   const [unsuccessfulProgress] = useState(new Animated.Value(0));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { t } = useTranslation();
   const [filteredBranches, setFilteredBranches] = useState<allBranches[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-
+  const [selectedLanguage] = useState<string>("en");
   const [accNumberError, setAccNumberError] = useState("");
+
+  // Modal visibility state
+  const [bankModalVisible, setBankModalVisible] = useState(false);
+  const [branchModalVisible, setBranchModalVisible] = useState(false);
+
+  const bankModalData = bankNames.map((bank) => ({
+    label: bank.name,
+    value: bank.name,
+  }));
+
+  const branchModalData = filteredBranches.map((branch) => ({
+    label: branch.name,
+    value: branch.name,
+  }));
 
   useEffect(() => {
     if (bankName) {
@@ -72,13 +82,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       if (selectedBank) {
         try {
           const data = require("../../assets/jsons/branches.json");
-          const filteredBranches = data[selectedBank.ID] || [];
-
-          const sortedBranches = filteredBranches.sort(
-            (a: { name: string }, b: { name: any }) =>
-              a.name.localeCompare(b.name),
+          const branches = data[selectedBank.ID] || [];
+          const sortedBranches = branches.sort(
+            (a: { name: string }, b: { name: any }) => a.name.localeCompare(b.name),
           );
-
           setFilteredBranches(sortedBranches);
         } catch (error) {
           console.error("Error loading branches", error);
@@ -96,18 +103,13 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
   const handleNext = async () => {
     if (!accNumber || !accHolderName || !bankName || !branchName) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Please fill in all required fields."),
-      );
+      Alert.alert(t("Error.error"), t("Error.Please fill in all required fields."));
       setLoading(false);
       return;
     }
 
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
+    if (!netState.isConnected) return;
 
     try {
       const apiUrl = "https://api.getshoutout.com/otpservice/send";
@@ -120,62 +122,35 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       let companyName = "";
 
       if (PreferdLanguage === "Sinhala") {
-        companyName =
-          (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
-        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}
-      
-${accHolderName}
-${accNumber}
-${bankName}
-${branchName}
-      
-නිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
+        companyName = (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
+        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (PreferdLanguage === "Tamil") {
-        companyName =
-          (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
-        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}
-      
-${accHolderName}
-${accNumber}
-${bankName}
-${branchName}
-      
-சரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
+        companyName = (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
+        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
-        companyName =
-          (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
-        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}
-      
-${accHolderName}
-${accNumber}
-${bankName}
-${branchName}
-      
-If correct, share OTP only with the ${companyName} representative who contacts you.`;
+        companyName = (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
+        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
       const body = {
         source: "PolygonAgro",
         transport: "sms",
-        content: {
-          sms: otpMessage,
-        },
+        content: { sms: otpMessage },
         destination: `${phoneNumber}`,
       };
 
       const response = await axios.post(apiUrl, body, { headers });
-
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
       navigation.navigate("otpBankDetailsupdate", {
-        phoneNumber: phoneNumber,
-        accNumber: accNumber,
-        accHolderName: accHolderName,
-        bankName: bankName,
-        branchName: branchName,
-        PreferdLanguage: PreferdLanguage,
+        phoneNumber,
+        accNumber,
+        accHolderName,
+        bankName,
+        branchName,
+        PreferdLanguage,
         farmerId: id,
-        officerRole: officerRole,
+        officerRole,
       });
       setLoading(false);
     } catch (error) {
@@ -195,12 +170,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
   });
 
   const getTextStyle = (language: string) => {
-    if (language === "si") {
-      return {
-        fontSize: 14,
-        lineHeight: 20,
-      };
-    }
+    if (language === "si") return { fontSize: 14, lineHeight: 20 };
   };
 
   return (
@@ -216,17 +186,16 @@ If correct, share OTP only with the ${companyName} representative who contacts y
         onBackPress={() => navigation.goBack()}
       />
       <View className="flex-1 px-5 bg-white">
-        {/* Scrollable Form */}
         <ScrollView className="flex-1 p-3 mt-4">
+
+          {/* Account Number */}
           <View className="mb-4">
             <Text className="text-[#434343] mb-2">
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
               className={`border ${
-                accNumberError
-                  ? "border-red-500"
-                  : "border-[#F4F4F4] bg-[#F4F4F4]"
+                accNumberError ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
               } p-3 rounded-full`}
               keyboardType="numeric"
               value={accNumber}
@@ -235,16 +204,12 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                   setAccNumber(text);
                   setAccNumberError("");
                 } else {
-                  setAccNumberError(
-                    t("UnregisteredFarmerDetails.AccountNumberError"),
-                  );
+                  setAccNumberError(t("UnregisteredFarmerDetails.AccountNumberError"));
                 }
               }}
             />
             {accNumberError ? (
-              <Text className="text-red-500 text-sm mt-1">
-                {accNumberError}
-              </Text>
+              <Text className="text-red-500 text-sm mt-1">{accNumberError}</Text>
             ) : null}
           </View>
 
@@ -258,22 +223,12 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               value={accHolderName}
               onChangeText={(text) => {
                 let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
-
-                if (filteredText.startsWith(" ")) {
-                  filteredText = filteredText.trimStart();
-                }
-
+                if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
                 const capitalizedText = filteredText
                   .toLowerCase()
                   .split(" ")
-                  .map((word) => {
-                    if (word.length > 0) {
-                      return word.charAt(0).toUpperCase() + word.slice(1);
-                    }
-                    return word;
-                  })
+                  .map((word) => (word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word))
                   .join(" ");
-
                 setAccHolderName(capitalizedText);
               }}
               keyboardType="default"
@@ -288,23 +243,25 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             <Text className="text-[#434343] mb-2">
               {t("UnregisteredFarmerDetails.Bank")}
             </Text>
-            <View className="  rounded-full">
-              <SelectList
-                setSelected={setBankName}
-                data={bankNames.map((bank) => ({
-                  key: bank.name,
-                  value: bank.name,
-                }))}
-                placeholder="Select Bank"
-                boxStyles={{
-                  borderRadius: 25,
-                  borderColor: "#F4F4F4",
-                  backgroundColor: "#F4F4F4",
-                }}
-                dropdownStyles={{ borderColor: "#ccc" }}
-                search={true}
-              />
-            </View>
+            <TouchableOpacity
+              onPress={() => setBankModalVisible(true)}
+              style={{
+                height: 50,
+                backgroundColor: "#F4F4F4",
+                borderRadius: 50,
+                borderWidth: 1,
+                borderColor: "#F4F4F4",
+                paddingHorizontal: 14,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text style={{ color: bankName ? "#000" : "#9CA3AF", fontSize: 14 }}>
+                {bankName || "Select Bank"}
+              </Text>
+              <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+            </TouchableOpacity>
           </View>
 
           {/* Branch Name */}
@@ -312,24 +269,33 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             <Text className="text-[#434343] mb-2">
               {t("UnregisteredFarmerDetails.Branch")}
             </Text>
-            <View className=" rounded-full">
-              <SelectList
-                setSelected={setBranchName}
-                data={filteredBranches.map((branch) => ({
-                  key: branch.name,
-                  value: branch.name,
-                }))}
-                placeholder="Select Branch"
-                boxStyles={{
-                  borderRadius: 25,
-                  borderColor: "#F4F4F4",
-                  backgroundColor: "#F4F4F4",
-                }}
-                dropdownStyles={{ borderColor: "#ccc" }}
-                search={true}
-              />
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                if (!bankName) {
+                  Alert.alert(t("Error.error"), t("UnregisteredFarmerDetails.SelectBank"));
+                  return;
+                }
+                setBranchModalVisible(true);
+              }}
+              style={{
+                height: 50,
+                backgroundColor: "#F4F4F4",
+                borderRadius: 50,
+                borderWidth: 1,
+                borderColor: "#F4F4F4",
+                paddingHorizontal: 14,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text style={{ color: branchName ? "#000" : "#9CA3AF", fontSize: 14 }}>
+                {branchName || "Select Branch"}
+              </Text>
+              <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+            </TouchableOpacity>
           </View>
+
           <TouchableOpacity
             className={`p-3 rounded-full items-center mt-5 ${
               loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"
@@ -356,20 +322,15 @@ If correct, share OTP only with the ${companyName} representative who contacts y
         </ScrollView>
 
         {/* Success Modal */}
-        <Modal
-          transparent={true}
-          visible={isModalVisible}
-          animationType="slide"
-        >
+        <Modal transparent={true} visible={isModalVisible} animationType="slide">
           <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
-                {" "}
                 {t("UnregisteredFarmerDetails.Success")}
               </Text>
               <View className="mb-4">
                 <Image
-                  source={require("../../assets/images/collection-common/tick.webp")} // Replace with your own checkmark image
+                  source={require("../../assets/images/collection-common/tick.webp")}
                   className="w-24 h-24"
                 />
               </View>
@@ -377,20 +338,14 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                 {t("UnregisteredFarmerDetails.Successful")}
               </Text>
               <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
-                <Animated.View
-                  className="h-full bg-green-500"
-                  style={{ width: loadingBarWidth }}
-                />
+                <Animated.View className="h-full bg-green-500" style={{ width: loadingBarWidth }} />
               </View>
             </View>
           </View>
         </Modal>
 
-        <Modal
-          transparent={true}
-          visible={isUnsuccessfulModalVisible}
-          animationType="slide"
-        >
+        {/* Unsuccessful Modal */}
+        <Modal transparent={true} visible={isUnsuccessfulModalVisible} animationType="slide">
           <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
@@ -398,29 +353,22 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               </Text>
               <View className="mb-4">
                 <Image
-                  source={require("../../assets/images/collection-common/error-unregister.webp")} // Replace with your own error image
+                  source={require("../../assets/images/collection-common/error-unregister.webp")}
                   className="w-24 h-24"
                 />
               </View>
               <Text className="text-gray-700">
                 {t("UnregisteredFarmerDetails.Unsuccessful")}
               </Text>
-
-              {/* Display error message */}
               {errorMessage && (
-                <Text className="text-red-600 text-center mt-2">
-                  {errorMessage}
-                </Text>
+                <Text className="text-red-600 text-center mt-2">{errorMessage}</Text>
               )}
-
-              {/* Red Loading Bar */}
               <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
                 <Animated.View
                   className="h-full bg-red-500"
                   style={{ width: unsuccessfulLoadingBarWidth }}
                 />
               </View>
-
               <TouchableOpacity
                 className="bg-red-500 p-2 rounded-full mt-4"
                 onPress={() => {
@@ -429,14 +377,43 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                   unsuccessfulProgress.setValue(0);
                 }}
               >
-                <Text className="text-white">
-                  {t("UnregisteredFarmerDetails.Close")}
-                </Text>
+                <Text className="text-white">{t("UnregisteredFarmerDetails.Close")}</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
       </View>
+
+      {/* Bank Modal */}
+      <GlobalSearchModal
+        visible={bankModalVisible}
+        onClose={() => setBankModalVisible(false)}
+        title={t("UnregisteredFarmerDetails.Bank")}
+        data={bankModalData}
+        selectedItems={bankName ? [bankName] : []}
+        onSelect={(items) => {
+          const val = items[0] ?? "";
+          setBankName(val);
+          setBranchName(""); // reset branch when bank changes
+        }}
+        searchPlaceholder="Search bank..."
+        multiSelect={false}
+      />
+
+      {/* Branch Modal */}
+      <GlobalSearchModal
+        visible={branchModalVisible}
+        onClose={() => setBranchModalVisible(false)}
+        title={t("UnregisteredFarmerDetails.Branch")}
+        data={branchModalData}
+        selectedItems={branchName ? [branchName] : []}
+        onSelect={(items) => {
+          const val = items[0] ?? "";
+          setBranchName(val);
+        }}
+        searchPlaceholder="Search branch..."
+        multiSelect={false}
+      />
     </KeyboardAvoidingView>
   );
 };

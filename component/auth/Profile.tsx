@@ -13,10 +13,6 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomHeader from "../common/CustomHeader";
 import { environment } from "@/environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";

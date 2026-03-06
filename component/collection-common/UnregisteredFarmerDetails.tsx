@@ -17,13 +17,15 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import bankNames from "../../assets/jsons/banks.json";
+import districtData from "../../assets/jsons/sri-lanka-districts.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ActivityIndicator } from "react-native";
 import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
-import { SelectList } from "react-native-dropdown-select-list";
+import { MaterialIcons } from "@expo/vector-icons";
 import CustomHeader from "../common/CustomHeader";
+import GlobalSearchModal from "../common/GlobalSearchModal";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -75,6 +77,31 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [phoneError, setPhoneError] = useState("");
   const [accNumberError, setAccNumberError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [districtModalVisible, setDistrictModalVisible] = useState(false);
+  const [bankModalVisible, setBankModalVisible] = useState(false);
+  const [branchModalVisible, setBranchModalVisible] = useState(false);
+
+  const languageOptions = [
+    { label: "English", value: "English" },
+    { label: "සිංහල", value: "Sinhala" },
+    { label: "தமிழ்", value: "Tamil" },
+  ];
+
+  const districtOptions = districtData.map((d) => ({
+    label: t(d.translationKey),
+    value: d.value,
+  }));
+
+  const bankModalData = bankNames.map((bank) => ({
+    label: bank.name,
+    value: bank.name,
+  }));
+
+  const branchModalData = filteredBranches.map((branch) => ({
+    label: branch.name,
+    value: branch.name,
+  }));
 
   useEffect(() => {
     if (bankName) {
@@ -82,8 +109,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       if (selectedBank) {
         try {
           const data = require("../../assets/jsons/branches.json");
-          const filteredBranches = data[selectedBank.ID] || [];
-          const sortedBranches = filteredBranches.sort(
+          const branches = data[selectedBank.ID] || [];
+          const sortedBranches = branches.sort(
             (a: { name: string }, b: { name: any }) =>
               a.name.localeCompare(b.name),
           );
@@ -102,54 +129,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     }
   }, [bankName]);
 
-  const districtOptions = [
-    { key: 1, value: "Ampara", translationKey: t("Districts.Ampara") },
-    {
-      key: 2,
-      value: "Anuradhapura",
-      translationKey: t("Districts.Anuradhapura"),
-    },
-    { key: 3, value: "Badulla", translationKey: t("Districts.Badulla") },
-    { key: 4, value: "Batticaloa", translationKey: t("Districts.Batticaloa") },
-    { key: 5, value: "Colombo", translationKey: t("Districts.Colombo") },
-    { key: 6, value: "Galle", translationKey: t("Districts.Galle") },
-    { key: 7, value: "Gampaha", translationKey: t("Districts.Gampaha") },
-    { key: 8, value: "Hambantota", translationKey: t("Districts.Hambantota") },
-    { key: 9, value: "Jaffna", translationKey: t("Districts.Jaffna") },
-    { key: 10, value: "Kalutara", translationKey: t("Districts.Kalutara") },
-    { key: 11, value: "Kandy", translationKey: t("Districts.Kandy") },
-    { key: 12, value: "Kegalle", translationKey: t("Districts.Kegalle") },
-    {
-      key: 13,
-      value: "Kilinochchi",
-      translationKey: t("Districts.Kilinochchi"),
-    },
-    { key: 14, value: "Kurunegala", translationKey: t("Districts.Kurunegala") },
-    { key: 15, value: "Mannar", translationKey: t("Districts.Mannar") },
-    { key: 16, value: "Matale", translationKey: t("Districts.Matale") },
-    { key: 17, value: "Matara", translationKey: t("Districts.Matara") },
-    { key: 18, value: "Moneragala", translationKey: t("Districts.Moneragala") },
-    { key: 19, value: "Mullaitivu", translationKey: t("Districts.Mullaitivu") },
-    {
-      key: 20,
-      value: "Nuwara Eliya",
-      translationKey: t("Districts.NuwaraEliya"),
-    },
-    {
-      key: 21,
-      value: "Polonnaruwa",
-      translationKey: t("Districts.Polonnaruwa"),
-    },
-    { key: 22, value: "Puttalam", translationKey: t("Districts.Puttalam") },
-    { key: 23, value: "Rathnapura", translationKey: t("Districts.Rathnapura") },
-    {
-      key: 24,
-      value: "Trincomalee",
-      translationKey: t("Districts.Trincomalee"),
-    },
-    { key: 25, value: "Vavuniya", translationKey: t("Districts.Vavuniya") },
-  ];
-
   useEffect(() => {
     if (NIC) {
       setNICnumber(NIC);
@@ -159,15 +138,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const validateAllFields = () => {
     const errors: Record<string, string> = {};
 
-    if (!firstName.trim()) {
+    if (!firstName.trim())
       errors.firstName = t("UnregisteredFarmerDetails.EnterFirstName");
-    }
-    if (!lastName.trim()) {
+    if (!lastName.trim())
       errors.lastName = t("UnregisteredFarmerDetails.EnterLastName");
-    }
-    if (!PreferdLanguage) {
+    if (!PreferdLanguage)
       errors.preferdLanguage = t("UnregisteredFarmerDetails.SelectLanguage");
-    }
     if (!NICnumber.trim()) {
       errors.nic = t("UnregisteredFarmerDetails.EnterNIC");
     } else if (NICError) {
@@ -178,23 +154,18 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     } else if (phoneError) {
       errors.phone = phoneError;
     }
-    if (!district) {
+    if (!district)
       errors.district = t("UnregisteredFarmerDetails.SelectDistrict");
-    }
     if (!accNumber.trim()) {
       errors.accNumber = t("UnregisteredFarmerDetails.EnterAccountNumber");
     } else if (accNumberError) {
       errors.accNumber = accNumberError;
     }
-    if (!accHolderName.trim()) {
+    if (!accHolderName.trim())
       errors.accHolderName = t("UnregisteredFarmerDetails.EnterAccountName");
-    }
-    if (!bankName) {
-      errors.bankName = t("UnregisteredFarmerDetails.SelectBank");
-    }
-    if (!branchName) {
+    if (!bankName) errors.bankName = t("UnregisteredFarmerDetails.SelectBank");
+    if (!branchName)
       errors.branchName = t("UnregisteredFarmerDetails.SelectBranch");
-    }
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -202,7 +173,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
   const handleNext = async () => {
     Keyboard.dismiss();
-
     setFieldErrors({});
 
     if (!validateAllFields()) {
@@ -213,18 +183,18 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     await AsyncStorage.removeItem("referenceId");
 
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
+    if (!netState.isConnected) return;
 
     try {
-      const checkApiUrl = `api/farmer/farmer-register-checker`;
       const checkBody = {
         phoneNumber: `${callingCode}${phoneNumber}`,
         NICnumber: NICnumber,
       };
 
-      const checkResponse = await api.post(checkApiUrl, checkBody);
+      const checkResponse = await api.post(
+        "api/farmer/farmer-register-checker",
+        checkBody,
+      );
 
       if (checkResponse.data.message === "This Phone Number already exists.") {
         Alert.alert(
@@ -261,62 +231,38 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       if (PreferdLanguage === "Sinhala") {
         companyName =
           (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
-        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}
-        
-${accHolderName}
-${accNumber}
-${bankName}
-${branchName}
-        
-නිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
+        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (PreferdLanguage === "Tamil") {
         companyName =
           (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
-        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}
-        
-${accHolderName}
-${accNumber}
-${bankName}
-${branchName}
-        
-சரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
+        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
         companyName =
           (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
-        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}
-        
-${accHolderName}
-${accNumber}
-${bankName}
-${branchName}
-        
-If correct, share OTP only with the ${companyName} representative who contacts you.`;
+        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
       const body = {
         source: "PolygonAgro",
         transport: "sms",
-        content: {
-          sms: otpMessage,
-        },
+        content: { sms: otpMessage },
         destination: `${callingCode}${phoneNumber}`,
       };
 
       const response = await axios.post(apiUrl, body, { headers });
-
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
       navigation.navigate("OTPE", {
-        firstName: firstName,
-        lastName: lastName,
-        NICnumber: NICnumber,
+        firstName,
+        lastName,
+        NICnumber,
         phoneNumber: `${callingCode}${phoneNumber}`,
-        district: district,
-        accNumber: accNumber,
-        accHolderName: accHolderName,
-        bankName: bankName,
-        branchName: branchName,
-        PreferdLanguage: PreferdLanguage,
+        district,
+        accNumber,
+        accHolderName,
+        bankName,
+        branchName,
+        PreferdLanguage,
       });
       setLoading(false);
     } catch (error) {
@@ -336,67 +282,82 @@ If correct, share OTP only with the ${companyName} representative who contacts y
   });
 
   const getTextStyle = (language: string) => {
-    if (language === "si") {
-      return {
-        fontSize: 14,
-        lineHeight: 20,
-      };
-    }
+    if (language === "si") return { fontSize: 14, lineHeight: 20 };
   };
 
   const handleNameChange = (text: string, setName: (name: string) => void) => {
     let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
-    if (filteredText.startsWith(" ")) {
-      filteredText = filteredText.trimStart();
-    }
+    if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
     const capitalizedText = filteredText
       .toLowerCase()
       .split(" ")
-      .map((word) => {
-        if (word.length > 0) {
-          return word.charAt(0).toUpperCase() + word.slice(1);
-        }
-        return word;
-      })
+      .map((word) =>
+        word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word,
+      )
       .join(" ");
     setName(capitalizedText);
   };
 
   const handleFirstNameChange = (text: string) => {
     handleNameChange(text, setFirstName);
-
-    if (fieldErrors.firstName) {
+    if (fieldErrors.firstName)
       setFieldErrors((prev) => ({ ...prev, firstName: "" }));
-    }
   };
 
   const handleLastNameChange = (text: string) => {
     handleNameChange(text, setLastName);
-    if (fieldErrors.lastName) {
+    if (fieldErrors.lastName)
       setFieldErrors((prev) => ({ ...prev, lastName: "" }));
-    }
   };
 
   const handleAccountNameChange = (text: string) => {
     let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
-    if (filteredText.startsWith(" ")) {
-      filteredText = filteredText.trimStart();
-    }
+    if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
     const capitalizedText = filteredText
       .toLowerCase()
       .split(" ")
-      .map((word) => {
-        if (word.length > 0) {
-          return word.charAt(0).toUpperCase() + word.slice(1);
-        }
-        return word;
-      })
+      .map((word) =>
+        word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word,
+      )
       .join(" ");
     setAccHolderName(capitalizedText);
-    if (fieldErrors.accHolderName) {
+    if (fieldErrors.accHolderName)
       setFieldErrors((prev) => ({ ...prev, accHolderName: "" }));
-    }
   };
+
+  const SelectorButton = ({
+    value,
+    placeholder,
+    hasError,
+    onPress,
+  }: {
+    value: string;
+    placeholder: string;
+    hasError: boolean;
+    onPress: () => void;
+  }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        height: 48,
+        backgroundColor: "#F4F4F4",
+        borderRadius: 50,
+        borderWidth: 1,
+        borderColor: hasError ? "#ef4444" : "#F4F4F4",
+        paddingHorizontal: 14,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <Text
+        style={{ color: value ? "#000" : "#9CA3AF", fontSize: 14, flex: 1 }}
+      >
+        {value || placeholder}
+      </Text>
+      <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+    </TouchableOpacity>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -418,9 +379,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               {t("UnregisteredFarmerDetails.FirstName")}
             </Text>
             <TextInput
-              className={`border ${
-                fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
               value={firstName}
               onChangeText={handleFirstNameChange}
               keyboardType="default"
@@ -441,9 +400,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               {t("UnregisteredFarmerDetails.LastName")}
             </Text>
             <TextInput
-              className={`border ${
-                fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
               value={lastName}
               onChangeText={handleLastNameChange}
               keyboardType="default"
@@ -463,28 +420,14 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             <Text className="text-[#434343] mb-2">
               {t("UnregisteredFarmerDetails.Preferd Language")}
             </Text>
-            <SelectList
-              setSelected={(val: string) => {
-                setPreferdLanguage(val);
-                if (fieldErrors.preferdLanguage) {
-                  setFieldErrors((prev) => ({ ...prev, preferdLanguage: "" }));
-                }
-              }}
-              data={[
-                { key: "English", value: "English" },
-                { key: "Sinhala", value: "සිංහල" },
-                { key: "Tamil", value: "தமிழ்" },
-              ]}
+            <SelectorButton
+              value={
+                languageOptions.find((l) => l.value === PreferdLanguage)
+                  ?.label || ""
+              }
               placeholder="Select Language"
-              boxStyles={{
-                borderColor: fieldErrors.preferdLanguage
-                  ? "#red-500"
-                  : "#F4F4F4",
-                borderRadius: 25,
-                backgroundColor: "#F4F4F4",
-              }}
-              dropdownStyles={{ borderColor: "#ccc" }}
-              search={false}
+              hasError={!!fieldErrors.preferdLanguage}
+              onPress={() => setLanguageModalVisible(true)}
             />
             {fieldErrors.preferdLanguage ? (
               <Text className="text-red-500 text-sm mt-1">
@@ -500,11 +443,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             </Text>
             <TextInput
               placeholder={t("UnregisteredFarmerDetails.NIC")}
-              className={`border ${
-                fieldErrors.nic || NICError
-                  ? "border-red-500"
-                  : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
               value={NICnumber}
               onChangeText={(text) => {
                 const updatedText = text.replace(/v$/, "V");
@@ -512,9 +451,8 @@ If correct, share OTP only with the ${companyName} representative who contacts y
 
                 if (!updatedText) {
                   setNICError("");
-                  if (fieldErrors.nic) {
+                  if (fieldErrors.nic)
                     setFieldErrors((prev) => ({ ...prev, nic: "" }));
-                  }
                   return;
                 }
 
@@ -536,9 +474,8 @@ If correct, share OTP only with the ${companyName} representative who contacts y
 
                 if (is12Digits || is9DigitsWithV) {
                   setNICError("");
-                  if (fieldErrors.nic) {
+                  if (fieldErrors.nic)
                     setFieldErrors((prev) => ({ ...prev, nic: "" }));
-                  }
                 } else {
                   setNICError(t("UnregisteredFarmerDetails.InvalidNIC"));
                 }
@@ -558,11 +495,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               {t("UnregisteredFarmerDetails.Phone")}
             </Text>
             <View
-              className={`flex-row items-center border ${
-                fieldErrors.phone || phoneError
-                  ? "border-red-500"
-                  : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] p-1  rounded-full`}
+              className={`flex-row items-center border ${fieldErrors.phone || phoneError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-1 rounded-full`}
             >
               <TextInput
                 placeholder="7XXXXXXXX"
@@ -575,14 +508,12 @@ If correct, share OTP only with the ${companyName} representative who contacts y
                     );
                     return;
                   }
-
                   setPhoneNumber(text);
 
                   if (!text) {
                     setPhoneError("");
-                    if (fieldErrors.phone) {
+                    if (fieldErrors.phone)
                       setFieldErrors((prev) => ({ ...prev, phone: "" }));
-                    }
                     return;
                   }
 
@@ -595,9 +526,8 @@ If correct, share OTP only with the ${companyName} representative who contacts y
 
                   if (text.length === 9) {
                     setPhoneError("");
-                    if (fieldErrors.phone) {
+                    if (fieldErrors.phone)
                       setFieldErrors((prev) => ({ ...prev, phone: "" }));
-                    }
                   } else {
                     setPhoneError(
                       t("UnregisteredFarmerDetails.InvalidPhoneLength"),
@@ -620,28 +550,14 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             <Text className="text-[#434343] mb-2">
               {t("UnregisteredFarmerDetails.District")}
             </Text>
-            <View className="rounded-lg">
-              <SelectList
-                setSelected={(val: string) => {
-                  setDistrict(val);
-                  if (fieldErrors.district) {
-                    setFieldErrors((prev) => ({ ...prev, district: "" }));
-                  }
-                }}
-                data={districtOptions.map((district) => ({
-                  key: district.value,
-                  value: district.translationKey,
-                }))}
-                placeholder="--Select District--"
-                boxStyles={{
-                  borderColor: fieldErrors.district ? "red-500" : "#F4F4F4",
-                  borderRadius: 25,
-                  backgroundColor: "#F4F4F4",
-                }}
-                dropdownStyles={{ borderColor: "#ccc" }}
-                search={true}
-              />
-            </View>
+            <SelectorButton
+              value={
+                districtOptions.find((d) => d.value === district)?.label || ""
+              }
+              placeholder="--Select District--"
+              hasError={!!fieldErrors.district}
+              onPress={() => setDistrictModalVisible(true)}
+            />
             {fieldErrors.district ? (
               <Text className="text-red-500 text-sm mt-1">
                 {fieldErrors.district}
@@ -655,20 +571,15 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
-              className={`border ${
-                fieldErrors.accNumber || accNumberError
-                  ? "border-red-500"
-                  : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
               keyboardType="numeric"
               value={accNumber}
               onChangeText={(text) => {
                 if (/^\d*$/.test(text)) {
                   setAccNumber(text);
                   setAccNumberError("");
-                  if (fieldErrors.accNumber) {
+                  if (fieldErrors.accNumber)
                     setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
-                  }
                 } else {
                   setAccNumberError(
                     t("UnregisteredFarmerDetails.AccountNumberError"),
@@ -689,11 +600,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               {t("UnregisteredFarmerDetails.AccountName")}
             </Text>
             <TextInput
-              className={`border ${
-                fieldErrors.accHolderName
-                  ? "border-red-500"
-                  : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
               value={accHolderName}
               onChangeText={handleAccountNameChange}
               keyboardType="default"
@@ -713,28 +620,12 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             <Text className="text-[#434343] mb-2">
               {t("UnregisteredFarmerDetails.Bank")}
             </Text>
-            <View className="rounded-lg">
-              <SelectList
-                setSelected={(val: string) => {
-                  setBankName(val);
-                  if (fieldErrors.bankName) {
-                    setFieldErrors((prev) => ({ ...prev, bankName: "" }));
-                  }
-                }}
-                data={bankNames.map((bank) => ({
-                  key: bank.name,
-                  value: bank.name,
-                }))}
-                placeholder="--Select Bank--"
-                boxStyles={{
-                  borderColor: fieldErrors.bankName ? "red-500" : "#F4F4F4",
-                  borderRadius: 25,
-                  backgroundColor: "#F4F4F4",
-                }}
-                dropdownStyles={{ borderColor: "#ccc" }}
-                search={true}
-              />
-            </View>
+            <SelectorButton
+              value={bankName}
+              placeholder="--Select Bank--"
+              hasError={!!fieldErrors.bankName}
+              onPress={() => setBankModalVisible(true)}
+            />
             {fieldErrors.bankName ? (
               <Text className="text-red-500 text-sm mt-1">
                 {fieldErrors.bankName}
@@ -747,28 +638,21 @@ If correct, share OTP only with the ${companyName} representative who contacts y
             <Text className="text-[#434343] mb-2">
               {t("UnregisteredFarmerDetails.Branch")}
             </Text>
-            <View className="rounded-lg">
-              <SelectList
-                setSelected={(val: string) => {
-                  setBranchName(val);
-                  if (fieldErrors.branchName) {
-                    setFieldErrors((prev) => ({ ...prev, branchName: "" }));
-                  }
-                }}
-                data={filteredBranches.map((branch) => ({
-                  key: branch.name,
-                  value: branch.name,
-                }))}
-                placeholder="--Select Branch--"
-                boxStyles={{
-                  borderColor: fieldErrors.branchName ? "red-500" : "#F4F4F4",
-                  borderRadius: 25,
-                  backgroundColor: "#F4F4F4",
-                }}
-                dropdownStyles={{ borderColor: "#ccc" }}
-                search={true}
-              />
-            </View>
+            <SelectorButton
+              value={branchName}
+              placeholder="--Select Branch--"
+              hasError={!!fieldErrors.branchName}
+              onPress={() => {
+                if (!bankName) {
+                  Alert.alert(
+                    t("Error.error"),
+                    t("UnregisteredFarmerDetails.SelectBank"),
+                  );
+                  return;
+                }
+                setBranchModalVisible(true);
+              }}
+            />
             {fieldErrors.branchName ? (
               <Text className="text-red-500 text-sm mt-1">
                 {fieldErrors.branchName}
@@ -778,9 +662,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
         </ScrollView>
 
         <TouchableOpacity
-          className={`p-3 rounded-full items-center mt-5 ${
-            loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"
-          }`}
+          className={`p-3 rounded-full items-center mt-5 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
           onPress={() => {
             if (!loading) {
               setLoading(true);
@@ -831,6 +713,7 @@ If correct, share OTP only with the ${companyName} representative who contacts y
           </View>
         </Modal>
 
+        {/* Unsuccessful Modal */}
         <Modal
           transparent={true}
           visible={isUnsuccessfulModalVisible}
@@ -850,20 +733,17 @@ If correct, share OTP only with the ${companyName} representative who contacts y
               <Text className="text-gray-700">
                 {t("UnregisteredFarmerDetails.Unsuccessful")}
               </Text>
-
               {errorMessage && (
                 <Text className="text-red-600 text-center mt-2">
                   {errorMessage}
                 </Text>
               )}
-
               <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
                 <Animated.View
                   className="h-full bg-red-500"
                   style={{ width: unsuccessfulLoadingBarWidth }}
                 />
               </View>
-
               <TouchableOpacity
                 className="bg-red-500 p-2 rounded-full mt-4"
                 onPress={() => {
@@ -880,6 +760,75 @@ If correct, share OTP only with the ${companyName} representative who contacts y
           </View>
         </Modal>
       </View>
+
+      {/* Language Modal */}
+      <GlobalSearchModal
+        visible={languageModalVisible}
+        onClose={() => setLanguageModalVisible(false)}
+        title={t("UnregisteredFarmerDetails.Preferd Language")}
+        data={languageOptions}
+        selectedItems={PreferdLanguage ? [PreferdLanguage] : []}
+        onSelect={(items) => {
+          const val = items[0] ?? "";
+          setPreferdLanguage(val);
+          if (val && fieldErrors.preferdLanguage)
+            setFieldErrors((prev) => ({ ...prev, preferdLanguage: "" }));
+        }}
+        multiSelect={false}
+        showSearch={false}
+      />
+
+      {/* District Modal */}
+      <GlobalSearchModal
+        visible={districtModalVisible}
+        onClose={() => setDistrictModalVisible(false)}
+        title={t("UnregisteredFarmerDetails.District")}
+        data={districtOptions}
+        selectedItems={district ? [district] : []}
+        onSelect={(items) => {
+          const val = items[0] ?? "";
+          setDistrict(val);
+          if (val && fieldErrors.district)
+            setFieldErrors((prev) => ({ ...prev, district: "" }));
+        }}
+        searchPlaceholder="Search district..."
+        multiSelect={false}
+      />
+
+      {/* Bank Modal */}
+      <GlobalSearchModal
+        visible={bankModalVisible}
+        onClose={() => setBankModalVisible(false)}
+        title={t("UnregisteredFarmerDetails.Bank")}
+        data={bankModalData}
+        selectedItems={bankName ? [bankName] : []}
+        onSelect={(items) => {
+          const val = items[0] ?? "";
+          setBankName(val);
+          setBranchName("");
+          if (val && fieldErrors.bankName)
+            setFieldErrors((prev) => ({ ...prev, bankName: "" }));
+        }}
+        searchPlaceholder="Search bank..."
+        multiSelect={false}
+      />
+
+      {/* Branch Modal */}
+      <GlobalSearchModal
+        visible={branchModalVisible}
+        onClose={() => setBranchModalVisible(false)}
+        title={t("UnregisteredFarmerDetails.Branch")}
+        data={branchModalData}
+        selectedItems={branchName ? [branchName] : []}
+        onSelect={(items) => {
+          const val = items[0] ?? "";
+          setBranchName(val);
+          if (val && fieldErrors.branchName)
+            setFieldErrors((prev) => ({ ...prev, branchName: "" }));
+        }}
+        searchPlaceholder="Search branch..."
+        multiSelect={false}
+      />
     </KeyboardAvoidingView>
   );
 };

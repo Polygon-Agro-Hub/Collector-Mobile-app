@@ -4,9 +4,10 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
 import * as ImagePicker from "react-native-image-picker";
-import DropDownPicker from "react-native-dropdown-picker";
 import { useTranslation } from "react-i18next";
+import { MaterialIcons } from "@expo/vector-icons";
 import CustomHeader from "../common/CustomHeader";
+import GlobalSearchModal from "../common/GlobalSearchModal";
 
 type UfarmercropdetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -25,23 +26,24 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
   const [total, setTotal] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [selectedNav, setSelectedNav] = useState<string | null>(null);
-  const [openCrop, setOpenCrop] = useState(false);
-  const [cropValue, setCropValue] = useState(null);
-  const [cropItems, setCropItems] = useState([
+
+  const [cropValue, setCropValue] = useState<string | null>(null);
+  const [cropItems] = useState([
     { label: "Carrots", value: "carrots" },
     { label: "Potatoes", value: "potatoes" },
     { label: "Tomatoes", value: "tomatoes" },
   ]);
+  const [cropModalVisible, setCropModalVisible] = useState(false);
 
-  const [openQuality, setOpenQuality] = useState(false);
-  const [qualityValue, setQualityValue] = useState(null);
-  const [qualityItems, setQualityItems] = useState([
+  const [qualityValue, setQualityValue] = useState<string | null>(null);
+  const [qualityItems] = useState([
     { label: "High", value: "high" },
     { label: "Medium", value: "medium" },
     { label: "Low", value: "low" },
   ]);
-  const { t } = useTranslation();
+  const [qualityModalVisible, setQualityModalVisible] = useState(false);
 
+  const { t } = useTranslation();
   const borderRadiusValue = 10;
 
   useEffect(() => {
@@ -80,6 +82,11 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
     );
   };
 
+  const selectedCropLabel =
+    cropItems.find((o) => o.value === cropValue)?.label || null;
+  const selectedQualityLabel =
+    qualityItems.find((o) => o.value === qualityValue)?.label || null;
+
   return (
     <View className="flex-1 bg-white">
       <CustomHeader
@@ -91,52 +98,75 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
 
       <View className="ml-[10%] mr-[10%] flex-1">
         <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+          {/* Crop Name */}
           <Text className="text-base pb-[2%] font-medium">
             {t("Ufarmercropdetails.CropName")}
           </Text>
-          <View style={{ zIndex: 500 }}>
-            <DropDownPicker
-              open={openCrop}
-              value={cropValue}
-              items={cropItems}
-              setOpen={setOpenCrop}
-              setValue={setCropValue}
-              setItems={setCropItems}
-              placeholder="Select a crop"
+          <TouchableOpacity
+            onPress={() => setCropModalVisible(true)}
+            style={{
+              borderColor: "gray",
+              borderWidth: 1,
+              borderRadius: borderRadiusValue,
+              marginBottom: 16,
+              backgroundColor: "white",
+              height: 50,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingHorizontal: 12,
+            }}
+          >
+            <Text
               style={{
-                borderColor: "gray",
-                borderWidth: 1,
-                borderRadius: borderRadiusValue,
+                color: selectedCropLabel ? "#000" : "#2E2E2E",
+                fontSize: 14,
               }}
-              placeholderStyle={{ color: "#2E2E2E" }}
-              containerStyle={{ marginBottom: 16 }}
-              zIndex={500}
+            >
+              {selectedCropLabel || "Select a crop"}
+            </Text>
+            <MaterialIcons
+              name="keyboard-arrow-down"
+              size={22}
+              color="#9CA3AF"
             />
-          </View>
+          </TouchableOpacity>
 
+          {/* Quality */}
           <Text className="text-base pb-[2%] font-medium">
             {t("Ufarmercropdetails.Quality")}
           </Text>
-          <View style={{ zIndex: 400 }}>
-            <DropDownPicker
-              open={openQuality}
-              value={qualityValue}
-              items={qualityItems}
-              setOpen={setOpenQuality}
-              setValue={setQualityValue}
-              setItems={setQualityItems}
-              placeholder="Select quality"
+          <TouchableOpacity
+            onPress={() => setQualityModalVisible(true)}
+            style={{
+              borderColor: "gray",
+              borderWidth: 1,
+              borderRadius: borderRadiusValue,
+              marginBottom: 16,
+              backgroundColor: "white",
+              height: 50,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingHorizontal: 12,
+            }}
+          >
+            <Text
               style={{
-                borderColor: "gray",
-                borderWidth: 1,
-                borderRadius: borderRadiusValue,
+                color: selectedQualityLabel ? "#000" : "#2E2E2E",
+                fontSize: 14,
               }}
-              placeholderStyle={{ color: "#2E2E2E" }}
-              containerStyle={{ marginBottom: 16 }}
-              zIndex={400}
+            >
+              {selectedQualityLabel || "Select quality"}
+            </Text>
+            <MaterialIcons
+              name="keyboard-arrow-down"
+              size={22}
+              color="#9CA3AF"
             />
-          </View>
+          </TouchableOpacity>
 
+          {/* Quantity */}
           <Text className="text-base pb-[2%] font-medium">
             {t("Ufarmercropdetails.Quantity")}
           </Text>
@@ -158,6 +188,7 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
             />
           </View>
 
+          {/* Unit Price */}
           <Text className="text-base pb-[2%] font-medium">
             {t("Ufarmercropdetails.UnitPrice")}
           </Text>
@@ -179,6 +210,7 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
             />
           </View>
 
+          {/* Upload Image */}
           <Text className="text-base pb-[2%] font-medium">
             {t("Ufarmercropdetails.UploadImage")}
           </Text>
@@ -192,7 +224,6 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
             </Text>
           </TouchableOpacity>
 
-          {/* Display selected image */}
           {imageUri && (
             <Image
               source={{ uri: imageUri }}
@@ -206,6 +237,7 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
             />
           )}
 
+          {/* Total */}
           <Text className="text-base pb-[2%] font-medium">
             {t("Ufarmercropdetails.Total")}
           </Text>
@@ -276,6 +308,31 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Crop Modal */}
+      <GlobalSearchModal
+        visible={cropModalVisible}
+        onClose={() => setCropModalVisible(false)}
+        title={t("Ufarmercropdetails.CropName")}
+        data={cropItems}
+        selectedItems={cropValue ? [cropValue] : []}
+        onSelect={(items) => setCropValue(items[0] ?? null)}
+        searchPlaceholder="Search crop..."
+        multiSelect={false}
+      />
+
+      {/* Quality Modal */}
+      <GlobalSearchModal
+        visible={qualityModalVisible}
+        onClose={() => setQualityModalVisible(false)}
+        title={t("Ufarmercropdetails.Quality")}
+        data={qualityItems}
+        selectedItems={qualityValue ? [qualityValue] : []}
+        onSelect={(items) => setQualityValue(items[0] ?? null)}
+        searchPlaceholder="Search quality..."
+        multiSelect={false}
+        showSearch={false}
+      />
     </View>
   );
 };
