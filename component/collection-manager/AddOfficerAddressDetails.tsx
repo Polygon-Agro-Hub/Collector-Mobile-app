@@ -393,7 +393,7 @@ const AddOfficerAddressDetails: React.FC = () => {
       disabled={disabled}
       className={`border ${
         hasError ? "border-red-500" : "border-[#F4F4F4]"
-      } bg-[#F4F4F4] rounded-full px-4 h-[46px] flex-row items-center justify-between ${
+      } bg-[#F4F4F4] rounded-2xl px-4 h-[46px] flex-row items-center justify-between ${
         disabled ? "opacity-50" : ""
       }`}
     >
@@ -430,7 +430,7 @@ const AddOfficerAddressDetails: React.FC = () => {
             onChangeText={(text) => handleInputChange("houseNumber", text)}
             className={`border ${
               fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.houseNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -449,7 +449,7 @@ const AddOfficerAddressDetails: React.FC = () => {
             }
             className={`border ${
               fieldErrors.streetName ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
             autoCorrect={false}
           />
           {fieldErrors.streetName ? (
@@ -467,7 +467,7 @@ const AddOfficerAddressDetails: React.FC = () => {
             onChangeText={(text) => handleInputChange("city", formatText(text))}
             className={`border ${
               fieldErrors.city ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
             autoCorrect={false}
           />
           {fieldErrors.city ? (
@@ -478,12 +478,12 @@ const AddOfficerAddressDetails: React.FC = () => {
             <View className="mb-3" />
           )}
 
-          {/* Country (read-only) */}
+          {/* Country */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.Country")}
             value={t("AddOfficerAddressDetails.Country")}
             editable={false}
-            className="border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-3 mb-4 text-gray-700"
+            className="border-[#F4F4F4] bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-4 text-gray-700"
           />
 
           {/* Province */}
@@ -576,7 +576,7 @@ const AddOfficerAddressDetails: React.FC = () => {
               fieldErrors.accountHolderName
                 ? "border-red-500"
                 : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.accountHolderName ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -594,7 +594,7 @@ const AddOfficerAddressDetails: React.FC = () => {
             onChangeText={(text) => handleValidation("accountNumber", text)}
             className={`border ${
               fieldErrors.accountNumber ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.accountNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -616,7 +616,7 @@ const AddOfficerAddressDetails: React.FC = () => {
               error || fieldErrors.confirmAccountNumber
                 ? "border-red-500"
                 : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {error || fieldErrors.confirmAccountNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -664,13 +664,14 @@ const AddOfficerAddressDetails: React.FC = () => {
         </View>
 
         {/* ── Buttons ── */}
-        <View className="flex-row justify-center space-x-4 px-4 mt-8 mb-4">
+
+        <View className="px-8 flex-col w-full gap-4 mt-5 mb-4">
           <TouchableOpacity
+            className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
             onPress={() => navigation.goBack()}
-            className="bg-gray-300 px-8 py-3 rounded-full"
           >
             <Text
-              className="text-gray-800 text-center"
+              className="text-[#686868]"
               style={[
                 i18n.language === "si"
                   ? { fontSize: 13 }
@@ -682,18 +683,19 @@ const AddOfficerAddressDetails: React.FC = () => {
               {t("AddOfficerAddressDetails.Go")}
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            onPress={handleSubmit}
-            className={`bg-[#000000] px-8 py-3 rounded-full ${
+            className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${
               loading ? "opacity-50" : ""
             }`}
+            onPress={handleSubmit}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />
             ) : (
               <Text
-                className="text-white text-center"
+                className="text-white"
                 style={[
                   i18n.language === "si"
                     ? { fontSize: 13 }
@@ -702,7 +704,7 @@ const AddOfficerAddressDetails: React.FC = () => {
                       : { fontSize: 14 },
                 ]}
               >
-                {t("AddOfficerAddressDetails.Submit")}
+                {t("AddOfficerBasicDetails.Next")}
               </Text>
             )}
           </TouchableOpacity>

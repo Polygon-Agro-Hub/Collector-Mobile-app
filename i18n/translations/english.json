@@ -537,6 +537,8 @@
   "AddOfficerBasicDetails": {
     "LNG": "en",
     "AddOfficer": "Add Officer",
+    "SelectCountryCode":"Select Country Code",
+    "SearchCountry":"Search Country",
     "Type": "Type :",
     "Permanent": "Permanent",
     "Temporary": "Temporary",
