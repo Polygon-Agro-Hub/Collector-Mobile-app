@@ -49,7 +49,6 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
   const [farmerName, setFarmerName] = useState("");
   const [farmerNIC, setFarmerNIC] = useState("");
   const [farmerQRCode, setFarmerQRCode] = useState<string | null>(null);
-
   const [farmerPhone, setFarmerPhone] = useState("");
   const [farmerLanguage, setFarmerLanguage] = useState("");
   const [loading, setLoading] = useState<boolean>(true);
@@ -97,7 +96,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     fetchFarmerData();
 
     const getPermissions = async () => {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync();
     };
 
     getPermissions();
@@ -115,7 +114,22 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const response = await api.post(
+      const eligibilityResponse = await api.get(
+        `api/pension/check-eligibility/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!eligibilityResponse.data.eligible) {
+        setCheckingPensionStatus(false);
+        navigation.navigate("NotEligibleScreen");
+        return;
+      }
+
+      const statusResponse = await api.post(
         `api/pension/pension-request/check-status-by-nic`,
         { nic: farmerNIC },
         {
@@ -127,11 +141,11 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
       setCheckingPensionStatus(false);
 
-      if (response.data.status) {
-        if (response.data.hasPensionRequest) {
+      if (statusResponse.data.status) {
+        if (statusResponse.data.hasPensionRequest) {
           navigation.navigate("GoviPensionStatus", {
-            status: response.data.reqStatus,
-            creatAt: response.data.requestCreatedAt,
+            status: statusResponse.data.reqStatus,
+            creatAt: statusResponse.data.requestCreatedAt,
           });
         } else {
           navigation.navigate("GoviPensionForm", {
@@ -143,12 +157,12 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       } else {
         Alert.alert(
           t("Error.error"),
-          response.data.message || "Failed to check pension status",
+          statusResponse.data.message || "Failed to check pension status",
         );
       }
     } catch (error: any) {
       setCheckingPensionStatus(false);
-      console.error("Error checking pension status:", error);
+      console.error("Error checking pension eligibility/status:", error);
 
       if (error.response?.status === 401) {
         Alert.alert(
@@ -165,6 +179,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       }
     }
   };
+
   const downloadQRCode = async () => {
     try {
       if (!farmerQRCode) {

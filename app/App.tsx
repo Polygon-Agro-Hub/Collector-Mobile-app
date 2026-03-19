@@ -2,9 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Alert,
   Text,
-  View,
   TextInput,
-  Dimensions,
   StatusBar,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -113,6 +111,7 @@ import ReceivedCashOfficer from "@/component/distribution-officer/ReceivedCashOf
 import ReceivedCashQrCode from "@/component/distribution-officer/ReceivedCashQrCode";
 import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
+import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
 
 LogBox.ignoreAllLogs(true);
 NativeWindStyleSheet.setOutput({
@@ -493,6 +492,10 @@ function AppContent() {
             <Stack.Screen
               name="GoviPensionStatus"
               component={GoviPensionStatus as any}
+            />
+            <Stack.Screen
+              name="NotEligibleScreen"
+              component={NotEligibleScreen as any}
             />
           </Stack.Navigator>
         </NavigationContainer>

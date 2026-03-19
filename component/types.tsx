@@ -352,6 +352,7 @@ export type RootStackParamList = {
     status: string;
     creatAt: string;
   };
+  NotEligibleScreen:undefined
 };
 
 export interface OrderItem {
