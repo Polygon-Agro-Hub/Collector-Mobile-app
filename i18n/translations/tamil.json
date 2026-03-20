@@ -536,6 +536,8 @@
   "AddOfficerBasicDetails": {
     "LNG": "ta",
     "AddOfficer": "அதிகாரியைச் சேர்க்கவும்",
+    "SelectCountryCode":"நாட்டின் குறியீட்டைத் தேர்ந்தெடுக்கவும்",
+    "SearchCountry":"நாட்டைத் தேடு",
     "Type": "வகை :",
     "Permanent": "நிரந்தரமானது",
     "Temporary": "தற்காலிகமானது",

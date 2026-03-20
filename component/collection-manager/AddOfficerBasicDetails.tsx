@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import axios from "axios";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { RadioButton } from "react-native-paper";
+import Checkbox from "expo-checkbox";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { RouteProp } from "@react-navigation/native";
@@ -25,7 +27,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
 import countryData from "../../assets/jsons/countryflag.json";
 import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal"; 
+import GlobalSearchModal from "../common/GlobalSearchModal";
 
 type AddOfficerBasicDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -68,7 +70,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const [phoneNumber1, setPhoneNumber1] = useState("");
   const [phoneNumber2, setPhoneNumber2] = useState("");
   const { t } = useTranslation();
-
+  const [currentCountryCodeModal, setCurrentCountryCodeModal] = useState<
+    "phone1" | "phone2"
+  >("phone1");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [error1, setError1] = useState("");
@@ -135,7 +139,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     if (normalizedInput.length === 0) {
       setError3("");
     } else if (!validateNicNumber(normalizedInput)) {
-      setError3(t("Error.NIC Number must be 9 digits followed by 'V' or 12 digits."));
+      setError3(
+        t("Error.NIC Number must be 9 digits followed by 'V' or 12 digits."),
+      );
     } else {
       setError3("");
       checkNicExists(normalizedInput);
@@ -144,7 +150,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
   const checkNicExists = async (nic: string) => {
     if (!validateNicNumber(nic) || nic.length === 0) return;
-
     try {
       setIsValidating(true);
       const token = await AsyncStorage.getItem("token");
@@ -170,7 +175,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         `${environment.API_BASE_URL}api/collection-manager/generate-empId/${role}`,
       );
       if (response.data.status) {
-        setFormData((prev) => ({ ...prev, userId: response.data.result.empId }));
+        setFormData((prev) => ({
+          ...prev,
+          userId: response.data.result.empId,
+        }));
       }
     } catch (error) {
       console.error("Error fetching empId:", error);
@@ -178,7 +186,11 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     }
   };
 
-  useFocusEffect(useCallback(() => { fetchEmpId(jobRole); }, [jobRole]));
+  useFocusEffect(
+    useCallback(() => {
+      fetchEmpId(jobRole);
+    }, [jobRole]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -189,37 +201,51 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   );
 
   const handleImagePick = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
-      Alert.alert(t("Error.Permission required"), t("Error.Permission required message"));
+      Alert.alert(
+        t("Error.Permission required"),
+        t("Error.Permission required message"),
+      );
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      base64: true,
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
     });
-
-    if (!result.canceled && result.assets?.[0]?.base64) {
-      setSelectedImage(result.assets[0].base64);
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setSelectedImage(result.assets[0].uri);
     }
   };
 
   const validateFields = () => {
     const errors: Record<string, string> = {};
 
-    if (!formData.firstNameEnglish.trim()) errors.firstNameEnglish = t("Error.First name in English is required");
-    if (!formData.lastNameEnglish.trim()) errors.lastNameEnglish = t("Error.Last name in English is required");
-    if (!formData.firstNameSinhala?.trim()) errors.firstNameSinhala = t("Error.First name in Sinhala is required");
-    if (!formData.lastNameSinhala?.trim()) errors.lastNameSinhala = t("Error.Last name in Sinhala is required");
-    if (!formData.firstNameTamil?.trim()) errors.firstNameTamil = t("Error.First name in Tamil is required");
-    if (!formData.lastNameTamil?.trim()) errors.lastNameTamil = t("Error.Last name in Tamil is required");
-    if (!phoneNumber1.trim()) errors.phoneNumber1 = t("Error.Phone number is required");
-    if (!formData.nicNumber.trim()) errors.nicNumber = t("Error.NIC number is required");
+    if (!formData.firstNameEnglish.trim())
+      errors.firstNameEnglish = t("Error.First name in English is required");
+    if (!formData.lastNameEnglish.trim())
+      errors.lastNameEnglish = t("Error.Last name in English is required");
+    if (!formData.firstNameSinhala?.trim())
+      errors.firstNameSinhala = t("Error.First name in Sinhala is required");
+    if (!formData.lastNameSinhala?.trim())
+      errors.lastNameSinhala = t("Error.Last name in Sinhala is required");
+    if (!formData.firstNameTamil?.trim())
+      errors.firstNameTamil = t("Error.First name in Tamil is required");
+    if (!formData.lastNameTamil?.trim())
+      errors.lastNameTamil = t("Error.Last name in Tamil is required");
+    if (!phoneNumber1.trim())
+      errors.phoneNumber1 = t("Error.Phone number is required");
+    if (!formData.nicNumber.trim())
+      errors.nicNumber = t("Error.NIC number is required");
     if (!formData.email.trim()) errors.email = t("Error.Email is required");
     if (!jobRole) errors.jobRole = t("Error.Job role is required");
     if (Object.values(preferredLanguages).every((val) => !val)) {
-      errors.preferredLanguages = t("Error.Please select at least one preferred language");
+      errors.preferredLanguages = t(
+        "Error.Please select at least one preferred language",
+      );
     }
 
     setFieldErrors(errors);
@@ -243,7 +269,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         phoneNumber2,
         profileImage: selectedImage || "",
       };
-
       navigation.navigate("AddOfficerAddressDetails", {
         formData: { ...updatedFormData },
         type,
@@ -262,8 +287,12 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     clearFieldError(fieldName);
     let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
     if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
-    const capitalizedText = filteredText.toLowerCase().split(" ")
-      .map((word) => word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word)
+    const capitalizedText = filteredText
+      .toLowerCase()
+      .split(" ")
+      .map((word) =>
+        word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word,
+      )
       .join(" ");
     setFormData({ ...formData, [fieldName]: capitalizedText });
   };
@@ -313,7 +342,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.exists) {
-        setError1(t("Error.This phone number is already registered in the system."));
+        setError1(
+          t("Error.This phone number is already registered in the system."),
+        );
       } else {
         setError1("");
       }
@@ -352,7 +383,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.exists) {
-        setError2(t("Error.This phone number is already registered in the system."));
+        setError2(
+          t("Error.This phone number is already registered in the system."),
+        );
       } else {
         setError2("");
       }
@@ -364,14 +397,14 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const validateEmail = (email: string): boolean => {
-    const generalEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const generalEmailRegex =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!generalEmailRegex.test(email)) return false;
-
     const emailLower = email.toLowerCase();
     const [localPart, domain] = emailLower.split("@");
     const allowedTLDs = [".com", ".gov", ".lk"];
-
-    if (domain === "gmail.com" || domain === "googlemail.com") return validateGmailLocalPart(localPart);
+    if (domain === "gmail.com" || domain === "googlemail.com")
+      return validateGmailLocalPart(localPart);
     if (domain === "yahoo.com") return true;
     for (const tld of allowedTLDs) {
       if (domain.endsWith(tld)) return true;
@@ -392,8 +425,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     const trimmedInput = input.trim();
     setFormData({ ...formData, email: trimmedInput });
 
-    if (!trimmedInput) { setErrorEmail(t("Error.Email is required")); return; }
-
+    if (!trimmedInput) {
+      setErrorEmail(t("Error.Email is required"));
+      return;
+    }
     if (!validateEmail(trimmedInput)) {
       const domain = trimmedInput.toLowerCase().split("@")[1];
       setErrorEmail(
@@ -403,14 +438,15 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       );
       return;
     }
-
     setErrorEmail("");
     checkEmailExists(trimmedInput);
   };
 
   const checkEmailExists = async (email: string) => {
-    if (!validateEmail(email)) { setErrorEmail(t("Error.Invalid email address Example")); return; }
-
+    if (!validateEmail(email)) {
+      setErrorEmail(t("Error.Invalid email address Example"));
+      return;
+    }
     try {
       setIsValidating(true);
       const token = await AsyncStorage.getItem("token");
@@ -419,7 +455,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.exists) {
-        setErrorEmail(t("Error.This Email is already registered in the system."));
+        setErrorEmail(
+          t("Error.This Email is already registered in the system."),
+        );
       } else {
         setErrorEmail("");
       }
@@ -431,97 +469,104 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     }
   };
 
-  // Phone code selector pill component
-  const PhoneCodeSelector = ({
-    value,
-    onPress,
-    hasError,
-  }: {
-    value: string;
-    onPress: () => void;
-    hasError?: boolean;
-  }) => (
+  const handleCountryCodeSelect = (selectedValues: string[]) => {
+    if (selectedValues.length > 0) {
+      const selectedCode = selectedValues[0];
+      if (currentCountryCodeModal === "phone1") {
+        setPhoneCode1(selectedCode);
+        setPhoneCode1ModalVisible(false);
+      } else {
+        setPhoneCode2(selectedCode);
+        setPhoneCode2ModalVisible(false);
+      }
+    }
+  };
+
+  const renderCountryCodeItem = (item: any, isSelected: boolean) => (
     <TouchableOpacity
-      onPress={onPress}
-      style={{
-        width: 90,
-        height: 46,
-        backgroundColor: "#F4F4F4",
-        borderRadius: 25,
-        borderWidth: 1,
-        borderColor: hasError ? "#ef4444" : "#F4F4F4",
-        paddingHorizontal: 10,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
+      className="px-4 py-3 border-b border-gray-200 flex-row items-center"
+      onPress={() => handleCountryCodeSelect([item.value])}
     >
-      <Text style={{ fontSize: 13, color: "#374151" }} numberOfLines={1}>
-        {value}
-      </Text>
-      <MaterialIcons name="keyboard-arrow-down" size={16} color="#9CA3AF" />
+      <Text className="text-2xl mr-3">{item.flag}</Text>
+      <View className="flex-1 flex-row items-center justify-between">
+        <Text className="text-sm text-gray-600">{item.dialCode}</Text>
+        <Text className="text-base text-gray-800 font-medium">
+          {item.countryName}
+        </Text>
+      </View>
+      {isSelected && <MaterialIcons name="check" size={20} color="#21202B" />}
     </TouchableOpacity>
   );
 
+  const getSelectedFlag = (dialCode: string) =>
+    countryItems.find((item) => item.dialCode === dialCode)?.flag ?? "🏳️";
+
   return (
-    <>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        enabled
-        style={{ flex: 1 }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1, backgroundColor: "white" }}
+    >
+      <CustomHeader
+        title={t("AddOfficerBasicDetails.AddOfficer")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={async () => {
+          try {
+            await AsyncStorage.removeItem("officerFormData");
+            navigation.goBack();
+          } catch (error) {
+            console.error("Error clearing form data:", error);
+          }
+        }}
+      />
+
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
-          <CustomHeader
-            title={t("AddOfficerBasicDetails.AddOfficer")}
-            showBackButton={true}
-            navigation={navigation}
-            onBackPress={async () => {
-              try {
-                await AsyncStorage.removeItem("officerFormData");
-                navigation.goBack();
-              } catch (error) {
-                console.error("Error clearing form data:", error);
-              }
-            }}
-          />
+        {/* ── Profile Avatar ── */}
+        <View className="items-center mt-6">
+          <TouchableOpacity onPress={handleImagePick}>
+            <View className="relative">
+              <View className="w-20 h-20 bg-gray-300 rounded-full overflow-hidden items-center justify-center">
+                {selectedImage ? (
+                  <Image
+                    source={{ uri: `data:image/png;base64,${selectedImage}` }}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Ionicons name="person" size={40} color="#fff" />
+                )}
+              </View>
+              <View className="absolute bottom-0 right-0 w-6 h-6 bg-[#980775] rounded-full items-center justify-center">
+                <Ionicons name="pencil" size={14} color="#fff" />
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
 
-          {/* Profile Avatar */}
-          <View className="justify-center items-center my-4 relative">
-            <Image
-              source={
-                selectedImage
-                  ? { uri: `data:image/png;base64,${selectedImage}` }
-                  : require("../../assets/images/collection-manager/user2.webp")
-              }
-              className="w-24 h-24 rounded-full"
-            />
-            <TouchableOpacity
-              onPress={handleImagePick}
-              className="absolute bottom-0 right-4 bg-[#980775] p-1 rounded-full mr-[35%] shadow-md"
-              style={{ elevation: 5 }}
-            >
-              <Ionicons name="pencil" size={18} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Type Selector */}
-          <View className="px-8 flex-row items-center mb-4">
-            <Text className="font-semibold text-sm mr-4">
-              {t("AddOfficerBasicDetails.Type")}
-            </Text>
-            {(["Permanent", "Temporary"] as const).map((t_type) => (
+        <View className="p-2 px-4">
+          {/* ── Type Selector ── */}
+          <View className="px-2 mt-6 items-center">
+            <View className="flex flex-row items-center space-x-2 justify-between">
+              <Text className="text-base font-medium">
+                {t("AddOfficerBasicDetails.Type")}
+              </Text>
               <TouchableOpacity
-                key={t_type}
-                className={`flex-row items-center ${t_type === "Permanent" ? "mr-6" : ""}`}
-                onPress={() => setType(t_type)}
+                className="flex-row items-center"
+                onPress={() => setType("Permanent")}
               >
-                <Ionicons
-                  name={type === t_type ? "radio-button-on" : "radio-button-off"}
-                  size={20}
+                <RadioButton
+                  value="Permanent"
+                  status={type === "Permanent" ? "checked" : "unchecked"}
+                  onPress={() => setType("Permanent")}
                   color="#980775"
+                  uncheckedColor="#980775"
                 />
                 <Text
-                  className="ml-2 text-gray-700"
+                  className="ml-1 text-base text-[#534E4E]"
                   style={[
                     i18n.language === "si"
                       ? { fontSize: 13 }
@@ -530,245 +575,435 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                         : { fontSize: 14 },
                   ]}
                 >
-                  {t_type === "Permanent"
-                    ? t("AddOfficerBasicDetails.Permanent")
-                    : t("AddOfficerBasicDetails.Temporary")}
+                  {t("AddOfficerBasicDetails.Permanent")}
                 </Text>
               </TouchableOpacity>
-            ))}
+
+              <TouchableOpacity
+                className="flex-row items-center"
+                onPress={() => setType("Temporary")}
+              >
+                <RadioButton
+                  value="Temporary"
+                  status={type === "Temporary" ? "checked" : "unchecked"}
+                  onPress={() => setType("Temporary")}
+                  color="#980775"
+                  uncheckedColor="#980775"
+                />
+                <Text
+                  className="ml-1 text-base text-[#534E4E]"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 10 }
+                        : { fontSize: 14 },
+                  ]}
+                >
+                  {t("AddOfficerBasicDetails.Temporary")}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <View style={{ borderBottomWidth: 1, borderColor: "#ADADAD", marginVertical: 10 }} />
+          {/* ── Divider ── */}
+          <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
-          {/* Preferred Languages */}
-          <View className="px-8 mb-1">
-            <Text className="font-semibold text-sm mb-2">
+          {/* ── Preferred Languages ── */}
+          <View className="px-6 mt-4">
+            <Text className="text-base font-medium mb-4">
               {t("AddOfficerBasicDetails.PreferredLanguages")}
             </Text>
-            <View className="flex-row items-center">
-              {["සිංහල", "English", "தமிழ்"].map((lang) => (
-                <TouchableOpacity
-                  key={lang}
-                  className="flex-row items-center mr-6"
-                  onPress={() => toggleLanguage(lang as keyof typeof preferredLanguages)}
+            <View className="flex-row justify-between space-x-4">
+              {(
+                Object.keys(preferredLanguages) as Array<
+                  keyof typeof preferredLanguages
                 >
-                  <Ionicons
-                    name={
-                      preferredLanguages[lang as keyof typeof preferredLanguages]
-                        ? "checkbox"
-                        : "square-outline"
-                    }
-                    size={20}
-                    color="#980775"
+              ).map((lang) => (
+                <View key={lang} className="flex-row items-center space-x-1">
+                  <Checkbox
+                    value={preferredLanguages[lang]}
+                    onValueChange={() => toggleLanguage(lang)}
+                    color={preferredLanguages[lang] ? "#980775" : "#980775"}
                   />
-                  <Text className="ml-2 text-gray-700">{lang}</Text>
-                </TouchableOpacity>
+                  <Text className="text-base text-[#534E4E]">
+                    {t(`AddOfficerBasicDetails.${lang}`)}
+                  </Text>
+                </View>
               ))}
             </View>
+            {fieldErrors.preferredLanguages && (
+              <Text className="text-red-500 text-sm mt-1">
+                {fieldErrors.preferredLanguages}
+              </Text>
+            )}
           </View>
-          {fieldErrors.preferredLanguages ? (
-            <Text className="text-red-500 text-sm mb-3 ml-8">{fieldErrors.preferredLanguages}</Text>
-          ) : (
-            <View className="mb-3" />
-          )}
 
-          <View style={{ borderBottomWidth: 1, borderColor: "#ADADAD", marginVertical: 10 }} />
+          {/* ── Divider ── */}
+          <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
-          {/* Input Fields */}
-          <View className="px-8">
-            {/* Name fields */}
-            {[
-              { placeholder: t("AddOfficerBasicDetails.FirstNameEnglish"), key: "firstNameEnglish", handler: handleEnglishNameChange },
-              { placeholder: t("AddOfficerBasicDetails.LastNameEnglish"), key: "lastNameEnglish", handler: handleEnglishNameChange },
-              { placeholder: t("AddOfficerBasicDetails.FirstNameinSinhala"), key: "firstNameSinhala", handler: handleSinhalaNameChange },
-              { placeholder: t("AddOfficerBasicDetails.LastNameSinhala"), key: "lastNameSinhala", handler: handleSinhalaNameChange },
-              { placeholder: t("AddOfficerBasicDetails.FirstNameTamil"), key: "firstNameTamil", handler: handleTamilNameChange },
-              { placeholder: t("AddOfficerBasicDetails.LastNameTamil"), key: "lastNameTamil", handler: handleTamilNameChange },
-            ].map(({ placeholder, key, handler }) => (
-              <View key={key}>
-                <TextInput
-                  placeholder={placeholder}
-                  value={(formData as any)[key]}
-                  onChangeText={(text) => handler(text, key)}
-                  className={`border ${fieldErrors[key] ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
-                  keyboardType="default"
-                  autoCapitalize={key.includes("English") ? "words" : "none"}
-                  autoCorrect={false}
-                />
-                {fieldErrors[key] ? (
-                  <Text className="text-red-500 text-sm mb-3 ml-3">{fieldErrors[key]}</Text>
-                ) : (
-                  <View className="mb-3" />
-                )}
-              </View>
-            ))}
+          {/* ── Name Fields ── */}
+          <View className="px-2 mt-4 space-y-4">
+            {/* First Name English */}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.FirstNameEnglish")}
+                placeholderTextColor="#7D7D7D"
+                value={formData.firstNameEnglish}
+                onChangeText={(text) =>
+                  handleEnglishNameChange(text, "firstNameEnglish")
+                }
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.firstNameEnglish ? "border border-red-500" : ""
+                }`}
+                keyboardType="default"
+                autoCapitalize="words"
+                autoCorrect={false}
+                underlineColorAndroid="transparent"
+              />
+              {fieldErrors.firstNameEnglish && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.firstNameEnglish}
+                </Text>
+              )}
+            </View>
 
+            {/* Last Name English */}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.LastNameEnglish")}
+                placeholderTextColor="#7D7D7D"
+                value={formData.lastNameEnglish}
+                onChangeText={(text) =>
+                  handleEnglishNameChange(text, "lastNameEnglish")
+                }
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.lastNameEnglish ? "border border-red-500" : ""
+                }`}
+                keyboardType="default"
+                autoCapitalize="words"
+                autoCorrect={false}
+                underlineColorAndroid="transparent"
+              />
+              {fieldErrors.lastNameEnglish && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.lastNameEnglish}
+                </Text>
+              )}
+            </View>
+
+            {/* First Name Sinhala */}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.FirstNameinSinhala")}
+                placeholderTextColor="#7D7D7D"
+                value={formData.firstNameSinhala}
+                onChangeText={(text) =>
+                  handleSinhalaNameChange(text, "firstNameSinhala")
+                }
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.firstNameSinhala ? "border border-red-500" : ""
+                }`}
+                autoCorrect={false}
+                underlineColorAndroid="transparent"
+              />
+              {fieldErrors.firstNameSinhala && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.firstNameSinhala}
+                </Text>
+              )}
+            </View>
+
+            {/* Last Name Sinhala */}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.LastNameSinhala")}
+                placeholderTextColor="#7D7D7D"
+                value={formData.lastNameSinhala}
+                onChangeText={(text) =>
+                  handleSinhalaNameChange(text, "lastNameSinhala")
+                }
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.lastNameSinhala ? "border border-red-500" : ""
+                }`}
+                autoCorrect={false}
+                underlineColorAndroid="transparent"
+              />
+              {fieldErrors.lastNameSinhala && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.lastNameSinhala}
+                </Text>
+              )}
+            </View>
+
+            {/* First Name Tamil */}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.FirstNameTamil")}
+                placeholderTextColor="#7D7D7D"
+                value={formData.firstNameTamil}
+                onChangeText={(text) =>
+                  handleTamilNameChange(text, "firstNameTamil")
+                }
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.firstNameTamil ? "border border-red-500" : ""
+                }`}
+                autoCorrect={false}
+                underlineColorAndroid="transparent"
+              />
+              {fieldErrors.firstNameTamil && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.firstNameTamil}
+                </Text>
+              )}
+            </View>
+
+            {/* Last Name Tamil */}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.LastNameTamil")}
+                placeholderTextColor="#7D7D7D"
+                value={formData.lastNameTamil}
+                onChangeText={(text) =>
+                  handleTamilNameChange(text, "lastNameTamil")
+                }
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.lastNameTamil ? "border border-red-500" : ""
+                }`}
+                autoCorrect={false}
+                underlineColorAndroid="transparent"
+              />
+              {fieldErrors.lastNameTamil && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.lastNameTamil}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* ── Divider ── */}
+          <View className="border border-[#ADADAD] border-b-0 mt-4" />
+
+          {/* ── Phone & Contact Fields ── */}
+          <View className="px-2 mt-4 space-y-4">
             {/* Phone Number 1 */}
-            <View className="mb-1">
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <PhoneCodeSelector
-                  value={phoneCode1}
-                  onPress={() => setPhoneCode1ModalVisible(true)}
-                  hasError={!!fieldErrors.phoneNumber1}
-                />
-                <View
-                  style={{
-                    flex: 1,
-                    height: 46,
-                    borderWidth: 1,
-                    borderColor: fieldErrors.phoneNumber1 ? "#ef4444" : "#F4F4F4",
-                    backgroundColor: "#F4F4F4",
-                    borderRadius: 25,
-                    justifyContent: "center",
+            <View>
+              <View className="flex-row space-x-2">
+                <TouchableOpacity
+                  className="bg-[#F4F4F4] rounded-2xl px-3 py-4 w-24 flex-row justify-between items-center"
+                  onPress={() => {
+                    setCurrentCountryCodeModal("phone1");
+                    setPhoneCode1ModalVisible(true);
                   }}
                 >
+                  <Text className="text-base">
+                    {getSelectedFlag(phoneCode1)}
+                  </Text>
+                  <Text className="text-black text-xs">{phoneCode1}</Text>
+                  <MaterialIcons
+                    name="arrow-drop-down"
+                    size={18}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+                <View className="flex-1">
                   <TextInput
-                    placeholder="7X-XXX-XXXX"
-                    keyboardType="phone-pad"
+                    placeholder="7XXXXXXXX"
+                    placeholderTextColor="#7D7D7D"
+                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${
+                      error1 || fieldErrors.phoneNumber1
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={phoneNumber1}
                     onChangeText={handlePhoneNumber1Change}
-                    style={{ paddingHorizontal: 14, fontSize: 14, color: "#374151" }}
+                    keyboardType="phone-pad"
+                    underlineColorAndroid="transparent"
                     maxLength={9}
                   />
                 </View>
               </View>
+              {(error1 || fieldErrors.phoneNumber1) && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.phoneNumber1 || error1}
+                </Text>
+              )}
             </View>
-            {error1 || fieldErrors.phoneNumber1 ? (
-              <Text className="text-red-500 text-sm mb-3 ml-3">
-                {fieldErrors.phoneNumber1 || error1}
-              </Text>
-            ) : (
-              <View className="mb-3" />
-            )}
 
             {/* Phone Number 2 */}
-            <View className="mb-1">
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <PhoneCodeSelector
-                  value={phoneCode2}
-                  onPress={() => setPhoneCode2ModalVisible(true)}
-                />
-                <View
-                  style={{
-                    flex: 1,
-                    height: 46,
-                    borderWidth: 1,
-                    borderColor: "#F4F4F4",
-                    backgroundColor: "#F4F4F4",
-                    borderRadius: 25,
-                    justifyContent: "center",
+            <View>
+              <View className="flex-row space-x-2">
+                <TouchableOpacity
+                  className="bg-[#F4F4F4] rounded-2xl px-3 py-4 w-24 flex-row justify-between items-center"
+                  onPress={() => {
+                    setCurrentCountryCodeModal("phone2");
+                    setPhoneCode2ModalVisible(true);
                   }}
                 >
+                  <Text className="text-base">
+                    {getSelectedFlag(phoneCode2)}
+                  </Text>
+                  <Text className="text-black text-xs">{phoneCode2}</Text>
+                  <MaterialIcons
+                    name="arrow-drop-down"
+                    size={18}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+                <View className="flex-1">
                   <TextInput
-                    placeholder="7X-XXX-XXXX"
-                    keyboardType="phone-pad"
+                    placeholder="7XXXXXXXX"
+                    placeholderTextColor="#7D7D7D"
+                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${
+                      error2 ? "border border-red-500" : ""
+                    }`}
                     value={phoneNumber2}
                     onChangeText={handlePhoneNumber2Change}
-                    style={{ paddingHorizontal: 14, fontSize: 14, color: "#374151" }}
+                    keyboardType="phone-pad"
+                    underlineColorAndroid="transparent"
                     maxLength={9}
                   />
                 </View>
               </View>
+              {error2 && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">{error2}</Text>
+              )}
             </View>
-            {error2 ? (
-              <Text className="text-red-500 text-sm mb-3 ml-3">{error2}</Text>
-            ) : (
-              <View className="mb-3" />
-            )}
 
             {/* NIC */}
-            <TextInput
-              placeholder={t("AddOfficerBasicDetails.NIC")}
-              value={formData.nicNumber}
-              onChangeText={handleNicNumberChange}
-              maxLength={12}
-              keyboardType="default"
-              autoCapitalize="characters"
-              autoCorrect={false}
-              className={`border ${fieldErrors.nicNumber || error3 ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
-            />
-            {error3 || fieldErrors.nicNumber ? (
-              <Text className="text-red-500 text-sm mb-3 ml-3">
-                {fieldErrors.nicNumber || error3}
-              </Text>
-            ) : (
-              <View className="mb-3" />
-            )}
+            <View>
+              <TextInput
+                placeholder={t("AddOfficerBasicDetails.NIC")}
+                placeholderTextColor="#7D7D7D"
+                value={formData.nicNumber}
+                onChangeText={handleNicNumberChange}
+                maxLength={12}
+                keyboardType="default"
+                autoCapitalize="characters"
+                autoCorrect={false}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
+                }`}
+                underlineColorAndroid="transparent"
+              />
+              {(error3 || fieldErrors.nicNumber) && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.nicNumber || error3}
+                </Text>
+              )}
+            </View>
 
             {/* Email */}
             <View>
               <TextInput
                 placeholder={t("AddOfficerBasicDetails.Email")}
+                placeholderTextColor="#7D7D7D"
                 value={formData.email}
                 onChangeText={handleEmailChange}
-                className={`border ${fieldErrors.email || errorEmail ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-full px-3 py-3 mb-1 text-gray-700`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.email || errorEmail ? "border border-red-500" : ""
+                }`}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!isValidating}
+                underlineColorAndroid="transparent"
               />
               {isValidating && (
-                <Text style={{ color: "#666", fontSize: 12, marginBottom: 4, marginLeft: 12 }}>
+                <Text className="text-gray-500 text-xs mt-1 ml-2">
                   {t("Validating email...")}
                 </Text>
               )}
-              {errorEmail || fieldErrors.email ? (
-                <Text className="text-red-500 text-sm mb-3 ml-3">
+              {(errorEmail || fieldErrors.email) && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
                   {fieldErrors.email || errorEmail}
                 </Text>
-              ) : (
-                <View className="mb-3" />
               )}
             </View>
           </View>
 
-          {/* Buttons */}
-          <View className="flex-row justify-center space-x-3 px-2 mt-8 mb-4">
+          {/* ── Buttons ── */}
+          <View className="px-2 flex-col w-full gap-4 mt-6">
             <TouchableOpacity
+              className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
               onPress={() => navigation.goBack()}
-              className="bg-gray-300 px-10 py-3 rounded-full"
             >
-              <Text className="text-gray-800 text-center">
+              <Text
+                className="text-[#686868]"
+                style={[
+                  i18n.language === "si"
+                    ? { fontSize: 13 }
+                    : i18n.language === "ta"
+                      ? { fontSize: 10 }
+                      : { fontSize: 14 },
+                ]}
+              >
                 {t("AddOfficerBasicDetails.Cancel")}
               </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
+              className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${
+                isValidating ? "opacity-50" : ""
+              }`}
               onPress={handleNext}
               disabled={isValidating}
-              className={`${isValidating ? "bg-gray-400" : "bg-[#000000]"} px-12 py-3 rounded-full`}
             >
-              <Text className="text-white text-center">
-                {isValidating ? <ActivityIndicator /> : t("AddOfficerBasicDetails.Next")}
-              </Text>
+              {isValidating ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text
+                  className="text-white"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 10 }
+                        : { fontSize: 14 },
+                  ]}
+                >
+                  {t("AddOfficerBasicDetails.Next")}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </ScrollView>
 
       {/* Phone Code 1 Modal */}
       <GlobalSearchModal
         visible={phoneCode1ModalVisible}
         onClose={() => setPhoneCode1ModalVisible(false)}
-        title="Select Country Code"
+        title={t("AddOfficerBasicDetails.SelectCountryCode")}
         data={countryItems}
         selectedItems={[phoneCode1]}
-        onSelect={(items) => setPhoneCode1(items[0] ?? "+94")}
-        searchPlaceholder="Search country or code..."
+        onSelect={(items) => {
+          setPhoneCode1(items[0] ?? "+94");
+          setPhoneCode1ModalVisible(false);
+        }}
+        searchPlaceholder={t("AddOfficerBasicDetails.SearchCountry")}
         multiSelect={false}
+        renderItem={renderCountryCodeItem}
+        searchKeys={["label", "value", "countryName"]}
       />
 
       {/* Phone Code 2 Modal */}
       <GlobalSearchModal
         visible={phoneCode2ModalVisible}
         onClose={() => setPhoneCode2ModalVisible(false)}
-        title="Select Country Code"
+        title={t("AddOfficerBasicDetails.SelectCountryCode")}
         data={countryItems}
         selectedItems={[phoneCode2]}
-        onSelect={(items) => setPhoneCode2(items[0] ?? "+94")}
-        searchPlaceholder="Search country or code..."
+        onSelect={(items) => {
+          setPhoneCode2(items[0] ?? "+94");
+          setPhoneCode2ModalVisible(false);
+        }}
+        searchPlaceholder={t("AddOfficerBasicDetails.SearchCountry")}
         multiSelect={false}
+        renderItem={renderCountryCodeItem}
+        searchKeys={["label", "value", "countryName"]}
       />
-    </>
+    </KeyboardAvoidingView>
   );
 };
 

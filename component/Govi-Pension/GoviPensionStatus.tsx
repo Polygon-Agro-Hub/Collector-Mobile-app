@@ -131,7 +131,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
 
         {/* Status Content */}
         <View className="px-8 mb-10">
-          <Text className="text-md text-[#4B6B87] text-center leading-7">
+          <Text className="text-md text-[#4B6B87] text-center leading-5">
             {config.content}
           </Text>
         </View>

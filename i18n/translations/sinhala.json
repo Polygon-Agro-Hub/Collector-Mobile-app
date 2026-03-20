@@ -537,6 +537,8 @@
   "AddOfficerBasicDetails": {
     "LNG": "si",
     "AddOfficer": "නිලධාරියෙක් එකතු කරන්න",
+    "SelectCountryCode":"රටේ කේතය තෝරන්න",
+    "SearchCountry":"රට සොයන්න",
     "Type": "ස්වභාවය :",
     "Permanent": "ස්ථිර",
     "Temporary": "තාවකාලික",
