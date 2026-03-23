@@ -1153,7 +1153,8 @@
     "September": "September",
     "October": "October",
     "November": "November",
-    "December": "December"
+    "December": "December",
+    "Enteravalidenic":"Please enter a valid National Identity Card (NIC) number"
   },
   "GoviPensionStatus": {
     "Application Already Submitted!": "Application Already Submitted!",
