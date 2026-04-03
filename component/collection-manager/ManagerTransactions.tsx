@@ -16,7 +16,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { RootStackParamList } from "../types";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AntDesign } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import { Platform } from "react-native";
@@ -220,7 +220,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
               onPress={() => navigation.goBack()}
               className=" bg-[#FFFFFF1A] rounded-full  p-2 justify-center w-10"
             >
-              <AntDesign name="left" size={22} color="white" />
+              <Entypo name="chevron-left" size={25} color="white" />
             </TouchableOpacity>
 
             <Text className="text-white text-lg font-bold text-center flex-1">

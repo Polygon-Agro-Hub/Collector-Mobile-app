@@ -11,12 +11,11 @@ import {
   Modal,
   BackHandler,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { CircularProgress } from "react-native-circular-progress";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { environment } from "@/environment/environment";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
@@ -269,9 +268,11 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
                 screen: "DistributionOfficersList",
               })
             }
-            className="absolute top-4 left-4 bg-[#F6F6F680] rounded-full p-2"
+            className="absolute top-2 left-4 bg-[#F6F6F680] rounded-full p-3"
+            
           >
-            <AntDesign name="left" size={22} color="#000" />
+            <Entypo
+              name="chevron-left" size={25} color="#000" />
           </TouchableOpacity>
 
           <TouchableOpacity

@@ -175,17 +175,16 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
       >
+        <CustomHeader
+          title={t("SearchFarmer.Search")}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => navigation.goBack()}
+        />
         <View
           className="flex-1 bg-white"
           style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
         >
-          <CustomHeader
-            title={t("SearchFarmer.Search")}
-            showBackButton={true}
-            navigation={navigation}
-            onBackPress={() => navigation.goBack()}
-          />
-
           {/* Search Form */}
           <View className="p-4">
             <Text

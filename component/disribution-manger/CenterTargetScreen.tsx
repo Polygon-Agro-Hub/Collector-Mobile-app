@@ -22,7 +22,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { RouteProp } from "@react-navigation/native";
 import { Animated } from "react-native";
@@ -1135,7 +1135,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           className="absolute left-4 bg-white/10 rounded-full  justify-center items-center"
           style={{ width: 40, height: 40 }}
         >
-          <AntDesign name="left" size={22} color="white" />
+          <Entypo name="chevron-left" size={25} color="white" />
         </TouchableOpacity>
 
         {selectedToggle === "ToDo" && (

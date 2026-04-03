@@ -374,7 +374,7 @@ const DailyTargetListOfficerDistribution: React.FC<
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
 
-      <View className="bg-[#282828] px-4  flex-row justify-center items-center">
+      <View className="bg-[#282828]  flex-row justify-center items-center">
         <CustomHeader
           title={officerId || ""}
           showBackButton={true}

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
@@ -16,6 +15,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
+import CustomHeader from "./CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -160,23 +160,14 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   };
 
   return (
-    <View
-      className="flex-1 bg-white"
-      style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
-    >
-      {/* Header */}
-      <View className="flex-row items-center mb-6">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="bg-[#F6F6F680] rounded-full p-2"
-        >
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text className="flex-1 text-center text-xl font-bold text-black">
-          {t("OfficerQr.QRCode")}
-        </Text>
-      </View>
-      <ScrollView>
+    <View className="flex-1 bg-white">
+      <CustomHeader
+        title={t("OfficerQr.QRCode")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
+      <ScrollView style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}>
         {/* QR Code Display */}
         <View className="items-center mb-4 mt-5">
           {QR ? (

@@ -417,10 +417,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-white"
-      style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
-    >
+    <ScrollView className="flex-1 bg-white">
       <CustomHeader
         title={t("")}
         showBackButton={true}
@@ -430,7 +427,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
       <View
         className="flex justify-center items-center"
-        style={{ marginTop: dynamicStyles.margingTopForImage }}
+        style={{
+          marginTop: dynamicStyles.margingTopForImage,
+          paddingHorizontal: wp(4),
+          paddingVertical: hp(2),
+        }}
       >
         <Image
           source={require("../../assets/images/collection-common/opt.webp")}

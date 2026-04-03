@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
@@ -23,6 +17,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { LanguageContext } from "@/context/LanguageContext";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "./CustomHeader";
 
 type EngProfileNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -275,21 +270,20 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
   };
 
   return (
-    <View
-      className="flex-1 bg-white "
-      style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
-    >
-      {/* Back Button */}
-      <TouchableOpacity
-        onPress={() => handleBackPress()}
-        className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-      >
-        <AntDesign name="left" size={24} color="#000502" />
-      </TouchableOpacity>
+    <View className="flex-1 bg-white ">
+      <CustomHeader
+        title=""
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => handleBackPress()}
+      />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+      >
         {/* Profile Card */}
-        <View className="flex-row items-center p-2 mt-4  mb-4">
+        <View className="flex-row items-center px-2  mb-4">
           <Image
             source={
               profile?.image
@@ -486,8 +480,6 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            width: "120%",
-            height: "100%",
             backgroundColor: "white",
             justifyContent: "center",
             alignItems: "center",

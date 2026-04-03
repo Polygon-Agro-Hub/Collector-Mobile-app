@@ -9,7 +9,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -215,10 +215,10 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
       {/* Header */}
       <View className="bg-white px-4 py-4 flex-row items-center ">
         <TouchableOpacity
-          className="absolute left-4 bg-[#F6F6F680] rounded-full p-2 z-50"
+          className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={24} color="#000" />
+          <Entypo name="chevron-left" size={25} color="#000" />
         </TouchableOpacity>
         <View className="flex-1 items-center justify-center ml-2">
           <Text className="text-lg font-semibold text-gray-900">

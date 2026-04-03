@@ -22,6 +22,7 @@ import {
 } from "react-native-responsive-screen";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../common/CustomHeader";
+import LottieView from "lottie-react-native";
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -361,7 +362,12 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   if (loadingCurrentReplace) {
     return (
       <View className="flex-1 bg-white justify-center items-center">
-        <ActivityIndicator size="large" color="#000" />
+        <LottieView
+          source={require("../../assets/lottie/newLottie.json")}
+          autoPlay
+          loop
+          style={{ width: 300, height: 300 }}
+        />
         <Text className="mt-2 text-gray-600">
           {t("ReplaceRequestsApprove.Loading replace request")}
         </Text>
