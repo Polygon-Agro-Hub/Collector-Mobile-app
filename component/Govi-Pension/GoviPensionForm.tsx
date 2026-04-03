@@ -132,7 +132,6 @@ const CustomDatePicker = ({
             <View style={{ width: 60 }} />
           </View>
 
-          {/* Date Pickers */}
           <View className="px-5 py-6">
             {/* Year Picker */}
             <View className="mb-4">
@@ -198,7 +197,7 @@ const CustomDatePicker = ({
                     <TouchableOpacity
                       key={day}
                       onPress={() => setSelectedDay(day)}
-                      className={`w-1/7 py-3 px-2 ${selectedDay === day ? "bg-[#980775] rounded-xl" : ""}`}
+                      className={`py-3 px-2 ${selectedDay === day ? "bg-[#980775] rounded-xl" : ""}`}
                       style={{ width: "14.28%" }}
                     >
                       <Text
@@ -219,6 +218,7 @@ const CustomDatePicker = ({
                 {`${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`}
               </Text>
             </View>
+
             <View className="mt-3">
               <TouchableOpacity
                 onPress={handleConfirm}
@@ -241,67 +241,17 @@ const sanitizeNameInput = (text: string): string => {
     /[^a-zA-Z.\u00C0-\u024F\u1E00-\u1EFF\s]/g,
     "",
   );
-
   const trimmed = lettersDotsSpaces.replace(/^\s+/, "");
-
   if (trimmed.length === 0) return trimmed;
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-};
-
-const handleNicInput = (text: string): string => {
-  const stripped = text.replace(/[^0-9Vv]/g, "");
-
-  const vIndex = stripped.search(/[Vv]/);
-
-  if (vIndex !== -1) {
-    const digitsBeforeV = stripped.slice(0, vIndex).replace(/\D/g, "");
-
-    return digitsBeforeV + "V";
-  }
-
-  return stripped.slice(0, 12);
-};
-
-const getNicValidationMessage = (nic: string): string | null => {
-  if (!nic.trim()) return null;
-
-  const hasV = nic.includes("V");
-
-  if (hasV) {
-    const digitsBeforeV = nic.slice(0, -1);
-    if (digitsBeforeV.length < 9) {
-      return `NIC needs ${9 - digitsBeforeV.length} more digit(s) before V`;
-    }
-    if (digitsBeforeV.length === 9) {
-      return null;
-    }
-  }
-
-  const digitCount = nic.replace(/\D/g, "").length;
-
-  if (digitCount === 12) {
-    return null;
-  }
-
-  if (digitCount < 9) {
-    return "Enter 9 digits + V (old NIC) or 12 digits (new NIC)";
-  }
-
-  if (digitCount === 9) {
-    return "Add 'V' to complete old NIC, or 3 more digits for new NIC";
-  }
-
-  if (digitCount > 9 && digitCount < 12) {
-    return `${12 - digitCount} more digit(s) needed for new NIC`;
-  }
-
-  return "NIC must be 9 digits + V or 12 digits";
 };
 
 const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const [currentSection, setCurrentSection] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [successorNicError, setSuccessorNicError] = useState("");
 
   const route = useRoute<GoviPensionFormProps["route"]>();
   const { farmerNIC, farmerName, farmerPhone, userId } = route.params || {};
@@ -361,14 +311,12 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-
     if (
       monthDiff < 0 ||
       (monthDiff === 0 && today.getDate() < birthDate.getDate())
     ) {
       age--;
     }
-
     return age;
   };
 
@@ -377,11 +325,10 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     return calculateAge(formData.successorDateOfBirth) >= 17;
   };
 
+  const nicRegex = /^(\d{12}|\d{9}[VvXx])$/;
+
   const validateNIC = (nic: string): boolean => {
-    const cleanNIC = nic.trim();
-    const oldNICPattern = /^[0-9]{9}[Vv]$/;
-    const newNICPattern = /^[0-9]{12}$/;
-    return oldNICPattern.test(cleanNIC) || newNICPattern.test(cleanNIC);
+    return nicRegex.test(nic.trim());
   };
 
   const formatDate = (date: Date | null): string => {
@@ -395,6 +342,35 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const formatDateForAPI = (date: Date | null): string => {
     if (!date) return "";
     return date.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const handleSuccessorNicChange = (text: string) => {
+    const cleaned = text.replace(/[^0-9VvXx]/g, "");
+    const normalized = cleaned.replace(/[vV]/g, "V").replace(/[xX]/g, "X");
+    let final = normalized;
+
+    if (
+      normalized.length > 9 &&
+      (normalized.includes("V") || normalized.includes("X"))
+    ) {
+      const nums = normalized.replace(/[VX]/g, "");
+      const lets = normalized.replace(/[0-9]/g, "");
+      if (nums.length === 9 && lets.length === 1) {
+        final = nums + lets;
+      } else if (nums.length >= 9) {
+        final = nums.substring(0, 9) + (lets.length > 0 ? lets.charAt(0) : "");
+      } else {
+        final = nums;
+      }
+    }
+
+    if (final.length > 12) final = final.substring(0, 12);
+
+    updateFormData("successorNicNumber", final);
+
+    setSuccessorNicError(
+      final && !nicRegex.test(final) ? "Enter a valid NIC number" : "",
+    );
   };
 
   const requestPermission = async () => {
@@ -498,7 +474,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     if (isOver17) {
       const nicValid =
         formData.successorNicNumber.trim() &&
-        validateNIC(formData.successorNicNumber);
+        nicRegex.test(formData.successorNicNumber);
       const nicImagesValid =
         formData.successorNicFrontImage && formData.successorNicBackImage;
       return nicValid && nicImagesValid;
@@ -553,7 +529,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
   const handleNavigateToFarmerQr = () => {
     setShowSuccessModal(false);
-
     navigation.navigate("FarmerQr", {
       cropCount: 1,
       userId: userId,
@@ -566,14 +541,8 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       "Confirm Submission",
       "Are you sure you want to submit this pension request?",
       [
-        {
-          text: "No",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: () => submitForm(),
-        },
+        { text: "No", style: "cancel" },
+        { text: "Yes", onPress: () => submitForm() },
       ],
       { cancelable: true },
     );
@@ -659,7 +628,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       }
 
       const formDataToSend = new FormData();
-
       formDataToSend.append("fullName", formData.fullName);
       formDataToSend.append("nic", formData.nicNumber);
       formDataToSend.append("dob", formatDateForAPI(formData.dateOfBirth));
@@ -678,7 +646,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         if (uri) {
           const uriParts = uri.split(".");
           const fileType = uriParts[uriParts.length - 1];
-
           formDataToSend.append(fieldName, {
             uri,
             name: `${fieldName}_${Date.now()}.${fileType}`,
@@ -742,7 +709,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       if (error.response) {
         errorMessage =
           error.response.data?.message || error.response.statusText;
-        console.log("Error response:", error.response.data);
       } else if (error.request) {
         errorMessage =
           "No response from server. Please check your internet connection.";
@@ -896,18 +862,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
   const renderSection2 = () => {
     const isOver17 = isSuccessorOver17();
-    const age = formData.successorDateOfBirth
-      ? calculateAge(formData.successorDateOfBirth)
-      : 0;
-
-    const successorNicMessage = getNicValidationMessage(
-      formData.successorNicNumber,
-    );
-
-    const isSuccessorNicValid =
-      formData.successorNicNumber.trim().length > 0 &&
-      successorNicMessage === null &&
-      validateNIC(formData.successorNicNumber);
 
     return (
       <ScrollView
@@ -932,7 +886,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           />
         </View>
 
-        {/*  Successor Relationship */}
+        {/* Successor Relationship */}
         <View className="mb-5">
           <Text className="text-[#070707] mb-2">
             {t("GoviPensionForm.Relationship")} *
@@ -981,7 +935,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 8. Successor's Date of Birth */}
+        {/* Successor's Date of Birth */}
         <View className="mb-5">
           <Text className="text-[#070707] mb-2">
             {t("GoviPensionForm.Successor's Date of Birth")} *
@@ -1011,9 +965,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
                 </Text>
                 <TextInput
                   value={formData.successorNicNumber}
-                  onChangeText={(text) =>
-                    updateFormData("successorNicNumber", handleNicInput(text))
-                  }
+                  onChangeText={handleSuccessorNicChange}
                   placeholder={t("GoviPensionForm.--Type here--")}
                   placeholderTextColor="#585858"
                   className="bg-[#F4F4F4] rounded-2xl px-4 py-3 text-[#070707] text-sm"
@@ -1023,11 +975,11 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
                 />
 
                 {formData.successorNicNumber.trim().length > 0 &&
-                  !isSuccessorNicValid && (
-                    <Text className="text-red-500 text-xs mt-1 ml-4">
-                      {successorNicMessage ?? "Invalid NIC format"}
-                    </Text>
-                  )}
+                successorNicError ? (
+                  <Text className="text-red-500 text-xs mt-1 ml-1">
+                    {successorNicError}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Successor's NIC Front Image */}
@@ -1209,7 +1161,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         onBackPress={() => navigation.goBack()}
       />
 
-      {/* Custom Date Pickers */}
       <CustomDatePicker
         visible={showCustomDobPicker}
         onClose={() => setShowCustomDobPicker(false)}
@@ -1226,7 +1177,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         maximumDate={new Date()}
       />
 
-      {/* Modal Components */}
       <SuccessModal
         visible={showSuccessModal}
         title={modalTitle}
@@ -1248,7 +1198,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         duration={4000}
       />
 
-      {/* Form Content */}
       {currentSection === 1 ? renderSection1() : renderSection2()}
 
       {/* Action Buttons */}
@@ -1262,7 +1211,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: isSection1Valid() ? 0.35 : 0.1,
+                shadowOpacity: 0.1,
                 shadowRadius: 6,
                 elevation: 4,
               }}
@@ -1297,7 +1246,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: isSection1Valid() ? 0.35 : 0.1,
+                shadowOpacity: 0.1,
                 shadowRadius: 6,
                 elevation: 4,
               }}
@@ -1313,7 +1262,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: isSection1Valid() ? 0.35 : 0.1,
+                shadowOpacity: isSection2Valid() ? 0.35 : 0.1,
                 shadowRadius: 6,
                 elevation: 4,
               }}
