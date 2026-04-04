@@ -4,7 +4,6 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
@@ -220,8 +219,13 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View className="flex-1 justify-center items-center">
+        <LottieView
+          source={require("../../assets/lottie/newLottie.json")}
+          autoPlay
+          loop
+          style={{ width: 300, height: 300 }}
+        />
       </View>
     );
   }

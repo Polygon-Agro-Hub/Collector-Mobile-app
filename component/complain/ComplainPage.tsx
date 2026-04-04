@@ -20,12 +20,13 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../common/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -41,7 +42,7 @@ interface ComplainPageProps {
 }
 
 const ComplainPage: React.FC<ComplainPageProps> = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ComplainPageNavigationProps>();
   const route = useRoute<RouteProp<RootStackParamList, "ComplainPage">>();
   const { userId, farmerLanguage } = route.params;
 
@@ -194,17 +195,19 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
             <ScrollView
               className="flex-1 bg-white"
               keyboardShouldPersistTaps="handled"
-              style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
               showsVerticalScrollIndicator={false}
             >
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-              >
-                <AntDesign name="left" size={24} color="#000502" />
-              </TouchableOpacity>
+              <CustomHeader
+                title=""
+                showBackButton={true}
+                navigation={navigation}
+                onBackPress={() => navigation.goBack()}
+              />
 
-              <View className="items-center bg-white">
+              <View
+                className="items-center bg-white"
+                style={{ paddingHorizontal: wp(4) }}
+              >
                 <Image
                   source={require("../../assets/images/complain/complain.webp")}
                   className="w-36 h-36"

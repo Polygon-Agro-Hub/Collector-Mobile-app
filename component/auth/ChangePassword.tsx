@@ -21,11 +21,11 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomHeader from "../common/CustomHeader";
 
 type ChangePasswordNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -178,19 +178,19 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       enabled
       style={{ flex: 1 }}
     >
+      {passwordUpdate === 1 && (
+        <CustomHeader
+          title=""
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => navigation.goBack()}
+        />
+      )}
       <ScrollView
         className="flex-1 bg-white"
         style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
         keyboardShouldPersistTaps="handled"
       >
-        {passwordUpdate === 1 && (
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="bg-[#f3f3f380] rounded-full p-2 justify-center w-10"
-          >
-            <AntDesign name="left" size={24} color="#000502" />
-          </TouchableOpacity>
-        )}
         <View
           className={`flex-row items-center justify-center ${
             passwordUpdate === 1 ? "mt-[2%]" : "mt-[12%]"
