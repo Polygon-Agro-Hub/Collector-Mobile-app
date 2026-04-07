@@ -307,7 +307,7 @@ export default function DigitalSignature({
         setTimeout(() => {
           setShowSuccessModal(false);
           navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
-        }, 2500);
+        }, 4000);
       } else {
         throw new Error(response.data.message || "Failed to save signature");
       }
@@ -519,9 +519,19 @@ export default function DigitalSignature({
           onPress={handleBackPress}
           className="flex-row items-center bg-[#DFE5F2] border border-[#DFE5F2] px-6 py-3 rounded-full"
           disabled={loading}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.15,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
         >
           <Ionicons name="close" size={20} color="black" />
-          <Text className="text-black font-medium ml-2">Cancel</Text>
+          <Text className="text-black font-bold ml-2">Cancel</Text>
         </TouchableOpacity>
 
         {loading ? (
@@ -544,12 +554,28 @@ export default function DigitalSignature({
                 signatureRef.current.readSignature();
               }
             }}
-            className="flex-row items-center bg-[#980775] px-6 py-3 rounded-full"
+            className="flex-row items-center px-6 py-3 rounded-full"
             disabled={!signatureDrawn || loading}
-            style={{ opacity: signatureDrawn ? 1 : 0.5 }}
+            style={{
+              backgroundColor: signatureDrawn ? "#980775" : "#DCDCDC",
+              shadowColor: "#000000",
+              shadowOffset: { width: 2, height: 2 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              elevation: 4,
+            }}
           >
-            <FontAwesome6 name="check" size={18} color={"white"} />
-            <Text className="font-semibold text-white ml-2">Done</Text>
+            <FontAwesome6
+              name="check"
+              size={18}
+              color={signatureDrawn ? "white" : "#000000"}
+            />
+            <Text
+              style={{ color: signatureDrawn ? "white" : "#000000" }}
+              className="font-semibold ml-2"
+            >
+              Done
+            </Text>
           </TouchableOpacity>
         )}
       </View>

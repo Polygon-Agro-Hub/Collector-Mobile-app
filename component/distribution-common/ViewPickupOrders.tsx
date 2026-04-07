@@ -250,7 +250,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
             </View>
 
             {/* Payment Status */}
-            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center mb-2 mt-[-5%]">
+            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center mb-2 ">
               <View className="mb-2">
                 {isPaid ? (
                   <MaterialIcons
@@ -273,7 +273,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
               )}
             </View>
 
-            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center">
+            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center ">
               <Octicons name="clock-fill" size={28} color="black" />
               <Text className="text-sm font-semibold text-gray-800 mt-2">
                 {timeSlot}
@@ -294,6 +294,13 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
                   index < phoneNumbers.length - 1 ? "mb-3" : ""
                 }`}
                 activeOpacity={0.7}
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 2, height: 2 },
+                  shadowOpacity: 0.18,
+                  shadowRadius: 4,
+                  elevation: 4,
+                }}
               >
                 {/* CENTER TEXT */}
                 <View className="absolute left-0 right-0 items-center">
@@ -318,6 +325,13 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
             className="bg-[#980775] rounded-full py-3 px-7 mx-4 mb-20 shadow-md"
             activeOpacity={0.8}
             disabled={isProcessing}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 2, height: 2 },
+              shadowOpacity: 0.18,
+              shadowRadius: 4,
+              elevation: 4,
+            }}
           >
             <View className="flex-row items-center justify-center">
               <FontAwesome6 name="qrcode" size={24} color="white" />

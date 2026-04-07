@@ -264,6 +264,13 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                     })
                   }
                   className="mt-16 bg-[#000000]  rounded-full px-16 py-3  "
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 4,
+                    elevation: 4,
+                  }}
                 >
                   <Text
                     style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -316,6 +323,14 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                     })
                   }
                   className="mt-8 bg-[#000000]  rounded-full  p-3"
+                  style={{
+                    backgroundColor: "#000000",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 6,
+                    elevation: 8,
+                  }}
                 >
                   <Text
                     style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
