@@ -23,7 +23,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal"; 
+import GlobalSearchModal from "../common/GlobalSearchModal";
 
 type UnregisteredFarmerDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -52,7 +52,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [bankName, setBankName] = useState("");
   const [branchName, setBranchName] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] = useState(false);
+  const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
+    useState(false);
   const [loading, setLoading] = useState(false);
   const [progress] = useState(new Animated.Value(0));
   const [unsuccessfulProgress] = useState(new Animated.Value(0));
@@ -62,7 +63,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [selectedLanguage] = useState<string>("en");
   const [accNumberError, setAccNumberError] = useState("");
 
-  // Modal visibility state
   const [bankModalVisible, setBankModalVisible] = useState(false);
   const [branchModalVisible, setBranchModalVisible] = useState(false);
 
@@ -84,7 +84,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           const data = require("../../assets/jsons/branches.json");
           const branches = data[selectedBank.ID] || [];
           const sortedBranches = branches.sort(
-            (a: { name: string }, b: { name: any }) => a.name.localeCompare(b.name),
+            (a: { name: string }, b: { name: any }) =>
+              a.name.localeCompare(b.name),
           );
           setFilteredBranches(sortedBranches);
         } catch (error) {
@@ -103,7 +104,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
   const handleNext = async () => {
     if (!accNumber || !accHolderName || !bankName || !branchName) {
-      Alert.alert(t("Error.error"), t("Error.Please fill in all required fields."));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Please fill in all required fields."),
+      );
       setLoading(false);
       return;
     }
@@ -122,13 +126,16 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       let companyName = "";
 
       if (PreferdLanguage === "Sinhala") {
-        companyName = (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
+        companyName =
+          (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (PreferdLanguage === "Tamil") {
-        companyName = (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
+        companyName =
+          (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
-        companyName = (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
+        companyName =
+          (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
         otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
@@ -187,7 +194,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       />
       <View className="flex-1 px-5 bg-white">
         <ScrollView className="flex-1 p-3 mt-4">
-
           {/* Account Number */}
           <View className="mb-4">
             <Text className="text-[#434343] mb-2">
@@ -195,21 +201,22 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <TextInput
               className={`border ${
-                accNumberError ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+                accNumberError
+                  ? "border-red-500"
+                  : "border-[#F4F4F4] bg-[#F4F4F4]"
               } p-3 rounded-full`}
               keyboardType="numeric"
               value={accNumber}
               onChangeText={(text) => {
-                if (/^\d*$/.test(text)) {
-                  setAccNumber(text);
-                  setAccNumberError("");
-                } else {
-                  setAccNumberError(t("UnregisteredFarmerDetails.AccountNumberError"));
-                }
+                const digitsOnly = text.replace(/[^\d]/g, "");
+                setAccNumber(digitsOnly);
+                setAccNumberError("");
               }}
             />
             {accNumberError ? (
-              <Text className="text-red-500 text-sm mt-1">{accNumberError}</Text>
+              <Text className="text-red-500 text-sm mt-1">
+                {accNumberError}
+              </Text>
             ) : null}
           </View>
 
@@ -222,12 +229,17 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               className="border border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full"
               value={accHolderName}
               onChangeText={(text) => {
-                let filteredText = text.replace(/[^a-zA-Z\s]/g, "");
-                if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
+                const filteredText = text
+                  .replace(/[^a-zA-Z\s]/g, "")
+                  .trimStart();
                 const capitalizedText = filteredText
                   .toLowerCase()
                   .split(" ")
-                  .map((word) => (word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word))
+                  .map((word) =>
+                    word.length > 0
+                      ? word.charAt(0).toUpperCase() + word.slice(1)
+                      : word,
+                  )
                   .join(" ");
                 setAccHolderName(capitalizedText);
               }}
@@ -257,10 +269,16 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 justifyContent: "space-between",
               }}
             >
-              <Text style={{ color: bankName ? "#000" : "#9CA3AF", fontSize: 14 }}>
+              <Text
+                style={{ color: bankName ? "#000" : "#9CA3AF", fontSize: 14 }}
+              >
                 {bankName || "Select Bank"}
               </Text>
-              <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+              <MaterialIcons
+                name="keyboard-arrow-down"
+                size={22}
+                color="#9CA3AF"
+              />
             </TouchableOpacity>
           </View>
 
@@ -272,7 +290,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             <TouchableOpacity
               onPress={() => {
                 if (!bankName) {
-                  Alert.alert(t("Error.error"), t("UnregisteredFarmerDetails.SelectBank"));
+                  Alert.alert(
+                    t("Error.error"),
+                    t("UnregisteredFarmerDetails.SelectBank"),
+                  );
                   return;
                 }
                 setBranchModalVisible(true);
@@ -289,10 +310,16 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 justifyContent: "space-between",
               }}
             >
-              <Text style={{ color: branchName ? "#000" : "#9CA3AF", fontSize: 14 }}>
+              <Text
+                style={{ color: branchName ? "#000" : "#9CA3AF", fontSize: 14 }}
+              >
                 {branchName || "Select Branch"}
               </Text>
-              <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+              <MaterialIcons
+                name="keyboard-arrow-down"
+                size={22}
+                color="#9CA3AF"
+              />
             </TouchableOpacity>
           </View>
 
@@ -300,6 +327,13 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             className={`p-3 rounded-full items-center mt-5 ${
               loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"
             }`}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 4,
+            }}
             onPress={() => {
               if (!loading) {
                 setLoading(true);
@@ -322,7 +356,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         </ScrollView>
 
         {/* Success Modal */}
-        <Modal transparent={true} visible={isModalVisible} animationType="slide">
+        <Modal
+          transparent={true}
+          visible={isModalVisible}
+          animationType="slide"
+        >
           <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
@@ -338,14 +376,21 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 {t("UnregisteredFarmerDetails.Successful")}
               </Text>
               <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
-                <Animated.View className="h-full bg-green-500" style={{ width: loadingBarWidth }} />
+                <Animated.View
+                  className="h-full bg-green-500"
+                  style={{ width: loadingBarWidth }}
+                />
               </View>
             </View>
           </View>
         </Modal>
 
         {/* Unsuccessful Modal */}
-        <Modal transparent={true} visible={isUnsuccessfulModalVisible} animationType="slide">
+        <Modal
+          transparent={true}
+          visible={isUnsuccessfulModalVisible}
+          animationType="slide"
+        >
           <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
@@ -361,7 +406,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 {t("UnregisteredFarmerDetails.Unsuccessful")}
               </Text>
               {errorMessage && (
-                <Text className="text-red-600 text-center mt-2">{errorMessage}</Text>
+                <Text className="text-red-600 text-center mt-2">
+                  {errorMessage}
+                </Text>
               )}
               <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
                 <Animated.View
@@ -377,7 +424,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                   unsuccessfulProgress.setValue(0);
                 }}
               >
-                <Text className="text-white">{t("UnregisteredFarmerDetails.Close")}</Text>
+                <Text className="text-white">
+                  {t("UnregisteredFarmerDetails.Close")}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -394,7 +443,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         onSelect={(items) => {
           const val = items[0] ?? "";
           setBankName(val);
-          setBranchName(""); // reset branch when bank changes
+          setBranchName("");
         }}
         searchPlaceholder="Search bank..."
         multiSelect={false}

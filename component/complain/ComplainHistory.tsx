@@ -175,13 +175,13 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
 
       if (companyName && centerRegCode) {
-        return `${closingWord}\n${replierName},\n${headTitle},\n${centerRegCode}\n${companyName}`;
+        return `${closingWord},\n${replierName},\n${headTitle},\n${centerRegCode}\n${companyName}`;
       } else if (companyName) {
-        return `${closingWord}\n${replierName},\n${headTitle},\n${companyName}`;
+        return `${closingWord},\n${replierName},\n${headTitle},\n${companyName}`;
       } else if (centerRegCode) {
-        return `${closingWord}\n${replierName},\n${headTitle},\n${centerRegCode}`;
+        return `${closingWord},\n${replierName},\n${headTitle},\n${centerRegCode}`;
       } else {
-        return `${closingWord}\n${replierName},\n${headTitle}`;
+        return `${closingWord},\n${replierName},\n${headTitle}`;
       }
     } else if (complain.complainAssign === "DCH") {
       const headTitle =

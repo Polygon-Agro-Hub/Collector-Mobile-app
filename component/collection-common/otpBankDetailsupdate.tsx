@@ -250,15 +250,36 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const handleOtpChange = (text: string, index: number) => {
     const updatedOtpCode = otpCode.split("");
     updatedOtpCode[index] = text;
+
+    for (let i = 0; i < 5; i++) {
+      if (updatedOtpCode[i] === undefined) updatedOtpCode[i] = "";
+    }
+
     setOtpCode(updatedOtpCode.join(""));
+    setIsOtpValid(updatedOtpCode.every((c) => c !== ""));
 
-    setIsOtpValid(updatedOtpCode.length === 5 && !updatedOtpCode.includes(""));
-
-    if (text && inputRefs.current[index + 1]) {
+    if (text && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
-    if (updatedOtpCode.length === 5) {
+    if (updatedOtpCode.every((c) => c !== "")) {
       Keyboard.dismiss();
+    }
+  };
+
+  const handleKeyPress = (e: any, index: number) => {
+    if (e.nativeEvent.key === "Backspace") {
+      const updatedOtpCode = otpCode.split("");
+
+      if (updatedOtpCode[index]) {
+        updatedOtpCode[index] = "";
+        setOtpCode(updatedOtpCode.join(""));
+        setIsOtpValid(false);
+      } else if (index > 0) {
+        updatedOtpCode[index - 1] = "";
+        setOtpCode(updatedOtpCode.join(""));
+        setIsOtpValid(false);
+        inputRefs.current[index - 1]?.focus();
+      }
     }
   };
 
@@ -488,6 +509,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                 maxLength={1}
                 value={otpCode[index] || ""}
                 onChangeText={(text) => handleOtpChange(text, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
                 placeholder={maskedCode[index] || "_"}
                 placeholderTextColor="lightgray"
                 style={{
@@ -533,10 +555,17 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           />
           <View style={{ marginTop: dynamicStyles.margingTopForBtn }}>
             <TouchableOpacity
-              style={{ height: hp(7), width: wp(80) }}
-              className={`flex items-center justify-center mx-auto rounded-full mb-8 ${
-                !isOtpValid || isVerified ? "bg-[#000000]" : "bg-[#000000]"
-              }`}
+              style={{
+                height: hp(7),
+                width: wp(80),
+                backgroundColor: "#000000",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
+              className="flex items-center justify-center mx-auto rounded-full mb-8"
               onPress={handleVerify}
               disabled={isVerified}
             >

@@ -333,7 +333,6 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-
       <CustomHeader
         title={t("ReadytoPickupOrders.Ready to Pickup Orders")}
         showBackButton={true}
@@ -420,6 +419,14 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         <View className="absolute bottom-20 left-0 right-0 bg-white px-6 pb-6 pt-2  border-gray-100">
           <TouchableOpacity
             onPress={handleClearSearch}
+            style={{
+              backgroundColor: "#000000",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 6,
+              elevation: 8,
+            }}
             className="bg-black px-8 py-3 rounded-full w-full items-center"
           >
             <View className="flex-row items-center">
