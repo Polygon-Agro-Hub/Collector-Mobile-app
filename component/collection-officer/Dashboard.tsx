@@ -17,7 +17,7 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { useTranslation } from "react-i18next";
-import DashboardSkeleton from "../skeleton/DashboardSkeleton";
+import DashboardSkeleton from "../skeletons/DashboardSkeleton";
 
 type DashboardNavigationProps = StackNavigationProp<
   RootStackParamList,

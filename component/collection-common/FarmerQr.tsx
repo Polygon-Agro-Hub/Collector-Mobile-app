@@ -19,7 +19,7 @@ import { RootStackParamList } from "../types";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
-import FarmerQrSkeletonLoader from "../skeleton/FarmerQrSkeletonLoader";
+import FarmerQrSkeletonLoader from "../skeletons/FarmerQrSkeletonLoader";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
