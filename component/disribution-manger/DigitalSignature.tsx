@@ -21,7 +21,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../common/CustomHeader;
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,

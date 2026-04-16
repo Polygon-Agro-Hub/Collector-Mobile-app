@@ -23,7 +23,7 @@ import {
 } from "react-native-responsive-screen";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../common/CustomHeader;
 
 interface complainItem {
   id: number;

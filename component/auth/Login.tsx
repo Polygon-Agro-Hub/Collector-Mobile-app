@@ -24,7 +24,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "../../store/authSlice";
 import { useDispatch } from "react-redux";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../common/CustomHeader;
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 

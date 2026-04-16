@@ -16,7 +16,7 @@ interface LanuageProps {
   navigation: LanuageScreenNavigationProp;
 }
 
-const lg = require("../../assets/images/commons/language.webp");
+const lg = require("../../assets/images/common/language.webp");
 
 const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   const { changeLanguage } = useContext(LanguageContext);

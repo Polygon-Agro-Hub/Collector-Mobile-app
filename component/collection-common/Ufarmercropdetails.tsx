@@ -6,8 +6,8 @@ import { ScrollView, TextInput } from "react-native-gesture-handler";
 import * as ImagePicker from "react-native-image-picker";
 import { useTranslation } from "react-i18next";
 import { MaterialIcons } from "@expo/vector-icons";
-import CustomHeader from "../commons/CustomHeader";
-import GlobalSearchModal from "../commons/GlobalSearchModal";
+import CustomHeader from "../common/CustomHeader;
+import GlobalSearchModal from "../common/GlobalSearchModal;
 
 type UfarmercropdetailsNavigationProp = StackNavigationProp<
   RootStackParamList,

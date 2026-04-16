@@ -22,8 +22,8 @@ import { Platform } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../commons/CustomHeader";
-import GlobalSearchModal from "../commons/GlobalSearchModal";
+import CustomHeader from "../common/CustomHeader;
+import GlobalSearchModal from "../common/GlobalSearchModal;
 
 type UnregisteredFarmerDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,

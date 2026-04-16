@@ -25,8 +25,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import GlobalSearchModal from "../commons/GlobalSearchModal";
-import CustomHeader from "../commons/CustomHeader";
+import GlobalSearchModal from "../common/GlobalSearchModal;
+import CustomHeader from "../common/CustomHeader;
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,

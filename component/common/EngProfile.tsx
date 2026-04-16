@@ -48,7 +48,7 @@ interface UserProfile {
   jobRole: string;
 }
 
-const icon = require("@/assets/images/commons/eng-profile-icon.webp");
+const icon = require("@/assets/images/common/eng-profile-icon.webp");
 
 const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] =

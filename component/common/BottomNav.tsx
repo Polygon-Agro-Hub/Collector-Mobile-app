@@ -7,11 +7,11 @@ import { AppState } from "react-native";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../services/reducxStore";
 
-const homeIcon = require("../../assets/images/commons/nav-bar/navhome.webp");
-const searchIcon = require("../../assets/images/commons/nav-bar/navsearch.webp");
-const qrIcon = require("../../assets/images/commons/nav-bar/navtarget.webp");
-const adminIcon = require("../../assets/images/commons/nav-bar/navusers.webp");
-const dataTransfer = require("../../assets/images/commons/nav-bar/transfer.webp");
+const homeIcon = require("../../assets/images/common/nav-bar/navhome.webp");
+const searchIcon = require("../../assets/images/common/nav-bar/navsearch.webp");
+const qrIcon = require("../../assets/images/common/nav-bar/navtarget.webp");
+const adminIcon = require("../../assets/images/common/nav-bar/navusers.webp");
+const dataTransfer = require("../../assets/images/common/nav-bar/transfer.webp");
 
 const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);

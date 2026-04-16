@@ -17,10 +17,10 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { environment } from "../../environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../common/CustomHeader;
 import { RouteProp, useRoute } from "@react-navigation/native";
-import SuccessModal from "../commons/SuccessModal";
-import FailedModal from "../commons/FailedModal";
+import SuccessModal from "../common/SuccessModal;
+import FailedModal from "../common/FailedModal;
 
 interface GoviPensionFormProps {
   navigation: any;

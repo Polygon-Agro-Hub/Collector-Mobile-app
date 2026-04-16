@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import GlobalSearchModal from "../commons/GlobalSearchModal";
+import GlobalSearchModal from "../common/GlobalSearchModal;
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
