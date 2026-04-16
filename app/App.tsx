@@ -109,9 +109,9 @@ import DigitalSignature from "@/component/disribution-manger/DigitalSignature";
 import ReceivedCash from "@/component/disribution-manger/ReceivedCash";
 import ReceivedCashOfficer from "@/component/distribution-officer/ReceivedCashOfficer";
 import ReceivedCashQrCode from "@/component/distribution-officer/ReceivedCashQrCode";
-import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
-import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
-import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
+import GoviPensionForm from "@/component/govi-pensions/GoviPensionForm";
+import GoviPensionStatus from "@/component/govi-pensions/GoviPensionStatus";
+import NotEligibleScreen from "@/component/govi-pensions/NotEligibleScreen";
 
 LogBox.ignoreAllLogs(true);
 NativeWindStyleSheet.setOutput({

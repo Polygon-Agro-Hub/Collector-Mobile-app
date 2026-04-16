@@ -53,7 +53,7 @@ const NotEligibleScreen: React.FC<NotEligibleScreenProps> = ({
         <View className="items-center justify-center mt-4 mb-8">
           <View className="w-64 h-64 overflow-hidden">
             <Image
-              source={require("../../assets/images/govi-pension/not-eligible.webp")}
+              source={require("../../assets/images/govi-pensions/not-eligible.webp")}
               className="w-full h-full"
               resizeMode="contain"
             />

@@ -56,7 +56,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
     switch (currentStatus) {
       case "To Review":
         return {
-          image: require("../../assets/images/govi-pension/stay-tunedR.webp"),
+          image: require("../../assets/images/govi-pensions/stay-tunedR.webp"),
           title: t("GoviPensionStatus.Application Already Submitted!"),
           content: t(
             "GoviPensionStatus.It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
@@ -69,7 +69,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
         };
       case "Approved":
         return {
-          image: require("../../assets/images/govi-pension/congratulations.webp"),
+          image: require("../../assets/images/govi-pensions/congratulations.webp"),
           title: t("GoviPensionStatus.Application Approved!"),
           content: t(
             "GoviPensionStatus.Advise the farmer to log in to the GoViCare app and check the current pension status.",
@@ -77,7 +77,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
         };
       case "Rejected":
         return {
-          image: require("../../assets/images/govi-pension/try-again.webp"),
+          image: require("../../assets/images/govi-pensions/try-again.webp"),
           title: t("GoviPensionStatus.Application Rejected!"),
           content: t(
             "GoviPensionStatus.The pension application submitted on {{date}} has been reviewed and was not approved.",
@@ -86,7 +86,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
         };
       default:
         return {
-          image: require("../../assets/images/govi-pension/stay-tunedR.webp"),
+          image: require("../../assets/images/govi-pensions/stay-tunedR.webp"),
           title: t("GoviPensionStatus.Stay Tuned!"),
           content: t(
             "GoviPensionStatus.We're taking a closer look at your pension application and will update you soon. This process might take a while.",
