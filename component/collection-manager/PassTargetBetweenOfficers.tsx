@@ -17,8 +17,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../commons/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 type PassTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,

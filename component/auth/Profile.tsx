@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../commons/CustomHeader";
 import { environment } from "@/environment/environment";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";

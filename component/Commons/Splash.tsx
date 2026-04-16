@@ -14,9 +14,9 @@ interface SplashProps {
   navigation: SplashNavigationProp;
 }
 
-const Center = require("../../assets/images/common/codinet.webp");
-const Bottom = require("../../assets/images/common/codinet-back.webp");
-const Top = require("../../assets/images/common/codinet-up.webp");
+const Center = require("../../assets/images/commons/codinet.webp");
+const Bottom = require("../../assets/images/commons/codinet-back.webp");
+const Top = require("../../assets/images/commons/codinet-up.webp");
 const Splash: React.FC<SplashProps> = ({ navigation }) => {
   const [progress, setProgress] = useState(0);
   const dispatch = useDispatch();

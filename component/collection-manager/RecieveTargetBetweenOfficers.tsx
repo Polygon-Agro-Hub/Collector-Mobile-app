@@ -16,8 +16,8 @@ import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../commons/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 type RecieveTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,

@@ -26,8 +26,8 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
 import countryData from "../../assets/jsons/countryflag.json";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../commons/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 type AddOfficerBasicDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,

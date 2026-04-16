@@ -23,7 +23,7 @@ import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import Timer from "@/component/distribution-common/TimerContainer ";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../commons/CustomHeader";
 
 interface OrderItem {
   id: string;

@@ -24,8 +24,8 @@ import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { MaterialIcons } from "@expo/vector-icons";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../commons/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,

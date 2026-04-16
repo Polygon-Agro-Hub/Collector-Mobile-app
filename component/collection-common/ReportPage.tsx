@@ -18,7 +18,7 @@ import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { useTranslation } from "react-i18next";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../commons/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,

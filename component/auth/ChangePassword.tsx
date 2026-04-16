@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../commons/CustomHeader";
 
 type ChangePasswordNavigationProp = StackNavigationProp<
   RootStackParamList,

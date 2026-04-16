@@ -12,7 +12,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { CameraView, Camera } from "expo-camera";
 import { useTranslation } from "react-i18next";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../commons/CustomHeader";
 
 type QRScannerNavigationProp = StackNavigationProp<
   RootStackParamList,

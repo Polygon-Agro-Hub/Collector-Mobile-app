@@ -16,7 +16,7 @@ import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import GlobalSearchModal from "../common/GlobalSearchModal"; 
+import GlobalSearchModal from "../commons/GlobalSearchModal"; 
 
 type SetTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,

@@ -12,7 +12,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../commons/CustomHeader";
 
 type DistributionOfficerReportNavigationProp = StackNavigationProp<
   RootStackParamList,

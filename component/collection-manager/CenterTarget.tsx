@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../commons/CustomHeader";
 
 type CenterTargetNavigationProps = StackNavigationProp<
   RootStackParamList,
