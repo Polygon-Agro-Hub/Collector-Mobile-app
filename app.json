@@ -4,11 +4,11 @@
     "slug": "CoDi-Net",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/adaptive-icon2.png",
+    "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/adaptive-icon2.png",
+      "image": "./assets/images/app/adaptive-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,14 +17,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon2.png",
+        "foregroundImage": "./assets/images/app/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.polygonagro.Collector",
-      "versionCode": 12,
+      "versionCode": 10,
       "compileSdkVersion": 35,
       "targetSdkVersion": 35,
       "minSdkVersion": 24,
@@ -49,7 +49,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/app/favicon.png"
     },
     "plugins": [
       "expo-router",
@@ -86,7 +86,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "440bdac5-9dd2-4553-bfc3-66236d104787"
+        "projectId": "9afbae25-e037-482b-8e14-0c98ed313834"
       }
     },
     "expo-camera": {

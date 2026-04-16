@@ -107,7 +107,7 @@ const FailedModal: React.FC<FailedModalProps> = ({
           >
             <View className="relative">
               <Image
-                source={require("../../assets/images/New/error.png")}
+                source={require("../../assets/images/collection-common/error.webp")}
                 className="h-[100px] w-[100px] rounded-lg"
                 resizeMode="contain"
               />
