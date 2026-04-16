@@ -16,8 +16,8 @@ import { environment } from "@/environment/environment";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader;
-import GlobalSearchModal from "../common/GlobalSearchModal;
+import CustomHeader from "../commons/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 type RecieveTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,

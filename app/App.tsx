@@ -17,27 +17,22 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
-import Splash from "../component/common/Splash;
-import Lanuage from "../component/common/Lanuage;
 import Login from "@/component/auth/Login";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeWindStyleSheet } from "nativewind";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { LogBox } from "react-native";
-import NavigationBar from "@/component/common/BottomNav;
 import ChangePassword from "@/component/auth/ChangePassword";
 import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
 import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails";
 import Dashboard from "@/component/collection-officer/Dashboard";
 import QRScanner from "@/component/collection-common/QRScanner";
 import FormScreen from "@/component/collection-common/FormScreen";
-import EngProfile from "@/component/common/EngProfile;
 import UnregisteredFarmerDetails from "@/component/collection-common/UnregisteredFarmerDetails";
 import UnregisteredCropDetails from "@/component/collection-common/UnregisteredCropDetails";
 import SearchFarmer from "@/component/collection-common/SearchFarmer";
 import FarmerQr from "@/component/collection-common/FarmerQr";
 import ComplainPage from "@/component/complain/ComplainPage";
-import OfficerQr from "@/component/common/OfficerQr;
 import Profile from "@/component/auth/Profile";
 import ReportPage from "@/component/collection-common/ReportPage";
 import SearchPriceScreen from "@/component/collection-common/SearchPriceScreen";
@@ -83,7 +78,6 @@ import NewReport from "@/component/collection-common/NewReport";
 import TransactionReport from "@/component/collection-manager/TransactionReport";
 import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
 import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
-import PrivacyPolicy from "@/component/common/PrivacyPolicy;
 import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
 import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
 import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
@@ -109,9 +103,15 @@ import DigitalSignature from "@/component/disribution-manger/DigitalSignature";
 import ReceivedCash from "@/component/disribution-manger/ReceivedCash";
 import ReceivedCashOfficer from "@/component/distribution-officer/ReceivedCashOfficer";
 import ReceivedCashQrCode from "@/component/distribution-officer/ReceivedCashQrCode";
-import GoviPensionForm from "@/component/Govi-Pensions/GoviPensionForm";
-import GoviPensionStatus from "@/component/Govi-Pensions/GoviPensionStatus";
-import NotEligibleScreen from "@/component/Govi-Pensions/NotEligibleScreen";
+import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
+import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
+import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
+import Splash from "@/component/commons/Splash";
+import Lanuage from "@/component/commons/Lanuage";
+import OfficerQr from "@/component/commons/OfficerQr";
+import EngProfile from "@/component/commons/EngProfile";
+import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
+import BottomNav from "@/component/commons/BottomNav";
 
 LogBox.ignoreAllLogs(true);
 NativeWindStyleSheet.setOutput({
@@ -164,7 +164,7 @@ function MainTabNavigator() {
         tabBarHideOnKeyboard: false,
         tabBarStyle: { position: "absolute", backgroundColor: "#fff" },
       })}
-      tabBar={(props) => <NavigationBar {...props} />}
+      tabBar={(props) => <BottomNav {...props} />}
     >
       <Tab.Screen name="Dashboard" component={Dashboard} />
       <Tab.Screen

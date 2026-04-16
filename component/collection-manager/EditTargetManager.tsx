@@ -7,7 +7,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader;
+import CustomHeader from "../commons/CustomHeader";
 
 type EditTargetManagerNavigationProps = StackNavigationProp<
   RootStackParamList,

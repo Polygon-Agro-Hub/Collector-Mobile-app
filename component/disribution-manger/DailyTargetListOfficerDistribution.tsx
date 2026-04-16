@@ -18,7 +18,7 @@ import { RootStackParamList } from "../types";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader;
+import CustomHeader from "../commons/CustomHeader";
 
 type DailyTargetListOfficerDistributiontNavigationProps = StackNavigationProp<
   RootStackParamList,

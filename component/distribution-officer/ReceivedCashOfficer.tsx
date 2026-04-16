@@ -17,7 +17,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../common/CustomHeader;
+import CustomHeader from "../commons/CustomHeader";
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
   RootStackParamList,
