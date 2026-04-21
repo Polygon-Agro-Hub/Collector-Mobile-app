@@ -20,8 +20,8 @@ import bankNames from "../../assets/jsons/banks.json";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../navigations/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 import provincesData from "../../assets/jsons/sri-lanka-provinces.json";
 import { Entypo } from "@expo/vector-icons";
 

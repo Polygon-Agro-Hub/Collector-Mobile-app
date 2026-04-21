@@ -206,7 +206,7 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   const renderEmptyComponent = () => (
     <View className="items-center justify-center py-10 mt-[40%]">
       <LottieView
-        source={require("../../assets/lottie/NoComplaints.json")}
+        source={require("../../assets/lottie/no-data.json")}
         autoPlay
         loop
         style={{ width: 150, height: 150 }}
@@ -221,10 +221,10 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
     return (
       <View className="flex-1 justify-center items-center">
         <LottieView
-          source={require("../../assets/lottie/newLottie.json")}
+          source={require("../../assets/lottie/loading.json")}
           autoPlay
           loop
-          style={{ width: 300, height: 300 }}
+          style={{ width: 150, height: 150 }}
         />
       </View>
     );

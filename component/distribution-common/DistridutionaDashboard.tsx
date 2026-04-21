@@ -288,7 +288,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
     >
       <TouchableOpacity
         className="flex-row items-center  p-4"
-        onPress={() => navigation.navigate("EngProfile")}
+        onPress={() => navigation.navigate("SideMenu")}
       >
         <Image
           source={

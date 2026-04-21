@@ -23,7 +23,7 @@ import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import Timer from "@/component/distribution-common/TimerContainer ";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 interface OrderItem {
   id: string;
@@ -278,7 +278,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         orderData.packageData.forEach(
           (packageInfo: any, packageIndex: number) => {
             if (packageInfo.items && Array.isArray(packageInfo.items)) {
-              packageInfo.items.forEach((item: any, itemIndex: number) => {});
+              packageInfo.items.forEach((item: any, itemIndex: number) => { });
             }
           },
         );
@@ -622,7 +622,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       } else {
         throw new Error(
           response.data.message ||
-            t("PendingOrderScreen.Failed to complete order"),
+          t("PendingOrderScreen.Failed to complete order"),
         );
       }
     } catch (error) {
@@ -861,7 +861,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       } else {
         throw new Error(
           response.data.message ||
-            t("PendingOrderScreen.Failed to submit replacement request"),
+          t("PendingOrderScreen.Failed to submit replacement request"),
         );
       }
     } catch (error) {
@@ -1280,11 +1280,10 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               {/* Action Buttons */}
               <View className="space-y-3">
                 <TouchableOpacity
-                  className={`py-3 rounded-full px-3 ${
-                    isFormComplete && !isReplacementPriceHigher
+                  className={`py-3 rounded-full px-3 ${isFormComplete && !isReplacementPriceHigher
                       ? "bg-[#FA0000]"
                       : "bg-[#FA0000]/50"
-                  }`}
+                    }`}
                   onPress={
                     isFormComplete && !isReplacementPriceHigher
                       ? handleReplaceSubmit
@@ -1809,7 +1808,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       {isLoading || !isDataLoaded || completingOrder ? (
         <View className="flex-1 justify-center items-center py-20">
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
             style={{ width: 200, height: 200 }}
@@ -1851,13 +1850,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     className={index > 0 ? "mt-3" : ""}
                   >
                     <TouchableOpacity
-                      className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${
-                        packageGroup.allSelected || orderStatus === "Completed"
+                      className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${packageGroup.allSelected || orderStatus === "Completed"
                           ? "bg-[#D4F7D4] border border-[#4CAF50]"
                           : packageGroup.someSelected
                             ? "bg-[#FFF9C4] border border-[#F9CC33]"
                             : "bg-[#FFF8F8] border border-[#D16D6A]"
-                      } ${orderStatus === "Completed" ? "opacity-100" : ""}`}
+                        } ${orderStatus === "Completed" ? "opacity-100" : ""}`}
                       onPress={() =>
                         togglePackageExpansion(packageGroup.packageId)
                       }
@@ -1892,14 +1890,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     {/* Expanded content remains the same */}
                     {isPackageExpanded(packageGroup.packageId) && (
                       <View
-                        className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${
-                          packageGroup.allSelected ||
-                          orderStatus === "Completed"
+                        className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${packageGroup.allSelected ||
+                            orderStatus === "Completed"
                             ? "border-[#4CAF50]"
                             : packageGroup.someSelected
                               ? "border-[#F9CC33]"
                               : "border-[#D16D6A]"
-                        }`}
+                          }`}
                       >
                         {packageGroup.items.map((item) => (
                           <View
@@ -1932,13 +1929,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                               )}
                               <View className="flex-1">
                                 <Text
-                                  className={`font-medium text-black ${
-                                    orderStatus === "Completed" && item.selected
+                                  className={`font-medium text-black ${orderStatus === "Completed" && item.selected
                                       ? "text-black"
                                       : orderStatus === "Completed"
                                         ? "text-black"
                                         : "text-black"
-                                  }`}
+                                    }`}
                                 >
                                   {item.name}
                                 </Text>
@@ -1984,15 +1980,14 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             {additionalItems.length > 0 && (
               <View className="mx-4 mb-6">
                 <TouchableOpacity
-                  className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${
-                    orderStatus === "Completed"
+                  className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${orderStatus === "Completed"
                       ? "bg-[#D4F7D4] border border-[#4CAF50]"
                       : areAllAdditionalItemsSelected()
                         ? "bg-[#D4F7D4] border border-[#4CAF50]"
                         : hasAdditionalItemSelections()
                           ? "bg-[#FFF9C4] border border-[#F9CC33]"
                           : "bg-[#FFF8F8] border border-[#D16D6A]"
-                  }`}
+                    }`}
                   onPress={() =>
                     setAdditionalItemsExpanded(!additionalItemsExpanded)
                   }
@@ -2012,15 +2007,14 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
                 {additionalItemsExpanded && (
                   <View
-                    className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${
-                      orderStatus === "Completed"
+                    className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${orderStatus === "Completed"
                         ? "border-[#4CAF50]"
                         : areAllAdditionalItemsSelected()
                           ? "border-[#4CAF50]"
                           : hasAdditionalItemSelections()
                             ? "border-[#F9CC33]"
                             : "border-[#D16D6A]"
-                    }`}
+                      }`}
                   >
                     {additionalItems.map((item) => (
                       <View
@@ -2029,13 +2023,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                       >
                         <View className="flex-1">
                           <Text
-                            className={`font-medium ${
-                              orderStatus === "Completed" && item.selected
+                            className={`font-medium ${orderStatus === "Completed" && item.selected
                                 ? "text-black"
                                 : orderStatus === "Completed"
                                   ? "text-gray-600 line-through"
                                   : "text-black"
-                            }`}
+                              }`}
                           >
                             {item.name}
                           </Text>

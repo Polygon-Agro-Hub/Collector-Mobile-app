@@ -5,8 +5,8 @@ export type RootStackParamList = {
   ChangePassword: undefined;
   Registeredfarmer: undefined;
   Ufarmercropdetails: undefined;
-  Dashboard: undefined;
-  EngProfile: undefined;
+  CollectionOfficerDashboard: undefined;
+  SideMenu: undefined;
   ReadytoPickupOrders: undefined;
   SinChangePassword: undefined;
   SinLogin: undefined;
@@ -54,6 +54,7 @@ export type RootStackParamList = {
   ReplaceRequestsScreen: undefined;
   ReceivedCash: undefined;
   ReceivedCashOfficer: undefined;
+  CameraAccess: undefined;
   QRScanner: {
     userId: any;
   };

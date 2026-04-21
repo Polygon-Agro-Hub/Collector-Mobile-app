@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "@/component/navigations/CustomHeader";
 
 type ChangePasswordNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -176,7 +176,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       {passwordUpdate === 1 && (
         <CustomHeader
@@ -188,104 +188,121 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       )}
       <ScrollView
         className="flex-1 bg-white"
-        style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+        contentContainerStyle={{ padding: 4 }}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <View
-          className={`flex-row items-center justify-center ${
-            passwordUpdate === 1 ? "mt-[2%]" : "mt-[12%]"
-          }  space-x-[-30%] ml-[5%]`}
-        >
-          <Image
-            source={require("@/assets/images/auth/change-password.webp")}
-            resizeMode="contain"
-            className="w-30 h-20"
-          />
-        </View>
-
-        <View className="items-center pt-[5%]">
-          <Text className="font-bold text-2xl">
-            {t("ChangePassword.ChoosePassword")}
-          </Text>
-          <Text className="w-[53%] text-center font-light pt-3">
-            {t("ChangePassword.Changepassword")}
-          </Text>
-        </View>
-
-        <View className="items-center pt-[12%]">
-          <Text className="font-normal pb-2 self-start ml-4">
-            {t("ChangePassword.CurrentPassword")}
-          </Text>
-          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl w-[95%] h-[53px] mb-8 px-3">
-            <TextInput
-              className="flex-1 h-[40px] bg-[#F4F4F4]"
-              secureTextEntry={secureCurrent}
-              onChangeText={setCurrentPassword}
-              value={currentPassword}
+        <View className="flex-1 justify-center">
+          <View className="items-center mt-[5%]">
+            <Image
+              source={require("@/assets/images/auth/change-password.webp")}
+              resizeMode="contain"
+              className="w-60 h-32"
+              style={{ width: 220, height: 140 }}
             />
-            <TouchableOpacity onPress={() => setSecureCurrent(!secureCurrent)}>
-              <Icon
-                name={secureCurrent ? "eye-off-outline" : "eye-outline"}
-                size={24}
-                color="#0000000"
-              />
-            </TouchableOpacity>
           </View>
 
-          <Text className="font-normal pb-2 items-start self-start ml-4 ">
-            {t("ChangePassword.NewPassword")}
-          </Text>
-          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl w-[95%] h-[53px] mb-8 px-3">
-            <TextInput
-              className="flex-1 h-[40px] "
-              secureTextEntry={secureNew}
-              value={newPassword}
-              onChangeText={(text) => {
-                const cleanText = text.replace(/\s/g, "");
-                setNewPassword(cleanText);
-              }}
-            />
-            <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
-              <Icon
-                name={secureNew ? "eye-off-outline" : "eye-outline"}
-                size={24}
-                color="#000000"
-              />
-            </TouchableOpacity>
-          </View>
-
-          <Text className="font-normal pb-2 self-start ml-4">
-            {t("ChangePassword.ConfirmNewPassword")}
-          </Text>
-          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl w-[95%] h-[53px] mb-8 px-3">
-            <TextInput
-              className="flex-1 h-[40px] bg-[#F4F4F4]"
-              secureTextEntry={secureConfirm}
-              onChangeText={(text) => {
-                const cleanText = text.replace(/\s/g, "");
-                setConfirmPassword(cleanText);
-              }}
-              value={confirmPassword}
-            />
-            <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
-              <Icon
-                name={secureConfirm ? "eye-off-outline" : "eye-outline"}
-                size={24}
-                color="#000000"
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View className="items-center justify-center pt-7 gap-y-5 mb-20">
-          <TouchableOpacity
-            className="bg-[#000000] w-[95%] p-3 rounded-full items-center justify-center"
-            onPress={handleChangePassword}
-          >
-            <Text className="text-xl font-light text-white">
-              {t("ChangePassword.Next")}
+          <View className="items-center pt-[5%]">
+            <Text className="font-bold text-2xl">
+              {t("ChangePassword.ChoosePassword")}
             </Text>
-          </TouchableOpacity>
+            <Text className="text-center font-light pt-3">
+              {t("ChangePassword.Changepassword")}
+            </Text>
+          </View>
+
+          <View className="px-4 py-6">
+            <Text className="font-normal pb-2">
+              {t("ChangePassword.CurrentPassword")}
+            </Text>
+            <View
+              className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3"
+              style={{ height: 50 }}
+            >
+              <TextInput
+                className="flex-1 bg-[#F4F4F4]"
+                style={{ height: 40, fontSize: 16 }}
+                secureTextEntry={secureCurrent}
+                onChangeText={setCurrentPassword}
+                value={currentPassword}
+              />
+              <TouchableOpacity
+                onPress={() => setSecureCurrent(!secureCurrent)}
+              >
+                <Icon
+                  name={secureCurrent ? "eye-off-outline" : "eye-outline"}
+                  size={24}
+                  color="#000000"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="font-normal pb-2">
+              {t("ChangePassword.NewPassword")}
+            </Text>
+            <View
+              className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3"
+              style={{ height: 50 }}
+            >
+              <TextInput
+                className="flex-1"
+                style={{ height: 40, fontSize: 16 }}
+                secureTextEntry={secureNew}
+                value={newPassword}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/\s/g, "");
+                  setNewPassword(cleanText);
+                }}
+              />
+              <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
+                <Icon
+                  name={secureNew ? "eye-off-outline" : "eye-outline"}
+                  size={24}
+                  color="#000000"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="font-normal pb-2">
+              {t("ChangePassword.ConfirmNewPassword")}
+            </Text>
+            <View
+              className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3"
+              style={{ height: 50 }}
+            >
+              <TextInput
+                className="flex-1 bg-[#F4F4F4]"
+                style={{ height: 40, fontSize: 16 }}
+                secureTextEntry={secureConfirm}
+                onChangeText={(text) => {
+                  const cleanText = text.replace(/\s/g, "");
+                  setConfirmPassword(cleanText);
+                }}
+                value={confirmPassword}
+              />
+              <TouchableOpacity
+                onPress={() => setSecureConfirm(!secureConfirm)}
+              >
+                <Icon
+                  name={secureConfirm ? "eye-off-outline" : "eye-outline"}
+                  size={24}
+                  color="#000000"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View className="px-4 pb-20">
+            <TouchableOpacity
+              className="bg-[#000000] w-full rounded-3xl items-center justify-center"
+              style={{ height: 50 }}
+              onPress={handleChangePassword}
+            >
+              <Text className="font-light text-white" style={{ fontSize: 18 }}>
+                {t("ChangePassword.Next")}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

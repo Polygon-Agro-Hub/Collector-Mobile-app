@@ -21,7 +21,7 @@ import {
 } from "react-native-responsive-screen";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,

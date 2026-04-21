@@ -78,15 +78,15 @@ const AddVehicleDetails: React.FC = () => {
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
-    useFocusEffect(
-      React.useCallback(() => {
-        setInsuranceExpireDate(new Date());
-        setShowDatePicker(false);
-  
-        return () => {
-        };
-      }, []) 
-    );
+  useFocusEffect(
+    React.useCallback(() => {
+      setInsuranceExpireDate(new Date());
+      setShowDatePicker(false);
+
+      return () => {
+      };
+    }, [])
+  );
   useEffect(() => {
     const fetchLanguage = async () => {
       try {
@@ -373,16 +373,11 @@ const AddVehicleDetails: React.FC = () => {
     }, 1000);
   }, []);
 
-  const handleDismissDropdown = () => {
-    setOpen(false);
-    Keyboard.dismiss(); // Close the keyboard if it's open
-  };
-
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-black/20 ">
         <LottieView
-          source={require("../../assets/lottie/collector.json")} // Ensure you have a valid JSON file
+          source={require("../../assets/lottie/collector.json")}
           autoPlay
           loop
           style={{ width: 300, height: 300 }}

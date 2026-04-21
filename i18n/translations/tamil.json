@@ -11,7 +11,7 @@
     "Password": "கடவுச்சொல்",
     "Sign": "உள்நுழை"
   },
-  "DashBoard": {
+  "CollectionOfficerDashboard": {
     "LNG": "ta",
     "Keep": "தொடருங்கள்!",
     "Youhavenotachieved": "இன்றைய உங்கள் இலக்கை நீங்கள் அடையவில்லை.",
@@ -248,7 +248,7 @@
     "Branch name is required": "கிளையின் பெயர் அவசியம்.",
     "Price updated successfully": "விலை வெற்றிகரமாக புதுப்பிக்கப்பட்டது."
   },
-  "EngProfile": {
+  "SideMenu": {
     "LNG": "en",
     "Language": "மொழி மாற்றம்",
     "View": "எனது QR குறியீடு",
@@ -536,8 +536,8 @@
   "AddOfficerBasicDetails": {
     "LNG": "ta",
     "AddOfficer": "அதிகாரியைச் சேர்க்கவும்",
-    "SelectCountryCode":"நாட்டின் குறியீட்டைத் தேர்ந்தெடுக்கவும்",
-    "SearchCountry":"நாட்டைத் தேடு",
+    "SelectCountryCode": "நாட்டின் குறியீட்டைத் தேர்ந்தெடுக்கவும்",
+    "SearchCountry": "நாட்டைத் தேடு",
     "Type": "வகை :",
     "Permanent": "நிரந்தரமானது",
     "Temporary": "தற்காலிகமானது",
@@ -916,7 +916,7 @@
   },
   "PendingOrderScreen": {
     "Completing order": "ஆர்டரை முடிக்கிறது...",
-    "Processing":"செயலாக்குகிறது...",
+    "Processing": "செயலாக்குகிறது...",
     "Custom Selected Items": "வாடிக்கையாளர் தேர்ந்தெடுத்த பொருட்கள்",
     "Back to Edit": "திருத்தத்திற்கு திரும்பவும்",
     "Mark as Completed": "முடிந்ததாக குறிக்கவும்",
@@ -1005,7 +1005,7 @@
     "Success": "வெற்றி!",
     "order": "ஆணை",
     "Time": "நேரம்",
-    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.":"முதல் 5 ஆர்டர்கள் மட்டுமே தேர்ந்தெடுக்கப்பட்டுள்ளன. டெலிவரிக்கு ஒரு நேரத்தில் 5 ஆர்டர்கள் வரை மட்டுமே தேர்ந்தெடுக்க முடியும்.",
+    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.": "முதல் 5 ஆர்டர்கள் மட்டுமே தேர்ந்தெடுக்கப்பட்டுள்ளன. டெலிவரிக்கு ஒரு நேரத்தில் 5 ஆர்டர்கள் வரை மட்டுமே தேர்ந்தெடுக்க முடியும்.",
     "been sent out": "அனுப்பப்பட்டது",
     "for delivery": "டெலிவரிக்காக",
     "Centre Target": "மைய இலக்கு",
@@ -1074,23 +1074,23 @@
     "Hand Over": "கையளி",
     "No cash was received recently": "சமீபத்தில் எந்தப் பணமும் பெறப்படவில்லை.",
     "Rs": "ரூ. ",
-    "Rscash":" ரூ. "
+    "Rscash": " ரூ. "
   },
   "ViewPickupOrders": {
-    "ID":"எண்:",
+    "ID": "எண்:",
     "Order Details": "ஆர்டர் விவரங்கள்",
     "Ready": "தயார்",
     "Already Paid": "ஏற்கனவே பணம் செலுத்தப்பட்டது!",
     "Rs": "ரூ.",
     "Make Phone Call": "தொலைபேசி அழைப்பு செய்",
     "Scan Order": "ஸ்கேன் ஆர்டர்",
-    "Cash":"பணம்"
+    "Cash": "பணம்"
   },
   "qrcode": {
     "success": "வெற்றி!",
     "error": "பிழை",
     "cashHandoverSuccess": "Rs.{{amount}} {{officerCode}} க்கு வெற்றிகரமாக ஒப்படைக்கப்பட்டது.",
-    "You cannot transfer the maximum amount of":"அதிகபட்ச தொகையை நீங்கள் மாற்ற முடியாது",
+    "You cannot transfer the maximum amount of": "அதிகபட்ச தொகையை நீங்கள் மாற்ற முடியாது",
     "cashHandoverFailed": "பணம் ஒப்படைப்பு தோல்வியடைந்தது",
     "Loading camera": "கேமராவை ஏற்றுகிறது...",
     "Camera Permission Required": "கேமரா அனுமதி தேவை",
@@ -1155,7 +1155,7 @@
     "October": "அக்டோபர்",
     "November": "நவம்பர்",
     "December": "டிசம்பர்",
-    "Enteravalidenic":"செல்லுபடியாகும் தேசிய அடையாள அட்டை (NIC) எண்ணை உள்ளிடவும்."
+    "Enteravalidenic": "செல்லுபடியாகும் தேசிய அடையாள அட்டை (NIC) எண்ணை உள்ளிடவும்."
   },
   "GoviPensionStatus": {
     "Stay Tuned!": "காத்திருங்கள்!",
@@ -1167,7 +1167,23 @@
     "Go Back": "திரும்பிச் செல்லவும்",
     "View My Pension Account": "எனது பென்ஷன் கணக்கைக் காண்க",
     "Loading status...": "நிலை ஏற்றப்படுகிறது...",
-      "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": " looks like the farmer has already Itapplied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.விவசாயி ஏற்கனவே {{date}} அன்று ஓய்வூதியத்திற்கு விண்ணப்பித்திருப்பது போல் தெரிகிறது. விண்ணப்பம் தற்போது மதிப்பாய்வில் உள்ளது. விரைவில் ஒரு முடிவு பகிரப்படும். GoViCare செயலி மூலம் விவசாயி எந்த நேரத்திலும் நிலையைக் கண்காணிக்கலாம்.",
+    "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": " looks like the farmer has already Itapplied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.விவசாயி ஏற்கனவே {{date}} அன்று ஓய்வூதியத்திற்கு விண்ணப்பித்திருப்பது போல் தெரிகிறது. விண்ணப்பம் தற்போது மதிப்பாய்வில் உள்ளது. விரைவில் ஒரு முடிவு பகிரப்படும். GoViCare செயலி மூலம் விவசாயி எந்த நேரத்திலும் நிலையைக் கண்காணிக்கலாம்.",
     "The pension application submitted on {{date}} has been reviewed and was not approved.": "{{தேதி}} அன்று சமர்ப்பிக்கப்பட்ட ஓய்வூதிய விண்ணப்பம் மதிப்பாய்வு செய்யப்பட்டு அங்கீகரிக்கப்படவில்லை."
+  },
+  "Permission": {
+    "locationAccess": "Location Access",
+    "enableLocationMessage": "Enable location access to access location information.",
+    "allow": "Allow",
+    "requesting": "Requesting...",
+    "success": "Success",
+    "locationEnabled": "Location access enabled successfully!",
+    "permissionDenied": "Permission Denied",
+    "enableLocationManually": "Location access is required. Please enable it in settings.",
+    "openSettings": "Open Settings",
+    "permissionError": "Unable to request location permission. Please try again.",
+    "skipLocation": "Skip Location?",
+    "skipMessage": "Some features may not work properly without location access. Are you sure?",
+    "skip": "Skip",
+    "skipForNow": "Skip for now"
   }
 }
