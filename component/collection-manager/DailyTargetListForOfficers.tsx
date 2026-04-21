@@ -15,7 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type DailyTargetListForOfficerstNavigationProps = StackNavigationProp<
   RootStackParamList,

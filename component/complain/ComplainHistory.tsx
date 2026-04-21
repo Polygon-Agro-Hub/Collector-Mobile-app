@@ -23,7 +23,7 @@ import {
 } from "react-native-responsive-screen";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 interface complainItem {
   id: number;
@@ -348,7 +348,7 @@ ${signature}${replyTime}`,
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        navigation.navigate("EngProfile");
+        navigation.navigate("SideMenu");
         return true;
       };
 
@@ -369,7 +369,7 @@ ${signature}${replyTime}`,
         title={t("ReportHistory.Complaints")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("EngProfile")}
+        onBackPress={() => navigation.navigate("SideMenu")}
       />
 
       {loading ? (

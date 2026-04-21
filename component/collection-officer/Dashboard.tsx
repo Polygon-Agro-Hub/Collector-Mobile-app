@@ -288,7 +288,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
       {/* Profile Section */}
       <TouchableOpacity
         className="flex-row items-center mb-4 p-4"
-        onPress={() => navigation.navigate("EngProfile")}
+        onPress={() => navigation.navigate("SideMenu")}
       >
         <Image
           source={

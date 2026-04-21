@@ -27,7 +27,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const api = axios.create({

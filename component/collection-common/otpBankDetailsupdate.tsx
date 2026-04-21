@@ -23,7 +23,7 @@ import { Modal } from "react-native";
 import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 const { width: screenWidth } = Dimensions.get("window");
 

@@ -14,9 +14,10 @@ interface SplashProps {
   navigation: SplashNavigationProp;
 }
 
-const Center = require("../../assets/images/common/codinet.webp");
-const Bottom = require("../../assets/images/common/codinet-back.webp");
-const Top = require("../../assets/images/common/codinet-up.webp");
+const center = require("../../assets/images/common/codinet.webp");
+const bottom = require("../../assets/images/common/codinet-back.webp");
+const top = require("../../assets/images/common/codinet-up.webp");
+
 const Splash: React.FC<SplashProps> = ({ navigation }) => {
   const [progress, setProgress] = useState(0);
   const dispatch = useDispatch();
@@ -137,12 +138,12 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
   return (
     <View className="flex-1 bg-white relative justify-center">
       <Image
-        source={Top}
+        source={top}
         className="w-[50%] h-[18%] absolute left-0 top-0 -mt-2"
         resizeMode="contain"
       />
       <Image
-        source={Center}
+        source={center}
         className="w-full h-32 justify-center items-center"
         resizeMode="contain"
       />
@@ -157,7 +158,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         />
       </View>
       <Image
-        source={Bottom}
+        source={bottom}
         className="w-[50%] h-[18%] absolute bottom-0 right-0"
         resizeMode="contain"
       />

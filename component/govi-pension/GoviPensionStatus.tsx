@@ -10,7 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import CustomHeader from "@/component/commons/CustomHeader";
+import CustomHeader from "@/component/navigations/CustomHeader";
 import { RootStackParamList } from "../types";
 
 type GoviPensionStatusScreenNavigationProp = StackNavigationProp<

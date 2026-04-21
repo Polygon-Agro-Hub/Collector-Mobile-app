@@ -8,7 +8,7 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { useFocusEffect } from "@react-navigation/native";
-import CustomHeader from "./CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 type PrivacyPolicyNavigationProp = StackNavigationProp<
   RootStackParamList,
   "PrivacyPolicy"

@@ -21,7 +21,7 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 import LottieView from "lottie-react-native";
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<

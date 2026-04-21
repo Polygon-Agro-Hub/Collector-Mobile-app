@@ -24,7 +24,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "../../store/authSlice";
 import { useDispatch } from "react-redux";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -346,9 +346,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       style={{ flex: 1, backgroundColor: "white" }}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{ flexGrow: 1, padding: 4 }}
         keyboardShouldPersistTaps="handled"
-        className=" bg-white"
+        className="bg-white"
+        showsVerticalScrollIndicator={false}
       >
         <CustomHeader
           title=""
@@ -357,102 +358,116 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           onBackPress={() => handleNavBack()}
         />
 
-        <View className="items-center ">
-          <Image
-            source={loginImage}
-            style={{ width: 270, height: 270 }}
-            resizeMode="contain"
-          />
-          <Text className="font-bold text-2xl pt-[7%]">
-            {t("SignIn.Wellcome")}
-          </Text>
-        </View>
-
-        <View className="mt-2 items-center">
-          <Text>{t("SignIn.SigntoLogin")}</Text>
-        </View>
-
-        {loading ? (
-          <View className="flex-1 justify-center items-center ">
-            <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
-              autoPlay
-              loop
-              style={{ width: 300, height: 300 }}
+        <View className="flex-1 justify-center">
+          <View className="items-center">
+            <Image
+              source={loginImage}
+              style={{ width: 270, height: 270 }}
+              resizeMode="contain"
             />
-          </View>
-        ) : (
-          <View className="p-6">
-            <Text className="text-base pb-[2%] font-light">
-              {t("SignIn.Employee")}
+            <Text className="font-bold text-2xl pt-[7%]">
+              {t("SignIn.Wellcome")}
             </Text>
-            <View
-              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl h-[53px] mb-2 px-3 ${
-                empIdError ? "border-red-500" : "border-[#F4F4F4]"
-              }`}
-            >
-              <Image
-                source={user}
-                style={{ width: 24, height: 24 }}
-                resizeMode="contain"
-              />
-              <TextInput
-                className="flex-1 h-[40px] text-base pl-2"
-                onChangeText={handleEmpIdChange}
-                autoCapitalize="characters"
-                value={empid}
+          </View>
+
+          <View className="mt-2 items-center">
+            <Text>{t("SignIn.SigntoLogin")}</Text>
+          </View>
+
+          {loading ? (
+            <View className="flex-1 justify-center items-center">
+              <LottieView
+                source={require("../../assets/lottie/newLottie.json")}
+                autoPlay
+                loop
+                style={{ width: 300, height: 300 }}
               />
             </View>
-
-            {empIdError ? (
-              <View className="mb-4">
-                <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>
-              </View>
-            ) : (
-              <View className="mb-6" />
-            )}
-
-            <Text className="text-base pb-[2%] font-light">
-              {t("SignIn.Password")}
-            </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl h-[53px] mb-8 px-3">
-              <Image
-                source={passwordicon}
-                style={{ width: 24, height: 24 }}
-                resizeMode="contain"
-              />
-              <TextInput
-                className="flex-1 h-[40px] text-base pl-2"
-                secureTextEntry={secureTextEntry}
-                onChangeText={handlePasswordChange}
-                value={password}
-              />
-              <TouchableOpacity
-                onPress={() => setSecureTextEntry(!secureTextEntry)}
+          ) : (
+            <View className="px-4 py-6">
+              <Text className="text-base pb-[2%] font-light">
+                {t("SignIn.Employee")}
+              </Text>
+              <View
+                className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 ${
+                  empIdError ? "border-red-500" : "border-[#F4F4F4]"
+                }`}
+                style={{ height: 50 }}
               >
-                <Icon
-                  name={secureTextEntry ? "eye-off-outline" : "eye-outline"}
-                  size={24}
-                  color="black"
+                <Image
+                  source={user}
+                  style={{ width: 24, height: 24 }}
+                  resizeMode="contain"
                 />
+                <TextInput
+                  className="flex-1 h-[40px] text-base pl-2"
+                  onChangeText={handleEmpIdChange}
+                  autoCapitalize="characters"
+                  value={empid}
+                  style={{ fontSize: 16 }}
+                />
+              </View>
+
+              {empIdError ? (
+                <View className="mb-4">
+                  <Text className="text-red-500 text-sm pl-3">
+                    {empIdError}
+                  </Text>
+                </View>
+              ) : (
+                <View className="mb-6" />
+              )}
+
+              <Text className="text-base pb-[2%] font-light">
+                {t("SignIn.Password")}
+              </Text>
+              <View
+                className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3"
+                style={{ height: 50 }}
+              >
+                <Image
+                  source={passwordicon}
+                  style={{ width: 24, height: 24 }}
+                  resizeMode="contain"
+                />
+                <TextInput
+                  className="flex-1 h-[40px] text-base pl-2"
+                  secureTextEntry={secureTextEntry}
+                  onChangeText={handlePasswordChange}
+                  value={password}
+                  style={{ fontSize: 16 }}
+                />
+                <TouchableOpacity
+                  onPress={() => setSecureTextEntry(!secureTextEntry)}
+                >
+                  <Icon
+                    name={secureTextEntry ? "eye-off-outline" : "eye-outline"}
+                    size={24}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                className="bg-[#000000] w-full rounded-3xl shadow-2xl items-center justify-center mb-[20%]"
+                style={{ height: 50 }}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="white" size="small" />
+                ) : (
+                  <Text
+                    className="text-center font-light text-white"
+                    style={{ fontSize: 18 }}
+                  >
+                    {t("SignIn.Sign")}
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              className="bg-[#000000] w-full p-3 rounded-3xl shadow-2xl items-center justify-center mb-[20%]"
-              onPress={handleLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <Text className="text-center text-xl font-light text-white">
-                  {t("SignIn.Sign")}
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
+          )}
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

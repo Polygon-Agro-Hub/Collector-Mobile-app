@@ -4,7 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack'
 import { RootStackParamList } from '../types'
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { useTranslation } from "react-i18next";
-import CustomHeader from "@/component/commons/CustomHeader";
+import CustomHeader from "@/component/navigations/CustomHeader";
 
 
 type RegisteredfarmerNavigationProp = StackNavigationProp<RootStackParamList, 'Registeredfarmer'>;

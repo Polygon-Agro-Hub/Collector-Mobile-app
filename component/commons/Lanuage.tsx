@@ -61,48 +61,66 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   return (
     <ScrollView 
       className="bg-white"
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1, padding: 4 }}
+      showsVerticalScrollIndicator={false}
     >
-      <View className="flex-1 bg-white">
-        {/* Main content container with centered content */}
-        <View className="flex-1 justify-center px-4">
-          {/* Image and text section */}
-          <View className="items-center">
-            <Image
-              className="w-40 h-40 rounded-full"
-              source={lg}
-              resizeMode="contain"
-            />
-            <Text className="text-3xl pt-5 font-semibold">Language</Text>
-            <Text className="text-lg pt-5 font-extralight">
-              மொழியைத் தேர்ந்தெடுக்கவும்
-            </Text>
-            <Text className="text-lg pt-1 font-extralight">
-              කරුණාකර භාෂාව තෝරන්න
-            </Text>
-          </View>
+      <View className="flex-1 bg-white justify-center">
+        {/* Image and text section */}
+        <View className="items-center">
+          <Image
+            className="w-40 h-40 rounded-full"
+            source={lg}
+            resizeMode="contain"
+          />
+          <Text className="text-3xl pt-5 font-semibold">Language</Text>
+          <Text className="text-lg pt-5 font-extralight">
+            மொழியைத் தேர்ந்தெடுக்கவும்
+          </Text>
+          <Text className="text-lg pt-1 font-extralight">
+            කරුණාකර භාෂාව තෝරන්න
+          </Text>
+        </View>
 
-          {/* Buttons section */}
-          <View className="w-64 self-center mt-8">
-            <TouchableOpacity
-              className="bg-[#413A3F] p-4 rounded-3xl mb-6"
-              onPress={() => handleLanguageSelect("en")}
+        {/* Buttons section */}
+        <View className="w-64 self-center mt-8">
+          <TouchableOpacity
+            className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center"
+            style={{ height: 50 }}
+            onPress={() => handleLanguageSelect("en")}
+          >
+            <Text 
+              className="text-white text-center"
+              style={{ fontSize: 18 }}
             >
-              <Text className="text-white text-lg text-center">ENGLISH</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#413A3F] p-4 rounded-3xl mb-6"
-              onPress={() => handleLanguageSelect("si")}
+              ENGLISH
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center"
+            style={{ height: 50 }}
+            onPress={() => handleLanguageSelect("si")}
+          >
+            <Text 
+              className="text-white text-center"
+              style={{ fontSize: 18 }}
             >
-              <Text className="text-white text-2xl text-center">සිංහල</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#413A3F] p-4 rounded-3xl"
-              onPress={() => handleLanguageSelect("ta")}
+              සිංහල
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            className="bg-[#413A3F] rounded-3xl items-center justify-center"
+            style={{ height: 50 }}
+            onPress={() => handleLanguageSelect("ta")}
+          >
+            <Text 
+              className="text-white text-center"
+              style={{ fontSize: 18 }}
             >
-              <Text className="text-white text-2xl text-center">தமிழ்</Text>
-            </TouchableOpacity>
-          </View>
+              தமிழ்
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>

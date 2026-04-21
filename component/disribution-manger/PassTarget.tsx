@@ -14,7 +14,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "@/component/commons/GlobalSearchModal";  
 
 interface PassTargetProps {

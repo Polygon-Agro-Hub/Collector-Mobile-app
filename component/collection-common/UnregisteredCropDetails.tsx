@@ -31,7 +31,7 @@ import CameraComponent from "@/utils/CameraComponent";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../commons/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 const api = axios.create({

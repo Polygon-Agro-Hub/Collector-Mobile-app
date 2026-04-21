@@ -106,12 +106,12 @@ import ReceivedCashQrCode from "@/component/distribution-officer/ReceivedCashQrC
 import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
 import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
-import Splash from "@/component/commons/Splash";
+import Splash from "@/component/auth/Splash";
 import Lanuage from "@/component/commons/Lanuage";
-import OfficerQr from "@/component/commons/OfficerQr";
-import EngProfile from "@/component/commons/EngProfile";
+import OfficerQr from "@/component/auth/OfficerQrCode";
+import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
-import BottomNav from "@/component/commons/BottomNav";
+import BottomNav from "@/component/navigations/BottomNav";
 
 LogBox.ignoreAllLogs(true);
 NativeWindStyleSheet.setOutput({
@@ -367,7 +367,7 @@ function AppContent() {
               name="AddOfficerAddressDetails"
               component={AddOfficerAddressDetails}
             />
-            <Stack.Screen name="EngProfile" component={EngProfile} />
+            <Stack.Screen name="SideMenu" component={SideMenu} />
             <Stack.Screen name="ClaimOfficer" component={ClaimOfficer} />
             <Stack.Screen name="OTPE" component={OTPE} />
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
