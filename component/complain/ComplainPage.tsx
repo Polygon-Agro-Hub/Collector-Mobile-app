@@ -73,13 +73,12 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   }, []);
 
   useEffect(() => {
-    let appName = userId === 0 ? "CollectionOfficer" : "PlantCare";
     const selectedLanguage = t("ReportComplaint.LNG");
 
     const fetchComplainCategory = async () => {
       try {
         const response = await axios.get(
-          `${environment.API_BASE_URL}api/complain/get-complain-category/${appName}`,
+          `${environment.API_BASE_URL}api/complain/get-complain-category/CoDi`,
         );
         if (response.data.status === "success") {
           const categoryField =
@@ -183,17 +182,27 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       >
         <View className="flex-1 bg-white">
           {loading ? (
-            <View className="flex-1 justify-center items-center">
-              <LottieView
-                source={require("../../assets/lottie/newLottie.json")}
-                autoPlay
-                loop
-                style={{ width: 300, height: 300 }}
+            <View className="flex-1">
+              <CustomHeader
+                title=""
+                showBackButton={true}
+                navigation={navigation}
+                onBackPress={() => navigation.goBack()}
               />
+
+              <View className="flex-1 justify-center items-center">
+                <LottieView
+                  source={require("../../assets/lottie/loading.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 150, height: 150 }}
+                />
+              </View>
             </View>
           ) : (
             <ScrollView
               className="flex-1 bg-white"
+              contentContainerStyle={{ flexGrow: 1 }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
@@ -204,92 +213,88 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 onBackPress={() => navigation.goBack()}
               />
 
-              <View
-                className="items-center bg-white"
-                style={{ paddingHorizontal: wp(4) }}
-              >
-                <Image
-                  source={require("../../assets/images/complain/complain.webp")}
-                  className="w-36 h-36"
-                  resizeMode="contain"
-                />
-
-                <View className="w-[100%] items-center p-6 shadow-2xl bg-white rounded-xl">
-                  <View className="flex-row">
-                    <Text className="text-2xl font-semibold text-center mb-4 color-[#424242]">
-                      {t("ReportComplaint.Tellus")}
-                    </Text>
-                    <Text className="text-2xl font-semibold text-center mb-4 pl-2 color-[#D72C62]">
-                      {t("ReportComplaint.Problem")}
-                    </Text>
-                  </View>
-
-                  {/* Category Selector */}
-                  <View className="w-full mb-4">
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (Category.length > 0) setCategoryModalVisible(true);
-                      }}
-                      style={{
-                        borderWidth: 1,
-                        borderColor: "#ccc",
-                        borderRadius: 25,
-                        paddingHorizontal: 16,
-                        paddingVertical: 12,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        backgroundColor: "white",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: selectedCategoryLabel ? "#424242" : "#434343",
-                          fontSize: 12,
-                          flex: 1,
-                          marginLeft: 8,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {selectedCategoryLabel
-                          ? t(selectedCategoryLabel)
-                          : t("ReportComplaint.selectCategory")}
-                      </Text>
-                      <MaterialIcons
-                        name="keyboard-arrow-down"
-                        size={22}
-                        color="#9CA3AF"
-                        style={{ paddingRight: 10 }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-
-                  <Text className="text-sm text-gray-600 text-center mb-4">
-                    {t("ReportComplaint.WewilRespond")}
-                  </Text>
-
-                  <TextInput
-                    className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8"
-                    placeholder={t("ReportComplaint.Kindlysubmit")}
-                    placeholderTextColor="#434343"
-                    multiline
-                    value={complain}
-                    onChangeText={(text) => setComplain(text)}
-                    style={{ textAlignVertical: "top", color: "#424242" }}
+              <View className="flex-1 justify-center bg-white">
+                <View
+                  className="items-center bg-white"
+                >
+                  <Image
+                    source={require("../../assets/images/complain/complain.webp")}
+                    className="w-36 h-36"
+                    resizeMode="contain"
                   />
 
-                  <TouchableOpacity
-                    className="w-full bg-[#000000] py-4 rounded-full items-center mb-20"
-                    onPress={handleSubmit}
-                  >
-                    {isLoading ? (
-                      <ActivityIndicator size="small" color="white" />
-                    ) : (
-                      <Text className="text-white font-bold text-lg">
-                        {t("ReportComplaint.Submit")}
+                  <View className="w-[100%] items-center px-4 shadow-2xl bg-white rounded-xl mt-10">
+                    <View className="flex-row">
+                      <Text className="text-2xl font-semibold text-center mb-4 color-[#424242]">
+                        {t("ReportComplaint.Tellus")}
                       </Text>
-                    )}
-                  </TouchableOpacity>
+                      <Text className="text-2xl font-semibold text-center mb-4 pl-2 color-[#D72C62]">
+                        {t("ReportComplaint.Problem")}
+                      </Text>
+                    </View>
+
+                    {/* Category Selector */}
+                    <View className="w-full mb-4">
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (Category.length > 0) setCategoryModalVisible(true);
+                        }}
+                        style={{
+                          borderWidth: 1,
+                          borderColor: "#ccc",
+                          borderRadius: 25,
+                          paddingHorizontal: 8,
+                          height: 50,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          backgroundColor: "white",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: selectedCategoryLabel ? "#424242" : "#434343",
+                            fontSize: 16,
+                            flex: 1,
+                            marginLeft: 8,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {selectedCategoryLabel
+                            ? t(selectedCategoryLabel)
+                            : t("ReportComplaint.selectCategory")}
+                        </Text>
+                        <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text className="text-sm text-gray-600 text-center mb-4">
+                      {t("ReportComplaint.WewilRespond")}
+                    </Text>
+
+                    <TextInput
+                      className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8"
+                      style={{ textAlignVertical: "top", color: "#424242" }}
+                      placeholder={t("ReportComplaint.Kindlysubmit")}
+                      placeholderTextColor="#434343"
+                      multiline
+                      value={complain}
+                      onChangeText={(text) => setComplain(text)}
+                    />
+
+                    <TouchableOpacity
+                      className="w-full bg-[#000000] rounded-3xl items-center justify-center mb-20 h-[50px]"
+                      onPress={handleSubmit}
+                    >
+                      {isLoading ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <Text className="text-white font-bold" style={{ fontSize: 18 }}>
+                          {t("ReportComplaint.Submit")}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </ScrollView>

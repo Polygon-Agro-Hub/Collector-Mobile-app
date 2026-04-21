@@ -163,7 +163,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     try {
       await AsyncStorage.setItem("@user_language", language);
       changeLanguage(language);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleLanguageSelect = (language: string) => {
@@ -180,7 +180,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
         LanguageSelect("si");
         HanldeAsynStorage("si");
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleLogout = async () => {
@@ -346,18 +346,16 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                   <TouchableOpacity
                     key={language}
                     onPress={() => handleLanguageSelect(language)}
-                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
-                      selectedLanguage === language
+                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedLanguage === language
                         ? "bg-[#FFDFF7]"
                         : "bg-transparent"
-                    }`}
+                      }`}
                   >
                     <Text
-                      className={`text-base ${
-                        selectedLanguage === language
+                      className={`text-base ${selectedLanguage === language
                           ? "text-black"
                           : "text-[#434343]"
-                      }`}
+                        }`}
                     >
                       {displayLanguage}
                     </Text>
@@ -434,14 +432,12 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                 <TouchableOpacity
                   key={complaint}
                   onPress={() => handleComplaintSelect(complaint)}
-                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
-                    selectedComplaint === complaint ? "bg-green-200" : ""
-                  }`}
+                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedComplaint === complaint ? "bg-green-200" : ""
+                    }`}
                 >
                   <Text
-                    className={`text-base ${
-                      selectedComplaint === complaint ? "text-black" : "#434343"
-                    }`}
+                    className={`text-base ${selectedComplaint === complaint ? "text-black" : "#434343"
+                      }`}
                   >
                     {complaint}
                   </Text>
@@ -487,7 +483,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
           }}
         >
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
             style={{ width: 200, height: 200 }}

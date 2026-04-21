@@ -302,7 +302,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       <View className="flex-1 justify-center items-center mt-[-25%] px-4">
         <View className="items-center">
           <LottieView
-            source={require("../../assets/lottie/NoComplaints.json")}
+            source={require("../../assets/lottie/no-data.json")}
             autoPlay
             loop
             style={{ width: 150, height: 150 }}

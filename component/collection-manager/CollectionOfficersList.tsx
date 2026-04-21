@@ -180,11 +180,10 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 bg-[#ADADAD1A] ${
-        item.status === "Not Approved"
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 bg-[#ADADAD1A] ${item.status === "Not Approved"
           ? "border border-[#FF9797]"
           : "border border-[#ADADAD1A]"
-      }`}
+        }`}
       onPress={() => {
         if (item.status !== "Not Approved") {
           navigation.navigate("OfficerSummary" as any, {
@@ -249,9 +248,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         {showFilter && (
           <View className="absolute z-40 flex-col top-14 left-6 bg-white shadow-lg rounded-lg">
             <TouchableOpacity
-              className={`px-4 py-2 bg-white rounded-lg  ${
-                selectedJobRole === "Driver" ? "bg-gray-200" : ""
-              }`}
+              className={`px-4 py-2 bg-white rounded-lg  ${selectedJobRole === "Driver" ? "bg-gray-200" : ""
+                }`}
               onPress={() => {
                 setSelectedJobRole("Driver");
                 setShowFilter(false);
@@ -262,9 +260,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className={`px-4 py-2 bg-white rounded-lg  ${
-                selectedJobRole === "Collection Officer" ? "bg-gray-200" : ""
-              }`}
+              className={`px-4 py-2 bg-white rounded-lg  ${selectedJobRole === "Collection Officer" ? "bg-gray-200" : ""
+                }`}
               onPress={() => {
                 setSelectedJobRole("Collection Officer");
                 setShowFilter(false);
@@ -364,7 +361,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         {loading ? (
           <View className="flex-1 justify-center items-center -mt-[25%]">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
+              source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 350, height: 350 }}

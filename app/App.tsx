@@ -28,10 +28,10 @@ import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails
 import CollectionOfficerDashboard from "@/component/collection-officer/CollectionOfficerDashboard";
 import QRScanner from "@/component/collection-common/QRScanner";
 import FormScreen from "@/component/collection-common/FormScreen";
-import UnregisteredFarmerDetails from "@/component/collection-common/UnregisteredFarmerDetails";
+import UnregisteredFarmerDetails from "@/component/farmer/UnregisteredFarmerDetails";
 import UnregisteredCropDetails from "@/component/collection-common/UnregisteredCropDetails";
-import SearchFarmer from "@/component/collection-common/SearchFarmer";
-import FarmerQr from "@/component/collection-common/FarmerQr";
+import SearchFarmer from "@/component/farmer/SearchFarmer";
+import FarmerQr from "@/component/farmer/FarmerQr";
 import ComplainPage from "@/component/complain/ComplainPage";
 import Profile from "@/component/auth/Profile";
 import ReportPage from "@/component/collection-common/ReportPage";
@@ -153,7 +153,7 @@ function MainTabNavigator() {
   useFocusEffect(
     useCallback(() => {
       console.log("Job roll hgi");
-      return () => {};
+      return () => { };
     }, []),
   );
 

@@ -77,13 +77,13 @@ const NotEligibleScreen: React.FC<NotEligibleScreenProps> = ({
       </ScrollView>
 
       {/* Action Button - Always "Go Back" */}
-      <View className="px-5 pb-6 pt-4 bg-white">
+      <View className="px-4 pb-6 pt-4 bg-white">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          className={`bg-[#353535] rounded-full py-4`}
+          className={`bg-[#353535] rounded-3xl h-[50px] items-center justify-center`}
           activeOpacity={0.8}
         >
-          <Text className={`text-white text-center font-bold text-lg`}>
+          <Text className="text-white text-center font-bold text-lg">
             {t("GoviPensionStatus.Go Back")}
           </Text>
         </TouchableOpacity>

@@ -52,7 +52,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ navigation }) => {
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <View style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}>
+      <View style={{ paddingHorizontal: wp(2), paddingVertical: hp(2) }}>
         <Text className="text-sm   text-center font-bold ">
           {t("PrivacyPlicy.PrivacyPlicyCompany")}
         </Text>

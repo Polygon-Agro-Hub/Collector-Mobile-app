@@ -363,10 +363,10 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     return (
       <View className="flex-1 bg-white justify-center items-center">
         <LottieView
-          source={require("../../assets/lottie/newLottie.json")}
+          source={require("../../assets/lottie/loading.json")}
           autoPlay
           loop
-          style={{ width: 300, height: 300 }}
+          style={{ width: 150, height: 150 }}
         />
         <Text className="mt-2 text-gray-600">
           {t("ReplaceRequestsApprove.Loading replace request")}

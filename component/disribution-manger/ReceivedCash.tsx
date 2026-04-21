@@ -247,10 +247,10 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
       {loading || filterLoading ? (
         <View className="flex-1 justify-center items-center">
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
-            style={{ width: 300, height: 300 }}
+            style={{ width: 150, height: 150 }}
           />
         </View>
       ) : hasTransactions ? (
@@ -350,7 +350,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
           <View className="items-center justify-center py-20">
             <View className="flex items-center justify-center mb-4">
               <LottieView
-                source={require("../../assets/lottie/NoComplaints.json")}
+                source={require("../../assets/lottie/no-data.json")}
                 autoPlay
                 loop
                 style={{ width: 150, height: 150 }}

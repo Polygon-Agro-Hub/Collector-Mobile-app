@@ -468,9 +468,8 @@ const DailyTargetListOfficerDistribution: React.FC<
       {/* Toggle Buttons */}
       <View className="flex-row justify-center items-center py-4 bg-[#282828] px-4">
         <TouchableOpacity
-          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${
-            selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-          }`}
+          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+            }`}
           onPress={() => handleToggleChange("ToDo")}
         >
           <Text
@@ -490,9 +489,8 @@ const DailyTargetListOfficerDistribution: React.FC<
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${
-            selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-          }`}
+          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+            }`}
           onPress={() => handleToggleChange("Completed")}
         >
           <Text
@@ -532,12 +530,12 @@ const DailyTargetListOfficerDistribution: React.FC<
               <MaterialIcons
                 name={
                   pendingItemsCount > 0 &&
-                  todoData
-                    .filter((item) => canSelectItem(item))
-                    .every((item) =>
-                      selectedItems.has(item.distributedTargetItemId),
-                    ) &&
-                  selectedItems.size > 0
+                    todoData
+                      .filter((item) => canSelectItem(item))
+                      .every((item) =>
+                        selectedItems.has(item.distributedTargetItemId),
+                      ) &&
+                    selectedItems.size > 0
                     ? "check-box"
                     : "check-box-outline-blank"
                 }
@@ -587,7 +585,7 @@ const DailyTargetListOfficerDistribution: React.FC<
         {loading ? (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
+              source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 200, height: 200 }}
@@ -597,13 +595,11 @@ const DailyTargetListOfficerDistribution: React.FC<
           displayedData.map((item, index) => (
             <View
               key={`${item.distributedTargetItemId}-${index}`}
-              className={`flex-row py-4 border-b border-gray-200 ${
-                index % 2 === 0 ? "bg-gray-50" : "bg-white"
-              } ${
-                selectedItems.has(item.distributedTargetItemId)
+              className={`flex-row py-4 border-b border-gray-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                } ${selectedItems.has(item.distributedTargetItemId)
                   ? "bg-blue-50"
                   : ""
-              }`}
+                }`}
             >
               {/* Checkbox for ToDo items */}
               {selectedToggle === "ToDo" && (
@@ -678,7 +674,7 @@ const DailyTargetListOfficerDistribution: React.FC<
         ) : (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/NoComplaints.json")}
+              source={require("../../assets/lottie/no-data.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}

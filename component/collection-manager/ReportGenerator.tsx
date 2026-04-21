@@ -473,7 +473,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       ) : generateAgain ? (
         <View className="items-center justify-center flex-1">
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
             style={{ width: 250, height: 250 }}

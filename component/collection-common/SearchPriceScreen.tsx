@@ -111,7 +111,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     useCallback(() => {
       setLoading(false);
       resetForm();
-      return () => {};
+      return () => { };
     }, [resetForm]),
   );
 
@@ -273,10 +273,10 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     return (
       <View className="flex-1 bg-white items-center justify-center">
         <LottieView
-          source={require("../../assets/lottie/newLottie.json")}
+          source={require("../../assets/lottie/loading.json")}
           autoPlay
           loop
-          style={{ width: 300, height: 300 }}
+          style={{ width: 150, height: 150 }}
         />
       </View>
     );
@@ -285,10 +285,11 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       <ScrollView
         className="flex-1 bg-white"
+        contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled={true}
         refreshControl={
@@ -299,85 +300,88 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
             tintColor="#2AAD7A"
           />
         }
+        showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1 bg-white items-center px-6 pt-8">
-          <Text className="text-xl font-semibold mb-4">
+        {/* Header at the top */}
+        <View className="bg-white py-3">
+          <Text className="text-xl font-semibold text-center">
             {t("SearchPrice.SearchPrice")}
           </Text>
-          <Image
-            source={require("../../assets/images/collection-common/search-crop.webp")}
-            className="w-64 h-40 mb-6 mt-8"
-            resizeMode="contain"
-          />
+        </View>
 
-          {/* Crop Name Selector */}
-          <View className="w-full mb-4">
-            <Text className="text-base mb-2 text-center">
-              {t("SearchPrice.Crop")}
-            </Text>
-            <TouchableOpacity
-              onPress={() => setCropModalVisible(true)}
-              className="w-full flex-row items-center justify-between px-4 py-3 rounded-[25px]"
-              style={{ backgroundColor: "#F4F4F4" }}
-            >
-              <Text
-                className={`text-base ${selectedCropLabel ? "text-black" : "text-gray-400"}`}
-              >
-                {selectedCropLabel || t("SearchPrice.SelectCrop")}
+        {/* Centered content after header */}
+        <View className="flex-1 justify-center">
+          <View className="bg-white items-center px-4">
+            <Image
+              source={require("../../assets/images/collection-common/search-crop.webp")}
+              className="w-80 h-52 mb-6"
+              resizeMode="contain"
+            />
+
+            {/* Crop Name Selector */}
+            <View className="w-full mb-4">
+              <Text className="text-base mb-2 text-center" style={{ fontSize: 16 }}>
+                {t("SearchPrice.Crop")}
               </Text>
-              <MaterialIcons
-                name="keyboard-arrow-down"
-                size={22}
-                color="#9CA3AF"
-              />
-            </TouchableOpacity>
-          </View>
-
-          {/* Variety Selector */}
-          <View className="w-full mb-8">
-            <Text className="text-base mb-2 text-center">
-              {t("SearchPrice.Variety")}
-            </Text>
-            {loadingVarieties ? (
-              <View
-                className="w-full flex-row items-center justify-center px-4 py-3 rounded-[25px]"
-                style={{ backgroundColor: "#F4F4F4" }}
-              >
-                <ActivityIndicator size="small" color="#2AAD7A" />
-              </View>
-            ) : (
               <TouchableOpacity
-                onPress={handleVarietyModalOpen}
-                className="w-full flex-row items-center justify-between px-4 py-3 rounded-[25px]"
-                style={{ backgroundColor: "#F4F4F4" }}
+                onPress={() => setCropModalVisible(true)}
+                className="w-full flex-row items-center justify-between px-4 rounded-3xl"
+                style={{ backgroundColor: "#F4F4F4", height: 50 }}
               >
                 <Text
-                  className={`text-base ${selectedVarietyLabel ? "text-black" : "text-gray-400"}`}
+                  className={`${selectedCropLabel ? "text-black" : "text-gray-400"}`}
+                  style={{ fontSize: 16 }}
                 >
-                  {selectedVarietyLabel || t("SearchPrice.SelectVariety")}
+                  {selectedCropLabel || t("SearchPrice.SelectCrop")}
                 </Text>
-                <MaterialIcons
-                  name="keyboard-arrow-down"
-                  size={22}
-                  color="#9CA3AF"
-                />
+                <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
               </TouchableOpacity>
-            )}
-          </View>
+            </View>
 
-          {/* Search Button */}
-          <TouchableOpacity
-            className="bg-[#000000] w-full py-3 mb-4 rounded-[35px] items-center"
-            onPress={handleSearch}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Text className="text-white font-semibold text-lg">
-                {t("SearchPrice.Search")}
+            {/* Variety Selector */}
+            <View className="w-full mb-8">
+              <Text className="text-base mb-2 text-center" style={{ fontSize: 16 }}>
+                {t("SearchPrice.Variety")}
               </Text>
-            )}
-          </TouchableOpacity>
+              {loadingVarieties ? (
+                <View
+                  className="w-full flex-row items-center justify-center px-4 rounded-3xl"
+                  style={{ backgroundColor: "#F4F4F4", height: 50 }}
+                >
+                  <ActivityIndicator size="small" color="#2AAD7A" />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleVarietyModalOpen}
+                  className="w-full flex-row items-center justify-between px-4 rounded-3xl"
+                  style={{ backgroundColor: "#F4F4F4", height: 50 }}
+                >
+                  <Text
+                    className={`${selectedVarietyLabel ? "text-black" : "text-gray-400"}`}
+                    style={{ fontSize: 16 }}
+                  >
+                    {selectedVarietyLabel || t("SearchPrice.SelectVariety")}
+                  </Text>
+                  <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Search Button */}
+            <TouchableOpacity
+              className="bg-[#000000] w-full rounded-3xl items-center justify-center mb-4"
+              style={{ height: 50 }}
+              onPress={handleSearch}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text className="text-white font-semibold" style={{ fontSize: 18 }}>
+                  {t("SearchPrice.Search")}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
 

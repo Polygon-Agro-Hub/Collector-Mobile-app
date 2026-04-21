@@ -29,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "../navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -292,16 +293,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       >
         <View className="flex-1">
           {loading ? (
-            <View
-              className="items-center mt-10"
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <FarmerQrSkeletonLoader />
-            </View>
+            <FarmerQrSkeletonLoader />
           ) : (
             <>
               {/* Farmer Name and NIC - Centered */}
@@ -335,9 +327,8 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               {/* Collect Button - Centered */}
               <View className="items-center mb-6 mx-4">
                 <TouchableOpacity
-                  className={`w-full py-4 rounded-full items-center ${
-                    !farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
-                  }`}
+                  className={`w-full h-[50px] rounded-full items-center justify-center ${!farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
+                    }`}
                   onPress={() =>
                     navigation.navigate("Main", {
                       screen: "UnregisteredCropDetails",
@@ -355,7 +346,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               {/* Apply For Pension Button - Centered */}
               <View className="items-center mb-8 mx-4">
                 <TouchableOpacity
-                  className="border border-[#606060] w-full py-4 rounded-full items-center"
+                  className="border border-[#606060] w-full h-[50px] rounded-full items-center justify-center"
                   onPress={checkPensionStatus}
                   disabled={checkingPensionStatus}
                 >
@@ -370,18 +361,15 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               </View>
 
               {/* Download and Share buttons - Centered */}
-              <View className="flex-row justify-center space-x-6 mb-4">
+              <View className="flex flex-row w-full px-12 pb-8 gap-3">
                 <TouchableOpacity
-                  className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg items-center"
+                  className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
                   onPress={downloadQRCode}
                   disabled={checkingPensionStatus}
                 >
-                  <Image
-                    source={require("../../assets/images/collection-common/download.webp")}
-                    style={{ width: 24, height: 24, marginBottom: 8 }}
-                  />
+                  <MaterialIcons name="download" size={20} color="white" />
                   <Text
-                    className="text-white text-sm"
+                    className="text-white text-base"
                     style={[
                       i18n.language === "si"
                         ? { fontSize: 12 }
@@ -395,16 +383,13 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg items-center"
+                  className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
                   onPress={shareQRCode}
                   disabled={checkingPensionStatus}
                 >
-                  <Image
-                    source={require("../../assets/images/collection-common/share.webp")}
-                    style={{ width: 24, height: 24, marginBottom: 8 }}
-                  />
+                  <MaterialIcons name="share" size={20} color="white" />
                   <Text
-                    className="text-white text-sm"
+                    className="text-white text-base"
                     style={[
                       i18n.language === "si"
                         ? { fontSize: 12 }

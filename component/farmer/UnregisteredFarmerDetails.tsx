@@ -339,23 +339,24 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     <TouchableOpacity
       onPress={onPress}
       style={{
-        height: 48,
+        height: 50,
         backgroundColor: "#F4F4F4",
-        borderRadius: 50,
+        borderRadius: 24,
         borderWidth: 1,
         borderColor: hasError ? "#ef4444" : "#F4F4F4",
-        paddingHorizontal: 14,
+        paddingHorizontal: 16,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
       }}
     >
       <Text
-        style={{ color: value ? "#000" : "#9CA3AF", fontSize: 14, flex: 1 }}
+        style={{ color: value ? "#000" : "#9CA3AF", fontSize: 16, flex: 1 }}
+        numberOfLines={1}
       >
         {value || placeholder}
       </Text>
-      <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+      <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
     </TouchableOpacity>
   );
 
@@ -363,7 +364,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       <CustomHeader
         title={t("UnregisteredFarmerDetails.FillDetails")}
@@ -371,21 +372,27 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <View className="flex-1 p-5 bg-white">
-        <ScrollView className="flex-1 p-3">
+      <View className="flex-1 bg-white px-4">
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        >
           {/* First Name */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.FirstName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              style={{ height: 50, fontSize: 16 }}
               value={firstName}
               onChangeText={handleFirstNameChange}
               keyboardType="default"
               autoCapitalize="words"
               autoCorrect={false}
               maxLength={50}
+              placeholderTextColor="#9CA3AF"
             />
             {fieldErrors.firstName ? (
               <Text className="text-red-500 text-sm mt-1">
@@ -396,17 +403,19 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Last Name */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.LastName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              style={{ height: 50, fontSize: 16 }}
               value={lastName}
               onChangeText={handleLastNameChange}
               keyboardType="default"
               autoCapitalize="words"
               autoCorrect={false}
               maxLength={50}
+              placeholderTextColor="#9CA3AF"
             />
             {fieldErrors.lastName ? (
               <Text className="text-red-500 text-sm mt-1">
@@ -417,7 +426,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Preferred Language */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.Preferd Language")}
             </Text>
             <SelectorButton
@@ -438,12 +447,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* NIC */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.NIC")}
             </Text>
             <TextInput
+              className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              style={{ height: 50, fontSize: 16 }}
               placeholder={t("UnregisteredFarmerDetails.NIC")}
-              className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
+              placeholderTextColor="#9CA3AF"
               value={NICnumber}
               onChangeText={(text) => {
                 const updatedText = text.replace(/v$/, "V");
@@ -491,14 +502,16 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Phone Number */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.Phone")}
             </Text>
             <View
-              className={`flex-row items-center border ${fieldErrors.phone || phoneError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-1 rounded-full`}
+              className={`flex-row items-center border ${fieldErrors.phone || phoneError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              style={{ height: 50 }}
             >
               <TextInput
                 placeholder="7XXXXXXXX"
+                placeholderTextColor="#9CA3AF"
                 keyboardType="phone-pad"
                 value={phoneNumber}
                 onChangeText={(text) => {
@@ -535,6 +548,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                   }
                 }}
                 className="flex-1"
+                style={{ fontSize: 16, height: 50 }}
                 maxLength={9}
               />
             </View>
@@ -547,7 +561,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* District */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.District")}
             </Text>
             <SelectorButton
@@ -567,12 +581,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Account Number */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              style={{ height: 50, fontSize: 16 }}
               keyboardType="numeric"
+              placeholderTextColor="#9CA3AF"
               value={accNumber}
               onChangeText={(text) => {
                 if (/^\d*$/.test(text)) {
@@ -596,17 +612,19 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Account Holder Name */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.AccountName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] p-3 rounded-full`}
+              className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              style={{ height: 50, fontSize: 16 }}
               value={accHolderName}
               onChangeText={handleAccountNameChange}
               keyboardType="default"
               autoCapitalize="words"
               autoCorrect={false}
               maxLength={100}
+              placeholderTextColor="#9CA3AF"
             />
             {fieldErrors.accHolderName ? (
               <Text className="text-red-500 text-sm mt-1">
@@ -617,7 +635,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Bank Name */}
           <View className="mb-4">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.Bank")}
             </Text>
             <SelectorButton
@@ -635,7 +653,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Branch Name */}
           <View className="mb-8">
-            <Text className="text-[#434343] mb-2">
+            <Text className="text-[#434343] mb-2" style={{ fontSize: 14 }}>
               {t("UnregisteredFarmerDetails.Branch")}
             </Text>
             <SelectorButton
@@ -659,29 +677,31 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               </Text>
             ) : null}
           </View>
-        </ScrollView>
 
-        <TouchableOpacity
-          className={`p-3 rounded-full items-center mt-5 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
-          onPress={() => {
-            if (!loading) {
-              setLoading(true);
-              handleNext();
-            }
-          }}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-center text-xl font-light text-white"
-            >
-              {t("UnregisteredFarmerDetails.Submit")}
-            </Text>
-          )}
-        </TouchableOpacity>
+          {/* Submit Button */}
+          <TouchableOpacity
+            className={`rounded-3xl items-center justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
+            style={{ height: 50 }}
+            onPress={() => {
+              if (!loading) {
+                setLoading(true);
+                handleNext();
+              }
+            }}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text
+                style={{ fontSize: 18 }}
+                className="text-center text-white font-light"
+              >
+                {t("UnregisteredFarmerDetails.Submit")}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
 
         {/* Success Modal */}
         <Modal

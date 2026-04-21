@@ -377,10 +377,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           {loading ? (
             <View className="flex-1 justify-center items-center">
               <LottieView
-                source={require("../../assets/lottie/newLottie.json")}
+                source={require("../../assets/lottie/loading.json")}
                 autoPlay
                 loop
-                style={{ width: 300, height: 300 }}
+                style={{ width: 150, height: 150 }}
               />
             </View>
           ) : (
@@ -389,9 +389,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
                 {t("SignIn.Employee")}
               </Text>
               <View
-                className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 ${
-                  empIdError ? "border-red-500" : "border-[#F4F4F4]"
-                }`}
+                className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
+                  }`}
                 style={{ height: 50 }}
               >
                 <Image

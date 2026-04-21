@@ -1206,7 +1206,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 {loading ? (
                   <View className="flex-row justify-center items-center">
                     <LottieView
-                      source={require("../../assets/lottie/newLottie.json")}
+                      source={require("../../assets/lottie/loading.json")}
                       autoPlay
                       loop
                       style={{ width: 30, height: 30 }}
