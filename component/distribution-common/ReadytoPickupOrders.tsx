@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type CollectionOfficersListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -302,7 +302,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       <View className="flex-1 justify-center items-center mt-[-25%] px-4">
         <View className="items-center">
           <LottieView
-            source={require("../../assets/lottie/NoComplaints.json")}
+            source={require("../../assets/lottie/no-data.json")}
             autoPlay
             loop
             style={{ width: 150, height: 150 }}

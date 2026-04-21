@@ -202,9 +202,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+              }`}
             onPress={() => setSelectedToggle("ToDo")}
             style={{
               shadowColor:
@@ -216,9 +215,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
             }}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "ToDo" ? "text-white" : "text-black"
-              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
+                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -249,9 +247,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
-              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+              }`}
             onPress={() => setSelectedToggle("Completed")}
             style={{
               shadowColor:
@@ -263,9 +260,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
             }}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
+              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
+                }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -329,7 +325,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
               {loading ? (
                 <View className="flex-1 justify-center items-center py-20">
                   <LottieView
-                    source={require("../../assets/lottie/newLottie.json")}
+                    source={require("../../assets/lottie/loading.json")}
                     autoPlay
                     loop
                     style={{ width: 250, height: 250 }}
@@ -339,9 +335,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
                 displayedData.map((item, index) => (
                   <TouchableOpacity
                     key={index}
-                    className={`flex-row justify-center items-center ${
-                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                    }`}
+                    className={`flex-row justify-center items-center ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      }`}
                     onPress={() => {
                       if (selectedToggle === "Completed") return;
 
@@ -381,7 +376,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
               ) : (
                 <View className="flex-1 justify-center items-center py-20">
                   <LottieView
-                    source={require("../../assets/lottie/NoComplaints.json")}
+                    source={require("../../assets/lottie/no-data.json")}
                     autoPlay
                     loop
                     style={{ width: 150, height: 150 }}
@@ -390,7 +385,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
                     {selectedToggle === "ToDo"
                       ? t("DailyTarget.NoTodoItems") || "No items to do"
                       : t("DailyTarget.noCompletedTargets") ||
-                        "No completed items"}
+                      "No completed items"}
                   </Text>
                 </View>
               )}

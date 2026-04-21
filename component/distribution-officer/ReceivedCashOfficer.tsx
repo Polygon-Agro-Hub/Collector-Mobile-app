@@ -17,7 +17,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -161,7 +161,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           Alert.alert(
             "Error",
             error.response?.data?.message ||
-              "Failed to fetch received cash data",
+            "Failed to fetch received cash data",
           );
         }
       } else {
@@ -292,7 +292,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
     <View className="flex-1 items-center justify-center mt-[50%]">
       <View className=" items-center justify-center mb-4">
         <LottieView
-          source={require("../../assets/lottie/NoComplaints.json")}
+          source={require("../../assets/lottie/no-data.json")}
           autoPlay
           loop
           style={{ width: 150, height: 150 }}

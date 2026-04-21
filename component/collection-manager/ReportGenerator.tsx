@@ -20,7 +20,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type ReportGeneratorNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -473,7 +473,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       ) : generateAgain ? (
         <View className="items-center justify-center flex-1">
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
             style={{ width: 250, height: 250 }}

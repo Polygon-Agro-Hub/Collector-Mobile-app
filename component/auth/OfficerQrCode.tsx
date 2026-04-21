@@ -15,7 +15,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
-import CustomHeader from "./CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -63,7 +63,6 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
 
       if (response.data.status === "success") {
         setProfile(data);
-
         setQR(data.QRcode || "");
       } else {
         Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
@@ -85,6 +84,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
     }
   };
+
   const getCompanyName = () => {
     if (!profile) return "Loading...";
     switch (language) {
@@ -167,63 +167,73 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <ScrollView style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}>
-        {/* QR Code Display */}
-        <View className="items-center mb-4 mt-5">
-          {QR ? (
-            <View className="bg-white p-2 rounded-xl border-2 border-[#FAE432]">
-              <Image
-                source={{ uri: QR }}
-                style={{ width: 230, height: 230, resizeMode: "contain" }}
-              />
-            </View>
-          ) : (
-            <Text className="text-gray-500 text-center mt-4">
-              {t("OfficerQr.Noavailable")}
-            </Text>
-          )}
-        </View>
-
-        {/* Profile Info */}
-        <View className="flex-row items-center justify-center mb-4 px-4 mt-[10%]">
-          {profile && profile.image ? (
-            <Image
-              source={{ uri: profile.image }}
-              className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
-            />
-          ) : (
-            <Image
-              source={require("../../assets/images/collection-manager/pc-profile.webp")}
-              className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
-            />
-          )}
-
-          <View>
-            <Text className="text-lg font-semibold">{getFullName()}</Text>
-            <Text className="text-gray-600">{getCompanyName()}</Text>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, padding: 4 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-1 justify-center">
+          {/* QR Code Display */}
+          <View className="items-center mb-8">
+            {QR ? (
+              <View className="bg-white p-4 rounded-3xl border-2 border-[#FAE432]">
+                <Image
+                  source={{ uri: QR }}
+                  style={{ width: 300, height: 300, resizeMode: "contain" }}
+                />
+              </View>
+            ) : (
+              <Text className="text-gray-500 text-center mt-4">
+                {t("OfficerQr.Noavailable")}
+              </Text>
+            )}
           </View>
-        </View>
 
-        {/* Actions */}
-        <View className="flex-row justify-evenly mt-[50px] mb-4">
-          <TouchableOpacity
-            className="bg-[#000000] w-24 h-20 rounded-lg items-center justify-center flex-col mx-2"
-            onPress={downloadQRCode}
-          >
-            <MaterialIcons name="download" size={24} color="white" />
-            <Text className="text-white text-xs mt-1">
-              {t("OfficerQr.Download")}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="bg-[#000000] w-24 h-20 rounded-lg items-center justify-center flex-col mx-2"
-            onPress={shareQRCode}
-          >
-            <MaterialIcons name="share" size={24} color="white" />
-            <Text className="text-white text-xs mt-1">
-              {t("OfficerQr.Share")}
-            </Text>
-          </TouchableOpacity>
+          {/* Profile Info */}
+          <View className="flex-row items-center justify-center mb-8 px-4">
+            {profile && profile.image ? (
+              <Image
+                source={{ uri: profile.image }}
+                className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
+              />
+            ) : (
+              <Image
+                source={require("../../assets/images/collection-manager/pc-profile.webp")}
+                className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
+              />
+            )}
+
+            <View>
+              <Text className="text-lg font-semibold">{getFullName()}</Text>
+              <Text className="text-gray-600">{getCompanyName()}</Text>
+            </View>
+          </View>
+
+          {/* Actions */}
+          <View className="flex flex-row w-full px-12 pb-8 gap-3">
+            <TouchableOpacity
+              className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
+              onPress={downloadQRCode}
+            >
+              <View className="flex items-center justify-center">
+                <MaterialIcons name="download" size={20} color="white" />
+                <Text className="text-white ml-2 text-base">
+                  {t("OfficerQr.Download")}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
+              onPress={shareQRCode}
+            >
+              <View className="flex items-center justify-center">
+                <MaterialIcons name="share" size={20} color="white" />
+                <Text className="text-white ml-2 text-base">
+                  {t("OfficerQr.Share")}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>

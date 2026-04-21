@@ -178,9 +178,8 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${
-        item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
-      }`}
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
+        }`}
       onPress={() => {
         if (item.status !== "Not Approved") {
           navigation.navigate("DistributionOfficerSummary" as any, {
@@ -325,7 +324,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         {loading ? (
           <View className="flex-1 justify-center items-center -mt-[25%]">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
+              source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 350, height: 350 }}

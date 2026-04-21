@@ -21,7 +21,7 @@ import { Modal } from "react-native";
 import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -468,11 +468,10 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
               ref={(el: TextInput | null) => {
                 inputRefs.current[index] = el;
               }}
-              className={`w-12 h-12 text-lg text-center rounded-lg ${
-                otpCode[index]
-                  ? "bg-[#FFFFFF] text-black pb-2"
-                  : "bg-[#FFFFFF] text-black"
-              }`}
+              className={`w-12 h-12 text-lg text-center rounded-lg ${otpCode[index]
+                ? "bg-[#FFFFFF] text-black pb-2"
+                : "bg-[#FFFFFF] text-black"
+                }`}
               keyboardType="numeric"
               maxLength={1}
               value={otpCode[index] || ""}
@@ -510,12 +509,10 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           onClose={() => setModalVisible(false)}
         />
 
-        <View style={{ marginTop: dynamicStyles.margingTopForBtn }}>
+        <View className="w-full px-4" style={{ marginTop: dynamicStyles.margingTopForBtn }}>
           <TouchableOpacity
-            style={{ height: hp(7), width: wp(80) }}
-            className={`flex items-center justify-center mx-auto rounded-full ${
-              !isOtpValid || isVerified ? "bg-gray-400" : "bg-[#000000]"
-            }`}
+            className={`w-full h-[50px] items-center justify-center rounded-3xl ${!isOtpValid || isVerified ? "bg-gray-400" : "bg-black"
+              }`}
             onPress={handleVerify}
             disabled={!isOtpValid || isVerified}
           >

@@ -74,7 +74,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   useEffect(() => {
     let tabs = [
       { name: "DailyTargetList", icon: qrIcon, focusedIcon: qrIcon },
-      { name: "Dashboard", icon: homeIcon, focusedIcon: homeIcon },
+      { name: "CollectionOfficerDashboard", icon: homeIcon, focusedIcon: homeIcon },
       { name: "SearchPriceScreen", icon: searchIcon, focusedIcon: searchIcon },
     ];
 
@@ -97,7 +97,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     } else if (userRole === "Collection Officer") {
       tabs = [
         { name: "DailyTargetList", icon: qrIcon, focusedIcon: qrIcon },
-        { name: "Dashboard", icon: homeIcon, focusedIcon: homeIcon },
+        { name: "CollectionOfficerDashboard", icon: homeIcon, focusedIcon: homeIcon },
         {
           name: "SearchPriceScreen",
           icon: searchIcon,
@@ -128,7 +128,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     }
   }, [userRole]);
 
-  let currentTabName = state.routes[state.index]?.name || "Dashboard";
+  let currentTabName = state.routes[state.index]?.name || "CollectionOfficerDashboard";
 
   if (currentTabName === "PriceChart") {
     currentTabName = "SearchPriceScreen";
@@ -145,7 +145,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     currentTabName = "CollectionOfficersList";
   } else if (
     userRole === "Distribution Centre Manager" &&
-    currentTabName === "Dashboard"
+    currentTabName === "CollectionOfficerDashboard"
   ) {
     currentTabName = "DistridutionaDashboard";
     navigation.navigate("DistridutionaDashboard");
@@ -156,18 +156,18 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   useEffect(() => {
     if (
       userRole === "Collection Centre Manager" &&
-      currentTabName == "Dashboard"
+      currentTabName == "CollectionOfficerDashboard"
     ) {
       navigation.navigate("ManagerDashboard");
     }
   }, [userRole, currentTabName, navigation]);
 
   useEffect(() => {
-    if (userRole === "Distribution Officer" && currentTabName == "Dashboard") {
+    if (userRole === "Distribution Officer" && currentTabName == "CollectionOfficerDashboard") {
       navigation.navigate("DistridutionaDashboard");
     } else if (
       userRole === "Distribution Centre Manager" &&
-      currentTabName === "Dashboard"
+      currentTabName === "CollectionOfficerDashboard"
     ) {
       navigation.navigate("DistridutionaDashboard");
     }

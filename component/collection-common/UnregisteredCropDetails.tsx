@@ -31,8 +31,8 @@ import CameraComponent from "@/utils/CameraComponent";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../navigations/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -1206,7 +1206,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 {loading ? (
                   <View className="flex-row justify-center items-center">
                     <LottieView
-                      source={require("../../assets/lottie/newLottie.json")}
+                      source={require("../../assets/lottie/loading.json")}
                       autoPlay
                       loop
                       style={{ width: 30, height: 30 }}

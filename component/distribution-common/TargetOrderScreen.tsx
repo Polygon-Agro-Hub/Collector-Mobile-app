@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type TargetOrderScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -570,9 +570,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+              }`}
             onPress={() => setSelectedToggle("ToDo")}
             style={{
               shadowColor:
@@ -584,9 +583,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
             }}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "ToDo" ? "text-white" : "text-black"
-              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
+                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -616,9 +614,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
-              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+              }`}
             onPress={() => setSelectedToggle("Completed")}
             style={{
               shadowColor:
@@ -630,9 +627,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
             }}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
+              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
+                }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -750,7 +746,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         {loading ? (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
+              source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 200, height: 200 }}
@@ -760,9 +756,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           displayedData.map((item, index) => (
             <TouchableOpacity
               key={item.id || index}
-              className={`flex-row py-4 border-b border-gray-200 ${
-                index % 2 === 0 ? "bg-gray-50" : "bg-white"
-              }`}
+              className={`flex-row py-4 border-b border-gray-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                }`}
               onPress={() => handleRowPress(item)}
             >
               <View className="flex-1 items-center justify-center relative">
@@ -860,7 +855,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         ) : (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/NoComplaints.json")}
+              source={require("../../assets/lottie/no-data.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}

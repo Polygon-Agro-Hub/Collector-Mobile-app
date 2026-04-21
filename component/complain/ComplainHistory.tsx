@@ -23,7 +23,7 @@ import {
 } from "react-native-responsive-screen";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 interface complainItem {
   id: number;
@@ -348,7 +348,7 @@ ${signature}${replyTime}`,
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        navigation.navigate("EngProfile");
+        navigation.navigate("SideMenu");
         return true;
       };
 
@@ -369,23 +369,23 @@ ${signature}${replyTime}`,
         title={t("ReportHistory.Complaints")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("EngProfile")}
+        onBackPress={() => navigation.navigate("SideMenu")}
       />
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
-            style={{ width: 300, height: 300 }}
+            style={{ width: 150, height: 150 }}
           />
         </View>
       ) : complains.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           <LottieView
-            source={require("../../assets/lottie/NoComplaints.json")}
-            style={{ width: wp(50), height: hp(50) }}
+            source={require("../../assets/lottie/no-data.json")}
+            style={{ width: wp(50), height: hp(20) }}
             autoPlay
             loop
           />
@@ -395,10 +395,10 @@ ${signature}${replyTime}`,
         </View>
       ) : (
         <ScrollView
-          className="p-4 flex-1 mb-14"
+          className=" flex-1 mb-14"
           contentContainerStyle={{
             paddingBottom: hp(4),
-            paddingHorizontal: wp(2),
+            paddingHorizontal: wp(4),
           }}
         >
           {complains.map((complain) => (
@@ -427,11 +427,10 @@ ${signature}${replyTime}`,
                 )}
                 <View style={{ flex: 1, alignItems: "flex-end" }}>
                   <Text
-                    className={`text-s font-semibold px-4 py-2 rounded ${
-                      complain.status === "Opened"
-                        ? "bg-blue-100 text-[#0051FF]"
-                        : "bg-[#FFDFF7] text-[#980775]"
-                    }`}
+                    className={`text-s font-semibold px-4 py-2 rounded ${complain.status === "Opened"
+                      ? "bg-blue-100 text-[#0051FF]"
+                      : "bg-[#FFDFF7] text-[#980775]"
+                      }`}
                   >
                     {complain.status === "Opened"
                       ? t("ReportHistory.Opened")

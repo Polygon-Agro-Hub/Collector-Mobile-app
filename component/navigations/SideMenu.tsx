@@ -17,15 +17,15 @@ import { ScrollView } from "react-native-gesture-handler";
 import { LanguageContext } from "@/context/LanguageContext";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "./CustomHeader";
+import CustomHeader from "@/component/navigations/CustomHeader";
 
-type EngProfileNavigationProp = StackNavigationProp<
+type SideMenuNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "EngProfile"
+  "SideMenu"
 >;
 
-interface EngProfileProps {
-  navigation: EngProfileNavigationProp;
+interface SideMenuProps {
+  navigation: SideMenuNavigationProp;
 }
 
 const api = axios.create({
@@ -50,7 +50,7 @@ interface UserProfile {
 
 const icon = require("@/assets/images/common/eng-profile-icon.webp");
 
-const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
+const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const [isLanguageDropdownOpen, setLanguageDropdownOpen] =
     useState<boolean>(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -110,23 +110,23 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
         profile?.jobRole === "Collection Officer") ||
       profile?.jobRole === "Collection Centre Manager"
     ) {
-      navigation.navigate("Main", { screen: "Dashboard" });
+      navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
     } else {
       navigation.goBack();
     }
   };
 
   const complaintOptions = [
-    t("EngProfile.Report Complaint"),
-    t("EngProfile.View Complaint History"),
+    t("SideMenu.Report Complaint"),
+    t("SideMenu.View Complaint History"),
   ];
 
   const handleComplaintSelect = (complaint: string) => {
     setComplaintDropdownOpen(false);
 
-    if (complaint === t("EngProfile.Report Complaint")) {
+    if (complaint === t("SideMenu.Report Complaint")) {
       navigation.navigate("ComplainPage" as any, { userId: 0 });
-    } else if (complaint === t("EngProfile.View Complaint History")) {
+    } else if (complaint === t("SideMenu.View Complaint History")) {
       navigation.navigate("Main", {
         screen: "ComplainHistory",
         params: { fullname: getFullName },
@@ -163,7 +163,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
     try {
       await AsyncStorage.setItem("@user_language", language);
       changeLanguage(language);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleLanguageSelect = (language: string) => {
@@ -180,7 +180,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
         LanguageSelect("si");
         HanldeAsynStorage("si");
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleLogout = async () => {
@@ -280,10 +280,10 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
+        style={{ paddingVertical: hp(2) }}
       >
         {/* Profile Card */}
-        <View className="flex-row items-center px-2  mb-4">
+        <View className="flex-row items-center px-4  mb-4">
           <Image
             source={
               profile?.image
@@ -312,7 +312,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <View className="flex-1 p-4 mt-[-30]">
+        <View className="flex-1 py-4 px-4 mt-[-30]">
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 
           <TouchableOpacity
@@ -321,7 +321,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
           >
             <Ionicons name="globe-outline" size={20} color="black" />
             <Text className="flex-1 text-lg ml-2">
-              {t("EngProfile.Language")}
+              {t("SideMenu.Language")}
             </Text>
             <Ionicons
               name={isLanguageDropdownOpen ? "chevron-up" : "chevron-down"}
@@ -346,18 +346,16 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
                   <TouchableOpacity
                     key={language}
                     onPress={() => handleLanguageSelect(language)}
-                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
-                      selectedLanguage === language
+                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedLanguage === language
                         ? "bg-[#FFDFF7]"
                         : "bg-transparent"
-                    }`}
+                      }`}
                   >
                     <Text
-                      className={`text-base ${
-                        selectedLanguage === language
+                      className={`text-base ${selectedLanguage === language
                           ? "text-black"
                           : "text-[#434343]"
-                      }`}
+                        }`}
                     >
                       {displayLanguage}
                     </Text>
@@ -382,7 +380,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
             onPress={() => navigation.navigate("OfficerQr")}
           >
             <Ionicons name="qr-code" size={20} color="black" />
-            <Text className="flex-1 text-lg ml-2">{t("EngProfile.View")}</Text>
+            <Text className="flex-1 text-lg ml-2">{t("SideMenu.View")}</Text>
           </TouchableOpacity>
 
           {/* Horizontal Line */}
@@ -395,7 +393,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
           >
             <Ionicons name="lock-closed-outline" size={20} color="black" />
             <Text className="flex-1 text-lg ml-2">
-              {t("EngProfile.ChangePassword")}
+              {t("SideMenu.ChangePassword")}
             </Text>
           </TouchableOpacity>
 
@@ -419,7 +417,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
           >
             <AntDesign name="warning" size={20} color="black" />
             <Text className="flex-1 text-lg ml-2">
-              {t("EngProfile.Complaints")}
+              {t("SideMenu.Complaints")}
             </Text>
             <Ionicons
               name={isComplaintDropdownOpen ? "chevron-up" : "chevron-down"}
@@ -434,14 +432,12 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
                 <TouchableOpacity
                   key={complaint}
                   onPress={() => handleComplaintSelect(complaint)}
-                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
-                    selectedComplaint === complaint ? "bg-green-200" : ""
-                  }`}
+                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedComplaint === complaint ? "bg-green-200" : ""
+                    }`}
                 >
                   <Text
-                    className={`text-base ${
-                      selectedComplaint === complaint ? "text-black" : "#434343"
-                    }`}
+                    className={`text-base ${selectedComplaint === complaint ? "text-black" : "#434343"
+                      }`}
                   >
                     {complaint}
                   </Text>
@@ -465,7 +461,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
           >
             <Ionicons name="log-out-outline" size={20} color="red" />
             <Text className="flex-1 text-lg ml-2 text-red-500">
-              {t("EngProfile.Logout")}
+              {t("SideMenu.Logout")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -487,7 +483,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
           }}
         >
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
             style={{ width: 200, height: 200 }}
@@ -501,7 +497,7 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
               fontWeight: "500",
             }}
           >
-            {t("EngProfile.Logging out")}
+            {t("SideMenu.Logging out")}
           </Text>
         </View>
       )}
@@ -509,4 +505,4 @@ const EngProfile: React.FC<EngProfileProps> = ({ navigation }) => {
   );
 };
 
-export default EngProfile;
+export default SideMenu;

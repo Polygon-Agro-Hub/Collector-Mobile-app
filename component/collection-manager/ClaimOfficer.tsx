@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 interface OfficerDetails {
   id: number;

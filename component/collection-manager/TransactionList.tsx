@@ -87,7 +87,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
       setSelectedDate(new Date());
       setShowDatePicker(false);
 
-      return () => {};
+      return () => { };
     }, []),
   );
   const fetchTransactions = async (date: string) => {
@@ -318,7 +318,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
         {loading ? (
           <View className="flex-1 justify-center items-center">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
+              source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}
@@ -401,7 +401,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 ListEmptyComponent={
                   <View className="items-center mt-[50%]">
                     <LottieView
-                      source={require("../../assets/lottie/NoComplaints.json")}
+                      source={require("../../assets/lottie/no-data.json")}
                       autoPlay
                       loop
                       style={{ width: 150, height: 150 }}

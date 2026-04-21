@@ -17,27 +17,22 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
-import Splash from "../component/common/Splash";
-import Lanuage from "../component/common/Lanuage";
 import Login from "@/component/auth/Login";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeWindStyleSheet } from "nativewind";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { LogBox } from "react-native";
-import NavigationBar from "@/component/common/BottomNav";
 import ChangePassword from "@/component/auth/ChangePassword";
 import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
 import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails";
-import Dashboard from "@/component/collection-officer/Dashboard";
+import CollectionOfficerDashboard from "@/component/collection-officer/CollectionOfficerDashboard";
 import QRScanner from "@/component/collection-common/QRScanner";
 import FormScreen from "@/component/collection-common/FormScreen";
-import EngProfile from "@/component/common/EngProfile";
-import UnregisteredFarmerDetails from "@/component/collection-common/UnregisteredFarmerDetails";
+import UnregisteredFarmerDetails from "@/component/farmer/UnregisteredFarmerDetails";
 import UnregisteredCropDetails from "@/component/collection-common/UnregisteredCropDetails";
-import SearchFarmer from "@/component/collection-common/SearchFarmer";
-import FarmerQr from "@/component/collection-common/FarmerQr";
+import SearchFarmer from "@/component/farmer/SearchFarmer";
+import FarmerQr from "@/component/farmer/FarmerQr";
 import ComplainPage from "@/component/complain/ComplainPage";
-import OfficerQr from "@/component/common/OfficerQr";
 import Profile from "@/component/auth/Profile";
 import ReportPage from "@/component/collection-common/ReportPage";
 import SearchPriceScreen from "@/component/collection-common/SearchPriceScreen";
@@ -83,7 +78,6 @@ import NewReport from "@/component/collection-common/NewReport";
 import TransactionReport from "@/component/collection-manager/TransactionReport";
 import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
 import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
-import PrivacyPolicy from "@/component/common/PrivacyPolicy";
 import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
 import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
 import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
@@ -112,6 +106,13 @@ import ReceivedCashQrCode from "@/component/distribution-officer/ReceivedCashQrC
 import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
 import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
+import Splash from "@/component/auth/Splash";
+import Lanuage from "@/component/commons/Lanuage";
+import OfficerQr from "@/component/auth/OfficerQrCode";
+import SideMenu from "@/component/navigations/SideMenu";
+import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
+import BottomNav from "@/component/navigations/BottomNav";
+import CameraAccess from "@/component/permission/CameraAccess";
 
 LogBox.ignoreAllLogs(true);
 NativeWindStyleSheet.setOutput({
@@ -132,7 +133,7 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabNavigator() {
-  const [initialTab, setInitialTab] = useState("Dashboard");
+  const [initialTab, setInitialTab] = useState("CollectionOfficerDashboard");
   const jobRole = useSelector((state: RootState) => state.auth.jobRole);
 
   useEffect(() => {
@@ -143,7 +144,7 @@ function MainTabNavigator() {
     ) {
       setInitialTab("DistridutionaDashboard"); // Set the first tab for Distribution Manager/Officer
     } else if (jobRole === "Collection Officer") {
-      setInitialTab("Dashboard"); // Set the first tab for Collection Officer
+      setInitialTab("CollectionOfficerDashboard"); // Set the first tab for Collection Officer
     } else {
       setInitialTab("ManagerDashboard"); // Set the first tab for other roles like Manager
     }
@@ -152,7 +153,7 @@ function MainTabNavigator() {
   useFocusEffect(
     useCallback(() => {
       console.log("Job roll hgi");
-      return () => {};
+      return () => { };
     }, []),
   );
 
@@ -164,9 +165,9 @@ function MainTabNavigator() {
         tabBarHideOnKeyboard: false,
         tabBarStyle: { position: "absolute", backgroundColor: "#fff" },
       })}
-      tabBar={(props) => <NavigationBar {...props} />}
+      tabBar={(props) => <BottomNav {...props} />}
     >
-      <Tab.Screen name="Dashboard" component={Dashboard} />
+      <Tab.Screen name="CollectionOfficerDashboard" component={CollectionOfficerDashboard} />
       <Tab.Screen
         name="DistridutionaDashboard"
         component={DistridutionaDashboard as any}
@@ -235,6 +236,10 @@ function MainTabNavigator() {
       <Tab.Screen
         name="ReplaceRequestsScreen"
         component={ReplaceRequestsScreen as any}
+      />
+      <Tab.Screen
+        name="CameraAccess"
+        component={CameraAccess as any}
       />
     </Tab.Navigator>
   );
@@ -367,7 +372,7 @@ function AppContent() {
               name="AddOfficerAddressDetails"
               component={AddOfficerAddressDetails}
             />
-            <Stack.Screen name="EngProfile" component={EngProfile} />
+            <Stack.Screen name="SideMenu" component={SideMenu} />
             <Stack.Screen name="ClaimOfficer" component={ClaimOfficer} />
             <Stack.Screen name="OTPE" component={OTPE} />
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
