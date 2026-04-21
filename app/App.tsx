@@ -25,7 +25,7 @@ import { LogBox } from "react-native";
 import ChangePassword from "@/component/auth/ChangePassword";
 import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
 import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails";
-import Dashboard from "@/component/collection-officer/Dashboard";
+import CollectionOfficerDashboard from "@/component/collection-officer/CollectionOfficerDashboard";
 import QRScanner from "@/component/collection-common/QRScanner";
 import FormScreen from "@/component/collection-common/FormScreen";
 import UnregisteredFarmerDetails from "@/component/collection-common/UnregisteredFarmerDetails";
@@ -112,6 +112,7 @@ import OfficerQr from "@/component/auth/OfficerQrCode";
 import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
+import CameraAccess from "@/component/permission/CameraAccess";
 
 LogBox.ignoreAllLogs(true);
 NativeWindStyleSheet.setOutput({
@@ -132,7 +133,7 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabNavigator() {
-  const [initialTab, setInitialTab] = useState("Dashboard");
+  const [initialTab, setInitialTab] = useState("CollectionOfficerDashboard");
   const jobRole = useSelector((state: RootState) => state.auth.jobRole);
 
   useEffect(() => {
@@ -143,7 +144,7 @@ function MainTabNavigator() {
     ) {
       setInitialTab("DistridutionaDashboard"); // Set the first tab for Distribution Manager/Officer
     } else if (jobRole === "Collection Officer") {
-      setInitialTab("Dashboard"); // Set the first tab for Collection Officer
+      setInitialTab("CollectionOfficerDashboard"); // Set the first tab for Collection Officer
     } else {
       setInitialTab("ManagerDashboard"); // Set the first tab for other roles like Manager
     }
@@ -166,7 +167,7 @@ function MainTabNavigator() {
       })}
       tabBar={(props) => <BottomNav {...props} />}
     >
-      <Tab.Screen name="Dashboard" component={Dashboard} />
+      <Tab.Screen name="CollectionOfficerDashboard" component={CollectionOfficerDashboard} />
       <Tab.Screen
         name="DistridutionaDashboard"
         component={DistridutionaDashboard as any}
@@ -235,6 +236,10 @@ function MainTabNavigator() {
       <Tab.Screen
         name="ReplaceRequestsScreen"
         component={ReplaceRequestsScreen as any}
+      />
+      <Tab.Screen
+        name="CameraAccess"
+        component={CameraAccess as any}
       />
     </Tab.Navigator>
   );

@@ -237,14 +237,14 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
   };
 
   const handleBackPress = () => {
-    navigation.navigate("Main", { screen: "Dashboard" });
+    navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
     return true;
   };
 
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        navigation.navigate("Main", { screen: "Dashboard" });
+        navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
         return true;
       };
 

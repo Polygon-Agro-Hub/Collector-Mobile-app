@@ -11,7 +11,7 @@
     "Password": "මුරපදය",
     "Sign": "පුරන්න"
   },
-  "DashBoard": {
+  "CollectionOfficerDashboard": {
     "LNG": "si",
     "Keep": "ඉදිරියට යමු!",
     "Youhavenotachieved": "ඔබ තවමත් ඔබේ දෛනික ඉලක්කය සපුරා ගෙන නැත",
@@ -26,7 +26,7 @@
     "error": "සමාවෙන්න",
     "Error": "දෝෂයක්",
     "Failed to fetch empid.": "සේවක හැඳුනුම්පත සොයා ගැනීමට අසමත් විය.",
-    "You cannot transfer the maximum amount of":"ඔබට උපරිම මුදල මාරු කළ නොහැක",
+    "You cannot transfer the maximum amount of": "ඔබට උපරිම මුදල මාරු කළ නොහැක",
     "This EMP ID is not approved.": "මෙම EMP ID අනුමත කර නැත.",
     "This EMP ID is Rejected": "මෙම EMP ID ප්‍රතික්ෂේප කර ඇත.",
     "New password and confirm password do not match.": "නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය එකිනෙකට නොගැලපේ.",
@@ -537,8 +537,8 @@
   "AddOfficerBasicDetails": {
     "LNG": "si",
     "AddOfficer": "නිලධාරියෙක් එකතු කරන්න",
-    "SelectCountryCode":"රටේ කේතය තෝරන්න",
-    "SearchCountry":"රට සොයන්න",
+    "SelectCountryCode": "රටේ කේතය තෝරන්න",
+    "SearchCountry": "රට සොයන්න",
     "Type": "ස්වභාවය :",
     "Permanent": "ස්ථිර",
     "Temporary": "තාවකාලික",
@@ -917,7 +917,7 @@
   },
   "PendingOrderScreen": {
     "Completing order": "ඇණවුම සම්පූර්ණ කරමින්...",
-    "Processing":"සකසමින්...",
+    "Processing": "සකසමින්...",
     "Custom Selected Items": "පාරිභෝගික-තෝරාගත් අයිතම",
     "Back to Edit": "සංස්කරණය වෙත ආපසු",
     "Mark as Completed": "සම්පූර්ණ කළ ලෙස ලකුණු කරන්න",
@@ -1006,7 +1006,7 @@
     "Success": "සාර්ථකයි",
     "order": "ඇණවුම",
     "Time": "කාලය",
-    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.":"පළමු ඇණවුම් 5 පමණක් තෝරාගෙන ඇත. ඔබට බෙදා හැරීම සඳහා වරකට ඇණවුම් 5ක් දක්වා පමණක් තෝරා ගත හැකිය.",
+    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.": "පළමු ඇණවුම් 5 පමණක් තෝරාගෙන ඇත. ඔබට බෙදා හැරීම සඳහා වරකට ඇණවුම් 5ක් දක්වා පමණක් තෝරා ගත හැකිය.",
     "been sent out": "යවා ඇත",
     "for delivery": "බෙදා හැරීම සඳහා",
     "Centre Target": "මධ්‍යස්ථාන ඉලක්කය",
@@ -1075,17 +1075,17 @@
     "Hand Over": "භාර දෙන්න",
     "No cash was received recently": "මෑතකදී මුදල් ලැබුණේ නැහැ.",
     "Rs": "රු. ",
-    "Rscash":" රු. "
+    "Rscash": " රු. "
   },
   "ViewPickupOrders": {
-    "ID":"අංකය",
+    "ID": "අංකය",
     "Order Details": "ඇණවුම් විස්තර",
     "Ready": "සූදානම්",
     "Already Paid": "දැනටමත් ගෙවා ඇත!",
     "Rs": "රු",
     "Make Phone Call": "දුරකථන ඇමතුමක් ගන්න",
     "Scan Order": "ස්කෑන් ඇණවුම",
-    "Cash":"මුදල්"
+    "Cash": "මුදල්"
   },
   "qrcode": {
     "success": "සාර්ථකයි!",
@@ -1155,7 +1155,7 @@
     "October": "ඔක්තෝබර්",
     "November": "නොවැම්බර්",
     "December": "දෙසැම්බර්",
-    "Enteravalidenic":"කරුණාකර වලංගු ජාතික හැඳුනුම්පත් අංකයක් (NIC) ඇතුළත් කරන්න."
+    "Enteravalidenic": "කරුණාකර වලංගු ජාතික හැඳුනුම්පත් අංකයක් (NIC) ඇතුළත් කරන්න."
   },
   "GoviPensionStatus": {
     "Stay Tuned!": "රැඳී සිටින්න!",
@@ -1167,7 +1167,23 @@
     "Go Back": "ආපසු යන්න",
     "View My Pension Account": "මගේ විශ්‍රාම වැටුප් ගිණුම බලන්න",
     "Loading status...": "තත්ත්වය ලෝඩ් වෙමින් පවතී...",
-      "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "ගොවියා දැනටමත් {{date}} දින විශ්‍රාම වැටුප සඳහා ඉල්ලුම් කර ඇති බව පෙනේ. අයදුම්පත දැනට සමාලෝචනයට ලක්ව ඇත. තීරණයක් ඉක්මනින් බෙදා ගනු ඇත. ගොවියාට GoViCare යෙදුම හරහා ඕනෑම වේලාවක තත්ත්වය නිරීක්ෂණය කළ හැකිය.",
+    "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "ගොවියා දැනටමත් {{date}} දින විශ්‍රාම වැටුප සඳහා ඉල්ලුම් කර ඇති බව පෙනේ. අයදුම්පත දැනට සමාලෝචනයට ලක්ව ඇත. තීරණයක් ඉක්මනින් බෙදා ගනු ඇත. ගොවියාට GoViCare යෙදුම හරහා ඕනෑම වේලාවක තත්ත්වය නිරීක්ෂණය කළ හැකිය.",
     "The pension application submitted on {{date}} has been reviewed and was not approved.": "{{date}} දින ඉදිරිපත් කරන ලද විශ්‍රාම වැටුප් අයදුම්පත සමාලෝචනය කර ඇති අතර එය අනුමත කර නොමැත."
+  },
+  "Permission": {
+    "locationAccess": "Location Access",
+    "enableLocationMessage": "Enable location access to access location information.",
+    "allow": "Allow",
+    "requesting": "Requesting...",
+    "success": "Success",
+    "locationEnabled": "Location access enabled successfully!",
+    "permissionDenied": "Permission Denied",
+    "enableLocationManually": "Location access is required. Please enable it in settings.",
+    "openSettings": "Open Settings",
+    "permissionError": "Unable to request location permission. Please try again.",
+    "skipLocation": "Skip Location?",
+    "skipMessage": "Some features may not work properly without location access. Are you sure?",
+    "skip": "Skip",
+    "skipForNow": "Skip for now"
   }
 }

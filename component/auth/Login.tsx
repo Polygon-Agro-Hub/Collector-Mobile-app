@@ -276,7 +276,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           ) {
             navigation.navigate("Main", { screen: "DistridutionaDashboard" });
           } else if (jobRole === "Collection Officer") {
-            navigation.navigate("Main", { screen: "Dashboard" });
+            navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
           } else {
             navigation.navigate("Main", { screen: "ManagerDashboard" });
           }

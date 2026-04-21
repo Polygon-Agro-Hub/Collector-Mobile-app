@@ -110,7 +110,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
         profile?.jobRole === "Collection Officer") ||
       profile?.jobRole === "Collection Centre Manager"
     ) {
-      navigation.navigate("Main", { screen: "Dashboard" });
+      navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
     } else {
       navigation.goBack();
     }

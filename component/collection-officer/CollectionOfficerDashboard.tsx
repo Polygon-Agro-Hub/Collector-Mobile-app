@@ -21,10 +21,10 @@ import DashboardSkeleton from "../skeletons/DashboardSkeleton";
 
 type DashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
-  "Dashboard"
+  "CollectionOfficerDashboard"
 >;
 
-interface DashboardProps {
+interface CollectionOfficerDashboardProps {
   navigation: DashboardNavigationProps;
 }
 
@@ -42,11 +42,11 @@ interface ProfileData {
   companyNameTamil: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
+const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({ navigation }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
-
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -61,6 +61,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
   };
 
   const fetchUserProfile = async () => {
+    setIsLoadingProfile(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (token) {
@@ -74,6 +75,8 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
+    } finally {
+      setIsLoadingProfile(false);
     }
   };
 
@@ -200,7 +203,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
     if (isLoadingTarget) {
       return (
         <View
-          className="bg-white ml-[20px] w-[90%] rounded-[15px] mt-3 p-4"
+          className="bg-white rounded-3xl mt-3 p-4 mx-4"
           style={{
             shadowColor: "#000",
             shadowOffset: {
@@ -222,7 +225,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
         <View
-          className="bg-white ml-[20px] w-[90%] rounded-[15px] mt-3 p-4"
+          className="bg-white rounded-3xl mt-3 p-4 mx-4"
           style={{
             shadowColor: "#000",
             shadowOffset: {
@@ -234,18 +237,21 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
             elevation: 5,
           }}
         >
-          <Text className="text-center text-yellow-600 font-bold">
-            🚀{t("DashBoard.Keep")}
+          <Text
+            className="text-center text-yellow-600 font-bold"
+            style={{ fontSize: 16 }}
+          >
+            🚀 {t("CollectionOfficerDashboard.Keep")}
           </Text>
-          <Text className="text-center text-gray-500">
-            {t("DashBoard.Youhavenotachieved")}
+          <Text className="text-center text-gray-500" style={{ fontSize: 14 }}>
+            {t("CollectionOfficerDashboard.Youhavenotachieved")}
           </Text>
         </View>
       );
-    } else {
+    } else if (targetPercentage === 100) {
       return (
         <View
-          className="bg-white ml-[20px] w-[90%] rounded-[15px] mt-3 p-4"
+          className="bg-white rounded-3xl mt-3 p-4 mx-4"
           style={{
             shadowColor: "#000",
             shadowOffset: {
@@ -262,32 +268,39 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
               source={require("../../assets/images/dashboard/hand.webp")}
               className="w-8 h-8 mr-2"
             />
-            <Text className="text-center text-[#2AAD7A] font-bold">
-              {t("DashBoard.Completed")}
+            <Text
+              className="text-center text-[#2AAD7A] font-bold"
+              style={{ fontSize: 16 }}
+            >
+              {t("CollectionOfficerDashboard.Completed")}
             </Text>
           </View>
-          <Text className="text-center text-gray-500">
-            {t("DashBoard.Youhaveachieved")}
+          <Text className="text-center text-gray-500" style={{ fontSize: 14 }}>
+            {t("CollectionOfficerDashboard.Youhaveachieved")}
           </Text>
         </View>
       );
     }
+    return null;
   };
 
-  if (!profile) {
+  // Show skeleton while loading profile
+  if (isLoadingProfile || !profile) {
     return <DashboardSkeleton />;
   }
 
   return (
     <ScrollView
-      className="flex-1 bg-white p-3"
+      className="flex-1 bg-white"
+      contentContainerStyle={{ padding: 4, flexGrow: 1 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      showsVerticalScrollIndicator={false}
     >
-      {/* Profile Section */}
+      {/* Profile Section - at the top */}
       <TouchableOpacity
-        className="flex-row items-center mb-4 p-4"
+        className="flex-row items-center p-4"
         onPress={() => navigation.navigate("SideMenu")}
       >
         <Image
@@ -301,8 +314,11 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
 
         <View>
           <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-lg font-bold"
+            style={[
+              { fontSize: 18, fontWeight: "bold" },
+              getTextStyle(selectedLanguage),
+            ]}
+            className="text-black"
           >
             {getFullName()}
           </Text>
@@ -315,79 +331,92 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
         </View>
       </TouchableOpacity>
 
-      {/* Render target status using the new function */}
-      {renderTargetStatus()}
+      {/* Centered Content */}
+      <View className="flex-1 justify-center">
+        {/* Render target status using the new function */}
+        {renderTargetStatus()}
 
-      <View className="flex items-center justify-center my-6 mt-[13%]">
-        <View className="relative">
-          <CircularProgress
-            size={100}
-            width={8}
-            fill={targetPercentage !== null ? targetPercentage : 0}
-            tintColor="#000000"
-            backgroundColor="#E5E7EB"
-          />
-          <View className="absolute items-center justify-center h-24 w-24">
-            <Text className="text-2xl font-bold">
-              {isLoadingTarget
-                ? "..."
-                : targetPercentage !== null
-                  ? `${targetPercentage}%`
-                  : "0%"}
-            </Text>
+        {/* Circular Progress */}
+        <View className="flex items-center justify-center my-20">
+          <View className="relative">
+            <CircularProgress
+              size={120}
+              width={8}
+              fill={targetPercentage !== null ? targetPercentage : 0}
+              tintColor="#000000"
+              backgroundColor="#E5E7EB"
+            />
+            <View
+              className="absolute items-center justify-center"
+              style={{ width: 120, height: 120 }}
+            >
+              <Text className="text-2xl font-bold">
+                {isLoadingTarget
+                  ? "..."
+                  : targetPercentage !== null
+                    ? `${targetPercentage}%`
+                    : "0%"}
+              </Text>
+            </View>
           </View>
+          <Text
+            style={[
+              { fontSize: 18, fontWeight: "bold" },
+              getTextStyle(selectedLanguage),
+            ]}
+            className="text-gray-700 mt-2"
+          >
+            {t("CollectionOfficerDashboard.Yourtarget")}
+          </Text>
+          <Text
+            style={[
+              { fontSize: 18, fontWeight: "bold" },
+              getTextStyle(selectedLanguage),
+            ]}
+            className="text-gray-700"
+          >
+            {" "}
+            {t("CollectionOfficerDashboard.Progress")}
+          </Text>
         </View>
-        <Text
-          style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-          className="text-gray-700 font-bold text-lg mt-2"
-        >
-          {t("DashBoard.Yourtarget")}{" "}
-        </Text>
-        <Text
-          style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-          className="text-gray-700 font-bold text-lg "
-        >
-          {" "}
-          {t("DashBoard.Progress")}
-        </Text>
-      </View>
 
-      {/* Action Buttons */}
-      <View className="flex-row flex-wrap justify-between p-6 mt-[-5%]">
-        <TouchableOpacity
-          className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative border border-[#FFE300]"
-          onPress={() => navigation.navigate("QRScanner" as any)}
-        >
-          <Image
-            source={require("../../assets/images/dashboard/qr.webp")}
-            className="w-8 h-8 absolute top-2 right-2"
-          />
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-700 text-lg absolute bottom-2 left-2"
+        {/* Action Buttons */}
+        <View className="flex flex-row min-w-full px-4 pb-8 gap-4 justify-center">
+          <TouchableOpacity
+            className="bg-white p-4 rounded-3xl flex-1 h-32 mt-4 shadow-lg shadow-gray-500 relative border border-[#FFE300]"
+            onPress={() => navigation.navigate("QRScanner" as any)}
           >
-            {t("DashBoard.Scan")}
-          </Text>
-        </TouchableOpacity>
+            <Image
+              source={require("../../assets/images/dashboard/qr.webp")}
+              className="w-8 h-8 absolute top-2 right-2"
+            />
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-gray-700 text-lg absolute bottom-2 left-4"
+            >
+              {t("CollectionOfficerDashboard.Scan")}
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative mb-5 border border-[#FF0086]"
-          onPress={() => navigation.navigate("SearchFarmer" as any)}
-        >
-          <Image
-            source={require("../../assets/images/dashboard/search-client.webp")}
-            className="w-8 h-8 absolute top-2 right-2"
-          />
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-700 text-lg absolute bottom-2 left-2"
+          <TouchableOpacity
+            className="bg-white p-4 rounded-3xl flex-1 h-32 mt-4 shadow-lg shadow-gray-500 relative mb-5 border border-[#FF0086]"
+            onPress={() => navigation.navigate("SearchFarmer" as any)}
           >
-            {t("DashBoard.Search")}
-          </Text>
-        </TouchableOpacity>
+            <Image
+              source={require("../../assets/images/dashboard/search-client.webp")}
+              className="w-8 h-8 absolute top-2 right-2"
+            />
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-gray-700 text-lg absolute bottom-2 left-4"
+            >
+              {t("CollectionOfficerDashboard.Search")}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
 };
 
-export default Dashboard;
+export default CollectionOfficerDashboard;

@@ -96,7 +96,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
           if (jobRole === "Collection Officer") {
             navigation.reset({
               index: 0,
-              routes: [{ name: "Main", params: { screen: "Dashboard" } }],
+              routes: [{ name: "Main", params: { screen: "CollectionOfficerDashboard" } }],
             });
           } else if (jobRole === "Collection Centre Manager") {
             navigation.reset({
