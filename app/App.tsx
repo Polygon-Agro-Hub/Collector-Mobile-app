@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
 import Login from "@/component/auth/Login";
 import { useFocusEffect } from "@react-navigation/native";
-import { NativeWindStyleSheet } from "nativewind";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { LogBox } from "react-native";
 import ChangePassword from "@/component/auth/ChangePassword";
@@ -115,10 +114,6 @@ import BottomNav from "@/component/navigations/BottomNav";
 import CameraAccess from "@/component/permission/CameraAccess";
 
 LogBox.ignoreAllLogs(true);
-NativeWindStyleSheet.setOutput({
-  default: "native",
-});
-
 (Text as any).defaultProps = {
   ...(Text as any).defaultProps,
   allowFontScaling: false,
