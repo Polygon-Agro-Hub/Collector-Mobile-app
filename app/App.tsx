@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
 import Login from "@/component/auth/Login";
 import { useFocusEffect } from "@react-navigation/native";
-import { NativeWindStyleSheet } from "nativewind";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { LogBox } from "react-native";
 import ChangePassword from "@/component/auth/ChangePassword";
@@ -98,7 +97,7 @@ import ReplaceRequestsApprove from "@/component/disribution-manger/ReplaceReques
 import DistributionOfficerReport from "@/component/disribution-manger/DistributionOfficerReport";
 import ReadytoPickupOrders from "@/component/distribution-common/ReadytoPickupOrders";
 import ViewPickupOrders from "@/component/distribution-common/ViewPickupOrders";
-import qrcode from "@/component/disribution-manger/qrcode";
+import Qrcode from "@/component/disribution-manger/qrcode";
 import DigitalSignature from "@/component/disribution-manger/DigitalSignature";
 import ReceivedCash from "@/component/disribution-manger/ReceivedCash";
 import ReceivedCashOfficer from "@/component/distribution-officer/ReceivedCashOfficer";
@@ -115,10 +114,6 @@ import BottomNav from "@/component/navigations/BottomNav";
 import CameraAccess from "@/component/permission/CameraAccess";
 
 LogBox.ignoreAllLogs(true);
-NativeWindStyleSheet.setOutput({
-  default: "native",
-});
-
 (Text as any).defaultProps = {
   ...(Text as any).defaultProps,
   allowFontScaling: false,
@@ -237,10 +232,7 @@ function MainTabNavigator() {
         name="ReplaceRequestsScreen"
         component={ReplaceRequestsScreen as any}
       />
-      <Tab.Screen
-        name="CameraAccess"
-        component={CameraAccess as any}
-      />
+
     </Tab.Navigator>
   );
 }
@@ -453,7 +445,7 @@ function AppContent() {
               component={AddVehicleDetails as any}
             />
             <Stack.Screen name="NewReport" component={NewReport as any} />
-            <Stack.Screen name="qrcode" component={qrcode as any} />
+            <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen
               name="DigitalSignature"
               component={DigitalSignature as any}

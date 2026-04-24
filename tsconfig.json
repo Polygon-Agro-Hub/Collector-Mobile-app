@@ -17,6 +17,7 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-     "component/disribution-manger/pdf.js" 
+    "component/disribution-manger/pdf.js",
+    "nativewind-env.d.ts"
   ]
 }

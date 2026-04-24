@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useCallback } from "react";
 import { View, Text, Image, TouchableOpacity, BackHandler } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { LanguageContext } from "@/context/LanguageContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScrollView } from "react-native-gesture-handler";
@@ -59,8 +59,8 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   );
 
   return (
-    <ScrollView 
-      className="bg-white"
+    <ScrollView
+      className="bg-white flex-1"
       contentContainerStyle={{ flexGrow: 1, padding: 4 }}
       showsVerticalScrollIndicator={false}
     >
@@ -68,7 +68,7 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
         {/* Image and text section */}
         <View className="items-center">
           <Image
-            className="w-40 h-40 rounded-full"
+            className="w-52 h-52 rounded-full"
             source={lg}
             resizeMode="contain"
           />
@@ -84,40 +84,28 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
         {/* Buttons section */}
         <View className="w-64 self-center mt-8">
           <TouchableOpacity
-            className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center"
-            style={{ height: 50 }}
+            className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("en")}
           >
-            <Text 
-              className="text-white text-center"
-              style={{ fontSize: 18 }}
-            >
+            <Text className="text-white text-center text-lg">
               ENGLISH
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
-            className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center"
-            style={{ height: 50 }}
+            className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("si")}
           >
-            <Text 
-              className="text-white text-center"
-              style={{ fontSize: 18 }}
-            >
+            <Text className="text-white text-center text-lg">
               සිංහල
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
-            className="bg-[#413A3F] rounded-3xl items-center justify-center"
-            style={{ height: 50 }}
+            className="bg-[#413A3F] rounded-3xl items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("ta")}
           >
-            <Text 
-              className="text-white text-center"
-              style={{ fontSize: 18 }}
-            >
+            <Text className="text-white text-center text-lg">
               தமிழ்
             </Text>
           </TouchableOpacity>

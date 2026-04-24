@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { CameraView, Camera } from "expo-camera";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
@@ -119,7 +119,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   if (showCameraAccess) {
     return (
       <CameraAccess
-        navigation={navigation}
+        navigation={navigation as any}
         onPermissionGranted={handlePermissionGranted}
         returnScreen="QRScanner"
       />

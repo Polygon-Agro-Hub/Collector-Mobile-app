@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "@/component/types";
+import { RootStackParamList } from "@/component/types/types";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
@@ -21,10 +21,10 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 
-type qrcodeNavigationProp = StackNavigationProp<RootStackParamList, "qrcode">;
+type QrcodeNavigationProp = StackNavigationProp<RootStackParamList, "qrcode">;
 
-interface qrcodeProps {
-  navigation: qrcodeNavigationProp;
+interface QrcodeProps {
+  navigation: QrcodeNavigationProp;
   route: RouteProp<RootStackParamList, "qrcode">;
 }
 
@@ -316,7 +316,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   );
 };
 
-const qrcode: React.FC<qrcodeProps> = ({ navigation, route }) => {
+const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
@@ -1089,4 +1089,4 @@ const qrcode: React.FC<qrcodeProps> = ({ navigation, route }) => {
   );
 };
 
-export default qrcode;
+export default Qrcode;

@@ -20,7 +20,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Camera } from "expo-camera";
 import CustomHeader from "../navigations/CustomHeader";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 
 type CameraAccessNavigationProp = StackNavigationProp<
   RootStackParamList,

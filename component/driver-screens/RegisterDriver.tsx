@@ -12,9 +12,9 @@ import {
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useNavigation } from "@react-navigation/native";
-import { OfficerBasicDetailsFormData } from "../types";
+import { OfficerBasicDetailsFormData } from "../types/types";
 import { environment } from "@/environment/environment";
 import countryCodes from "../collection-manager/countryCodes.json";
 import AntDesign from "react-native-vector-icons/AntDesign";

@@ -14,9 +14,9 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { RadioButton } from "react-native-paper";
 import Checkbox from "expo-checkbox";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { RouteProp } from "@react-navigation/native";
-import { OfficerBasicDetailsFormData } from "../types";
+import { OfficerBasicDetailsFormData } from "../types/types";
 import { environment } from "@/environment/environment";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAvoidingView } from "react-native";
@@ -196,7 +196,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     useCallback(() => {
       setJobRole(String(jobRolle));
       fetchEmpId(String(jobRolle));
-      return () => {};
+      return () => { };
     }, []),
   );
 
@@ -550,7 +550,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         <View className="p-2 px-4">
           {/* ── Type Selector ── */}
           <View className="px-2 mt-6 items-center">
-            <View className="flex flex-row items-center space-x-2 justify-between">
+            <View className="flex flex-row items-center gap-2 justify-between">
               <Text className="text-base font-medium">
                 {t("AddOfficerBasicDetails.Type")}
               </Text>
@@ -614,13 +614,13 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             <Text className="text-base font-medium mb-4">
               {t("AddOfficerBasicDetails.PreferredLanguages")}
             </Text>
-            <View className="flex-row justify-between space-x-4">
+            <View className="flex-row justify-between gap-4">
               {(
                 Object.keys(preferredLanguages) as Array<
                   keyof typeof preferredLanguages
                 >
               ).map((lang) => (
-                <View key={lang} className="flex-row items-center space-x-1">
+                <View key={lang} className="flex-row items-center gap-1">
                   <Checkbox
                     value={preferredLanguages[lang]}
                     onValueChange={() => toggleLanguage(lang)}
@@ -643,7 +643,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
           {/* ── Name Fields ── */}
-          <View className="px-2 mt-4 space-y-4">
+          <View className="px-2 mt-4 gap-4">
             {/* First Name English */}
             <View>
               <TextInput
@@ -653,9 +653,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleEnglishNameChange(text, "firstNameEnglish")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.firstNameEnglish ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.firstNameEnglish ? "border border-red-500" : ""
+                  }`}
                 keyboardType="default"
                 autoCapitalize="words"
                 autoCorrect={false}
@@ -677,9 +676,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleEnglishNameChange(text, "lastNameEnglish")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.lastNameEnglish ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.lastNameEnglish ? "border border-red-500" : ""
+                  }`}
                 keyboardType="default"
                 autoCapitalize="words"
                 autoCorrect={false}
@@ -701,9 +699,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleSinhalaNameChange(text, "firstNameSinhala")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.firstNameSinhala ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.firstNameSinhala ? "border border-red-500" : ""
+                  }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -723,9 +720,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleSinhalaNameChange(text, "lastNameSinhala")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.lastNameSinhala ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.lastNameSinhala ? "border border-red-500" : ""
+                  }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -745,9 +741,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleTamilNameChange(text, "firstNameTamil")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.firstNameTamil ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.firstNameTamil ? "border border-red-500" : ""
+                  }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -767,9 +762,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleTamilNameChange(text, "lastNameTamil")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.lastNameTamil ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.lastNameTamil ? "border border-red-500" : ""
+                  }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -785,10 +779,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
           {/* ── Phone & Contact Fields ── */}
-          <View className="px-2 mt-4 space-y-4">
+          <View className="px-2 mt-4 gap-4">
             {/* Phone Number 1 */}
             <View>
-              <View className="flex-row space-x-2">
+              <View className="flex-row gap-2">
                 <TouchableOpacity
                   className="bg-[#F4F4F4] rounded-2xl px-3 py-4 w-24 flex-row justify-between items-center"
                   onPress={() => {
@@ -810,11 +804,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   <TextInput
                     placeholder="7XXXXXXXX"
                     placeholderTextColor="#7D7D7D"
-                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${
-                      error1 || fieldErrors.phoneNumber1
-                        ? "border border-red-500"
-                        : ""
-                    }`}
+                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${error1 || fieldErrors.phoneNumber1
+                      ? "border border-red-500"
+                      : ""
+                      }`}
                     value={phoneNumber1}
                     onChangeText={handlePhoneNumber1Change}
                     keyboardType="phone-pad"
@@ -832,7 +825,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
             {/* Phone Number 2 */}
             <View>
-              <View className="flex-row space-x-2">
+              <View className="flex-row gap-2">
                 <TouchableOpacity
                   className="bg-[#F4F4F4] rounded-2xl px-3 py-4 w-24 flex-row justify-between items-center"
                   onPress={() => {
@@ -854,9 +847,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   <TextInput
                     placeholder="7XXXXXXXX"
                     placeholderTextColor="#7D7D7D"
-                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${
-                      error2 ? "border border-red-500" : ""
-                    }`}
+                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${error2 ? "border border-red-500" : ""
+                      }`}
                     value={phoneNumber2}
                     onChangeText={handlePhoneNumber2Change}
                     keyboardType="phone-pad"
@@ -881,9 +873,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 keyboardType="default"
                 autoCapitalize="characters"
                 autoCorrect={false}
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
+                  }`}
                 underlineColorAndroid="transparent"
               />
               {(error3 || fieldErrors.nicNumber) && (
@@ -900,9 +891,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 placeholderTextColor="#7D7D7D"
                 value={formData.email}
                 onChangeText={handleEmailChange}
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
-                  fieldErrors.email || errorEmail ? "border border-red-500" : ""
-                }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.email || errorEmail ? "border border-red-500" : ""
+                  }`}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -943,9 +933,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${
-                isValidating ? "opacity-50" : ""
-              }`}
+              className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${isValidating ? "opacity-50" : ""
+                }`}
               onPress={handleNext}
               disabled={isValidating}
             >

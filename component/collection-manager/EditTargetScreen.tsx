@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "@/i18n/i18n";
@@ -94,7 +94,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
       />
 
       {/* Content */}
-      <View className="mt-6 space-y-6 p-8">
+      <View className="mt-6 gap-y-6 p-8">
         {/* Total Target */}
         <View>
           <Text className="text-[#475A6A] font-medium">

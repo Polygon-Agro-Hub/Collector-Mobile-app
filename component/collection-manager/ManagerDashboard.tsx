@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import TransportComponent from "../driver-screens/TransportComponent";
 
@@ -207,7 +207,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
   const renderTargetStatus = () => {
     if (isLoadingTarget) {
       return (
-        <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-gray-300">
+        <View className="bg-white rounded-3xl mt-3 p-4 mx-4 shadow-lg">
           <Text className="text-center text-gray-500">
             Loading target status...
           </Text>
@@ -248,14 +248,16 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
 
   return (
     <ScrollView
-      className="flex-1 bg-white p-3"
+      className="flex-1 bg-white"
+      contentContainerStyle={{ flexGrow: 1 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      showsVerticalScrollIndicator={false}
     >
       {/* Profile Section */}
       <TouchableOpacity
-        className="flex-row items-center mb-4 p-4"
+        className="flex-row items-center p-4 mt-10"
         onPress={() => navigation.navigate("SideMenu")}
       >
         <Image
@@ -269,12 +271,11 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
 
         <View>
           <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-lg font-bold"
+            style={[{ fontSize: 18, fontWeight: "bold" }, getTextStyle(selectedLanguage)]}
+            className="text-black"
           >
             {getFullName()}
           </Text>
-
           <Text
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             className="text-gray-500"
@@ -289,7 +290,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           {renderTargetStatus()}
 
           {/* Target Progress */}
-          <View className="flex-row items-center justify-between mb-[-5%] p-7 mt-[4%] ">
+          <View className="flex-row items-center justify-center gap-4 mt-10 mb-10">
             <Text
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
               className="text-gray-700 font-bold text-lg"
@@ -298,13 +299,16 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
             </Text>
             <View className="relative">
               <CircularProgress
-                size={100}
+                size={120}
                 width={8}
                 fill={targetPercentage !== null ? targetPercentage : 0}
                 tintColor="#000000"
                 backgroundColor="#EEEEEE"
               />
-              <View className="absolute items-center justify-center h-24 w-24">
+              <View
+                className="absolute items-center justify-center"
+                style={{ width: 120, height: 120 }}
+              >
                 <Text className="text-2xl font-bold">
                   {isLoadingTarget
                     ? "..."
@@ -316,10 +320,10 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Action Buttons */}
-          <View className="flex-row flex-wrap justify-between p-5 mt-[5%] mb-[18%]">
+          {/* Action Buttons - Consistent Design */}
+          <View className="flex-row px-4 pb-8 gap-4 justify-center">
             <TouchableOpacity
-              className="bg-white p-4 border border-[#980775] rounded-lg w-[45%] h-28 shadow-lg shadow-gray-500 relative"
+              className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#980775]"
               onPress={() => navigation.navigate("CenterTarget" as any)}
             >
               <Image
@@ -328,14 +332,14 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               />
               <Text
                 style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-gray-700 text-lg absolute bottom-2 left-2"
+                className="text-gray-700 text-lg absolute bottom-2 left-4"
               >
                 {t("ManagerDashboard.CenterTarget")}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-white p-4 border border-[#FF7338] rounded-lg w-[45%] h-28 shadow-lg shadow-gray-500 relative"
+              className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#FF7338]"
               onPress={() =>
                 navigation.navigate("ManagerTransactions" as any, { empId })
               }
@@ -346,14 +350,16 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               />
               <Text
                 style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-gray-700 text-lg absolute bottom-2 left-2"
+                className="text-gray-700 text-lg absolute bottom-2 left-4"
               >
                 {t("ManagerDashboard.MyCollection")}
               </Text>
             </TouchableOpacity>
+          </View>
 
+          <View className="flex-row px-4 pb-8 gap-4 justify-center">
             <TouchableOpacity
-              className="bg-white p-4 rounded-lg border border-[#FFE300] w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative"
+              className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#FFE300]"
               onPress={() => navigation.navigate("QRScanner" as any)}
             >
               <Image
@@ -362,14 +368,14 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               />
               <Text
                 style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-gray-700 text-lg absolute bottom-2 left-2"
+                className="text-gray-700 text-lg absolute bottom-2 left-4"
               >
                 {t("ManagerDashboard.Scan")}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-white p-4 rounded-lg w-[45%] border border-[#FF0086] h-28 mt-4 shadow-lg shadow-gray-500 relative mb-5"
+              className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#FF0086]"
               onPress={() => navigation.navigate("SearchFarmer" as any)}
             >
               <Image
@@ -378,7 +384,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
               />
               <Text
                 style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-gray-700 text-lg absolute bottom-2 left-2"
+                className="text-gray-700 text-lg absolute bottom-2 left-4"
               >
                 {t("ManagerDashboard.Search")}
               </Text>

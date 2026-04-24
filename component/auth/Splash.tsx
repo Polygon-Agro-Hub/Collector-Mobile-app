@@ -2,7 +2,7 @@ import { View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../store/authSlice";

@@ -13,7 +13,7 @@ import {
   Keyboard,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import CountryPicker, { Country, CountryCode } from "react-native-country-picker-modal";
 import axios from "axios";
 import {environment }from '@/environment/environment';

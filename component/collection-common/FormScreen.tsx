@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 
 type FormScreenRouteProp = RouteProp<RootStackParamList, "FormScreen">;
 

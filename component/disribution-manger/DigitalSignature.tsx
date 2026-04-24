@@ -11,7 +11,7 @@ import Signature from "react-native-signature-canvas";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "@/component/types";
+import { RootStackParamList } from "@/component/types/types";
 import * as ScreenOrientation from "expo-screen-orientation";
 import {
   widthPercentageToDP as wp,

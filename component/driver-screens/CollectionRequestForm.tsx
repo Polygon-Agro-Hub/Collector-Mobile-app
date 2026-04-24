@@ -17,7 +17,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect, useRoute } from "@react-navigation/native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import DropDownPicker from "react-native-dropdown-picker";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native-gesture-handler";
 import axios from "axios";

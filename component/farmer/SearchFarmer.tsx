@@ -14,7 +14,7 @@ import {
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import {
   widthPercentageToDP as wp,
