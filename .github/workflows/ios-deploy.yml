@@ -61,7 +61,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"   # Caches node_modules between runs — saves 1-2 min
+          #cache: "npm"   # Caches node_modules between runs — saves 1-2 min
 
       # ─────────────────────────────────────────────────────────────────
       # STEP 4: Install JavaScript dependencies
