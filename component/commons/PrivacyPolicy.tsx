@@ -1,7 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, BackHandler } from "react-native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import {
   widthPercentageToDP as wp,

@@ -12,7 +12,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -1278,7 +1278,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               </View>
 
               {/* Action Buttons */}
-              <View className="space-y-3">
+              <View className="gap-y-3">
                 <TouchableOpacity
                   className={`py-3 rounded-full px-3 ${isFormComplete && !isReplacementPriceHigher
                       ? "bg-[#FA0000]"

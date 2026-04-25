@@ -16,7 +16,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SelectList } from "react-native-dropdown-select-list";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import CameraComponent from "@/utils/CamComponentForDrivers";
 import axios from "axios";
 import { environment } from "@/environment/environment";

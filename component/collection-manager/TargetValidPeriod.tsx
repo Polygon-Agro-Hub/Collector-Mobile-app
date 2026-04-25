@@ -1,7 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Platform } from "react-native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useTranslation } from "react-i18next";

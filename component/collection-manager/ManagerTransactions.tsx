@@ -13,7 +13,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { scale } from "react-native-size-matters";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Entypo } from "@expo/vector-icons";

@@ -15,7 +15,7 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
@@ -286,7 +286,8 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         className="bg-white"
         contentContainerStyle={{
           paddingHorizontal: wp(4),
-          paddingVertical: hp(2),
+          paddingTop: loading ? 0 : hp(2),
+          paddingBottom: hp(2),
           flexGrow: 1,
         }}
         showsVerticalScrollIndicator={false}
@@ -361,45 +362,48 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               </View>
 
               {/* Download and Share buttons - Centered */}
-              <View className="flex flex-row w-full px-12 pb-8 gap-3">
+              <View className="flex-row w-full px-12 pb-8 gap-3">
                 <TouchableOpacity
-                  className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
+                  className="bg-black rounded-lg items-center justify-center flex-1 py-4"
                   onPress={downloadQRCode}
                   disabled={checkingPensionStatus}
                 >
-                  <MaterialIcons name="download" size={20} color="white" />
-                  <Text
-                    className="text-white text-base"
-                    style={[
-                      i18n.language === "si"
-                        ? { fontSize: 12 }
-                        : i18n.language === "ta"
-                          ? { fontSize: 11 }
-                          : { fontSize: 15 },
-                    ]}
-                  >
-                    {t("FarmerQr.Download")}
-                  </Text>
+                  <View className="flex-col items-center justify-center gap-2">
+                    <MaterialIcons name="download" size={20} color="white" />
+                    <Text
+                      className="text-white text-base"
+                      style={[
+                        i18n.language === "si"
+                          ? { fontSize: 12 }
+                          : i18n.language === "ta"
+                            ? { fontSize: 11 }
+                            : { fontSize: 15 },
+                      ]}
+                    >
+                      {t("FarmerQr.Download")}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
+                  className="bg-black rounded-lg items-center justify-center flex-1 py-4"
                   onPress={shareQRCode}
                   disabled={checkingPensionStatus}
-                >
-                  <MaterialIcons name="share" size={20} color="white" />
-                  <Text
-                    className="text-white text-base"
-                    style={[
-                      i18n.language === "si"
-                        ? { fontSize: 12 }
-                        : i18n.language === "ta"
-                          ? { fontSize: 11 }
-                          : { fontSize: 15 },
-                    ]}
-                  >
-                    {t("FarmerQr.Share")}
-                  </Text>
+                ><View className="flex-col items-center justify-center gap-2">
+                    <MaterialIcons name="share" size={20} color="white" />
+                    <Text
+                      className="text-white text-base"
+                      style={[
+                        i18n.language === "si"
+                          ? { fontSize: 12 }
+                          : i18n.language === "ta"
+                            ? { fontSize: 11 }
+                            : { fontSize: 15 },
+                      ]}
+                    >
+                      {t("FarmerQr.Share")}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             </>

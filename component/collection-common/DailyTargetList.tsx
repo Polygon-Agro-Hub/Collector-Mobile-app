@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 

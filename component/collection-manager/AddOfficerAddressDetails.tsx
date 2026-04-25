@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";

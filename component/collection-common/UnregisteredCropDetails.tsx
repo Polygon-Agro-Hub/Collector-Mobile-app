@@ -14,7 +14,7 @@ import {
 import { Modal } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect, useRoute } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import Entypo from "react-native-vector-icons/Entypo";
 import MdIcons from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons } from "@expo/vector-icons";

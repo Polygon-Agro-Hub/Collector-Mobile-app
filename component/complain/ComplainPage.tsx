@@ -11,15 +11,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
@@ -178,11 +174,11 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         enabled
-        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        className="flex-1 bg-white"
       >
         <View className="flex-1 bg-white">
           {loading ? (
-            <View className="flex-1">
+            <View className="flex-1 bg-white">
               <CustomHeader
                 title=""
                 showBackButton={true}
@@ -190,7 +186,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 onBackPress={() => navigation.goBack()}
               />
 
-              <View className="flex-1 justify-center items-center">
+              <View className="flex-1 justify-center items-center bg-white">
                 <LottieView
                   source={require("../../assets/lottie/loading.json")}
                   autoPlay
@@ -202,7 +198,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
           ) : (
             <ScrollView
               className="flex-1 bg-white"
-              contentContainerStyle={{ flexGrow: 1 }}
+              contentContainerStyle={{ flexGrow: 1, backgroundColor: "white" }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
@@ -211,24 +207,27 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 showBackButton={true}
                 navigation={navigation}
                 onBackPress={() => navigation.goBack()}
+                bgColor="#F6F6F6"
               />
 
-              <View className="flex-1 justify-center bg-white">
-                <View
-                  className="items-center bg-white"
-                >
+
+              <View className="flex-1 justify-center mx-auto bg-[#F6F6F6] px-4">
+                <View className="justify-center items-center bg-[#F6F6F6] px-4">
                   <Image
                     source={require("../../assets/images/complain/complain.webp")}
-                    className="w-36 h-36"
+                    className="w-48 h-48"
                     resizeMode="contain"
                   />
+                </View>
 
-                  <View className="w-[100%] items-center px-4 shadow-2xl bg-white rounded-xl mt-10">
+                <View className="items-center bg-white rounded-3xl">
+
+                  <View className="w-full items-center px-4 bg-white rounded-xl mt-10">
                     <View className="flex-row">
-                      <Text className="text-2xl font-semibold text-center mb-4 color-[#424242]">
+                      <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">
                         {t("ReportComplaint.Tellus")}
                       </Text>
-                      <Text className="text-2xl font-semibold text-center mb-4 pl-2 color-[#D72C62]">
+                      <Text className="text-2xl font-semibold text-center mb-4 pl-2 text-[#D72C62]">
                         {t("ReportComplaint.Problem")}
                       </Text>
                     </View>
@@ -239,25 +238,10 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                         onPress={() => {
                           if (Category.length > 0) setCategoryModalVisible(true);
                         }}
-                        style={{
-                          borderWidth: 1,
-                          borderColor: "#ccc",
-                          borderRadius: 25,
-                          paddingHorizontal: 8,
-                          height: 50,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          backgroundColor: "white",
-                        }}
+                        className="border border-gray-300 rounded-3xl px-2 h-[50px] flex-row items-center justify-between bg-white"
                       >
                         <Text
-                          style={{
-                            color: selectedCategoryLabel ? "#424242" : "#434343",
-                            fontSize: 16,
-                            flex: 1,
-                            marginLeft: 8,
-                          }}
+                          className={`flex-1 ml-2 text-base ${selectedCategoryLabel ? "text-[#424242]" : "text-[#434343]"}`}
                           numberOfLines={1}
                         >
                           {selectedCategoryLabel
@@ -273,8 +257,8 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     </Text>
 
                     <TextInput
-                      className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8"
-                      style={{ textAlignVertical: "top", color: "#424242" }}
+                      className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8 text-[#424242]"
+                      style={{ textAlignVertical: "top" }}
                       placeholder={t("ReportComplaint.Kindlysubmit")}
                       placeholderTextColor="#434343"
                       multiline
@@ -283,13 +267,13 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     />
 
                     <TouchableOpacity
-                      className="w-full bg-[#000000] rounded-3xl items-center justify-center mb-20 h-[50px]"
+                      className="w-full bg-black rounded-3xl items-center justify-center mb-20 h-[50px]"
                       onPress={handleSubmit}
                     >
                       {isLoading ? (
                         <ActivityIndicator size="small" color="white" />
                       ) : (
-                        <Text className="text-white font-bold" style={{ fontSize: 18 }}>
+                        <Text className="text-white font-bold text-lg">
                           {t("ReportComplaint.Submit")}
                         </Text>
                       )}

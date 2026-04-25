@@ -12,7 +12,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";

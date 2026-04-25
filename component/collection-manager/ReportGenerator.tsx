@@ -10,7 +10,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { handleGeneratePDF } from "./ReportPDFGenerator";
 import * as Sharing from "expo-sharing";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";

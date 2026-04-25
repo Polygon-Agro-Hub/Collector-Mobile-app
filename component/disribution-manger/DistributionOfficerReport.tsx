@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { handleGeneratePDF } from "./ReportPDF";
 import * as Sharing from "expo-sharing";
 import { RouteProp } from "@react-navigation/native";

@@ -16,7 +16,7 @@ const FarmerQrSkeletonLoader: React.FC = () => (
     {/* Farmer Name */}
     <Rect
       x={wp("15%")}
-      y={hp("10%")}
+      y={hp("2%")}
       rx="8"
       ry="8"
       width={wp("60%")}
@@ -24,17 +24,17 @@ const FarmerQrSkeletonLoader: React.FC = () => (
     />
     <Rect
       x={wp("25%")}
-      y={hp("15%")}
+      y={hp("6%")}
       rx="8"
       ry="8"
       width={wp("40%")}
       height={hp("2%")}
     />
 
-    {/* QR Code Placeholder */}
+    {/* QR Code */}
     <Rect
       x={wp("10%")}
-      y={hp("20%")}
+      y={hp("10%")}
       rx="8"
       ry="8"
       width={wp("70%")}
@@ -44,7 +44,7 @@ const FarmerQrSkeletonLoader: React.FC = () => (
     {/* Buttons */}
     <Rect
       x={wp("5%")}
-      y={hp("60%")}
+      y={hp("55%")}
       rx="8"
       ry="8"
       width={wp("80%")}
@@ -52,17 +52,17 @@ const FarmerQrSkeletonLoader: React.FC = () => (
     />
     <Rect
       x={wp("5%")}
-      y={hp("70%")}
+      y={hp("65%")}
       rx="8"
       ry="8"
       width={wp("80%")}
       height={hp("6%")}
     />
 
-    {/* Buttons Section */}
+    {/* Bottom buttons */}
     <Rect
       x={wp("10%")}
-      y={hp("80%")}
+      y={hp("75%")}
       rx="10"
       ry="10"
       width={wp("25%")}
@@ -70,7 +70,7 @@ const FarmerQrSkeletonLoader: React.FC = () => (
     />
     <Rect
       x={wp("55%")}
-      y={hp("80%")}
+      y={hp("75%")}
       rx="10"
       ry="10"
       width={wp("25%")}

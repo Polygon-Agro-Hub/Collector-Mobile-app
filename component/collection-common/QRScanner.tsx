@@ -9,7 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { CameraView, Camera } from "expo-camera";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
@@ -51,15 +51,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
         setHasPermission(false);
         setShowCameraAccess(true);
       } else {
-        // undetermined - request permission directly or show camera access screen
-        const { status: requestedStatus } = await Camera.requestCameraPermissionsAsync();
-        if (requestedStatus === "granted") {
-          setHasPermission(true);
-          setShowCameraAccess(false);
-        } else {
-          setHasPermission(false);
-          setShowCameraAccess(true);
-        }
+        // undetermined - show camera access screen
+        setHasPermission(false);
+        setShowCameraAccess(true);
       }
     };
 
@@ -119,7 +113,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   if (showCameraAccess) {
     return (
       <CameraAccess
-        navigation={navigation}
+        navigation={navigation as any}
         onPermissionGranted={handlePermissionGranted}
         returnScreen="QRScanner"
       />

@@ -13,7 +13,7 @@ import {
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "../../environment/environment";
 import { ScrollView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -310,7 +310,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         </View>
 
         {/* Centered content after header */}
-        <View className="flex-1 justify-center">
+        <View className="flex-1  mt-20">
           <View className="bg-white items-center px-4">
             <Image
               source={require("../../assets/images/collection-common/search-crop.webp")}

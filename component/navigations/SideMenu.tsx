@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -280,10 +280,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ paddingVertical: hp(2) }}
       >
         {/* Profile Card */}
-        <View className="flex-row items-center px-4  mb-4">
+        <View className="flex-row items-center px-6 mb-4">
           <Image
             source={
               profile?.image
@@ -312,7 +311,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <View className="flex-1 py-4 px-4 mt-[-30]">
+        <View className="flex-1 py-4 px-6 mt-[-30]">
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 
           <TouchableOpacity
@@ -323,9 +322,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
             <Text className="flex-1 text-lg ml-2">
               {t("SideMenu.Language")}
             </Text>
-            <Ionicons
-              name={isLanguageDropdownOpen ? "chevron-up" : "chevron-down"}
-              size={20}
+            <MaterialIcons
+              name={isLanguageDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"}
+              size={30}
               color="black"
             />
           </TouchableOpacity>
@@ -347,14 +346,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                     key={language}
                     onPress={() => handleLanguageSelect(language)}
                     className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedLanguage === language
-                        ? "bg-[#FFDFF7]"
-                        : "bg-transparent"
+                      ? "bg-[#FFDFF7]"
+                      : "bg-transparent"
                       }`}
                   >
                     <Text
                       className={`text-base ${selectedLanguage === language
-                          ? "text-black"
-                          : "text-[#434343]"
+                        ? "text-black"
+                        : "text-[#434343]"
                         }`}
                     >
                       {displayLanguage}
@@ -419,9 +418,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
             <Text className="flex-1 text-lg ml-2">
               {t("SideMenu.Complaints")}
             </Text>
-            <Ionicons
-              name={isComplaintDropdownOpen ? "chevron-up" : "chevron-down"}
-              size={20}
+            <MaterialIcons
+              name={isComplaintDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"}
+              size={30}
               color="black"
             />
           </TouchableOpacity>
@@ -486,7 +485,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
             source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
-            style={{ width: 200, height: 200 }}
+            style={{ width: 150, height: 150 }}
           />
           <Text
             style={{

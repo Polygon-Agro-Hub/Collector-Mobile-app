@@ -14,7 +14,7 @@ interface GlobalSearchModalProps {
   visible: boolean;
   onClose: () => void;
   title: string;
-  data: Array<{ label: string; value: string; [key: string]: any }>;
+  data: Array<{ label: string; value: string;[key: string]: any }>;
   selectedItems: string[];
   onSelect: (items: string[]) => void;
   searchPlaceholder?: string;
@@ -108,9 +108,8 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     isLast: boolean,
   ) => (
     <TouchableOpacity
-      className={`px-4 py-3 flex-row items-center justify-between ${
-        !isLast ? "border-b border-gray-200" : ""
-      }`}
+      className={`px-4 py-3 flex-row items-center justify-between ${!isLast ? "border-b border-gray-200" : ""
+        }`}
       onPress={() => handleItemPress(item.value)}
     >
       <Text className="text-base text-gray-800">{item.label}</Text>
@@ -120,7 +119,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   const renderSearchInput = () => (
     <View className="px-4 py-2 border-b border-gray-200">
-      <View className="bg-gray-100 rounded-lg px-3 flex-row items-center">
+      <View className="bg-gray-100 rounded-lg px-3 flex-row items-center h-[50px]">
         <MaterialIcons name="search" size={20} color="#666" />
         <TextInput
           placeholder={searchPlaceholder}
@@ -212,7 +211,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {multiSelect && (
             <View className="px-4 py-3 border-t border-gray-200">
               <TouchableOpacity
-                className="bg-[#21202B] rounded-xl py-3 items-center"
+                className="bg-[#21202B] rounded-xl py-3 items-center h-[50px] justify-center"
                 onPress={handleDone}
               >
                 <Text className="text-white font-semibold text-base">

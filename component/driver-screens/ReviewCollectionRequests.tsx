@@ -6,7 +6,7 @@ import { RouteProp } from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import DropDownPicker from "react-native-dropdown-picker";
 
 type ReviewProps = {

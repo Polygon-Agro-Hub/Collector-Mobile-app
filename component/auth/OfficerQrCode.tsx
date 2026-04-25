@@ -5,14 +5,10 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
@@ -112,7 +108,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
-          "Gallery access is required to save QR Code.",
+          "Gallery access is required to save QR Code."
         );
         return;
       }
@@ -150,7 +146,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       } else {
         Alert.alert(
           "Sharing Unavailable",
-          "Sharing is not available on this device.",
+          "Sharing is not available on this device."
         );
       }
     } catch (error) {
@@ -178,7 +174,8 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
               <View className="bg-white p-4 rounded-3xl border-2 border-[#FAE432]">
                 <Image
                   source={{ uri: QR }}
-                  style={{ width: 300, height: 300, resizeMode: "contain" }}
+                  className="w-[300px] h-[300px]"
+                  resizeMode="contain"
                 />
               </View>
             ) : (
@@ -209,26 +206,26 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
           </View>
 
           {/* Actions */}
-          <View className="flex flex-row w-full px-12 pb-8 gap-3">
+          <View className="flex-row w-full px-12 pb-8 gap-3">
             <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
+              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
               onPress={downloadQRCode}
             >
-              <View className="flex items-center justify-center">
-                <MaterialIcons name="download" size={20} color="white" />
-                <Text className="text-white ml-2 text-base">
+              <View className="flex-col items-center justify-center gap-2">
+                <MaterialIcons name="download" size={24} color="white" />
+                <Text className="text-white text-base">
                   {t("OfficerQr.Download")}
                 </Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center w-1/2 py-3"
+              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
               onPress={shareQRCode}
             >
-              <View className="flex items-center justify-center">
-                <MaterialIcons name="share" size={20} color="white" />
-                <Text className="text-white ml-2 text-base">
+              <View className="flex-col items-center justify-center gap-2">
+                <MaterialIcons name="share" size={24} color="white" />
+                <Text className="text-white text-base">
                   {t("OfficerQr.Share")}
                 </Text>
               </View>

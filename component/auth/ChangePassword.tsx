@@ -12,15 +12,11 @@ import {
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import axios from "axios";
 import { ScrollView } from "react-native-gesture-handler";
 import { environment } from "@/environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import NetInfo from "@react-native-community/netinfo";
@@ -176,15 +172,17 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1, backgroundColor: "white" }}
+      className="flex-1 bg-white"
     >
-      {passwordUpdate === 1 && (
+      {passwordUpdate === 1 ? (
         <CustomHeader
           title=""
           showBackButton={true}
           navigation={navigation}
           onBackPress={() => navigation.goBack()}
         />
+      ) : (
+        <View className="h-[70px]" />
       )}
       <ScrollView
         className="flex-1 bg-white"
@@ -197,8 +195,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             <Image
               source={require("@/assets/images/auth/change-password.webp")}
               resizeMode="contain"
-              className="w-60 h-32"
-              style={{ width: 220, height: 140 }}
+              className="w-[220px] h-[140px]"
             />
           </View>
 
@@ -215,13 +212,9 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             <Text className="font-normal pb-2">
               {t("ChangePassword.CurrentPassword")}
             </Text>
-            <View
-              className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3"
-              style={{ height: 50 }}
-            >
+            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4]"
-                style={{ height: 40, fontSize: 16 }}
+                className="flex-1 bg-[#F4F4F4] text-base"
                 secureTextEntry={secureCurrent}
                 onChangeText={setCurrentPassword}
                 value={currentPassword}
@@ -240,13 +233,9 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             <Text className="font-normal pb-2">
               {t("ChangePassword.NewPassword")}
             </Text>
-            <View
-              className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3"
-              style={{ height: 50 }}
-            >
+            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1"
-                style={{ height: 40, fontSize: 16 }}
+                className="flex-1 text-base"
                 secureTextEntry={secureNew}
                 value={newPassword}
                 onChangeText={(text) => {
@@ -266,13 +255,9 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             <Text className="font-normal pb-2">
               {t("ChangePassword.ConfirmNewPassword")}
             </Text>
-            <View
-              className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3"
-              style={{ height: 50 }}
-            >
+            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4]"
-                style={{ height: 40, fontSize: 16 }}
+                className="flex-1 bg-[#F4F4F4] text-base"
                 secureTextEntry={secureConfirm}
                 onChangeText={(text) => {
                   const cleanText = text.replace(/\s/g, "");
@@ -294,11 +279,10 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
 
           <View className="px-4 pb-20">
             <TouchableOpacity
-              className="bg-[#000000] w-full rounded-3xl items-center justify-center"
-              style={{ height: 50 }}
+              className="bg-black w-full rounded-3xl items-center justify-center h-[50px]"
               onPress={handleChangePassword}
             >
-              <Text className="font-light text-white" style={{ fontSize: 18 }}>
+              <Text className="font-light text-white text-lg">
                 {t("ChangePassword.Next")}
               </Text>
             </TouchableOpacity>

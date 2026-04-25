@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomHeader from "../navigations/CustomHeader";
 import { environment } from "@/environment/environment";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import provincesData from "@/assets/jsons/sri-lanka-provinces.json";
@@ -425,7 +425,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   };
 
   return (
-    <View className="flex-1 bg-white" style={{ padding: 4 }}>
+    <View className="flex-1 bg-white px-1">
       <CustomHeader
         title={t("Profile.MyProfile")}
         showBackButton={true}
@@ -446,25 +446,24 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   ? { uri: profileImage.uri }
                   : require("../../assets/images/auth/my-profile.webp")
               }
-              style={{ width: 100, height: 100, borderRadius: 50 }}
+              className="w-[100px] h-[100px] rounded-full"
               defaultSource={require("../../assets/images/auth/my-profile.webp")}
             />
           </View>
         </View>
 
-        <View className="space-y-4 px-4 pb-6">
+        <View className="gap-y-4 px-4 pb-6">
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.FirstName")}
             </Text>
             <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
-                  className="px-4 text-black min-w-full"
-                  style={{ height: 50, fontSize: 16, minWidth: 250 }}
+                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
                   value={getfirstName()}
                   editable={false}
                   scrollEnabled={false}
@@ -475,16 +474,15 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.LastName")}
             </Text>
             <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
-                  className="px-4 text-black min-w-full"
-                  style={{ height: 50, fontSize: 16, minWidth: 250 }}
+                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
                   value={getlastName()}
                   editable={false}
                   scrollEnabled={false}
@@ -495,16 +493,15 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.Company")}
             </Text>
             <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
-                  className="px-4 text-black min-w-full"
-                  style={{ height: 50, fontSize: 16, minWidth: 250 }}
+                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
                   value={getcompanyName()}
                   editable={false}
                   scrollEnabled={false}
@@ -515,14 +512,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.CenterCode")}
             </Text>
             <TextInput
-              className="px-4 border border-[#F4F4F4] text-black bg-[#F4F4F4] rounded-3xl"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 border border-[#F4F4F4] text-black bg-[#F4F4F4] rounded-3xl h-[50px] text-base"
               value={profileData.regcode}
               editable={false}
             />
@@ -530,16 +526,15 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.CenterName")}
             </Text>
             <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
-                  className="px-4 text-black min-w-full"
-                  style={{ height: 50, fontSize: 16, minWidth: 250 }}
+                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
                   value={profileData.collectionCenterName}
                   editable={false}
                   scrollEnabled={false}
@@ -550,14 +545,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.Job")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={getTranslatedJobRole(
                 profileData.jobRole,
                 selectedLanguage,
@@ -568,14 +562,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.NIC")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={profileData.nicNumber}
               editable={false}
             />
@@ -583,14 +576,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.Phone1")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={newPhoneNumber}
               placeholder="7XXXXXXXX"
               keyboardType="numeric"
@@ -605,14 +597,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.Phone2")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={newPhoneNumber2}
               placeholder="7XXXXXXXX"
               keyboardType="numeric"
@@ -627,14 +618,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.House")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={profileData.houseNumber}
               editable={false}
             />
@@ -642,14 +632,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.Street")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={profileData.streetName}
               editable={false}
             />
@@ -657,14 +646,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.City")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={getTranslatedCity(
                 profileData.city,
                 profileData.district,
@@ -676,14 +664,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.District")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={getTranslatedDistrict(
                 profileData.district,
                 selectedLanguage,
@@ -694,14 +681,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
           <View>
             <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2"
+              style={[getTextStyle(selectedLanguage)]}
+              className="text-gray-500 mb-2 text-base"
             >
               {t("Profile.Province")}
             </Text>
             <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4]"
-              style={{ height: 50, fontSize: 16 }}
+              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
               value={getTranslatedProvince(
                 profileData.province,
                 selectedLanguage,
@@ -715,13 +701,9 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               newPhoneNumber2 !== profileData.phoneNumber2) && (
               <TouchableOpacity
                 onPress={handleUpdatePhoneNumber}
-                className="bg-[#000000] rounded-3xl mb-4"
-                style={{ height: 50 }}
+                className="bg-black rounded-3xl mb-4 h-[50px] items-center justify-center"
               >
-                <Text
-                  style={{ fontSize: 18 }}
-                  className="text-center text-white font-semibold"
-                >
+                <Text className="text-center text-white font-semibold text-lg">
                   {t("Profile.Update")}
                 </Text>
               </TouchableOpacity>

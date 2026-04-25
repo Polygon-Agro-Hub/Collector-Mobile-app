@@ -11,7 +11,7 @@ import {
   Animated,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
