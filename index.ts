@@ -2,6 +2,7 @@ import { registerRootComponent } from 'expo';
 
 import './global.css';
 import App from './app/App';
+import './global.css';
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,
