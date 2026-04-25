@@ -258,7 +258,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
     >
       {/* Profile Section - at the top */}
       <TouchableOpacity
-        className="flex-row items-center p-4 mt-10"
+        className="flex-row items-center p-4 "
         onPress={() => navigation.navigate("SideMenu")}
       >
         <Image

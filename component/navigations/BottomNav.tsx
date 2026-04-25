@@ -16,9 +16,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const userRole = useSelector((state: RootState) => state.auth.jobRole);
 
-  // ---------------------------
   // Keyboard handling
-  // ---------------------------
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
     const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
@@ -29,9 +27,8 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     };
   }, []);
 
-  // ---------------------------
+
   // Role-based tabs (stable)
-  // ---------------------------
   const tabs = useMemo(() => {
     switch (userRole) {
       case "Collection Centre Manager":
@@ -65,9 +62,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     }
   }, [userRole]);
 
-  // ---------------------------
   // current tab normalization
-  // ---------------------------
   let currentTabName = state?.routes?.[state.index]?.name;
 
   if (currentTabName === "PriceChart") currentTabName = "SearchPriceScreen";
@@ -85,9 +80,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     currentTabName = "DistributionOfficersList";
   }
 
-  // ---------------------------
-  // Claim status check (SAFE)
-  // ---------------------------
+  // Claim status check 
   useEffect(() => {
     const checkClaimStatus = async () => {
       try {
@@ -115,40 +108,34 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
       checkClaimStatus();
     }
   }, [userRole]);
+  -
+    // AppState handling 
+    useEffect(() => {
+      const subscription = AppState.addEventListener("change", async (nextAppState) => {
+        if (nextAppState === "background") {
+          setTimeout(async () => {
+            try {
+              const currentState = AppState.currentState;
 
-  // ---------------------------
-  // AppState handling (FIXED LEAK)
-  // ---------------------------
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", async (nextAppState) => {
-      if (nextAppState === "background") {
-        setTimeout(async () => {
-          try {
-            const currentState = AppState.currentState;
-
-            if (currentState === "background" || currentState === "inactive") {
-              await AsyncStorage.removeItem("token");
-              await AsyncStorage.removeItem("empid");
-              navigation?.navigate?.("Login");
+              if (currentState === "background" || currentState === "inactive") {
+                await AsyncStorage.removeItem("token");
+                await AsyncStorage.removeItem("empid");
+                navigation?.navigate?.("Login");
+              }
+            } catch (error) {
+              console.log("AppState error:", error);
             }
-          } catch (error) {
-            console.log("AppState error:", error);
-          }
-        }, 3000);
-      }
-    });
+          }, 3000);
+        }
+      });
 
-    return () => subscription.remove();
-  }, []);
+      return () => subscription.remove();
+    }, []);
 
-  // ---------------------------
   // Hide conditions
-  // ---------------------------
   if (isKeyboardVisible || userRole === "Distribution Officer") return null;
 
-  // ---------------------------
   // UI
-  // ---------------------------
   return (
     <View className="bg-white">
       <View className="absolute bottom-0 flex-row justify-between items-center bg-white py-3 px-6 rounded-t-3xl w-full border-t border-r border-l border-[#00000040] shadow-md">

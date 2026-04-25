@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   Keyboard,
+  SafeAreaView,
+  Platform,
 } from "react-native";
 import {
   widthPercentageToDP as wp,
@@ -23,12 +25,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 
-const { width: screenWidth } = Dimensions.get("window");
-
-type RootStackParamList = {
-  OtpVerification: undefined;
-  NextScreen: undefined;
-};
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 interface userItem {
   firstName: string;
@@ -73,17 +70,18 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 justify-center items-center bg-black/50">
-        <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
+        <View className="bg-white p-6 rounded-2xl items-center w-80 h-96 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {t("Otpverification.Success")}
           </Text>
 
           <Image
             source={require("../../assets/images/collection-common/otpsuccess.webp")}
-            style={{ width: 100, height: 100 }}
+            style={{ width: wp(20), height: wp(20), marginVertical: hp(2) }}
+            resizeMode="contain"
           />
 
-          <Text className="text-gray-500 mb-4">
+          <Text className="text-gray-500 mb-6 text-center">
             {t("Otpverification.Registration")}
           </Text>
 
@@ -409,15 +407,31 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
-  const dynamicStyles = {
-    imageWidth: screenWidth < 400 ? wp(28) : wp(35),
-    imageHeight: screenWidth < 400 ? wp(28) : wp(28),
-    margingTopForImage: screenWidth < 400 ? wp(1) : wp(16),
-    margingTopForBtn: screenWidth < 400 ? wp(0) : wp(10),
+  // Responsive sizing based on screen dimensions
+  const getResponsiveStyles = () => {
+    const isSmallDevice = screenWidth < 380;
+    const isTablet = screenWidth >= 768;
+
+    return {
+      imageWidth: isTablet ? wp(45) : isSmallDevice ? wp(60) : wp(50),
+      imageHeight: isTablet ? hp(25) : isSmallDevice ? hp(20) : hp(22),
+      imageMarginTop: isTablet ? hp(4) : isSmallDevice ? hp(2) : hp(3),
+      otpInputSize: isTablet ? wp(8) : isSmallDevice ? wp(12) : wp(14),
+      otpInputTextSize: isTablet ? wp(4) : isSmallDevice ? wp(5) : wp(6),
+      titleFontSize: isTablet ? wp(5) : isSmallDevice ? wp(5.5) : wp(6),
+      phoneFontSize: isTablet ? wp(3.5) : isSmallDevice ? wp(4) : wp(4.5),
+      buttonWidth: (isTablet ? "50%" : "70%") as any,
+      buttonHeight: isTablet ? hp(7) : hp(6),
+      buttonBorderRadius: isTablet ? wp(5) : wp(10),
+      containerPaddingHorizontal: isTablet ? wp(8) : wp(5),
+      verticalSpacing: isTablet ? hp(3) : hp(2),
+    };
   };
 
+  const styles = getResponsiveStyles();
+
   return (
-    <ScrollView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <CustomHeader
         title={t("")}
         showBackButton={true}
@@ -425,104 +439,150 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         onBackPress={() => navigation.goBack()}
       />
 
-      <View
-        className="flex justify-center items-center"
-        style={{
-          marginTop: dynamicStyles.margingTopForImage,
-          paddingHorizontal: wp(4),
-          paddingVertical: hp(2),
+      <ScrollView
+        className="flex-1 bg-white"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: Platform.OS === 'ios' ? hp(4) : hp(3),
         }}
       >
-        <Image
-          source={require("../../assets/images/collection-common/opt.webp")}
+        <View
+          className="flex-1 justify-center items-center"
           style={{
-            width: dynamicStyles.imageWidth,
-            height: dynamicStyles.imageHeight,
+            paddingHorizontal: styles.containerPaddingHorizontal,
+            paddingTop: styles.imageMarginTop,
           }}
-        />
-
-        <View className="">
-          <Text className="mt-3 text-lg text-black text-center font-bold">
-            {t("Otpverification.EnterCode")}
-          </Text>
-        </View>
-
-        {language === "en" ? (
-          <View className="mt-5">
-            <Text className="text-md text-[#0085FF] text-center pt-1 ">
-              {phoneNumber}
-            </Text>
-          </View>
-        ) : (
-          <View className="mt-5">
-            <Text className="text-md text-[#0085FF] text-center ">
-              {phoneNumber}
-            </Text>
-          </View>
-        )}
-
-        <View className="flex-row justify-center gap-3 mt-4 px-4">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <TextInput
-              key={index}
-              ref={(el: TextInput | null) => {
-                inputRefs.current[index] = el;
-              }}
-              className={`w-12 h-12 text-lg text-center rounded-lg ${otpCode[index]
-                ? "bg-[#FFFFFF] text-black pb-2"
-                : "bg-[#FFFFFF] text-black"
-                }`}
-              keyboardType="numeric"
-              maxLength={1}
-              value={otpCode[index] || ""}
-              onChangeText={(text) => handleOtpChange(text, index)}
-              placeholder={maskedCode[index] || "_"}
-              placeholderTextColor="lightgray"
+        >
+          {/* Image Section */}
+          <View style={{ marginBottom: styles.verticalSpacing }}>
+            <Image
+              source={require("../../assets/images/collection-common/opt.webp")}
               style={{
-                borderColor: "#FFC738",
-                borderWidth: 2,
+                width: styles.imageWidth,
+                height: styles.imageHeight,
               }}
+              resizeMode="contain"
             />
-          ))}
-        </View>
+          </View>
 
-        <View className="mt-5">
-          <Text className="text-md text-[#707070] pt-1">
-            {t("Otpverification.Didreceive")}
-          </Text>
-        </View>
-
-        <View className="mt-1 mb-9">
-          <Text
-            className="mt-3 text-lg text-black text-center underline"
-            onPress={disabledResend ? undefined : handleResendOTP}
-            style={{ color: disabledResend ? "gray" : "black" }}
-          >
-            {timer > 0
-              ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
-              : `${t("Otpverification.Resend again")}`}
-          </Text>
-        </View>
-
-        <ShowSuccessModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-        />
-
-        <View className="w-full px-4" style={{ marginTop: dynamicStyles.margingTopForBtn }}>
-          <TouchableOpacity
-            className={`w-full h-[50px] items-center justify-center rounded-3xl ${!isOtpValid || isVerified ? "bg-gray-400" : "bg-black"
-              }`}
-            onPress={handleVerify}
-            disabled={!isOtpValid || isVerified}
-          >
-            <Text className="text-white text-lg">
-              {t("Otpverification.Verify")}
+          {/* Title Section */}
+          <View style={{ marginBottom: styles.verticalSpacing }}>
+            <Text
+              className="text-black text-center font-bold"
+              style={{ fontSize: styles.titleFontSize }}
+            >
+              {t("Otpverification.EnterCode")}
             </Text>
-          </TouchableOpacity>
+          </View>
+
+          {/* Phone Number Section */}
+          <View style={{ marginBottom: styles.verticalSpacing }}>
+            <Text
+              className="text-[#0085FF] text-center"
+              style={{ fontSize: styles.phoneFontSize }}
+            >
+              {phoneNumber}
+            </Text>
+          </View>
+
+          {/* OTP Input Section */}
+          <View
+            className="flex-row justify-center"
+            style={{
+              gap: wp(3),
+              marginBottom: styles.verticalSpacing,
+              paddingHorizontal: wp(2),
+            }}
+          >
+            {Array.from({ length: 5 }).map((_, index) => (
+              <TextInput
+                key={index}
+                ref={(el: TextInput | null) => {
+                  inputRefs.current[index] = el;
+                }}
+                style={{
+                  width: styles.otpInputSize,
+                  height: styles.otpInputSize,
+                  fontSize: styles.otpInputTextSize,
+                  textAlign: "center",
+                  borderRadius: wp(3),
+                  borderColor: "#FFC738",
+                  borderWidth: 2,
+                  backgroundColor: "#FFFFFF",
+                  color: otpCode[index] ? "#000000" : "#000000",
+                }}
+                keyboardType="numeric"
+                maxLength={1}
+                value={otpCode[index] || ""}
+                onChangeText={(text) => handleOtpChange(text, index)}
+                placeholder={maskedCode[index] || "_"}
+                placeholderTextColor="lightgray"
+              />
+            ))}
+          </View>
+
+          {/* Resend Instructions */}
+          <View style={{ marginBottom: styles.verticalSpacing / 2 }}>
+            <Text
+              className="text-md text-[#707070] text-center"
+              style={{ fontSize: wp(3.5) }}
+            >
+              {t("Otpverification.Didreceive")}
+            </Text>
+          </View>
+
+          {/* Resend Button/Timer */}
+          <View style={{ marginBottom: styles.verticalSpacing * 2 }}>
+            <Text
+              className="text-center underline"
+              onPress={disabledResend ? undefined : handleResendOTP}
+              style={{
+                fontSize: wp(4),
+                color: disabledResend ? "#9CA3AF" : "#000000",
+                fontWeight: "600",
+              }}
+            >
+              {timer > 0
+                ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
+                : `${t("Otpverification.Resend again")}`}
+            </Text>
+          </View>
+
+          {/* Verify Button */}
+          <View
+            className="w-full items-center"
+            style={{ marginBottom: hp(2) }}
+          >
+            <TouchableOpacity
+              style={{
+                width: styles.buttonWidth,
+                height: styles.buttonHeight,
+                backgroundColor: !isOtpValid || isVerified ? "#9CA3AF" : "#000000",
+                borderRadius: styles.buttonBorderRadius,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={handleVerify}
+              disabled={!isOtpValid || isVerified}
+              activeOpacity={0.8}
+            >
+              <Text
+                className="text-white font-semibold"
+                style={{ fontSize: styles.phoneFontSize }}
+              >
+                {t("Otpverification.Verify")}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      <ShowSuccessModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+    </SafeAreaView>
   );
 };
 

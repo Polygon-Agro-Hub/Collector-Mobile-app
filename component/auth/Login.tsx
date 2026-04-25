@@ -19,7 +19,6 @@ import { ScrollView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import LottieView from "lottie-react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "../../store/authSlice";
 import { useDispatch } from "react-redux";
@@ -376,88 +375,79 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             <Text>{t("SignIn.SigntoLogin")}</Text>
           </View>
 
-          {loading ? (
-            <View className="flex-1 justify-center items-center">
-              <LottieView
-                source={require("../../assets/lottie/loading.json")}
-                autoPlay
-                loop
-                style={{ width: 150, height: 150 }}
+
+          <View className="px-4 py-6">
+            <Text className="text-base pb-[2%] font-light">
+              {t("SignIn.Employee")}
+            </Text>
+            <View
+              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
+                }`}
+            >
+              <Image
+                source={user}
+                className="w-6 h-6"
+                resizeMode="contain"
+              />
+              <TextInput
+                className="flex-1 text-base pl-2"
+                onChangeText={handleEmpIdChange}
+                autoCapitalize="characters"
+                value={empid}
               />
             </View>
-          ) : (
-            <View className="px-4 py-6">
-              <Text className="text-base pb-[2%] font-light">
-                {t("SignIn.Employee")}
-              </Text>
-              <View
-                className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
-                  }`}
-              >
-                <Image
-                  source={user}
-                  className="w-6 h-6"
-                  resizeMode="contain"
-                />
-                <TextInput
-                  className="flex-1 text-base pl-2"
-                  onChangeText={handleEmpIdChange}
-                  autoCapitalize="characters"
-                  value={empid}
-                />
+
+            {empIdError ? (
+              <View className="mb-4">
+                <Text className="text-red-500 text-sm pl-3">
+                  {empIdError}
+                </Text>
               </View>
+            ) : (
+              <View className="mb-6" />
+            )}
 
-              {empIdError ? (
-                <View className="mb-4">
-                  <Text className="text-red-500 text-sm pl-3">
-                    {empIdError}
-                  </Text>
-                </View>
-              ) : (
-                <View className="mb-6" />
-              )}
-
-              <Text className="text-base pb-[2%] font-light">
-                {t("SignIn.Password")}
-              </Text>
-              <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
-                <Image
-                  source={passwordicon}
-                  className="w-6 h-6"
-                  resizeMode="contain"
-                />
-                <TextInput
-                  className="flex-1 text-base pl-2"
-                  secureTextEntry={secureTextEntry}
-                  onChangeText={handlePasswordChange}
-                  value={password}
-                />
-                <TouchableOpacity
-                  onPress={() => setSecureTextEntry(!secureTextEntry)}
-                >
-                  <Icon
-                    name={secureTextEntry ? "eye-off-outline" : "eye-outline"}
-                    size={24}
-                    color="black"
-                  />
-                </TouchableOpacity>
-              </View>
-
+            <Text className="text-base pb-[2%] font-light">
+              {t("SignIn.Password")}
+            </Text>
+            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
+              <Image
+                source={passwordicon}
+                className="w-6 h-6"
+                resizeMode="contain"
+              />
+              <TextInput
+                className="flex-1 text-base pl-2"
+                secureTextEntry={secureTextEntry}
+                onChangeText={handlePasswordChange}
+                value={password}
+              />
               <TouchableOpacity
-                className="bg-black w-full rounded-3xl shadow-2xl items-center justify-center mb-[20%] h-[50px]"
-                onPress={handleLogin}
-                disabled={loading}
+                onPress={() => setSecureTextEntry(!secureTextEntry)}
               >
-                {loading ? (
-                  <ActivityIndicator color="white" size="small" />
-                ) : (
-                  <Text className="text-center font-light text-white text-lg">
-                    {t("SignIn.Sign")}
-                  </Text>
-                )}
+                <Icon
+                  name={secureTextEntry ? "eye-off-outline" : "eye-outline"}
+                  size={24}
+                  color="black"
+                />
               </TouchableOpacity>
             </View>
-          )}
+
+            <TouchableOpacity
+              className="bg-black w-full rounded-3xl shadow-2xl items-center justify-center mb-[20%] h-[50px]"
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text className="text-center font-light text-white text-lg">
+                  {t("SignIn.Sign")}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

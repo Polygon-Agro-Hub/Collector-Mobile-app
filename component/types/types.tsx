@@ -13,14 +13,12 @@ export type RootStackParamList = {
   Lanuage: undefined;
   SinDashboard: undefined;
   SinUfarmercropdetails: undefined;
-  SinUnregisteredFarmerDetails: undefined;
   SinRegisteredfarmer: undefined;
   TamChangePassword: undefined;
   TamLogin: undefined;
   TamDashboard: undefined;
   TamRegisteredfarmer: undefined;
   TamUfarmercropdetails: undefined;
-  TamUnregisteredFarmerDetails: undefined;
   TransportComponent: undefined;
   SinProfile: undefined;
   OfficerQr: undefined;
@@ -353,7 +351,7 @@ export type RootStackParamList = {
     status: string;
     creatAt: string;
   };
-  NotEligibleScreen:undefined
+  NotEligibleScreen: undefined
 };
 
 export interface OrderItem {

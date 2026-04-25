@@ -307,7 +307,6 @@ ${signature}${replyTime}`,
       );
       setComplains(res.data);
     } catch (err) {
-      // Alert.alert(t("ReportHistory.sorry"), t("ReportHistory.noData"));
     } finally {
       setLoading(false);
     }
@@ -476,9 +475,9 @@ ${signature}${replyTime}`,
                 </ScrollView>
               </View>
 
-              <View className="mt-auto" style={{ paddingBottom: 20 }}>
+              <View className="mt-auto">
                 <TouchableOpacity
-                  className="bg-black py-4 rounded-lg items-center"
+                  className="bg-black py-4 rounded-3xl items-center"
                   onPress={() => setModalVisible(false)}
                 >
                   <Text className="text-white text-lg">

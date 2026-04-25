@@ -77,7 +77,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
         Alert.alert(
           t("Permission.permissionDenied") || "Permission Denied",
           t("Permission.enableCameraManually") ||
-            "Camera access is required. Please enable it in settings.",
+          "Camera access is required. Please enable it in settings.",
           [
             { text: t("PublicForum.Cancel") || "Cancel", style: "cancel" },
             {
@@ -127,27 +127,18 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
 
           {/* Allow Button */}
           <View className="mt-20 w-full items-center">
-            <View
-              className="w-2/3 rounded-full"
-              style={{
-                shadowColor: "#009570",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 8,
-                backgroundColor: "transparent",
-              }}
-            >
+            <View className="w-2/3">
               <TouchableOpacity
                 onPress={requestCameraPermission}
                 disabled={isLoading}
                 activeOpacity={0.8}
+                className="rounded-full overflow-hidden"
               >
                 <LinearGradient
                   colors={["#EE8D5F", "#B31A51"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
-                  className="w-full rounded-full h-14 justify-center items-center"
+                  className="h-[50px] justify-center items-center"
                 >
                   <Text className="text-white font-semibold text-center text-lg">
                     {isLoading

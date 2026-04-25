@@ -208,24 +208,24 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
           {/* Actions */}
           <View className="flex-row w-full px-12 pb-8 gap-3">
             <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center flex-1 py-3"
+              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
               onPress={downloadQRCode}
             >
-              <View className="flex-row items-center justify-center">
-                <MaterialIcons name="download" size={20} color="white" />
-                <Text className="text-white ml-2 text-base">
+              <View className="flex-col items-center justify-center gap-2">
+                <MaterialIcons name="download" size={24} color="white" />
+                <Text className="text-white text-base">
                   {t("OfficerQr.Download")}
                 </Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center flex-1 py-3"
+              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
               onPress={shareQRCode}
             >
-              <View className="flex-row items-center justify-center">
-                <MaterialIcons name="share" size={20} color="white" />
-                <Text className="text-white ml-2 text-base">
+              <View className="flex-col items-center justify-center gap-2">
+                <MaterialIcons name="share" size={24} color="white" />
+                <Text className="text-white text-base">
                   {t("OfficerQr.Share")}
                 </Text>
               </View>

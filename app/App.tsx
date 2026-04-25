@@ -1,33 +1,32 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  Alert,
-  Text,
-  TextInput,
-  StatusBar,
-} from "react-native";
+import { Alert, Text, TextInput, StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { AppState } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../services/reducxStore";
+import { Provider } from "react-redux";
+import { environment } from "../environment/environment";
+import { LanguageProvider } from "@/context/LanguageContext";
+import { LogBox } from "react-native";
 import {
   SafeAreaProvider,
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import NetInfo from "@react-native-community/netinfo";
 import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
+import NetInfo from "@react-native-community/netinfo";
 import Login from "@/component/auth/Login";
-import { useFocusEffect } from "@react-navigation/native";
-import { LanguageProvider } from "@/context/LanguageContext";
-import { LogBox } from "react-native";
 import ChangePassword from "@/component/auth/ChangePassword";
 import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
 import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails";
 import CollectionOfficerDashboard from "@/component/collection-officer/CollectionOfficerDashboard";
 import QRScanner from "@/component/collection-common/QRScanner";
 import FormScreen from "@/component/collection-common/FormScreen";
-import UnregisteredFarmerDetails from "@/component/farmer/UnregisteredFarmerDetails";
+import UnregisteredFarmerDetails from "@/component/farmer/UnregisteredFarmerForm";
 import UnregisteredCropDetails from "@/component/collection-common/UnregisteredCropDetails";
 import SearchFarmer from "@/component/farmer/SearchFarmer";
 import FarmerQr from "@/component/farmer/FarmerQr";
@@ -57,12 +56,10 @@ import DailyTargetListForOfficers from "@/component/collection-manager/DailyTarg
 import EditTargetManager from "@/component/collection-manager/EditTargetManager";
 import RecieveTargetBetweenOfficers from "@/component/collection-manager/RecieveTargetBetweenOfficers";
 import PassTargetBetweenOfficers from "@/component/collection-manager/PassTargetBetweenOfficers";
-import OTPE from "@/component/collection-common/Otpverification";
-import { AppState } from "react-native";
+import OTPE from "@/component/farmer/FarmerOTPVerification";
 import ManagerDashboard from "@/component/collection-manager/ManagerDashboard";
 import CenterTarget from "@/component/collection-manager/CenterTarget";
 import ManagerTransactions from "@/component/collection-manager/ManagerTransactions";
-import { environment } from "../environment/environment";
 import RegisterDriver from "@/component/driver-screens/RegisterDriver";
 import AddDriverAddressDetails from "@/component/driver-screens/AddDriverAddressDetails";
 import AddVehicleDetails from "@/component/driver-screens/AddVehicleDetails";
@@ -89,10 +86,7 @@ import DistributionOfficerSummary from "@/component/disribution-manger/Distribut
 import ReplaceRequestsScreen from "@/component/disribution-manger/ReplaceRequestsScreen";
 import DailyTargetListOfficerDistribution from "@/component/disribution-manger/DailyTargetListOfficerDistribution";
 import PassTarget from "@/component/disribution-manger/PassTarget";
-import { Provider } from "react-redux";
 import store from "@/services/reducxStore";
-import { useSelector } from "react-redux";
-import { RootState } from "../services/reducxStore";
 import ReplaceRequestsApprove from "@/component/disribution-manger/ReplaceRequestsApprove";
 import DistributionOfficerReport from "@/component/disribution-manger/DistributionOfficerReport";
 import ReadytoPickupOrders from "@/component/distribution-common/ReadytoPickupOrders";
@@ -111,7 +105,6 @@ import OfficerQr from "@/component/auth/OfficerQrCode";
 import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
-import CameraAccess from "@/component/permission/CameraAccess";
 
 LogBox.ignoreAllLogs(true);
 (Text as any).defaultProps = {
@@ -132,25 +125,17 @@ function MainTabNavigator() {
   const jobRole = useSelector((state: RootState) => state.auth.jobRole);
 
   useEffect(() => {
-    // Set the first tab based on user role
     if (
       jobRole === "Distribution Officer" ||
       jobRole === "Distribution Centre Manager"
     ) {
-      setInitialTab("DistridutionaDashboard"); // Set the first tab for Distribution Manager/Officer
+      setInitialTab("DistridutionaDashboard");
     } else if (jobRole === "Collection Officer") {
-      setInitialTab("CollectionOfficerDashboard"); // Set the first tab for Collection Officer
+      setInitialTab("CollectionOfficerDashboard");
     } else {
-      setInitialTab("ManagerDashboard"); // Set the first tab for other roles like Manager
+      setInitialTab("ManagerDashboard");
     }
   }, [jobRole]);
-
-  useFocusEffect(
-    useCallback(() => {
-      console.log("Job roll hgi");
-      return () => { };
-    }, []),
-  );
 
   return (
     <Tab.Navigator
@@ -162,15 +147,28 @@ function MainTabNavigator() {
       })}
       tabBar={(props) => <BottomNav {...props} />}
     >
-      <Tab.Screen name="CollectionOfficerDashboard" component={CollectionOfficerDashboard} />
-      <Tab.Screen
-        name="DistridutionaDashboard"
-        component={DistridutionaDashboard as any}
-      />
       <Tab.Screen name="ManagerDashboard" component={ManagerDashboard as any} />
       <Tab.Screen name="SearchPriceScreen" component={SearchPriceScreen} />
       <Tab.Screen name="QRScanner" component={QRScanner} />
       <Tab.Screen name="PriceChart" component={PriceChart as any} />
+      <Tab.Screen name="SearchFarmer" component={SearchFarmer} />
+      <Tab.Screen name="DailyTargetList" component={DailyTargetList} />
+      <Tab.Screen name="DailyTarget" component={DailyTarget as any} />
+      <Tab.Screen name="PassTargetScreen" component={PassTargetScreen as any} />
+      <Tab.Screen name="ComplainHistory" component={ComplainHistory} />
+      <Tab.Screen name="TransactionList" component={TransactionList as any} />
+      <Tab.Screen name="OfficerSummary" component={OfficerSummary as any} />
+      <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
+      <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
+      <Tab.Screen name="ReportGenerator" component={ReportGenerator as any} />
+      <Tab.Screen
+        name="CollectionOfficerDashboard"
+        component={CollectionOfficerDashboard}
+      />
+      <Tab.Screen
+        name="DistridutionaDashboard"
+        component={DistridutionaDashboard as any}
+      />
       <Tab.Screen
         name="PriceChartManager"
         component={PriceChartManager as any}
@@ -179,34 +177,22 @@ function MainTabNavigator() {
         name="UnregisteredCropDetails"
         component={UnregisteredCropDetails as any}
       />
-      <Tab.Screen name="SearchFarmer" component={SearchFarmer} />
-
-      {/* changed here stack to tab */}
-      <Tab.Screen name="DailyTargetList" component={DailyTargetList} />
       <Tab.Screen
         name="CollectionOfficersList"
         component={CollectionOfficersList}
       />
-      <Tab.Screen name="DailyTarget" component={DailyTarget as any} />
-      <Tab.Screen name="PassTargetScreen" component={PassTargetScreen as any} />
       <Tab.Screen
         name="RecieveTargetScreen"
         component={RecieveTargetScreen as any}
       />
-      <Tab.Screen name="ComplainHistory" component={ComplainHistory} />
       <Tab.Screen
         name="EditTargetManager"
         component={EditTargetManager as any}
       />
-
-      <Tab.Screen name="TransactionList" component={TransactionList as any} />
       <Tab.Screen
         name="ReadytoPickupOrders"
         component={ReadytoPickupOrders as any}
       />
-      <Tab.Screen name="OfficerSummary" component={OfficerSummary as any} />
-      <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
-      <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
       <Tab.Screen
         name="ReceivedCashOfficer"
         component={ReceivedCashOfficer as any}
@@ -215,7 +201,7 @@ function MainTabNavigator() {
         name="TargetOrderScreen"
         component={TargetOrderScreen as any}
       />
-      <Tab.Screen name="ReportGenerator" component={ReportGenerator as any} />
+
       <Tab.Screen
         name="DistributionOfficersList"
         component={DistributionOfficersList}
@@ -232,7 +218,6 @@ function MainTabNavigator() {
         name="ReplaceRequestsScreen"
         component={ReplaceRequestsScreen as any}
       />
-
     </Tab.Navigator>
   );
 }
@@ -248,7 +233,7 @@ function AppContent() {
   useEffect(() => {
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (!state.isConnected && !isOfflineAlertShown) {
-        setIsOfflineAlertShown(true); // mark that alert is shown
+        setIsOfflineAlertShown(true);
         Alert.alert(
           t("Main.No Internet Connection"),
           t("Main.Please turn on mobile data or Wi-Fi to continue."),
@@ -256,7 +241,6 @@ function AppContent() {
             {
               text: "OK",
               onPress: () => {
-                // Reset flag after user presses OK
                 setIsOfflineAlertShown(false);
               },
             },
@@ -269,9 +253,9 @@ function AppContent() {
       unsubscribeNetInfo();
     };
   }, [isOfflineAlertShown]);
+
   const onlineStatus = async () => {
     AppState.addEventListener("change", async (nextAppState) => {
-      console.log("App state changed toooolllllll:", nextAppState);
       const storedEmpId = await AsyncStorage.getItem("empid");
 
       if (nextAppState === "active") {
@@ -279,13 +263,13 @@ function AppContent() {
           await status(storedEmpId, true);
         }
       } else if (nextAppState === "background") {
-        console.log("App went to background, disconnecting socketssssss");
         if (storedEmpId) {
           await status(storedEmpId, false);
         }
       }
     });
   };
+
   const status = async (empId: string, status: boolean) => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -294,7 +278,7 @@ function AppContent() {
         return;
       }
 
-      const response = await fetch(
+      await fetch(
         `${environment.API_BASE_URL}api/collection-officer/online-status`,
         {
           method: "POST",
@@ -333,6 +317,25 @@ function AppContent() {
           >
             <Stack.Screen name="Splash" component={Splash} />
             <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="FormScreen" component={FormScreen} />
+            <Stack.Screen name="Lanuage" component={Lanuage} />
+            <Stack.Screen name="FarmerQr" component={FarmerQr} />
+            <Stack.Screen name="OfficerQr" component={OfficerQr} />
+            <Stack.Screen name="ComplainPage" component={ComplainPage} />
+            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="ReportPage" component={ReportPage} />
+            <Stack.Screen name="SideMenu" component={SideMenu} />
+            <Stack.Screen name="ClaimOfficer" component={ClaimOfficer} />
+            <Stack.Screen name="OTPE" component={OTPE} />
+            <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
+            <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
+            <Stack.Screen name="ViewScreen" component={ViewScreen as any} />
+            <Stack.Screen name="Cancelreson" component={Cancelreson as any} />
+            <Stack.Screen name="NewReport" component={NewReport as any} />
+            <Stack.Screen name="qrcode" component={Qrcode as any} />
+            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+            <Stack.Screen name="Timer" component={Timer as any} />
+            <Stack.Screen name="PassTarget" component={PassTarget as any} />
             <Stack.Screen
               name="ChangePassword"
               component={ChangePassword as any}
@@ -345,17 +348,10 @@ function AppContent() {
               name="Ufarmercropdetails"
               component={Ufarmercropdetails}
             />
-            <Stack.Screen name="FormScreen" component={FormScreen} />
             <Stack.Screen
               name="UnregisteredFarmerDetails"
               component={UnregisteredFarmerDetails}
             />
-            <Stack.Screen name="Lanuage" component={Lanuage} />
-            <Stack.Screen name="FarmerQr" component={FarmerQr} />
-            <Stack.Screen name="OfficerQr" component={OfficerQr} />
-            <Stack.Screen name="ComplainPage" component={ComplainPage} />
-            <Stack.Screen name="Profile" component={Profile} />
-            <Stack.Screen name="ReportPage" component={ReportPage} />
             <Stack.Screen
               name="AddOfficerBasicDetails"
               component={AddOfficerBasicDetails as any}
@@ -364,10 +360,6 @@ function AppContent() {
               name="AddOfficerAddressDetails"
               component={AddOfficerAddressDetails}
             />
-            <Stack.Screen name="SideMenu" component={SideMenu} />
-            <Stack.Screen name="ClaimOfficer" component={ClaimOfficer} />
-            <Stack.Screen name="OTPE" component={OTPE} />
-            <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
             <Stack.Screen
               name="ReceivedCashQrCode"
               component={ReceivedCashQrCode as any}
@@ -392,7 +384,6 @@ function AppContent() {
               name="RecieveTargetBetweenOfficers"
               component={RecieveTargetBetweenOfficers as any}
             />
-            <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
             <Stack.Screen
               name="ManagerTransactions"
               component={ManagerTransactions as any}
@@ -422,8 +413,6 @@ function AppContent() {
               name="CollectionRequests"
               component={CollectionRequests as any}
             />
-            <Stack.Screen name="ViewScreen" component={ViewScreen as any} />
-            <Stack.Screen name="Cancelreson" component={Cancelreson as any} />
             <Stack.Screen
               name="TransactionReport"
               component={TransactionReport as any}
@@ -444,8 +433,6 @@ function AppContent() {
               name="AddVehicleDetails"
               component={AddVehicleDetails as any}
             />
-            <Stack.Screen name="NewReport" component={NewReport as any} />
-            <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen
               name="DigitalSignature"
               component={DigitalSignature as any}
@@ -454,13 +441,10 @@ function AppContent() {
               name="otpBankDetailsupdate"
               component={otpBankDetailsupdate as any}
             />
-            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
             <Stack.Screen
               name="PendingOrderScreen"
               component={PendingOrderScreen as any}
             />
-
-            <Stack.Screen name="Timer" component={Timer as any} />
             <Stack.Screen
               name="TimerContainer"
               component={TimerContainer as any}
@@ -477,7 +461,6 @@ function AppContent() {
               name="DailyTargetListOfficerDistribution"
               component={DailyTargetListOfficerDistribution as any}
             />
-            <Stack.Screen name="PassTarget" component={PassTarget as any} />
             <Stack.Screen
               name="DistributionOfficerReport"
               component={DistributionOfficerReport as any}

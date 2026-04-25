@@ -51,15 +51,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
         setHasPermission(false);
         setShowCameraAccess(true);
       } else {
-        // undetermined - request permission directly or show camera access screen
-        const { status: requestedStatus } = await Camera.requestCameraPermissionsAsync();
-        if (requestedStatus === "granted") {
-          setHasPermission(true);
-          setShowCameraAccess(false);
-        } else {
-          setHasPermission(false);
-          setShowCameraAccess(true);
-        }
+        // undetermined - show camera access screen
+        setHasPermission(false);
+        setShowCameraAccess(true);
       }
     };
 

@@ -71,6 +71,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
       setShowMenu(false);
     }, []),
   );
+
   const getTextStyle = (language: string) => {
     if (language === "si") {
       return {
@@ -78,7 +79,9 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         lineHeight: 20,
       };
     }
+    return {};
   };
+
   const fetchOfficers = async () => {
     try {
       setLoading(true);
@@ -180,10 +183,17 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 bg-[#ADADAD1A] ${item.status === "Not Approved"
-          ? "border border-[#FF9797]"
-          : "border border-[#ADADAD1A]"
-        }`}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 16,
+        marginBottom: 16,
+        borderRadius: 24,
+        marginHorizontal: 16,
+        backgroundColor: "#ADADAD1A",
+        borderWidth: item.status === "Not Approved" ? 1 : 0,
+        borderColor: item.status === "Not Approved" ? "#FF9797" : "transparent",
+      }}
       onPress={() => {
         if (item.status !== "Not Approved") {
           navigation.navigate("OfficerSummary" as any, {
@@ -198,26 +208,50 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
       }}
       disabled={item.status === "Not Approved"}
     >
-      <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
+      <View
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          overflow: "hidden",
+          justifyContent: "center",
+          alignItems: "center",
+          marginRight: 16,
+        }}
+      >
         <Image
           source={
             item.image
               ? { uri: item.image }
               : require("../../assets/images/collection-manager/avetar.webp")
           }
-          className="w-16 h-16 rounded-full mr-3"
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+          }}
         />
       </View>
 
-      <View className="flex-1">
-        <Text className="text-[18px] font-semibold text-gray-900">
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 18, fontWeight: "600", color: "#111827" }}>
           {getOfficerName(item)}
         </Text>
-        <Text className="text-sm text-gray-500">EMP ID : {item.empId}</Text>
+        <Text style={{ fontSize: 14, color: "#6B7280" }}>
+          EMP ID : {item.empId}
+        </Text>
       </View>
 
       {item.status === "Not Approved" && (
-        <Text className="text-red-500 text-xs font-semibold mr-2 mt-[-12%]">
+        <Text
+          style={{
+            color: "#EF4444",
+            fontSize: 12,
+            fontWeight: "600",
+            marginRight: 8,
+            marginTop: -12,
+          }}
+        >
           {t("CollectionOfficersList.Not Approved")}
         </Text>
       )}
@@ -228,46 +262,62 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
     </TouchableOpacity>
   );
 
-  <TouchableOpacity
-    onPress={async () => {
-      try {
-        await AsyncStorage.removeItem("officerFormData");
-        navigation.navigate("AddOfficerBasicDetails" as any);
-      } catch (error) {
-        console.error("Error clearing form data:", error);
-      }
-    }}
-    className="absolute bottom-5 right-5 bg-black w-14 h-14 rounded-full justify-center items-center shadow-lg"
-  >
-    <Ionicons name="add" size={scale(24)} color="#fff" />
-  </TouchableOpacity>;
-
   return (
-    <View className="flex-1 bg-[#313131]">
-      <View className="bg-[#313131] py-6 px-4  relative">
+    <View style={{ flex: 1, backgroundColor: "#313131" }}>
+      <View
+        style={{
+          backgroundColor: "#313131",
+          paddingVertical: 24,
+          paddingHorizontal: 16,
+          position: "relative",
+        }}
+      >
         {showFilter && (
-          <View className="absolute z-40 flex-col top-14 left-6 bg-white shadow-lg rounded-lg">
+          <View
+            style={{
+              position: "absolute",
+              zIndex: 40,
+              flexDirection: "column",
+              top: 56,
+              left: 24,
+              backgroundColor: "white",
+              borderRadius: 8,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
+          >
             <TouchableOpacity
-              className={`px-4 py-2 bg-white rounded-lg  ${selectedJobRole === "Driver" ? "bg-gray-200" : ""
-                }`}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: selectedJobRole === "Driver" ? "#F3F4F6" : "white",
+                borderRadius: 8,
+              }}
               onPress={() => {
                 setSelectedJobRole("Driver");
                 setShowFilter(false);
               }}
             >
-              <Text className="text-gray-700 font-semibold">
+              <Text style={{ color: "#374151", fontWeight: "600" }}>
                 {t("CollectionOfficersList.Drivers")}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className={`px-4 py-2 bg-white rounded-lg  ${selectedJobRole === "Collection Officer" ? "bg-gray-200" : ""
-                }`}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: selectedJobRole === "Collection Officer" ? "#F3F4F6" : "white",
+                borderRadius: 8,
+              }}
               onPress={() => {
                 setSelectedJobRole("Collection Officer");
                 setShowFilter(false);
               }}
             >
-              <Text className="text-gray-700 font-semibold">
+              <Text style={{ color: "#374151", fontWeight: "600" }}>
                 {t("CollectionOfficersList.Collection Officers")}
               </Text>
             </TouchableOpacity>
@@ -275,14 +325,13 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         )}
 
         <Text
-          style={{ fontSize: 18 }}
-          className="text-white text-center font-bold"
+          style={{ fontSize: 18, color: "white", textAlign: "center", fontWeight: "bold" }}
         >
           {t("CollectionOfficersList.Collection Officers")}
         </Text>
 
         <TouchableOpacity
-          className="absolute top-6 right-4"
+          style={{ position: "absolute", top: 24, right: 16 }}
           onPress={() => {
             setShowMenu((prev) => !prev);
             setShowFilter(false);
@@ -293,8 +342,15 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
         {showMenu && (
           <View
-            className="absolute top-14 right-4 bg-white z-50 rounded-lg border border-[#00000040]"
             style={{
+              position: "absolute",
+              top: 56,
+              right: 16,
+              backgroundColor: "white",
+              zIndex: 50,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#00000040",
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.25,
@@ -303,10 +359,10 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             }}
           >
             <TouchableOpacity
-              className="px-4 py-2 bg-white rounded-lg"
+              style={{ paddingHorizontal: 16, paddingVertical: 8, backgroundColor: "white", borderRadius: 8 }}
               onPress={() => navigation.navigate("ClaimOfficer")}
             >
-              <Text className="text-gray-700 font-semibold">
+              <Text style={{ color: "#374151", fontWeight: "600" }}>
                 {t("CollectionOfficersList.Claim Officer")}
               </Text>
             </TouchableOpacity>
@@ -314,52 +370,52 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         )}
       </View>
 
-      <View className="flex-1 z-2 mt-3 rounded-t-2xl bg-white">
-        <View className="mt-4 px-4">
+      <View
+        style={{
+          flex: 1,
+          marginTop: 12,
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          backgroundColor: "white",
+        }}
+      >
+        <View style={{ marginTop: 16, paddingHorizontal: 16 }}>
           {selectedJobRole === "Collection Officer" ? (
-            <>
-              <Text
-                style={[
-                  { fontSize: scale(16) },
-                  getTextStyle(selectedLanguage),
-                ]}
-                className="font-bold text-[#21202B] mb-2"
-              >
-                {t("CollectionOfficersList.Officers List")}
-                <Text className="text-[#21202B] font-semibold">
-                  ({filteredOfficers.length})
-                </Text>
+            <Text
+              style={[
+                { fontSize: scale(16) },
+                getTextStyle(selectedLanguage),
+                { fontWeight: "bold", color: "#21202B", marginBottom: 8 },
+              ]}
+            >
+              {t("CollectionOfficersList.Officers List")}
+              <Text style={{ color: "#21202B", fontWeight: "600" }}>
+                ({filteredOfficers.length})
               </Text>
-            </>
+            </Text>
           ) : selectedJobRole === "Driver" ? (
-            <>
-              <Text
-                style={{ fontSize: scale(16) }}
-                className="font-bold text-[#21202B] mb-2"
-              >
-                {t("CollectionOfficersList.Drivers List")}
-                <Text className="text-[#21202B] font-semibold">
-                  ({filteredOfficers.length})
-                </Text>
+            <Text
+              style={{ fontSize: scale(16), fontWeight: "bold", color: "#21202B", marginBottom: 8 }}
+            >
+              {t("CollectionOfficersList.Drivers List")}
+              <Text style={{ color: "#21202B", fontWeight: "600" }}>
+                ({filteredOfficers.length})
               </Text>
-            </>
+            </Text>
           ) : (
-            <>
-              <Text
-                style={{ fontSize: 16 }}
-                className="font-bold text-[#21202B] mb-2"
-              >
-                {t("CollectionOfficersList.Officers / Drivers List")}
-                <Text className="text-[#21202B] font-normal">
-                  ({t("ManagerTransactions.All")} {officers.length})
-                </Text>
+            <Text
+              style={{ fontSize: 16, fontWeight: "bold", color: "#21202B", marginBottom: 8 }}
+            >
+              {t("CollectionOfficersList.Officers / Drivers List")}
+              <Text style={{ color: "#21202B", fontWeight: "normal" }}>
+                ({t("ManagerTransactions.All")} {officers.length})
               </Text>
-            </>
+            </Text>
           )}
         </View>
 
         {loading ? (
-          <View className="flex-1 justify-center items-center -mt-[25%]">
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: -50 }}>
             <LottieView
               source={require("../../assets/lottie/loading.json")}
               autoPlay
@@ -368,8 +424,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             />
           </View>
         ) : errorMessage ? (
-          <View className="flex-1 justify-center items-center">
-            <Text className="text-gray-500 text-lg">{errorMessage}</Text>
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Text style={{ color: "#6B7280", fontSize: 18 }}>{errorMessage}</Text>
           </View>
         ) : (
           <FlatList
@@ -384,8 +440,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor="#ADADAD1A"
-                colors={["#ADADAD1A"]}
+                tintColor="#ADADAD"
+                colors={["#ADADAD"]}
               />
             }
             showsVerticalScrollIndicator={true}
@@ -396,7 +452,6 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           onPress={async () => {
             try {
               await AsyncStorage.removeItem("officerFormData");
-
               navigation.navigate("AddOfficerBasicDetails", {
                 jobRolle: "Collection Officer",
               });
@@ -404,7 +459,22 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               console.error("Error clearing form data:", error);
             }
           }}
-          className="absolute bottom-20 right-5 bg-black w-14 h-14 rounded-full justify-center items-center shadow-lg"
+          style={{
+            position: "absolute",
+            bottom: 80,
+            right: 16,
+            backgroundColor: "black",
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            justifyContent: "center",
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5,
+          }}
         >
           <Ionicons name="add" size={scale(24)} color="#fff" />
         </TouchableOpacity>

@@ -21,6 +21,7 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import CameraAccess from "../permission/CameraAccess";
 
 type ReceivedCashQrCodeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -366,10 +367,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
   );
 
   useEffect(() => {
-    if (permission && !permission.granted && permission.canAskAgain) {
-      requestPermission();
-    }
-
     startScanAnimation();
 
     return () => {
@@ -708,26 +705,14 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
 
   if (!permission.granted) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center px-6">
-        <StatusBar barStyle="light-content" />
-        <View className="bg-red-500/20 p-6 rounded-full mb-6">
-          <Ionicons name="camera" size={wp(15)} color="#EF4444" />
-        </View>
-        <Text className="text-white text-2xl font-bold mb-3 text-center">
-          {t("qrcode.Camera Permission Required")}
-        </Text>
-        <Text className="text-gray-400 text-center mb-8 px-4">
-          {t("qrcode.Please grant camera permission to scan QR codes.")}
-        </Text>
-        <TouchableOpacity
-          className="bg-[black] py-4 px-12 rounded-xl"
-          onPress={requestPermission}
-        >
-          <Text className="text-black font-bold text-base">
-            {t("qrcode.Grant Permission")}
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+      <CameraAccess
+        navigation={navigation as any}
+        onPermissionGranted={() => {
+          // Force a re-request to update the useCameraPermissions hook state
+          requestPermission();
+        }}
+        returnScreen="ReceivedCashQrCode"
+      />
     );
   }
 

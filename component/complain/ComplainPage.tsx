@@ -207,15 +207,20 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 showBackButton={true}
                 navigation={navigation}
                 onBackPress={() => navigation.goBack()}
+                bgColor="#F6F6F6"
               />
 
-              <View className="flex-1 justify-center bg-white">
-                <View className="items-center bg-white">
+
+              <View className="flex-1 justify-center mx-auto bg-[#F6F6F6] px-4">
+                <View className="justify-center items-center bg-[#F6F6F6] px-4">
                   <Image
                     source={require("../../assets/images/complain/complain.webp")}
-                    className="w-36 h-36"
+                    className="w-48 h-48"
                     resizeMode="contain"
                   />
+                </View>
+
+                <View className="items-center bg-white rounded-3xl">
 
                   <View className="w-full items-center px-4 bg-white rounded-xl mt-10">
                     <View className="flex-row">

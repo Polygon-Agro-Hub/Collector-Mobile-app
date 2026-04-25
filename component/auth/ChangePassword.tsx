@@ -174,13 +174,15 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       enabled
       className="flex-1 bg-white"
     >
-      {passwordUpdate === 1 && (
+      {passwordUpdate === 1 ? (
         <CustomHeader
           title=""
           showBackButton={true}
           navigation={navigation}
           onBackPress={() => navigation.goBack()}
         />
+      ) : (
+        <View className="h-[70px]" />
       )}
       <ScrollView
         className="flex-1 bg-white"
