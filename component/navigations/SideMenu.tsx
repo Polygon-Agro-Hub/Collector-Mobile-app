@@ -1,15 +1,18 @@
-import React, { useState, useEffect, useContext } from "react";
-import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Alert,
+  BackHandler,
+} from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import { useRoute, useFocusEffect } from "@react-navigation/native";
@@ -64,6 +67,19 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const { changeLanguage } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+  const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -98,23 +114,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
 
   const route = useRoute();
   const currentScreen = route.name;
-  const handleBackPress = () => {
-    if (
-      (currentScreen === "EngProfile" &&
-        profile?.jobRole === "Distribution Officer") ||
-      profile?.jobRole === "Distribution Centre Manager"
-    ) {
-      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-    } else if (
-      (currentScreen === "EngProfile" &&
-        profile?.jobRole === "Collection Officer") ||
-      profile?.jobRole === "Collection Centre Manager"
-    ) {
-      navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-    } else {
-      navigation.goBack();
-    }
-  };
 
   const complaintOptions = [
     t("SideMenu.Report Complaint"),
@@ -163,7 +162,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     try {
       await AsyncStorage.setItem("@user_language", language);
       changeLanguage(language);
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const handleLanguageSelect = (language: string) => {
@@ -180,7 +179,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
         LanguageSelect("si");
         HanldeAsynStorage("si");
       }
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const handleLogout = async () => {
@@ -269,20 +268,52 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     }
   };
 
+  const handleBackPress = () => {
+    if (
+      currentScreen === "EngProfile" &&
+      (profile?.jobRole === "Distribution Officer" ||
+        profile?.jobRole === "Distribution Centre Manager")
+    ) {
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+    } else if (
+      currentScreen === "EngProfile" &&
+      profile?.jobRole === "Collection Officer"
+    ) {
+      navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
+    } else if (
+      currentScreen === "EngProfile" &&
+      profile?.jobRole === "Collection Centre Manager"
+    ) {
+      navigation.navigate("Main", { screen: "ManagerDashboard" });
+    } else {
+      navigation.goBack();
+    }
+    return true;
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation, jobRole, profile, currentScreen]),
+  );
+
   return (
     <View className="flex-1 bg-white ">
       <CustomHeader
         title=""
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => handleBackPress()}
+        onBackPress={handleBackPress}
       />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
-        <View className="flex-row items-center px-6 mb-4">
+        <View className="flex-row items-center px-8 mb-4">
           <Image
             source={
               profile?.image
@@ -311,7 +342,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <View className="flex-1 py-4 px-6 mt-[-30]">
+        <View className="flex-1 py-4 px-8 mt-[-30]">
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 
           <TouchableOpacity
@@ -323,7 +354,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
               {t("SideMenu.Language")}
             </Text>
             <MaterialIcons
-              name={isLanguageDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"}
+              name={
+                isLanguageDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"
+              }
               size={30}
               color="black"
             />
@@ -345,16 +378,18 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                   <TouchableOpacity
                     key={language}
                     onPress={() => handleLanguageSelect(language)}
-                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedLanguage === language
-                      ? "bg-[#FFDFF7]"
-                      : "bg-transparent"
-                      }`}
+                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
+                      selectedLanguage === language
+                        ? "bg-[#FFDFF7]"
+                        : "bg-transparent"
+                    }`}
                   >
                     <Text
-                      className={`text-base ${selectedLanguage === language
-                        ? "text-black"
-                        : "text-[#434343]"
-                        }`}
+                      className={`text-base ${
+                        selectedLanguage === language
+                          ? "text-black"
+                          : "text-[#434343]"
+                      }`}
                     >
                       {displayLanguage}
                     </Text>
@@ -419,7 +454,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
               {t("SideMenu.Complaints")}
             </Text>
             <MaterialIcons
-              name={isComplaintDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"}
+              name={
+                isComplaintDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"
+              }
               size={30}
               color="black"
             />
@@ -431,12 +468,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                 <TouchableOpacity
                   key={complaint}
                   onPress={() => handleComplaintSelect(complaint)}
-                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedComplaint === complaint ? "bg-green-200" : ""
-                    }`}
+                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
+                    selectedComplaint === complaint ? "bg-green-200" : ""
+                  }`}
                 >
                   <Text
-                    className={`text-base ${selectedComplaint === complaint ? "text-black" : "#434343"
-                      }`}
+                    className={`text-base ${
+                      selectedComplaint === complaint ? "text-black" : "#434343"
+                    }`}
                   >
                     {complaint}
                   </Text>

@@ -5,6 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -119,6 +120,21 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   useEffect(() => {
     fetchReplaceRequests();
   }, [fetchReplaceRequests]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   useFocusEffect(
     useCallback(() => {

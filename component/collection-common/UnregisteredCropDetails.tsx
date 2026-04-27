@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  BackHandler
 } from "react-native";
 import { Modal } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -659,6 +660,22 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }
   };
 
+    useFocusEffect(
+      useCallback(() => {
+        const handleBackPress = () => {
+          navigation.navigate("FarmerQr", { userId } as any);
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          handleBackPress,
+        );
+  
+        return () => subscription.remove();
+      }, [navigation]),
+    );
+
   const sendSMS = async (
     language: string | null,
     farmerPhone: number,
@@ -775,6 +792,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   ) => {
     setDeleteGradeModal({ visible: true, cropIndex, grade, varietyName });
   };
+  
 
   const handleDeleteGrade = () => {
     const { cropIndex, grade } = deleteGradeModal;
@@ -843,6 +861,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       setDeletingGrade(null);
     }, 1000);
   };
+
+  
 
   const selectedCropLabel = selectedCrop?.name || null;
   const selectedVarietyLabel = selectedVariety

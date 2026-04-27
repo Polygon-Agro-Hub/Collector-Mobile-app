@@ -321,7 +321,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       {renderTargetStatus()}
 
       <View className="flex items-center justify-center  mt-[5%]">
-        <View className="relative">
+        <View style={{ width: 100, height: 100 }}>
           <CircularProgress
             size={100}
             width={8}
@@ -329,8 +329,18 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
             tintColor="#000000"
             backgroundColor="#E5E7EB"
           />
-          <View className="absolute items-center justify-center h-24 w-24">
-            <Text className="text-2xl font-bold ml-3  mt-1">
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text className="text-2xl font-bold">
               {isLoadingTarget
                 ? "..."
                 : targetPercentage !== null

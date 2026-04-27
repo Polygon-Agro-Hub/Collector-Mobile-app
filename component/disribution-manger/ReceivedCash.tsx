@@ -8,6 +8,7 @@ import {
   Modal,
   Platform,
   Alert,
+  BackHandler,
 } from "react-native";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -210,13 +211,28 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
     setRefreshing(false);
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
       <View className="bg-white px-4 py-4 flex-row items-center ">
         <TouchableOpacity
           className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate("DistridutionaDashboard")}
         >
           <Entypo name="chevron-left" size={25} color="#000" />
         </TouchableOpacity>
@@ -303,7 +319,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
             {transactions.map((item) => (
               <View
                 key={item.id}
-                className="bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border border-[#738FAE] shadow-sm"
+                className="bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border border-[#738FAE] "
               >
                 <Text className="text-sm font-medium text-gray-900 mb-1">
                   {t("ReceivedCash.Order ID")} : {item.invoiceNo}

@@ -406,7 +406,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
 
           <View className="mt-6 mb-10 items-center">
             <TouchableOpacity
-              className="bg-black rounded-full w-64 py-3 h-12"
+              className="bg-black rounded-full w-64 py-3 h-[50px] justify-center"
               onPress={() =>
                 navigation.navigate("DailyTargetListOfficerDistribution", {
                   officerId,

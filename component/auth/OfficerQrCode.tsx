@@ -169,12 +169,12 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       >
         <View className="flex-1 justify-center">
           {/* QR Code Display */}
-          <View className="items-center mb-8">
+          <View className="items-center mb-8 mt-[-5%]">
             {QR ? (
               <View className="bg-white p-4 rounded-3xl border-2 border-[#FAE432]">
                 <Image
                   source={{ uri: QR }}
-                  className="w-[300px] h-[300px]"
+                  className="w-[270px] h-[270px]"
                   resizeMode="contain"
                 />
               </View>
@@ -206,10 +206,17 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
           </View>
 
           {/* Actions */}
-          <View className="flex-row w-full px-12 pb-8 gap-3">
+          <View className="flex-row w-full px-8 pb-8 gap-4">
             <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
+              className="bg-black rounded-lg items-center justify-center flex-1 py-3 h-[70px]"
               onPress={downloadQRCode}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
             >
               <View className="flex-col items-center justify-center gap-2">
                 <MaterialIcons name="download" size={24} color="white" />
@@ -220,8 +227,15 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
+              className="bg-black rounded-lg items-center justify-center flex-1 py-4 h-[70px] "
               onPress={shareQRCode}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
             >
               <View className="flex-col items-center justify-center gap-2">
                 <MaterialIcons name="share" size={24} color="white" />

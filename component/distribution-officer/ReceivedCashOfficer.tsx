@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  BackHandler,
 } from "react-native";
 import { Entypo, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -176,6 +177,21 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
     fetchReceivedCash();
   }, []);
 
+    useFocusEffect(
+        React.useCallback(() => {
+          const onBackPress = () => {
+            navigation.navigate("DistridutionaDashboard");
+            return true;
+          };
+    
+          const subscription = BackHandler.addEventListener(
+            "hardwareBackPress",
+            onBackPress,
+          );
+          return () => subscription.remove();
+        }, [navigation]),
+      );
+
   useFocusEffect(
     useCallback(() => {
       fetchReceivedCash();
@@ -244,7 +260,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         activeOpacity={0.7}
       >
         <View
-          className={`bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} shadow-sm`}
+          className={`bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} `}
         >
           <View className="flex-row items-start">
             {/* Checkbox */}
@@ -310,7 +326,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         title={t("ReceivedCash.Received Cash")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
       />
 
       {/* Filter Tabs */}
@@ -404,10 +420,10 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
       {/* Hand Over Button */}
       {selectedTransactions.size > 0 && transactions.length > 0 && (
-        <View className="absolute bottom-0 left-0 right-0 bg-white px-5 py-4">
+        <View className="absolute bottom-0 left-0 right-0 bg-white px-5 py-4 ">
           <TouchableOpacity
             onPress={handleHandOver}
-            className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center"
+            className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center h-[50px]"
             activeOpacity={0.8}
             style={{
               shadowColor: "#000000",

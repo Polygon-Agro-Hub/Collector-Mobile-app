@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -165,6 +166,21 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     }, []),
   );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   useEffect(() => {
     if (selectedJobRole) {
       const filtered = officers.filter(
@@ -178,8 +194,9 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
-        }`}
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${
+        item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
+      }`}
       onPress={() => {
         if (item.status !== "Not Approved") {
           navigation.navigate("DistributionOfficerSummary" as any, {

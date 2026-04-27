@@ -7,6 +7,7 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import {
   FontAwesome5,
@@ -297,6 +298,21 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
     }
   };
 
+     useFocusEffect(
+          React.useCallback(() => {
+            const onBackPress = () => {
+              navigation.navigate("DistridutionaDashboard");
+              return true;
+            };
+      
+            const subscription = BackHandler.addEventListener(
+              "hardwareBackPress",
+              onBackPress,
+            );
+            return () => subscription.remove();
+          }, [navigation]),
+        );
+
   const NoOrdersState = () => {
     return (
       <View className="flex-1 justify-center items-center mt-[-25%] px-4">
@@ -337,7 +353,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         title={t("ReadytoPickupOrders.Ready to Pickup Orders")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
       />
 
       {/* Search Bar */}

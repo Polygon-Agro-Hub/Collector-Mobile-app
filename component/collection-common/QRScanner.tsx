@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Animated,
   Image,
   Dimensions,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -14,6 +15,8 @@ import { CameraView, Camera } from "expo-camera";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
 import CameraAccess from "../permission/CameraAccess";
+import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type QRScannerNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -40,10 +43,24 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   const [unsuccessfulLoadingBarWidth, setUnsuccessfulLoadingBarWidth] =
     useState(new Animated.Value(100));
 
+  const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
+
   useEffect(() => {
     const checkCameraPermissions = async () => {
       const { status } = await Camera.getCameraPermissionsAsync();
-      
+
       if (status === "granted") {
         setHasPermission(true);
         setShowCameraAccess(false);
@@ -71,6 +88,38 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     setHasPermission(true);
     setShowCameraAccess(false);
   };
+
+  const handleBackPress = () => {
+    if (jobRole === "Collection Officer") {
+      navigation.navigate("CollectionOfficerDashboard" as any);
+    } else if (jobRole === "Collection Centre Manager") {
+      navigation.navigate("ManagerDashboard" as any);
+    } else {
+      navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        if (jobRole === "Collection Officer") {
+          navigation.navigate("CollectionOfficerDashboard" as any);
+        } else if (jobRole === "Collection Centre Manager") {
+          navigation.navigate("ManagerDashboard" as any);
+        } else {
+          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+        }
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation, jobRole]),
+  );
 
   const handleBarCodeScanned = async ({
     data,
@@ -139,7 +188,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
           title={t("QRScanner.ScantheQR")}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={handleBackPress}
         />
         <CameraView
           className="flex-1 "
@@ -174,7 +223,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
         {/* "Tap to Scan Again" button */}
         {scanned && (
-          <View style={{ position: "absolute", bottom: 50, alignSelf: "center" }}>
+          <View
+            style={{ position: "absolute", bottom: 50, alignSelf: "center" }}
+          >
             <TouchableOpacity
               style={{
                 backgroundColor: "#FAE432",
@@ -211,7 +262,9 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
                     resizeMode="contain"
                   />
                 </View>
-                <Text className="text-gray-700">{t("QRScanner.SearchNIC")}</Text>
+                <Text className="text-gray-700">
+                  {t("QRScanner.SearchNIC")}
+                </Text>
               </View>
 
               {/* Red Loading Bar at bottom */}

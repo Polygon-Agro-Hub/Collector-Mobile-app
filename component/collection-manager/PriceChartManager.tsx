@@ -328,7 +328,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
             {t("PriceChart.Crop")}
           </Text>
           <TextInput
-            className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800"
+            className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800 h-[50px]"
             value={cropName}
             editable={false}
           />
@@ -339,7 +339,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
             {t("PriceChart.Variety")}
           </Text>
           <TextInput
-            className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4]"
+            className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4] h-[50px]"
             value={varietyName}
             editable={false}
           />
@@ -370,7 +370,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
                       {`${t("PriceChart.Grade")} ${priceItem.grade}`} Rs.
                     </Text>
                     <TextInput
-                      className="flex-1 rounded-full px-4 py-2 text-gray-800"
+                      className="flex-1 rounded-full px-4 py-2 text-gray-800 h-[50px]"
                       style={{
                         borderWidth: 1,
                         borderColor: isEditable
@@ -402,7 +402,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         )}
 
         <TouchableOpacity
-          className="rounded-[45px] py-3 h-12 mt-4 w-3/4 mx-auto"
+          className="rounded-[45px] py-3 h-12 mt-4 w-3/4 mx-auto h-[50px] justify-center"
           style={{
             backgroundColor:
               (isEditable && !areAllPricesValid()) || isSubmitting
@@ -425,7 +425,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="border border-[#606060] mt-4 py-3 h-12 rounded-full items-center w-3/4 mx-auto"
+          className="border border-[#606060] mt-4 py-3 h-12 rounded-full items-center w-3/4 mx-auto h-[50px] justify-center"
           onPress={() => {
             if (isEditable) {
               setIsEditable(false);

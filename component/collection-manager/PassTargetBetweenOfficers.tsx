@@ -283,12 +283,12 @@ const PassTargetBetweenOfficers: React.FC<
             ) : (
               <TouchableOpacity
                 onPress={() => setOfficerModalVisible(true)}
-                style={{
+                   style={{
                   height: 50,
+                  backgroundColor: "#F4F4F4",
+                  borderRadius: 25,
                   borderWidth: 1,
-                  borderColor: "#CFCFCF",
-                  borderRadius: 8,
-                  backgroundColor: "white",
+                  borderColor: "#F4F4F4",
                   paddingHorizontal: 14,
                   flexDirection: "row",
                   alignItems: "center",
@@ -319,7 +319,7 @@ const PassTargetBetweenOfficers: React.FC<
               {t("PassTargetBetweenOfficers.Amount")}
             </Text>
             <TextInput
-              className="border border-gray-300 rounded-lg p-3 text-gray-800"
+               className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
               keyboardType="numeric"
               value={amount}
               onChangeText={handleAmountChange}
@@ -330,7 +330,7 @@ const PassTargetBetweenOfficers: React.FC<
 
         <View className="mt-6 items-center">
           <TouchableOpacity
-            className={`rounded-full w-64 py-3 ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
+            className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
             onPress={passTarget}
             disabled={isSaveDisabled()}
           >

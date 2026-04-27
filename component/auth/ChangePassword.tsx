@@ -43,47 +43,47 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
   const { t } = useTranslation();
 
   const validatePassword = () => {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      Alert.alert(t("Error.error"), t("Error.All fields are required"));
-      return false;
-    }
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    Alert.alert(t("Error.error"), t("Error.All fields are required"));
+    return false;
+  }
 
-    if (newPassword.length < 8) {
-      Alert.alert(t("Error.error"), t("Error.Your password must contain"));
-      return false;
-    }
+  if (newPassword.length < 8) {
+    Alert.alert(t("Error.error"), t("Error.Your password must contain"));
+    return false;
+  }
 
-    if (!/[A-Z]/.test(newPassword)) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Your password must contain a minimum"),
-      );
-      return false;
-    }
+  if (!/[A-Z]/.test(newPassword)) {
+    Alert.alert(t("Error.error"), t("Error.Your password must contain a minimum"));
+    return false;
+  }
 
-    if (!/[0-9]/.test(newPassword)) {
-      Alert.alert(t("Error.error"), t("Error.Your password must contain"));
-      return false;
-    }
+  if (!/[0-9]/.test(newPassword)) {
+    Alert.alert(t("Error.error"), t("Error.Your password must contain"));
+    return false;
+  }
 
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Your password must contain a minimum"),
-      );
-      return false;
-    }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+    Alert.alert(t("Error.error"), t("Error.Your password must contain a minimum"));
+    return false;
+  }
 
-    if (newPassword !== confirmPassword) {
-      Alert.alert(
-        t("Error.error"),
-        "New password and confirm password do not match",
-      );
-      return false;
-    }
+  // ✅ New check — must be before confirmPassword check
+  if (newPassword === currentPassword) {
+    Alert.alert(
+      t("Error.error"),
+      "New password cannot be the same as the current password."
+    );
+    return false;
+  }
 
-    return true;
-  };
+  if (newPassword !== confirmPassword) {
+    Alert.alert(t("Error.error"), "New password and confirm password do not match");
+    return false;
+  }
+
+  return true;
+};
 
   const handleChangePassword = async () => {
     Keyboard.dismiss();
@@ -281,6 +281,13 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             <TouchableOpacity
               className="bg-black w-full rounded-3xl items-center justify-center h-[50px]"
               onPress={handleChangePassword}
+               style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
             >
               <Text className="font-light text-white text-lg">
                 {t("ChangePassword.Next")}

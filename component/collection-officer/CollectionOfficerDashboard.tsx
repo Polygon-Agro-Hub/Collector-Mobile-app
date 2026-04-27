@@ -202,7 +202,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
   const renderTargetStatus = () => {
     if (isLoadingTarget) {
       return (
-        <View className="bg-white rounded-3xl mt-3 p-4 mx-4 shadow-lg">
+        <View className="bg-white rounded-3xl mt-3 p-4 mx-4 h-[5%] shadow-lg">
           <Text className="text-center text-gray-500">
             Loading target status...
           </Text>
@@ -212,7 +212,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View className="bg-white rounded-3xl mt-3 p-4 mx-4 shadow-lg">
+        <View className="bg-white rounded-3xl mt-5 p-4 mx-5 shadow-lg">
           <Text className="text-center text-yellow-600 font-bold text-base">
             🚀 {t("CollectionOfficerDashboard.Keep")}
           </Text>
@@ -258,7 +258,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
     >
       {/* Profile Section - at the top */}
       <TouchableOpacity
-        className="flex-row items-center p-4 "
+        className="flex-row items-center p-5 "
         onPress={() => navigation.navigate("SideMenu")}
       >
         <Image
@@ -336,9 +336,9 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
       </View>
 
       {/* Action Buttons */}
-      <View className="flex-row px-4 pb-8 gap-4 justify-center">
+      <View className="flex-row px-6 pb-8 gap-4 justify-center">
         <TouchableOpacity
-          className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#FFE300]"
+          className="bg-white p-4 rounded-3xl flex-1 h-36 shadow-lg relative border border-[#FFE300]"
           onPress={() => navigation.navigate("QRScanner" as any)}
         >
           <Image
@@ -354,7 +354,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative mb-5 border border-[#FF0086]"
+          className="bg-white p-4 rounded-3xl flex-1 h-36 shadow-lg relative mb-5 border border-[#FF0086]"
           onPress={() => navigation.navigate("SearchFarmer" as any)}
         >
           <Image

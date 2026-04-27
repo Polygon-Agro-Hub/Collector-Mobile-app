@@ -22,6 +22,7 @@ import {
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../navigations/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -227,20 +228,18 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
     <View className="flex-1 bg-whitegray-100">
       {/* Header */}
       <View
-        className="bg-[#313131] h-20 flex-row items-center"
+        className="bg-[#313131] flex-row items-center"
         style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
       >
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
-          }
-          className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-        >
-          <AntDesign name="left" size={24} color="#000502" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-bold text-center flex-1 mr-[5%]">
-          {t("PriceChart.PriceChart")}
-        </Text>
+        <CustomHeader
+          title={t("PriceChart.PriceChart")}
+          showBackButton={true}
+          navigation={navigation}
+          onBackPress={() => navigation.goBack()}
+          textColor="white"
+          bgColor="#313131"
+          iconBgColor="#FFFFFF1A"
+        />
       </View>
 
       {/* Content */}
@@ -253,7 +252,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             {t("PriceChart.Crop")}
           </Text>
           <TextInput
-            className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800 "
+            className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800 h-[50px]"
             value={cropName}
             editable={false}
           />
@@ -264,7 +263,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             {t("PriceChart.Variety")}
           </Text>
           <TextInput
-            className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4]"
+            className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4] h-[50px]"
             value={varietyName}
             editable={false}
           />
@@ -294,7 +293,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
                     {`${t("PriceChart.Grade")} ${priceItem.grade}`} Rs.
                   </Text>
                   <TextInput
-                    className="flex-1 rounded-full px-4 py-2 text-gray-800"
+                    className="flex-1 rounded-full px-4 py-2 text-gray-800 h-[50px]"
                     style={{
                       borderWidth: 1,
                       borderColor: isEditable ? "#980775" : "#F4F4F4",
@@ -314,7 +313,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         )}
 
         <TouchableOpacity
-          className="bg-[#000000] rounded-[45px] py-3 h-12 mt-4 w-3/4 mx-auto"
+          className="bg-[#000000] rounded-[45px] py-3 h-[50px] items-center justify-center mt-4 w-3/4 mx-auto"
           onPress={handleButtonClick}
         >
           <Text
@@ -327,7 +326,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
 
         {/* Secondary Button - Changes based on state */}
         <TouchableOpacity
-          className="border border-[#606060] mt-4 py-3 h-12 rounded-full items-center w-3/4 mx-auto"
+          className="border border-[#606060] mt-4 py-3 h-12 rounded-full h-[50px] items-center justify-center w-3/4 mx-auto"
           onPress={() => {
             if (isEditable) {
               setIsEditable(false);

@@ -446,15 +446,22 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
             </Text>
           </View>
 
-          <View className="mt-6 mb-10 items-center">
+          <View className="mt-6 mb-10 items-center justify-center">
             <TouchableOpacity
-              className="bg-[#000000] rounded-full w-64 py-3 h-12"
+              className="bg-[#000000] rounded-full w-64 py-3 h-[50px] justify-center"
               onPress={() =>
                 navigation.navigate("DailyTargetListForOfficers", {
                   officerId,
                   collectionOfficerId,
                 })
               }
+              style={{
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
             >
               <Text className="text-white text-center font-medium">
                 {t("OfficerSummary.OpenTarget")}

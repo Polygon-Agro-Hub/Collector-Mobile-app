@@ -403,7 +403,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-2 text-gray-800"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-2 text-gray-800 h-[50px]"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}
@@ -418,7 +418,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
 
           <View className="mt-6 items-center">
             <TouchableOpacity
-              className={`rounded-full w-64 py-3 ${isSaveButtonDisabled() ? "bg-gray-400" : "bg-[#000000]"}`}
+              className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveButtonDisabled() ? "bg-gray-400" : "bg-[#000000]"}`}
               onPress={receiveTarget}
               disabled={isSaveButtonDisabled()}
             >

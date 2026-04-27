@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import axios from "axios";
@@ -15,6 +16,8 @@ import LottieView from "lottie-react-native";
 import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import CustomHeader from "../navigations/CustomHeader";
 
 type DailyTargetListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -45,6 +48,19 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -152,14 +168,39 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        if (jobRole === "Collection Officer") {
+          navigation.navigate("CollectionOfficerDashboard" as any);
+        } else if (jobRole === "Collection Centre Manager") {
+          navigation.navigate("ManagerDashboard" as any);
+        } else {
+          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+        }
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation, jobRole]),
+  );
+
   return (
     <View className="flex-1 bg-[#282828] w-full">
       {/* Header */}
-      <View className="bg-[#282828] px-4 py-3 flex-row justify-between items-center w-full">
-        <Text className="text-white text-lg font-bold ml-[35%]">
-          {t("DailyTarget.DailyTarget")}
-        </Text>
-      </View>
+
+      <CustomHeader
+        title={t("DailyTarget.DailyTarget")}
+        showBackButton={false}
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
 
       {/* Toggle Buttons */}
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
@@ -169,8 +210,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+            }`}
             style={{
               height: 40,
               shadowColor:
@@ -183,8 +225,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("ToDo")}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
-                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${
+                selectedToggle === "ToDo" ? "text-white" : "text-black"
+              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -214,8 +257,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+            }`}
             style={{
               height: 40,
               shadowColor:
@@ -228,8 +272,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("Completed")}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
-                }`}
+              className={`font-bold ${
+                selectedToggle === "Completed" ? "text-white" : "text-black"
+              }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -329,8 +374,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 displayedData.map((item, index) => (
                   <View
                     key={index}
-                    className={`flex-row ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                      }`}
+                    className={`flex-row ${
+                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                    }`}
                   >
                     <Text className="w-16 p-2 border-r border-gray-300 text-center">
                       {selectedToggle === "ToDo" ? (

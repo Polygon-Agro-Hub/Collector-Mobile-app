@@ -346,14 +346,14 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
 
         <View className="mt-6 items-center">
           <TouchableOpacity
-            className={`rounded-full w-64 py-3 ${isSaveDisabled() ? "bg-[#ABABAB]" : "bg-[#000000]"}`}
+            className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveDisabled() ? "bg-[#ABABAB]" : "bg-[#000000]"}`}
             onPress={passTarget}
             disabled={isSaveDisabled()}
           >
             {submitting ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text className="text-white text-center font-medium">
+              <Text className="text-white text-center font-medium ">
                 {t("PassTargetBetweenOfficers.Save")}
               </Text>
             )}

@@ -428,11 +428,19 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           </Text>
 
           {/* Download and Share Buttons */}
-          <View className="flex-row space-x-8">
+          <View className="flex-row gap-4">
             <TouchableOpacity
               onPress={handleDownload}
-              className="bg-[#000000] rounded-lg items-center justify-center"
-              style={{ width: 100, height: 70 }}
+              className="bg-[#000000] rounded-lg items-center justify-center ml-4"
+              style={{
+                width: 100,
+                height: 70,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
             >
               <Ionicons name="download" size={24} color="white" />
               <Text
@@ -452,7 +460,15 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             <TouchableOpacity
               onPress={handleShare}
               className="bg-[#000000] rounded-lg items-center justify-center"
-              style={{ width: 100, height: 70 }}
+                style={{
+                width: 100,
+                height: 70,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
             >
               <Ionicons name="share-social" size={24} color="white" />
               <Text

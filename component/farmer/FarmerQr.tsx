@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -58,6 +58,21 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
   const route = useRoute<FarmerQrRouteProp>();
   const { userId } = route.params;
+   const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
+
+
 
   useEffect(() => {
     const fetchFarmerData = async () => {
@@ -237,25 +252,29 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     }
   };
 
-  const handleBackPress = () => {
-    navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-    return true;
-  };
+ const handleBackPress = useCallback(() => {
+  if (jobRole === "Collection Officer") {
+    navigation.navigate("Main" as any, { screen: "CollectionOfficerDashboard" });
+  } else if (jobRole === "Collection Centre Manager") {
+    navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
+  } else {
+    navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+  }
+}, [navigation, jobRole]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
+
+useFocusEffect(
+  useCallback(() => {
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        handleBackPress();
         return true;
-      };
-
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress,
-      );
-      return () => subscription.remove();
-    }, [navigation]),
-  );
+      },
+    );
+    return () => subscription.remove();
+  }, [handleBackPress]),
+);
 
   return (
     <KeyboardAvoidingView
