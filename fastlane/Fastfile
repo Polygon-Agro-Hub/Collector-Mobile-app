@@ -48,7 +48,7 @@ platform :ios do
       export_method:    "app-store",
       clean:            true,
       output_directory: "./build",
-      output_name:      "CoDiNet.ipa",
+      output_name:      "GoVi-Transport.ipa",
       export_options: {
         provisioningProfiles: {
           APP_IDENTIFIER => ENV["sigh_#{APP_IDENTIFIER}_appstore_profile-name"]
