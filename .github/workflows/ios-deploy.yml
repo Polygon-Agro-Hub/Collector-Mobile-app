@@ -1,6 +1,6 @@
 # .github/workflows/ios-deploy.yml
 #
-# iOS CI/CD Pipeline — GoVi-Transport
+# iOS CI/CD Pipeline — CoDi-Net
 #
 # TRIGGERS:
 #   Push to dev-main → Upload to TestFlight (QA testing)
@@ -202,8 +202,8 @@ jobs:
         if: always()   # Run even if previous steps fail
         uses: actions/upload-artifact@v4
         with:
-          name: "GoVi-Transport-${{ github.ref_name }}-${{ github.run_number }}.ipa"
-          path: build/GoVi-Transport.ipa
+          name: "CoDi-Net-${{ github.ref_name }}-${{ github.run_number }}.ipa"
+          path: build/CoDiNet.ipa
           retention-days: 7
           if-no-files-found: warn   # Don't fail if build never produced an .ipa
 
