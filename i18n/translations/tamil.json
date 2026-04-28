@@ -556,7 +556,9 @@
     "NIC": "--தேசிய அடையாள அட்டை எண்--",
     "Email": "--மின்னஞ்சல் முகவரி--",
     "Cancel": "ரத்து செய்",
-    "Next": "அடுத்து"
+    "Next": "அடுத்து",
+    "Phone Number 01 and Phone Number 02 cannot be the same.": "தொலைபேசி எண் 01 மற்றும் 02 ஒரே மாதிரியாக இருக்க முடியாது.",
+    "Submit":"சமர்ப்பிக்கவும்"
   },
   "AddOfficerAddressDetails": {
     "LNG": "ta",
@@ -827,7 +829,8 @@
     "Save GRN Report": "GRN அறிக்கையை சேமிக்கவும்",
     "Info": "தகவல்",
     "Use the 'Save to Files' option to save to Downloads": "'கோப்புகளில் சேமி' விருப்பத்தை பயன்படுத்தி பதிவிறக்கங்களுக்கு சேமிக்கவும்",
-    "Failed to prepare PDF for download": "பதிவிறக்கத்திற்கு PDF-ஐ தயாரிக்க முடியவில்லை."
+    "Failed to prepare PDF for download": "பதிவிறக்கத்திற்கு PDF-ஐ தயாரிக்க முடியவில்லை.",
+    "Full Total (Rs.)":"மொத்த தொகை (ரூ.) :"
   },
   "BankDetailsUpdate": {
     "Success": "வெற்றி",

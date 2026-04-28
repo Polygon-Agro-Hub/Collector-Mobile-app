@@ -93,7 +93,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     if (jobRole === "Collection Officer") {
       navigation.navigate("CollectionOfficerDashboard" as any);
     } else if (jobRole === "Collection Centre Manager") {
-      navigation.navigate("ManagerDashboard" as any);
+      navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
     } else {
       navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
     }
@@ -105,7 +105,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
         if (jobRole === "Collection Officer") {
           navigation.navigate("CollectionOfficerDashboard" as any);
         } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("ManagerDashboard" as any);
+          navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
         } else {
           navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
         }
@@ -158,7 +158,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     }
   };
 
-  // Show CameraAccess screen when permission is not granted
   if (showCameraAccess) {
     return (
       <CameraAccess

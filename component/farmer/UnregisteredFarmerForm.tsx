@@ -457,21 +457,23 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               placeholderTextColor="#9CA3AF"
               value={NICnumber}
               onChangeText={(text) => {
-                const updatedText = text.replace(/v$/, "V");
+                const sanitized = text.replace(/[^0-9vV]/g, "");
+                if (sanitized !== text) return;
+
+                if (
+                  /^\d{9}[vV]$/.test(NICnumber) &&
+                  sanitized.length > NICnumber.length
+                ) {
+                  return;
+                }
+
+                const updatedText = sanitized.replace(/v$/, "V");
                 setNICnumber(updatedText);
 
                 if (!updatedText) {
                   setNICError("");
                   if (fieldErrors.nic)
                     setFieldErrors((prev) => ({ ...prev, nic: "" }));
-                  return;
-                }
-
-                const isValidCharacters = /^(\d+|[\d]+[vV]?)$/.test(
-                  updatedText,
-                );
-                if (!isValidCharacters) {
-                  setNICError(t("UnregisteredFarmerDetails.InvalidNIC"));
                   return;
                 }
 
@@ -594,12 +596,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 if (/^\d*$/.test(text)) {
                   setAccNumber(text);
                   setAccNumberError("");
-                  if (fieldErrors.accNumber)
-                    setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
-                } else {
-                  setAccNumberError(
-                    t("UnregisteredFarmerDetails.AccountNumberError"),
-                  );
+                  setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
                 }
               }}
             />

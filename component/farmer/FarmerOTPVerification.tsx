@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Alert,
   Keyboard,
-  SafeAreaView,
   Platform,
 } from "react-native";
 import {
@@ -188,16 +187,16 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       return;
     }
 
-    if (isOtpExpired) {
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      Alert.alert(t("Error.Sorry"), t("Error.noInternet"));
+      return;
+    }
+
+    if (isOtpExpired || timer === 0) {
       Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
-        {
-          text: t("Otpverification.ResendOTP"),
-          onPress: handleResendOTP,
-        },
-        {
-          text: t("Otpverification.Cancel"),
-          style: "cancel",
-        },
+        { text: t("Otpverification.ResendOTP"), onPress: handleResendOTP },
+        { text: t("Otpverification.Cancel"), style: "cancel" },
       ]);
       return;
     }
@@ -207,15 +206,15 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
       const data: userItem = {
         phoneNumber: parseInt(phoneNumber, 10),
-        firstName: firstName,
-        lastName: lastName,
-        NICnumber: NICnumber,
-        district: district,
-        accNumber: accNumber,
-        accHolderName: accHolderName,
-        bankName: bankName,
-        branchName: branchName,
-        PreferdLanguage: PreferdLanguage,
+        firstName,
+        lastName,
+        NICnumber,
+        district,
+        accNumber,
+        accHolderName,
+        bankName,
+        branchName,
+        PreferdLanguage,
       };
 
       const url = "https://api.getshoutout.com/otpservice/verify";
@@ -224,18 +223,12 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         "Content-Type": "application/json",
       };
 
-      const body = {
-        code: code,
-        referenceId: refId,
-      };
-
-      const response = await axios.post(url, body, { headers });
+      const response = await axios.post(
+        url,
+        { code, referenceId: refId },
+        { headers },
+      );
       const { statusCode, message } = response.data;
-
-      const netState = await NetInfo.fetch();
-      if (!netState.isConnected) {
-        return;
-      }
 
       switch (statusCode) {
         case "1000":
@@ -273,10 +266,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                   onPress: () => {
                     setOtpCode("");
                     setIsOtpValid(false);
-
-                    if (inputRefs.current[0]) {
-                      inputRefs.current[0]?.focus();
-                    }
+                    inputRefs.current[0]?.focus();
                   },
                 },
               ],
@@ -289,10 +279,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         case "1002":
           setIsOtpExpired(true);
           Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
-            {
-              text: t("Otpverification.ResendOTP"),
-              onPress: handleResendOTP,
-            },
+            { text: t("Otpverification.ResendOTP"), onPress: handleResendOTP },
           ]);
           break;
 
@@ -305,15 +292,14 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     } catch (error: any) {
       console.error("OTP Verification Error:", error);
 
-      if (error.response?.data?.statusCode === "1002") {
+      const errStatusCode = error.response?.data?.statusCode;
+
+      if (errStatusCode === "1002") {
         setIsOtpExpired(true);
         Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
-          {
-            text: t("Otpverification.ResendOTP"),
-            onPress: handleResendOTP,
-          },
+          { text: t("Otpverification.ResendOTP"), onPress: handleResendOTP },
         ]);
-      } else if (error.response?.data?.statusCode === "1001") {
+      } else if (errStatusCode === "1001") {
         Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       } else {
         Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
@@ -407,7 +393,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
-  // Responsive sizing based on screen dimensions
   const getResponsiveStyles = () => {
     const isSmallDevice = screenWidth < 380;
     const isTablet = screenWidth >= 768;
@@ -424,14 +409,14 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       buttonHeight: isTablet ? hp(7) : hp(6),
       buttonBorderRadius: isTablet ? wp(5) : wp(10),
       containerPaddingHorizontal: isTablet ? wp(8) : wp(5),
-      verticalSpacing: isTablet ? hp(3) : hp(2),
+      verticalSpacing: isTablet ? hp(3) : hp(5),
     };
   };
 
   const styles = getResponsiveStyles();
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       <CustomHeader
         title={t("")}
         showBackButton={true}
@@ -444,7 +429,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           flexGrow: 1,
-          paddingBottom: Platform.OS === 'ios' ? hp(4) : hp(3),
+          paddingBottom: Platform.OS === "ios" ? hp(4) : hp(3),
         }}
       >
         <View
@@ -454,7 +439,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             paddingTop: styles.imageMarginTop,
           }}
         >
-          {/* Image Section */}
           <View style={{ marginBottom: styles.verticalSpacing }}>
             <Image
               source={require("../../assets/images/collection-common/opt.webp")}
@@ -466,8 +450,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             />
           </View>
 
-          {/* Title Section */}
-          <View style={{ marginBottom: styles.verticalSpacing }}>
+          <View className="mb-7">
             <Text
               className="text-black text-center font-bold"
               style={{ fontSize: styles.titleFontSize }}
@@ -476,8 +459,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </Text>
           </View>
 
-          {/* Phone Number Section */}
-          <View style={{ marginBottom: styles.verticalSpacing }}>
+          <View className="mb-5">
             <Text
               className="text-[#0085FF] text-center"
               style={{ fontSize: styles.phoneFontSize }}
@@ -486,13 +468,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </Text>
           </View>
 
-          {/* OTP Input Section */}
           <View
             className="flex-row justify-center"
             style={{
-              gap: wp(3),
+              gap: wp(2.5),
               marginBottom: styles.verticalSpacing,
-              paddingHorizontal: wp(2),
             }}
           >
             {Array.from({ length: 5 }).map((_, index) => (
@@ -502,15 +482,15 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                   inputRefs.current[index] = el;
                 }}
                 style={{
-                  width: styles.otpInputSize,
-                  height: styles.otpInputSize,
+                  width: 51,
+                  height: 48,
                   fontSize: styles.otpInputTextSize,
                   textAlign: "center",
-                  borderRadius: wp(3),
+                  borderRadius: 10,
                   borderColor: "#FFC738",
-                  borderWidth: 2,
+                  borderWidth: 1,
                   backgroundColor: "#FFFFFF",
-                  color: otpCode[index] ? "#000000" : "#000000",
+                  color: "#000000",
                 }}
                 keyboardType="numeric"
                 maxLength={1}
@@ -522,20 +502,15 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             ))}
           </View>
 
-          {/* Resend Instructions */}
           <View style={{ marginBottom: styles.verticalSpacing / 2 }}>
-            <Text
-              className="text-md text-[#707070] text-center"
-              style={{ fontSize: wp(3.5) }}
-            >
+            <Text className="text-[#707070] text-center text-base">
               {t("Otpverification.Didreceive")}
             </Text>
           </View>
 
-          {/* Resend Button/Timer */}
           <View style={{ marginBottom: styles.verticalSpacing * 2 }}>
             <Text
-              className="text-center underline"
+              className="text-center underline text-base"
               onPress={disabledResend ? undefined : handleResendOTP}
               style={{
                 fontSize: wp(4),
@@ -549,19 +524,21 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </Text>
           </View>
 
-          {/* Verify Button */}
-          <View
-            className="w-full items-center"
-            style={{ marginBottom: hp(2) }}
-          >
+          <View className="w-full items-center" style={{ marginBottom: hp(2) }}>
             <TouchableOpacity
               style={{
-                width: styles.buttonWidth,
-                height: styles.buttonHeight,
-                backgroundColor: !isOtpValid || isVerified ? "#9CA3AF" : "#000000",
-                borderRadius: styles.buttonBorderRadius,
+                width: 281,
+                height: 50,
+                backgroundColor:
+                  !isOtpValid || isVerified ? "#9CA3AF" : "#000000",
+                borderRadius: 20,
                 alignItems: "center",
                 justifyContent: "center",
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 4,
               }}
               onPress={handleVerify}
               disabled={!isOtpValid || isVerified}
@@ -582,7 +559,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

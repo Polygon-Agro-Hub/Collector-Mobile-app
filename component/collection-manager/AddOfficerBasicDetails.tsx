@@ -196,7 +196,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     useCallback(() => {
       setJobRole(String(jobRolle));
       fetchEmpId(String(jobRolle));
-      return () => { };
+      return () => {};
     }, []),
   );
 
@@ -245,6 +245,16 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     if (Object.values(preferredLanguages).every((val) => !val)) {
       errors.preferredLanguages = t(
         "Error.Please select at least one preferred language",
+      );
+    }
+    if (
+      phoneNumber1.trim() &&
+      phoneNumber2.trim() &&
+      phoneCode1 === phoneCode2 &&
+      phoneNumber1 === phoneNumber2
+    ) {
+      errors.phoneNumber2Duplicate = t(
+        "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
       );
     }
 
@@ -320,12 +330,40 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
     if (numbersOnly.length === 0) {
       setError1("");
+      // Clear duplicate error on phone2 if phone1 is cleared
+      if (
+        error2 ===
+        t(
+          "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+        )
+      ) {
+        setError2("");
+      }
     } else if (!numbersOnly.startsWith("7")) {
       setError1(t("Error.Invalid phone number"));
     } else if (numbersOnly.length < 9) {
       setError1(t("Error.Phone number must be 9 digits long"));
     } else if (validatePhoneNumber(numbersOnly)) {
       setError1("");
+      // Re-evaluate phone2 duplicate state whenever phone1 changes
+      if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
+        if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber2) {
+          setError2(
+            t(
+              "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+            ),
+          );
+        } else {
+          setError2((prev) =>
+            prev ===
+            t(
+              "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+            )
+              ? ""
+              : prev,
+          );
+        }
+      }
       checkPhoneExists(numbersOnly);
     } else {
       setError1(t("Error.Invalid phone number"));
@@ -366,8 +404,16 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     } else if (numbersOnly.length < 9) {
       setError2(t("Error.Phone number must be 9 digits long"));
     } else if (validatePhoneNumber(numbersOnly)) {
-      setError2("");
-      checkPhone2Exists(numbersOnly);
+      if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber1) {
+        setError2(
+          t(
+            "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+          ),
+        );
+      } else {
+        setError2("");
+        checkPhone2Exists(numbersOnly);
+      }
     } else {
       setError2(t("Error.Invalid phone number"));
     }
@@ -526,13 +572,14 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         showsVerticalScrollIndicator={false}
       >
         {/* ── Profile Avatar ── */}
+        {/* ── Profile Avatar ── */}
         <View className="items-center mt-6">
           <TouchableOpacity onPress={handleImagePick}>
             <View className="relative">
               <View className="w-20 h-20 bg-gray-300 rounded-full overflow-hidden items-center justify-center">
                 {selectedImage ? (
                   <Image
-                    source={{ uri: `data:image/png;base64,${selectedImage}` }}
+                    source={{ uri: selectedImage }}
                     className="w-full h-full"
                     resizeMode="cover"
                   />
@@ -653,8 +700,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleEnglishNameChange(text, "firstNameEnglish")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.firstNameEnglish ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.firstNameEnglish ? "border border-red-500" : ""
+                }`}
                 keyboardType="default"
                 autoCapitalize="words"
                 autoCorrect={false}
@@ -676,8 +724,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleEnglishNameChange(text, "lastNameEnglish")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.lastNameEnglish ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.lastNameEnglish ? "border border-red-500" : ""
+                }`}
                 keyboardType="default"
                 autoCapitalize="words"
                 autoCorrect={false}
@@ -699,8 +748,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleSinhalaNameChange(text, "firstNameSinhala")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.firstNameSinhala ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.firstNameSinhala ? "border border-red-500" : ""
+                }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -720,8 +770,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleSinhalaNameChange(text, "lastNameSinhala")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.lastNameSinhala ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.lastNameSinhala ? "border border-red-500" : ""
+                }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -741,8 +792,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleTamilNameChange(text, "firstNameTamil")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.firstNameTamil ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.firstNameTamil ? "border border-red-500" : ""
+                }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -762,8 +814,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleTamilNameChange(text, "lastNameTamil")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.lastNameTamil ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.lastNameTamil ? "border border-red-500" : ""
+                }`}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -804,10 +857,11 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   <TextInput
                     placeholder="7XXXXXXXX"
                     placeholderTextColor="#7D7D7D"
-                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${error1 || fieldErrors.phoneNumber1
-                      ? "border border-red-500"
-                      : ""
-                      }`}
+                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${
+                      error1 || fieldErrors.phoneNumber1
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={phoneNumber1}
                     onChangeText={handlePhoneNumber1Change}
                     keyboardType="phone-pad"
@@ -823,6 +877,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
               )}
             </View>
 
+            {/* Phone Number 2 */}
             {/* Phone Number 2 */}
             <View>
               <View className="flex-row gap-2">
@@ -847,8 +902,11 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   <TextInput
                     placeholder="7XXXXXXXX"
                     placeholderTextColor="#7D7D7D"
-                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${error2 ? "border border-red-500" : ""
-                      }`}
+                    className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 flex-1 ${
+                      error2 || fieldErrors.phoneNumber2Duplicate
+                        ? "border border-red-500"
+                        : ""
+                    }`}
                     value={phoneNumber2}
                     onChangeText={handlePhoneNumber2Change}
                     keyboardType="phone-pad"
@@ -859,6 +917,11 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
               </View>
               {error2 && (
                 <Text className="text-red-500 text-sm mt-1 ml-2">{error2}</Text>
+              )}
+              {!error2 && fieldErrors.phoneNumber2Duplicate && (
+                <Text className="text-red-500 text-sm mt-1 ml-2">
+                  {fieldErrors.phoneNumber2Duplicate}
+                </Text>
               )}
             </View>
 
@@ -873,8 +936,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 keyboardType="default"
                 autoCapitalize="characters"
                 autoCorrect={false}
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
+                }`}
                 underlineColorAndroid="transparent"
               />
               {(error3 || fieldErrors.nicNumber) && (
@@ -891,8 +955,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 placeholderTextColor="#7D7D7D"
                 value={formData.email}
                 onChangeText={handleEmailChange}
-                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${fieldErrors.email || errorEmail ? "border border-red-500" : ""
-                  }`}
+                className={`bg-[#F4F4F4] rounded-2xl px-4 py-4 ${
+                  fieldErrors.email || errorEmail ? "border border-red-500" : ""
+                }`}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -933,8 +998,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${isValidating ? "opacity-50" : ""
-                }`}
+              className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${
+                isValidating ? "opacity-50" : ""
+              }`}
               onPress={handleNext}
               disabled={isValidating}
             >

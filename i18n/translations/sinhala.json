@@ -557,7 +557,9 @@
     "NIC": "--ජාතික හැඳුනුම්පත් අංකය--",
     "Email": "--ඊමේල් ලිපිනය--",
     "Cancel": "අවලංගු කරන්න",
-    "Next": "ඉදිරියට යන්න"
+    "Next": "ඉදිරියට යන්න",
+    "Phone Number 01 and Phone Number 02 cannot be the same.": "දුරකථන අංක 01 සහ 02 එකම විය නොහැක.",
+    "Submit":"තහවුරු කරන්න"
   },
   "AddOfficerAddressDetails": {
     "LNG": "si",
@@ -828,7 +830,8 @@
     "Save GRN Report": "GRN වාර්තාව සුරකින්න",
     "Info": "තොරතුරු",
     "Use the 'Save to Files' option to save to Downloads": "බාගැනීම් වලට සුරැකීමට 'ගොනු වලට සුරකින්න' විකල්පය භාවිතා කරන්න.",
-    "Failed to prepare PDF for download": "බාගත කිරීම සඳහා PDF සකස් කිරීමට අසමත් විය."
+    "Failed to prepare PDF for download": "බාගත කිරීම සඳහා PDF සකස් කිරීමට අසමත් විය.",
+    "Full Total (Rs.)":"සම්පූර්ණ එකතුව (රු.) :"
   },
   "BankDetailsUpdate": {
     "Success": "සාර්ථකයි",

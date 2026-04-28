@@ -158,8 +158,16 @@ const PassTargetBetweenOfficers: React.FC<
   );
 
   const handleAmountChange = (text: string) => {
-    setAmount(text);
-    const numericValue = parseFloat(text);
+    let sanitized = text.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    setAmount(sanitized);
+
+    const numericValue = parseFloat(sanitized);
     if (numericValue > maxAmount) {
       setError(t("Error.You have exceeded the maximum amount."));
     } else {
@@ -283,7 +291,7 @@ const PassTargetBetweenOfficers: React.FC<
             ) : (
               <TouchableOpacity
                 onPress={() => setOfficerModalVisible(true)}
-                   style={{
+                style={{
                   height: 50,
                   backgroundColor: "#F4F4F4",
                   borderRadius: 25,
@@ -319,7 +327,7 @@ const PassTargetBetweenOfficers: React.FC<
               {t("PassTargetBetweenOfficers.Amount")}
             </Text>
             <TextInput
-               className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
+              className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
               keyboardType="numeric"
               value={amount}
               onChangeText={handleAmountChange}

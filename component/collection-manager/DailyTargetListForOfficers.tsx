@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -28,6 +29,10 @@ interface DailyTargetListForOfficersProps {
     params: {
       collectionOfficerId: number;
       officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
     };
   };
 }
@@ -54,7 +59,14 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
-  const { collectionOfficerId, officerId } = route.params;
+  const {
+    collectionOfficerId,
+    officerId,
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+    image,
+  } = route.params;
   const { t } = useTranslation();
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -148,6 +160,20 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     }, []),
   );
 
+  // DailyTargetListForOfficers.tsx
+useFocusEffect(
+  React.useCallback(() => {
+    const onBackPress = () => {
+      navigation.popToTop();
+      navigation.goBack();
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    return () => subscription.remove();
+  }, [navigation]),
+);
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchTargets();
@@ -182,7 +208,10 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         title={officerId || ""}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => {
+          navigation.popToTop(); 
+          navigation.goBack(); 
+        }}
         textColor="white"
         bgColor="#282828"
         iconBgColor="#FFFFFF1A"
@@ -191,14 +220,16 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
       {/* Toggle Buttons */}
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
         <TouchableOpacity
-          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+            selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+          }`}
           style={{ height: 40 }}
           onPress={() => setSelectedToggle("ToDo")}
         >
           <Text
-            className={`font-bold mr-2 ${selectedToggle === "ToDo" ? "text-white" : "text-black"
-              }`}
+            className={`font-bold mr-2 ${
+              selectedToggle === "ToDo" ? "text-white" : "text-black"
+            }`}
           >
             {t("DailyTarget.Todo")}
           </Text>
@@ -210,14 +241,16 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+            selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+          }`}
           style={{ height: 40 }}
           onPress={() => setSelectedToggle("Completed")}
         >
           <Text
-            className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
+            className={`font-bold ${
+              selectedToggle === "Completed" ? "text-white" : "text-black"
+            }`}
           >
             {t("DailyTarget.Completed")}
           </Text>
@@ -273,8 +306,9 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                 displayedData.map((item, index) => (
                   <TouchableOpacity
                     key={index}
-                    className={`flex-row justify-center items-center ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                      }`}
+                    className={`flex-row justify-center items-center ${
+                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                    }`}
                     onPress={() => {
                       let qty = 0;
                       if (item.centerTarget) {
@@ -346,7 +380,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                     {selectedToggle === "ToDo"
                       ? t("DailyTarget.NoTodoItems") || "No items to do"
                       : t("DailyTarget.noCompletedTargets") ||
-                      "No completed items"}
+                        "No completed items"}
                   </Text>
                 </View>
               )}

@@ -93,7 +93,12 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
   );
 
   const handlePriceChange = (index: number, newPrice: string) => {
-    const cleanedPrice = newPrice.replace(/[^0-9.]/g, "");
+    const sanitized = newPrice.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    const cleanedPrice =
+      parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
+
     const updatedPrices = [...editedPrices];
     updatedPrices[index].price = cleanedPrice;
     setEditedPrices(updatedPrices);

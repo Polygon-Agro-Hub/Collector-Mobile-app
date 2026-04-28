@@ -50,14 +50,15 @@ interface Officer {
   fullNameTamil: string;
 }
 
-const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenProps> = ({
-  navigation,
-  route,
-}) => {
+const RecieveTargetBetweenOfficers: React.FC<
+  RecieveTargetBetweenOfficersScreenProps
+> = ({ navigation, route }) => {
   const [assignee, setAssignee] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
-  const [officers, setOfficers] = useState<{ label: string; value: string }[]>([]);
+  const [officers, setOfficers] = useState<{ label: string; value: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingTarget, setFetchingTarget] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -84,9 +85,12 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
 
   const getOfficerName = (officer: Officer) => {
     switch (selectedLanguage) {
-      case "si": return officer.fullNameSinhala;
-      case "ta": return officer.fullNameTamil;
-      default: return officer.fullNameEnglish;
+      case "si":
+        return officer.fullNameSinhala;
+      case "ta":
+        return officer.fullNameTamil;
+      default:
+        return officer.fullNameEnglish;
     }
   };
 
@@ -172,8 +176,16 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
   }, []);
 
   const handleAmountChange = (text: string) => {
-    setAmount(text);
-    const numericValue = parseFloat(text);
+    let sanitized = text.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    setAmount(sanitized);
+
+    const numericValue = parseFloat(sanitized);
     if (numericValue > maxAmount) {
       setError(t("Error.You have exceeded the maximum amount."));
     } else {
@@ -236,7 +248,10 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
       );
 
       if (response.status === 200) {
-        Alert.alert(t("Error.Success"), t("Error.Target received successfully."));
+        Alert.alert(
+          t("Error.Success"),
+          t("Error.Target received successfully."),
+        );
         navigation.navigate("DailyTargetListForOfficers" as any, {
           officerId,
           collectionOfficerId,
@@ -246,7 +261,10 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
       }
     } catch (error: any) {
       console.error("Receive Target Error:", error);
-      Alert.alert(t("Error.error"), t("Error.An error occurred while transferring the target."));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.An error occurred while transferring the target."),
+      );
     } finally {
       setFetchingTarget(false);
     }
@@ -254,17 +272,24 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
 
   const getvarietyName = () => {
     switch (selectedLanguage) {
-      case "si": return route.params.varietyNameSinhala;
-      case "ta": return route.params.varietyNameTamil;
-      default: return route.params.varietyNameEnglish;
+      case "si":
+        return route.params.varietyNameSinhala;
+      case "ta":
+        return route.params.varietyNameTamil;
+      default:
+        return route.params.varietyNameEnglish;
     }
   };
 
-  const selectedOfficerLabel = officers.find((o) => o.value === assignee)?.label || null;
+  const selectedOfficerLabel =
+    officers.find((o) => o.value === assignee)?.label || null;
 
   return (
     <>
-      <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        className="flex-1 bg-white"
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="flex-1 bg-white mb-4">
           <CustomHeader
             title={getvarietyName() || ""}
@@ -289,7 +314,7 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
               ) : (
                 <TouchableOpacity
                   onPress={() => setOfficerModalVisible(true)}
-                   style={{
+                  style={{
                     height: 50,
                     backgroundColor: "#F4F4F4",
                     borderRadius: 25,
@@ -310,9 +335,14 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
                     }}
                     numberOfLines={1}
                   >
-                    {selectedOfficerLabel || t("PassTargetBetweenOfficers.Select an officer")}
+                    {selectedOfficerLabel ||
+                      t("PassTargetBetweenOfficers.Select an officer")}
                   </Text>
-                  <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+                  <MaterialIcons
+                    name="keyboard-arrow-down"
+                    size={22}
+                    color="#9CA3AF"
+                  />
                 </TouchableOpacity>
               )}
 
@@ -325,7 +355,9 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
                 <ActivityIndicator size="small" color="#313131" />
               ) : (
                 <Text className="text-xl font-bold text-center text-black mb-4">
-                  {maxAmount ? `${maxAmount} ${t("PassTargetBetweenOfficers.kg")}` : "--"}
+                  {maxAmount
+                    ? `${maxAmount} ${t("PassTargetBetweenOfficers.kg")}`
+                    : "--"}
                 </Text>
               )}
             </View>
@@ -335,14 +367,16 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                 className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}
                 placeholder="--"
                 editable={assignee === "0" || !!errorMessage ? false : true}
               />
-              {error ? <Text className="text-red-500 mt-2">{error}</Text> : null}
+              {error ? (
+                <Text className="text-red-500 mt-2">{error}</Text>
+              ) : null}
             </View>
           </View>
 

@@ -145,6 +145,13 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                     officerId,
                   })
                 }
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-white font-medium"
@@ -175,6 +182,13 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                     officerId,
                   })
                 }
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-white font-medium"
@@ -199,7 +213,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
             {t("EditTargetManager.Amount")}
           </Text>
           <TextInput
-             className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 mt-2 text-gray-800 h-[50px]"
+            className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 mt-2 text-gray-800 h-[50px]"
             value={todo.toString()}
             editable={false}
           />

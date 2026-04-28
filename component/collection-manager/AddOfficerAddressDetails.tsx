@@ -704,7 +704,7 @@ const AddOfficerAddressDetails: React.FC = () => {
                       : { fontSize: 14 },
                 ]}
               >
-                {t("AddOfficerBasicDetails.Next")}
+                {t("AddOfficerBasicDetails.Submit")}
               </Text>
             )}
           </TouchableOpacity>

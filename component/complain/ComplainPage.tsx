@@ -23,6 +23,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 import CustomHeader from "../navigations/CustomHeader";
+import LoadingPage from "../commons/LoadingPage";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -178,23 +179,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       >
         <View className="flex-1 bg-white">
           {loading ? (
-            <View className="flex-1 bg-white">
-              <CustomHeader
-                title=""
-                showBackButton={true}
-                navigation={navigation}
-                onBackPress={() => navigation.goBack()}
-              />
-
-              <View className="flex-1 justify-center items-center bg-white">
-                <LottieView
-                  source={require("../../assets/lottie/loading.json")}
-                  autoPlay
-                  loop
-                  style={{ width: 150, height: 150 }}
-                />
-              </View>
-            </View>
+           <LoadingPage fullScreen />
           ) : (
             <ScrollView
               className="flex-1 bg-white"
@@ -210,7 +195,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 bgColor="#F6F6F6"
               />
 
-
               <View className="flex-1 justify-center mx-auto bg-[#F6F6F6] px-4">
                 <View className="justify-center items-center bg-[#F6F6F6] px-4">
                   <Image
@@ -221,7 +205,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 </View>
 
                 <View className="items-center bg-white rounded-3xl">
-
                   <View className="w-full items-center px-4 bg-white rounded-xl mt-10">
                     <View className="flex-row">
                       <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">
@@ -236,7 +219,8 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     <View className="w-full mb-4">
                       <TouchableOpacity
                         onPress={() => {
-                          if (Category.length > 0) setCategoryModalVisible(true);
+                          if (Category.length > 0)
+                            setCategoryModalVisible(true);
                         }}
                         className="border border-gray-300 rounded-3xl px-2 h-[50px] flex-row items-center justify-between bg-white"
                       >
@@ -248,7 +232,11 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                             ? t(selectedCategoryLabel)
                             : t("ReportComplaint.selectCategory")}
                         </Text>
-                        <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
+                        <MaterialIcons
+                          name="arrow-drop-down"
+                          size={24}
+                          color="#9CA3AF"
+                        />
                       </TouchableOpacity>
                     </View>
 
@@ -263,12 +251,19 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                       placeholderTextColor="#434343"
                       multiline
                       value={complain}
-                      onChangeText={(text) => setComplain(text)}
+                      onChangeText={(text) => setComplain(text.trimStart())}
                     />
 
                     <TouchableOpacity
                       className="w-full bg-black rounded-3xl items-center justify-center mb-20 h-[50px]"
                       onPress={handleSubmit}
+                      style={{
+                        shadowColor: "#000000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 10,
+                        elevation: 6,
+                      }}
                     >
                       {isLoading ? (
                         <ActivityIndicator size="small" color="white" />
@@ -295,7 +290,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
         selectedItems={selectedCategory ? [selectedCategory] : []}
         onSelect={(items) => setSelectedCategory(items[0] ?? null)}
         multiSelect={false}
-        showSearch={false}
+        showSearch={true} 
       />
     </>
   );

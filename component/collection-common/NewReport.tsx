@@ -507,9 +507,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="total-row">
           <div class="total-box">
             <div class="total-label">${t(
-              "NewReport.Full Total (Rs.) Rs.",
+              "NewReport.Full Total (Rs.)",
             )}</div>
-            <div class="total-value">Rs.${formatNumberWithCommas(
+            <div class="total-value">Rs. ${formatNumberWithCommas(
               totalSum,
             )}</div>
           </div>
@@ -565,11 +565,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-          Alert.alert(
-            t("NewReport.PDF Ready"),
-            t("NewReport.To save to Downloads"),
-            [{ text: "OK" }],
-          );
         } else {
           Alert.alert(
             t("Error.error"),
@@ -710,7 +705,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         {/* Received Items */}
         <View className="mb-4">
           <Text className="font-bold text-sm mb-2">
-            {t("NewReport.Received Items")};
+            {t("NewReport.Received Items")} :
           </Text>
           <ScrollView horizontal className="border border-gray-300 rounded-lg">
             <View>
@@ -793,6 +788,13 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           <TouchableOpacity
             className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
             onPress={handleDownloadPDF}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Image
               source={require("../../assets/images/collection-common/download.webp")}
@@ -806,6 +808,13 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           <TouchableOpacity
             className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
             onPress={handleSharePDF}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Image
               source={require("../../assets/images/collection-common/share.webp")}

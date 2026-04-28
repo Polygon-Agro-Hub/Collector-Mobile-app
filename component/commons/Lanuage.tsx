@@ -86,28 +86,43 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
           <TouchableOpacity
             className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("en")}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
-            <Text className="text-white text-center text-lg">
-              ENGLISH
-            </Text>
+            <Text className="text-white text-center text-lg">ENGLISH</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("si")}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
-            <Text className="text-white text-center text-lg">
-              සිංහල
-            </Text>
+            <Text className="text-white text-center text-lg">සිංහල</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             className="bg-[#413A3F] rounded-3xl items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("ta")}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
-            <Text className="text-white text-center text-lg">
-              தமிழ்
-            </Text>
+            <Text className="text-white text-center text-lg">தமிழ்</Text>
           </TouchableOpacity>
         </View>
       </View>

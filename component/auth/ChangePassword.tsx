@@ -191,7 +191,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         <View className="flex-1 justify-center">
-          <View className="items-center mt-[5%]">
+          <View className="items-center mt-[-5%]">
             <Image
               source={require("@/assets/images/auth/change-password.webp")}
               resizeMode="contain"

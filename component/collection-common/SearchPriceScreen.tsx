@@ -406,8 +406,15 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
             {/* Search Button */}
             <TouchableOpacity
               className="bg-[#000000] w-full rounded-3xl items-center justify-center mb-4"
-              style={{ height: 50 }}
               onPress={handleSearch}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+                height: 50,
+              }}
             >
               {loading ? (
                 <ActivityIndicator color="white" size="small" />

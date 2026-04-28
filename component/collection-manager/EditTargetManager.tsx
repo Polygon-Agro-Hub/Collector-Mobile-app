@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import {  Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import { ScrollView } from "react-native-gesture-handler";
@@ -165,6 +165,13 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
                       },
                     })
                   }
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
                 >
                   <Text
                     className="text-white font-medium"
@@ -196,6 +203,13 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
                       },
                     })
                   }
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
                 >
                   <Text
                     className="text-white font-medium"

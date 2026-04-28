@@ -106,6 +106,15 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      setStartDate(undefined);
+      setEndDate(undefined);
+      setReportGenerated(false);
+      setGenerateAgain(false);
+    }, []),
+  );
+
   const handleDownload = async () => {
     try {
       if (!startDate || !endDate) {
@@ -207,8 +216,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     setReportGenerated(false);
   };
 
-  const formatDate = (date: Date | undefined) => {
-    if (!date) return "Select Date";
+  const formatDate = (date: Date | undefined, placeholder?: string) => {
+    if (!date) return placeholder ?? "Select Date";
     return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(
       2,
       "0",
@@ -223,6 +232,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     if (event.type === "set") {
       if (type === "start") {
         setStartDate(selectedDate || startDate);
+        setEndDate(undefined);
         setShowStartPicker(false);
       } else {
         setEndDate(selectedDate || endDate);
@@ -282,18 +292,19 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         }
       />
 
-      {/* Form Section */}
       <View className="px-8 mt-8">
         <View className="mb-6">
           <Text className="text-sm text-gray-700 mb-2">
-            {t("ReportGenerator.Start Date")}
+            {t("ReportGenerator.Start Date")} :
           </Text>
           <View className="flex-row items-center">
             <TouchableOpacity
               onPress={() => setShowStartPicker((prev) => !prev)}
-              className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-4 py-3 flex-1 flex-row justify-between items-center"
+              className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-1 flex-row justify-between items-center"
             >
-              <Text className="text-gray-500">{formatDate(startDate)}</Text>
+              <Text className="text-gray-500">
+                {formatDate(startDate, t("ReportGenerator.Start Date"))}
+              </Text>
               <Image
                 source={require("../../assets/images/collection-manager/rescheduling.webp")}
                 className="w-6 h-6"
@@ -330,18 +341,25 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         </View>
 
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">
-            {t("ReportGenerator.End Date")}
+          <Text className="text-sm mb-2" style={{ color: "#374151" }}>
+            {t("ReportGenerator.End Date")} :
           </Text>
           <TouchableOpacity
-            onPress={() => setShowEndPicker((prev) => !prev)}
-            className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-4 py-3 flex-row justify-between items-center"
+            onPress={() => {
+              if (startDate) setShowEndPicker((prev) => !prev);
+            }}
+            disabled={!startDate}
+            className="border border-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-row justify-between items-center"
+            style={{ backgroundColor: startDate ? "#F4F4F4" : "#EBEBEB" }}
           >
-            <Text className="text-gray-500">{formatDate(endDate)}</Text>
+            <Text style={{ color: startDate ? "#6B7280" : "#D1D5DB" }}>
+              {formatDate(endDate, t("ReportGenerator.End Date"))}
+            </Text>
             <Image
               source={require("../../assets/images/collection-manager/rescheduling.webp")}
               className="w-6 h-6"
               resizeMode="contain"
+              style={{ opacity: startDate ? 1 : 0.35 }}
             />
           </TouchableOpacity>
 
@@ -377,10 +395,10 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         <View className="flex-row justify-center gap-2 items-center">
           <TouchableOpacity
             onPress={handleReset}
-            className="border border-[#6B6B6B] py-3 rounded-full w-40 items-center"
+            className="border border-[#6B6B6B] py-3 rounded-full w-40 items-center h-[50px] justify-center"
           >
             <Text
-              className="text-gray-700 text-center"
+              className="text-gray-700 text-center text-lg"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -390,10 +408,10 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
           <TouchableOpacity
             onPress={handleGenerate}
-            className="bg-[#980775] py-3 rounded-full w-40 items-center"
+            className="bg-[#980775] py-3 rounded-full w-40 h-[50px] justify-center items-center"
           >
             <Text
-              className="text-white font-semibold text-center"
+              className="text-white font-semibold text-center text-lg"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -413,7 +431,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         />
       </View>
 
-      {/* Conditional UI Section */}
       {reportGenerated ? (
         <View className="items-center justify-center flex-1">
           <View className="w-24 h-24 bg-[#FFE6CB66] rounded-full items-center justify-center mb-4">
@@ -427,7 +444,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             {t("ReportGenerator.Report has been generated")}
           </Text>
 
-          {/* Download and Share Buttons */}
           <View className="flex-row gap-4">
             <TouchableOpacity
               onPress={handleDownload}
@@ -460,7 +476,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             <TouchableOpacity
               onPress={handleShare}
               className="bg-[#000000] rounded-lg items-center justify-center"
-                style={{
+              style={{
                 width: 100,
                 height: 70,
                 shadowColor: "#000",
