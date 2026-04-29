@@ -1,5 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { View, TouchableOpacity, Image, Keyboard, AppState } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Image,
+  Keyboard,
+  AppState,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -18,15 +24,18 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
 
   // Keyboard handling
   useEffect(() => {
-    const show = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
-    const hide = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+    const show = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true),
+    );
+    const hide = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false),
+    );
 
     return () => {
       show.remove();
       hide.remove();
     };
   }, []);
-
 
   // Role-based tabs (stable)
   const tabs = useMemo(() => {
@@ -62,25 +71,28 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     }
   }, [userRole]);
 
-  // current tab normalization
   let currentTabName = state?.routes?.[state.index]?.name;
 
-  if (currentTabName === "PriceChart") currentTabName = "SearchPriceScreen";
   if (
-    ["EditTargetManager", "PassTargetScreen", "RecieveTargetScreen"].includes(currentTabName)
+    ["PriceChart", "PriceChartManager", "PriceChange"].includes(currentTabName)
+  ) {
+    currentTabName = "SearchPriceScreen";
+  }
+  if (
+    ["EditTargetManager", "PassTargetScreen", "RecieveTargetScreen"].includes(
+      currentTabName,
+    )
   ) {
     currentTabName = "DailyTarget";
   }
-  if (
-    ["TransactionList", "OfficerSummary"].includes(currentTabName)
-  ) {
+  if (["TransactionList", "OfficerSummary"].includes(currentTabName)) {
     currentTabName = "CollectionOfficersList";
   }
   if (currentTabName === "ClaimDistribution") {
     currentTabName = "DistributionOfficersList";
   }
 
-  // Claim status check 
+  // Claim status check
   useEffect(() => {
     const checkClaimStatus = async () => {
       try {
@@ -90,7 +102,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
           `${environment.API_BASE_URL}api/collection-officer/get-claim-status`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         if (response.data.claimStatus === 0) {
@@ -108,29 +120,36 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
       checkClaimStatus();
     }
   }, [userRole]);
-  -
-    // AppState handling 
+  -(
+    // AppState handling
     useEffect(() => {
-      const subscription = AppState.addEventListener("change", async (nextAppState) => {
-        if (nextAppState === "background") {
-          setTimeout(async () => {
-            try {
-              const currentState = AppState.currentState;
+      const subscription = AppState.addEventListener(
+        "change",
+        async (nextAppState) => {
+          if (nextAppState === "background") {
+            setTimeout(async () => {
+              try {
+                const currentState = AppState.currentState;
 
-              if (currentState === "background" || currentState === "inactive") {
-                await AsyncStorage.removeItem("token");
-                await AsyncStorage.removeItem("empid");
-                navigation?.navigate?.("Login");
+                if (
+                  currentState === "background" ||
+                  currentState === "inactive"
+                ) {
+                  await AsyncStorage.removeItem("token");
+                  await AsyncStorage.removeItem("empid");
+                  navigation?.navigate?.("Login");
+                }
+              } catch (error) {
+                console.log("AppState error:", error);
               }
-            } catch (error) {
-              console.log("AppState error:", error);
-            }
-          }, 3000);
-        }
-      });
+            }, 3000);
+          }
+        },
+      );
 
       return () => subscription.remove();
-    }, []);
+    }, [])
+  );
 
   // Hide conditions
   if (isKeyboardVisible || userRole === "Distribution Officer") return null;
@@ -139,7 +158,6 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   return (
     <View className="bg-white">
       <View className="absolute bottom-0 flex-row justify-between items-center bg-white py-3 px-6 rounded-t-3xl w-full border-t border-r border-l border-[#00000040] shadow-md">
-
         {tabs.map((tab, index) => {
           const isFocused = currentTabName === tab.name;
 
@@ -161,7 +179,6 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
             </TouchableOpacity>
           );
         })}
-
       </View>
     </View>
   );

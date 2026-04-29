@@ -309,6 +309,7 @@ useFocusEffect(
                     className={`flex-row justify-center items-center ${
                       index % 2 === 0 ? "bg-gray-100" : "bg-white"
                     }`}
+                    style={{ alignItems: "stretch" }}
                     onPress={() => {
                       let qty = 0;
                       if (item.centerTarget) {

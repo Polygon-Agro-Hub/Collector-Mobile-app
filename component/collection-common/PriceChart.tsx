@@ -95,9 +95,12 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
   const handlePriceChange = (index: number, newPrice: string) => {
     const sanitized = newPrice.replace(/[^0-9.]/g, "");
 
-    const parts = sanitized.split(".");
+    const firstDot = sanitized.indexOf(".");
     const cleanedPrice =
-      parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
+      firstDot === -1
+        ? sanitized
+        : sanitized.slice(0, firstDot + 1) +
+          sanitized.slice(firstDot + 1).replace(/\./g, "");
 
     const updatedPrices = [...editedPrices];
     updatedPrices[index].price = cleanedPrice;
@@ -295,22 +298,28 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
               {priceData.map((priceItem, index) => (
                 <View key={index} className="flex-row items-center mb-3">
                   <Text className="w-32 text-gray-600">
-                    {`${t("PriceChart.Grade")} ${priceItem.grade}`} Rs.
+                    {`${t("PriceChart.Grade")} ${priceItem.grade}`}
                   </Text>
-                  <TextInput
-                    className="flex-1 rounded-full px-4 py-2 text-gray-800 h-[50px]"
+
+                  <View
+                    className="flex-1 flex-row items-center rounded-full px-4 h-[50px]"
                     style={{
                       borderWidth: 1,
                       borderColor: isEditable ? "#980775" : "#F4F4F4",
                       backgroundColor: "#F4F4F4",
                     }}
-                    value={editedPrices[index]?.price}
-                    editable={isEditable}
-                    onChangeText={(newPrice) =>
-                      handlePriceChange(index, newPrice)
-                    }
-                    keyboardType="numeric"
-                  />
+                  >
+                    <Text className="text-gray-800 mr-1">Rs.</Text>
+                    <TextInput
+                      className="flex-1 text-gray-800"
+                      value={editedPrices[index]?.price}
+                      editable={isEditable}
+                      onChangeText={(newPrice) =>
+                        handlePriceChange(index, newPrice)
+                      }
+                      keyboardType="numeric"
+                    />
+                  </View>
                 </View>
               ))}
             </View>
@@ -320,6 +329,13 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         <TouchableOpacity
           className="bg-[#000000] rounded-[45px] py-3 h-[50px] items-center justify-center mt-4 w-3/4 mx-auto"
           onPress={handleButtonClick}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 5,
+          }}
         >
           <Text
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -342,6 +358,20 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
                 screen: "SearchPriceScreen",
               });
             }
+          }}
+          style={{
+            height: 50,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: "#000000",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#FFFFFF",
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 5,
           }}
         >
           <Text

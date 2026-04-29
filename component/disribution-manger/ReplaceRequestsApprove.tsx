@@ -351,8 +351,11 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
-  const isFormComplete =
-    replaceData.newProduct && replaceData.quantity && !isPriceExceeded();
+ 
+const isQuantityValid = parseFloat(replaceData.quantity) > 0;
+
+const isFormComplete =
+    replaceData.newProduct && replaceData.quantity && isQuantityValid && !isPriceExceeded();
 
   const [searchQuery, setSearchQuery] = useState("");
   const filteredItems = retailItems.filter((product) =>
@@ -485,7 +488,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
             )}
           </View>
 
-          <View className="mb-4">
+        <View className="mb-4">
             <TextInput
               className="border border-gray-300 rounded-full p-4 bg-white"
               placeholder="Enter Quantity"
@@ -493,6 +496,12 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
               onChangeText={handleQuantityChange}
               keyboardType="decimal-pad"
             />
+            {/* Quantity validation message */}
+            {replaceData.quantity !== "" && !isQuantityValid && (
+              <Text className="text-red-600 text-sm text-center mt-1 px-2">
+                {t("ReplaceRequestsApprove.Please enter a value greater than 0")}
+              </Text>
+            )}
           </View>
 
           <View className="mb-2">

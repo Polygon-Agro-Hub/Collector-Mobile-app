@@ -341,6 +341,13 @@ const PassTargetBetweenOfficers: React.FC<
             className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
             onPress={passTarget}
             disabled={isSaveDisabled()}
+            style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
           >
             {submitting ? (
               <ActivityIndicator size="small" color="white" />
@@ -363,6 +370,7 @@ const PassTargetBetweenOfficers: React.FC<
         onSelect={(items) => setAssignee(items[0] ?? "")}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
+        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </View>
   );

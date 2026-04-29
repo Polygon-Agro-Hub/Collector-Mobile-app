@@ -67,7 +67,8 @@ const ClaimOfficer: React.FC = () => {
 
   const handleEmpIDChange = (text: string) => {
     const trimmedText = text.replace(/^\s+/, "");
-    setEmpID(trimmedText);
+    const numericOnly = trimmedText.replace(/[^0-9]/g, "");
+    setEmpID(numericOnly);
     setOfficerFound(false);
     setSearchPerformed(false);
   };
@@ -217,7 +218,7 @@ const ClaimOfficer: React.FC = () => {
             <View className="flex-row  justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-3 px-8 bg-gray-300 rounded-lg"
+                className="p-2 py-3 px-8 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
@@ -272,8 +273,8 @@ const ClaimOfficer: React.FC = () => {
         <Text className="font-semibold text-gray-800  mb-2 text-center">
           {t("ClaimOfficer.EMPID")}
         </Text>
-        <View className="flex-row items-center border border-[#CFCFCF] rounded-full mb-4">
-          <View className="bg-[#D2DADD] px-4 py-3 rounded-full">
+        <View className="flex-row items-center justify-center border border-[#CFCFCF] rounded-full mb-4">
+          <View className="bg-[#D2DADD] px-4 h-[50px] rounded-full items-center justify-center">
             <Text className="text-gray-600 font-bold">{empPrefix}</Text>
           </View>
           <TextInput
@@ -286,13 +287,20 @@ const ClaimOfficer: React.FC = () => {
         </View>
 
         <TouchableOpacity
-          className={`py-2 rounded-full items-center mt-7 ${
+          className={`py-2 rounded-full items-center mt-7 h-[50px] justify-center ${
             !empID || officerFound || searchLoading
               ? "bg-gray-300"
               : "bg-[#313131]"
           }`}
           disabled={!empID || officerFound}
           onPress={handleSearch}
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 6,
+            elevation: 4,
+          }}
         >
           {searchLoading ? (
             <ActivityIndicator size="small" color="#ffffff" />
@@ -303,6 +311,17 @@ const ClaimOfficer: React.FC = () => {
           )}
         </TouchableOpacity>
       </View>
+
+      {searchPerformed && !searchLoading && (
+        <View
+          style={{
+            height: 1,
+            backgroundColor: "#ADADAD",
+
+            marginTop: 24,
+          }}
+        />
+      )}
 
       {!officerFound && searchPerformed && !searchLoading && (
         <View className="flex items-center justify-center mt-24">
@@ -384,6 +403,13 @@ const ClaimOfficer: React.FC = () => {
           <TouchableOpacity
             className="mt-6 mb-10 bg-[#313131]    py-4 rounded-full"
             onPress={() => setModalVisible(true)}
+             style={{
+                  shadowColor: "#0b0a0a",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
           >
             <Text
               className={`text-white text-lg ${

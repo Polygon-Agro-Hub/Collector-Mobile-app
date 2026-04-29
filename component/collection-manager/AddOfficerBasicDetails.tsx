@@ -309,14 +309,22 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
   const handleSinhalaNameChange = (text: string, fieldName: string) => {
     clearFieldError(fieldName);
-    let filteredText = text;
+
+    let filteredText = text.replace(
+      /[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/g,
+      "",
+    );
     if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
     setFormData({ ...formData, [fieldName]: filteredText });
   };
 
   const handleTamilNameChange = (text: string, fieldName: string) => {
     clearFieldError(fieldName);
-    let filteredText = text;
+
+    let filteredText = text.replace(
+      /[0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/g,
+      "",
+    );
     if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
     setFormData({ ...formData, [fieldName]: filteredText });
   };
@@ -330,7 +338,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
     if (numbersOnly.length === 0) {
       setError1("");
-      // Clear duplicate error on phone2 if phone1 is cleared
+
       if (
         error2 ===
         t(
@@ -345,7 +353,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       setError1(t("Error.Phone number must be 9 digits long"));
     } else if (validatePhoneNumber(numbersOnly)) {
       setError1("");
-      // Re-evaluate phone2 duplicate state whenever phone1 changes
+
       if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
         if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber2) {
           setError2(
@@ -571,8 +579,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Profile Avatar ── */}
-        {/* ── Profile Avatar ── */}
         <View className="items-center mt-6">
           <TouchableOpacity onPress={handleImagePick}>
             <View className="relative">
@@ -595,7 +601,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         </View>
 
         <View className="p-2 px-4">
-          {/* ── Type Selector ── */}
           <View className="px-2 mt-6 items-center">
             <View className="flex flex-row items-center gap-2 justify-between">
               <Text className="text-base font-medium">
@@ -653,10 +658,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             </View>
           </View>
 
-          {/* ── Divider ── */}
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
-          {/* ── Preferred Languages ── */}
           <View className="px-6 mt-4">
             <Text className="text-base font-medium mb-4">
               {t("AddOfficerBasicDetails.PreferredLanguages")}
@@ -686,12 +689,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             )}
           </View>
 
-          {/* ── Divider ── */}
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
-          {/* ── Name Fields ── */}
           <View className="px-2 mt-4 gap-4">
-            {/* First Name English */}
             <View>
               <TextInput
                 placeholder={t("AddOfficerBasicDetails.FirstNameEnglish")}
@@ -715,7 +715,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
               )}
             </View>
 
-            {/* Last Name English */}
             <View>
               <TextInput
                 placeholder={t("AddOfficerBasicDetails.LastNameEnglish")}
@@ -982,6 +981,13 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             <TouchableOpacity
               className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
               onPress={() => navigation.goBack()}
+              style={{
+                shadowColor: "#8f8a8a",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
             >
               <Text
                 className="text-[#686868]"
@@ -1003,6 +1009,13 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
               }`}
               onPress={handleNext}
               disabled={isValidating}
+              style={{
+                shadowColor: "#070707",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
             >
               {isValidating ? (
                 <ActivityIndicator color="white" size="small" />

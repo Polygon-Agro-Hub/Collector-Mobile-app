@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,13 @@ import {
   Keyboard,
   Modal,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -182,6 +183,22 @@ const ClaimOfficer: React.FC = () => {
   const handleCancel = () => {
     setModalVisible(false);
   };
+
+    useFocusEffect(
+      useCallback(() => {
+        const handleBackPress = () => {
+          navigation.navigate("DistributionOfficersList")
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          handleBackPress,
+        );
+  
+        return () => subscription.remove();
+      }, [navigation]),
+    );
 
   const ConfirmationModal = ({
     visible,

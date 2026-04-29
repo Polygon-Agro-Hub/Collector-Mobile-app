@@ -211,44 +211,43 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View>
-        {/* Header */}
-        <View className="bg-[#313131] p-4  rounded-b-[35px] shadow-md">
-          <View className="flex-row items-center justify-between">
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              className=" bg-[#FFFFFF1A] rounded-full  p-2 justify-center w-10"
-            >
-              <Entypo name="chevron-left" size={25} color="white" />
-            </TouchableOpacity>
+    <SafeAreaView className="flex-1 bg-[#313131]">
+      <View className="bg-[#313131] px-4 pt-2 pb-10">
+        <View className="flex-row items-center justify-between">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-15 h-15 items-center"
+          >
+            <Entypo name="chevron-left" size={25} color="white" />
+          </TouchableOpacity>
 
-            <Text className="text-white text-lg font-bold text-center flex-1">
-              {t("ManagerDashboard.MyCollection")}
-            </Text>
+          <Text className="text-white text-lg font-bold text-center flex-1">
+            {t("ManagerDashboard.MyCollection")}
+          </Text>
 
-            <TouchableOpacity
-              onPress={() => setShowDatePicker((prev) => !prev)}
-              className="mr-2"
-            >
-              <Ionicons name="calendar-outline" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-row items-center justify-between mb-2">
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-white text-lg ml-[20%]"
-            >
-              {t("ManagerTransactions.Selected Date")}{" "}
-              {selectedDate
-                ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
-                : "N/A"}
-            </Text>
-          </View>
+          <TouchableOpacity
+            onPress={() => setShowDatePicker((prev) => !prev)}
+            className="mr-2"
+          >
+            <Ionicons name="calendar-outline" size={24} color="white" />
+          </TouchableOpacity>
         </View>
 
-        <View className="flex-row items-center bg-[#F7F7F7] px-4 py-2  rounded-full border border-[#444444] mt-[-18] mx-auto w-[90%] shadow-sm">
+        <View className="flex-row items-center justify-center mt-2 mb-4">
+          <Text
+            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            className="text-white"
+          >
+            {t("ManagerTransactions.Selected Date")}{" "}
+            {selectedDate
+              ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+              : "N/A"}
+          </Text>
+        </View>
+      </View>
+
+      <View className="flex-1 bg-white rounded-t-[40px] mt-[-20px]">
+        <View className="flex-row items-center bg-white px-4 py-2 rounded-full border border-[#444444] mx-4 shadow-md mt-[-22px]">
           <TextInput
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
             placeholder={t("ManagerTransactions.Search")}
@@ -257,9 +256,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             value={searchQuery}
             onChangeText={(text) => {
               const cleanedText = text.replace(/[^a-zA-Z0-9\s]/g, "");
-
               const finalText = cleanedText.replace(/^\s+/, "");
-
               handleSearch(finalText);
             }}
           />
@@ -283,8 +280,9 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             }}
           />
         )}
+
         {showDatePicker && Platform.OS === "ios" && (
-          <View className=" justify-center items-center z-50 absolute ml-6 mt-[52%] bg-gray-100  rounded-lg">
+          <View className="justify-center items-center z-50 absolute ml-6 mt-[52%] bg-gray-100 rounded-lg">
             <DateTimePicker
               value={selectedDate}
               mode="date"
@@ -297,35 +295,34 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             />
           </View>
         )}
-      </View>
 
-      <View className="px-4 mt-4">
-        <Text
-          style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-          className="text-lg font-bold text-black mb-4"
-        >
-          {t("ManagerTransactions.Transaction List")}{" "}
-          <Text className="font-normal">
-            ({t("ManagerTransactions.All")} {filteredTransactions.length})
-          </Text>
-        </Text>
-      </View>
-
-      {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <LottieView
-            source={require("../../assets/lottie/loading.json")}
-            autoPlay
-            loop
-            style={{ width: 150, height: 150 }}
-          />
-          <Text className="text-gray-500 mt-4">
-            {t("ManagerTransactions.Loading")}
+        <View className="px-4 mt-4">
+          <Text
+            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            className="text-lg font-bold text-black mb-4"
+          >
+            {t("ManagerTransactions.Transaction List")}{" "}
+            <Text className="font-normal">
+              ({t("ManagerTransactions.All")} {filteredTransactions.length})
+            </Text>
           </Text>
         </View>
-      ) : (
+
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View className="flex-1 mb-2">
+             {loading ? (
+          <View className="flex-1 justify-center items-center">
+            <LottieView
+              source={require("../../assets/lottie/loading.json")}
+              autoPlay
+              loop
+              style={{ width: 150, height: 150 }}
+            />
+            <Text className="text-gray-500 mt-4">
+              {t("ManagerTransactions.Loading")}
+            </Text>
+          </View>
+        ) : (
             <FlatList
               data={filteredTransactions}
               keyExtractor={(item) =>
@@ -413,9 +410,10 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                 </View>
               }
             />
+              )}
           </View>
         </ScrollView>
-      )}
+      </View>
     </SafeAreaView>
   );
 };

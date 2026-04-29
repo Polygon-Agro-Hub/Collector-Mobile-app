@@ -93,7 +93,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
             <View className="flex-row justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-3 px-7 bg-gray-300 rounded-lg"
+                className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
                  style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },

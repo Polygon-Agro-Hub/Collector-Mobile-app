@@ -502,6 +502,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
         }}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
+        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </>
   );

@@ -663,7 +663,8 @@
     "Amount": "அளவு (Kg)",
     "Save": "சேமிக்க",
     "maximum amount receive": "அதிகபட்ச பெறத்தக்க தொகை (Kg):",
-    "Select an officer": "--அதிகாரியைத் தேர்ந்தெடுங்கள்--"
+    "Select an officer": "--அதிகாரியைத் தேர்ந்தெடுங்கள்--",
+    "No Officers Found":"அதிகாரிகள் யாரும் காணப்படவில்லை"
   },
   "ReportGenerator": {
     "LNG": "ta",
@@ -994,7 +995,8 @@
     "ID": "எண்:",
     "No products available": "பொருட்கள் இல்லை",
     "Approve": "ஒப்புதல்",
-    "Rs": "Rs."
+    "Rs": "Rs.",
+    "Please enter a value greater than 0":"0-ஐ விடப் பெரிய மதிப்பை உள்ளிடவும்."
   },
   "ReplaceRequestsScreen": {
     "Order ID": "ஆர்டர் இல்லை:",

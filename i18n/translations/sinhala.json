@@ -664,7 +664,8 @@
     "Amount": "ප්‍රමාණය (Kg)",
     "Save": "සුරකින්න",
     "maximum amount receive": "ලැබිය හැකි උපරිම ප්‍රමාණය (Kg):",
-    "Select an officer": "--නිලධාරියෙකු තෝරන්න--"
+    "Select an officer": "--නිලධාරියෙකු තෝරන්න--",
+    "No Officers Found":"නිලධාරීන් හමු නොවීය"
   },
   "ReportGenerator": {
     "LNG": "si",
@@ -995,7 +996,8 @@
     "ID": "අංකය:",
     "No products available": "නිෂ්පාදන නොමැත",
     "Approve": "අනුමත කරන්න",
-    "Rs": "රු."
+    "Rs": "රු.",
+    "Please enter a value greater than 0":"කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න."
   },
   "ReplaceRequestsScreen": {
     "Order ID": "ඇණවුම් අංකය:",

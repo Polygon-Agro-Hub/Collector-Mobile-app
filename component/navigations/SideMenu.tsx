@@ -270,23 +270,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
 
   const handleBackPress = () => {
     if (
-      currentScreen === "EngProfile" &&
-      (profile?.jobRole === "Distribution Officer" ||
-        profile?.jobRole === "Distribution Centre Manager")
+      profile?.jobRole === "Distribution Officer" ||
+      profile?.jobRole === "Distribution Centre Manager"
     ) {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-    } else if (
-      currentScreen === "EngProfile" &&
-      profile?.jobRole === "Collection Officer"
-    ) {
+    } else if (profile?.jobRole === "Collection Officer") {
       navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-    } else if (
-      currentScreen === "EngProfile" &&
-      profile?.jobRole === "Collection Centre Manager"
-    ) {
+    } else if (profile?.jobRole === "Collection Centre Manager") {
       navigation.navigate("Main", { screen: "ManagerDashboard" });
-    } else {
-      navigation.goBack();
     }
     return true;
   };

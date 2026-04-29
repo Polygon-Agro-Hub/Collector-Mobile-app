@@ -242,7 +242,7 @@
     "City is required": "City is required",
     "Province is required": "Province is required",
     "District is required": "District is required",
-    "Account holder name is required": "Account holder name is required",
+    "Account holder name is required": "Account Holder’s Name",
     "Account number is required": "Account number is required",
     "Confirm account number is required": "Confirm account number is required",
     "Bank name is required": "Bank name is required",
@@ -640,7 +640,7 @@
     "Notransactions": "No transactions found for the selected date.",
     "Search": "Search By NIC Number, Name",
     "All": "All",
-    "TotalRs": "Total: Rs.",
+    "TotalRs": "Total: Rs. ",
     "ID": "ID",
     "Loading": "Loading..."
   },
@@ -664,7 +664,8 @@
     "Amount": "Amount (kg)",
     "Save": "Save",
     "maximum amount receive": "The maximum amount you can receive:",
-    "Select an officer": "--Select an officer--"
+    "Select an officer": "--Select an officer--",
+    "No Officers Found":"No Officers Found"
   },
   "ReportGenerator": {
     "LNG": "ta",
@@ -995,7 +996,8 @@
     "ID": "ID:",
     "No products available": "No products available",
     "Approve": "Approve",
-    "Rs": "Rs."
+    "Rs": "Rs.",
+    "Please enter a value greater than 0":"Please enter a value greater than 0"
   },
   "ReplaceRequestsScreen": {
     "Order ID": "Order ID:",
