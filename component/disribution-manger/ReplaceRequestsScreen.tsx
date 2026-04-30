@@ -90,7 +90,17 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
           orderId: item.orderId ? item.orderId.toString() : "",
           orderPackageId: item.orderPackageId.toString(),
           productDisplayName: item.productDisplayName,
-          createdAt: new Date(item.createdAt).toLocaleString(),
+          createdAt: (() => {
+            const d = new Date(item.createdAt);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            let hours = d.getHours();
+            const minutes = String(d.getMinutes()).padStart(2, "0");
+            const ampm = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12 || 12;
+            return `${yyyy}/${mm}/${dd} ${hours}.${minutes} ${ampm}`;
+          })(),
           status: item.status,
           price: item.price,
           qty: item.qty,
@@ -175,8 +185,17 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   };
 
   const renderRequestItem = ({ item }: { item: ReplaceRequestItem }) => (
-    <TouchableOpacity onPress={() => handleNavigateToApprove(item)}>
-      <View className="flex-row items-center bg-[#ADADAD1A] p-3 px-4 mb-4 rounded-xl mx-3">
+  <TouchableOpacity activeOpacity={1} onPress={() => handleNavigateToApprove(item)}>
+      <View
+        className="flex-row items-center bg-white p-3 px-4 mb-4 rounded-xl mx-3"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 6,
+          elevation: 4,
+        }}
+      >
         <View className="flex-1">
           <Text
             style={[
@@ -186,21 +205,22 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
                   ? { fontSize: 12 }
                   : { fontSize: 15 },
             ]}
-            className="font-bold text-base text-gray-900"
+            className="font-bold text-lg text-gray-900"
           >
             {t("ReplaceRequestsScreen.Order ID")} {item.invNo}
           </Text>
-          <Text className="text-gray-700 text-sm">
+          <Text className="text-[#848484] text-base">
             {t("ReplaceRequestsScreen.Replacing Item")}{" "}
-            {item.replaceProductDisplayName}
+            <Text className="text-[#565559] text-base font-semibold">
+              {item.replaceProductDisplayName}
+            </Text>
           </Text>
-
-          <Text className="text-gray-500 text-sm">
+          <Text className="text-[#848484] text-base">
             {t("ReplaceRequestsScreen.Requested Time")} : {item.createdAt}
           </Text>
         </View>
-        <View className="p-2 rounded-full">
-          <AntDesign name="right" size={20} color="#5f5c5cff" />
+        <View className="p-1 rounded-full">
+          <AntDesign name="right" size={20} color="#848484" />
         </View>
       </View>
     </TouchableOpacity>

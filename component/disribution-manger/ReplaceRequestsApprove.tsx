@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
@@ -23,6 +23,7 @@ import {
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import LottieView from "lottie-react-native";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 type ReplaceRequestsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -105,7 +106,14 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   navigation,
 }) => {
   const { t } = useTranslation();
-  const [showDropdown, setShowDropdown] = useState(false);
+
+  const formatPrice = (amount: number): string =>
+    amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+  const [showProductModal, setShowProductModal] = useState(false);
   const [loadingRetailItems, setLoadingRetailItems] = useState(false);
   const [loadingCurrentReplace, setLoadingCurrentReplace] = useState(false);
   const [retailItems, setRetailItems] = useState<RetailItem[]>([]);
@@ -189,7 +197,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
           newProduct: currentRequest.displayName || "",
           newProductId: currentRequest.productId || "",
           quantity: quantity,
-          price: `Rs.${currentRequest.price.toFixed(2)}`,
+          price: `Rs. ${formatPrice(currentRequest.price)}`,
         }));
       }
     } catch (error) {
@@ -229,9 +237,9 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
       ...prev,
       newProduct: product.displayName,
       newProductId: product.id,
-      price: `Rs.${(currentQty * productPrice).toFixed(2)}`,
+      price: `Rs. ${formatPrice(currentQty * productPrice)}`,
     }));
-    setShowDropdown(false);
+    setShowProductModal(false);
   };
 
   const handleQuantityChange = (text: string) => {
@@ -251,7 +259,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
           setReplaceData((prev) => ({
             ...prev,
             quantity: text,
-            price: `Rs.${(qty * unitPrice).toFixed(2)}`,
+            price: `Rs. ${formatPrice(qty * unitPrice)}`,
           }));
           return;
         }
@@ -265,14 +273,14 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
       setReplaceData((prev) => ({
         ...prev,
         quantity: text,
-        price: `Rs.${(qty * price).toFixed(2)}`,
+        price: `Rs. ${formatPrice(qty * price)}`,
       }));
     }
   };
 
   const getNumericPrice = (priceString: string): number => {
     if (!priceString) return 0;
-    const cleanPrice = priceString.replace(/Rs\.?/gi, "").trim();
+    const cleanPrice = priceString.replace(/Rs\.?\s*/gi, "").trim();
     return parseFloat(cleanPrice) || 0;
   };
 
@@ -316,7 +324,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         newProduct: replaceData.newProduct,
         newProductId: replaceData.newProductId,
         quantity: parseFloat(replaceData.quantity),
-        price: parseFloat(replaceData.price.replace("Rs.", "")),
+        price: parseFloat(replaceData.price.replace(/Rs\.?\s*/gi, "")),
         originalProductId: replaceRequestData.productId,
         originalProductName: replaceRequestData.productDisplayName,
         originalQuantity: replaceRequestData.qty,
@@ -351,16 +359,19 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
- 
-const isQuantityValid = parseFloat(replaceData.quantity) > 0;
+  const isQuantityValid = parseFloat(replaceData.quantity) > 0;
 
-const isFormComplete =
-    replaceData.newProduct && replaceData.quantity && isQuantityValid && !isPriceExceeded();
+  const isFormComplete =
+    replaceData.newProduct &&
+    replaceData.quantity &&
+    isQuantityValid &&
+    !isPriceExceeded();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const filteredItems = retailItems.filter((product) =>
-    product.displayName.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const modalItems = retailItems.map((item) => ({
+    label: item.displayName,
+    value: item.id,
+    price: formatPrice(item.discountedPrice || item.normalPrice || 0),
+  }));
 
   if (loadingCurrentReplace) {
     return (
@@ -398,7 +409,7 @@ const isFormComplete =
               {t("ReplaceRequestsApprove.Defined product")}
             </Text>
             <Text className="text-center font-medium mb-2">
-              {replaceData.replaceProductDisplayName} - {replaceData.replaceQty}{" "}
+              {replaceData.replaceProductDisplayName} - {replaceData.replaceQty}{" "}kg
               - {replaceData.replacePrice}
             </Text>
             <Text className="text-center text-gray-600 text-sm mb-1">
@@ -416,79 +427,75 @@ const isFormComplete =
           </Text>
 
           <View className="mb-4">
-            {showDropdown ? (
-              <View>
-                <View className="">
-                  <TextInput
-                    placeholder={t("PendingOrderScreen.Search products...")}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    className="w-full p-3 border border-gray-300 rounded-full flex-row justify-between items-center bg-white"
-                    placeholderTextColor="#888"
-                  />
-                </View>
-                <View className="border border-t-0 border-gray-300 rounded-b-lg bg-white max-h-40 mt-1">
-                  <ScrollView>
-                    {loadingRetailItems ? (
-                      <View className="p-4 items-center">
-                        <ActivityIndicator size="small" color="#000" />
-                      </View>
-                    ) : filteredItems.length > 0 ? (
-                      filteredItems.map((product) => (
-                        <TouchableOpacity
-                          key={product.id}
-                          className="p-3 border-b border-gray-100"
-                          onPress={() => {
-                            handleProductSelect(product);
-                            setShowDropdown(false);
-                            setSearchQuery("");
-                          }}
-                        >
-                          <Text className="font-medium">
-                            {product.displayName}
-                          </Text>
-                          <Text className="text-xs text-gray-500">
-                            {t("PendingOrderScreen.Rs")}.
-                            {(
-                              product.discountedPrice ||
-                              product.normalPrice ||
-                              0
-                            ).toFixed(2)}
-                          </Text>
-                        </TouchableOpacity>
-                      ))
-                    ) : (
-                      <View className="p-4 items-center">
-                        <Text className="text-gray-500">
-                          {t("ReplaceRequestsApprove.No products available")}
-                        </Text>
-                      </View>
-                    )}
-                  </ScrollView>
-                </View>
-              </View>
-            ) : (
-              <TouchableOpacity
-                className="border border-gray-300 rounded-full p-4 flex-row justify-between items-center bg-white"
-                onPress={() => setShowDropdown(!showDropdown)}
+            <TouchableOpacity
+              className="border border-gray-300 rounded-full p-4 flex-row justify-between items-center bg-white"
+              onPress={() => setShowProductModal(true)}
+            >
+              <Text
+                className={
+                  replaceData.newProduct ? "text-black" : "text-gray-400"
+                }
               >
-                <Text
-                  className={
-                    replaceData.newProduct ? "text-black" : "text-gray-400"
-                  }
+                {replaceData.newProduct ||
+                  t("PendingOrderScreen.Select Product")}
+              </Text>
+              <MaterialIcons
+                name="keyboard-arrow-down"
+                size={20}
+                color="#666"
+              />
+            </TouchableOpacity>
+
+            <GlobalSearchModal
+              visible={showProductModal}
+              onClose={() => setShowProductModal(false)}
+              title={t("PendingOrderScreen.Select Product")}
+              data={modalItems}
+              selectedItems={
+                replaceData.newProductId ? [replaceData.newProductId] : []
+              }
+              onSelect={(selected) => {
+                if (selected.length > 0) {
+                  const product = retailItems.find(
+                    (item) => item.id === selected[0],
+                  );
+                  if (product) handleProductSelect(product);
+                }
+              }}
+              searchPlaceholder={t("PendingOrderScreen.Search products...")}
+              noResultsText={t("ReplaceRequestsApprove.No products available")}
+              multiSelect={false}
+              isLoading={loadingRetailItems}
+              renderItem={(item, isSelected) => (
+                <TouchableOpacity
+                  className={`px-4 py-3 flex-row items-center justify-between border-b border-gray-100`}
+                  onPress={() => {
+                    const product = retailItems.find(
+                      (p) => p.id === item.value,
+                    );
+                    if (product) {
+                      handleProductSelect(product);
+                      setShowProductModal(false);
+                    }
+                  }}
                 >
-                  {replaceData.newProduct || "Select Product"}
-                </Text>
-                <AntDesign
-                  name={showDropdown ? "up" : "down"}
-                  size={16}
-                  color="#666"
-                />
-              </TouchableOpacity>
-            )}
+                  <View className="flex-1">
+                    <Text className="text-base text-gray-800">
+                      {item.label}
+                    </Text>
+                    <Text className="text-xs text-gray-500">
+                      Rs. {item.price}
+                    </Text>
+                  </View>
+                  {isSelected && (
+                    <MaterialIcons name="check" size={20} color="#21202B" />
+                  )}
+                </TouchableOpacity>
+              )}
+            />
           </View>
 
-        <View className="mb-4">
+          <View className="mb-4">
             <TextInput
               className="border border-gray-300 rounded-full p-4 bg-white"
               placeholder="Enter Quantity"
@@ -499,7 +506,9 @@ const isFormComplete =
             {/* Quantity validation message */}
             {replaceData.quantity !== "" && !isQuantityValid && (
               <Text className="text-red-600 text-sm text-center mt-1 px-2">
-                {t("ReplaceRequestsApprove.Please enter a value greater than 0")}
+                {t(
+                  "ReplaceRequestsApprove.Please enter a value greater than 0",
+                )}
               </Text>
             )}
           </View>
@@ -513,7 +522,7 @@ const isFormComplete =
               >
                 {replaceData.newProduct && replaceData.quantity
                   ? replaceData.price
-                  : "Rs.0.00"}
+                  : "Rs. 0.00"}
               </Text>
             </View>
           </View>
@@ -529,14 +538,21 @@ const isFormComplete =
           )}
 
           <TouchableOpacity
-            className={`py-3 ml-3 mr-3 rounded-full mb-4 ${isFormComplete ? "bg-black" : "bg-gray-300"}`}
+            className={`py-3 ml-3 mr-3 rounded-full mb-4 h-[50px] justify-center mt-[5%] ${isFormComplete ? "bg-black" : "bg-gray-300"}`}
             onPress={isFormComplete ? handleApprove : undefined}
             disabled={!isFormComplete || submitting}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             {submitting ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text className="text-white text-center font-medium text-base">
+              <Text className="text-white text-center font-medium text-lg">
                 {t("ReplaceRequestsApprove.Approve")}
               </Text>
             )}

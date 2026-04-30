@@ -904,7 +904,8 @@
     "Completed Time": "Completed Time",
     "Retry": "Retry",
     "Pending": "Pending",
-    "Opened": "Opened"
+    "Opened": "Opened",
+    "My Target":"My Target"
   },
   "OpenedOrderScreen": {
     "INV No": "INV No :",
@@ -921,6 +922,8 @@
   },
   "PendingOrderScreen": {
     "Completing order": "Completing order...",
+    "Select New Product":"Select New Product",
+    "Select Product":"Select Product",
     "Processing": "Processing...",
     "Custom Selected Items": "Custom Selected Items",
     "Back to Edit": "Back to Edit",

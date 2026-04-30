@@ -903,7 +903,8 @@
     "Completed Time": "முடிந்த நேரம்",
     "Retry": "மீண்டும் முயற்சிக்கவும்",
     "Pending": "நிலுவையில் உள்ளது",
-    "Opened": "திறக்கப்பட்டது"
+    "Opened": "திறக்கப்பட்டது",
+    "My Target":"எனது இலக்கு "
   },
   "OpenedOrderScreen": {
     "INV No": "INV எண்:",
@@ -921,6 +922,8 @@
   "PendingOrderScreen": {
     "Completing order": "ஆர்டரை முடிக்கிறது...",
     "Processing": "செயலாக்குகிறது...",
+    "Select New Product":"புதிய தயாரிப்பைத் தேர்ந்தெடுக்கவும்",
+    "Select Product":"தயாரிப்பைத் தேர்ந்தெடுக்கவும்",
     "Custom Selected Items": "வாடிக்கையாளர் தேர்ந்தெடுத்த பொருட்கள்",
     "Back to Edit": "திருத்தத்திற்கு திரும்பவும்",
     "Mark as Completed": "முடிந்ததாக குறிக்கவும்",

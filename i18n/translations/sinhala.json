@@ -904,7 +904,8 @@
     "Completed Time": "සම්පූර්ණ කළ වේලාව",
     "Retry": "නැවත උත්සාහ කරන්න",
     "Pending": "අපරිපූර්ණ",
-    "Opened": "විවෘත කළ"
+    "Opened": "විවෘත කළ",
+    "My Target":"මගේ ඉලක්කය"
   },
   "OpenedOrderScreen": {
     "INV No ": "INV අංකය:",
@@ -922,6 +923,8 @@
   "PendingOrderScreen": {
     "Completing order": "ඇණවුම සම්පූර්ණ කරමින්...",
     "Processing": "සකසමින්...",
+    "Select New Product":"නව නිෂ්පාදනය තෝරන්න",
+    "Select Product":"නිෂ්පාදනය තෝරන්න",
     "Custom Selected Items": "පාරිභෝගික-තෝරාගත් අයිතම",
     "Back to Edit": "සංස්කරණය වෙත ආපසු",
     "Mark as Completed": "සම්පූර්ණ කළ ලෙස ලකුණු කරන්න",

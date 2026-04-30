@@ -569,7 +569,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
   return (
     <View className="flex-1 bg-[#282828]">
       <CustomHeader
-        title={t("TargetOrderScreen.My Daily Target")}
+        title={t("TargetOrderScreen.My Target")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => navigation.navigate("DistridutionaDashboard")}
@@ -679,7 +679,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           ]}
           className="flex-1 text-center text-white font-bold"
         >
-          {selectedToggle === "ToDo" ? t("TargetOrderScreen.No") : ""}
+          {selectedToggle === "ToDo" ? t("TargetOrderScreen.No") : t("TargetOrderScreen.No")}
         </Text>
         <Text
           style={[
@@ -781,7 +781,9 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                     {(index + 1).toString().padStart(2, "0")}
                   </Text>
                 ) : (
-                  <Ionicons name="flag" size={20} color="#980775" />
+                   <Text className="text-center font-medium">
+                    {(index + 1).toString().padStart(2, "0")}
+                  </Text>
                 )}
               </View>
 

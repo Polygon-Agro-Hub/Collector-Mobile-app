@@ -162,6 +162,7 @@ function MainTabNavigator() {
       <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
       <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
       <Tab.Screen name="ReportGenerator" component={ReportGenerator as any} />
+      <Tab.Screen name="PassTarget" component={PassTarget as any} />
       <Tab.Screen
         name="CollectionOfficerDashboard"
         component={CollectionOfficerDashboard}
@@ -344,7 +345,7 @@ function AppContent() {
             <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
             <Stack.Screen name="Timer" component={Timer as any} />
-            <Stack.Screen name="PassTarget" component={PassTarget as any} />
+           
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen
               name="ChangePassword"
