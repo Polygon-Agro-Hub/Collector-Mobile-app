@@ -175,7 +175,7 @@
     "This NIC is already registered in the system.": "This NIC is already registered in the system.",
     "This Email is already registered in the system.": "This Email is already registered in the system.",
     "Failed to verify email. Please try again.": "Failed to verify email. Please try again.",
-    "This phone number is already registered in the system.": "This mobile Number is already registered in the system.",
+    "This phone number is already registered in the system.": "This Mobile Number is already registered in the system.",
     "NIC Number must be 9 digits followed by 'V' or 12 digits.": "NIC Number must be 9 digits followed by 'V' or 12 digits.",
     "Email is required": "Email is required",
     "Invalid email address. Please enter a valid email format (e.g. example@domain.com).": "Invalid email address. Please enter a valid email format (e.g. example@domain.com).",
@@ -205,7 +205,7 @@
     "Order updated successfully": "Order updated successfully!",
     "Locked Package": "Locked Package",
     "This package is locked and cannot be accessed": "This package is locked and cannot be accessed",
-    "Invalid phone number": "Invalid mobile Number. Format must start with 7 (e.g., 7XXXXXXXX).",
+    "Invalid phone number": "Invalid Mobile Number. Format must start with 7 (e.g., 7XXXXXXXX).",
     "Phone number must be 9 digits long": "Mobile Number must be 9 digits long.",
     "Invalid Gmail address": "Invalid Gmail address. Gmail addresses cannot have consecutive dots (.), leading/trailing dots, or special characters except + and .",
     "Invalid email address Example": "Invalid email address. Please enter a valid email format (e.g. example@domain.com).",
@@ -558,7 +558,7 @@
     "Email": "--Email Address--",
     "Cancel": "Cancel",
     "Next": "Next",
-    "Phone Number 01 and Phone Number 02 cannot be the same.": "Phone Number 01 and Phone Number 02 cannot be the same.",
+    "Phone Number 01 and Phone Number 02 cannot be the same.": "Mobile Number 01 and Mobile Number 02 cannot be the same.",
     "Submit":"Submit"
   },
   "AddOfficerAddressDetails": {

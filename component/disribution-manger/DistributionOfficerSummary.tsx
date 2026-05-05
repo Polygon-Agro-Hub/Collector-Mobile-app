@@ -95,8 +95,8 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
             <View className="flex-row  justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                  className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
-                 style={{
+                className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.25,
@@ -111,8 +111,8 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
 
               <TouchableOpacity
                 onPress={onConfirm}
-                 className="p-2 py-3 px-6 bg-[#FF0700] rounded-lg"
-                 style={{
+                className="p-2 py-3 px-6 bg-[#FF0700] rounded-lg"
+                style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.25,
@@ -283,10 +283,8 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
               })
             }
             className="absolute top-2 left-4 bg-[#F6F6F680] rounded-full p-3"
-            
           >
-            <Entypo
-              name="chevron-left" size={25} color="#000" />
+            <Entypo name="chevron-left" size={25} color="#000" />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -425,15 +423,19 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
                 navigation.navigate("DailyTargetListOfficerDistribution", {
                   officerId,
                   collectionOfficerId,
+                  officerName,
+                  phoneNumber1,
+                  phoneNumber2,
+                  image,
                 })
               }
-               style={{
-                  shadowColor: "#060606",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
+              style={{
+                shadowColor: "#060606",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
             >
               <Text className="text-white text-center font-medium text-base">
                 {t("OfficerSummary.OpenTarget")}

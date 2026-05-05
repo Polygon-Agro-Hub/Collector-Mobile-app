@@ -228,6 +228,14 @@ function MainTabNavigator() {
         name="ReplaceRequestsScreen"
         component={ReplaceRequestsScreen as any}
       />
+      <Tab.Screen
+        name="DailyTargetListOfficerDistribution"
+        component={DailyTargetListOfficerDistribution as any}
+      />
+      <Tab.Screen
+        name="ReplaceRequestsApprove"
+        component={ReplaceRequestsApprove as any}
+      />
     </Tab.Navigator>
   );
 }
@@ -345,7 +353,7 @@ function AppContent() {
             <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
             <Stack.Screen name="Timer" component={Timer as any} />
-           
+
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen
               name="ChangePassword"

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -56,6 +57,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
     invoiceNumbers = [],
     processOrderId = [],
     officerId,
+    collectionOfficerId,
   } = route.params;
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -69,6 +71,25 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
   const [loadingOfficers, setLoadingOfficers] = useState<boolean>(false);
   const [officerModalVisible, setOfficerModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
+
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("DailyTargetListOfficerDistribution", {
+          officerId,
+          collectionOfficerId,
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const getOfficerName = useCallback(
     (officer: Officer) => {
@@ -280,7 +301,10 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
       );
 
       if (response.data.success) {
-        navigation.goBack();
+        navigation.navigate("DailyTargetListOfficerDistribution", {
+          officerId,
+          collectionOfficerId,
+        });
       } else {
         setError(response.data.message || t("Error.Failed to save data."));
       }
@@ -318,7 +342,12 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           title={`${t("PassTarget.EMP ID")} : ${officerId}`}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={() =>
+            navigation.navigate("DailyTargetListOfficerDistribution", {
+              officerId,
+              collectionOfficerId,
+            })
+          }
           textColor="white"
           bgColor="#282828"
           iconBgColor="#FFFFFF1A"
@@ -330,7 +359,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           }
         >
           {/* Assignee Selection */}
-          <View className="bg-white mx-4 my-2 p-4 rounded-full shadow-sm">
+          <View className="bg-white mx-4 my-2 p-4 ">
             <View className="flex-row items-center mb-3">
               <Text className="text-[#475A6A] font-semibold flex-1">
                 {selectedAssignee

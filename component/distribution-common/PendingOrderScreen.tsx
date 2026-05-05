@@ -734,34 +734,34 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     product.displayName.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
- const handleReplaceProduct = (item: FamilyPackItem) => {
-  if (orderStatus === "Completed") {
-    Alert.alert(
-      t("Error.Info"),
-      t("Error.Cannot replace products in completed orders"),
-    );
-    return;
-  }
+  const handleReplaceProduct = (item: FamilyPackItem) => {
+    if (orderStatus === "Completed") {
+      Alert.alert(
+        t("Error.Info"),
+        t("Error.Cannot replace products in completed orders"),
+      );
+      return;
+    }
 
-  setTimeout(() => {
-    const itemPrice = parseFloat(item.price) || 0;
-    const numericPrice = itemPrice;
+    setTimeout(() => {
+      const itemPrice = parseFloat(item.price) || 0;
+      const numericPrice = itemPrice;
 
-    setReplaceData({
-      selectedProduct: `${item.name} - ${item.weight}Kg - Rs. ${formatPrice(itemPrice)}`,
-      selectedProductPrice: numericPrice.toString(),
-      productType: item.productType || 0,
-      newProduct: "",
-      quantity: "",
-      price: `Rs. ${formatPrice(itemPrice)}`,
-      productTypeName: item.productTypeName || "",
-    });
+      setReplaceData({
+        selectedProduct: `${item.name} - ${item.weight}Kg - Rs. ${formatPrice(itemPrice)}`,
+        selectedProductPrice: numericPrice.toString(),
+        productType: item.productType || 0,
+        newProduct: "",
+        quantity: "",
+        price: `Rs. ${formatPrice(itemPrice)}`,
+        productTypeName: item.productTypeName || "",
+      });
 
-    setIsReplacementPriceHigher(false);
-    setSelectedItemForReplace(item);
-    setShowReplaceModal(true);
-  }, 100);
-};
+      setIsReplacementPriceHigher(false);
+      setSelectedItemForReplace(item);
+      setShowReplaceModal(true);
+    }, 100);
+  };
 
   const handleReplaceSubmit = async () => {
     if (
@@ -847,7 +847,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             ? t("Error.Product replacement successful!")
             : t("Error.Replacement request submitted successfully");
 
-        // Close modal first
         setShowReplaceModal(false);
         setShowDropdown(false);
         setSelectedItemForReplace(null);
@@ -863,9 +862,22 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           productTypeName: "",
         });
 
-        await loadOrderData(true);
-
-        Alert.alert(t("Error.Success"), successMessage);
+        if (jobRole === "Distribution Centre Manager") {
+          // Manager stays on screen and refreshes
+          await loadOrderData(true);
+          Alert.alert(t("Error.Success"), successMessage);
+        } else {
+          // Distribution Officer → navigate to TargetOrderScreen
+          Alert.alert(t("Error.Success"), successMessage, [
+            {
+              text: t("Error.Ok"),
+              onPress: () =>
+                navigation.navigate("Main" as any, {
+                  screen: "TargetOrderScreen",
+                }),
+            },
+          ]);
+        }
       } else {
         throw new Error(
           response.data.message ||

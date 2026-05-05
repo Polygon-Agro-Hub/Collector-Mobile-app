@@ -581,59 +581,58 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
   const getOutingStatus = (
     outTime: string | null,
+    scheduleDate: string | null,
     scheduleTime: string | null,
   ): string => {
-    if (!outTime || !scheduleTime) return "N/A";
+    if (!outTime || !scheduleDate || !scheduleTime) return "N/A";
 
     try {
       const outDate = new Date(outTime);
+
+      const outDay = new Date(outDate);
+      outDay.setHours(0, 0, 0, 0);
+
+      const schedDay = new Date(scheduleDate);
+      schedDay.setHours(0, 0, 0, 0);
+
+      if (outDay.getTime() > schedDay.getTime()) {
+        return t("CenterTargetScreen.Late");
+      }
+
+      if (outDay.getTime() < schedDay.getTime()) {
+        return t("CenterTargetScreen.On Time");
+      }
 
       const timeRangeMatch = scheduleTime.match(
         /within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i,
       );
 
+      let startHourStr: string,
+        startPeriod: string,
+        endHourStr: string,
+        endPeriod: string;
+
       if (!timeRangeMatch) {
         const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
         if (!altMatch) return "N/A";
-
-        var [, startHourStr, startPeriod, endHourStr, endPeriod] = altMatch;
+        [, startHourStr, startPeriod, endHourStr, endPeriod] = altMatch;
       } else {
-        var [, startHourStr, startPeriod, endHourStr, endPeriod] =
-          timeRangeMatch;
+        [, startHourStr, startPeriod, endHourStr, endPeriod] = timeRangeMatch;
       }
 
       const convertTo24Hour = (hourStr: string, period: string): number => {
         let hour = parseInt(hourStr);
-
-        if (period.toUpperCase() === "PM" && hour !== 12) {
-          hour += 12;
-        } else if (period.toUpperCase() === "AM" && hour === 12) {
-          hour = 0;
-        }
-
+        if (period.toUpperCase() === "PM" && hour !== 12) hour += 12;
+        else if (period.toUpperCase() === "AM" && hour === 12) hour = 0;
         return hour;
       };
 
-      const startHour = convertTo24Hour(startHourStr, startPeriod);
-      const endHour = convertTo24Hour(endHourStr, endPeriod);
+      const endTotalMinutes = convertTo24Hour(endHourStr, endPeriod) * 60;
+      const outTotalMinutes = outDate.getHours() * 60 + outDate.getMinutes();
 
-      const outHour = outDate.getHours();
-      const outMinutes = outDate.getMinutes();
-      const outTotalMinutes = outHour * 60 + outMinutes;
-
-      const startTotalMinutes = startHour * 60;
-      const endTotalMinutes = endHour * 60;
-
-      if (
-        outTotalMinutes >= startTotalMinutes &&
-        outTotalMinutes <= endTotalMinutes
-      ) {
-        return t("CenterTargetScreen.On Time");
-      } else if (outTotalMinutes < startTotalMinutes) {
-        return t("CenterTargetScreen.On Time");
-      } else {
-        return t("CenterTargetScreen.Late");
-      }
+      return outTotalMinutes <= endTotalMinutes
+        ? t("CenterTargetScreen.On Time")
+        : t("CenterTargetScreen.Late");
     } catch (error) {
       console.error("Error determining outing status:", error);
       return "N/A";
@@ -1839,38 +1838,28 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   </View>
 
                   {/* Outing Status */}
+
                   <View className="flex-[2] items-center justify-center px-2">
-                    <View
-                      className={`px-3 py-2 rounded-full ${
-                        getOutingStatus(item.outDlvrDate, item.sheduleTime) ===
-                        "On Time"
-                          ? "bg-"
-                          : getOutingStatus(
-                                item.outDlvrDate,
-                                item.sheduleTime,
-                              ) === "On Time"
-                            ? "bg-"
-                            : "bg-"
-                      }`}
-                    >
-                      <Text
-                        className={`text-xs font-medium text-center ${
-                          getOutingStatus(
-                            item.outDlvrDate,
-                            item.sheduleTime,
-                          ) === "On Time"
-                            ? "text-[#980775]"
-                            : getOutingStatus(
-                                  item.outDlvrDate,
-                                  item.sheduleTime,
-                                ) === "On Time"
-                              ? "text-[#980775]"
-                              : "text-[#FF0700]"
-                        }`}
-                      >
-                        {getOutingStatus(item.outDlvrDate, item.sheduleTime)}
-                      </Text>
-                    </View>
+                    {(() => {
+                      const outingStatus = getOutingStatus(
+                        item.outDlvrDate,
+                        item.sheduleDate,
+                        item.sheduleTime,
+                      );
+                      const isOnTime =
+                        outingStatus === t("CenterTargetScreen.On Time");
+                      return (
+                        <View className={`px-3 py-2 rounded-full`}>
+                          <Text
+                            className={`text-xs font-medium text-center ${
+                              isOnTime ? "text-[#980775]" : "text-[#FF0700]"
+                            }`}
+                          >
+                            {outingStatus}
+                          </Text>
+                        </View>
+                      );
+                    })()}
                   </View>
                 </>
               ) : selectedToggle === "Completed" ? (

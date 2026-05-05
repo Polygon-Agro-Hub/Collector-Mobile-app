@@ -375,7 +375,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
             className="flex-row items-center"
           >
             <View
-              className={`w-4 h-4 rounded  ${allSelected ? "" : " border bg-white border-black"} items-center justify-center mr-2`}
+              className={`w-6 h-6 rounded  ${allSelected ? "" : " border bg-white border-black"} items-center justify-center mr-2`}
             >
               {allSelected && (
                 <Entypo name="squared-minus" size={18} color="red" />

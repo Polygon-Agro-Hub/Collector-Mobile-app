@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Alert,
   Modal,
+  BackHandler,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -31,6 +32,10 @@ interface DailyTargetListOfficerDistributionProps {
     params: {
       collectionOfficerId: number;
       officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
     };
   };
 }
@@ -85,7 +90,41 @@ const DailyTargetListOfficerDistribution: React.FC<
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const { collectionOfficerId, officerId } = route.params;
+  const {
+    collectionOfficerId,
+    officerId,
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+    image,
+  } = route.params;
+
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("Main" as any, {
+          screen: "DistributionOfficerSummary",
+          params: {
+            officerId,
+            officerName,
+            phoneNumber1,
+            phoneNumber2,
+            collectionOfficerId,
+            image,
+          },
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const { t } = useTranslation();
 
   const getStatusColor = (status: string) => {
@@ -382,7 +421,19 @@ const DailyTargetListOfficerDistribution: React.FC<
           title={officerId || ""}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={() =>
+            navigation.navigate("Main" as any, {
+              screen: "DistributionOfficerSummary",
+              params: {
+                officerId,
+                officerName,
+                phoneNumber1,
+                phoneNumber2,
+                collectionOfficerId,
+                image,
+              },
+            })
+          }
           textColor="white"
           bgColor="#282828"
           iconBgColor="#FFFFFF1A"

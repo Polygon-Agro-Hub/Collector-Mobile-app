@@ -205,7 +205,6 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
   ) => {
     if (event.type === "set") {
       if (type === "start") {
-        // Change 4: If start date changes after end date was already set, clear the end date
         if (endDate !== undefined) {
           setEndDate(undefined);
         }

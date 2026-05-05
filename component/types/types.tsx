@@ -325,6 +325,10 @@ export type RootStackParamList = {
   DailyTargetListOfficerDistribution: {
     officerId: string;
     collectionOfficerId: number;
+    officerName: string;
+    phoneNumber1: string;
+    phoneNumber2: string;
+    image: string;
   };
   DigitalSignature: {
     orderId: Number;
@@ -351,7 +355,7 @@ export type RootStackParamList = {
     status: string;
     creatAt: string;
   };
-  NotEligibleScreen: undefined
+  NotEligibleScreen: undefined;
 };
 
 export interface OrderItem {

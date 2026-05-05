@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,12 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -121,6 +122,23 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     CurrentReplaceRequest[]
   >([]);
   const [submitting, setSubmitting] = useState(false);
+
+  useFocusEffect(
+      useCallback(() => {
+        const handleBackPress = () => {
+         navigation.navigate("ReplaceRequestsScreen");
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          handleBackPress,
+        );
+  
+        return () => subscription.remove();
+      }, [navigation]),
+    );
+  
 
   const replaceRequestData = route.params
     ?.replaceRequestData as ReplaceRequestData;
@@ -280,11 +298,15 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
 
   const getNumericPrice = (priceString: string): number => {
     if (!priceString) return 0;
-    const cleanPrice = priceString.replace(/Rs\.?\s*/gi, "").trim();
+    const cleanPrice = priceString
+      .replace(/Rs\.?\s*/gi, "")
+      .replace(/,/g, "")
+      .trim();
     return parseFloat(cleanPrice) || 0;
   };
 
   const isPriceExceeded = (): boolean => {
+    if (!replaceData.newProduct || !replaceData.quantity) return false;
     const currentPrice = getNumericPrice(replaceData.price);
     const definedPrice = getNumericPrice(
       replaceRequestData.replacePrice || "0",
@@ -346,7 +368,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         Alert.alert(
           t("Error.Success"),
           t("Error.Replace request approved successfully"),
-          [{ text: "OK", onPress: () => navigation.goBack() }],
+          [{ text: "OK", onPress: () => navigation.navigate("ReplaceRequestsScreen") }],
         );
       } else {
         Alert.alert(t("Error.Error"), t("Error.somethingWentWrong"));
@@ -362,8 +384,8 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   const isQuantityValid = parseFloat(replaceData.quantity) > 0;
 
   const isFormComplete =
-    replaceData.newProduct &&
-    replaceData.quantity &&
+    !!replaceData.newProduct &&
+    !!replaceData.quantity &&
     isQuantityValid &&
     !isPriceExceeded();
 
@@ -395,7 +417,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         title={`${t("ReplaceRequestsApprove.Order ID")} ${replaceData.invNo}`}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("ReplaceRequestsScreen")}
       />
 
       <ScrollView
@@ -409,8 +431,9 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
               {t("ReplaceRequestsApprove.Defined product")}
             </Text>
             <Text className="text-center font-medium mb-2">
-              {replaceData.replaceProductDisplayName} - {replaceData.replaceQty}{" "}kg
-              - {replaceData.replacePrice}
+              {replaceData.replaceProductDisplayName} - {replaceData.replaceQty}{" "}
+              kg - Rs.{" "}
+              {formatPrice(parseFloat(replaceData.replacePrice || "0"))}
             </Text>
             <Text className="text-center text-gray-600 text-sm mb-1">
               {t("ReplaceRequestsApprove.Relevant Product Type")}
@@ -531,23 +554,17 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
           {isPriceExceeded() && (
             <View className="mb-4 px-2">
               <Text className="text-red-600 text-sm text-center">
-                Price must match defined product price (
-                {replaceData.replacePrice})
+                Price must match defined product price
               </Text>
             </View>
           )}
 
           <TouchableOpacity
-            className={`py-3 ml-3 mr-3 rounded-full mb-4 h-[50px] justify-center mt-[5%] ${isFormComplete ? "bg-black" : "bg-gray-300"}`}
+            className={`py-3 ml-3 mr-3 rounded-full mb-4 h-[50px] justify-center mt-[5%] ${
+              isFormComplete ? "bg-black" : "bg-gray-300"
+            }`}
             onPress={isFormComplete ? handleApprove : undefined}
             disabled={!isFormComplete || submitting}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 6,
-            }}
           >
             {submitting ? (
               <ActivityIndicator size="small" color="white" />
