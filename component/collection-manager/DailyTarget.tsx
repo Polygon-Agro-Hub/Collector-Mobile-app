@@ -190,7 +190,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
       {/* Header */}
       <View className="bg-[#282828] px-4 py-3 flex-row justify-between items-center">
         <Text className="text-white text-lg font-bold ml-[35%]">
-          {t("DailyTarget.MyTarget")}
+          {t("TargetOrderScreen.My Daily Target")}
         </Text>
       </View>
 
@@ -291,7 +291,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={true}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 60 }}
         >
           <View style={{ minWidth: "100%" }}>
             {/* Table Header */}

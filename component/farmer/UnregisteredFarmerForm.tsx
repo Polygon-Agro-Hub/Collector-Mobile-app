@@ -252,17 +252,20 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       const response = await axios.post(apiUrl, body, { headers });
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
-      navigation.navigate("OTPE", {
-        firstName,
-        lastName,
-        NICnumber,
-        phoneNumber: `${callingCode}${phoneNumber}`,
-        district,
-        accNumber,
-        accHolderName,
-        bankName,
-        branchName,
-        PreferdLanguage,
+      navigation.navigate("Main" as any, {
+        screen: "OTPE",
+        params: {
+          firstName,
+          lastName,
+          NICnumber,
+          phoneNumber: `${callingCode}${phoneNumber}`,
+          district,
+          accNumber,
+          accHolderName,
+          bankName,
+          branchName,
+          PreferdLanguage,
+        },
       });
       setLoading(false);
     } catch (error) {
@@ -678,7 +681,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           {/* Submit Button */}
           <TouchableOpacity
             className={`rounded-3xl items-center justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
-            style={{ height: 50 }}
             onPress={() => {
               if (!loading) {
                 setLoading(true);
@@ -686,6 +688,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               }
             }}
             disabled={loading}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+              height: 50,
+            }}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />

@@ -21,21 +21,6 @@ const lg = require("../../assets/images/common/language.webp");
 const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   const { changeLanguage } = useContext(LanguageContext);
 
-  useEffect(() => {
-    const checkLanguagePreference = async () => {
-      try {
-        const storedLanguage = await AsyncStorage.getItem("@user_language");
-        if (storedLanguage) {
-          handleLanguageSelect(storedLanguage);
-        }
-      } catch (error) {
-        console.error("Failed to retrieve language preference:", error);
-      }
-    };
-
-    checkLanguagePreference();
-  }, []);
-
   const handleLanguageSelect = async (language: string) => {
     try {
       await AsyncStorage.setItem("@user_language", language);
@@ -49,7 +34,6 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => true;
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress,
@@ -65,7 +49,6 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View className="flex-1 bg-white justify-center">
-        {/* Image and text section */}
         <View className="items-center">
           <Image
             className="w-52 h-52 rounded-full"
@@ -81,7 +64,6 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* Buttons section */}
         <View className="w-64 self-center mt-8">
           <TouchableOpacity
             className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center h-[50px]"

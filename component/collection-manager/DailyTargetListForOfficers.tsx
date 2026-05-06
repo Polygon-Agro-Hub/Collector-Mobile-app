@@ -160,19 +160,21 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     }, []),
   );
 
-  // DailyTargetListForOfficers.tsx
-useFocusEffect(
-  React.useCallback(() => {
-    const onBackPress = () => {
-      navigation.popToTop();
-      navigation.goBack();
-      return true;
-    };
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.popToTop();
+        navigation.goBack();
+        return true;
+      };
 
-    const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
-    return () => subscription.remove();
-  }, [navigation]),
-);
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -209,8 +211,8 @@ useFocusEffect(
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => {
-          navigation.popToTop(); 
-          navigation.goBack(); 
+          navigation.popToTop();
+          navigation.goBack();
         }}
         textColor="white"
         bgColor="#282828"

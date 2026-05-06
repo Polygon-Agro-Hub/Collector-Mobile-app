@@ -224,6 +224,7 @@ function MainTabNavigator() {
         name="DistributionOfficerSummary"
         component={DistributionOfficerSummary as any}
       />
+      <Tab.Screen name="OTPE" component={OTPE} />
       <Tab.Screen
         name="ReplaceRequestsScreen"
         component={ReplaceRequestsScreen as any}
@@ -344,7 +345,6 @@ function AppContent() {
             <Stack.Screen name="ReportPage" component={ReportPage} />
             <Stack.Screen name="SideMenu" component={SideMenu} />
             <Stack.Screen name="ClaimOfficer" component={ClaimOfficer} />
-            <Stack.Screen name="OTPE" component={OTPE} />
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
             <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
             <Stack.Screen name="ViewScreen" component={ViewScreen as any} />

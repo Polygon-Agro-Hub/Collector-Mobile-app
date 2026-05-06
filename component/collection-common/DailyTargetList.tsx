@@ -195,7 +195,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
       {/* Header */}
 
       <CustomHeader
-        title={t("DailyTarget.DailyTarget")}
+        title={t("TargetOrderScreen.My Daily Target")}
         showBackButton={false}
         textColor="white"
         bgColor="#282828"
@@ -304,7 +304,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={true}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 60 }}
         >
           <View className="bg-white">
             {/* Table Header */}

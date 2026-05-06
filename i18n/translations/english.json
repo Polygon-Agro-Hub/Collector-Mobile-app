@@ -383,7 +383,7 @@
     "Success": "Success!",
     "Registration": "Registration Successful!",
     "OK": "OK",
-    "invalidOTP": "verification code is Incorrect",
+    "invalidOTP": "Verification Code is incorrect",
     "completeOTP": "Please enter the full verification code",
     "Resend in": "Resend in",
     "Resend again": "Resend again",

@@ -59,9 +59,7 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
         duration: 2000,
         useNativeDriver: false,
       }).start(() => {
-        setTimeout(() => {
-          onClose();
-        }, 500);
+        onClose();
       });
     }
   }, [visible]);
@@ -69,7 +67,7 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 justify-center items-center bg-black/50">
-        <View className="bg-white p-6 rounded-2xl items-center w-80 h-96 shadow-lg relative">
+        <View className="bg-white p-6 rounded-2xl items-center w-80 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {t("Otpverification.Success")}
           </Text>
@@ -116,8 +114,8 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     PreferdLanguage,
   } = route.params;
 
-  const [otpCode, setOtpCode] = useState<string>("");
-  const [maskedCode, setMaskedCode] = useState<string>("XXXXX");
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", ""]);
+  const [maskedCode] = useState<string>("XXXXX");
   const [referenceId, setReferenceId] = useState<string | null>(null);
   const [timer, setTimer] = useState<number>(240);
   const [isVerified, setIsVerified] = useState<boolean>(false);
@@ -130,32 +128,32 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
+  const pendingNavigation = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const selectedLanguage = t("Otpverification.LNG");
     setLanguage(selectedLanguage);
+
     const fetchReferenceId = async () => {
       try {
         const refId = await AsyncStorage.getItem("referenceId");
-        if (refId) {
-          setReferenceId(refId);
-        }
+        if (refId) setReferenceId(refId);
       } catch (error) {
         console.error("Failed to load referenceId:", error);
       }
     };
 
     fetchReferenceId();
+
+    setTimeout(() => inputRefs.current[0]?.focus(), 100);
   }, []);
 
   useEffect(() => {
     if (timer > 0 && !isVerified) {
       const interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer - 1);
+        setTimer((prev) => prev - 1);
       }, 1000);
-
       setDisabledResend(true);
-
       return () => clearInterval(interval);
     } else if (timer === 0 && !isVerified) {
       setDisabledResend(false);
@@ -164,22 +162,43 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   }, [timer, isVerified]);
 
   const handleOtpChange = (text: string, index: number) => {
-    const updatedOtpCode = otpCode.split("");
-    updatedOtpCode[index] = text;
-    setOtpCode(updatedOtpCode.join(""));
+    const sanitized = text.replace(/[^0-9]/g, "");
 
-    setIsOtpValid(updatedOtpCode.length === 5 && !updatedOtpCode.includes(""));
+    const updated = [...otpDigits];
+    updated[index] = sanitized;
+    setOtpDigits(updated);
 
-    if (text && inputRefs.current[index + 1]) {
+    const filled = updated.every((d) => d !== "");
+    setIsOtpValid(filled);
+
+    if (sanitized && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
-    if (updatedOtpCode.length === 5) {
+
+    if (filled) {
       Keyboard.dismiss();
     }
   };
 
+  const handleKeyPress = (e: any, index: number) => {
+    if (e.nativeEvent.key === "Backspace") {
+      if (otpDigits[index] !== "") {
+        const updated = [...otpDigits];
+        updated[index] = "";
+        setOtpDigits(updated);
+        setIsOtpValid(false);
+      } else if (index > 0) {
+        const updated = [...otpDigits];
+        updated[index - 1] = "";
+        setOtpDigits(updated);
+        setIsOtpValid(false);
+        inputRefs.current[index - 1]?.focus();
+      }
+    }
+  };
+
   const handleVerify = async () => {
-    const code = otpCode;
+    const code = otpDigits.join("");
     Keyboard.dismiss();
 
     if (code.length !== 5) {
@@ -233,7 +252,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       switch (statusCode) {
         case "1000":
           setIsVerified(true);
-          setModalVisible(true);
 
           const response1 = await axios.post(
             `${environment.API_BASE_URL}api/farmer/register-farmer`,
@@ -241,12 +259,14 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           );
           await AsyncStorage.removeItem("referenceId");
 
-          setTimeout(() => {
+          pendingNavigation.current = () => {
             navigation.navigate("FarmerQr" as any, {
               NICnumber: response1.data.NICnumber,
               userId: response1.data.userId,
             });
-          }, 2000);
+          };
+
+          setModalVisible(true);
           break;
 
         case "1001":
@@ -264,7 +284,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                 {
                   text: t("Otpverification.TryAgain"),
                   onPress: () => {
-                    setOtpCode("");
+                    setOtpDigits(["", "", "", "", ""]);
                     setIsOtpValid(false);
                     inputRefs.current[0]?.focus();
                   },
@@ -358,9 +378,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       const body = {
         source: "PolygonAgro",
         transport: "sms",
-        content: {
-          sms: otpMessage,
-        },
+        content: { sms: otpMessage },
         destination: `${phoneNumber}`,
       };
 
@@ -372,12 +390,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
         setIsOtpExpired(false);
         setVerificationAttempts(0);
-        setOtpCode("");
+        setOtpDigits(["", "", "", "", ""]);
         setIsOtpValid(false);
         setTimer(240);
         setDisabledResend(true);
 
         Alert.alert(t("Otpverification.Success"), t("Error.otpResent"));
+        setTimeout(() => inputRefs.current[0]?.focus(), 300);
       } else {
         Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
       }
@@ -442,10 +461,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           <View style={{ marginBottom: styles.verticalSpacing }}>
             <Image
               source={require("../../assets/images/collection-common/opt.webp")}
-              style={{
-                width: styles.imageWidth,
-                height: styles.imageHeight,
-              }}
+              style={{ width: styles.imageWidth, height: styles.imageHeight }}
               resizeMode="contain"
             />
           </View>
@@ -468,12 +484,10 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </Text>
           </View>
 
+          {/* OTP Input Boxes */}
           <View
             className="flex-row justify-center"
-            style={{
-              gap: wp(2.5),
-              marginBottom: styles.verticalSpacing,
-            }}
+            style={{ gap: wp(2.5), marginBottom: styles.verticalSpacing }}
           >
             {Array.from({ length: 5 }).map((_, index) => (
               <TextInput
@@ -487,15 +501,23 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                   fontSize: styles.otpInputTextSize,
                   textAlign: "center",
                   borderRadius: 10,
-                  borderColor: "#FFC738",
-                  borderWidth: 1,
+                  borderColor: otpDigits[index] !== "" ? "#FFC738" : "#FFC738",
+                  borderWidth: otpDigits[index] !== "" ? 2 : 1,
                   backgroundColor: "#FFFFFF",
                   color: "#000000",
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
                 }}
-                keyboardType="numeric"
+                keyboardType="number-pad"
                 maxLength={1}
-                value={otpCode[index] || ""}
+                autoCorrect={false}
+                autoCapitalize="none"
+                value={otpDigits[index]}
                 onChangeText={(text) => handleOtpChange(text, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
                 placeholder={maskedCode[index] || "_"}
                 placeholderTextColor="lightgray"
               />
@@ -503,7 +525,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
 
           <View style={{ marginBottom: styles.verticalSpacing / 2 }}>
-            <Text className="text-[#707070] text-center text-base">
+            <Text className="text-[#707070] text-center text-base font-medium">
               {t("Otpverification.Didreceive")}
             </Text>
           </View>
@@ -539,6 +561,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                 shadowOpacity: 0.25,
                 shadowRadius: 4,
                 elevation: 4,
+                marginBottom: 40,
               }}
               onPress={handleVerify}
               disabled={!isOtpValid || isVerified}
@@ -557,7 +580,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
       <ShowSuccessModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false);
+          pendingNavigation.current?.();
+          pendingNavigation.current = null;
+        }}
       />
     </View>
   );

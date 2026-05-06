@@ -56,6 +56,22 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     return true;
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("Lanuage");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const checkDCMAccess = async (empId: string, pass: string) => {
     if (!empId.trim() || !pass.trim()) return;
 
@@ -328,17 +344,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     await AsyncStorage.removeItem("@user_language");
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => true;
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress,
-      );
-      return () => subscription.remove();
-    }, []),
-  );
+
 
   return (
     <KeyboardAvoidingView
@@ -434,7 +440,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,
-                elevation: 6, 
+                elevation: 6,
               }}
               onPress={handleLogin}
               disabled={loading}
