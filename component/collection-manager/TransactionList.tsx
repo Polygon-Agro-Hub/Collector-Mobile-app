@@ -261,7 +261,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
             <TextInput
               placeholder={t("ManagerTransactions.Search")}
               placeholderTextColor="grey"
-              className="flex-1 text-sm text-gray-800"
+              className="flex-1 text-base text-[#565559]"
+              style={{ fontStyle: "italic" }}
               value={searchQuery}
               onChangeText={handleSearch}
             />
@@ -400,14 +401,17 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   </TouchableOpacity>
                 )}
                 ListEmptyComponent={
-                  <View className="items-center mt-[50%]">
+                  <View className="items-center mt-[40%]">
                     <LottieView
                       source={require("../../assets/lottie/no-data.json")}
                       autoPlay
                       loop
                       style={{ width: 150, height: 150 }}
                     />
-                    <Text style={{ fontSize: 16 }} className="text-gray-500">
+                    <Text
+                      style={{ fontSize: 14, marginTop: -20 }}
+                      className="text-gray-500"
+                    >
                       {t("ManagerTransactions.Notransactions")}
                     </Text>
                   </View>

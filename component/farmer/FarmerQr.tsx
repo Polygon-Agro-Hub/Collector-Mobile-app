@@ -346,7 +346,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               {/* Collect Button - Centered */}
               <View className="items-center mb-6 mx-4">
                 <TouchableOpacity
-                  className={`w-full h-[50px] rounded-full items-center justify-center ${
+                  className={`rounded-full items-center justify-center ${
                     !farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
                   }`}
                   onPress={() =>
@@ -362,6 +362,8 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                     shadowOpacity: 0.25,
                     shadowRadius: 10,
                     elevation: 6,
+                    width: 293,
+                    height: 50,
                   }}
                 >
                   <Text className="text-white text-lg font-medium">

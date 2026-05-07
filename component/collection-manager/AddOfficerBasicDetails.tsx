@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -65,6 +65,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   });
   const [jobRole, setJobRole] = useState<string>("Collection Officer");
 
+  const scrollRef = useRef<ScrollView>(null);
+
   const [phoneCode1, setPhoneCode1] = useState<string>("+94");
   const [phoneCode2, setPhoneCode2] = useState<string>("+94");
   const [phoneNumber1, setPhoneNumber1] = useState("");
@@ -102,6 +104,12 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const [countryItems, setCountryItems] = useState<CountryItem[]>([]);
   const [phoneCode1ModalVisible, setPhoneCode1ModalVisible] = useState(false);
   const [phoneCode2ModalVisible, setPhoneCode2ModalVisible] = useState(false);
+
+  useFocusEffect(
+  useCallback(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [])
+);
 
   useMemo(() => {
     const initialItems = countryData.map((country) => ({
@@ -575,6 +583,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
       />
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}

@@ -680,7 +680,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Submit Button */}
           <TouchableOpacity
-            className={`rounded-3xl items-center justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
+            className={`rounded-3xl items-center mb-[30%] justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
             onPress={() => {
               if (!loading) {
                 setLoading(true);
@@ -702,7 +702,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             ) : (
               <Text
                 style={{ fontSize: 18 }}
-                className="text-center text-white font-light"
+                className="text-center text-white font-light "
               >
                 {t("UnregisteredFarmerDetails.Submit")}
               </Text>

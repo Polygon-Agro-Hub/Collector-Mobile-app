@@ -211,11 +211,23 @@ function MainTabNavigator() {
         name="TargetOrderScreen"
         component={TargetOrderScreen as any}
       />
-
+      <Tab.Screen
+        name="UnregisteredFarmerDetails"
+        component={UnregisteredFarmerDetails}
+      />
+      <Tab.Screen
+        name="ManagerTransactions"
+        component={ManagerTransactions as any}
+      />
+      <Tab.Screen
+        name="DailyTargetListForOfficers"
+        component={DailyTargetListForOfficers as any}
+      />
       <Tab.Screen
         name="DistributionOfficersList"
         component={DistributionOfficersList}
       />
+      <Tab.Screen name="ClaimOfficer" component={ClaimOfficer} />
       <Tab.Screen
         name="ClaimDistribution"
         component={ClaimDistribution as any}
@@ -344,7 +356,7 @@ function AppContent() {
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="ReportPage" component={ReportPage} />
             <Stack.Screen name="SideMenu" component={SideMenu} />
-            <Stack.Screen name="ClaimOfficer" component={ClaimOfficer} />
+
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
             <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
             <Stack.Screen name="ViewScreen" component={ViewScreen as any} />
@@ -367,10 +379,7 @@ function AppContent() {
               name="Ufarmercropdetails"
               component={Ufarmercropdetails}
             />
-            <Stack.Screen
-              name="UnregisteredFarmerDetails"
-              component={UnregisteredFarmerDetails}
-            />
+
             <Stack.Screen
               name="AddOfficerBasicDetails"
               component={AddOfficerBasicDetails as any}
@@ -391,10 +400,7 @@ function AppContent() {
               name="NoCollectionCenterScreen"
               component={NoCollectionCenterScreen}
             />
-            <Stack.Screen
-              name="DailyTargetListForOfficers"
-              component={DailyTargetListForOfficers as any}
-            />
+
             <Stack.Screen
               name="PassTargetBetweenOfficers"
               component={PassTargetBetweenOfficers as any}
@@ -403,10 +409,7 @@ function AppContent() {
               name="RecieveTargetBetweenOfficers"
               component={RecieveTargetBetweenOfficers as any}
             />
-            <Stack.Screen
-              name="ManagerTransactions"
-              component={ManagerTransactions as any}
-            />
+
             <Stack.Screen
               name="Main"
               component={MainTabNavigator}
