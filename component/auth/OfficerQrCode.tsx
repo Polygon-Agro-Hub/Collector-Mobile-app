@@ -12,6 +12,7 @@ import { RootStackParamList } from "../types/types";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
+import LoadingPage from "../commons/LoadingPage";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -31,6 +32,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   const { t } = useTranslation();
   const [language, setLanguage] = useState<string>("en");
   const [profile, setProfile] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchLanguage = async () => {
@@ -44,30 +46,36 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   }, []);
 
   const fetchRegistrationDetails = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        Alert.alert(t("Error.error"), t("Error.No token found"));
-        return;
-      }
-
-      const response = await api.get("api/collection-officer/user-profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = response.data.data;
-
-      if (response.data.status === "success") {
-        setProfile(data);
-        setQR(data.QRcode || "");
-      } else {
-        Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
-      }
-    } catch (error) {
-      console.error("Error fetching registration details:", error);
-      Alert.alert(t("Error.error"), t("Error.Failed to fetch details"));
+  setIsLoading(true);
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      Alert.alert(t("Error.error"), t("Error.No token found"));
+      return;
     }
-  };
+
+    const [response] = await Promise.all([
+      api.get("api/collection-officer/user-profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      new Promise((resolve) => setTimeout(resolve, 1000)), // 👈 1 second minimum
+    ]);
+
+    const data = response.data.data;
+
+    if (response.data.status === "success") {
+      setProfile(data);
+      setQR(data.QRcode || "");
+    } else {
+      Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+    }
+  } catch (error) {
+    console.error("Error fetching registration details:", error);
+    Alert.alert(t("Error.error"), t("Error.Failed to fetch details"));
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const getFullName = () => {
     if (!profile) return "Loading...";
@@ -108,15 +116,13 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
-          "Gallery access is required to save QR Code."
+          "Gallery access is required to save QR Code.",
         );
         return;
       }
 
       const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
-
       const response = await FileSystem.downloadAsync(QR, fileUri);
-
       const asset = await MediaLibrary.createAssetAsync(response.uri);
       await MediaLibrary.createAlbumAsync("Download", asset, false);
 
@@ -135,7 +141,6 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       }
 
       const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
-
       const response = await FileSystem.downloadAsync(QR, fileUri);
 
       if (await Sharing.isAvailableAsync()) {
@@ -146,7 +151,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       } else {
         Alert.alert(
           "Sharing Unavailable",
-          "Sharing is not available on this device."
+          "Sharing is not available on this device.",
         );
       }
     } catch (error) {
@@ -163,76 +168,91 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, padding: 4 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="flex-1 justify-center">
-          {/* QR Code Display */}
-          <View className="items-center mb-8">
-            {QR ? (
-              <View className="bg-white p-4 rounded-3xl border-2 border-[#FAE432]">
+
+      {isLoading ? (
+        <LoadingPage fullScreen />
+      ) : (
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, padding: 4 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="flex-1 justify-center">
+            <View className="items-center mb-8 mt-[-5%]">
+              {QR ? (
+                <View className="bg-white p-4 rounded-3xl border-2 border-[#FAE432]">
+                  <Image
+                    source={{ uri: QR }}
+                    className="w-[270px] h-[270px]"
+                    resizeMode="contain"
+                  />
+                </View>
+              ) : (
+                <Text className="text-gray-500 text-center mt-4">
+                  {t("OfficerQr.Noavailable")}
+                </Text>
+              )}
+            </View>
+
+            <View className="flex-row items-center justify-center mb-8 px-4">
+              {profile && profile.image ? (
                 <Image
-                  source={{ uri: QR }}
-                  className="w-[300px] h-[300px]"
-                  resizeMode="contain"
+                  source={{ uri: profile.image }}
+                  className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
                 />
+              ) : (
+                <Image
+                  source={require("../../assets/images/collection-manager/pc-profile.webp")}
+                  className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
+                />
+              )}
+              <View>
+                <Text className="text-lg font-semibold">{getFullName()}</Text>
+                <Text className="text-gray-600">{getCompanyName()}</Text>
               </View>
-            ) : (
-              <Text className="text-gray-500 text-center mt-4">
-                {t("OfficerQr.Noavailable")}
-              </Text>
-            )}
-          </View>
+            </View>
 
-          {/* Profile Info */}
-          <View className="flex-row items-center justify-center mb-8 px-4">
-            {profile && profile.image ? (
-              <Image
-                source={{ uri: profile.image }}
-                className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
-              />
-            ) : (
-              <Image
-                source={require("../../assets/images/collection-manager/pc-profile.webp")}
-                className="w-20 h-20 rounded-full border-2 border-gray-300 mr-4"
-              />
-            )}
+            <View className="flex-row w-full px-8 pb-8 gap-4">
+              <TouchableOpacity
+                className="bg-black rounded-lg items-center justify-center flex-1 py-3 h-[70px]"
+                onPress={downloadQRCode}
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
+              >
+                <View className="flex-col items-center justify-center gap-2">
+                  <MaterialIcons name="download" size={24} color="white" />
+                  <Text className="text-white text-base">
+                    {t("OfficerQr.Download")}
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-            <View>
-              <Text className="text-lg font-semibold">{getFullName()}</Text>
-              <Text className="text-gray-600">{getCompanyName()}</Text>
+              <TouchableOpacity
+                className="bg-black rounded-lg items-center justify-center flex-1 py-4 h-[70px]"
+                onPress={shareQRCode}
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
+              >
+                <View className="flex-col items-center justify-center gap-2">
+                  <MaterialIcons name="share" size={24} color="white" />
+                  <Text className="text-white text-base">
+                    {t("OfficerQr.Share")}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
-
-          {/* Actions */}
-          <View className="flex-row w-full px-12 pb-8 gap-3">
-            <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
-              onPress={downloadQRCode}
-            >
-              <View className="flex-col items-center justify-center gap-2">
-                <MaterialIcons name="download" size={24} color="white" />
-                <Text className="text-white text-base">
-                  {t("OfficerQr.Download")}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
-              onPress={shareQRCode}
-            >
-              <View className="flex-col items-center justify-center gap-2">
-                <MaterialIcons name="share" size={24} color="white" />
-                <Text className="text-white text-base">
-                  {t("OfficerQr.Share")}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </View>
   );
 };

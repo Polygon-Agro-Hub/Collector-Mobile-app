@@ -56,6 +56,22 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     return true;
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("Lanuage");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const checkDCMAccess = async (empId: string, pass: string) => {
     if (!empId.trim() || !pass.trim()) return;
 
@@ -78,7 +94,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             empId: trimmedEmpId,
             password: pass,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -87,8 +103,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         if (data.jobRole.toLowerCase() === "distribution centre head") {
           setEmpIdError(
             t(
-              "Error.Distribution Centre Head are not allowed to access this application"
-            )
+              "Error.Distribution Centre Head are not allowed to access this application",
+            ),
           );
           return;
         } else {
@@ -128,7 +144,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     if (!empid && !password) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Password & Employee ID are not allowed to be empty")
+        t("Error.Password & Employee ID are not allowed to be empty"),
       );
       return false;
     }
@@ -136,7 +152,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     if (empid && !password) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Password is not allowed to be empty")
+        t("Error.Password is not allowed to be empty"),
       );
       return false;
     }
@@ -144,7 +160,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     if (!empid && password) {
       Alert.alert(
         t("Error.error"),
-        t("Error.Employee ID is not allowed to be empty")
+        t("Error.Employee ID is not allowed to be empty"),
       );
       return false;
     }
@@ -182,7 +198,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             empId: trimmedEmpId,
             password,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -209,7 +225,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         } else if (response.status === 401) {
           Alert.alert(
             t("Error.error"),
-            t("Error.Invalid Password. Please try again.")
+            t("Error.Invalid Password. Please try again."),
           );
         } else if (data.status === "error") {
           Alert.alert(t("Error.error"), t("Error.Invalid EMP ID"));
@@ -253,7 +269,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       if (token) {
         const timestamp = new Date();
         const expirationTime = new Date(
-          timestamp.getTime() + 8 * 60 * 60 * 1000
+          timestamp.getTime() + 8 * 60 * 60 * 1000,
         );
         await AsyncStorage.multiSet([
           ["tokenStoredTime", timestamp.toISOString()],
@@ -310,7 +326,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             empId: empId,
             status: status,
           }),
-        }
+        },
       );
 
       if (response) {
@@ -328,17 +344,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     await AsyncStorage.removeItem("@user_language");
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => true;
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress
-      );
-      return () => subscription.remove();
-    }, [])
-  );
+
 
   return (
     <KeyboardAvoidingView
@@ -375,20 +381,16 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             <Text>{t("SignIn.SigntoLogin")}</Text>
           </View>
 
-
           <View className="px-4 py-6">
             <Text className="text-base pb-[2%] font-light">
               {t("SignIn.Employee")}
             </Text>
             <View
-              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
-                }`}
+              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${
+                empIdError ? "border-red-500" : "border-[#F4F4F4]"
+              }`}
             >
-              <Image
-                source={user}
-                className="w-6 h-6"
-                resizeMode="contain"
-              />
+              <Image source={user} className="w-6 h-6" resizeMode="contain" />
               <TextInput
                 className="flex-1 text-base pl-2"
                 onChangeText={handleEmpIdChange}
@@ -399,9 +401,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
             {empIdError ? (
               <View className="mb-4">
-                <Text className="text-red-500 text-sm pl-3">
-                  {empIdError}
-                </Text>
+                <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>
               </View>
             ) : (
               <View className="mb-6" />
@@ -434,20 +434,26 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             </View>
 
             <TouchableOpacity
-              className="bg-black w-full rounded-3xl shadow-2xl items-center justify-center mb-[20%] h-[50px]"
+              className="bg-black w-full rounded-3xl items-center justify-center mb-[20%] h-[50px]"
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
               onPress={handleLogin}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text className="text-center font-light text-white text-lg">
+                <Text className="text-center font-semibold text-white text-lg">
                   {t("SignIn.Sign")}
                 </Text>
               )}
             </TouchableOpacity>
           </View>
-
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

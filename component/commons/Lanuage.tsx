@@ -21,21 +21,6 @@ const lg = require("../../assets/images/common/language.webp");
 const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   const { changeLanguage } = useContext(LanguageContext);
 
-  useEffect(() => {
-    const checkLanguagePreference = async () => {
-      try {
-        const storedLanguage = await AsyncStorage.getItem("@user_language");
-        if (storedLanguage) {
-          handleLanguageSelect(storedLanguage);
-        }
-      } catch (error) {
-        console.error("Failed to retrieve language preference:", error);
-      }
-    };
-
-    checkLanguagePreference();
-  }, []);
-
   const handleLanguageSelect = async (language: string) => {
     try {
       await AsyncStorage.setItem("@user_language", language);
@@ -49,7 +34,6 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => true;
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress,
@@ -65,7 +49,6 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
     >
       <View className="flex-1 bg-white justify-center">
-        {/* Image and text section */}
         <View className="items-center">
           <Image
             className="w-52 h-52 rounded-full"
@@ -81,33 +64,47 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* Buttons section */}
         <View className="w-64 self-center mt-8">
           <TouchableOpacity
             className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("en")}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
-            <Text className="text-white text-center text-lg">
-              ENGLISH
-            </Text>
+            <Text className="text-white text-center text-lg">ENGLISH</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             className="bg-[#413A3F] rounded-3xl mb-6 items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("si")}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
-            <Text className="text-white text-center text-lg">
-              සිංහල
-            </Text>
+            <Text className="text-white text-center text-lg">සිංහල</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             className="bg-[#413A3F] rounded-3xl items-center justify-center h-[50px]"
             onPress={() => handleLanguageSelect("ta")}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
-            <Text className="text-white text-center text-lg">
-              தமிழ்
-            </Text>
+            <Text className="text-white text-center text-lg">தமிழ்</Text>
           </TouchableOpacity>
         </View>
       </View>

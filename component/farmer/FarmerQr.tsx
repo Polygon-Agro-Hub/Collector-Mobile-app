@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -58,6 +58,19 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
   const route = useRoute<FarmerQrRouteProp>();
   const { userId } = route.params;
+  const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
 
   useEffect(() => {
     const fetchFarmerData = async () => {
@@ -237,24 +250,29 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     }
   };
 
-  const handleBackPress = () => {
-    navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-    return true;
-  };
+  const handleBackPress = useCallback(() => {
+    if (jobRole === "Collection Officer") {
+      navigation.navigate("Main" as any, {
+        screen: "CollectionOfficerDashboard",
+      });
+    } else if (jobRole === "Collection Centre Manager") {
+      navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
+    } else {
+      navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+    }
+  }, [navigation, jobRole]);
 
   useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-        return true;
-      };
-
+    useCallback(() => {
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress,
+        () => {
+          handleBackPress();
+          return true;
+        },
       );
       return () => subscription.remove();
-    }, [navigation]),
+    }, [handleBackPress]),
   );
 
   return (
@@ -328,8 +346,9 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               {/* Collect Button - Centered */}
               <View className="items-center mb-6 mx-4">
                 <TouchableOpacity
-                  className={`w-full h-[50px] rounded-full items-center justify-center ${!farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
-                    }`}
+                  className={`w-full h-[50px] rounded-full items-center justify-center ${
+                    !farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
+                  }`}
                   onPress={() =>
                     navigation.navigate("Main", {
                       screen: "UnregisteredCropDetails",
@@ -337,6 +356,13 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                     } as never)
                   }
                   disabled={!farmerQRCode}
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
                 >
                   <Text className="text-white text-lg font-medium">
                     {t("FarmerQr.Collect")}
@@ -344,17 +370,34 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
 
-              {/* Apply For Pension Button - Centered */}
               <View className="items-center mb-8 mx-4">
                 <TouchableOpacity
-                  className="border border-[#606060] w-full h-[50px] rounded-full items-center justify-center"
+                  style={{
+                    width: 293,
+                    height: 50,
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: "#000000",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#FFFFFF",
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 5,
+                  }}
                   onPress={checkPensionStatus}
                   disabled={checkingPensionStatus}
+                  activeOpacity={0.8}
                 >
                   {checkingPensionStatus ? (
                     <ActivityIndicator size="small" color="#606060" />
                   ) : (
-                    <Text className="text-gray-700 text-lg font-medium">
+                    <Text
+                      className="text-gray-700 font-medium"
+                      style={{ fontSize: wp(4.5) }}
+                    >
                       {t("FarmerQr.Apply For Pension")}
                     </Text>
                   )}
@@ -367,6 +410,13 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                   className="bg-black rounded-lg items-center justify-center flex-1 py-4"
                   onPress={downloadQRCode}
                   disabled={checkingPensionStatus}
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
                 >
                   <View className="flex-col items-center justify-center gap-2">
                     <MaterialIcons name="download" size={20} color="white" />
@@ -389,7 +439,15 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                   className="bg-black rounded-lg items-center justify-center flex-1 py-4"
                   onPress={shareQRCode}
                   disabled={checkingPensionStatus}
-                ><View className="flex-col items-center justify-center gap-2">
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
+                >
+                  <View className="flex-col items-center justify-center gap-2">
                     <MaterialIcons name="share" size={20} color="white" />
                     <Text
                       className="text-white text-base"

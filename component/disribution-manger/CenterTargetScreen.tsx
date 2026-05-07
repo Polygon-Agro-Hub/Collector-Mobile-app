@@ -581,59 +581,58 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
   const getOutingStatus = (
     outTime: string | null,
+    scheduleDate: string | null,
     scheduleTime: string | null,
   ): string => {
-    if (!outTime || !scheduleTime) return "N/A";
+    if (!outTime || !scheduleDate || !scheduleTime) return "N/A";
 
     try {
       const outDate = new Date(outTime);
+
+      const outDay = new Date(outDate);
+      outDay.setHours(0, 0, 0, 0);
+
+      const schedDay = new Date(scheduleDate);
+      schedDay.setHours(0, 0, 0, 0);
+
+      if (outDay.getTime() > schedDay.getTime()) {
+        return t("CenterTargetScreen.Late");
+      }
+
+      if (outDay.getTime() < schedDay.getTime()) {
+        return t("CenterTargetScreen.On Time");
+      }
 
       const timeRangeMatch = scheduleTime.match(
         /within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i,
       );
 
+      let startHourStr: string,
+        startPeriod: string,
+        endHourStr: string,
+        endPeriod: string;
+
       if (!timeRangeMatch) {
         const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
         if (!altMatch) return "N/A";
-
-        var [, startHourStr, startPeriod, endHourStr, endPeriod] = altMatch;
+        [, startHourStr, startPeriod, endHourStr, endPeriod] = altMatch;
       } else {
-        var [, startHourStr, startPeriod, endHourStr, endPeriod] =
-          timeRangeMatch;
+        [, startHourStr, startPeriod, endHourStr, endPeriod] = timeRangeMatch;
       }
 
       const convertTo24Hour = (hourStr: string, period: string): number => {
         let hour = parseInt(hourStr);
-
-        if (period.toUpperCase() === "PM" && hour !== 12) {
-          hour += 12;
-        } else if (period.toUpperCase() === "AM" && hour === 12) {
-          hour = 0;
-        }
-
+        if (period.toUpperCase() === "PM" && hour !== 12) hour += 12;
+        else if (period.toUpperCase() === "AM" && hour === 12) hour = 0;
         return hour;
       };
 
-      const startHour = convertTo24Hour(startHourStr, startPeriod);
-      const endHour = convertTo24Hour(endHourStr, endPeriod);
+      const endTotalMinutes = convertTo24Hour(endHourStr, endPeriod) * 60;
+      const outTotalMinutes = outDate.getHours() * 60 + outDate.getMinutes();
 
-      const outHour = outDate.getHours();
-      const outMinutes = outDate.getMinutes();
-      const outTotalMinutes = outHour * 60 + outMinutes;
-
-      const startTotalMinutes = startHour * 60;
-      const endTotalMinutes = endHour * 60;
-
-      if (
-        outTotalMinutes >= startTotalMinutes &&
-        outTotalMinutes <= endTotalMinutes
-      ) {
-        return t("CenterTargetScreen.On Time");
-      } else if (outTotalMinutes < startTotalMinutes) {
-        return t("CenterTargetScreen.On Time");
-      } else {
-        return t("CenterTargetScreen.Late");
-      }
+      return outTotalMinutes <= endTotalMinutes
+        ? t("CenterTargetScreen.On Time")
+        : t("CenterTargetScreen.Late");
     } catch (error) {
       console.error("Error determining outing status:", error);
       return "N/A";
@@ -904,6 +903,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
   const handleCloseIconPress = () => {
     setSelectedItems([]);
+    setSelectAll(false);
   };
 
   const handleRightIconPress = () => {
@@ -1086,8 +1086,8 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
               {successCount === 1
                 ? t("CenterTargetScreen.order one", { count: successCount })
                 : t("CenterTargetScreen.orders out for delivery", {
-                  count: successCount,
-                })}
+                    count: successCount,
+                  })}
             </Text>
 
             {/* Progress Bar */}
@@ -1249,8 +1249,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+            }`}
             onPress={() => setSelectedToggle("ToDo")}
             style={{
               shadowColor:
@@ -1262,8 +1263,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             }}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
-                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${
+                selectedToggle === "ToDo" ? "text-white" : "text-black"
+              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={[
                 { opacity: selectedToggle === "ToDo" ? 1 : 0.7 },
                 i18n.language === "si"
@@ -1298,8 +1300,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+            }`}
             onPress={() => setSelectedToggle("Completed")}
             style={{
               shadowColor:
@@ -1311,8 +1314,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             }}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
-                }`}
+              className={`font-bold ${
+                selectedToggle === "Completed" ? "text-white" : "text-black"
+              }`}
               style={[
                 { opacity: selectedToggle === "ToDo" ? 1 : 0.7 },
                 i18n.language === "si"
@@ -1347,8 +1351,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Out" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+              selectedToggle === "Out" ? "bg-[#980775]" : "bg-white"
+            }`}
             onPress={() => setSelectedToggle("Out")}
             style={{
               shadowColor: selectedToggle === "Out" ? "#980775" : "transparent",
@@ -1359,8 +1364,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             }}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "Out" ? "text-white" : "text-black"
-                }`}
+              className={`font-bold ${
+                selectedToggle === "Out" ? "text-white" : "text-black"
+              }`}
               style={[
                 { opacity: selectedToggle === "ToDo" ? 1 : 0.7 },
                 i18n.language === "si"
@@ -1406,18 +1412,20 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
               {/* Clear Date Filter Option */}
               <TouchableOpacity
-                className={`w-full mb-4 px-4 py-4 rounded-lg border-2 ${selectedDateFilter === null
-                  ? "bg-[#980775] border-[#980775]"
-                  : "bg-gray-50 border-gray-200"
-                  }`}
+                className={`w-full mb-4 px-4 py-4 rounded-lg border-2 ${
+                  selectedDateFilter === null
+                    ? "bg-[#980775] border-[#980775]"
+                    : "bg-gray-50 border-gray-200"
+                }`}
                 onPress={() => {
                   setSelectedDateFilter(null);
                   setShowCalendarModal(false);
                 }}
               >
                 <Text
-                  className={`text-center font-medium text-lg ${selectedDateFilter === null ? "text-white" : "text-gray-700"
-                    }`}
+                  className={`text-center font-medium text-lg ${
+                    selectedDateFilter === null ? "text-white" : "text-gray-700"
+                  }`}
                 >
                   {t("CenterTargetScreen.All Datese")}
                 </Text>
@@ -1432,10 +1440,11 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 return (
                   <TouchableOpacity
                     key={index}
-                    className={`w-full mb-3 px-4 py-4 rounded-lg border-2 ${isSelected
-                      ? "bg-[#980775] border-[#980775]"
-                      : "bg-white border-gray-300"
-                      }`}
+                    className={`w-full mb-3 px-4 py-4 rounded-lg border-2 ${
+                      isSelected
+                        ? "bg-[#980775] border-[#980775]"
+                        : "bg-white border-gray-300"
+                    }`}
                     onPress={() => {
                       setSelectedDateFilter(dateOption.label);
                       setShowCalendarModal(false);
@@ -1443,14 +1452,16 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   >
                     <View className="flex-row justify-between items-center">
                       <Text
-                        className={`font-semibold text-lg ${isSelected ? "text-white" : "text-gray-800"
-                          }`}
+                        className={`font-semibold text-lg ${
+                          isSelected ? "text-white" : "text-gray-800"
+                        }`}
                       >
                         {dateOption.label}
                       </Text>
                       <Text
-                        className={`font-medium ${isSelected ? "text-white" : "text-gray-500"
-                          }`}
+                        className={`font-medium ${
+                          isSelected ? "text-white" : "text-gray-500"
+                        }`}
                       >
                         {formatDateForDisplay(dateOption.date)}
                       </Text>
@@ -1490,20 +1501,22 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
               {/* Clear Date Filter Option */}
               <TouchableOpacity
-                className={`w-full mb-4 px-4 py-4 rounded-lg border-2 ${completedDateFilter === null
-                  ? "bg-[#980775] border-[#980775]"
-                  : "bg-gray-50 border-gray-200"
-                  }`}
+                className={`w-full mb-4 px-4 py-4 rounded-lg border-2 ${
+                  completedDateFilter === null
+                    ? "bg-[#980775] border-[#980775]"
+                    : "bg-gray-50 border-gray-200"
+                }`}
                 onPress={() => {
                   setCompletedDateFilter(null);
                   setShowCompletedCalendarModal(false);
                 }}
               >
                 <Text
-                  className={`text-center font-medium text-lg ${completedDateFilter === null
-                    ? "text-white"
-                    : "text-gray-700"
-                    }`}
+                  className={`text-center font-medium text-lg ${
+                    completedDateFilter === null
+                      ? "text-white"
+                      : "text-gray-700"
+                  }`}
                 >
                   {t("CenterTargetScreen.All Completion Dates")}
                 </Text>
@@ -1518,10 +1531,11 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 return (
                   <TouchableOpacity
                     key={index}
-                    className={`w-full mb-3 px-4 py-4 rounded-lg border-2 ${isSelected
-                      ? "bg-[#980775] border-[#980775]"
-                      : "bg-white border-gray-300"
-                      }`}
+                    className={`w-full mb-3 px-4 py-4 rounded-lg border-2 ${
+                      isSelected
+                        ? "bg-[#980775] border-[#980775]"
+                        : "bg-white border-gray-300"
+                    }`}
                     onPress={() => {
                       setCompletedDateFilter(dateOption.label);
                       setShowCompletedCalendarModal(false);
@@ -1529,14 +1543,16 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   >
                     <View className="flex-row justify-between items-center">
                       <Text
-                        className={`font-semibold text-lg ${isSelected ? "text-white" : "text-gray-800"
-                          }`}
+                        className={`font-semibold text-lg ${
+                          isSelected ? "text-white" : "text-gray-800"
+                        }`}
                       >
                         {dateOption.label}
                       </Text>
                       <Text
-                        className={`font-medium ${isSelected ? "text-white" : "text-gray-500"
-                          }`}
+                        className={`font-medium ${
+                          isSelected ? "text-white" : "text-gray-500"
+                        }`}
                       >
                         {formatDateForDisplay(dateOption.date)}
                       </Text>
@@ -1586,31 +1602,34 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
               <Text className="text-center text-gray-600 mb-6">
                 {selectedItems.length === 1
                   ? t(
-                    "CenterTargetScreen.Are you sure you want to send these selected",
-                  )
+                      "CenterTargetScreen.Are you sure you want to send these selected",
+                    )
                   : t("CenterTargetScreen.Are you sure you want", {
-                    count: selectedItems.length,
-                  })}
+                      count: selectedItems.length,
+                    })}
               </Text>
 
               <View className="flex-row justify-between">
                 <TouchableOpacity
-                  className={`px-4 py-3 rounded-lg flex-1 mr-2 ${loading ? "bg-gray-200" : "bg-gray-300"
-                    }`}
+                  className={`px-4 py-3 rounded-lg flex-1 mr-2 ${
+                    loading ? "bg-gray-200" : "bg-gray-300"
+                  }`}
                   onPress={() => setShowConfirmModal(false)}
                   disabled={loading}
                 >
                   <Text
-                    className={`text-center font-medium ${loading ? "text-gray-400" : "text-gray-700"
-                      }`}
+                    className={`text-center font-medium ${
+                      loading ? "text-gray-400" : "text-gray-700"
+                    }`}
                   >
                     {t("CenterTargetScreen.Cancel")}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className={`px-4 py-3 rounded-lg flex-1 ml-2 ${loading ? "bg-gray-400" : "bg-[#980775]"
-                    }`}
+                  className={`px-4 py-3 rounded-lg flex-1 ml-2 ${
+                    loading ? "bg-gray-400" : "bg-[#980775]"
+                  }`}
                   onPress={confirmAction}
                   disabled={loading}
                   style={loading ? { opacity: 0.6 } : { opacity: 1 }}
@@ -1787,8 +1806,9 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           displayedData.map((item, index) => (
             <TouchableOpacity
               key={item.id || index}
-              className={`flex-row py-4 border-b border-gray-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                }`}
+              className={`flex-row py-4 border-b border-gray-200 ${
+                index % 2 === 0 ? "bg-gray-50" : "bg-white"
+              }`}
             >
               {/* Row Number or Checkbox */}
               <View className="flex-1 items-center justify-center relative">
@@ -1818,36 +1838,28 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   </View>
 
                   {/* Outing Status */}
+
                   <View className="flex-[2] items-center justify-center px-2">
-                    <View
-                      className={`px-3 py-2 rounded-full ${getOutingStatus(item.outDlvrDate, item.sheduleTime) ===
-                        "On Time"
-                        ? "bg-"
-                        : getOutingStatus(
-                          item.outDlvrDate,
-                          item.sheduleTime,
-                        ) === "On Time"
-                          ? "bg-"
-                          : "bg-"
-                        }`}
-                    >
-                      <Text
-                        className={`text-xs font-medium text-center ${getOutingStatus(
-                          item.outDlvrDate,
-                          item.sheduleTime,
-                        ) === "On Time"
-                          ? "text-[#980775]"
-                          : getOutingStatus(
-                            item.outDlvrDate,
-                            item.sheduleTime,
-                          ) === "On Time"
-                            ? "text-[#980775]"
-                            : "text-[#FF0700]"
-                          }`}
-                      >
-                        {getOutingStatus(item.outDlvrDate, item.sheduleTime)}
-                      </Text>
-                    </View>
+                    {(() => {
+                      const outingStatus = getOutingStatus(
+                        item.outDlvrDate,
+                        item.sheduleDate,
+                        item.sheduleTime,
+                      );
+                      const isOnTime =
+                        outingStatus === t("CenterTargetScreen.On Time");
+                      return (
+                        <View className={`px-3 py-2 rounded-full`}>
+                          <Text
+                            className={`text-xs font-medium text-center ${
+                              isOnTime ? "text-[#980775]" : "text-[#FF0700]"
+                            }`}
+                          >
+                            {outingStatus}
+                          </Text>
+                        </View>
+                      );
+                    })()}
                   </View>
                 </>
               ) : selectedToggle === "Completed" ? (
@@ -1874,14 +1886,15 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                       return (
                         <View className="items-center">
                           <Text
-                            className={`text-center font-medium text-xs ${isScheduleDateToday(item.sheduleDate)
-                              ? status === "on-time"
-                                ? "text-[#980775]"
-                                : status === "late"
-                                  ? "text-[#FF0700]"
-                                  : "text-[#980775]"
-                              : "text-black"
-                              }`}
+                            className={`text-center font-medium text-xs ${
+                              isScheduleDateToday(item.sheduleDate)
+                                ? status === "on-time"
+                                  ? "text-[#980775]"
+                                  : status === "late"
+                                    ? "text-[#FF0700]"
+                                    : "text-[#980775]"
+                                : "text-black"
+                            }`}
                           >
                             {scheduleDisplay}
                           </Text>
@@ -1943,7 +1956,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 ? t("DailyTarget.NoTodoItems") || t("DailyTarget.NoTodoItems")
                 : selectedToggle === "Completed"
                   ? t("DailyTarget.noCompletedTargets") ||
-                  t("DailyTarget.noCompletedTargets")
+                    t("DailyTarget.noCompletedTargets")
                   : t("CenterTargetScreen.No out for delivery orders")}
             </Text>
           </View>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -18,7 +19,7 @@ import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
-import GlobalSearchModal from "@/component/commons/GlobalSearchModal";  
+import GlobalSearchModal from "@/component/commons/GlobalSearchModal";
 
 type PassTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -57,7 +58,9 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
   const [assignee, setAssignee] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
-  const [officers, setOfficers] = useState<{ label: string; value: string }[]>([]);
+  const [officers, setOfficers] = useState<{ label: string; value: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -112,9 +115,12 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
 
   const getOfficerName = (officer: Officer) => {
     switch (selectedLanguage) {
-      case "si": return officer.fullNameSinhala;
-      case "ta": return officer.fullNameTamil;
-      default: return officer.fullNameEnglish;
+      case "si":
+        return officer.fullNameSinhala;
+      case "ta":
+        return officer.fullNameTamil;
+      default:
+        return officer.fullNameEnglish;
     }
   };
 
@@ -150,8 +156,16 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
   };
 
   const handleAmountChange = (text: string) => {
-    setAmount(text);
-    const numericValue = parseFloat(text);
+    let sanitized = text.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    setAmount(sanitized);
+
+    const numericValue = parseFloat(sanitized);
     if (numericValue > maxAmount) {
       setError(t("Error.You have exceeded the maximum amount."));
     } else {
@@ -198,7 +212,10 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
       );
 
       if (response.status === 200) {
-        Alert.alert(t("Error.Success"), t("Error.Target transferred successfully."));
+        Alert.alert(
+          t("Error.Success"),
+          t("Error.Target transferred successfully."),
+        );
         navigation.reset({
           index: 0,
           routes: [
@@ -226,21 +243,65 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
       }
     } catch (error: any) {
       console.error("Transfer Target Error:", error);
-      Alert.alert(t("Error.error"), t("Error.An error occurred while transferring the target."));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.An error occurred while transferring the target."),
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Main",
+              params: {
+                screen: "EditTargetManager",
+                params: {
+                  varietyId,
+                  varietyNameEnglish,
+                  grade,
+                  target,
+                  todo,
+                  qty,
+                  varietyNameSinhala,
+                  varietyNameTamil,
+                  dailyTarget,
+                },
+              },
+            },
+          ],
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const getvarietyName = () => {
     switch (selectedLanguage) {
-      case "si": return route.params.varietyNameSinhala;
-      case "ta": return route.params.varietyNameTamil;
-      default: return route.params.varietyNameEnglish;
+      case "si":
+        return route.params.varietyNameSinhala;
+      case "ta":
+        return route.params.varietyNameTamil;
+      default:
+        return route.params.varietyNameEnglish;
     }
   };
 
-  const selectedOfficerLabel = officers.find((o) => o.value === assignee)?.label || null;
+  const selectedOfficerLabel =
+    officers.find((o) => o.value === assignee)?.label || null;
 
   return (
     <View className="flex-1 bg-white">
@@ -287,7 +348,8 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
             {t("PassTargetBetweenOfficers.maximum amount")}
           </Text>
           <Text className="text-xl font-bold text-center text-black mb-4">
-            {maxAmount}{t("PassTargetBetweenOfficers.kg")}
+            {maxAmount}
+            {t("PassTargetBetweenOfficers.kg")}
           </Text>
 
           <View className="border-b border-gray-300 my-4" />
@@ -325,9 +387,14 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
                   }}
                   numberOfLines={1}
                 >
-                  {selectedOfficerLabel || t("PassTargetBetweenOfficers.Select an officer")}
+                  {selectedOfficerLabel ||
+                    t("PassTargetBetweenOfficers.Select an officer")}
                 </Text>
-                <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+                <MaterialIcons
+                  name="keyboard-arrow-down"
+                  size={22}
+                  color="#9CA3AF"
+                />
               </TouchableOpacity>
             )}
 
@@ -346,14 +413,21 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
 
         <View className="mt-6 items-center">
           <TouchableOpacity
-            className={`rounded-full w-64 py-3 ${isSaveDisabled() ? "bg-[#ABABAB]" : "bg-[#000000]"}`}
+            className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveDisabled() ? "bg-[#ABABAB]" : "bg-[#000000]"}`}
             onPress={passTarget}
             disabled={isSaveDisabled()}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             {submitting ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text className="text-white text-center font-medium">
+              <Text className="text-white text-center font-medium ">
                 {t("PassTargetBetweenOfficers.Save")}
               </Text>
             )}
@@ -371,6 +445,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
         onSelect={(items) => setAssignee(items[0] ?? "")}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
+        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </View>
   );

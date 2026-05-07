@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import provincesData from "@/assets/jsons/sri-lanka-provinces.json";
 import jobRolesData from "@/assets/jsons/job-roles.json";
+import LoadingPage from "../commons/LoadingPage";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -72,6 +73,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "si" | "ta">(
     "en",
   );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -98,13 +100,8 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${newPhoneNumber}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-
       if (response.data.exists && newPhoneNumber !== profileData.phoneNumber) {
         setErrorMessage(
           t("Error.This phone number is already registered in the system."),
@@ -114,16 +111,12 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Error checking phone number:", error);
-    } finally {
     }
   };
 
   const handlePhoneNumberChange = (text: string) => {
-    if (text.startsWith("0")) {
-      text = text.replace(/^0+/, "");
-    }
+    if (text.startsWith("0")) text = text.replace(/^0+/, "");
     setNewPhoneNumber(text);
-
     if (text.length < 9) {
       setErrorMessage(t("Error.Phone number 1 must be at least 9 digits."));
     } else if (text.length > 9) {
@@ -136,9 +129,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   };
 
   const handlePhoneNumber2Change = (text: string) => {
-    if (text.startsWith("0")) {
-      text = text.replace(/^0+/, "");
-    }
+    if (text.startsWith("0")) text = text.replace(/^0+/, "");
     setNewPhoneNumber2(text);
     if (text.length < 9 && text.length > 0) {
       setErrorMessage2(t("Error.Phone number 2 must be at least 9 digits."));
@@ -160,13 +151,8 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         const token = await AsyncStorage.getItem("token");
         const response = await axios.get(
           `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode02}${newPhoneNumber2}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
-
         if (response.data.exists && newPhoneNumber2 !== "0") {
           setErrorMessage2(
             t("Error.This phone number is already registered in the system."),
@@ -176,7 +162,6 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         }
       } catch (error) {
         console.error("Error checking phone number 2:", error);
-      } finally {
       }
     }
   };
@@ -193,15 +178,11 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   }, []);
 
   const getTextStyle = (language: string) => {
-    if (language === "si") {
-      return {
-        fontSize: 13,
-        lineHeight: 20,
-      };
-    }
+    if (language === "si") return { fontSize: 13, lineHeight: 20 };
   };
 
   const fetchProfileData = async () => {
+    setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -209,20 +190,25 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         return;
       }
 
-      let response;
+      let apiCall;
 
       if (
         jobRole === "Distribution Centre Manager" ||
         jobRole === "Distribution Officer"
       ) {
-        response = await api.get("api/distribution-manager/user-profile", {
+        apiCall = api.get("api/distribution-manager/user-profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        response = await api.get("api/collection-officer/user-profile", {
+        apiCall = api.get("api/collection-officer/user-profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
+
+      const [response] = await Promise.all([
+        apiCall,
+        new Promise((resolve) => setTimeout(resolve, 1000)),
+      ]);
 
       const data = response.data.data;
 
@@ -257,12 +243,13 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     } catch (error) {
       console.error("Error fetching profile data:", error);
       Alert.alert(t("Error.error"), t("Error.Failed to load profile data"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleUpdatePhoneNumber = async () => {
     Keyboard.dismiss();
-
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -341,9 +328,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   ) => {
     for (const province of provincesData.provinces) {
       const districtObj = province.districts.find((d) => d.en === district);
-      if (districtObj) {
-        return districtObj[language];
-      }
+      if (districtObj) return districtObj[language];
     }
     return district;
   };
@@ -367,9 +352,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
       const districtObj = province.districts.find((d) => d.en === district);
       if (districtObj) {
         const cityObj = districtObj.cities.find((c) => c.en === city);
-        if (cityObj) {
-          return cityObj[language];
-        }
+        if (cityObj) return cityObj[language];
       }
     }
     return city;
@@ -382,21 +365,18 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     const jobRoleObj = jobRolesData.jobRoles.find(
       (role) => role.en === jobRole,
     );
-    if (jobRoleObj) {
-      return jobRoleObj[language];
-    }
-    return jobRole;
+    return jobRoleObj ? jobRoleObj[language] : jobRole;
   };
 
   const getcompanyName = () => {
     if (!profileData) return "Loading...";
     switch (selectedLanguage) {
       case "si":
-        return `${profileData.companyNameSinhala}`;
+        return profileData.companyNameSinhala;
       case "ta":
-        return `${profileData.companyNameTamil}`;
+        return profileData.companyNameTamil;
       default:
-        return `${profileData.companyNameEnglish} `;
+        return profileData.companyNameEnglish;
     }
   };
 
@@ -404,11 +384,11 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     if (!profileData) return "Loading...";
     switch (selectedLanguage) {
       case "si":
-        return `${profileData.firstNameSinhala}`;
+        return profileData.firstNameSinhala;
       case "ta":
-        return `${profileData.firstNameTamil}`;
+        return profileData.firstNameTamil;
       default:
-        return `${profileData.firstNameEnglish} `;
+        return profileData.firstNameEnglish;
     }
   };
 
@@ -416,11 +396,11 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     if (!profileData) return "Loading...";
     switch (selectedLanguage) {
       case "si":
-        return `${profileData.lastNameSinhala}`;
+        return profileData.lastNameSinhala;
       case "ta":
-        return `${profileData.lastNameTamil}`;
+        return profileData.lastNameTamil;
       default:
-        return `${profileData.lastNameEnglish} `;
+        return profileData.lastNameEnglish;
     }
   };
 
@@ -433,283 +413,291 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      >
-        <View className="items-center mb-6 mt-4">
-          <View className="items-center relative">
-            <Image
-              source={
-                profileImage && profileImage.uri
-                  ? { uri: profileImage.uri }
-                  : require("../../assets/images/auth/my-profile.webp")
-              }
-              className="w-[100px] h-[100px] rounded-full"
-              defaultSource={require("../../assets/images/auth/my-profile.webp")}
-            />
-          </View>
-        </View>
-
-        <View className="gap-y-4 px-4 pb-6">
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.FirstName")}
-            </Text>
-            <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <TextInput
-                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
-                  value={getfirstName()}
-                  editable={false}
-                  scrollEnabled={false}
-                />
-              </ScrollView>
+      {isLoading ? (
+        <LoadingPage fullScreen />
+      ) : (
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        >
+          <View className="items-center mb-6 mt-4">
+            <View className="items-center relative">
+              <Image
+                source={
+                  profileImage && profileImage.uri
+                    ? { uri: profileImage.uri }
+                    : require("../../assets/images/auth/my-profile.webp")
+                }
+                className="w-[100px] h-[100px] rounded-full"
+                defaultSource={require("../../assets/images/auth/my-profile.webp")}
+              />
             </View>
           </View>
 
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.LastName")}
-            </Text>
-            <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <TextInput
-                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
-                  value={getlastName()}
-                  editable={false}
-                  scrollEnabled={false}
-                />
-              </ScrollView>
-            </View>
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.Company")}
-            </Text>
-            <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <TextInput
-                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
-                  value={getcompanyName()}
-                  editable={false}
-                  scrollEnabled={false}
-                />
-              </ScrollView>
-            </View>
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.CenterCode")}
-            </Text>
-            <TextInput
-              className="px-4 border border-[#F4F4F4] text-black bg-[#F4F4F4] rounded-3xl h-[50px] text-base"
-              value={profileData.regcode}
-              editable={false}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.CenterName")}
-            </Text>
-            <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <TextInput
-                  className="px-4 text-black min-w-[250px] h-[50px] text-base"
-                  value={profileData.collectionCenterName}
-                  editable={false}
-                  scrollEnabled={false}
-                />
-              </ScrollView>
-            </View>
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.Job")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={getTranslatedJobRole(
-                profileData.jobRole,
-                selectedLanguage,
-              )}
-              editable={false}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.NIC")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={profileData.nicNumber}
-              editable={false}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.Phone1")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={newPhoneNumber}
-              placeholder="7XXXXXXXX"
-              keyboardType="numeric"
-              onChangeText={handlePhoneNumberChange}
-              maxLength={9}
-              editable={false}
-            />
-            {errorMessage && (
-              <Text className="text-red-500 text-sm mt-1">{errorMessage}</Text>
-            )}
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.Phone2")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={newPhoneNumber2}
-              placeholder="7XXXXXXXX"
-              keyboardType="numeric"
-              onChangeText={handlePhoneNumber2Change}
-              maxLength={9}
-              editable={false}
-            />
-            {errorMessage2 && (
-              <Text className="text-red-500 text-sm mt-1">{errorMessage2}</Text>
-            )}
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.House")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={profileData.houseNumber}
-              editable={false}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.Street")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={profileData.streetName}
-              editable={false}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.City")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={getTranslatedCity(
-                profileData.city,
-                profileData.district,
-                selectedLanguage,
-              )}
-              editable={false}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.District")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={getTranslatedDistrict(
-                profileData.district,
-                selectedLanguage,
-              )}
-              editable={false}
-            />
-          </View>
-
-          <View>
-            <Text
-              style={[getTextStyle(selectedLanguage)]}
-              className="text-gray-500 mb-2 text-base"
-            >
-              {t("Profile.Province")}
-            </Text>
-            <TextInput
-              className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-              value={getTranslatedProvince(
-                profileData.province,
-                selectedLanguage,
-              )}
-              editable={false}
-            />
-          </View>
-
-          {showUpdateButton &&
-            (newPhoneNumber !== profileData.phoneNumber ||
-              newPhoneNumber2 !== profileData.phoneNumber2) && (
-              <TouchableOpacity
-                onPress={handleUpdatePhoneNumber}
-                className="bg-black rounded-3xl mb-4 h-[50px] items-center justify-center"
+          <View className="gap-y-4 px-4 pb-6">
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
               >
-                <Text className="text-center text-white font-semibold text-lg">
-                  {t("Profile.Update")}
+                {t("Profile.FirstName")}
+              </Text>
+              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TextInput
+                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    value={getfirstName()}
+                    editable={false}
+                    scrollEnabled={false}
+                  />
+                </ScrollView>
+              </View>
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.LastName")}
+              </Text>
+              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TextInput
+                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    value={getlastName()}
+                    editable={false}
+                    scrollEnabled={false}
+                  />
+                </ScrollView>
+              </View>
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.Company")}
+              </Text>
+              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TextInput
+                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    value={getcompanyName()}
+                    editable={false}
+                    scrollEnabled={false}
+                  />
+                </ScrollView>
+              </View>
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.CenterCode")}
+              </Text>
+              <TextInput
+                className="px-4 border border-[#F4F4F4] text-black bg-[#F4F4F4] rounded-3xl h-[50px] text-base"
+                value={profileData.regcode}
+                editable={false}
+              />
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.CenterName")}
+              </Text>
+              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TextInput
+                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    value={profileData.collectionCenterName}
+                    editable={false}
+                    scrollEnabled={false}
+                  />
+                </ScrollView>
+              </View>
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.Job")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={getTranslatedJobRole(
+                  profileData.jobRole,
+                  selectedLanguage,
+                )}
+                editable={false}
+              />
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.NIC")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={profileData.nicNumber}
+                editable={false}
+              />
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.Phone1")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={newPhoneNumber}
+                placeholder="7XXXXXXXX"
+                keyboardType="numeric"
+                onChangeText={handlePhoneNumberChange}
+                maxLength={9}
+                editable={false}
+              />
+              {errorMessage && (
+                <Text className="text-red-500 text-sm mt-1">
+                  {errorMessage}
                 </Text>
-              </TouchableOpacity>
-            )}
-        </View>
-      </ScrollView>
+              )}
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.Phone2")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={newPhoneNumber2}
+                placeholder="7XXXXXXXX"
+                keyboardType="numeric"
+                onChangeText={handlePhoneNumber2Change}
+                maxLength={9}
+                editable={false}
+              />
+              {errorMessage2 && (
+                <Text className="text-red-500 text-sm mt-1">
+                  {errorMessage2}
+                </Text>
+              )}
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.House")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={profileData.houseNumber}
+                editable={false}
+              />
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.Street")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={profileData.streetName}
+                editable={false}
+              />
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.City")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={getTranslatedCity(
+                  profileData.city,
+                  profileData.district,
+                  selectedLanguage,
+                )}
+                editable={false}
+              />
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.District")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={getTranslatedDistrict(
+                  profileData.district,
+                  selectedLanguage,
+                )}
+                editable={false}
+              />
+            </View>
+
+            <View>
+              <Text
+                style={[getTextStyle(selectedLanguage)]}
+                className="text-gray-500 mb-2 text-base"
+              >
+                {t("Profile.Province")}
+              </Text>
+              <TextInput
+                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
+                value={getTranslatedProvince(
+                  profileData.province,
+                  selectedLanguage,
+                )}
+                editable={false}
+              />
+            </View>
+
+            {showUpdateButton &&
+              (newPhoneNumber !== profileData.phoneNumber ||
+                newPhoneNumber2 !== profileData.phoneNumber2) && (
+                <TouchableOpacity
+                  onPress={handleUpdatePhoneNumber}
+                  className="bg-black rounded-3xl mb-4 h-[50px] items-center justify-center"
+                >
+                  <Text className="text-center text-white font-semibold text-lg">
+                    {t("Profile.Update")}
+                  </Text>
+                </TouchableOpacity>
+              )}
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 };

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -165,6 +166,21 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     }, []),
   );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   useEffect(() => {
     if (selectedJobRole) {
       const filtered = officers.filter(
@@ -178,8 +194,9 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
-        }`}
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${
+        item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
+      }`}
       onPress={() => {
         if (item.status !== "Not Approved") {
           navigation.navigate("DistributionOfficerSummary" as any, {
@@ -193,6 +210,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         }
       }}
       disabled={item.status === "Not Approved"}
+      style={{
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 6,
+      }}
     >
       <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
         <Image
@@ -264,9 +288,30 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </TouchableOpacity>
 
         {showMenu && (
-          <View className="absolute top-14 right-4 bg-white shadow-lg rounded-lg">
+          <View 
+            style={{
+              position: "absolute",
+              top: 56,
+              right: 16,
+              backgroundColor: "white",
+              zIndex: 50,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#00000040",
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 5,
+            }}
+          >
             <TouchableOpacity
-              className="px-4 py-2 bg-white rounded-lg shadow-lg"
+               style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: "white",
+                borderRadius: 8,
+              }}
               onPress={() => navigation.navigate("ClaimDistribution")}
             >
               <Text className="text-gray-700 font-semibold">

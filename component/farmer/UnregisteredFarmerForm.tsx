@@ -252,17 +252,20 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       const response = await axios.post(apiUrl, body, { headers });
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
-      navigation.navigate("OTPE", {
-        firstName,
-        lastName,
-        NICnumber,
-        phoneNumber: `${callingCode}${phoneNumber}`,
-        district,
-        accNumber,
-        accHolderName,
-        bankName,
-        branchName,
-        PreferdLanguage,
+      navigation.navigate("Main" as any, {
+        screen: "OTPE",
+        params: {
+          firstName,
+          lastName,
+          NICnumber,
+          phoneNumber: `${callingCode}${phoneNumber}`,
+          district,
+          accNumber,
+          accHolderName,
+          bankName,
+          branchName,
+          PreferdLanguage,
+        },
       });
       setLoading(false);
     } catch (error) {
@@ -457,21 +460,23 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               placeholderTextColor="#9CA3AF"
               value={NICnumber}
               onChangeText={(text) => {
-                const updatedText = text.replace(/v$/, "V");
+                const sanitized = text.replace(/[^0-9vV]/g, "");
+                if (sanitized !== text) return;
+
+                if (
+                  /^\d{9}[vV]$/.test(NICnumber) &&
+                  sanitized.length > NICnumber.length
+                ) {
+                  return;
+                }
+
+                const updatedText = sanitized.replace(/v$/, "V");
                 setNICnumber(updatedText);
 
                 if (!updatedText) {
                   setNICError("");
                   if (fieldErrors.nic)
                     setFieldErrors((prev) => ({ ...prev, nic: "" }));
-                  return;
-                }
-
-                const isValidCharacters = /^(\d+|[\d]+[vV]?)$/.test(
-                  updatedText,
-                );
-                if (!isValidCharacters) {
-                  setNICError(t("UnregisteredFarmerDetails.InvalidNIC"));
                   return;
                 }
 
@@ -594,12 +599,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 if (/^\d*$/.test(text)) {
                   setAccNumber(text);
                   setAccNumberError("");
-                  if (fieldErrors.accNumber)
-                    setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
-                } else {
-                  setAccNumberError(
-                    t("UnregisteredFarmerDetails.AccountNumberError"),
-                  );
+                  setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
                 }
               }}
             />
@@ -681,7 +681,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           {/* Submit Button */}
           <TouchableOpacity
             className={`rounded-3xl items-center justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
-            style={{ height: 50 }}
             onPress={() => {
               if (!loading) {
                 setLoading(true);
@@ -689,6 +688,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               }
             }}
             disabled={loading}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+              height: 50,
+            }}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />

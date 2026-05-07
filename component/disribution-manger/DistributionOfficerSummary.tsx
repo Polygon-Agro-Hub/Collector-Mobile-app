@@ -86,7 +86,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
             </View>
-            <Text className="text-center text-sm font-semibold mb-4">
+            <Text className="text-center text-lg font-semibold mb-4">
               {t(
                 "DisclaimOfficer.Are you sure you want to disclaim this officer?",
               )}
@@ -95,18 +95,32 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
             <View className="flex-row  justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-2 border-[#95A1AC] border rounded-lg"
+                className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                style={{
+                  shadowColor: "#8f8a8a",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
-                <Text className="text-sm text-[#6B7D8C] font-semibold">
+                <Text className="text-lg text-[#6B7D8C] font-semibold">
                   {t("ClaimOfficer.Cancel")}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={onConfirm}
-                className="p-2  py-2 bg-[#FF0700] rounded-lg"
+                className="p-2 py-3 px-6 bg-[#FF0700] rounded-lg"
+                style={{
+                  shadowColor: "#8f8a8a",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
-                <Text className="text-sm text-white font-semibold">
+                <Text className="text-lg text-white font-semibold">
                   {t("DisclaimOfficer.Disclaim")}
                 </Text>
               </TouchableOpacity>
@@ -269,10 +283,8 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
               })
             }
             className="absolute top-2 left-4 bg-[#F6F6F680] rounded-full p-3"
-            
           >
-            <Entypo
-              name="chevron-left" size={25} color="#000" />
+            <Entypo name="chevron-left" size={25} color="#000" />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -285,7 +297,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
           {showMenu && (
             <View className="absolute z-50 top-14 right-4 bg-white shadow-lg rounded-lg">
               <TouchableOpacity
-                className="p-2 py-2 bg-white rounded-lg shadow-lg"
+                className="p-2 py-2 px-4 bg-white rounded-lg  border-[#00000040] shadow-lg"
                 onPress={() => setModalVisible(true)}
               >
                 <Text className="text-gray-700 font-semibold">
@@ -406,13 +418,24 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
 
           <View className="mt-6 mb-10 items-center">
             <TouchableOpacity
-              className="bg-black rounded-full w-64 py-3 h-12"
+              className="bg-black rounded-full w-64 py-3 h-[50px] justify-center"
               onPress={() =>
                 navigation.navigate("DailyTargetListOfficerDistribution", {
                   officerId,
                   collectionOfficerId,
+                  officerName,
+                  phoneNumber1,
+                  phoneNumber2,
+                  image,
                 })
               }
+              style={{
+                shadowColor: "#060606",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
             >
               <Text className="text-white text-center font-medium text-base">
                 {t("OfficerSummary.OpenTarget")}

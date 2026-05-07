@@ -105,6 +105,7 @@ import OfficerQr from "@/component/auth/OfficerQrCode";
 import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
+import LoadingPage from "@/component/commons/LoadingPage";
 
 LogBox.ignoreAllLogs(true);
 (Text as any).defaultProps = {
@@ -149,7 +150,7 @@ function MainTabNavigator() {
     >
       <Tab.Screen name="ManagerDashboard" component={ManagerDashboard as any} />
       <Tab.Screen name="SearchPriceScreen" component={SearchPriceScreen} />
-      <Tab.Screen name="QRScanner" component={QRScanner} />
+
       <Tab.Screen name="PriceChart" component={PriceChart as any} />
       <Tab.Screen name="SearchFarmer" component={SearchFarmer} />
       <Tab.Screen name="DailyTargetList" component={DailyTargetList} />
@@ -161,9 +162,14 @@ function MainTabNavigator() {
       <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
       <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
       <Tab.Screen name="ReportGenerator" component={ReportGenerator as any} />
+      <Tab.Screen name="PassTarget" component={PassTarget as any} />
       <Tab.Screen
         name="CollectionOfficerDashboard"
         component={CollectionOfficerDashboard}
+      />
+      <Tab.Screen
+        name="UpdateFarmerBankDetails"
+        component={UpdateFarmerBankDetails as any}
       />
       <Tab.Screen
         name="DistridutionaDashboard"
@@ -176,6 +182,10 @@ function MainTabNavigator() {
       <Tab.Screen
         name="UnregisteredCropDetails"
         component={UnregisteredCropDetails as any}
+      />
+      <Tab.Screen
+        name="otpBankDetailsupdate"
+        component={otpBankDetailsupdate as any}
       />
       <Tab.Screen
         name="CollectionOfficersList"
@@ -214,9 +224,18 @@ function MainTabNavigator() {
         name="DistributionOfficerSummary"
         component={DistributionOfficerSummary as any}
       />
+      <Tab.Screen name="OTPE" component={OTPE} />
       <Tab.Screen
         name="ReplaceRequestsScreen"
         component={ReplaceRequestsScreen as any}
+      />
+      <Tab.Screen
+        name="DailyTargetListOfficerDistribution"
+        component={DailyTargetListOfficerDistribution as any}
+      />
+      <Tab.Screen
+        name="ReplaceRequestsApprove"
+        component={ReplaceRequestsApprove as any}
       />
     </Tab.Navigator>
   );
@@ -326,7 +345,6 @@ function AppContent() {
             <Stack.Screen name="ReportPage" component={ReportPage} />
             <Stack.Screen name="SideMenu" component={SideMenu} />
             <Stack.Screen name="ClaimOfficer" component={ClaimOfficer} />
-            <Stack.Screen name="OTPE" component={OTPE} />
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
             <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
             <Stack.Screen name="ViewScreen" component={ViewScreen as any} />
@@ -335,7 +353,8 @@ function AppContent() {
             <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
             <Stack.Screen name="Timer" component={Timer as any} />
-            <Stack.Screen name="PassTarget" component={PassTarget as any} />
+
+            <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen
               name="ChangePassword"
               component={ChangePassword as any}
@@ -417,10 +436,7 @@ function AppContent() {
               name="TransactionReport"
               component={TransactionReport as any}
             />
-            <Stack.Screen
-              name="UpdateFarmerBankDetails"
-              component={UpdateFarmerBankDetails as any}
-            />
+
             <Stack.Screen
               name="RegisterDriver"
               component={RegisterDriver as any}
@@ -437,10 +453,7 @@ function AppContent() {
               name="DigitalSignature"
               component={DigitalSignature as any}
             />
-            <Stack.Screen
-              name="otpBankDetailsupdate"
-              component={otpBankDetailsupdate as any}
-            />
+
             <Stack.Screen
               name="PendingOrderScreen"
               component={PendingOrderScreen as any}
@@ -477,6 +490,7 @@ function AppContent() {
               name="NotEligibleScreen"
               component={NotEligibleScreen as any}
             />
+            <Stack.Screen name="LoadingPage" component={LoadingPage as any} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaView>

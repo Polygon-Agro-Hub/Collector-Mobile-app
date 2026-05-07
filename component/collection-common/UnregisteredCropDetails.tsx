@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  BackHandler
 } from "react-native";
 import { Modal } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -659,6 +660,22 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }
   };
 
+    useFocusEffect(
+      useCallback(() => {
+        const handleBackPress = () => {
+          navigation.navigate("FarmerQr", { userId } as any);
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          handleBackPress,
+        );
+  
+        return () => subscription.remove();
+      }, [navigation]),
+    );
+
   const sendSMS = async (
     language: string | null,
     farmerPhone: number,
@@ -775,6 +792,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   ) => {
     setDeleteGradeModal({ visible: true, cropIndex, grade, varietyName });
   };
+  
 
   const handleDeleteGrade = () => {
     const { cropIndex, grade } = deleteGradeModal;
@@ -843,6 +861,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       setDeletingGrade(null);
     }, 1000);
   };
+
+  
 
   const selectedCropLabel = selectedCrop?.name || null;
   const selectedVarietyLabel = selectedVariety
@@ -1191,6 +1211,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               onPress={incrementCropCount}
               disabled={addbutton || loading}
               className={`bg-[#000000] rounded-full p-4 mt-2 ${addbutton || loading ? "opacity-25" : ""}`}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
             >
               <Text className="text-center text-white font-semibold text-base">
                 {t("UnregisteredCropDetails.Add")}
@@ -1202,6 +1229,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 onPress={handleSubmit}
                 disabled={donebutton2disabale || loading}
                 className={`bg-[#980775] rounded-full p-4 mt-4 mb-10 ${donebutton2disabale || loading ? "opacity-50" : ""}`}
+                style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
               >
                 {loading ? (
                   <View className="flex-row justify-center items-center">

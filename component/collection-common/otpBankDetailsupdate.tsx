@@ -84,7 +84,6 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
             {t("BankDetailsUpdate.SuccessMessage")}
           </Text>
 
-          {/* Progress Bar - Fixed to Bottom */}
           <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
             <Animated.View
               style={{
@@ -156,7 +155,6 @@ const ShowFailModal: React.FC<FailModalProps> = ({
             </Text>
           </TouchableOpacity>
 
-          {/* Progress Bar - Fixed to Bottom */}
           <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
             <Animated.View
               style={{
@@ -444,6 +442,28 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     margingTopForBtn: screenWidth < 400 ? wp(0) : wp(10),
   };
 
+  const getResponsiveStyles = () => {
+    const isSmallDevice = screenWidth < 380;
+    const isTablet = screenWidth >= 768;
+
+    return {
+      imageWidth: isTablet ? wp(45) : isSmallDevice ? wp(60) : wp(50),
+      imageHeight: isTablet ? hp(25) : isSmallDevice ? hp(20) : hp(22),
+      imageMarginTop: isTablet ? hp(4) : isSmallDevice ? hp(2) : hp(3),
+      otpInputSize: isTablet ? wp(8) : isSmallDevice ? wp(12) : wp(14),
+      otpInputTextSize: isTablet ? wp(4) : isSmallDevice ? wp(5) : wp(6),
+      titleFontSize: isTablet ? wp(5) : isSmallDevice ? wp(5.5) : wp(6),
+      phoneFontSize: isTablet ? wp(3.5) : isSmallDevice ? wp(4) : wp(4.5),
+      buttonWidth: (isTablet ? "50%" : "70%") as any,
+      buttonHeight: isTablet ? hp(7) : hp(6),
+      buttonBorderRadius: isTablet ? wp(5) : wp(10),
+      containerPaddingHorizontal: isTablet ? wp(8) : wp(5),
+      verticalSpacing: isTablet ? hp(3) : hp(5),
+    };
+  };
+
+  const styles = getResponsiveStyles();
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -451,7 +471,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       className="bg-white"
       style={{ flex: 1 }}
     >
-      <ScrollView className="flex-1 " keyboardShouldPersistTaps="handled">
+      <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
         <CustomHeader
           title={t("")}
           showBackButton={true}
@@ -462,49 +482,64 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         <View
           className="flex justify-center items-center"
           style={{
-            marginTop: dynamicStyles.margingTopForImage,
-            paddingHorizontal: wp(4),
-            paddingVertical: hp(2),
+            paddingHorizontal: styles.containerPaddingHorizontal,
+            paddingTop: styles.imageMarginTop,
+            paddingVertical: hp(1),
           }}
         >
-          <Image
-            source={require("../../assets/images/collection-common/opt.webp")}
-            style={{
-              width: dynamicStyles.imageWidth,
-              height: dynamicStyles.imageHeight,
-            }}
-          />
+          <View style={{ marginBottom: styles.verticalSpacing }}>
+            <Image
+              source={require("../../assets/images/collection-common/opt.webp")}
+              style={{
+                width: styles.imageWidth,
+                height: styles.imageHeight,
+              }}
+              resizeMode="contain"
+            />
+          </View>
 
-          <View className="">
-            <Text className="mt-3 text-lg text-black text-center font-bold">
+          <View className="mb-7">
+            <Text
+              className="text-black text-center font-bold"
+              style={{ fontSize: styles.titleFontSize }}
+            >
               {t("Otpverification.EnterCode")}
             </Text>
           </View>
-          {language === "en" ? (
-            <View className="mt-4">
-              <Text className="text-md text-[#0085FF] text-center pt-1 ">
-                {phoneNumber}
-              </Text>
-            </View>
-          ) : (
-            <View className="mt-5">
-              <Text className="text-md text-[#0085FF] text-center ">
-                {phoneNumber}
-              </Text>
-            </View>
-          )}
-          <View className="flex-row justify-center gap-3 mt-4 px-4">
+
+          <View className="mb-5">
+            <Text
+              className="text-[#0085FF] text-center"
+              style={{ fontSize: styles.phoneFontSize }}
+            >
+              {phoneNumber}
+            </Text>
+          </View>
+
+          <View
+            className="flex-row justify-center"
+            style={{
+              gap: wp(2.5),
+              marginBottom: styles.verticalSpacing,
+            }}
+          >
             {Array.from({ length: 5 }).map((_, index) => (
               <TextInput
                 key={index}
                 ref={(el: TextInput | null) => {
                   inputRefs.current[index] = el;
                 }}
-                className={`w-12 h-12 text-lg text-center rounded-lg shadow-[#00000040] ${
-                  otpCode[index]
-                    ? "bg-[#FFFFFF] text-black pb-2"
-                    : "bg-[#FFFFFF] text-black"
-                }`}
+                style={{
+                  width: 51,
+                  height: 48,
+                  fontSize: styles.otpInputTextSize,
+                  textAlign: "center",
+                  borderRadius: 10,
+                  borderColor: "#FFC738",
+                  borderWidth: 1,
+                  backgroundColor: "#FFFFFF",
+                  color: "#000000",
+                }}
                 keyboardType="numeric"
                 maxLength={1}
                 value={otpCode[index] || ""}
@@ -512,35 +547,28 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                 onKeyPress={(e) => handleKeyPress(e, index)}
                 placeholder={maskedCode[index] || "_"}
                 placeholderTextColor="lightgray"
-                style={{
-                  borderColor: "#FFC738",
-                  borderWidth: 1,
-
-                  shadowColor: "#000000",
-                  shadowOffset: {
-                    width: 0,
-                    height: 4,
-                  },
-
-                  shadowRadius: 4,
-
-                  elevation: 4,
-                }}
               />
             ))}
           </View>
 
-          <View className="mt-5">
-            <Text className="text-md text-[#707070] pt-1">
+          <View style={{ marginBottom: styles.verticalSpacing / 2 }}>
+            <Text
+              className="text-[#707070] text-center"
+              style={{ fontSize: styles.phoneFontSize }}
+            >
               {t("Otpverification.Didreceive")}
             </Text>
           </View>
 
-          <View className="mt-1 mb-9">
+          <View style={{ marginBottom: styles.verticalSpacing * 2 }}>
             <Text
-              className="mt-3 text-lg text-black text-center underline"
+              className="text-center underline"
               onPress={disabledResend ? undefined : handleResendOTP}
-              style={{ color: disabledResend ? "gray" : "black" }}
+              style={{
+                fontSize: styles.phoneFontSize,
+                color: disabledResend ? "#9CA3AF" : "#000000",
+                fontWeight: "600",
+              }}
             >
               {timer > 0
                 ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
@@ -553,23 +581,31 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             onClose={() => setModalVisible(false)}
             onComplete={handleSuccessCompletion}
           />
-          <View style={{ marginTop: dynamicStyles.margingTopForBtn }}>
+
+          <View className="w-full items-center" style={{ marginBottom: hp(4) }}>
             <TouchableOpacity
               style={{
-                height: hp(7),
-                width: wp(80),
-                backgroundColor: "#000000",
-                shadowColor: "#000",
+                width: 281,
+                height: 50,
+                backgroundColor:
+                  !isOtpValid || isVerified ? "#9CA3AF" : "#000000",
+                borderRadius: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 8,
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 4,
               }}
-              className="flex items-center justify-center mx-auto rounded-full mb-8"
               onPress={handleVerify}
-              disabled={isVerified}
+              disabled={!isOtpValid || isVerified}
+              activeOpacity={0.8}
             >
-              <Text className="text-white text-lg">
+              <Text
+                className="text-white font-semibold"
+                style={{ fontSize: styles.phoneFontSize }}
+              >
                 {t("Otpverification.Verify")}
               </Text>
             </TouchableOpacity>

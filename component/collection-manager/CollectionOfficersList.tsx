@@ -190,9 +190,14 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         marginBottom: 16,
         borderRadius: 24,
         marginHorizontal: 16,
-        backgroundColor: "#ADADAD1A",
+        backgroundColor: "#fff",
         borderWidth: item.status === "Not Approved" ? 1 : 0,
         borderColor: item.status === "Not Approved" ? "#FF9797" : "transparent",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 4,
       }}
       onPress={() => {
         if (item.status !== "Not Approved") {
@@ -293,7 +298,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               style={{
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                backgroundColor: selectedJobRole === "Driver" ? "#F3F4F6" : "white",
+                backgroundColor:
+                  selectedJobRole === "Driver" ? "#F3F4F6" : "white",
                 borderRadius: 8,
               }}
               onPress={() => {
@@ -309,7 +315,10 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               style={{
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                backgroundColor: selectedJobRole === "Collection Officer" ? "#F3F4F6" : "white",
+                backgroundColor:
+                  selectedJobRole === "Collection Officer"
+                    ? "#F3F4F6"
+                    : "white",
                 borderRadius: 8,
               }}
               onPress={() => {
@@ -325,7 +334,12 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         )}
 
         <Text
-          style={{ fontSize: 18, color: "white", textAlign: "center", fontWeight: "bold" }}
+          style={{
+            fontSize: 18,
+            color: "white",
+            textAlign: "center",
+            fontWeight: "bold",
+          }}
         >
           {t("CollectionOfficersList.Collection Officers")}
         </Text>
@@ -359,7 +373,12 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             }}
           >
             <TouchableOpacity
-              style={{ paddingHorizontal: 16, paddingVertical: 8, backgroundColor: "white", borderRadius: 8 }}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: "white",
+                borderRadius: 8,
+              }}
               onPress={() => navigation.navigate("ClaimOfficer")}
             >
               <Text style={{ color: "#374151", fontWeight: "600" }}>
@@ -395,7 +414,12 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             </Text>
           ) : selectedJobRole === "Driver" ? (
             <Text
-              style={{ fontSize: scale(16), fontWeight: "bold", color: "#21202B", marginBottom: 8 }}
+              style={{
+                fontSize: scale(16),
+                fontWeight: "bold",
+                color: "#21202B",
+                marginBottom: 8,
+              }}
             >
               {t("CollectionOfficersList.Drivers List")}
               <Text style={{ color: "#21202B", fontWeight: "600" }}>
@@ -404,7 +428,12 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             </Text>
           ) : (
             <Text
-              style={{ fontSize: 16, fontWeight: "bold", color: "#21202B", marginBottom: 8 }}
+              style={{
+                fontSize: 16,
+                fontWeight: "bold",
+                color: "#21202B",
+                marginBottom: 8,
+              }}
             >
               {t("CollectionOfficersList.Officers / Drivers List")}
               <Text style={{ color: "#21202B", fontWeight: "normal" }}>
@@ -415,7 +444,14 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </View>
 
         {loading ? (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: -50 }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: -50,
+            }}
+          >
             <LottieView
               source={require("../../assets/lottie/loading.json")}
               autoPlay
@@ -424,8 +460,12 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             />
           </View>
         ) : errorMessage ? (
-          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <Text style={{ color: "#6B7280", fontSize: 18 }}>{errorMessage}</Text>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text style={{ color: "#6B7280", fontSize: 18 }}>
+              {errorMessage}
+            </Text>
           </View>
         ) : (
           <FlatList

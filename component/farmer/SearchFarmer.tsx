@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  BackHandler,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
@@ -23,6 +24,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -54,6 +56,29 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   const [ere, setEre] = useState("");
   const [searchButtonClicked, setSearchButtonClicked] = useState(false);
   const { t } = useTranslation();
+  const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
+
+   const handleBackPress = () => {
+    if (jobRole === "Collection Officer") {
+      navigation.navigate("CollectionOfficerDashboard" as any);
+    } else if (jobRole === "Collection Centre Manager") {
+      navigation.navigate("ManagerDashboard" as any);
+    } else {
+      navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+    }
+  };
 
   const validateNic = (nic: string) => {
     const regex = /^(\d{12}|\d{9}V|\d{9}X|\d{9}v|\d{9}x)$/;
@@ -140,6 +165,28 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
+      const handleBackPress = () => {
+        if (jobRole === "Collection Officer") {
+          navigation.navigate("CollectionOfficerDashboard" as any);
+        } else if (jobRole === "Collection Centre Manager") {
+          navigation.navigate("ManagerDashboard" as any);
+        } else {
+          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+        }
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation, jobRole]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
       setNICnumber("");
       setNoResults(false);
       setEre("");
@@ -179,12 +226,9 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
           title={t("SearchFarmer.Search")}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={handleBackPress}
         />
-        <View
-          className="flex-1 bg-white"
-          style={{ paddingHorizontal: wp(4) }}
-        >
+        <View className="flex-1 bg-white" style={{ paddingHorizontal: wp(4) }}>
           {/* Search Form */}
           <View className="py-4">
             <Text

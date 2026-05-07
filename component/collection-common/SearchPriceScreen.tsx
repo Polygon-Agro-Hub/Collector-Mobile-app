@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -21,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
+import CustomHeader from "../navigations/CustomHeader";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -111,7 +113,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     useCallback(() => {
       setLoading(false);
       resetForm();
-      return () => { };
+      return () => {};
     }, [resetForm]),
   );
 
@@ -264,6 +266,28 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        if (jobRole === "Collection Officer") {
+          navigation.navigate("CollectionOfficerDashboard" as any);
+        } else if (jobRole === "Collection Centre Manager") {
+          navigation.navigate("ManagerDashboard" as any);
+        } else {
+          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+        }
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation, jobRole]),
+  );
+
   const selectedCropLabel =
     cropOptions.find((o) => o.value === selectedCrop)?.label || null;
   const selectedVarietyLabel =
@@ -302,12 +326,10 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         }
         showsVerticalScrollIndicator={false}
       >
-        {/* Header at the top */}
-        <View className="bg-white py-3">
-          <Text className="text-xl font-semibold text-center">
-            {t("SearchPrice.SearchPrice")}
-          </Text>
-        </View>
+        <CustomHeader
+          title={t("SearchPrice.SearchPrice")}
+          showBackButton={false}
+        />
 
         {/* Centered content after header */}
         <View className="flex-1  mt-20">
@@ -320,7 +342,10 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
 
             {/* Crop Name Selector */}
             <View className="w-full mb-4">
-              <Text className="text-base mb-2 text-center" style={{ fontSize: 16 }}>
+              <Text
+                className="text-base mb-2 text-center"
+                style={{ fontSize: 16 }}
+              >
                 {t("SearchPrice.Crop")}
               </Text>
               <TouchableOpacity
@@ -334,13 +359,20 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                 >
                   {selectedCropLabel || t("SearchPrice.SelectCrop")}
                 </Text>
-                <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
+                <MaterialIcons
+                  name="arrow-drop-down"
+                  size={24}
+                  color="#9CA3AF"
+                />
               </TouchableOpacity>
             </View>
 
             {/* Variety Selector */}
             <View className="w-full mb-8">
-              <Text className="text-base mb-2 text-center" style={{ fontSize: 16 }}>
+              <Text
+                className="text-base mb-2 text-center"
+                style={{ fontSize: 16 }}
+              >
                 {t("SearchPrice.Variety")}
               </Text>
               {loadingVarieties ? (
@@ -362,7 +394,11 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                   >
                     {selectedVarietyLabel || t("SearchPrice.SelectVariety")}
                   </Text>
-                  <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
+                  <MaterialIcons
+                    name="arrow-drop-down"
+                    size={24}
+                    color="#9CA3AF"
+                  />
                 </TouchableOpacity>
               )}
             </View>
@@ -370,13 +406,23 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
             {/* Search Button */}
             <TouchableOpacity
               className="bg-[#000000] w-full rounded-3xl items-center justify-center mb-4"
-              style={{ height: 50 }}
               onPress={handleSearch}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+                height: 50,
+              }}
             >
               {loading ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text className="text-white font-semibold" style={{ fontSize: 18 }}>
+                <Text
+                  className="text-white font-semibold"
+                  style={{ fontSize: 18 }}
+                >
                   {t("SearchPrice.Search")}
                 </Text>
               )}

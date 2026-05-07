@@ -427,7 +427,9 @@ const AddOfficerAddressDetails: React.FC = () => {
           <TextInput
             placeholder={t("AddOfficerAddressDetails.House")}
             value={formData.houseNumber}
-            onChangeText={(text) => handleInputChange("houseNumber", text)}
+            onChangeText={(text) =>
+              handleInputChange("houseNumber", text.replace(/^\s+/, ""))
+            }
             className={`border ${
               fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4]"
             } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
@@ -669,6 +671,13 @@ const AddOfficerAddressDetails: React.FC = () => {
           <TouchableOpacity
             className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
             onPress={() => navigation.goBack()}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
               className="text-[#686868]"
@@ -690,6 +699,13 @@ const AddOfficerAddressDetails: React.FC = () => {
             }`}
             onPress={handleSubmit}
             disabled={loading}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />
@@ -704,7 +720,7 @@ const AddOfficerAddressDetails: React.FC = () => {
                       : { fontSize: 14 },
                 ]}
               >
-                {t("AddOfficerBasicDetails.Next")}
+                {t("AddOfficerBasicDetails.Submit")}
               </Text>
             )}
           </TouchableOpacity>

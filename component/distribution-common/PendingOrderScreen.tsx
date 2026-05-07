@@ -24,6 +24,7 @@ import Timer from "@/component/distribution-common/TimerContainer ";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "../navigations/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 interface OrderItem {
   id: string;
@@ -179,6 +180,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [requestLoading, setRequestLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [quantityError, setQuantityError] = useState<string>("");
+  const [showProductSearchModal, setShowProductSearchModal] = useState(false);
 
   useEffect(() => {
     const loadingTimer = setTimeout(() => {
@@ -278,7 +281,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         orderData.packageData.forEach(
           (packageInfo: any, packageIndex: number) => {
             if (packageInfo.items && Array.isArray(packageInfo.items)) {
-              packageInfo.items.forEach((item: any, itemIndex: number) => { });
+              packageInfo.items.forEach((item: any, itemIndex: number) => {});
             }
           },
         );
@@ -622,7 +625,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       } else {
         throw new Error(
           response.data.message ||
-          t("PendingOrderScreen.Failed to complete order"),
+            t("PendingOrderScreen.Failed to complete order"),
         );
       }
     } catch (error) {
@@ -644,6 +647,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         },
       ]);
     }
+  };
+
+  const formatPrice = (value: number): string => {
+    const fixed = value.toFixed(2);
+    const parts = fixed.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
   };
 
   const startCountdown = () => {
@@ -734,19 +744,16 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }
 
     setTimeout(() => {
-      const weightKg = parseFloat(item.weight) || 0;
       const itemPrice = parseFloat(item.price) || 0;
-      const totalPrice = itemPrice.toFixed(2);
-
       const numericPrice = itemPrice;
 
       setReplaceData({
-        selectedProduct: `${item.name} - ${item.weight}Kg - Rs.${totalPrice}`,
+        selectedProduct: `${item.name} - ${item.weight}Kg - Rs. ${formatPrice(itemPrice)}`,
         selectedProductPrice: numericPrice.toString(),
         productType: item.productType || 0,
         newProduct: "",
         quantity: "",
-        price: `Rs.${totalPrice}`,
+        price: `Rs. ${formatPrice(itemPrice)}`,
         productTypeName: item.productTypeName || "",
       });
 
@@ -840,11 +847,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             ? t("Error.Product replacement successful!")
             : t("Error.Replacement request submitted successfully");
 
-        // Close modal first
         setShowReplaceModal(false);
         setShowDropdown(false);
         setSelectedItemForReplace(null);
         setSearchQuery("");
+        setQuantityError("");
         setReplaceData({
           selectedProduct: "",
           selectedProductPrice: "",
@@ -855,13 +862,26 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           productTypeName: "",
         });
 
-        await loadOrderData(true);
-
-        Alert.alert(t("Error.Success"), successMessage);
+        if (jobRole === "Distribution Centre Manager") {
+          // Manager stays on screen and refreshes
+          await loadOrderData(true);
+          Alert.alert(t("Error.Success"), successMessage);
+        } else {
+          // Distribution Officer → navigate to TargetOrderScreen
+          Alert.alert(t("Error.Success"), successMessage, [
+            {
+              text: t("Error.Ok"),
+              onPress: () =>
+                navigation.navigate("Main" as any, {
+                  screen: "TargetOrderScreen",
+                }),
+            },
+          ]);
+        }
       } else {
         throw new Error(
           response.data.message ||
-          t("PendingOrderScreen.Failed to submit replacement request"),
+            t("PendingOrderScreen.Failed to submit replacement request"),
         );
       }
     } catch (error) {
@@ -899,6 +919,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   const handleModalClose = () => {
     setShowReplaceModal(false);
     setShowDropdown(false);
+    setQuantityError("");
   };
 
   const handleBackPress = () => {
@@ -1108,7 +1129,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const renderReplaceModal = () => {
     const isFormComplete =
-      replaceData.newProduct && replaceData.quantity && replaceData.price;
+      replaceData.newProduct &&
+      replaceData.quantity &&
+      parseFloat(replaceData.quantity) > 0 &&
+      replaceData.price &&
+      !quantityError;
 
     const handleProductSelect = (product: RetailItem) => {
       const selectedProductPrice =
@@ -1119,7 +1144,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       setReplaceData((prev) => ({
         ...prev,
         newProduct: product.displayName,
-        price: `Rs.${newProductPrice.toFixed(2)}`,
+        price: `Rs. ${newProductPrice.toFixed(2)}`,
       }));
 
       setIsReplacementPriceHigher(newProductPrice > selectedProductPrice);
@@ -1128,6 +1153,14 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
     const handleQuantityChange = (text: string) => {
       if (/^\d*\.?\d*$/.test(text)) {
+        const numericQty = parseFloat(text);
+
+        if (text !== "" && (isNaN(numericQty) || numericQty === 0)) {
+          setQuantityError("Please enter a value greater than 0.");
+        } else {
+          setQuantityError("");
+        }
+
         const selectedProduct = retailItems.find(
           (item) => item.displayName === replaceData.newProduct,
         );
@@ -1142,8 +1175,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           ...prev,
           quantity: text,
           price: text
-            ? `Rs.${totalPrice.toFixed(2)}`
-            : `Rs.${price.toFixed(2)}`,
+            ? `Rs. ${formatPrice(totalPrice)}`
+            : `Rs. ${formatPrice(price)}`,
         }));
 
         setIsReplacementPriceHigher(totalPrice > selectedProductPrice);
@@ -1186,88 +1219,71 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               </Text>
 
               {/* Product Selection */}
+
               <View className="mb-4">
-                {showDropdown ? (
-                  <View>
-                    <View className="">
-                      <TextInput
-                        placeholder={t("PendingOrderScreen.Search products...")}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        className="w-full p-3 border border-black rounded-full flex-row justify-between items-center bg-white"
-                        placeholderTextColor="#888"
-                      />
-                    </View>
-                    <View className="border border-t-0 border-gray-300 rounded-b-lg bg-white max-h-32">
-                      <ScrollView keyboardShouldPersistTaps="handled">
-                        {loadingRetailItems ? (
-                          <View className="p-3 items-center">
-                            <ActivityIndicator size="small" color="#000" />
-                          </View>
-                        ) : filteredItems.length > 0 ? (
-                          filteredItems.map((product) => (
-                            <TouchableOpacity
-                              key={product.id}
-                              className="p-3 border-b border-gray-100"
-                              onPress={() => {
-                                handleProductSelect(product);
-                                setShowDropdown(false);
-                                setSearchQuery("");
-                              }}
-                            >
-                              <Text className="font-medium">
-                                {product.displayName}
-                              </Text>
-                              <Text className="text-xs text-gray-500">
-                                {t("PendingOrderScreen.Rs")}.
-                                {(
-                                  product.discountedPrice ||
-                                  product.normalPrice ||
-                                  0
-                                ).toFixed(2)}
-                              </Text>
-                            </TouchableOpacity>
-                          ))
-                        ) : (
-                          <View className="p-3 items-center">
-                            <Text className="text-gray-500">
-                              {t("PendingOrderScreen.No products available")}
-                            </Text>
-                          </View>
-                        )}
-                      </ScrollView>
-                    </View>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    className="border border-black rounded-full p-3 flex-row justify-between items-center bg-white"
-                    onPress={() => setShowDropdown(!showDropdown)}
+                <TouchableOpacity
+                  className="border border-black rounded-full p-3 flex-row justify-between items-center bg-white"
+                  onPress={() => setShowProductSearchModal(true)}
+                >
+                  <Text
+                    className={
+                      replaceData.newProduct ? "text-black" : "text-gray-400"
+                    }
                   >
-                    <Text
-                      className={
-                        replaceData.newProduct ? "text-black" : "text-gray-400"
+                    {replaceData.newProduct || "--Select New Product--"}
+                  </Text>
+                  <AntDesign name="down" size={16} color="#666" />
+                </TouchableOpacity>
+
+                <GlobalSearchModal
+                  visible={showProductSearchModal}
+                  onClose={() => setShowProductSearchModal(false)}
+                  title={t("PendingOrderScreen.Select New Product")}
+                  data={retailItems.map((product) => ({
+                    label: `${product.displayName} — Rs. ${formatPrice(
+                      product.discountedPrice || product.normalPrice || 0,
+                    )}`,
+                    value: product.displayName,
+                    ...product,
+                  }))}
+                  selectedItems={
+                    replaceData.newProduct ? [replaceData.newProduct] : []
+                  }
+                  onSelect={(selected) => {
+                    if (selected.length > 0) {
+                      const product = retailItems.find(
+                        (item) => item.displayName === selected[0],
+                      );
+                      if (product) {
+                        handleProductSelect(product);
                       }
-                    >
-                      {replaceData.newProduct || "--Select New Product--"}
-                    </Text>
-                    <AntDesign
-                      name={showDropdown ? "up" : "down"}
-                      size={16}
-                      color="#666"
-                    />
-                  </TouchableOpacity>
-                )}
+                    }
+                  }}
+                  searchPlaceholder={t("PendingOrderScreen.Search products...")}
+                  noResultsText={t("PendingOrderScreen.No products available")}
+                  multiSelect={false}
+                  isLoading={loadingRetailItems}
+                />
               </View>
 
               {/* Quantity Input */}
+
               <View className="mb-4">
                 <TextInput
-                  className="border border-black rounded-full p-3 bg-white"
+                  className={`border rounded-full p-3 bg-white ${
+                    quantityError ? "border-red-500" : "border-black"
+                  }`}
                   placeholder="Enter Quantity"
                   value={replaceData.quantity}
                   onChangeText={handleQuantityChange}
                   keyboardType="numeric"
                 />
+
+                {quantityError ? (
+                  <Text className="text-red-500 text-xs mt-1 ml-3">
+                    {quantityError}
+                  </Text>
+                ) : null}
               </View>
 
               {/* Price Display */}
@@ -1280,10 +1296,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               {/* Action Buttons */}
               <View className="gap-y-3">
                 <TouchableOpacity
-                  className={`py-3 rounded-full px-3 ${isFormComplete && !isReplacementPriceHigher
+                  className={`py-3 rounded-full px-3 ${
+                    isFormComplete && !isReplacementPriceHigher
                       ? "bg-[#FA0000]"
                       : "bg-[#FA0000]/50"
-                    }`}
+                  }`}
                   onPress={
                     isFormComplete && !isReplacementPriceHigher
                       ? handleReplaceSubmit
@@ -1294,6 +1311,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     isReplacementPriceHigher ||
                     requestLoading
                   }
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
                 >
                   {requestLoading ? (
                     <View className="flex-row justify-center items-center">
@@ -1313,6 +1337,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                 <TouchableOpacity
                   className="bg-[#D9D9D9] py-3 rounded-full px-3"
                   onPress={handleModalClose}
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
                 >
                   <Text className="text-[#686868] text-center font-medium">
                     {" "}
@@ -1667,6 +1698,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           <TouchableOpacity
             className="bg-black py-3 rounded-full mb-3"
             onPress={() => setShowUnsavedModal(false)}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text className="text-white text-center font-medium">
               {t("OpenedOrderScreen.Stay on page")}
@@ -1678,6 +1716,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             onPress={() => {
               setShowUnsavedModal(false);
               navigation.goBack();
+            }}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
             }}
           >
             <Text className="text-gray-700 text-center">
@@ -1773,6 +1818,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           className="bg-[#4CAF50] py-4 rounded-full mb-3 flex-row justify-center items-center"
           onPress={handleCompleteOrder}
           disabled={completingOrder}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 6,
+          }}
         >
           {completingOrder ? (
             <ActivityIndicator size="small" color="#ffffff" />
@@ -1787,6 +1839,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         <TouchableOpacity
           className="bg-gray-200 py-4 rounded-full"
           onPress={handleBackToEdit}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 6,
+          }}
         >
           <Text className="text-gray-700 text-center font-medium text-base">
             {t("PendingOrderScreen.Back to Edit")}
@@ -1850,12 +1909,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     className={index > 0 ? "mt-3" : ""}
                   >
                     <TouchableOpacity
-                      className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${packageGroup.allSelected || orderStatus === "Completed"
+                      className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${
+                        packageGroup.allSelected || orderStatus === "Completed"
                           ? "bg-[#D4F7D4] border border-[#4CAF50]"
                           : packageGroup.someSelected
                             ? "bg-[#FFF9C4] border border-[#F9CC33]"
                             : "bg-[#FFF8F8] border border-[#D16D6A]"
-                        } ${orderStatus === "Completed" ? "opacity-100" : ""}`}
+                      } ${orderStatus === "Completed" ? "opacity-100" : ""}`}
                       onPress={() =>
                         togglePackageExpansion(packageGroup.packageId)
                       }
@@ -1890,13 +1950,14 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     {/* Expanded content remains the same */}
                     {isPackageExpanded(packageGroup.packageId) && (
                       <View
-                        className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${packageGroup.allSelected ||
-                            orderStatus === "Completed"
+                        className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${
+                          packageGroup.allSelected ||
+                          orderStatus === "Completed"
                             ? "border-[#4CAF50]"
                             : packageGroup.someSelected
                               ? "border-[#F9CC33]"
                               : "border-[#D16D6A]"
-                          }`}
+                        }`}
                       >
                         {packageGroup.items.map((item) => (
                           <View
@@ -1929,12 +1990,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                               )}
                               <View className="flex-1">
                                 <Text
-                                  className={`font-medium text-black ${orderStatus === "Completed" && item.selected
+                                  className={`font-medium text-black ${
+                                    orderStatus === "Completed" && item.selected
                                       ? "text-black"
                                       : orderStatus === "Completed"
                                         ? "text-black"
                                         : "text-black"
-                                    }`}
+                                  }`}
                                 >
                                   {item.name}
                                 </Text>
@@ -1980,14 +2042,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             {additionalItems.length > 0 && (
               <View className="mx-4 mb-6">
                 <TouchableOpacity
-                  className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${orderStatus === "Completed"
+                  className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${
+                    orderStatus === "Completed"
                       ? "bg-[#D4F7D4] border border-[#4CAF50]"
                       : areAllAdditionalItemsSelected()
                         ? "bg-[#D4F7D4] border border-[#4CAF50]"
                         : hasAdditionalItemSelections()
                           ? "bg-[#FFF9C4] border border-[#F9CC33]"
                           : "bg-[#FFF8F8] border border-[#D16D6A]"
-                    }`}
+                  }`}
                   onPress={() =>
                     setAdditionalItemsExpanded(!additionalItemsExpanded)
                   }
@@ -2007,14 +2070,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
                 {additionalItemsExpanded && (
                   <View
-                    className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${orderStatus === "Completed"
+                    className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${
+                      orderStatus === "Completed"
                         ? "border-[#4CAF50]"
                         : areAllAdditionalItemsSelected()
                           ? "border-[#4CAF50]"
                           : hasAdditionalItemSelections()
                             ? "border-[#F9CC33]"
                             : "border-[#D16D6A]"
-                      }`}
+                    }`}
                   >
                     {additionalItems.map((item) => (
                       <View
@@ -2023,12 +2087,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                       >
                         <View className="flex-1">
                           <Text
-                            className={`font-medium ${orderStatus === "Completed" && item.selected
+                            className={`font-medium ${
+                              orderStatus === "Completed" && item.selected
                                 ? "text-black"
                                 : orderStatus === "Completed"
                                   ? "text-gray-600 line-through"
                                   : "text-black"
-                              }`}
+                            }`}
                           >
                             {item.name}
                           </Text>
@@ -2090,14 +2155,21 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           <SuccessModal />
 
           {orderStatus !== "Completed" && (
-            <View className="absolute bottom-0 left-2 right-2 bg-white px-4 py-4">
+            <View className="absolute bottom-1 left-2 right-2 bg-white px-4 h-[50px]">
               <TouchableOpacity
-                className={`py-3 rounded-full px-3 ${showWarning ? "bg-black" : "bg-gray-400"}`}
+                className={`h-[50px] justify-center rounded-full px-3 ${showWarning ? "bg-black" : "bg-gray-400"}`}
                 onPress={handleSubmitPress}
                 disabled={!showWarning}
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <View className="justify-center items-center">
-                  <Text className="text-white font-medium text-base">
+                  <Text className="text-white font-medium text-lg">
                     {t("PendingOrderScreen.Save")}
                   </Text>
                 </View>
@@ -2181,6 +2253,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                       <TouchableOpacity
                         className="bg-[#000000] py-4 rounded-full mb-3"
                         onPress={handleCompleteOrder}
+                        style={{
+                          shadowColor: "#000000",
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 10,
+                          elevation: 6,
+                        }}
                       >
                         <Text
                           className="text-white text-center font-bold text-base"
@@ -2199,6 +2278,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                       <TouchableOpacity
                         className="bg-gray-200 py-4 rounded-full"
                         onPress={handleBackToEdit}
+                        style={{
+                          shadowColor: "#000000",
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.25,
+                          shadowRadius: 10,
+                          elevation: 6,
+                        }}
                       >
                         <Text
                           className="text-gray-700 text-center font-medium text-base"

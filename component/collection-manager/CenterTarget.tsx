@@ -298,8 +298,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
               </Text>
               <Text className="w-32 p-2 text-center text-white">
                 {selectedToggle === "ToDo"
-                  ? t("DailyTarget.Todo")
-                  : t("DailyTarget.Completed")}
+                  ? t("DailyTarget.Todo()")
+                  : t("DailyTarget.Completedkg")}
               </Text>
             </View>
 
