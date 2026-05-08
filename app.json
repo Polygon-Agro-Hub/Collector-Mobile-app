@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/app/adaptive-icon.png",
       "resizeMode": "contain",
@@ -24,14 +23,10 @@
         "foregroundImage": "./assets/images/app/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.polygonagro.Collector",
       "versionCode": 10,
-      "compileSdkVersion": 35,
-      "targetSdkVersion": 35,
-      "minSdkVersion": 24,
       "permissions": [
         "CAMERA",
         "PHOTO_LIBRARY",
@@ -52,11 +47,19 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/app/favicon.png"
     },
     "plugins": [
       "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -79,11 +82,10 @@
             "enableMinifyInReleaseBuilds": true
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
-    "experiments": {
-      "typedRoutes": true
-    },
+    "experiments": {},
     "extra": {
       "router": {
         "origin": false
@@ -91,11 +93,6 @@
       "eas": {
         "projectId": "eeb35db0-1f3f-4393-91c1-c816247ec8c9"
       }
-    },
-    "expo-camera": {
-      "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-      "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-      "recordAudioAndroid": true
     }
   }
 }
