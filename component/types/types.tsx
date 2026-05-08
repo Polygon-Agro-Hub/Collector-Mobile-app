@@ -224,6 +224,10 @@ export type RootStackParamList = {
   DailyTargetListForOfficers: {
     officerId: string;
     collectionOfficerId: number;
+    officerName: string;
+    phoneNumber1: string;
+    phoneNumber2: string;
+    image: string;
   };
   ReplaceRequestsApprove: {
     replaceRequestData: {

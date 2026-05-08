@@ -187,6 +187,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     React.useCallback(() => {
       const fetchData = async () => {
         await fetchSelectedLanguage();
+        setSelectedDate(new Date());
         fetchTransactions(getCurrentDate());
         setSearchQuery("");
       };
@@ -249,7 +250,10 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
       <View className="flex-1 bg-white rounded-t-[40px] mt-[-20px]">
         <View className="flex-row items-center bg-white px-4 py-2 rounded-full border border-[#444444] mx-4 shadow-md mt-[-22px]">
           <TextInput
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            style={[
+              { fontSize: 16, fontStyle: "italic" },
+              getTextStyle(selectedLanguage),
+            ]}
             placeholder={t("ManagerTransactions.Search")}
             placeholderTextColor="grey"
             className="flex-1 text-sm text-gray-800"
@@ -310,107 +314,107 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
 
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View className="flex-1 mb-2">
-             {loading ? (
-          <View className="flex-1 justify-center items-center">
-            <LottieView
-              source={require("../../assets/lottie/loading.json")}
-              autoPlay
-              loop
-              style={{ width: 150, height: 150 }}
-            />
-            <Text className="text-gray-500 mt-4">
-              {t("ManagerTransactions.Loading")}
-            </Text>
-          </View>
-        ) : (
-            <FlatList
-              data={filteredTransactions}
-              keyExtractor={(item) =>
-                item.id ? item.id.toString() : Math.random().toString()
-              }
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 16,
-              }}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  className="flex-row items-center p-4 mb-3 rounded-[35px] bg-gray-100 shadow-sm"
-                  onPress={() => {
-                    navigation.navigate("TransactionReport", {
-                      registeredFarmerId: item.registeredFarmerId,
-                      userId: item.userId,
-                      firstName: item.firstName,
-                      lastName: item.lastName,
-                      phoneNumber: item.phoneNumber,
-                      address: item.address,
-                      NICnumber: item.NICnumber,
-                      totalAmount: item.totalAmount,
-                      bankAddress: item.bankAddress,
-                      accountNumber: item.accountNumber,
-                      accountHolderName: item.accountHolderName,
-                      bankName: item.bankName,
-                      branchName: item.branchName,
-                      selectedDate: selectedDate.toISOString().split("T")[0],
-                      selectedTime: selectedDate
-                        .toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })
-                        .toUpperCase(),
-                      empId: item.empId,
-                    });
-                  }}
-                >
-                  <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
-                    <Image
-                      source={
-                        item.image
-                          ? { uri: item.image }
-                          : require("../../assets/images/collection-manager/avetar.webp")
-                      }
-                      className="w-16 h-16 rounded-full mr-3"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-[18px] font-semibold text-gray-900">
-                      {item.firstName} {item.lastName}
-                    </Text>
-                    <Text className="text-sm text-gray-500">
-                      {t("ManagerTransactions.NIC")} {item.NICnumber}
-                    </Text>
-                    <Text className="text-sm text-gray-500">
-                      {t("ManagerTransactions.TotalRs")}
-                      {item.totalAmount
-                        ? item.totalAmount.toLocaleString()
-                        : "N/A"}
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={scale(20)}
-                    color="#9CA3AF"
-                  />
-                </TouchableOpacity>
-              )}
-              ListEmptyComponent={
-                <View className="items-center mt-[50%]">
-                  <LottieView
-                    source={require("../../assets/lottie/no-data.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 150, height: 150 }}
-                  />
-                  <Text
-                    style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                    className="text-gray-500 text-lg"
+            {loading ? (
+              <View className="flex-1 justify-center items-center">
+                <LottieView
+                  source={require("../../assets/lottie/loading.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 150, height: 150 }}
+                />
+                <Text className="text-gray-500 mt-4">
+                  {t("ManagerTransactions.Loading")}
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={filteredTransactions}
+                keyExtractor={(item) =>
+                  item.id ? item.id.toString() : Math.random().toString()
+                }
+                contentContainerStyle={{
+                  paddingHorizontal: 16,
+                  paddingBottom: 16,
+                }}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    className="flex-row items-center p-4 mb-3 rounded-[35px] bg-gray-100 shadow-sm"
+                    onPress={() => {
+                      navigation.navigate("TransactionReport", {
+                        registeredFarmerId: item.registeredFarmerId,
+                        userId: item.userId,
+                        firstName: item.firstName,
+                        lastName: item.lastName,
+                        phoneNumber: item.phoneNumber,
+                        address: item.address,
+                        NICnumber: item.NICnumber,
+                        totalAmount: item.totalAmount,
+                        bankAddress: item.bankAddress,
+                        accountNumber: item.accountNumber,
+                        accountHolderName: item.accountHolderName,
+                        bankName: item.bankName,
+                        branchName: item.branchName,
+                        selectedDate: selectedDate.toISOString().split("T")[0],
+                        selectedTime: selectedDate
+                          .toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })
+                          .toUpperCase(),
+                        empId: item.empId,
+                      });
+                    }}
                   >
-                    {t("ManagerTransactions.Notransactions")}
-                  </Text>
-                </View>
-              }
-            />
-              )}
+                    <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
+                      <Image
+                        source={
+                          item.image
+                            ? { uri: item.image }
+                            : require("../../assets/images/collection-manager/avetar.webp")
+                        }
+                        className="w-16 h-16 rounded-full mr-3"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-[18px] font-semibold text-gray-900">
+                        {item.firstName} {item.lastName}
+                      </Text>
+                      <Text className="text-sm text-gray-500">
+                        {t("ManagerTransactions.NIC")} {item.NICnumber}
+                      </Text>
+                      <Text className="text-sm text-gray-500">
+                        {t("ManagerTransactions.TotalRs")}
+                        {item.totalAmount
+                          ? item.totalAmount.toLocaleString()
+                          : "N/A"}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={scale(20)}
+                      color="#9CA3AF"
+                    />
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <View className="items-center mt-[40%]">
+                    <LottieView
+                      source={require("../../assets/lottie/no-data.json")}
+                      autoPlay
+                      loop
+                      style={{ width: 150, height: 150 }}
+                    />
+                    <Text
+                      style={{ fontSize: 14, marginTop: -20 }}
+                      className="text-gray-500"
+                    >
+                      {t("ManagerTransactions.Notransactions")}
+                    </Text>
+                  </View>
+                }
+              />
+            )}
           </View>
         </ScrollView>
       </View>

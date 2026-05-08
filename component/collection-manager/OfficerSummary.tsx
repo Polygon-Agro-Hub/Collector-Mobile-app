@@ -94,7 +94,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
               <TouchableOpacity
                 onPress={onCancel}
                 className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
-                 style={{
+                style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.25,
@@ -110,7 +110,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
               <TouchableOpacity
                 onPress={onConfirm}
                 className="p-2 py-3 px-6 bg-[#FF0700] rounded-lg"
-                 style={{
+                style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.25,
@@ -466,7 +466,11 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
               onPress={() =>
                 navigation.navigate("DailyTargetListForOfficers", {
                   officerId,
+                  officerName,
+                  phoneNumber1,
+                  phoneNumber2,
                   collectionOfficerId,
+                  image,
                 })
               }
               style={{

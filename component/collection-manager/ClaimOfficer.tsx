@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Keyboard,
   Modal,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
@@ -193,6 +194,20 @@ const ClaimOfficer: React.FC = () => {
     setModalVisible(false);
   };
 
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
   const ConfirmationModal = ({
     visible,
     onConfirm,
@@ -324,13 +339,13 @@ const ClaimOfficer: React.FC = () => {
       )}
 
       {!officerFound && searchPerformed && !searchLoading && (
-        <View className="flex items-center justify-center mt-24">
+        <View className="flex items-center justify-center mt-24 ">
           <Image
             source={require("../../assets/images/collection-manager/delete-icon.webp")}
             className="w-28 h-28"
             resizeMode="contain"
           />
-          <Text className="text-gray-500 mt-2">
+          <Text className="text-gray-500 mt-2 italic">
             {t("ClaimOfficer.No Disclaimed")}
           </Text>
         </View>
@@ -403,13 +418,13 @@ const ClaimOfficer: React.FC = () => {
           <TouchableOpacity
             className="mt-6 mb-10 bg-[#313131]    py-4 rounded-full"
             onPress={() => setModalVisible(true)}
-             style={{
-                  shadowColor: "#0b0a0a",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
+            style={{
+              shadowColor: "#0b0a0a",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
               className={`text-white text-lg ${

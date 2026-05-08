@@ -243,7 +243,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           title={t("PriceChart.PriceChart")}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={() => navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })}
           textColor="white"
           bgColor="#313131"
           iconBgColor="#FFFFFF1A"

@@ -164,7 +164,14 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     React.useCallback(() => {
       const onBackPress = () => {
         navigation.popToTop();
-        navigation.goBack();
+        navigation.navigate("OfficerSummary" as any, {
+          officerId: officerId,
+          officerName: officerName,
+          phoneNumber1: phoneNumber1,
+          phoneNumber2: phoneNumber2,
+          collectionOfficerId: collectionOfficerId,
+          image: image,
+        });
         return true;
       };
 
@@ -212,7 +219,14 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         navigation={navigation}
         onBackPress={() => {
           navigation.popToTop();
-          navigation.goBack();
+          navigation.navigate("OfficerSummary" as any, {
+            officerId: officerId,
+            officerName: officerName,
+            phoneNumber1: phoneNumber1,
+            phoneNumber2: phoneNumber2,
+            collectionOfficerId: collectionOfficerId,
+            image: image,
+          });
         }}
         textColor="white"
         bgColor="#282828"

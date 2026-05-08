@@ -9,6 +9,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  BackHandler,
 } from "react-native";
 import {
   widthPercentageToDP as wp,
@@ -128,7 +129,7 @@ const ShowFailModal: React.FC<FailModalProps> = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 justify-center items-center bg-black/50">
-        <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
+        <View className="bg-white p-6 rounded-2xl items-center w-72 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {" "}
             {t("BankDetailsUpdate.Failed")}
@@ -197,6 +198,22 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("blur", () => {
+      if (!isVerified) {
+        setOtpCode("");
+        setIsOtpValid(false);
+        setTimer(240);
+        setDisabledResend(true);
+
+        inputRefs.current.forEach((ref) => ref?.clear());
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, isVerified]);
+
   const handleSuccessCompletion = () => {
     setModalVisible(false);
 
@@ -246,8 +263,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   }, [timer, isVerified]);
 
   const handleOtpChange = (text: string, index: number) => {
+    const filtered = text.replace(/[^0-9]/g, "");
+    if (!filtered && text.length > 0) return;
+
     const updatedOtpCode = otpCode.split("");
-    updatedOtpCode[index] = text;
+    updatedOtpCode[index] = filtered;
 
     for (let i = 0; i < 5; i++) {
       if (updatedOtpCode[i] === undefined) updatedOtpCode[i] = "";
@@ -256,7 +276,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     setOtpCode(updatedOtpCode.join(""));
     setIsOtpValid(updatedOtpCode.every((c) => c !== ""));
 
-    if (text && index < 4) {
+    if (filtered && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
     if (updatedOtpCode.every((c) => c !== "")) {
@@ -464,6 +484,26 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
   const styles = getResponsiveStyles();
 
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("UpdateFarmerBankDetails" as any, {
+        id: farmerId,
+        NICnumber: NICnumber,
+        phoneNumber: phoneNumber,
+        PreferdLanguage: PreferdLanguage,
+        officerRole: "COO",
+      });
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -476,7 +516,15 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           title={t("")}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={() =>
+            navigation.navigate("UpdateFarmerBankDetails" as any, {
+              id: farmerId,
+              NICnumber: NICnumber,
+              phoneNumber: phoneNumber,
+              PreferdLanguage: PreferdLanguage,
+              officerRole: "COO",
+            })
+          }
         />
 
         <View
@@ -539,6 +587,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                   borderWidth: 1,
                   backgroundColor: "#FFFFFF",
                   color: "#000000",
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 4,
+                  elevation: 4,
                 }}
                 keyboardType="numeric"
                 maxLength={1}

@@ -536,8 +536,8 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
           </div>
         </div>
         
-        <div class="note">
-          <strong>${t("NewReport.Note")}</strong> ${t("NewReport.GRNnote")}
+        <div class="note" style="font-style: normal;">
+           <strong>${t("NewReport.Note")}</strong> <em>${t("NewReport.GRNnote")}</em>
         </div>
       </body>
     </html>
@@ -652,7 +652,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         {/* GRN Header */}
         <View className="mb-4">
           <Text className="text-sm font-bold">
-            {t("NewReport.GRN No")} {" "}
+            {t("NewReport.GRN No")}{" "}
             {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
           </Text>
           <Text className="text-sm">
@@ -770,9 +770,9 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
 
         {/* Note */}
         <View className="mb-4">
-          <Text className="text-xs italic text-i">
+          <Text className="text-xs">
             <Text className="font-bold">{t("NewReport.Note")}</Text>{" "}
-            {t("NewReport.GRNnote")}
+            <Text className="italic">{t("NewReport.GRNnote")}</Text>
           </Text>
         </View>
 

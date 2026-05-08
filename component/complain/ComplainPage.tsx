@@ -75,7 +75,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     const fetchComplainCategory = async () => {
       try {
         const response = await axios.get(
-          `${environment.API_BASE_URL}api/complain/get-complain-category/CoDi`,
+          `${environment.API_BASE_URL}api/complain/get-complain-category/Collection`,
         );
         if (response.data.status === "success") {
           const categoryField =

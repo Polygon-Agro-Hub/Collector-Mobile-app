@@ -250,11 +250,12 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
       {item.status === "Not Approved" && (
         <Text
           style={{
+            position: "absolute",
+            top: 10,
+            right: 14,
             color: "#EF4444",
             fontSize: 12,
             fontWeight: "600",
-            marginRight: 8,
-            marginTop: -12,
           }}
         >
           {t("CollectionOfficersList.Not Approved")}
