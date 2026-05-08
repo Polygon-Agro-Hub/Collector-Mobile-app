@@ -116,7 +116,6 @@
     "react": "$react",
     "react-dom": "$react-dom",
     "react-native-web": "$react-native-web",
-    "react-art": "$react",
     "scheduler": "^0.27.0"
   }
 }
