@@ -68,7 +68,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
         setHasPermission(false);
         setShowCameraAccess(true);
       } else {
-        // undetermined - show camera access screen
         setHasPermission(false);
         setShowCameraAccess(true);
       }
@@ -91,11 +90,15 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
   const handleBackPress = () => {
     if (jobRole === "Collection Officer") {
-      navigation.navigate("CollectionOfficerDashboard" as any);
+      navigation.navigate("Main" as any, {
+        screen: "CollectionOfficerDashboard",
+      });
     } else if (jobRole === "Collection Centre Manager") {
       navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
     } else {
-      navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+      navigation.navigate("Main" as any, {
+        screen: "CollectionOfficerDashboard",
+      });
     }
   };
 
@@ -103,11 +106,15 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     useCallback(() => {
       const handleBackPress = () => {
         if (jobRole === "Collection Officer") {
-          navigation.navigate("CollectionOfficerDashboard" as any);
+          navigation.navigate("Main" as any, {
+            screen: "CollectionOfficerDashboard",
+          });
         } else if (jobRole === "Collection Centre Manager") {
           navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
         } else {
-          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+          navigation.navigate("Main" as any, {
+            screen: "CollectionOfficerDashboard",
+          });
         }
         return true;
       };
@@ -168,7 +175,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     );
   }
 
-  // Show loading state while checking permissions
   if (hasPermission === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -179,7 +185,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     );
   }
 
-  // Show scanner when permission is granted
   if (hasPermission === true) {
     return (
       <View style={{ flex: 1, position: "relative" }}>

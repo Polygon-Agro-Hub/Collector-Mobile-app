@@ -250,7 +250,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     }
   };
 
-  const handleBackPress = useCallback(() => {
+   const handleBackPress = () => {
     if (jobRole === "Collection Officer") {
       navigation.navigate("Main" as any, {
         screen: "CollectionOfficerDashboard",
@@ -258,9 +258,11 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     } else if (jobRole === "Collection Centre Manager") {
       navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
     } else {
-      navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+      navigation.navigate("Main" as any, {
+        screen: "CollectionOfficerDashboard",
+      });
     }
-  }, [navigation, jobRole]);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -353,7 +355,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                     navigation.navigate("Main", {
                       screen: "UnregisteredCropDetails",
                       params: { userId, farmerPhone, farmerLanguage },
-                    } as never)
+                    } as any)
                   }
                   disabled={!farmerQRCode}
                   style={{

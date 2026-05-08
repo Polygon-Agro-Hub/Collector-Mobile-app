@@ -320,7 +320,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
 
       {renderTargetStatus()}
 
-      <View className="flex items-center justify-center  mt-[5%]">
+      <View className="flex items-center justify-center mt-4">
         <View style={{ width: 100, height: 100 }}>
           <CircularProgress
             size={100}
@@ -364,84 +364,85 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
         </Text>
       </View>
 
-      <View className="flex-row flex-wrap justify-between p-6 mt-[-5%]">
-        {jobRole === "Distribution Centre Manager" ? (
-          <TouchableOpacity
-            className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative border border-[#980775] mb-50"
-            onPress={() =>
-              navigation.navigate("CenterTargetScreen", {
-                centerId: centerId,
-              } as any)
-            }
-          >
-            <Image
-              source={require("../../assets/images/dashboard/center-target.webp")}
-              className="w-8 h-8 absolute top-2 right-2"
-            />
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-700 text-lg absolute bottom-2 left-2"
-            >
-              {t("CenterTarget.CenterTarget")}
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
-            onPress={() => navigation.navigate("TargetOrderScreen" as any)}
-          >
-            <Image
-              source={require("../../assets/images/dashboard/packing.webp")}
-              className="w-8 h-8 absolute top-2 right-2"
-            />
+  
 
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-[#555464] text-lg absolute bottom-2 left-2"
-            >
-              {t("DistridutionaDashboard.TargetOrders")}
-            </Text>
-          </TouchableOpacity>
-        )}
+<View className="flex-row flex-wrap justify-between px-6 pt-2 pb-6">
+  {jobRole === "Distribution Centre Manager" ? (
+    <TouchableOpacity
+      className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg shadow-gray-500 relative border border-[#980775]"
+      onPress={() =>
+        navigation.navigate("CenterTargetScreen", {
+          centerId: centerId,
+        } as any)
+      }
+    >
+      <Image
+        source={require("../../assets/images/dashboard/center-target.webp")}
+        className="w-8 h-8 absolute top-2 right-2"
+      />
+      <Text
+        style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+        className="text-gray-700 text-lg absolute bottom-2 left-2"
+      >
+        {t("CenterTarget.CenterTarget")}
+      </Text>
+    </TouchableOpacity>
+  ) : (
+    <TouchableOpacity
+      className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative"
+      onPress={() => navigation.navigate("TargetOrderScreen" as any)}
+    >
+      <Image
+        source={require("../../assets/images/dashboard/packing.webp")}
+        className="w-8 h-8 absolute top-2 right-2"
+      />
+      <Text
+        style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+        className="text-[#555464] text-lg absolute bottom-2 left-2"
+      >
+        {t("DistridutionaDashboard.TargetOrders")}
+      </Text>
+    </TouchableOpacity>
+  )}
 
-        <TouchableOpacity
-          className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
-          onPress={() => {
-            if (jobRole === "Distribution Centre Manager") {
-              navigation.navigate("ReceivedCash" as any);
-            } else if (jobRole === "Distribution Officer") {
-              navigation.navigate("ReceivedCashOfficer" as any);
-            } else {
-              navigation.navigate("ReceivedCash" as any);
-            }
-          }}
-        >
-          <View className="absolute top-2 right-2">
-            <FontAwesome6 name="hand-holding-hand" size={24} color="#980775" />
-          </View>
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-[#555464] text-lg absolute bottom-2 left-2"
-          >
-            {t("DistridutionaDashboard.Received Cash")}
-          </Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative"
+    onPress={() => {
+      if (jobRole === "Distribution Centre Manager") {
+        navigation.navigate("ReceivedCash" as any);
+      } else if (jobRole === "Distribution Officer") {
+        navigation.navigate("ReceivedCashOfficer" as any);
+      } else {
+        navigation.navigate("ReceivedCash" as any);
+      }
+    }}
+  >
+    <View className="absolute top-2 right-2">
+      <FontAwesome6 name="hand-holding-hand" size={24} color="#980775" />
+    </View>
+    <Text
+      style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+      className="text-[#555464] text-lg absolute bottom-2 left-2"
+    >
+      {t("DistridutionaDashboard.Received Cash")}
+    </Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity
-          className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative mb-50"
-          onPress={() => navigation.navigate("ReadytoPickupOrders" as any)}
-        >
-          <View className="absolute top-2 right-2">
-            <FontAwesome6 name="qrcode" size={24} color="#980775" />
-          </View>
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-[#555464] text-lg absolute bottom-2 left-2"
-          >
-            {t("DistridutionaDashboard.Pickup Order Scan")}
-          </Text>
-        </TouchableOpacity>
-      </View>
+  <TouchableOpacity
+    className="bg-white p-4 rounded-lg w-[45%] h-28 mt-4 shadow-lg border border-[#980775] shadow-gray-500 relative"
+    onPress={() => navigation.navigate("ReadytoPickupOrders" as any)}
+  >
+    <View className="absolute top-2 right-2">
+      <FontAwesome6 name="qrcode" size={24} color="#980775" />
+    </View>
+    <Text
+      style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+      className="text-[#555464] text-lg absolute bottom-2 left-2"
+    >
+      {t("DistridutionaDashboard.Pickup Order Scan")}
+    </Text>
+  </TouchableOpacity>
+</View>
     </ScrollView>
   );
 };
