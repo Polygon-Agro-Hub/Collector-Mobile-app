@@ -225,29 +225,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
           />
         </View>
 
-        {/* "Tap to Scan Again" button */}
-        {scanned && (
-          <View
-            style={{ position: "absolute", bottom: 50, alignSelf: "center" }}
-          >
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#FAE432",
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                borderRadius: 8,
-              }}
-              onPress={() => {
-                setScanned(false);
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 16 }}>
-                {t("QRScanner.TapScan")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
         <Modal
           transparent={true}
           visible={isUnsuccessfulModalVisible}

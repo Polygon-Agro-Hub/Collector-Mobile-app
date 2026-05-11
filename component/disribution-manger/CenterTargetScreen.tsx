@@ -1071,7 +1071,14 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         visible={showSuccessModal}
         onRequestClose={() => setShowSuccessModal(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000040",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <View className="bg-white rounded-2xl p-8 w-11/12 max-w-sm items-center">
             <Text className="text-2xl font-bold mb-6 text-center text-gray-800">
               {t("CenterTargetScreen.Success")}
@@ -1090,7 +1097,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   })}
             </Text>
 
-            {/* Progress Bar */}
             <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
               <Animated.View
                 style={{
@@ -1128,7 +1134,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
   };
   return (
     <View className="flex-1 bg-[#282828]">
-      {/* Header */}
       <View className="bg-[#282828] px-4 py-6 flex-row justify-center items-center">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -1190,7 +1195,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         )}
 
         <View className="absolute right-4 flex-row items-center space-x-2">
-          {/* Filter Icon for ToDo */}
           {selectedToggle === "ToDo" && (
             <TouchableOpacity className="p-2" onPress={handleRightIconPress}>
               <Image
@@ -1205,7 +1209,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             </TouchableOpacity>
           )}
 
-          {/* Filter Icon for Completed - only show when no items selected */}
           {selectedToggle === "Completed" && selectedItems.length === 0 && (
             <TouchableOpacity className="p-2" onPress={handleRightIconPress}>
               <Image
@@ -1220,7 +1223,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             </TouchableOpacity>
           )}
 
-          {/* Close and Correct Icons for Completed section - only show when items selected */}
           {selectedToggle === "Completed" && selectedItems.length > 0 && (
             <>
               <TouchableOpacity
@@ -1241,7 +1243,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         </View>
       </View>
 
-      {/* Toggle Buttons */}
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
         <Animated.View
           style={{
@@ -1396,7 +1397,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         </Animated.View>
       </View>
 
-      {/* ToDo Calendar Filter Modal */}
       {showCalendarModal && (
         <Modal
           animationType="slide"
@@ -1404,13 +1404,19 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           visible={showCalendarModal}
           onRequestClose={() => setShowCalendarModal(false)}
         >
-          <View className="flex-1 justify-center items-center bg-black/50">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#00000040",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View className="bg-white rounded-lg p-6 w-11/12 max-w-md">
               <Text className="text-lg font-bold mb-6 text-center text-gray-800">
                 {t("CenterTargetScreen.Select Date")}
               </Text>
 
-              {/* Clear Date Filter Option */}
               <TouchableOpacity
                 className={`w-full mb-4 px-4 py-4 rounded-lg border-2 ${
                   selectedDateFilter === null
@@ -1431,7 +1437,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 </Text>
               </TouchableOpacity>
 
-              {/* 3 Day Options */}
               {getDateOptions().map((dateOption, index) => {
                 const isSelected =
                   selectedDateFilter === dateOption.label ||
@@ -1470,7 +1475,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 );
               })}
 
-              {/* Close Button */}
               <TouchableOpacity
                 className="bg-gray-300 px-6 py-3 rounded-lg mt-4"
                 onPress={() => setShowCalendarModal(false)}
@@ -1485,7 +1489,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         </Modal>
       )}
 
-      {/* Completed Calendar Filter Modal */}
       {showCompletedCalendarModal && (
         <Modal
           animationType="slide"
@@ -1493,13 +1496,19 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           visible={showCompletedCalendarModal}
           onRequestClose={() => setShowCompletedCalendarModal(false)}
         >
-          <View className="flex-1 justify-center items-center bg-black/50">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#00000040",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View className="bg-white rounded-lg p-6 w-11/12 max-w-md">
               <Text className="text-lg font-bold mb-6 text-center text-gray-800">
                 {t("CenterTargetScreen.Select Completion Date")}
               </Text>
 
-              {/* Clear Date Filter Option */}
               <TouchableOpacity
                 className={`w-full mb-4 px-4 py-4 rounded-lg border-2 ${
                   completedDateFilter === null
@@ -1522,7 +1531,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 </Text>
               </TouchableOpacity>
 
-              {/* 3 Day Options */}
               {getDateOptions().map((dateOption, index) => {
                 const isSelected =
                   completedDateFilter === dateOption.label ||
@@ -1561,7 +1569,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 );
               })}
 
-              {/* Close Button */}
               <TouchableOpacity
                 className="bg-gray-300 px-6 py-3 rounded-lg mt-4"
                 onPress={() => setShowCompletedCalendarModal(false)}
@@ -1576,7 +1583,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         </Modal>
       )}
 
-      {/* Confirmation Modal */}
       {showConfirmModal && (
         <Modal
           animationType="fade"
@@ -1588,7 +1594,14 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             }
           }}
         >
-          <View className="flex-1 justify-center items-center bg-black/50">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#00000040",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View className="bg-white rounded-lg p-6 w-11/12 max-w-sm">
               <View className="items-center mb-2">
                 <View className="w-10 h-10 rounded-lg bg-[#F6F7F9] justify-center items-center ">
@@ -1778,7 +1791,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Error Message */}
         {error && (
           <View className="bg-red-100 border border-red-400 px-4 py-3 mx-4 mt-4 rounded">
             <Text className="text-red-700 text-center">{error}</Text>
@@ -1810,7 +1822,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 index % 2 === 0 ? "bg-gray-50" : "bg-white"
               }`}
             >
-              {/* Row Number or Checkbox */}
               <View className="flex-1 items-center justify-center relative">
                 {selectedToggle === "Completed" ? (
                   renderCheckbox(item)
@@ -1827,17 +1838,13 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 </Text>
               </View>
 
-              {/* Content changes based on selected toggle */}
               {selectedToggle === "Out" ? (
                 <>
-                  {/* Out Time */}
                   <View className="flex-[2] items-center justify-center px-2">
                     <Text className="text-center font-medium text-gray-800">
                       {formatOutTime(item.outDlvrDate)}
                     </Text>
                   </View>
-
-                  {/* Outing Status */}
 
                   <View className="flex-[2] items-center justify-center px-2">
                     {(() => {
@@ -1920,7 +1927,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                     </Text>
                   </View>
 
-                  {/* Status */}
                   <View className="flex-[2] items-center justify-center px-2">
                     <View
                       className={`px-3 py-2 rounded-full ${getStatusColor(item.selectedStatus)}`}

@@ -69,7 +69,7 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View className="flex-1 justify-center items-center bg-black/50">
+      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
         <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {" "}
@@ -128,7 +128,7 @@ const ShowFailModal: React.FC<FailModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View className="flex-1 justify-center items-center bg-black/50">
+     <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
         <View className="bg-white p-6 rounded-2xl items-center w-72 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {" "}
@@ -196,6 +196,9 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [language, setLanguage] = useState("en");
   const [isOtpValid, setIsOtpValid] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [failModalVisible, setFailModalVisible] = useState(false);
+  const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
+const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
@@ -301,77 +304,122 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     }
   };
 
-  const handleVerify = async () => {
-    const code = otpCode;
-    Keyboard.dismiss();
+ const handleVerify = async () => {
+  const code = otpCode; 
+  Keyboard.dismiss();
 
-    if (code.length !== 5) {
-      Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"));
-      return;
-    }
+  if (code.length !== 5) {
+    Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"));
+    return;
+  }
 
-    const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
+  const netState = await NetInfo.fetch();
+  if (!netState.isConnected) {
+    Alert.alert(t("Error.Sorry"), t("Error.noInternet"));
+    return;
+  }
 
-    try {
-      const refId = referenceId;
+  if (isOtpExpired || timer === 0) {
+    Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+    return;
+  }
 
-      const url = "https://api.getshoutout.com/otpservice/verify";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
+  try {
+    const refId = referenceId;
 
-      const body = {
-        code: code,
-        referenceId: refId,
-      };
+    const url = "https://api.getshoutout.com/otpservice/verify";
+    const headers = {
+      Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
+      "Content-Type": "application/json",
+    };
 
-      const response = await axios.post(url, body, { headers });
+    const response = await axios.post(
+      url,
+      { code, referenceId: refId },
+      { headers },
+    );
 
-      const { statusCode } = response.data;
+    const { statusCode, message } = response.data;
 
-      if (statusCode === "1000") {
+    switch (statusCode) {
+      case "1000":
         setIsVerified(true);
-        setModalVisible(true);
 
-        const response = await axios.post(
-          `${environment.API_BASE_URL}api/farmer/FarmerBankDetails`,
+        const saveResponse = await axios.post(
+          `${environment.API_BASE_URL}api/farmer/FarmerBankDetails`, 
           {
-            accNumber: accNumber,
-            accHolderName: accHolderName,
-            bankName: bankName,
-            branchName: branchName,
+            accNumber,
+            accHolderName,
+            bankName,
+            branchName,
             userId: farmerId,
-            NICnumber: NICnumber,
+            NICnumber,
           },
         );
 
-        if (response.status === 200) {
-          await AsyncStorage.removeItem("referenceId");
-          <ShowSuccessModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onComplete={handleSuccessCompletion}
-          />;
+        await AsyncStorage.removeItem("referenceId");
+
+        if (saveResponse.status === 200) {
+          setModalVisible(true); 
         } else {
-          <ShowFailModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onFail={handleFailCompletion}
-          />;
+          setFailModalVisible(true); 
         }
-      } else if (statusCode === "1001") {
-        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
-      } else {
-        Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
-      }
-    } catch (error) {
+        break;
+
+      case "1001":
+        setVerificationAttempts((prev: number) => prev + 1);
+
+        if (verificationAttempts >= 2) {
+          Alert.alert(
+            t("Error.Sorry"),
+            t("Otpverification.OTPExpiredOrInvalid"),
+            [
+              {
+                text: t("Otpverification.ResendOTP"),
+                onPress: handleResendOTP,
+              },
+              {
+                text: t("Otpverification.TryAgain"),
+                onPress: () => {
+                  setOtpCode("");
+                  setIsOtpValid(false);
+                  inputRefs.current.forEach((ref) => ref?.clear());
+                  inputRefs.current[0]?.focus();
+                },
+              },
+            ],
+          );
+        } else {
+          Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+        }
+        break;
+
+      case "1002":
+        setIsOtpExpired(true);
+        Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+        break;
+
+      default:
+        Alert.alert(
+          t("Error.Sorry"),
+          message || t("Error.somethingWentWrong"),
+        );
+    }
+  } catch (error: any) {
+    console.error("OTP Verification Error:", error);
+
+    const errStatusCode = error.response?.data?.statusCode;
+
+    if (errStatusCode === "1002") {
+      setIsOtpExpired(true);
+      Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+    } else if (errStatusCode === "1001") {
+      Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+    } else {
       Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
     }
-  };
+  }
+};
 
   const handleResendOTP = async () => {
     await AsyncStorage.removeItem("referenceId");
@@ -629,10 +677,10 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </Text>
           </View>
 
-          <ShowSuccessModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onComplete={handleSuccessCompletion}
+          <ShowFailModal
+            visible={failModalVisible}
+            onClose={() => setFailModalVisible(false)}
+            onFail={handleFailCompletion}
           />
 
           <View className="w-full items-center" style={{ marginBottom: hp(4) }}>

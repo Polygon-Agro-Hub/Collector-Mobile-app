@@ -716,7 +716,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           visible={isModalVisible}
           animationType="slide"
         >
-          <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
+          <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
                 {t("UnregisteredFarmerDetails.Success")}
@@ -746,7 +746,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           visible={isUnsuccessfulModalVisible}
           animationType="slide"
         >
-          <View className="flex-1 justify-center items-center bg-gray-900 bg-opacity-50">
+         <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
                 {t("UnregisteredFarmerDetails.Oops")}

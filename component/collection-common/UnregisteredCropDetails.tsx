@@ -84,7 +84,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
       animationType="fade"
       statusBarTranslucent={true}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-5">
+      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
         <View className="bg-white rounded-xl p-6 items-center min-w-[280px] max-w-[320px]">
           <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg justify-center items-center mb-4">
             <Image

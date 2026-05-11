@@ -148,8 +148,9 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false);
   const [countdown, setCountdown] = useState(30);
-  const [countdownInterval, setCountdownInterval] =
-    useState<NodeJS.Timeout | null>(null);
+  const [countdownInterval, setCountdownInterval] = useState<ReturnType<
+    typeof setInterval
+  > | null>(null);
   const [orderStatus, setOrderStatus] = useState<
     "Pending" | "Opened" | "Completed" | "In Progress"
   >(status || item.status || "Pending");
@@ -1144,7 +1145,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       setReplaceData((prev) => ({
         ...prev,
         newProduct: product.displayName,
-        price: `Rs. ${newProductPrice.toFixed(2)}`,
+        price: `Rs. ${formatPrice(newProductPrice)}`,
       }));
 
       setIsReplacementPriceHigher(newProductPrice > selectedProductPrice);
@@ -1190,7 +1191,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         visible={showReplaceModal}
         onRequestClose={handleModalClose}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
+        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
           <View className="bg-white rounded-lg mx-6 p-6 w-80">
             <View className="justify-between items-center mb-4">
               <Text className="text-lg font-semibold">
@@ -1522,7 +1523,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         navigation.goBack();
       }}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+          paddingHorizontal: 24,
+        }}
+      >
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
           <View className="items-center mb-4"></View>
           <Text className="text-xl font-bold text-center mb-2">
@@ -1682,15 +1691,20 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       animationType="fade"
       onRequestClose={() => setShowUnsavedModal(false)}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+          paddingHorizontal: 24,
+        }}
+      >
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
-          <Text className="text-lg font-semibold text-center mb-2">
-            {t("PendingOrderScreen.You have unsubmitted changes")}
-          </Text>
           <Text className="text-gray-600 text-center mb-6">
-            {t(
-              "OpenedOrderScreen.If you leave this page now, your changes will be lost.",
-            )}
+            {t("OpenedOrderScreen.If you leave this page now,")}
+            {"\n"}
+            {t("OpenedOrderScreen.your changes will be lost.")}
             {"\n"}
             {t("OpenedOrderScreen.Do you want to continue without saving?")}
           </Text>
@@ -1741,7 +1755,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       animationType="fade"
       onRequestClose={() => setShowSubmitModal(false)}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
+      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
           <Text className="text-lg font-semibold text-center mb-2">
             {t("PendingOrderScreen.You have unsubmitted changes")}
@@ -1780,9 +1794,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     </Modal>
   );
 
-  {
-    /* Completion Prompt Modal */
-  }
+  
   <Modal
     visible={showCompletionPrompt}
     transparent={true}
@@ -1791,7 +1803,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       handleBackToEdit();
     }}
   >
-    <View className="flex-1 bg-black/50 justify-center items-center px-6">
+    <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
       <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
         {/* Title */}
         <Text className="text-xl font-bold text-center mb-2">
@@ -2191,7 +2203,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   animationType="fade"
                   onRequestClose={handleBackToEdit}
                 >
-                  <View className="flex-1 bg-black/50 justify-center items-center px-6">
+                  <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
                     <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
                       <Text
                         className="text-xl font-bold text-center mb-2"
