@@ -1,7 +1,7 @@
-# fastlane/Fastfile
+# # fastlane/Fastfile
 
 WORKSPACE_NAME = "CoDiNet"
-APP_IDENTIFIER = "com.polygonagro.Collector"
+APP_IDENTIFIER  = "com.polygonagro.Collector"
 
 default_platform(:ios)
 
@@ -16,6 +16,15 @@ platform :ios do
       in_house:              false
     )
   end
+
+  # ── NEW: select Xcode 26.2 on the CI runner ─────────────────────────
+  # macos-latest (macOS 15) defaults to Xcode 16.4 (iOS 18.5 SDK).
+  # Apple requires iOS 26 SDK for all uploads since April 2026.
+  # Xcode 26.2 is pre-installed on the runner — we just need to select it.
+  private_lane :select_xcode do
+    xcode_select("/Applications/Xcode_26.2.app")
+  end
+  # ─────────────────────────────────────────────────────────────────────
 
   private_lane :sync_certificates do |options|
     api_key = options[:api_key]
@@ -54,13 +63,14 @@ platform :ios do
           APP_IDENTIFIER => ENV["sigh_#{APP_IDENTIFIER}_appstore_profile-name"]
         }
       }
-      # ← xcargs removed entirely — it conflicts with Match manual signing
     )
   end
 
   desc "Build and upload to TestFlight"
   lane :beta do
-    setup_ci  # ← THIS IS THE KEY FIX — creates unlocked keychain on GitHub Actions
+    select_xcode  # ← ADD THIS LINE
+
+    setup_ci
 
     api_key = get_api_key
     sync_certificates(api_key: api_key)
@@ -84,7 +94,9 @@ platform :ios do
 
   desc "Build and upload to App Store"
   lane :release do
-    setup_ci  # ← Same fix here
+    select_xcode  # ← ADD THIS LINE
+
+    setup_ci
 
     api_key = get_api_key
     sync_certificates(api_key: api_key)

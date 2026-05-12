@@ -19,6 +19,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
 import NetInfo from "@react-native-community/netinfo";
+import * as SplashScreen from "expo-splash-screen";
 import Login from "@/component/auth/Login";
 import ChangePassword from "@/component/auth/ChangePassword";
 import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
@@ -107,16 +108,17 @@ import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
 
-LogBox.ignoreAllLogs(true);
-(Text as any).defaultProps = {
-  ...(Text as any).defaultProps,
-  allowFontScaling: false,
-};
 
-(TextInput as any).defaultProps = {
-  ...(TextInput as any).defaultProps,
-  allowFontScaling: false,
-};
+// LogBox.ignoreAllLogs(true);
+// (Text as any).defaultProps = {
+//   ...(Text as any).defaultProps,
+//   allowFontScaling: false,
+// };
+
+// (TextInput as any).defaultProps = {
+//   ...(TextInput as any).defaultProps,
+//   allowFontScaling: false,
+// };
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -260,6 +262,10 @@ function AppContent() {
   const [isOfflineAlertShown, setIsOfflineAlertShown] = useState(false);
   useEffect(() => {
     onlineStatus();
+    // Hide splash screen when app is ready
+    SplashScreen.hideAsync().catch((err) => {
+      console.warn("Failed to hide splash screen:", err);
+    });
   }, []);
   useEffect(() => {
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
