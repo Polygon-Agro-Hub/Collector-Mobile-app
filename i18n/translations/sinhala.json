@@ -382,6 +382,7 @@
     "Verify": "තහවුරු කරන්න",
     "Success": "සාර්ථකයි!",
     "Registration": "ලියාපදිංචි වීම සාර්ථකයි!",
+    "expiredOTP": "මෙම OTP කල් ඉකුත් වී ඇත.",
     "OK": "හරි",
     "invalidOTP": "සත්‍යාපන කේතය වැරදියි",
     "completeOTP": "කරුණාකර සම්පූර්ණ සත්‍යාපන කේතය ඇතුළත් කරන්න.",
@@ -559,7 +560,7 @@
     "Cancel": "අවලංගු කරන්න",
     "Next": "ඉදිරියට යන්න",
     "Phone Number 01 and Phone Number 02 cannot be the same.": "දුරකථන අංක 01 සහ 02 එකම විය නොහැක.",
-    "Submit":"තහවුරු කරන්න"
+    "Submit": "තහවුරු කරන්න"
   },
   "AddOfficerAddressDetails": {
     "LNG": "si",
@@ -665,7 +666,7 @@
     "Save": "සුරකින්න",
     "maximum amount receive": "ලැබිය හැකි උපරිම ප්‍රමාණය (Kg):",
     "Select an officer": "--නිලධාරියෙකු තෝරන්න--",
-    "No Officers Found":"නිලධාරීන් හමු නොවීය"
+    "No Officers Found": "නිලධාරීන් හමු නොවීය"
   },
   "ReportGenerator": {
     "LNG": "si",
@@ -832,7 +833,7 @@
     "Info": "තොරතුරු",
     "Use the 'Save to Files' option to save to Downloads": "බාගැනීම් වලට සුරැකීමට 'ගොනු වලට සුරකින්න' විකල්පය භාවිතා කරන්න.",
     "Failed to prepare PDF for download": "බාගත කිරීම සඳහා PDF සකස් කිරීමට අසමත් විය.",
-    "Full Total (Rs.)":"සම්පූර්ණ එකතුව (රු.) :"
+    "Full Total (Rs.)": "සම්පූර්ණ එකතුව (රු.) :"
   },
   "BankDetailsUpdate": {
     "Success": "සාර්ථකයි",
@@ -905,7 +906,7 @@
     "Retry": "නැවත උත්සාහ කරන්න",
     "Pending": "අපරිපූර්ණ",
     "Opened": "විවෘත කළ",
-    "My Target":"මගේ ඉලක්කය"
+    "My Target": "මගේ ඉලක්කය"
   },
   "OpenedOrderScreen": {
     "INV No ": "INV අංකය:",
@@ -915,16 +916,19 @@
     "Leave without Submitting": "සුරැකීමකින් තොරව ඉවත් වන්න",
     "Stay on page": "පිටුවේ රැඳී සිටින්න",
     "You have unsubmitted changes!": "ඔබ සම්පූර්ණ නොකළ වෙනස්කම් තිබේ!",
-    "If you leave this page now, your changes will be lost.": "ඔබ දැන් මෙම පිටුවෙන් ඉවත් වන්නේ නම්, ඔබගේ වෙනස්කම් නැති වනු ඇත.",
+
     "Do you want to continue without saving?": "ඔබට සුරැකීමකින් තොරව ඉදිරියට යාමට අවශ්‍යද?",
+    "If you leave this page now,": "ඔබ දැන් මෙම පිටුවෙන් ඉවත් වන්නේ නම්,",
+    "your changes will be lost.": "ඔබගේ වෙනස්කම් නැති වනු ඇත.",
+
     "Opened": "විවෘත කළ",
     "Completed": "සම්පූර්ණ කළ"
   },
   "PendingOrderScreen": {
     "Completing order": "ඇණවුම සම්පූර්ණ කරමින්...",
     "Processing": "සකසමින්...",
-    "Select New Product":"නව නිෂ්පාදනය තෝරන්න",
-    "Select Product":"නිෂ්පාදනය තෝරන්න",
+    "Select New Product": "නව නිෂ්පාදනය තෝරන්න",
+    "Select Product": "නිෂ්පාදනය තෝරන්න",
     "Custom Selected Items": "පාරිභෝගික-තෝරාගත් අයිතම",
     "Back to Edit": "සංස්කරණය වෙත ආපසු",
     "Mark as Completed": "සම්පූර්ණ කළ ලෙස ලකුණු කරන්න",
@@ -1000,7 +1004,7 @@
     "No products available": "නිෂ්පාදන නොමැත",
     "Approve": "අනුමත කරන්න",
     "Rs": "රු.",
-    "Please enter a value greater than 0":"කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න."
+    "Please enter a value greater than 0": "කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න."
   },
   "ReplaceRequestsScreen": {
     "Order ID": "ඇණවුම් අංකය:",

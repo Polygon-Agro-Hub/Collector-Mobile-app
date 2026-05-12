@@ -80,7 +80,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-center items-center bg-black/70">
+      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
         <Animated.View
           style={{ transform: [{ scale: scaleAnim }] }}
           className="bg-white rounded-3xl p-6 mx-6 w-[85%] max-w-sm relative overflow-hidden"

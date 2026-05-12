@@ -24,6 +24,7 @@ import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 import provincesData from "../../assets/jsons/sri-lanka-provinces.json";
 import { Entypo } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
 
 type AddOfficerAddressDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -292,7 +293,25 @@ const AddOfficerAddressDetails: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateFields()) return;
+  if (!validateFields()) return;
+
+  const netState = await NetInfo.fetch();
+  if (!netState.isConnected) return;
+
+  try {
+    setLoading(true);
+    const token = await AsyncStorage.getItem("token");
+
+    // ── Convert local image URI → base64 so backend can upload to S3 ──
+    let profileImageBase64 = "";
+    const imageUri = basicDetails.profileImage;
+    if (imageUri) {
+      const ext = imageUri.split(".").pop()?.toLowerCase() || "jpg";
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+  encoding: 'base64',  // ← string literal instead of FileSystem.EncodingType.Base64
+});
+      profileImageBase64 = `data:image/${ext};base64,${base64}`;
+    }
 
     const combinedData = {
       ...basicDetails,
@@ -304,54 +323,45 @@ const AddOfficerAddressDetails: React.FC = () => {
           (lang) => preferredLanguages[lang as keyof typeof preferredLanguages],
         )
         .join(", "),
-      profileImage: basicDetails.profileImage || "",
+      profileImage: profileImageBase64, // ← real base64 now, not a file:// URI
     };
 
-    const netState = await NetInfo.fetch();
-    if (!netState.isConnected) return;
-
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem("token");
-      const response = await axios.post(
-        `${environment.API_BASE_URL}api/collection-manager/collection-officer/add`,
-        combinedData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+    const response = await axios.post(
+      `${environment.API_BASE_URL}api/collection-manager/collection-officer/add`,
+      combinedData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json", // ← stays JSON, backend handles base64
         },
-      );
+      },
+    );
 
-      if (response.status === 201) {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Officer created successfully"),
-        );
-        setLoading(false);
-        await AsyncStorage.removeItem("officerFormData");
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("Main", { screen: "CollectionOfficersList" });
-        } else if (jobRole === "Distribution Officer") {
-          navigation.navigate("Main", { screen: "DistributionOfficersList" });
-        }
-      }
-    } catch (error) {
-      console.error("Error submitting officer data:", error);
+    if (response.status === 201) {
+      Alert.alert(t("Error.Success"), t("Error.Officer created successfully"));
       setLoading(false);
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
-      } else {
-        Alert.alert(
-          t("Error.error"),
-          t("Error.An error occurred while creating the officer."),
-        );
+      await AsyncStorage.removeItem("officerFormData");
+      if (jobRole === "Collection Officer") {
+        navigation.navigate("Main", { screen: "CollectionOfficersList" });
+      } else if (jobRole === "Distribution Officer") {
+        navigation.navigate("Main", { screen: "DistributionOfficersList" });
       }
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error submitting officer data:", error);
+    setLoading(false);
+    if (axios.isAxiosError(error) && error.response?.status === 400) {
+      Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+    } else {
+      Alert.alert(
+        t("Error.error"),
+        t("Error.An error occurred while creating the officer."),
+      );
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const provinceModalData = (provincesData.provinces as Province[]).map(
     (p) => ({

@@ -6,13 +6,13 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  KeyboardAvoidingView,
   Platform,
   BackHandler,
+  ScrollView,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { scale } from "react-native-size-matters";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -22,7 +22,6 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
-import { ScrollView } from "react-native-gesture-handler";
 
 type TransactionListNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -64,6 +63,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
     officerName,
   } = route.params;
 
+  const insets = useSafeAreaInsets();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -86,10 +87,10 @@ const TransactionList: React.FC<TransactionListProps> = ({
     React.useCallback(() => {
       setSelectedDate(new Date());
       setShowDatePicker(false);
-
       return () => {};
     }, []),
   );
+
   const fetchTransactions = async (date: string) => {
     setLoading(true);
     try {
@@ -118,7 +119,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
         setTransactions(formattedData);
         setFilteredTransactions(formattedData);
-        setLoading(false);
       } else {
         console.error("Error fetching transactions:", data.error);
       }
@@ -131,7 +131,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-
     const normalizedQuery = query.trim().toLowerCase().replace(/\s+/g, " ");
 
     if (!normalizedQuery) {
@@ -145,15 +144,14 @@ const TransactionList: React.FC<TransactionListProps> = ({
       const nicNumber = (transaction.NICnumber || "")
         .replace(/[^\w\s]/gi, "")
         .toLowerCase();
-
       const fullName = `${firstName} ${lastName}`.trim().replace(/\s+/g, " ");
 
-      const firstNameMatch = firstName.includes(normalizedQuery);
-      const lastNameMatch = lastName.includes(normalizedQuery);
-      const fullNameMatch = fullName.includes(normalizedQuery);
-      const nicMatch = nicNumber.includes(normalizedQuery);
-
-      return firstNameMatch || lastNameMatch || fullNameMatch || nicMatch;
+      return (
+        firstName.includes(normalizedQuery) ||
+        lastName.includes(normalizedQuery) ||
+        fullName.includes(normalizedQuery) ||
+        nicNumber.includes(normalizedQuery)
+      );
     });
 
     setFilteredTransactions(filtered);
@@ -172,11 +170,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchData = async () => {
-        fetchTransactions(getCurrentDate());
-        setSearchQuery("");
-      };
-      fetchData();
+      fetchTransactions(getCurrentDate());
+      setSearchQuery("");
     }, []),
   );
 
@@ -200,127 +195,211 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
   useFocusEffect(
     useCallback(() => {
-      const onBackPress = () => handleBackPress();
-
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress,
+        handleBackPress,
       );
-
       return () => subscription.remove();
     }, [handleBackPress]),
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <SafeAreaView className="flex-1 bg-[#980775]">
-        <View className="bg-[#980775] px-4 pt-2 pb-10">
-          <View className="flex-row items-center justify-between">
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("OfficerSummary" as any, {
-                  collectionOfficerId,
-                  officerId,
-                  phoneNumber1,
-                  phoneNumber2,
-                  officerName,
-                })
-              }
-              className="bg-[#FFFFFF1A] rounded-full p-2 justify-center w-10"
-            >
-              <AntDesign name="left" size={22} color="white" />
-            </TouchableOpacity>
+    <View style={{ flex: 1, backgroundColor: "#980775" }}>
+      <View
+        style={{
+          backgroundColor: "#980775",
+          paddingTop: insets.top,
+          paddingHorizontal: 16,
+          paddingBottom: 40,
+          marginTop:5
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("OfficerSummary" as any, {
+                collectionOfficerId,
+                officerId,
+                phoneNumber1,
+                phoneNumber2,
+                officerName,
+              })
+            }
+            style={{
+              backgroundColor: "rgba(255,255,255,0.1)",
+              borderRadius: 999,
+              padding: 8,
+              width: 40,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <AntDesign name="left" size={22} color="white" />
+          </TouchableOpacity>
 
-            <Text className="text-white text-lg font-bold text-center flex-1">
-              EMP {t("ManagerTransactions.ID")} : {officerId}
-            </Text>
+          <Text
+            style={{
+              color: "white",
+              fontSize: 18,
+              fontWeight: "bold",
+              textAlign: "center",
+              flex: 1,
+            }}
+          >
+            EMP {t("ManagerTransactions.ID")} : {officerId}
+          </Text>
 
-            <TouchableOpacity
-              onPress={() => setShowDatePicker((prev) => !prev)}
-              className="mr-2"
-            >
-              <Ionicons name="calendar-outline" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-row items-center justify-center mt-1">
-            <Text className="text-white" style={{ fontSize: 16 }}>
-              {t("ManagerTransactions.Selected Date")}{" "}
-              {selectedDate
-                ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
-                : "N/A"}
-            </Text>
-          </View>
+          <TouchableOpacity
+            onPress={() => setShowDatePicker((prev) => !prev)}
+            style={{ marginRight: 8 }}
+          >
+            <Ionicons name="calendar-outline" size={24} color="white" />
+          </TouchableOpacity>
         </View>
 
-        <View className="flex-1 px-4 bg-white rounded-t-[35px] mt-[-10px]">
-          <View className="flex-row items-center bg-[#F7F7F7] px-6 py-2 rounded-full border border-[#444444] mx-4 shadow-md mt-[-22px]">
-            <TextInput
-              placeholder={t("ManagerTransactions.Search")}
-              placeholderTextColor="grey"
-              className="flex-1 text-base text-[#565559]"
-              style={{ fontStyle: "italic" }}
-              value={searchQuery}
-              onChangeText={handleSearch}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 8,
+            marginBottom: 16,
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 16 }}>
+            {t("ManagerTransactions.Selected Date")}{" "}
+            {selectedDate
+              ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+              : "N/A"}
+          </Text>
+        </View>
+      </View>
+
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "white",
+          borderTopLeftRadius: 40,
+          borderTopRightRadius: 40,
+          marginTop: -20,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: "white",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: "#444444",
+            marginHorizontal: 16,
+            marginTop: -22,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 4,
+          }}
+        >
+          <TextInput
+            style={{ flex: 1, fontSize: 16, fontStyle: "italic" }}
+            placeholder={t("ManagerTransactions.Search")}
+            placeholderTextColor="grey"
+            value={searchQuery}
+            onChangeText={(text) => {
+              const cleanedText = text.replace(/[^a-zA-Z0-9\s]/g, "");
+              const finalText = cleanedText.replace(/^\s+/, "");
+              handleSearch(finalText);
+            }}
+          />
+          <TouchableOpacity onPress={() => handleSearch(searchQuery)}>
+            <Image
+              source={require("../../assets/images/collection-manager/search-transaction.webp")}
+              style={{ width: 32, height: 32 }}
+              resizeMode="contain"
             />
-            <TouchableOpacity onPress={() => handleSearch(searchQuery)}>
-              <Image
-                source={require("../../assets/images/collection-manager/search-transaction.webp")}
-                className="w-8 h-8"
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
+
+        {showDatePicker && Platform.OS === "android" && (
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="default"
+            onChange={(event, date) => {
+              setShowDatePicker(false);
+              if (date) setSelectedDate(date);
+            }}
+          />
+        )}
+
+        {showDatePicker && Platform.OS === "ios" && (
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 50,
+              position: "absolute",
+              left: 24,
+              top: "52%",
+              backgroundColor: "#f3f4f6",
+              borderRadius: 12,
+            }}
+          >
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="inline"
+              style={{ width: 320, height: 260 }}
+              onChange={(event, date) => {
+                setShowDatePicker(false);
+                if (date) setSelectedDate(date);
+              }}
+            />
           </View>
+        )}
 
-          <View className="flex-1 bg-white rounded-t-[40px]">
-            {showDatePicker && Platform.OS === "android" && (
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display="default"
-                onChange={(event, date) => {
-                  setShowDatePicker(false);
-                  if (date) setSelectedDate(date);
-                }}
-              />
-            )}
+        <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              color: "black",
+              marginBottom: 16,
+            }}
+          >
+            {t("ManagerTransactions.Transaction List")}{" "}
+            <Text style={{ fontWeight: "normal" }}>
+              ({t("ManagerTransactions.All")} {filteredTransactions.length})
+            </Text>
+          </Text>
+        </View>
 
-            {showDatePicker && Platform.OS === "ios" && (
-              <View className="justify-center items-center z-50 absolute ml-6 mt-[52%] bg-gray-100 rounded-lg">
-                <DateTimePicker
-                  value={selectedDate}
-                  mode="date"
-                  display="inline"
-                  style={{ width: 320, height: 260 }}
-                  onChange={(event, date) => {
-                    setShowDatePicker(false);
-                    if (date) setSelectedDate(date);
-                  }}
-                />
-              </View>
-            )}
-
-            <View className="px-4 mt-4">
-              <Text className="text-lg font-semibold text-black mb-2">
-                {t("ManagerTransactions.Transaction List")}{" "}
-                <Text className="font-normal">
-                  ({t("ManagerTransactions.All")} {filteredTransactions.length})
-                </Text>
-              </Text>
-            </View>
-
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={{ flex: 1, marginBottom: 8 }}>
             {loading ? (
-              <View className="flex-1 justify-center items-center">
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <LottieView
                   source={require("../../assets/lottie/loading.json")}
                   autoPlay
                   loop
                   style={{ width: 150, height: 150 }}
                 />
-                <Text className="text-gray-500 mt-4">
+                <Text style={{ color: "#6b7280", marginTop: 16 }}>
                   {t("ManagerTransactions.Loading")}
                 </Text>
               </View>
@@ -333,12 +412,23 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 }
                 contentContainerStyle={{
                   paddingHorizontal: 16,
-                  paddingBottom: 32,
-                  flexGrow: 1,
+                  paddingBottom: insets.bottom + 16,
                 }}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    className="flex-row items-center mb-4 p-4 rounded-[35px] bg-gray-100 shadow-sm"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      padding: 16,
+                      marginBottom: 12,
+                      borderRadius: 35,
+                      backgroundColor: "#f3f4f6",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 6,
+                      elevation: 4,
+                    }}
                     onPress={() => {
                       navigation.navigate("TransactionReport" as any, {
                         registeredFarmerId: item.registeredFarmerId,
@@ -364,29 +454,38 @@ const TransactionList: React.FC<TransactionListProps> = ({
                           .toUpperCase(),
                       });
                     }}
-                    style={{
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 6,
-                      elevation: 4,
-                    }}
                   >
-                    <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
+                    <View
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 28,
+                        overflow: "hidden",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: 16,
+                      }}
+                    >
                       <Image
                         source={require("../../assets/images/collection-manager/avetar.webp")}
-                        className="w-full h-full"
+                        style={{ width: "100%", height: "100%" }}
                         resizeMode="cover"
                       />
                     </View>
-                    <View className="flex-1">
-                      <Text className="text-[18px] font-semibold text-gray-900">
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: "600",
+                          color: "#111827",
+                        }}
+                      >
                         {item.firstName} {item.lastName}
                       </Text>
-                      <Text className="text-sm text-gray-500">
+                      <Text style={{ fontSize: 14, color: "#6b7280" }}>
                         {t("ManagerTransactions.NIC")} {item.NICnumber}
                       </Text>
-                      <Text className="text-sm text-gray-500">
+                      <Text style={{ fontSize: 14, color: "#6b7280" }}>
                         {t("ManagerTransactions.TotalRs")}
                         {item.totalAmount
                           ? item.totalAmount.toLocaleString()
@@ -401,7 +500,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   </TouchableOpacity>
                 )}
                 ListEmptyComponent={
-                  <View className="items-center mt-[40%]">
+                  <View
+                    style={{ alignItems: "center", marginTop: "40%" as any }}
+                  >
                     <LottieView
                       source={require("../../assets/lottie/no-data.json")}
                       autoPlay
@@ -409,8 +510,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                       style={{ width: 150, height: 150 }}
                     />
                     <Text
-                      style={{ fontSize: 14, marginTop: -20 }}
-                      className="text-gray-500"
+                      style={{ fontSize: 14, marginTop: -20, color: "#6b7280" }}
                     >
                       {t("ManagerTransactions.Notransactions")}
                     </Text>
@@ -419,9 +519,10 @@ const TransactionList: React.FC<TransactionListProps> = ({
               />
             )}
           </View>
-        </View>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </View>
+    </View>
   );
 };
+
 export default TransactionList;

@@ -66,7 +66,7 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View className="flex-1 justify-center items-center bg-black/50">
+      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
         <View className="bg-white p-6 rounded-2xl items-center w-80 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {t("Otpverification.Success")}

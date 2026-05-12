@@ -121,7 +121,7 @@ const CustomDatePicker = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View className="flex-1 justify-end bg-black/50">
+      <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: '#00000040' }}>
         <View className="bg-white rounded-t-3xl pb-8">
           <View className="px-5 py-4 border-b border-gray-200">
             <TouchableOpacity onPress={onClose}>

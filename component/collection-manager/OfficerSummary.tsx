@@ -79,7 +79,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
         animationType="fade"
         onRequestClose={onCancel}
       >
-        <View className="flex-1 justify-center items-center bg-black/60 bg-opacity-50">
+        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
           <View className="bg-white items-center rounded-lg w-80 p-6">
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
