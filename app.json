@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/app/adaptive-icon.png",
       "resizeMode": "contain",
@@ -15,7 +16,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.polygonagro.Collector",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Camera access is required to scan QR codes and capture images.",
+        "NSMicrophoneUsageDescription": "Microphone access is required for voice features.",
+        "NSPhotoLibraryUsageDescription": "Photo library access is required to upload documents and images.",
+        "NSLocationWhenInUseUsageDescription": "Location access is required to track collection activities.",
+        "NSUserTrackingUsageDescription": "Tracking is used to improve app experience.",
+        "NSUserNotificationUsageDescription": "Notifications are used to send important updates.",
+        "NSPhoneUsageDescription": "Phone access is used to call farmers directly."
       }
     },
     "android": {
@@ -87,9 +95,6 @@
     ],
     "experiments": {},
     "extra": {
-      "router": {
-        "origin": false
-      },
       "eas": {
         "projectId": "eeb35db0-1f3f-4393-91c1-c816247ec8c9"
       }
