@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/app/adaptive-icon.png",
       "resizeMode": "contain",
@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.polygonagro.Collector",
+      "buildNumber": "1.0.0",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Camera access is required to scan QR codes and capture images.",
@@ -71,9 +72,12 @@
       [
         "expo-build-properties",
         {
+          "ios": {
+            "deploymentTarget": "15.1"
+          },
           "android": {
-            "compileSdkVersion": 36,
-            "targetSdkVersion": 36,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
             "minSdkVersion": 24,
             "ndkVersion": "28.0.12433566",
             "enableProguardInReleaseBuilds": true,
