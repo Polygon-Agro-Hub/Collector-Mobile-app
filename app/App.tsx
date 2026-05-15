@@ -68,8 +68,8 @@ import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsup
 import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
 import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
 import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
-import Timer from "@/component/distribution-common/TimerContainer ";
-import TimerContainer from "@/component/distribution-common/TimerContainer ";
+import Timer from "@/component/distribution-common/TimerContainer";
+import TimerContainer from "@/component/distribution-common/TimerContainer";
 import CenterTargetScreen from "@/component/disribution-manger/CenterTargetScreen";
 import DistributionOfficersList from "@/component/disribution-manger/DistributionOfficersList";
 import ClaimDistribution from "@/component/disribution-manger/ClaimDistribution";

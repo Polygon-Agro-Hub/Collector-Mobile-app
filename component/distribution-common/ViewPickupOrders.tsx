@@ -202,144 +202,148 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
         navigation={navigation}
         onBackPress={() => navigation.navigate("ReadytoPickupOrders")}
       />
-      <View className="px-4 ">
-        <View className="flex-row items-center justify-center">
-          <View className="px-3 py-1.5 rounded-full flex-row items-center">
-            <Text className="text-[#565559] mr-2">
-              {t("ViewPickupOrders.Ready") || "Ready"} :
-            </Text>
-            <Text className="font-semibold text-[#000000]">{readyTime}</Text>
+
+      <View className="flex-1 w-full max-w-[500px] mx-auto">
+        <View className="px-4 ">
+          <View className="flex-row items-center justify-center">
+            <View className="px-3 py-1.5 rounded-full flex-row items-center">
+              <Text className="text-[#565559] mr-2">
+                {t("ViewPickupOrders.Ready") || "Ready"} :
+              </Text>
+              <Text className="font-semibold text-[#000000]">{readyTime}</Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View className="flex-1 ">
-        <View className="px-4">
-          <View className="bg-white rounded-2xl p-4  shadow-sm">
-            <View className="items-center mb-4">
-              <Image
-                source={require("../../assets/images/distribution-common/profile-customer.webp")}
-                className="h-[100px] w-[100px] rounded-lg"
-                resizeMode="contain"
-              />
+        <View className="flex-1 ">
+          <View className="px-4">
+            <View className="bg-white rounded-2xl p-4  shadow-sm">
+              <View className="items-center mb-4">
+                <Image
+                  source={require("../../assets/images/distribution-common/profile-customer.webp")}
+                  className="h-[100px] w-[100px] rounded-lg"
+                  resizeMode="contain"
+                />
 
-              {/* Fixed Name Container with Equal Padding */}
-              <View className="mt-2 w-full px-8">
-                <View
-                  className="overflow-hidden"
-                  style={{
-                    width: "100%",
-                    alignItems:
-                      customerName.length > 20 ? "flex-start" : "center",
-                  }}
-                >
-                  <Animated.Text
-                    className="text-lg font-bold text-gray-800"
+                {/* Fixed Name Container with Equal Padding */}
+                <View className="mt-2 w-full px-8">
+                  <View
+                    className="overflow-hidden"
                     style={{
-                      transform:
-                        customerName.length > 20
-                          ? [{ translateX: scrollX }]
-                          : [],
-                      minWidth: customerName.length > 20 ? "200%" : "auto",
+                      width: "100%",
+                      alignItems:
+                        customerName.length > 20 ? "flex-start" : "center",
                     }}
                   >
-                    {customerName}
-                  </Animated.Text>
+                    <Animated.Text
+                      className="text-lg font-bold text-gray-800"
+                      style={{
+                        transform:
+                          customerName.length > 20
+                            ? [{ translateX: scrollX }]
+                            : [],
+                        minWidth: customerName.length > 20 ? "200%" : "auto",
+                      }}
+                    >
+                      {customerName}
+                    </Animated.Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            {/* Payment Status */}
-            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center mb-2 ">
-              <View className="mb-2">
+              {/* Payment Status */}
+              <View className="bg-[#F7F7F7] rounded-xl p-4 items-center mb-2 ">
+                <View className="mb-2">
+                  {isPaid ? (
+                    <MaterialIcons
+                      name="check-circle"
+                      size={28}
+                      color="#000000"
+                    />
+                  ) : (
+                    <FontAwesome5 name="coins" size={28} color="#000000" />
+                  )}
+                </View>
                 {isPaid ? (
-                  <MaterialIcons
-                    name="check-circle"
-                    size={28}
-                    color="#000000"
-                  />
+                  <Text className="font-bold text-[#980775]">
+                    {t("ViewPickupOrders.Already Paid") || "Already Paid!"}
+                  </Text>
                 ) : (
-                  <FontAwesome5 name="coins" size={28} color="#000000" />
+                  <Text className="font-bold text-[#980775]">
+                    {t("ViewPickupOrders.Rs")}. {cashAmount}
+                  </Text>
                 )}
               </View>
-              {isPaid ? (
-                <Text className="font-bold text-[#980775]">
-                  {t("ViewPickupOrders.Already Paid") || "Already Paid!"}
+
+              <View className="bg-[#F7F7F7] rounded-xl p-4 items-center ">
+                <Octicons name="clock-fill" size={28} color="black" />
+                <Text className="text-sm font-semibold text-gray-800 mt-2">
+                  {timeSlot}
                 </Text>
-              ) : (
-                <Text className="font-bold text-[#980775]">
-                  {t("ViewPickupOrders.Rs")}. {cashAmount}
+              </View>
+            </View>
+
+            <View
+              className={`px-4 ${
+                phoneNumbers.length === 1 ? "mb-[60px]" : "mb-4"
+              }`}
+            >
+              {[...phoneNumbers].reverse().map((phoneNumber, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => makePhoneCall(phoneNumber)}
+                  className={`relative flex-row items-center bg-white border-2 border-[#980775] rounded-full py-1 pl-6 pr-1 ${
+                    index < phoneNumbers.length - 1 ? "mb-3" : ""
+                  }`}
+                  activeOpacity={0.7}
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 2, height: 2 },
+                    shadowOpacity: 0.18,
+                    shadowRadius: 4,
+                    elevation: 4,
+                  }}
+                >
+                  {/* CENTER TEXT */}
+                  <View className="absolute left-0 right-0 items-center">
+                    <Text className="text-base font-semibold text-black">
+                      {`${
+                        t("ViewPickupOrders.Make Phone Call") ||
+                        "Make Phone Call"
+                      } - ${phoneNumbers.length - index}`}
+                    </Text>
+                  </View>
+
+                  {/* RIGHT ICON */}
+                  <View className="ml-auto bg-[#980775] rounded-full py-2 px-3">
+                    <Foundation name="telephone" size={24} color="#fff" />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Scan Order Button */}
+            <TouchableOpacity
+              onPress={handleScanOrder}
+              className="bg-[#980775] rounded-full py-3 px-7 mx-4 mb-20 shadow-md"
+              activeOpacity={0.8}
+              disabled={isProcessing}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 2, height: 2 },
+                shadowOpacity: 0.18,
+                shadowRadius: 4,
+                elevation: 4,
+              }}
+            >
+              <View className="flex-row items-center justify-center">
+                <FontAwesome6 name="qrcode" size={24} color="white" />
+                <Text className="text-white text-base font-bold ml-3">
+                  {t("ViewPickupOrders.Scan Order") || "Scan Order"}
                 </Text>
-              )}
-            </View>
-
-            <View className="bg-[#F7F7F7] rounded-xl p-4 items-center ">
-              <Octicons name="clock-fill" size={28} color="black" />
-              <Text className="text-sm font-semibold text-gray-800 mt-2">
-                {timeSlot}
-              </Text>
-            </View>
+              </View>
+            </TouchableOpacity>
           </View>
-
-          <View
-            className={`px-4 ${
-              phoneNumbers.length === 1 ? "mb-[60px]" : "mb-4"
-            }`}
-          >
-            {[...phoneNumbers].reverse().map((phoneNumber, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => makePhoneCall(phoneNumber)}
-                className={`relative flex-row items-center bg-white border-2 border-[#980775] rounded-full py-1 pl-6 pr-1 ${
-                  index < phoneNumbers.length - 1 ? "mb-3" : ""
-                }`}
-                activeOpacity={0.7}
-                style={{
-                  shadowColor: "#000000",
-                  shadowOffset: { width: 2, height: 2 },
-                  shadowOpacity: 0.18,
-                  shadowRadius: 4,
-                  elevation: 4,
-                }}
-              >
-                {/* CENTER TEXT */}
-                <View className="absolute left-0 right-0 items-center">
-                  <Text className="text-base font-semibold text-black">
-                    {`${
-                      t("ViewPickupOrders.Make Phone Call") || "Make Phone Call"
-                    } - ${phoneNumbers.length - index}`}
-                  </Text>
-                </View>
-
-                {/* RIGHT ICON */}
-                <View className="ml-auto bg-[#980775] rounded-full py-2 px-3">
-                  <Foundation name="telephone" size={24} color="#fff" />
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Scan Order Button */}
-          <TouchableOpacity
-            onPress={handleScanOrder}
-            className="bg-[#980775] rounded-full py-3 px-7 mx-4 mb-20 shadow-md"
-            activeOpacity={0.8}
-            disabled={isProcessing}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 2, height: 2 },
-              shadowOpacity: 0.18,
-              shadowRadius: 4,
-              elevation: 4,
-            }}
-          >
-            <View className="flex-row items-center justify-center">
-              <FontAwesome6 name="qrcode" size={24} color="white" />
-              <Text className="text-white text-base font-bold ml-3">
-                {t("ViewPickupOrders.Scan Order") || "Scan Order"}
-              </Text>
-            </View>
-          </TouchableOpacity>
         </View>
       </View>
     </View>
