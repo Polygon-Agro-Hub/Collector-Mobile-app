@@ -18,7 +18,6 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
-import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
@@ -179,11 +178,11 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       >
         <View className="flex-1 bg-white">
           {loading ? (
-           <LoadingPage fullScreen />
+            <LoadingPage fullScreen />
           ) : (
             <ScrollView
               className="flex-1 bg-white"
-              contentContainerStyle={{ flexGrow: 1, backgroundColor: "white" }}
+              contentContainerStyle={{ flexGrow: 1, backgroundColor: "#F6F6F6" }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
@@ -192,20 +191,18 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 showBackButton={true}
                 navigation={navigation}
                 onBackPress={() => navigation.goBack()}
-                bgColor="#F6F6F6"
+                transparent
               />
 
-              <View className="flex-1 justify-center mx-auto bg-[#F6F6F6] px-4">
-                <View className="justify-center items-center bg-[#F6F6F6] px-4">
-                  <Image
-                    source={require("../../assets/images/complain/complain.webp")}
-                    className="w-48 h-48"
-                    resizeMode="contain"
-                  />
-                </View>
+              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-[#F6F6F6] justify-center">
+                <Image
+                  source={require("../../assets/images/complain/complain.webp")}
+                  className="w-48 h-48 mx-auto"
+                  resizeMode="contain"
+                />
 
-                <View className="items-center bg-white rounded-3xl">
-                  <View className="w-full items-center px-4 bg-white rounded-xl mt-10">
+                <View className="items-center bg-white rounded-3xl w-full p-4">
+                  <View className="w-full items-center mt-10">
                     <View className="flex-row">
                       <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">
                         {t("ReportComplaint.Tellus")}
@@ -222,7 +219,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                           if (Category.length > 0)
                             setCategoryModalVisible(true);
                         }}
-                        className="border border-gray-300 rounded-3xl px-2 h-[50px] flex-row items-center justify-between bg-white"
+                        className="border border-gray-300 rounded-3xl px-2 h-[50px] flex-row items-center justify-between bg-white w-full"
                       >
                         <Text
                           className={`flex-1 ml-2 text-base ${selectedCategoryLabel ? "text-[#424242]" : "text-[#434343]"}`}
@@ -290,7 +287,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
         selectedItems={selectedCategory ? [selectedCategory] : []}
         onSelect={(items) => setSelectedCategory(items[0] ?? null)}
         multiSelect={false}
-        showSearch={true} 
+        showSearch={true}
       />
     </>
   );

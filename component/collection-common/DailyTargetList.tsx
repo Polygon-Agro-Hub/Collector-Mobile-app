@@ -210,9 +210,8 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+              }`}
             style={{
               height: 40,
               shadowColor:
@@ -225,9 +224,8 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("ToDo")}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "ToDo" ? "text-white" : "text-black"
-              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
+                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -243,7 +241,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
                 }}
               >
-                <Text className="text-black font-bold text-xs">
+                <Text className="text-black font-bold text-xs py-1">
                   {todoData.length}
                 </Text>
               </Animated.View>
@@ -257,9 +255,8 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
-              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+              }`}
             style={{
               height: 40,
               shadowColor:
@@ -272,9 +269,8 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("Completed")}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
+              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
+                }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -290,7 +286,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
                 }}
               >
-                <Text className="text-black font-bold text-xs">
+                <Text className="text-black font-bold text-xs py-1">
                   {completedData.length}
                 </Text>
               </Animated.View>
@@ -304,15 +300,14 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={true}
-          contentContainerStyle={{ paddingBottom: 60 }}
         >
-          <View className="bg-white">
+          <View style={{ minWidth: 800, width: "100%" }}>
             {/* Table Header */}
-            <View className="flex-row bg-[#980775]">
+            <View className="flex-row bg-[#980775] h-[60px] items-center">
               <Text className="w-16 p-2 text-center text-white font-bold">
                 {selectedToggle === "ToDo" ? t("DailyTarget.No") : ""}
               </Text>
-              <Text className="w-40 p-2 text-center text-white font-bold">
+              <Text className="flex-1 p-2 text-center text-white font-bold">
                 {t("DailyTarget.Variety")}
               </Text>
               <Text className="w-32 p-2 text-center text-white font-bold">
@@ -334,6 +329,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               showsVerticalScrollIndicator={true}
+              contentContainerStyle={{ paddingBottom: 60 }}
             >
               {/* Table Data */}
               {loading ? (
@@ -374,34 +370,43 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 displayedData.map((item, index) => (
                   <View
                     key={index}
-                    className={`flex-row ${
-                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                    }`}
+                    className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      }`}
                   >
-                    <Text className="w-16 p-2 border-r border-gray-300 text-center">
+                    {/* No. */}
+                    <View className="w-16 justify-center items-center border-r border-gray-300 py-3">
                       {selectedToggle === "ToDo" ? (
-                        index + 1
+                        <Text className="text-center">{index + 1}</Text>
                       ) : (
                         <Ionicons name="flag" size={20} color="#980775" />
                       )}
-                    </Text>
-                    <Text
-                      className="w-40 p-2 border-r border-gray-300 text-center"
-                      numberOfLines={2}
-                    >
-                      {getvarietyName(item)}
-                    </Text>
-                    <Text className="w-32 p-2 border-r border-gray-300 text-center">
-                      {item.grade}
-                    </Text>
-                    <Text className="w-32 p-2 border-r border-gray-300 text-center">
-                      {item.officerTarget}
-                    </Text>
-                    <Text className="w-32 p-2 text-center">
-                      {selectedToggle === "Completed"
-                        ? item.complete
-                        : item.todo}
-                    </Text>
+                    </View>
+
+                    {/* Variety */}
+                    <View className="flex-1 justify-center items-center border-r border-gray-300 p-2">
+                      <Text className="text-center">{getvarietyName(item)}</Text>
+                    </View>
+
+                    {/* Grade */}
+                    <View className="w-32 justify-center items-center border-r border-gray-300">
+                      <Text className="text-center">{item.grade}</Text>
+                    </View>
+
+                    {/* Target */}
+                    <View className="w-32 justify-center items-center border-r border-gray-300">
+                      <Text className="text-center">
+                        {item.officerTarget.toFixed(2)}
+                      </Text>
+                    </View>
+
+                    {/* Todo / Completed */}
+                    <View className="w-32 justify-center items-center">
+                      <Text className="text-center">
+                        {selectedToggle === "Completed"
+                          ? item.complete.toFixed(2)
+                          : item.todo.toFixed(2)}
+                      </Text>
+                    </View>
                   </View>
                 ))
               )}

@@ -381,14 +381,13 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             <Text>{t("SignIn.SigntoLogin")}</Text>
           </View>
 
-          <View className="px-4 py-6">
+          <View className="px-4 py-6 max-w-[500px] w-full mx-auto ">
             <Text className="text-base pb-[2%] font-light">
               {t("SignIn.Employee")}
             </Text>
             <View
-              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${
-                empIdError ? "border-red-500" : "border-[#F4F4F4]"
-              }`}
+              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
+                }`}
             >
               <Image source={user} className="w-6 h-6" resizeMode="contain" />
               <TextInput

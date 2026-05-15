@@ -22,6 +22,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
+import { Entypo } from "@expo/vector-icons";
 
 type TransactionListNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -87,7 +88,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
     React.useCallback(() => {
       setSelectedDate(new Date());
       setShowDatePicker(false);
-      return () => {};
+      return () => { };
     }, []),
   );
 
@@ -211,7 +212,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
           paddingTop: insets.top,
           paddingHorizontal: 16,
           paddingBottom: 40,
-          marginTop:5
+          marginTop: 5,
         }}
       >
         <View
@@ -231,16 +232,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 officerName,
               })
             }
-            style={{
-              backgroundColor: "rgba(255,255,255,0.1)",
-              borderRadius: 999,
-              padding: 8,
-              width: 40,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className="bg-[#FFFFFF1A] rounded-full p-2 justify-center  items-center"
           >
-            <AntDesign name="left" size={22} color="white" />
+            <Entypo name="chevron-left" size={25} color="white" />
           </TouchableOpacity>
 
           <Text
@@ -383,143 +377,145 @@ const TransactionList: React.FC<TransactionListProps> = ({
           </Text>
         </View>
 
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={{ flex: 1, marginBottom: 8 }}>
-            {loading ? (
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <LottieView
-                  source={require("../../assets/lottie/loading.json")}
-                  autoPlay
-                  loop
-                  style={{ width: 150, height: 150 }}
-                />
-                <Text style={{ color: "#6b7280", marginTop: 16 }}>
-                  {t("ManagerTransactions.Loading")}
-                </Text>
-              </View>
-            ) : (
-              <FlatList
-                keyboardShouldPersistTaps="handled"
-                data={filteredTransactions}
-                keyExtractor={(item) =>
-                  item.id ? item.id.toString() : Math.random().toString()
-                }
-                contentContainerStyle={{
-                  paddingHorizontal: 16,
-                  paddingBottom: insets.bottom + 16,
-                }}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
+        <View style={{ flex: 1, marginBottom: 8 }}>
+          {loading ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <LottieView
+                source={require("../../assets/lottie/loading.json")}
+                autoPlay
+                loop
+                style={{ width: 150, height: 150 }}
+              />
+              <Text style={{ color: "#6b7280", marginTop: 16 }}>
+                {t("ManagerTransactions.Loading")}
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              keyboardShouldPersistTaps="handled"
+              data={filteredTransactions}
+              keyExtractor={(item) =>
+                item.id ? item.id.toString() : Math.random().toString()
+              }
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingBottom: insets.bottom + 16,
+              }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    padding: 16,
+                    marginBottom: 12,
+                    borderRadius: 35,
+                    backgroundColor: "#f3f4f6",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 6,
+                    elevation: 4,
+                  }}
+                  onPress={() => {
+                    navigation.navigate("TransactionReport" as any, {
+                      registeredFarmerId: item.registeredFarmerId,
+                      userId: item.userId,
+                      firstName: item.firstName,
+                      lastName: item.lastName,
+                      phoneNumber: item.phoneNumber,
+                      address: item.address,
+                      NICnumber: item.NICnumber,
+                      totalAmount: item.totalAmount,
+                      bankAddress: item.bankAddress,
+                      accountNumber: item.accountNumber,
+                      accountHolderName: item.accountHolderName,
+                      bankName: item.bankName,
+                      branchName: item.branchName,
+                      selectedDate: selectedDate.toISOString().split("T")[0],
+                      selectedTime: selectedDate
+                        .toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })
+                        .toUpperCase(),
+                    });
+                  }}
+                >
+                  <View
                     style={{
-                      flexDirection: "row",
+                      width: 56,
+                      height: 56,
+                      borderRadius: 28,
+                      overflow: "hidden",
+                      justifyContent: "center",
                       alignItems: "center",
-                      padding: 16,
-                      marginBottom: 12,
-                      borderRadius: 35,
-                      backgroundColor: "#f3f4f6",
+                      marginRight: 16,
+                      backgroundColor: "white",
                       shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 6,
-                      elevation: 4,
-                    }}
-                    onPress={() => {
-                      navigation.navigate("TransactionReport" as any, {
-                        registeredFarmerId: item.registeredFarmerId,
-                        userId: item.userId,
-                        firstName: item.firstName,
-                        lastName: item.lastName,
-                        phoneNumber: item.phoneNumber,
-                        address: item.address,
-                        NICnumber: item.NICnumber,
-                        totalAmount: item.totalAmount,
-                        bankAddress: item.bankAddress,
-                        accountNumber: item.accountNumber,
-                        accountHolderName: item.accountHolderName,
-                        bankName: item.bankName,
-                        branchName: item.branchName,
-                        selectedDate: selectedDate.toISOString().split("T")[0],
-                        selectedTime: selectedDate
-                          .toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })
-                          .toUpperCase(),
-                      });
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      elevation: 2,
                     }}
                   >
-                    <View
+                    <Image
+                      source={require("../../assets/images/collection-manager/avetar.webp")}
+                      style={{ width: "100%", height: "100%" }}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
                       style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 28,
-                        overflow: "hidden",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginRight: 16,
+                        fontSize: 18,
+                        fontWeight: "600",
+                        color: "#111827",
                       }}
                     >
-                      <Image
-                        source={require("../../assets/images/collection-manager/avetar.webp")}
-                        style={{ width: "100%", height: "100%" }}
-                        resizeMode="cover"
-                      />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          fontWeight: "600",
-                          color: "#111827",
-                        }}
-                      >
-                        {item.firstName} {item.lastName}
-                      </Text>
-                      <Text style={{ fontSize: 14, color: "#6b7280" }}>
-                        {t("ManagerTransactions.NIC")} {item.NICnumber}
-                      </Text>
-                      <Text style={{ fontSize: 14, color: "#6b7280" }}>
-                        {t("ManagerTransactions.TotalRs")}
-                        {item.totalAmount
-                          ? item.totalAmount.toLocaleString()
-                          : "N/A"}
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={scale(20)}
-                      color="#9CA3AF"
-                    />
-                  </TouchableOpacity>
-                )}
-                ListEmptyComponent={
-                  <View
-                    style={{ alignItems: "center", marginTop: "40%" as any }}
-                  >
-                    <LottieView
-                      source={require("../../assets/lottie/no-data.json")}
-                      autoPlay
-                      loop
-                      style={{ width: 150, height: 150 }}
-                    />
-                    <Text
-                      style={{ fontSize: 14, marginTop: -20, color: "#6b7280" }}
-                    >
-                      {t("ManagerTransactions.Notransactions")}
+                      {item.firstName} {item.lastName}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: "#6b7280" }}>
+                      {t("ManagerTransactions.NIC")} {item.NICnumber}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: "#6b7280" }}>
+                      {t("ManagerTransactions.TotalRs")}
+                      {item.totalAmount
+                        ? item.totalAmount.toLocaleString()
+                        : "N/A"}
                     </Text>
                   </View>
-                }
-              />
-            )}
-          </View>
-        </ScrollView>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={scale(20)}
+                    color="#9CA3AF"
+                  />
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={
+                <View style={{ alignItems: "center", marginTop: "40%" }}>
+                  <LottieView
+                    source={require("../../assets/lottie/no-data.json")}
+                    autoPlay
+                    loop
+                    style={{ width: 150, height: 150 }}
+                  />
+                  <Text
+                    style={{ fontSize: 14, marginTop: -20, color: "#6b7280" }}
+                  >
+                    {t("ManagerTransactions.Notransactions")}
+                  </Text>
+                </View>
+              }
+            />
+          )}
+        </View>
       </View>
     </View>
   );

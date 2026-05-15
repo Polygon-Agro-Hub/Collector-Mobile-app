@@ -110,7 +110,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     fetchFarmerData();
 
     const getPermissions = async () => {
-      await MediaLibrary.requestPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync(true);
     };
 
     getPermissions();
@@ -201,7 +201,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== "granted") {
         Alert.alert(
           "QRcode.permissionDeniedTitle",
@@ -250,7 +250,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     }
   };
 
-   const handleBackPress = () => {
+  const handleBackPress = () => {
     if (jobRole === "Collection Officer") {
       navigation.navigate("Main" as any, {
         screen: "CollectionOfficerDashboard",
@@ -292,7 +292,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
       {/* Pension Status Checking Overlay */}
       {checkingPensionStatus && (
-       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', zIndex: 50 }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', zIndex: 50 }}>
           <View className="bg-white p-6 rounded-2xl items-center">
             <ActivityIndicator size="large" color="#980775" />
             <Text className="mt-4 text-gray-700 font-medium">
@@ -304,19 +304,14 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
       <ScrollView
         className="bg-white"
-        contentContainerStyle={{
-          paddingHorizontal: wp(4),
-          paddingTop: loading ? 0 : hp(2),
-          paddingBottom: hp(2),
-          flexGrow: 1,
-        }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1">
+        <View className="flex-1 w-full max-w-[500px] mx-auto px-4">
           {loading ? (
             <FarmerQrSkeletonLoader />
           ) : (
-            <>
+            <View className="flex-1 justify-center items-center">
               {/* Farmer Name and NIC - Centered */}
               <View className="items-center mt-2 mb-6">
                 <Text className="text-xl font-bold text-gray-800 mb-2">
@@ -348,9 +343,8 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               {/* Collect Button - Centered */}
               <View className="items-center mb-6 mx-4">
                 <TouchableOpacity
-                  className={`rounded-full items-center justify-center ${
-                    !farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
-                  }`}
+                  className={`rounded-full items-center justify-center ${!farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
+                    }`}
                   onPress={() =>
                     navigation.navigate("Main", {
                       screen: "UnregisteredCropDetails",
@@ -398,10 +392,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                   {checkingPensionStatus ? (
                     <ActivityIndicator size="small" color="#606060" />
                   ) : (
-                    <Text
-                      className="text-gray-700 font-medium"
-                      style={{ fontSize: wp(4.5) }}
-                    >
+                    <Text className="text-gray-700 text-lg font-medium">
                       {t("FarmerQr.Apply For Pension")}
                     </Text>
                   )}
@@ -409,7 +400,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               </View>
 
               {/* Download and Share buttons - Centered */}
-              <View className="flex-row w-full px-12 pb-8 gap-3">
+              <View className="flex-row w-full px-12 pb-8 gap-3 max-w-[500px] mx-auto">
                 <TouchableOpacity
                   className="bg-black rounded-lg items-center justify-center flex-1 py-4"
                   onPress={downloadQRCode}
@@ -468,7 +459,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                   </View>
                 </TouchableOpacity>
               </View>
-            </>
+            </View>
           )}
         </View>
       </ScrollView>

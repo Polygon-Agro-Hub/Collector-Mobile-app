@@ -384,7 +384,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
             iconBgColor="#FFFFFF1A"
           />
 
-          <View className="bg-white rounded-lg p-4">
+          <View className="bg-white rounded-lg p-4 w-full max-w-[500px] mx-auto">
             <View className="p-5">
               <Text className="text-gray-700 mb-2">
                 {t("PassTargetBetweenOfficers.Short Stock Assignee")}
@@ -463,7 +463,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
             </View>
           </View>
 
-          <View className="mt-6 items-center">
+          <View className="mt-6 items-center w-full max-w-[500px] mx-auto">
             <TouchableOpacity
               className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveButtonDisabled() ? "bg-gray-400" : "bg-[#000000]"}`}
               onPress={receiveTarget}

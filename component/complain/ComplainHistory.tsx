@@ -395,7 +395,7 @@ ${signature}${replyTime}`,
         </View>
       ) : (
         <ScrollView
-          className=" flex-1 mb-14"
+          className=" flex-1 mb-14 w-full max-w-[500px] mx-auto"
           contentContainerStyle={{
             paddingBottom: hp(4),
             paddingHorizontal: wp(4),
@@ -427,11 +427,10 @@ ${signature}${replyTime}`,
                 )}
                 <View style={{ flex: 1, alignItems: "flex-end" }}>
                   <Text
-                    className={`text-s font-semibold px-4 py-2 rounded ${
-                      complain.status === "Opened"
-                        ? "bg-blue-100 text-[#0051FF]"
-                        : "bg-[#FFDFF7] text-[#980775]"
-                    }`}
+                    className={`text-s font-semibold px-4 py-2 rounded ${complain.status === "Opened"
+                      ? "bg-blue-100 text-[#0051FF]"
+                      : "bg-[#FFDFF7] text-[#980775]"
+                      }`}
                   >
                     {complain.status === "Opened"
                       ? t("ReportHistory.Opened")

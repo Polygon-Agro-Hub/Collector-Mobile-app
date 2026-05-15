@@ -82,8 +82,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       if (selectedBank) {
         try {
           const data = require("../../assets/jsons/branches.json");
-          const branches = data[selectedBank.ID] || [];
-          const sortedBranches = branches.sort(
+          const rawBranches = data[selectedBank.ID] || [];
+          const uniqueBranches = rawBranches.filter(
+            (branch: any, index: number, self: any[]) =>
+              index === self.findIndex((b) => b.name === branch.name),
+          );
+          const sortedBranches = uniqueBranches.sort(
             (a: { name: string }, b: { name: any }) =>
               a.name.localeCompare(b.name),
           );
@@ -184,7 +188,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       <CustomHeader
         title={t("UnregisteredFarmerDetails.FillDetails")}
@@ -192,7 +196,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <View className="flex-1 px-5 bg-white">
+      <View className="flex-1 w-full max-w-[500px] mx-auto px-5 bg-white">
         <ScrollView className="flex-1 p-3 mt-4">
           {/* Account Number */}
           <View className="mb-4">
@@ -200,11 +204,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
-              className={`border ${
-                accNumberError
-                  ? "border-red-500"
-                  : "border-[#F4F4F4] bg-[#F4F4F4]"
-              } p-3 rounded-full`}
+              className={`border ${accNumberError
+                ? "border-red-500"
+                : "border-[#F4F4F4] bg-[#F4F4F4]"
+                } p-3 rounded-full h-[50px]`}
               keyboardType="numeric"
               value={accNumber}
               onChangeText={(text) => {
@@ -226,7 +229,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountName")}
             </Text>
             <TextInput
-              className="border border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full"
+              className="border border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full h-[50px]"
               value={accHolderName}
               onChangeText={(text) => {
                 const filteredText = text
@@ -324,9 +327,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           </View>
 
           <TouchableOpacity
-            className={`p-3 rounded-full items-center mt-5 ${
-              loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"
-            }`}
+            className={`py-4 rounded-full items-center mt-5 h-[50px] ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000] "
+              }`}
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
@@ -346,7 +348,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               <ActivityIndicator color="white" size="small" />
             ) : (
               <Text
-                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                style={[getTextStyle(selectedLanguage)]}
                 className="text-center text-xl font-semibold text-white"
               >
                 {t("UnregisteredFarmerDetails.Submit")}

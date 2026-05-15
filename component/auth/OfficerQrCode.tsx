@@ -46,36 +46,36 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   }, []);
 
   const fetchRegistrationDetails = async () => {
-  setIsLoading(true);
-  try {
-    const token = await AsyncStorage.getItem("token");
-    if (!token) {
-      Alert.alert(t("Error.error"), t("Error.No token found"));
-      return;
+    setIsLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert(t("Error.error"), t("Error.No token found"));
+        return;
+      }
+
+      const [response] = await Promise.all([
+        api.get("api/collection-officer/user-profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        new Promise((resolve) => setTimeout(() => resolve(null), 1000)),
+      ]);
+
+      const data = response.data.data;
+
+      if (response.data.status === "success") {
+        setProfile(data);
+        setQR(data.QRcode || "");
+      } else {
+        Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+      }
+    } catch (error) {
+      console.error("Error fetching registration details:", error);
+      Alert.alert(t("Error.error"), t("Error.Failed to fetch details"));
+    } finally {
+      setIsLoading(false);
     }
-
-    const [response] = await Promise.all([
-      api.get("api/collection-officer/user-profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-      new Promise((resolve) => setTimeout(resolve, 1000)), // 👈 1 second minimum
-    ]);
-
-    const data = response.data.data;
-
-    if (response.data.status === "success") {
-      setProfile(data);
-      setQR(data.QRcode || "");
-    } else {
-      Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
-    }
-  } catch (error) {
-    console.error("Error fetching registration details:", error);
-    Alert.alert(t("Error.error"), t("Error.Failed to fetch details"));
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const getFullName = () => {
     if (!profile) return "Loading...";
@@ -112,7 +112,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
@@ -211,7 +211,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
               </View>
             </View>
 
-            <View className="flex-row w-full px-8 pb-8 gap-4">
+            <View className="flex-row w-full px-8 pb-8 gap-4 max-w-[500px] w-full mx-auto">
               <TouchableOpacity
                 className="bg-black rounded-lg items-center justify-center flex-1 py-3 h-[70px]"
                 onPress={downloadQRCode}

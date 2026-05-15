@@ -343,7 +343,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
         contentContainerStyle={{ paddingBottom: 20 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="bg-white rounded-lg p-4">
+        <View className="bg-white rounded-lg p-4 w-full max-w-[500px] mx-auto">
           <Text className="text-gray text-sm mb-2 text-center mt-5">
             {t("PassTargetBetweenOfficers.maximum amount")}
           </Text>
@@ -411,7 +411,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
           </View>
         </View>
 
-        <View className="mt-6 items-center">
+        <View className="mt-6 items-center w-full max-w-[500px] mx-auto">
           <TouchableOpacity
             className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveDisabled() ? "bg-[#ABABAB]" : "bg-[#000000]"}`}
             onPress={passTarget}

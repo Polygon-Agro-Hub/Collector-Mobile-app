@@ -169,7 +169,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const toggleUpdateButton = (phone1: string, phone2: string) => {
     setShowUpdateButton(
       (phone1 !== "" && phone1 !== profileData.phoneNumber) ||
-        (phone2 !== "" && phone2 !== profileData.phoneNumber2),
+      (phone2 !== "" && phone2 !== profileData.phoneNumber2),
     );
   };
 
@@ -207,7 +207,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
 
       const [response] = await Promise.all([
         apiCall,
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        new Promise((resolve) => setTimeout(() => resolve(null), 1000)),
       ]);
 
       const data = response.data.data;
@@ -421,7 +421,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
         >
-          <View className="items-center mb-6 mt-4">
+          <View className="items-center mb-6 mt-4 max-w-[500px] w-full mx-auto">
             <View className="items-center relative">
               <Image
                 source={
@@ -435,7 +435,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
             </View>
           </View>
 
-          <View className="gap-y-4 px-4 pb-6">
+          <View className="gap-y-4 px-4 pb-6 max-w-[500px] w-full mx-auto">
             <View>
               <Text
                 style={[getTextStyle(selectedLanguage)]}

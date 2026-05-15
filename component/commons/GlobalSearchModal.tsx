@@ -14,7 +14,7 @@ interface GlobalSearchModalProps {
   visible: boolean;
   onClose: () => void;
   title: string;
-  data: Array<{ label: string; value: string; [key: string]: any }>;
+  data: Array<{ label: string; value: string;[key: string]: any }>;
   selectedItems: string[];
   onSelect: (items: string[]) => void;
   searchPlaceholder?: string;
@@ -106,9 +106,8 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     isLast: boolean,
   ) => (
     <TouchableOpacity
-      className={`px-4 py-3 flex-row items-center justify-between ${
-        !isLast ? "border-b border-gray-200" : ""
-      }`}
+      className={`px-4 py-3 flex-row items-center justify-between ${!isLast ? "border-b border-gray-200" : ""
+        }`}
       onPress={() => handleItemPress(item.value)}
     >
       <Text className="text-base text-gray-800">{item.label}</Text>
@@ -191,7 +190,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           alignItems: "center",
         }}
       >
-        <View className="bg-white rounded-2xl w-11/12 max-h-3/4">
+        <View className="bg-white rounded-2xl w-11/12 max-w-[500px] max-h-[80%]">
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>

@@ -354,7 +354,7 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
       }_${date}.pdf`;
 
       try {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
+        const { status } = await MediaLibrary.requestPermissionsAsync(true);
 
         if (status === "granted") {
           const tempUri = `${(FileSystem as any).cacheDirectory}${fileName}`;

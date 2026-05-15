@@ -189,7 +189,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
     <View className="flex-1 bg-[#282828] w-full">
       {/* Header */}
       <View className="bg-[#282828] px-4 py-3 flex-row justify-between items-center">
-        <Text className="text-white text-lg font-bold ml-[35%]">
+        <Text className="text-white text-lg font-bold mx-auto">
           {t("TargetOrderScreen.My Daily Target")}
         </Text>
       </View>
@@ -226,7 +226,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
 
             {selectedToggle === "ToDo" && (
               <Animated.View
-                className="bg-white rounded-full px-2 overflow-hidden"
+                className="bg-white rounded-full px-2 py-1 overflow-hidden"
                 style={{
                   opacity: 1,
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
@@ -271,7 +271,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
 
             {selectedToggle === "Completed" && (
               <Animated.View
-                className="bg-white rounded-full px-2 ml-2 overflow-hidden"
+                className="bg-white rounded-full px-2 py-1 ml-2 overflow-hidden"
                 style={{
                   opacity: 1,
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
@@ -288,18 +288,14 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
 
       <View className="flex-1 bg-white">
         {/* Horizontal ScrollView for wide table */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={true}
-          contentContainerStyle={{ paddingBottom: 60 }}
-        >
-          <View style={{ minWidth: "100%" }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+          <View style={{ minWidth: 800, width: "100%" }}>
             {/* Table Header */}
-            <View className="flex-row bg-[#980775] py-3">
+            <View className="flex-row bg-[#980775] h-[60px] items-center">
               <Text className="w-16 p-2 text-center text-white font-bold">
                 {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
               </Text>
-              <Text className="w-40 p-2 text-center text-white font-bold">
+              <Text className="flex-1 p-2 text-center text-white font-bold">
                 {t("DailyTarget.Variety")}
               </Text>
               <Text className="w-32 p-2 text-center text-white font-bold">
@@ -315,81 +311,99 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
               </Text>
             </View>
 
-            <ScrollView
-              className="flex-1 bg-white"
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-            >
-              {/* Table Data */}
-              {loading ? (
-                <View className="flex-1 justify-center items-center py-20">
-                  <LottieView
-                    source={require("../../assets/lottie/loading.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 250, height: 250 }}
-                  />
-                </View>
-              ) : displayedData.length > 0 ? (
-                displayedData.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    className={`flex-row justify-center items-center ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                      }`}
-                    onPress={() => {
-                      if (selectedToggle === "Completed") return;
+            {loading ? (
+              <View className="flex-1 justify-center items-center">
+                <LottieView
+                  source={require("../../assets/lottie/loading.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 150, height: 150 }}
+                />
+              </View>
+            ) : (
+              <ScrollView
+                className="flex-1 bg-white"
+                refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                contentContainerStyle={{ paddingBottom: 60 }}
+              >
+                {/* Table Data */}
+                {displayedData.length > 0 ? (
+                  displayedData.map((item, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                        }`}
+                      onPress={() => {
+                        if (selectedToggle === "Completed") return;
 
-                      navigation.navigate("EditTargetManager" as any, {
-                        varietyNameEnglish: item.varietyNameEnglish,
-                        varietyId: item.varietyId,
-                        grade: item.grade,
-                        target: item.officerTarget,
-                        todo: item.todo,
-                        dailyTarget: item.dailyTarget,
-                        varietyNameSinhala: item.varietyNameSinhala,
-                        varietyNameTamil: item.varietyNameTamil,
-                      });
-                    }}
-                  >
-                    <Text className="w-16 p-2 text-center">
-                      {selectedToggle === "ToDo" ? (
-                        index + 1
-                      ) : (
-                        <Ionicons name="flag" size={20} color="purple" />
-                      )}
+                        navigation.navigate("EditTargetManager" as any, {
+                          varietyNameEnglish: item.varietyNameEnglish,
+                          varietyId: item.varietyId,
+                          grade: item.grade,
+                          target: item.officerTarget,
+                          todo: item.todo,
+                          dailyTarget: item.dailyTarget,
+                          varietyNameSinhala: item.varietyNameSinhala,
+                          varietyNameTamil: item.varietyNameTamil,
+                        });
+                      }}
+                    >
+                      {/* No. */}
+                      <View className="w-16 justify-center items-center border-r border-gray-300 py-3">
+                        {selectedToggle === "ToDo" ? (
+                          <Text className="text-center">{index + 1}</Text>
+                        ) : (
+                          <Ionicons name="flag" size={20} color="purple" />
+                        )}
+                      </View>
+
+                      {/* Variety */}
+                      <View className="flex-1 justify-center items-center border-r border-gray-300 p-2">
+                        <Text className="text-center">{getvarietyName(item)}</Text>
+                      </View>
+
+                      {/* Grade */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">{item.grade}</Text>
+                      </View>
+
+                      {/* Target */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">
+                          {item.officerTarget.toFixed(2)}
+                        </Text>
+                      </View>
+
+                      {/* Todo / Completed */}
+                      <View className="w-32 justify-center items-center">
+                        <Text className="text-center">
+                          {selectedToggle === "Completed"
+                            ? item.complete.toFixed(2)
+                            : item.todo.toFixed(2)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <View className="flex-1 justify-center items-center py-20">
+                    <LottieView
+                      source={require("../../assets/lottie/no-data.json")}
+                      autoPlay
+                      loop
+                      style={{ width: 150, height: 150 }}
+                    />
+                    <Text className="text-gray-500 mt-4 text-center">
+                      {selectedToggle === "ToDo"
+                        ? t("DailyTarget.NoTodoItems") || "No items to do"
+                        : t("DailyTarget.noCompletedTargets") ||
+                        "No completed items"}
                     </Text>
-                    <Text className="w-40 p-2 text-center">
-                      {getvarietyName(item)}
-                    </Text>
-                    <Text className="w-32 p-2 text-center">{item.grade}</Text>
-                    <Text className="w-32 p-2 text-center">
-                      {item.officerTarget}
-                    </Text>
-                    <Text className="w-32 p-2 text-center">
-                      {selectedToggle === "Completed"
-                        ? item.complete
-                        : item.todo}
-                    </Text>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <View className="flex-1 justify-center items-center py-20">
-                  <LottieView
-                    source={require("../../assets/lottie/no-data.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 150, height: 150 }}
-                  />
-                  <Text className="text-gray-500 mt-4 text-center">
-                    {selectedToggle === "ToDo"
-                      ? t("DailyTarget.NoTodoItems") || "No items to do"
-                      : t("DailyTarget.noCompletedTargets") ||
-                      "No completed items"}
-                  </Text>
-                </View>
-              )}
-            </ScrollView>
+                  </View>
+                )}
+              </ScrollView>
+            )}
           </View>
         </ScrollView>
       </View>
