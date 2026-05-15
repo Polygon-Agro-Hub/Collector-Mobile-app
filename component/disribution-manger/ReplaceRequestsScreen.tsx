@@ -7,7 +7,7 @@ import {
   RefreshControl,
   BackHandler,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -185,9 +185,9 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   };
 
   const renderRequestItem = ({ item }: { item: ReplaceRequestItem }) => (
-  <TouchableOpacity activeOpacity={1} onPress={() => handleNavigateToApprove(item)}>
+    <TouchableOpacity activeOpacity={1} onPress={() => handleNavigateToApprove(item)}>
       <View
-        className="flex-row items-center bg-white p-3 px-4 mb-4 rounded-xl mx-3"
+        className="flex-row items-center bg-white p-3 px-4 mb-4 rounded-xl"
         style={{
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 4 },
@@ -220,23 +220,10 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
           </Text>
         </View>
         <View className="p-1 rounded-full">
-          <AntDesign name="right" size={20} color="#848484" />
+          <Entypo name="chevron-right" size={20} color="#848484" />
         </View>
       </View>
     </TouchableOpacity>
-  );
-
-  const renderHeader = () => (
-    <View className="p-4 bg-white">
-      <View className="mb-6">
-        <Text className="text-lg font-bold text-center">
-          {t("ReplaceRequestsScreen.Replace Requests")}
-        </Text>
-      </View>
-      <Text className="text-base pb-1 text-[#21202B] font-semibold">
-        {t("ReplaceRequestsScreen.All")} ({replaceRequests.length})
-      </Text>
-    </View>
   );
 
   const renderEmptyComponent = () => (
@@ -268,18 +255,27 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-      <FlatList
-        data={replaceRequests}
-        keyExtractor={(item) => item.id}
-        renderItem={renderRequestItem}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyComponent}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 70 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        showsVerticalScrollIndicator={false}
-      />
+      <View className="my-6">
+        <Text className="text-lg font-bold text-center">
+          {t("ReplaceRequestsScreen.Replace Requests")}
+        </Text>
+      </View>
+      <View className="flex-1 w-full max-w-[500px] mx-auto">
+        <Text className="text-base pb-1 text-[#21202B] font-semibold mx-4 mb-2">
+          {t("ReplaceRequestsScreen.All")} ({replaceRequests.length})
+        </Text>
+        <FlatList
+          data={replaceRequests}
+          keyExtractor={(item) => item.id}
+          renderItem={renderRequestItem}
+          ListEmptyComponent={renderEmptyComponent}
+          contentContainerStyle={{ paddingHorizontal: 14, paddingBottom: 70 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
     </View>
   );
 };

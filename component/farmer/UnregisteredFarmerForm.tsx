@@ -109,8 +109,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       if (selectedBank) {
         try {
           const data = require("../../assets/jsons/branches.json");
-          const branches = data[selectedBank.ID] || [];
-          const sortedBranches = branches.sort(
+          const rawBranches = data[selectedBank.ID] || [];
+          const uniqueBranches = rawBranches.filter(
+            (branch: any, index: number, self: any[]) =>
+              index === self.findIndex((b) => b.name === branch.name),
+          );
+          const sortedBranches = uniqueBranches.sort(
             (a: { name: string }, b: { name: any }) =>
               a.name.localeCompare(b.name),
           );
@@ -375,11 +379,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <View className="flex-1 bg-white px-4">
+      <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-4">
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 20, paddingTop: 16 }}
         >
           {/* First Name */}
           <View className="mb-4">

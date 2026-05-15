@@ -11,10 +11,7 @@ import {
   Platform,
   BackHandler,
 } from "react-native";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -78,7 +75,8 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
 
           <Image
             source={require("../../assets/images/collection-common/otpsuccess.webp")}
-            style={{ width: 100, height: 100 }}
+            style={{ width: 80, height: 80, marginVertical: 16 }}
+            resizeMode="contain"
           />
 
           <Text className="text-gray-500 mb-4">
@@ -128,7 +126,7 @@ const ShowFailModal: React.FC<FailModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-     <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
         <View className="bg-white p-6 rounded-2xl items-center w-72 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {" "}
@@ -137,7 +135,8 @@ const ShowFailModal: React.FC<FailModalProps> = ({
 
           <Image
             source={require("../../assets/images/collection-common/error.webp")}
-            style={{ width: 100, height: 100 }}
+            style={{ width: 80, height: 80, marginVertical: 16 }}
+            resizeMode="contain"
           />
 
           <Text className="text-gray-500 mb-4">
@@ -198,7 +197,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [failModalVisible, setFailModalVisible] = useState(false);
   const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
-const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
+  const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
@@ -304,122 +303,122 @@ const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
     }
   };
 
- const handleVerify = async () => {
-  const code = otpCode; 
-  Keyboard.dismiss();
+  const handleVerify = async () => {
+    const code = otpCode;
+    Keyboard.dismiss();
 
-  if (code.length !== 5) {
-    Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"));
-    return;
-  }
+    if (code.length !== 5) {
+      Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"));
+      return;
+    }
 
-  const netState = await NetInfo.fetch();
-  if (!netState.isConnected) {
-    Alert.alert(t("Error.Sorry"), t("Error.noInternet"));
-    return;
-  }
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      Alert.alert(t("Error.Sorry"), t("Error.noInternet"));
+      return;
+    }
 
-  if (isOtpExpired || timer === 0) {
-    Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
-    return;
-  }
+    if (isOtpExpired || timer === 0) {
+      Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+      return;
+    }
 
-  try {
-    const refId = referenceId;
+    try {
+      const refId = referenceId;
 
-    const url = "https://api.getshoutout.com/otpservice/verify";
-    const headers = {
-      Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-      "Content-Type": "application/json",
-    };
+      const url = "https://api.getshoutout.com/otpservice/verify";
+      const headers = {
+        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
+        "Content-Type": "application/json",
+      };
 
-    const response = await axios.post(
-      url,
-      { code, referenceId: refId },
-      { headers },
-    );
+      const response = await axios.post(
+        url,
+        { code, referenceId: refId },
+        { headers },
+      );
 
-    const { statusCode, message } = response.data;
+      const { statusCode, message } = response.data;
 
-    switch (statusCode) {
-      case "1000":
-        setIsVerified(true);
+      switch (statusCode) {
+        case "1000":
+          setIsVerified(true);
 
-        const saveResponse = await axios.post(
-          `${environment.API_BASE_URL}api/farmer/FarmerBankDetails`, 
-          {
-            accNumber,
-            accHolderName,
-            bankName,
-            branchName,
-            userId: farmerId,
-            NICnumber,
-          },
-        );
+          const saveResponse = await axios.post(
+            `${environment.API_BASE_URL}api/farmer/FarmerBankDetails`,
+            {
+              accNumber,
+              accHolderName,
+              bankName,
+              branchName,
+              userId: farmerId,
+              NICnumber,
+            },
+          );
 
-        await AsyncStorage.removeItem("referenceId");
+          await AsyncStorage.removeItem("referenceId");
 
-        if (saveResponse.status === 200) {
-          setModalVisible(true); 
-        } else {
-          setFailModalVisible(true); 
-        }
-        break;
+          if (saveResponse.status === 200) {
+            setModalVisible(true);
+          } else {
+            setFailModalVisible(true);
+          }
+          break;
 
-      case "1001":
-        setVerificationAttempts((prev: number) => prev + 1);
+        case "1001":
+          setVerificationAttempts((prev: number) => prev + 1);
 
-        if (verificationAttempts >= 2) {
+          if (verificationAttempts >= 2) {
+            Alert.alert(
+              t("Error.Sorry"),
+              t("Otpverification.OTPExpiredOrInvalid"),
+              [
+                {
+                  text: t("Otpverification.ResendOTP"),
+                  onPress: handleResendOTP,
+                },
+                {
+                  text: t("Otpverification.TryAgain"),
+                  onPress: () => {
+                    setOtpCode("");
+                    setIsOtpValid(false);
+                    inputRefs.current.forEach((ref) => ref?.clear());
+                    inputRefs.current[0]?.focus();
+                  },
+                },
+              ],
+            );
+          } else {
+            Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+          }
+          break;
+
+        case "1002":
+          setIsOtpExpired(true);
+          Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+          break;
+
+        default:
           Alert.alert(
             t("Error.Sorry"),
-            t("Otpverification.OTPExpiredOrInvalid"),
-            [
-              {
-                text: t("Otpverification.ResendOTP"),
-                onPress: handleResendOTP,
-              },
-              {
-                text: t("Otpverification.TryAgain"),
-                onPress: () => {
-                  setOtpCode("");
-                  setIsOtpValid(false);
-                  inputRefs.current.forEach((ref) => ref?.clear());
-                  inputRefs.current[0]?.focus();
-                },
-              },
-            ],
+            message || t("Error.somethingWentWrong"),
           );
-        } else {
-          Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
-        }
-        break;
+      }
+    } catch (error: any) {
+      console.error("OTP Verification Error:", error);
 
-      case "1002":
+      const errStatusCode = error.response?.data?.statusCode;
+
+      if (errStatusCode === "1002") {
         setIsOtpExpired(true);
         Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
-        break;
-
-      default:
-        Alert.alert(
-          t("Error.Sorry"),
-          message || t("Error.somethingWentWrong"),
-        );
+      } else if (errStatusCode === "1001") {
+        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+      } else {
+        Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
+      }
     }
-  } catch (error: any) {
-    console.error("OTP Verification Error:", error);
-
-    const errStatusCode = error.response?.data?.statusCode;
-
-    if (errStatusCode === "1002") {
-      setIsOtpExpired(true);
-      Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
-    } else if (errStatusCode === "1001") {
-      Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
-    } else {
-      Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
-    }
-  }
-};
+  };
 
   const handleResendOTP = async () => {
     await AsyncStorage.removeItem("referenceId");
@@ -503,34 +502,7 @@ const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
-  const dynamicStyles = {
-    imageWidth: screenWidth < 400 ? wp(28) : wp(35),
-    imageHeight: screenWidth < 400 ? wp(28) : wp(28),
-    margingTopForImage: screenWidth < 400 ? wp(1) : wp(16),
-    margingTopForBtn: screenWidth < 400 ? wp(0) : wp(10),
-  };
 
-  const getResponsiveStyles = () => {
-    const isSmallDevice = screenWidth < 380;
-    const isTablet = screenWidth >= 768;
-
-    return {
-      imageWidth: isTablet ? wp(45) : isSmallDevice ? wp(60) : wp(50),
-      imageHeight: isTablet ? hp(25) : isSmallDevice ? hp(20) : hp(22),
-      imageMarginTop: isTablet ? hp(4) : isSmallDevice ? hp(2) : hp(3),
-      otpInputSize: isTablet ? wp(8) : isSmallDevice ? wp(12) : wp(14),
-      otpInputTextSize: isTablet ? wp(4) : isSmallDevice ? wp(5) : wp(6),
-      titleFontSize: isTablet ? wp(5) : isSmallDevice ? wp(5.5) : wp(6),
-      phoneFontSize: isTablet ? wp(3.5) : isSmallDevice ? wp(4) : wp(4.5),
-      buttonWidth: (isTablet ? "50%" : "70%") as any,
-      buttonHeight: isTablet ? hp(7) : hp(6),
-      buttonBorderRadius: isTablet ? wp(5) : wp(10),
-      containerPaddingHorizontal: isTablet ? wp(8) : wp(5),
-      verticalSpacing: isTablet ? hp(3) : hp(5),
-    };
-  };
-
-  const styles = getResponsiveStyles();
 
   useEffect(() => {
     const backAction = () => {
@@ -559,82 +531,62 @@ const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
       className="bg-white"
       style={{ flex: 1 }}
     >
-      <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
-        <CustomHeader
-          title={t("")}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() =>
-            navigation.navigate("UpdateFarmerBankDetails" as any, {
-              id: farmerId,
-              NICnumber: NICnumber,
-              phoneNumber: phoneNumber,
-              PreferdLanguage: PreferdLanguage,
-              officerRole: "COO",
-            })
-          }
-        />
+      <CustomHeader
+        title={t("")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.navigate("UpdateFarmerBankDetails" as any, {
+            id: farmerId,
+            NICnumber: NICnumber,
+            phoneNumber: phoneNumber,
+            PreferdLanguage: PreferdLanguage,
+            officerRole: "COO",
+          })
+        }
+      />
+      <ScrollView
+        className="flex-1 bg-white w-full max-w-[500px] mx-auto"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 32,
+          justifyContent: "center",
+        }}
+      >
 
-        <View
-          className="flex justify-center items-center"
-          style={{
-            paddingHorizontal: styles.containerPaddingHorizontal,
-            paddingTop: styles.imageMarginTop,
-            paddingVertical: hp(1),
-          }}
-        >
-          <View style={{ marginBottom: styles.verticalSpacing }}>
+
+        <View className="flex justify-center items-center px-[20px] pt-[24px]">
+          <View className="mb-[32px]">
             <Image
               source={require("../../assets/images/collection-common/opt.webp")}
-              style={{
-                width: styles.imageWidth,
-                height: styles.imageHeight,
-              }}
+              className="w-[180px] h-[160px]"
               resizeMode="contain"
             />
           </View>
 
           <View className="mb-7">
-            <Text
-              className="text-black text-center font-bold"
-              style={{ fontSize: styles.titleFontSize }}
-            >
+            <Text className="text-black text-center font-bold text-[22px]">
               {t("Otpverification.EnterCode")}
             </Text>
           </View>
 
           <View className="mb-5">
-            <Text
-              className="text-[#0085FF] text-center"
-              style={{ fontSize: styles.phoneFontSize }}
-            >
+            <Text className="text-[#0085FF] text-center text-[18px]">
               {phoneNumber}
             </Text>
           </View>
 
-          <View
-            className="flex-row justify-center"
-            style={{
-              gap: wp(2.5),
-              marginBottom: styles.verticalSpacing,
-            }}
-          >
+          <View className="flex-row justify-center gap-x-[10px] mb-[32px]">
             {Array.from({ length: 5 }).map((_, index) => (
               <TextInput
                 key={index}
                 ref={(el: TextInput | null) => {
                   inputRefs.current[index] = el;
                 }}
+                className="w-[51px] h-[48px] text-[24px] text-center rounded-[10px] bg-white text-black border-[#FFC738] border-[1px]"
                 style={{
-                  width: 51,
-                  height: 48,
-                  fontSize: styles.otpInputTextSize,
-                  textAlign: "center",
-                  borderRadius: 10,
-                  borderColor: "#FFC738",
-                  borderWidth: 1,
-                  backgroundColor: "#FFFFFF",
-                  color: "#000000",
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.25,
@@ -652,21 +604,18 @@ const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
             ))}
           </View>
 
-          <View style={{ marginBottom: styles.verticalSpacing / 2 }}>
-            <Text
-              className="text-[#707070] text-center"
-              style={{ fontSize: styles.phoneFontSize }}
-            >
+          <View className="mb-[16px]">
+            <Text className="text-[#707070] text-center text-[18px]">
               {t("Otpverification.Didreceive")}
             </Text>
           </View>
 
-          <View style={{ marginBottom: styles.verticalSpacing * 2 }}>
+          <View className="mb-[64px]">
             <Text
               className="text-center underline"
               onPress={disabledResend ? undefined : handleResendOTP}
               style={{
-                fontSize: styles.phoneFontSize,
+                fontSize: 16,
                 color: disabledResend ? "#9CA3AF" : "#000000",
                 fontWeight: "600",
               }}
@@ -683,16 +632,12 @@ const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
             onFail={handleFailCompletion}
           />
 
-          <View className="w-full items-center" style={{ marginBottom: hp(4) }}>
+          <View className="w-full items-center" style={{ marginBottom: 16 }}>
             <TouchableOpacity
+              className={`w-[281px] h-[50px] rounded-[20px] items-center justify-center ${
+                !isOtpValid || isVerified ? "bg-[#9CA3AF]" : "bg-black"
+              }`}
               style={{
-                width: 281,
-                height: 50,
-                backgroundColor:
-                  !isOtpValid || isVerified ? "#9CA3AF" : "#000000",
-                borderRadius: 20,
-                alignItems: "center",
-                justifyContent: "center",
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
@@ -703,10 +648,7 @@ const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
               disabled={!isOtpValid || isVerified}
               activeOpacity={0.8}
             >
-              <Text
-                className="text-white font-semibold"
-                style={{ fontSize: styles.phoneFontSize }}
-              >
+              <Text className="text-white font-semibold text-[18px]">
                 {t("Otpverification.Verify")}
               </Text>
             </TouchableOpacity>

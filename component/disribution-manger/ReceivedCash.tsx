@@ -252,57 +252,105 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
           <Ionicons name="calendar-clear" size={26} color="black" />
         </TouchableOpacity>
       </View>
+      <View className="flex-1 w-full max-w-[500px] mx-auto">
 
-      <View className="bg-white px-4 py-3 flex-row items-center ">
-        <Text className="text-sm font-medium text-gray-900">
-          {t("ReceivedCash.All")} (
-          {transactions.length.toString().padStart(2, "0")})
-        </Text>
-      </View>
 
-      {loading || filterLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <LottieView
-            source={require("../../assets/lottie/loading.json")}
-            autoPlay
-            loop
-            style={{ width: 150, height: 150 }}
-          />
+        <View className="bg-white px-4 py-3 flex-row items-center ">
+          <Text className="text-sm font-medium text-gray-900">
+            {t("ReceivedCash.All")} (
+            {transactions.length.toString().padStart(2, "0")})
+          </Text>
         </View>
-      ) : hasTransactions ? (
-        <>
-          <View className="px-4 py-4">
-            <View
-              style={{
-                borderStyle: "dashed",
-                borderWidth: 2,
-                borderColor: "#980775",
-                borderRadius: 12,
-                backgroundColor: "white",
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                marginHorizontal: 40,
-              }}
-            >
-              <View className="flex-row items-center justify-center">
-                <Text className=" font-medium text-black">
-                  {t("ReceivedCash.Full Total")} :{" "}
-                </Text>
-                <Text className="text-xl font-bold text-[#980775]">
-                  {t("ReceivedCash.Rs")}
-                  {totalCash.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </Text>
+
+        {loading || filterLoading ? (
+          <View className="flex-1 justify-center items-center">
+            <LottieView
+              source={require("../../assets/lottie/loading.json")}
+              autoPlay
+              loop
+              style={{ width: 150, height: 150 }}
+            />
+          </View>
+        ) : hasTransactions ? (
+          <>
+            <View className="px-4 py-4">
+              <View
+                style={{
+                  borderStyle: "dashed",
+                  borderWidth: 2,
+                  borderColor: "#980775",
+                  borderRadius: 12,
+                  backgroundColor: "white",
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  marginHorizontal: 40,
+                }}
+              >
+                <View className="flex-row items-center justify-center">
+                  <Text className=" font-medium text-black">
+                    {t("ReceivedCash.Full Total")} :{" "}
+                  </Text>
+                  <Text className="text-xl font-bold text-[#980775]">
+                    {t("ReceivedCash.Rs")}
+                    {totalCash.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
 
-          {/* Transactions List */}
+            {/* Transactions List */}
+            <ScrollView
+              className="flex-1"
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor="#EF4444"
+                  colors={["#EF4444"]}
+                />
+              }
+              contentContainerStyle={{
+                paddingBottom: 16,
+                flexGrow: 1,
+              }}
+            >
+              {transactions.map((item) => (
+                <View
+                  key={item.id}
+                  className="bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border border-[#738FAE] "
+                >
+                  <Text className="text-sm font-medium text-gray-900 mb-1">
+                    {t("ReceivedCash.Order ID")} : {item.invoiceNo}
+                  </Text>
+                  <View className="flex-row">
+                    <Text className="text-sm text-[#848484] mb-1">
+                      {t("ReceivedCash.Cash")} :
+                    </Text>
+                    <Text className="text-sm text-black font-medium">
+                      {" "}
+                      {t("ReceivedCash.Rs")}
+                      {item.cash.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </Text>
+                  </View>
+                  <Text className="text-xs text-[#848484]">
+                    {t("ReceivedCash.Received Time")} : {item.receivedTime}
+                  </Text>
+                </View>
+              ))}
+
+              <View className="h-20" />
+            </ScrollView>
+          </>
+        ) : (
           <ScrollView
             className="flex-1"
-            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -312,72 +360,27 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
               />
             }
             contentContainerStyle={{
-              paddingBottom: 16,
-              flexGrow: 1,
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            {transactions.map((item) => (
-              <View
-                key={item.id}
-                className="bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border border-[#738FAE] "
-              >
-                <Text className="text-sm font-medium text-gray-900 mb-1">
-                  {t("ReceivedCash.Order ID")} : {item.invoiceNo}
-                </Text>
-                <View className="flex-row">
-                  <Text className="text-sm text-[#848484] mb-1">
-                    {t("ReceivedCash.Cash")} :
-                  </Text>
-                  <Text className="text-sm text-black font-medium">
-                    {" "}
-                    {t("ReceivedCash.Rs")}
-                    {item.cash.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </Text>
-                </View>
-                <Text className="text-xs text-[#848484]">
-                  {t("ReceivedCash.Received Time")} : {item.receivedTime}
-                </Text>
+            <View className="items-center justify-center py-20">
+              <View className="flex items-center justify-center mb-4">
+                <LottieView
+                  source={require("../../assets/lottie/no-data.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 150, height: 150 }}
+                />
               </View>
-            ))}
-
-            <View className="h-20" />
-          </ScrollView>
-        </>
-      ) : (
-        <ScrollView
-          className="flex-1"
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#EF4444"
-              colors={["#EF4444"]}
-            />
-          }
-          contentContainerStyle={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View className="items-center justify-center py-20">
-            <View className="flex items-center justify-center mb-4">
-              <LottieView
-                source={require("../../assets/lottie/no-data.json")}
-                autoPlay
-                loop
-                style={{ width: 150, height: 150 }}
-              />
+              <Text className="text-[#828282] text-base italic">
+                - {t("ReceivedCash.No cash was received today")} -
+              </Text>
             </View>
-            <Text className="text-[#828282] text-base italic">
-              - {t("ReceivedCash.No cash was received today")} -
-            </Text>
-          </View>
-        </ScrollView>
-      )}
+          </ScrollView>
+        )}
+      </View>
 
       {/* Date Picker */}
       {showDatePicker && (

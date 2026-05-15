@@ -31,7 +31,9 @@ export type RootStackParamList = {
   ComplainHistory: undefined;
   ClaimOfficer: undefined;
   ClaimDistribution: undefined;
-  TransactionList: undefined;
+  TransactionList: {
+    empId: string
+  };
   DailyTarget: undefined;
   TargetValidPeriod: undefined;
   NoCollectionCenterScreen: undefined;
@@ -81,10 +83,10 @@ export type RootStackParamList = {
     userId: any;
   };
   FarmerQr: {
-  cropCount?: number;
-  userId: any;
-  NICnumber?: string;
-};
+    cropCount?: number;
+    userId: any;
+    NICnumber?: string;
+  };
   ComplainPage: {
     farmerName: any;
     farmerPhone: any;

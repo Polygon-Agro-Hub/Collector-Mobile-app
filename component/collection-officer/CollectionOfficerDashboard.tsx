@@ -289,85 +289,88 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
         </View>
       </TouchableOpacity>
 
-      {/* Render target status */}
-      {renderTargetStatus()}
+      <View className=" w-full max-w-[500px] mx-auto">
+        {/* Render target status */}
+        {renderTargetStatus()}
 
-      {/* Circular Progress */}
-      <View className="items-center justify-center mt-10 mb-10">
-        <View className="relative">
-          <CircularProgress
-            size={120}
-            width={8}
-            fill={targetPercentage !== null ? targetPercentage : 0}
-            tintColor="#000000"
-            backgroundColor="#E5E7EB"
-          />
-          <View
-            className="absolute items-center justify-center"
-            style={{ width: 120, height: 120 }}
-          >
-            <Text className="text-2xl font-bold">
-              {isLoadingTarget
-                ? "..."
-                : targetPercentage !== null
-                  ? `${targetPercentage}%`
-                  : "0%"}
-            </Text>
+        {/* Circular Progress */}
+        <View className="items-center justify-center mt-10 mb-10">
+          <View className="relative">
+            <CircularProgress
+              size={120}
+              width={8}
+              fill={targetPercentage !== null ? targetPercentage : 0}
+              tintColor="#000000"
+              backgroundColor="#E5E7EB"
+            />
+            <View
+              className="absolute items-center justify-center"
+              style={{ width: 120, height: 120 }}
+            >
+              <Text className="text-2xl font-bold">
+                {isLoadingTarget
+                  ? "..."
+                  : targetPercentage !== null
+                    ? `${targetPercentage}%`
+                    : "0%"}
+              </Text>
+            </View>
           </View>
+          <Text
+            style={[
+              { fontSize: 18, fontWeight: "bold" },
+              getTextStyle(selectedLanguage),
+            ]}
+            className="text-gray-700 mt-2"
+          >
+            {t("CollectionOfficerDashboard.Yourtarget")}
+          </Text>
+          <Text
+            style={[
+              { fontSize: 18, fontWeight: "bold" },
+              getTextStyle(selectedLanguage),
+            ]}
+            className="text-gray-700"
+          >
+            {t("CollectionOfficerDashboard.Progress")}
+          </Text>
         </View>
-        <Text
-          style={[
-            { fontSize: 18, fontWeight: "bold" },
-            getTextStyle(selectedLanguage),
-          ]}
-          className="text-gray-700 mt-2"
-        >
-          {t("CollectionOfficerDashboard.Yourtarget")}
-        </Text>
-        <Text
-          style={[
-            { fontSize: 18, fontWeight: "bold" },
-            getTextStyle(selectedLanguage),
-          ]}
-          className="text-gray-700"
-        >
-          {t("CollectionOfficerDashboard.Progress")}
-        </Text>
-      </View>
 
-      {/* Action Buttons */}
-      <View className="flex-row px-6 pb-8 gap-4 justify-center">
-        <TouchableOpacity
-          className="bg-white p-4 rounded-3xl flex-1 h-36 shadow-lg relative border border-[#FFE300]"
-          onPress={() => navigation.navigate("QRScanner" as any)}
-        >
-          <Image
-            source={require("../../assets/images/dashboard/qr.webp")}
-            className="w-8 h-8 absolute top-2 right-2"
-          />
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-700 text-lg absolute bottom-2 left-4"
+        {/* Action Buttons */}
+        <View className="flex-row px-6 pb-8 gap-4 justify-center">
+          <TouchableOpacity
+            className="bg-white p-4 rounded-3xl flex-1 h-36 shadow-lg relative border border-[#FFE300]"
+            onPress={() => navigation.navigate("QRScanner" as any)}
           >
-            {t("CollectionOfficerDashboard.Scan")}
-          </Text>
-        </TouchableOpacity>
+            <Image
+              source={require("../../assets/images/dashboard/qr.webp")}
+              className="w-8 h-8 absolute top-2 right-2"
+            />
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-gray-700 text-lg absolute bottom-2 left-4"
+            >
+              {t("CollectionOfficerDashboard.Scan")}
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          className="bg-white p-4 rounded-3xl flex-1 h-36 shadow-lg relative mb-5 border border-[#FF0086]"
-          onPress={() => navigation.navigate("SearchFarmer" as any)}
-        >
-          <Image
-            source={require("../../assets/images/dashboard/search-client.webp")}
-            className="w-8 h-8 absolute top-2 right-2"
-          />
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-700 text-lg absolute bottom-2 left-4"
+          <TouchableOpacity
+            className="bg-white p-4 rounded-3xl flex-1 h-36 shadow-lg relative mb-5 border border-[#FF0086]"
+            onPress={() => navigation.navigate("SearchFarmer" as any)}
           >
-            {t("CollectionOfficerDashboard.Search")}
-          </Text>
-        </TouchableOpacity>
+            <Image
+              source={require("../../assets/images/dashboard/search-client.webp")}
+              className="w-8 h-8 absolute top-2 right-2"
+            />
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-gray-700 text-lg absolute bottom-2 left-4"
+            >
+              {t("CollectionOfficerDashboard.Search")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
     </ScrollView>
   );

@@ -332,7 +332,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         />
 
         {/* Centered content after header */}
-        <View className="flex-1  mt-20">
+        <View className="flex-1 mt-20 w-full max-w-[500px] mx-auto">
           <View className="bg-white items-center px-4">
             <Image
               source={require("../../assets/images/collection-common/search-crop.webp")}

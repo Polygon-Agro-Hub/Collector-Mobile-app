@@ -112,7 +112,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
         />
 
         {/* Content */}
-        <View className="mt-6 gap-y-6 p-8">
+        <View className="mt-6 gap-y-6 p-8 w-full max-w-[500px] mx-auto">
           {/* Total Target */}
           <View>
             <Text className="text-[#475A6A] font-medium">

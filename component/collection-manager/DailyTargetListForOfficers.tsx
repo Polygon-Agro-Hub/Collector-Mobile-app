@@ -212,13 +212,11 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
   return (
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
-
       <CustomHeader
         title={officerId || ""}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => {
-          navigation.popToTop();
           navigation.navigate("OfficerSummary" as any, {
             officerId: officerId,
             officerName: officerName,
@@ -236,20 +234,18 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
       {/* Toggle Buttons */}
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
         <TouchableOpacity
-          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-            selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-          }`}
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+            }`}
           style={{ height: 40 }}
           onPress={() => setSelectedToggle("ToDo")}
         >
           <Text
-            className={`font-bold mr-2 ${
-              selectedToggle === "ToDo" ? "text-white" : "text-black"
-            }`}
+            className={`font-bold mr-2 ${selectedToggle === "ToDo" ? "text-white" : "text-black"
+              }`}
           >
             {t("DailyTarget.Todo")}
           </Text>
-          <View className="bg-white rounded-full px-2">
+          <View className="bg-white rounded-full px-2 py-1">
             <Text className="text-black font-bold text-xs">
               {todoData.length}
             </Text>
@@ -257,20 +253,18 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
-            selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-          }`}
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+            }`}
           style={{ height: 40 }}
           onPress={() => setSelectedToggle("Completed")}
         >
           <Text
-            className={`font-bold ${
-              selectedToggle === "Completed" ? "text-white" : "text-black"
-            }`}
+            className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
+              }`}
           >
             {t("DailyTarget.Completed")}
           </Text>
-          <View className="bg-white rounded-full px-2 ml-2">
+          <View className="bg-white rounded-full px-2 py-1 ml-2">
             <Text className="text-black font-bold text-xs">
               {completedData.length}
             </Text>
@@ -280,130 +274,126 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
 
       {/* Scrollable Table - FIXED STRUCTURE */}
       <View className="flex-1 bg-white">
-        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-          <View>
-            {/* Table Header */}
-            <View className="flex-row bg-[#980775]">
-              <Text className="w-16 p-2 text-center text-white">
-                {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
-              </Text>
-              <Text className="w-40 p-2 text-center text-white">
-                {t("DailyTarget.Variety")}
-              </Text>
-              <Text className="w-32 p-2 text-center text-white">
-                {t("DailyTarget.Grade")}
-              </Text>
-              <Text className="w-32 p-2 text-center text-white">
-                {t("DailyTarget.Target")}
-              </Text>
-              <Text className="w-32 p-2 text-center text-white">
-                {selectedToggle === "Completed"
-                  ? t("DailyTarget.Completedkg")
-                  : t("DailyTarget.Todo()")}
-              </Text>
-            </View>
-
-            <ScrollView
-              className="flex-1 bg-white"
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-            >
-              {loading ? (
-                <View className="flex-1 justify-center items-center py-16">
-                  <LottieView
-                    source={require("../../assets/lottie/loading.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 350, height: 350 }}
-                  />
-                </View>
-              ) : displayedData.length > 0 ? (
-                displayedData.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    className={`flex-row justify-center items-center ${
-                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                    }`}
-                    style={{ alignItems: "stretch" }}
-                    onPress={() => {
-                      let qty = 0;
-                      if (item.centerTarget) {
-                        if (
-                          item.grade === "A" &&
-                          item.centerTarget.total_qtyA !== undefined
-                        ) {
-                          qty = parseFloat(item.centerTarget.total_qtyA);
-                        } else if (
-                          item.grade === "B" &&
-                          item.centerTarget.total_qtyB !== undefined
-                        ) {
-                          qty = parseFloat(item.centerTarget.total_qtyB);
-                        } else if (
-                          item.grade === "C" &&
-                          item.centerTarget.total_qtyC !== undefined
-                        ) {
-                          qty = parseFloat(item.centerTarget.total_qtyC);
-                        }
-                      }
-                      if (selectedToggle === "Completed") return;
-
-                      navigation.navigate("EditTargetScreen" as any, {
-                        varietyNameEnglish: item.varietyNameEnglish,
-                        varietyId: item.varietyId,
-                        grade: item.grade,
-                        target: item.officerTarget,
-                        todo: item.todo,
-                        qty: item.dailyTarget,
-                        collectionOfficerId,
-                        varietyNameSinhala: item.varietyNameSinhala,
-                        varietyNameTamil: item.varietyNameTamil,
-                        officerId: officerId,
-                      });
-                    }}
-                  >
-                    <Text className="w-16 p-2 border-r border-gray-300 text-center">
-                      {selectedToggle === "ToDo" ? (
-                        index + 1
-                      ) : (
-                        <Ionicons name="flag" size={20} color="purple" />
-                      )}
-                    </Text>
-                    <Text className="w-40 p-2 border-r border-gray-300 text-center flex-wrap">
-                      {getvarietyName(item)}
-                    </Text>
-                    <Text className="w-32 p-2 border-r border-gray-300 text-center">
-                      {item.grade}
-                    </Text>
-                    <Text className="w-32 p-2 border-r border-gray-300 text-center">
-                      {item.officerTarget}
-                    </Text>
-                    <Text className="w-32 p-2 text-center">
-                      {selectedToggle === "Completed"
-                        ? item.complete
-                        : item.todo}
-                    </Text>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <View className="flex-1 justify-center items-center py-16 w-screen">
-                  <LottieView
-                    source={require("../../assets/lottie/no-data.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 150, height: 150 }}
-                  />
-                  <Text className="text-gray-500 mt-4">
-                    {selectedToggle === "ToDo"
-                      ? t("DailyTarget.NoTodoItems") || "No items to do"
-                      : t("DailyTarget.noCompletedTargets") ||
-                        "No completed items"}
-                  </Text>
-                </View>
-              )}
-            </ScrollView>
+        {loading ? (
+          <View className="flex-1 justify-center items-center">
+            <LottieView
+              source={require("../../assets/lottie/loading.json")}
+              autoPlay
+              loop
+              style={{ width: 150, height: 150 }}
+            />
           </View>
-        </ScrollView>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            <View style={{ minWidth: 800, width: "100%" }}>
+              {/* Table Header */}
+              <View className="flex-row bg-[#980775] h-[60px] items-center">
+                <Text className="w-16 p-2 text-center text-white font-bold">
+                  {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
+                </Text>
+                <Text className="flex-1 p-2 text-center text-white font-bold">
+                  {t("DailyTarget.Variety")}
+                </Text>
+                <Text className="w-32 p-2 text-center text-white font-bold">
+                  {t("DailyTarget.Grade")}
+                </Text>
+                <Text className="w-32 p-2 text-center text-white font-bold">
+                  {t("DailyTarget.Target")}
+                </Text>
+                <Text className="w-32 p-2 text-center text-white font-bold">
+                  {selectedToggle === "Completed"
+                    ? t("DailyTarget.Completedkg")
+                    : t("DailyTarget.Todo()")}
+                </Text>
+              </View>
+
+              <ScrollView
+                className="flex-1 bg-white"
+                refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                contentContainerStyle={{ paddingBottom: 60 }}
+              >
+                {/* Table Data */}
+                {displayedData.length > 0 ? (
+                  displayedData.map((item, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                        }`}
+                      onPress={() => {
+                        if (selectedToggle === "Completed") return;
+
+                        navigation.navigate("EditTargetScreen" as any, {
+                          varietyNameEnglish: item.varietyNameEnglish,
+                          varietyId: item.varietyId,
+                          grade: item.grade,
+                          target: item.officerTarget,
+                          todo: item.todo,
+                          qty: item.dailyTarget,
+                          collectionOfficerId,
+                          varietyNameSinhala: item.varietyNameSinhala,
+                          varietyNameTamil: item.varietyNameTamil,
+                          officerId: officerId,
+                        });
+                      }}
+                    >
+                      {/* No. */}
+                      <View className="w-16 justify-center items-center border-r border-gray-300 py-3">
+                        {selectedToggle === "ToDo" ? (
+                          <Text className="text-center">{index + 1}</Text>
+                        ) : (
+                          <Ionicons name="flag" size={20} color="purple" />
+                        )}
+                      </View>
+
+                      {/* Variety */}
+                      <View className="flex-1 justify-center items-center border-r border-gray-300 p-2">
+                        <Text className="text-center">{getvarietyName(item)}</Text>
+                      </View>
+
+                      {/* Grade */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">{item.grade}</Text>
+                      </View>
+
+                      {/* Target */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">
+                          {item.officerTarget.toFixed(2)}
+                        </Text>
+                      </View>
+
+                      {/* Todo / Completed */}
+                      <View className="w-32 justify-center items-center">
+                        <Text className="text-center">
+                          {selectedToggle === "Completed"
+                            ? item.complete.toFixed(2)
+                            : item.todo.toFixed(2)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <View className="flex-1 justify-center items-center py-16">
+                    <LottieView
+                      source={require("../../assets/lottie/no-data.json")}
+                      autoPlay
+                      loop
+                      style={{ width: 150, height: 150 }}
+                    />
+                    <Text className="text-gray-500 mt-4 text-center">
+                      {selectedToggle === "ToDo"
+                        ? t("DailyTarget.NoTodoItems") || "No items to do"
+                        : t("DailyTarget.noCompletedTargets") ||
+                        "No completed items"}
+                    </Text>
+                  </View>
+                )}
+              </ScrollView>
+            </View>
+          </ScrollView>
+        )}
       </View>
     </View>
   );

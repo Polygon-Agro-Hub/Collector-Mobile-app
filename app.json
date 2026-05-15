@@ -51,6 +51,9 @@
         "VIBRATE",
         "USE_FINGERPRINT",
         "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_AUDIO",
         "CALL_PHONE"
       ]
     },
@@ -61,6 +64,14 @@
     },
     "plugins": [
       "expo-font",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
       [
         "expo-camera",
         {

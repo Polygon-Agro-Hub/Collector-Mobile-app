@@ -200,7 +200,7 @@ export default function DigitalSignature({
           ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
         );
 
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(() => resolve(null), 300));
 
         if (!isActive) return;
 

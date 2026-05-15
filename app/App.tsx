@@ -61,16 +61,6 @@ import OTPE from "@/component/farmer/FarmerOTPVerification";
 import ManagerDashboard from "@/component/collection-manager/ManagerDashboard";
 import CenterTarget from "@/component/collection-manager/CenterTarget";
 import ManagerTransactions from "@/component/collection-manager/ManagerTransactions";
-import RegisterDriver from "@/component/driver-screens/RegisterDriver";
-import AddDriverAddressDetails from "@/component/driver-screens/AddDriverAddressDetails";
-import AddVehicleDetails from "@/component/driver-screens/AddVehicleDetails";
-import SearchFarmerScreen from "@/component/driver-screens/Searchfarmer";
-import RegisterFarmer from "@/component/driver-screens/Register Farmer";
-import OTPverification from "@/component/driver-screens/OTPverification";
-import CollectionRequestForm from "@/component/driver-screens/CollectionRequestForm";
-import CollectionRequests from "@/component/driver-screens/CollectionRequests";
-import ViewScreen from "@/component/driver-screens/ViewScreen";
-import Cancelreson from "@/component/driver-screens/Cancelreson";
 import NewReport from "@/component/collection-common/NewReport";
 import TransactionReport from "@/component/collection-manager/TransactionReport";
 import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
@@ -78,8 +68,8 @@ import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsup
 import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
 import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
 import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
-import Timer from "@/component/distribution-common/TimerContainer ";
-import TimerContainer from "@/component/distribution-common/TimerContainer ";
+import Timer from "@/component/distribution-common/TimerContainer";
+import TimerContainer from "@/component/distribution-common/TimerContainer";
 import CenterTargetScreen from "@/component/disribution-manger/CenterTargetScreen";
 import DistributionOfficersList from "@/component/disribution-manger/DistributionOfficersList";
 import ClaimDistribution from "@/component/disribution-manger/ClaimDistribution";
@@ -365,8 +355,7 @@ function AppContent() {
 
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
             <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
-            <Stack.Screen name="ViewScreen" component={ViewScreen as any} />
-            <Stack.Screen name="Cancelreson" component={Cancelreson as any} />
+
             <Stack.Screen name="NewReport" component={NewReport as any} />
             <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
@@ -421,43 +410,19 @@ function AppContent() {
               component={MainTabNavigator}
               options={{ headerShown: false }}
             />
-            <Stack.Screen
-              name="SearchFarmerScreen"
-              component={SearchFarmerScreen as any}
-            />
-            <Stack.Screen
-              name="RegisterFarmer"
-              component={RegisterFarmer as any}
-            />
-            <Stack.Screen
-              name="OTPverification"
-              component={OTPverification as any}
-            />
-            <Stack.Screen
-              name="CollectionRequestForm"
-              component={CollectionRequestForm as any}
-            />
-            <Stack.Screen
-              name="CollectionRequests"
-              component={CollectionRequests as any}
-            />
+
+
+
+
+
             <Stack.Screen
               name="TransactionReport"
               component={TransactionReport as any}
             />
 
-            <Stack.Screen
-              name="RegisterDriver"
-              component={RegisterDriver as any}
-            />
-            <Stack.Screen
-              name="AddDriverAddressDetails"
-              component={AddDriverAddressDetails as any}
-            />
-            <Stack.Screen
-              name="AddVehicleDetails"
-              component={AddVehicleDetails as any}
-            />
+
+
+
             <Stack.Screen
               name="DigitalSignature"
               component={DigitalSignature as any}

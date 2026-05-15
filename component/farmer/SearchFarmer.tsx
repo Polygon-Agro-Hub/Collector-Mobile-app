@@ -17,10 +17,6 @@ import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
@@ -70,7 +66,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
     fetchJobRole();
   }, []);
 
-   const handleBackPress = () => {
+  const handleBackPress = () => {
     if (jobRole === "Collection Officer") {
       navigation.navigate("CollectionOfficerDashboard" as any);
     } else if (jobRole === "Collection Centre Manager") {
@@ -216,7 +212,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -228,7 +224,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
           navigation={navigation}
           onBackPress={handleBackPress}
         />
-        <View className="flex-1 bg-white" style={{ paddingHorizontal: wp(4) }}>
+        <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-4">
           {/* Search Form */}
           <View className="py-4">
             <Text

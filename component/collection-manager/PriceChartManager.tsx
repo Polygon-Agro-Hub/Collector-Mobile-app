@@ -15,10 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
@@ -308,25 +305,28 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
   );
 
   return (
-    <View className="flex-1 bg-whitegray-100">
-      {/* Header */}
-
-      <CustomHeader
-        title={t("PriceChart.PriceChart")}
-        showBackButton={true}
-        navigation={navigation}
-        onBackPress={() =>
-          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
-        }
-        textColor="white"
-        bgColor="#282828"
-        iconBgColor="#FFFFFF1A"
-      />
+    <View className="flex-1 bg-white">
+      {/* Full-width dark header container */}
+      <View style={{ backgroundColor: "#282828", width: "100%" }}>
+        <View className="w-full mx-auto">
+          <CustomHeader
+            title={t("PriceChart.PriceChart")}
+            showBackButton={true}
+            navigation={navigation}
+            onBackPress={() =>
+              navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
+            }
+            textColor="white"
+            bgColor="#282828"
+            iconBgColor="#FFFFFF1A"
+          />
+        </View>
+      </View>
 
       {/* Content */}
       <ScrollView
-        className="flex-1 bg-white"
-        style={{ paddingHorizontal: wp(8), paddingVertical: hp(2) }}
+        className="flex-1 bg-white w-full max-w-[500px] mx-auto"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
         <View className="mb-4">
           <Text className="text-black text-sm mb-1">
@@ -374,7 +374,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
                     <Text className="w-32 text-gray-600">
                       {`${t("PriceChart.Grade")} ${priceItem.grade}`}
                     </Text>
-                   
+
                     <View
                       className="flex-1 flex-row items-center rounded-full px-4 h-[50px]"
                       style={{

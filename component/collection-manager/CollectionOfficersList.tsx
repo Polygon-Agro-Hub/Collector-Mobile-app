@@ -269,125 +269,130 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#313131" }}>
-      <View
-        style={{
-          backgroundColor: "#313131",
-          paddingVertical: 24,
-          paddingHorizontal: 16,
-          position: "relative",
-        }}
-      >
-        {showFilter && (
-          <View
-            style={{
-              position: "absolute",
-              zIndex: 40,
-              flexDirection: "column",
-              top: 56,
-              left: 24,
-              backgroundColor: "white",
-              borderRadius: 8,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                backgroundColor:
-                  selectedJobRole === "Driver" ? "#F3F4F6" : "white",
-                borderRadius: 8,
-              }}
-              onPress={() => {
-                setSelectedJobRole("Driver");
-                setShowFilter(false);
-              }}
-            >
-              <Text style={{ color: "#374151", fontWeight: "600" }}>
-                {t("CollectionOfficersList.Drivers")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                backgroundColor:
-                  selectedJobRole === "Collection Officer"
-                    ? "#F3F4F6"
-                    : "white",
-                borderRadius: 8,
-              }}
-              onPress={() => {
-                setSelectedJobRole("Collection Officer");
-                setShowFilter(false);
-              }}
-            >
-              <Text style={{ color: "#374151", fontWeight: "600" }}>
-                {t("CollectionOfficersList.Collection Officers")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <Text
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      {/* Full-width dark header container */}
+      <View style={{ backgroundColor: "#313131", width: "100%" }}>
+        <View
           style={{
-            fontSize: 18,
-            color: "white",
-            textAlign: "center",
-            fontWeight: "bold",
+            backgroundColor: "#313131",
+            paddingVertical: 24,
+            paddingHorizontal: 16,
+            position: "relative",
+            width: "100%",
+            alignSelf: "center",
           }}
         >
-          {t("CollectionOfficersList.Collection Officers")}
-        </Text>
-
-        <TouchableOpacity
-          style={{ position: "absolute", top: 24, right: 16 }}
-          onPress={() => {
-            setShowMenu((prev) => !prev);
-            setShowFilter(false);
-          }}
-        >
-          <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
-        </TouchableOpacity>
-
-        {showMenu && (
-          <View
-            style={{
-              position: "absolute",
-              top: 56,
-              right: 16,
-              backgroundColor: "white",
-              zIndex: 50,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: "#00000040",
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-              elevation: 5,
-            }}
-          >
-            <TouchableOpacity
+          {showFilter && (
+            <View
               style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
+                position: "absolute",
+                zIndex: 40,
+                flexDirection: "column",
+                top: 56,
+                left: 24,
                 backgroundColor: "white",
                 borderRadius: 8,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
               }}
-              onPress={() => navigation.navigate("ClaimOfficer")}
             >
-              <Text style={{ color: "#374151", fontWeight: "600" }}>
-                {t("CollectionOfficersList.Claim Officer")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+              <TouchableOpacity
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  backgroundColor:
+                    selectedJobRole === "Driver" ? "#F3F4F6" : "white",
+                  borderRadius: 8,
+                }}
+                onPress={() => {
+                  setSelectedJobRole("Driver");
+                  setShowFilter(false);
+                }}
+              >
+                <Text style={{ color: "#374151", fontWeight: "600" }}>
+                  {t("CollectionOfficersList.Drivers")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  backgroundColor:
+                    selectedJobRole === "Collection Officer"
+                      ? "#F3F4F6"
+                      : "white",
+                  borderRadius: 8,
+                }}
+                onPress={() => {
+                  setSelectedJobRole("Collection Officer");
+                  setShowFilter(false);
+                }}
+              >
+                <Text style={{ color: "#374151", fontWeight: "600" }}>
+                  {t("CollectionOfficersList.Collection Officers")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <Text
+            style={{
+              fontSize: 18,
+              color: "white",
+              textAlign: "center",
+              fontWeight: "bold",
+            }}
+          >
+            {t("CollectionOfficersList.Collection Officers")}
+          </Text>
+
+          <TouchableOpacity
+            style={{ position: "absolute", top: 24, right: 16 }}
+            onPress={() => {
+              setShowMenu((prev) => !prev);
+              setShowFilter(false);
+            }}
+          >
+            <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
+          </TouchableOpacity>
+
+          {showMenu && (
+            <View
+              style={{
+                position: "absolute",
+                top: 56,
+                right: 16,
+                backgroundColor: "white",
+                zIndex: 50,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: "#00000040",
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 5,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  backgroundColor: "white",
+                  borderRadius: 8,
+                }}
+                onPress={() => navigation.navigate("ClaimOfficer")}
+              >
+                <Text style={{ color: "#374151", fontWeight: "600" }}>
+                  {t("CollectionOfficersList.Claim Officer")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
 
       <View
@@ -397,6 +402,9 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
           backgroundColor: "white",
+          width: "100%",
+          maxWidth: 500,
+          alignSelf: "center",
         }}
       >
         <View style={{ marginTop: 16, paddingHorizontal: 16 }}>
@@ -449,15 +457,14 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             style={{
               flex: 1,
               justifyContent: "center",
-              alignItems: "center",
-              marginTop: -50,
+              alignItems: "center"
             }}
           >
             <LottieView
               source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
-              style={{ width: 350, height: 350 }}
+              style={{ width: 150, height: 150 }}
             />
           </View>
         ) : errorMessage ? (

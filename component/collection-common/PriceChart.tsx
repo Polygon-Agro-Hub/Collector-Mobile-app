@@ -15,10 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
@@ -100,7 +97,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
       firstDot === -1
         ? sanitized
         : sanitized.slice(0, firstDot + 1) +
-          sanitized.slice(firstDot + 1).replace(/\./g, "");
+        sanitized.slice(firstDot + 1).replace(/\./g, "");
 
     const updatedPrices = [...editedPrices];
     updatedPrices[index].price = cleanedPrice;
@@ -233,27 +230,20 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
   );
 
   return (
-    <View className="flex-1 bg-whitegray-100">
-      {/* Header */}
-      <View
-        className="bg-[#313131] flex-row items-center"
-        style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
-      >
-        <CustomHeader
-          title={t("PriceChart.PriceChart")}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() => navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })}
-          textColor="white"
-          bgColor="#313131"
-          iconBgColor="#FFFFFF1A"
-        />
-      </View>
+    <View className="flex-1 bg-white">
+      <CustomHeader
+        title={t("PriceChart.PriceChart")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })}
+        textColor="white"
+        bgColor="#313131"
+      />
 
       {/* Content */}
       <ScrollView
-        className="flex-1 bg-white"
-        style={{ paddingHorizontal: wp(8), paddingVertical: hp(2) }}
+        className="flex-1 bg-white w-full max-w-[500px] mx-auto"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
         <View className="mb-4 ">
           <Text className="text-black text-sm mb-1">

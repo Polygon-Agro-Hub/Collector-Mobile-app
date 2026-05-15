@@ -194,9 +194,8 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${
-        item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
-      }`}
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
+        }`}
       onPress={() => {
         if (item.status !== "Not Approved") {
           navigation.navigate("DistributionOfficerSummary" as any, {
@@ -269,8 +268,8 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   );
 
   return (
-    <View className="flex-1 bg-[#313131]">
-      <View className="bg-[#313131] py-6 px-4  relative">
+    <View className="flex-1 bg-white">
+      <View className="bg-[#313131] py-6 px-4">
         <Text
           style={{ fontSize: 18 }}
           className="text-white text-center font-bold"
@@ -288,7 +287,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </TouchableOpacity>
 
         {showMenu && (
-          <View 
+          <View
             style={{
               position: "absolute",
               top: 56,
@@ -306,7 +305,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
             }}
           >
             <TouchableOpacity
-               style={{
+              style={{
                 paddingHorizontal: 16,
                 paddingVertical: 8,
                 backgroundColor: "white",
@@ -322,7 +321,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         )}
       </View>
 
-      <View className="flex-1  mt-3 rounded-t-2xl bg-white">
+      <View className="flex-1 w-full max-w-[500px] mx-auto mt-3 rounded-t-2xl bg-white">
         <View className="mt-4 px-4">
           {selectedJobRole === "Collection Officer" ? (
             <>
@@ -372,7 +371,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
-              style={{ width: 350, height: 350 }}
+              style={{ width: 150, height: 150 }}
             />
           </View>
         ) : errorMessage ? (
@@ -417,6 +416,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           <Ionicons name="add" size={scale(24)} color="#fff" />
         </TouchableOpacity>
       </View>
+
     </View>
   );
 };
