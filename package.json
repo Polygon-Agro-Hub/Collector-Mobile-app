@@ -104,8 +104,12 @@
     "@types/react": "~19.2.10",
     "@types/react-native": "0.72.8",
     "@types/react-native-vector-icons": "^6.4.18",
+    "art": "0.10.3",
     "babel-preset-expo": "~55.0.8",
     "baseline-browser-mapping": "^2.10.24",
+    "create-react-class": "15.7.0",
+    "react-art": "16.13.1",
+    "scheduler": "0.19.1",
     "typescript": "~5.9.2"
   },
   "private": true,
