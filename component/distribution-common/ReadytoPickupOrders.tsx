@@ -298,20 +298,20 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
     }
   };
 
-     useFocusEffect(
-          React.useCallback(() => {
-            const onBackPress = () => {
-              navigation.navigate("DistridutionaDashboard");
-              return true;
-            };
-      
-            const subscription = BackHandler.addEventListener(
-              "hardwareBackPress",
-              onBackPress,
-            );
-            return () => subscription.remove();
-          }, [navigation]),
-        );
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const NoOrdersState = () => {
     return (
@@ -339,7 +339,12 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   if (loading) {
     return (
       <View className="flex-1 bg-white justify-center items-center">
-        <ActivityIndicator size="large" color="#000" />
+        <LottieView
+          source={require("../../assets/lottie/loading.json")}
+          autoPlay
+          loop
+          style={{ width: 200, height: 200 }}
+        />
         <Text className="mt-4 text-gray-600">
           {t("ReadytoPickupOrders.Loading orders")}
         </Text>
@@ -397,7 +402,10 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
         {/* Content Area */}
         <View className="flex-1">
-          <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
             {searchState === "no-orders-at-all" && <NoOrdersState />}
 
             {(searchState === "initial" || searchState === "results") &&

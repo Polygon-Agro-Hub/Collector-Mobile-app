@@ -284,7 +284,11 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
             />
           </View>
         ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={true}
+          style={{
+            marginBottom:40
+          }}
+          >
             <View style={{ minWidth: 800, width: "100%" }}>
               {/* Table Header */}
               <View className="flex-row bg-[#980775] h-[60px] items-center">

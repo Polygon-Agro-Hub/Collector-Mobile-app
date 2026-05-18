@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,11 @@ import {
   StatusBar,
   Image,
   ScrollView,
+  BackHandler,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import CustomHeader from "@/component/navigations/CustomHeader";
 import { RootStackParamList } from "../types/types";
 
@@ -97,6 +98,22 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
 
   const config = getStatusConfig();
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.goBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   return (
     <View className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="white" />
@@ -141,11 +158,18 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
       </ScrollView>
 
       {/* Action Button - Always "Go Back" */}
-      <View className="px-4 pb-6 pt-4 bg-white">
+      <View className="px-4 mb-20  bg-white">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="bg-[#353535] rounded-3xl h-[50px] items-center justify-center"
           activeOpacity={0.8}
+          style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
         >
           <Text className="text-white text-center font-bold text-lg">
             {t("GoviPensionStatus.Go Back")}

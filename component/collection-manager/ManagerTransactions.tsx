@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { Entypo } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ManagerTransactionsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -85,12 +86,36 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     }, [])
   );
 
-  const fetchTransactions = async (date: string) => {
-    setLoading(true);
+   const sortTransactionsByName = (data: Transaction[]) => {
+    return [...data].sort((a, b) => {
+      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+  };
+
+ const fetchTransactions = async (date: string) => {
     try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        console.error("No token found. Please log in again.");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(
-        `${environment.API_BASE_URL}api/collection-manager/transaction-list?collectionOfficerId=${empId}&date=${date}`
+        `${environment.API_BASE_URL}api/collection-manager/my-collection?date=${date}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
+
       const data = await response.json();
 
       if (response.ok) {
@@ -109,16 +134,20 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           accountHolderName: transaction.accountHolderName || null,
           bankName: transaction.bankName || null,
           branchName: transaction.branchName || null,
+          empId: transaction.empId || "",
+          image: transaction.profileImage || null,
         }));
 
+        const sortedData = sortTransactionsByName(formattedData);
+
         setTransactions(formattedData);
-        setFilteredTransactions(formattedData);
+        setFilteredTransactions(sortedData);
       } else {
         console.error("Error fetching transactions:", data.error);
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching transactions:", error);
-    } finally {
       setLoading(false);
     }
   };

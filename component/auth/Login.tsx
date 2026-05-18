@@ -355,7 +355,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
-        className="bg-white flex-1 px-1"
+        className="bg-white flex-1 px-5"
         showsVerticalScrollIndicator={false}
       >
         <CustomHeader
@@ -433,7 +433,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             </View>
 
             <TouchableOpacity
-              className="bg-black w-full rounded-3xl items-center justify-center mb-[20%] h-[50px]"
+              className="bg-black w-full  rounded-3xl items-center justify-center mb-[20%] h-[50px]"
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },

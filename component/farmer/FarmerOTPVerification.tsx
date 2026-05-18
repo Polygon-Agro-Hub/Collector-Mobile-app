@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   Keyboard,
   Platform,
+  BackHandler,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,6 +20,7 @@ import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -62,7 +64,14 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <View className="bg-white p-6 rounded-2xl items-center w-80 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
             {t("Otpverification.Success")}
@@ -408,7 +417,49 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("UnregisteredFarmerDetails" as any, {
+          NIC: NICnumber,
+        });
+        return true;
+      };
 
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [navigation]),
+  );
+  // Track whether the user left this screen without completing verification
+  const hasLeftUnverified = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Reset state if the user left without verifying
+      if (hasLeftUnverified.current && !isVerified) {
+        setOtpDigits(["", "", "", "", ""]);
+        setIsOtpValid(false);
+        setTimer(240);
+        setDisabledResend(true);
+        setIsOtpExpired(false);
+        setVerificationAttempts(0);
+        setTimeout(() => inputRefs.current[0]?.focus(), 100);
+      }
+
+      return () => {
+        // Mark that the user navigated away (only if not yet verified)
+        if (!isVerified) {
+          hasLeftUnverified.current = true;
+        }
+      };
+    }, [isVerified]),
+  );
 
   return (
     <View className="flex-1 bg-white">
@@ -416,7 +467,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         title={t("")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() =>
+          navigation.navigate("UnregisteredFarmerDetails" as any, {
+            NIC: NICnumber,
+          })
+        }
       />
 
       <ScrollView
@@ -449,14 +504,14 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
 
           {/* OTP Input Boxes */}
-          <View className="flex-row justify-center gap-x-[10px] mb-[32px]">
+         <View className="flex-row justify-center gap-x-[10px] mb-[32px] pr-[16px]">
             {Array.from({ length: 5 }).map((_, index) => (
               <TextInput
                 key={index}
                 ref={(el: TextInput | null) => {
                   inputRefs.current[index] = el;
                 }}
-                className="w-[51px] h-[48px] text-[24px] text-center rounded-[10px] bg-white text-black border-[#FFC738]"
+                className="w-[51px] h-[48px] text-[20px] text-center rounded-[10px] bg-white text-black border-[#FFC738]"
                 style={{
                   borderWidth: otpDigits[index] !== "" ? 2 : 1,
                   shadowColor: "#000000",
@@ -502,8 +557,9 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
           <View className="w-full items-center" style={{ marginBottom: 8 }}>
             <TouchableOpacity
-              className={`w-[281px] h-[50px] rounded-[20px] items-center justify-center mb-10 ${!isOtpValid || isVerified ? "bg-[#9CA3AF]" : "bg-black"
-                }`}
+              className={`w-[281px] h-[50px] rounded-[20px] items-center justify-center mb-20 ${
+                !isOtpValid || isVerified ? "bg-[#9CA3AF]" : "bg-black"
+              }`}
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },

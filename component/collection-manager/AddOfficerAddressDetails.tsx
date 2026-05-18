@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,16 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -312,7 +318,7 @@ const AddOfficerAddressDetails: React.FC = () => {
       if (imageUri) {
         const ext = imageUri.split(".").pop()?.toLowerCase() || "jpg";
         const base64 = await FileSystem.readAsStringAsync(imageUri, {
-          encoding: 'base64',  // ← string literal instead of FileSystem.EncodingType.Base64
+          encoding: "base64", // ← string literal instead of FileSystem.EncodingType.Base64
         });
         profileImageBase64 = `data:image/${ext};base64,${base64}`;
       }
@@ -324,7 +330,8 @@ const AddOfficerAddressDetails: React.FC = () => {
         empType: type,
         languages: Object.keys(preferredLanguages)
           .filter(
-            (lang) => preferredLanguages[lang as keyof typeof preferredLanguages],
+            (lang) =>
+              preferredLanguages[lang as keyof typeof preferredLanguages],
           )
           .join(", "),
         profileImage: profileImageBase64, // ← real base64 now, not a file:// URI
@@ -342,7 +349,10 @@ const AddOfficerAddressDetails: React.FC = () => {
       );
 
       if (response.status === 201) {
-        Alert.alert(t("Error.Success"), t("Error.Officer created successfully"));
+        Alert.alert(
+          t("Error.Success"),
+          t("Error.Officer created successfully"),
+        );
         setLoading(false);
         await AsyncStorage.removeItem("officerFormData");
         if (jobRole === "Collection Officer") {
@@ -389,6 +399,22 @@ const AddOfficerAddressDetails: React.FC = () => {
     value: b.name,
   }));
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.goBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const DropdownButton = ({
     placeholder,
     value,
@@ -405,9 +431,11 @@ const AddOfficerAddressDetails: React.FC = () => {
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
-      className={`border ${hasError ? "border-red-500" : "border-[#F4F4F4]"
-        } bg-[#F4F4F4] rounded-2xl px-4 h-[46px] flex-row items-center justify-between ${disabled ? "opacity-50" : ""
-        }`}
+      className={`border ${
+        hasError ? "border-red-500" : "border-[#F4F4F4]"
+      } bg-[#F4F4F4] rounded-2xl px-4 h-[46px] flex-row items-center justify-between ${
+        disabled ? "opacity-50" : ""
+      }`}
     >
       <Text className={value ? "text-gray-700" : "text-gray-400"}>
         {value || placeholder}
@@ -441,8 +469,9 @@ const AddOfficerAddressDetails: React.FC = () => {
             onChangeText={(text) =>
               handleInputChange("houseNumber", text.replace(/^\s+/, ""))
             }
-            className={`border ${fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
+            className={`border ${
+              fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.houseNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -459,8 +488,9 @@ const AddOfficerAddressDetails: React.FC = () => {
             onChangeText={(text) =>
               handleInputChange("streetName", formatText(text))
             }
-            className={`border ${fieldErrors.streetName ? "border-red-500" : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
+            className={`border ${
+              fieldErrors.streetName ? "border-red-500" : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
             autoCorrect={false}
           />
           {fieldErrors.streetName ? (
@@ -476,8 +506,9 @@ const AddOfficerAddressDetails: React.FC = () => {
             placeholder={t("AddOfficerAddressDetails.City")}
             value={formData.city}
             onChangeText={(text) => handleInputChange("city", formatText(text))}
-            className={`border ${fieldErrors.city ? "border-red-500" : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
+            className={`border ${
+              fieldErrors.city ? "border-red-500" : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
             autoCorrect={false}
           />
           {fieldErrors.city ? (
@@ -503,14 +534,14 @@ const AddOfficerAddressDetails: React.FC = () => {
               value={
                 formData.province
                   ? (() => {
-                    const p = (provincesData.provinces as Province[]).find(
-                      (pr) => pr.name.en === formData.province,
-                    );
-                    return p
-                      ? p.name[selectedLanguage as keyof typeof p.name] ||
-                      p.name.en
-                      : formData.province;
-                  })()
+                      const p = (provincesData.provinces as Province[]).find(
+                        (pr) => pr.name.en === formData.province,
+                      );
+                      return p
+                        ? p.name[selectedLanguage as keyof typeof p.name] ||
+                            p.name.en
+                        : formData.province;
+                    })()
                   : ""
               }
               hasError={!!fieldErrors.province}
@@ -534,15 +565,15 @@ const AddOfficerAddressDetails: React.FC = () => {
                   value={
                     formData.district
                       ? (() => {
-                        const d = districts.find(
-                          (dis) => dis.en === formData.district,
-                        );
-                        return d
-                          ? (d[
-                            selectedLanguage as keyof typeof d
-                          ] as string) || d.en
-                          : formData.district;
-                      })()
+                          const d = districts.find(
+                            (dis) => dis.en === formData.district,
+                          );
+                          return d
+                            ? (d[
+                                selectedLanguage as keyof typeof d
+                              ] as string) || d.en
+                            : formData.district;
+                        })()
                       : ""
                   }
                   hasError={!!fieldErrors.district}
@@ -582,10 +613,11 @@ const AddOfficerAddressDetails: React.FC = () => {
             keyboardType="default"
             autoCapitalize="words"
             autoCorrect={false}
-            className={`border ${fieldErrors.accountHolderName
-              ? "border-red-500"
-              : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
+            className={`border ${
+              fieldErrors.accountHolderName
+                ? "border-red-500"
+                : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.accountHolderName ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -601,8 +633,9 @@ const AddOfficerAddressDetails: React.FC = () => {
             keyboardType="numeric"
             value={formData.accountNumber}
             onChangeText={(text) => handleValidation("accountNumber", text)}
-            className={`border ${fieldErrors.accountNumber ? "border-red-500" : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
+            className={`border ${
+              fieldErrors.accountNumber ? "border-red-500" : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {fieldErrors.accountNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -620,10 +653,11 @@ const AddOfficerAddressDetails: React.FC = () => {
             onChangeText={(text) =>
               handleValidation("confirmAccountNumber", text)
             }
-            className={`border ${error || fieldErrors.confirmAccountNumber
-              ? "border-red-500"
-              : "border-[#F4F4F4]"
-              } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
+            className={`border ${
+              error || fieldErrors.confirmAccountNumber
+                ? "border-red-500"
+                : "border-[#F4F4F4]"
+            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
           />
           {error || fieldErrors.confirmAccountNumber ? (
             <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -699,8 +733,9 @@ const AddOfficerAddressDetails: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${loading ? "opacity-50" : ""
-              }`}
+            className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${
+              loading ? "opacity-50" : ""
+            }`}
             onPress={handleSubmit}
             disabled={loading}
             style={{

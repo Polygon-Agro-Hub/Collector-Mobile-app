@@ -734,7 +734,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
   const renderSection1 = () => (
     <ScrollView
-      className="flex-1 px-5"
+      className="flex-1 px-8"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 20 }}
     >
@@ -750,7 +750,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           }
           placeholder={t("GoviPensionForm.--Type here--")}
           placeholderTextColor="#585858"
-          className="bg-[#F4F4F4] rounded-2xl px-4 py-3 text-[#070707] text-sm"
+          className="bg-[#F4F4F4] rounded-2xl px-4 h-[50px] text-[#070707] text-sm"
           autoCapitalize="words"
           editable={!farmerName}
         />
@@ -763,7 +763,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         </Text>
         <TouchableOpacity
           onPress={() => setShowCustomDobPicker(true)}
-          className="bg-[#F4F4F4] rounded-2xl px-4 py-3 flex-row justify-between items-center border border-gray-100"
+          className="bg-[#F4F4F4] rounded-2xl px-4 h-[50px] flex-row justify-between items-center border border-gray-100"
         >
           <Text
             className={`text-sm ${formData.dateOfBirth ? "text-[#070707]" : "text-[#585858]"}`}
@@ -781,7 +781,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         <Text className="text-[#070707] mb-2">
           {t("GoviPensionForm.Your NIC Number")} *
         </Text>
-        <View className="bg-[#F4F4F4] rounded-2xl px-4 py-3">
+        <View className="bg-[#F4F4F4] rounded-2xl px-4 h-[50px]  justify-center">
           <Text className="text-[#070707] text-sm">
             {formData.nicNumber || farmerNIC}
           </Text>
@@ -795,7 +795,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         </Text>
         <TouchableOpacity
           onPress={() => pickImageFromGallery("nicFront")}
-          className="bg-white border border-gray-300 rounded-2xl px-6 py-3 flex-row justify-center items-center mb-4"
+          className="bg-white border border-gray-300 rounded-2xl px-6 h-[50px] flex-row justify-center items-center mb-4"
         >
           <FontAwesome6 name="cloud-arrow-up" size={22} color="black" />
           <Text className="text-gray-900 ml-2 font-medium text-sm">
@@ -830,7 +830,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         </Text>
         <TouchableOpacity
           onPress={() => pickImageFromGallery("nicBack")}
-          className="bg-white border border-gray-300 rounded-2xl px-6 py-3 flex-row justify-center items-center mb-4"
+          className="bg-white border border-gray-300 rounded-2xl px-6 h-[50px] flex-row justify-center items-center mb-4"
         >
           <FontAwesome6 name="cloud-arrow-up" size={22} color="black" />
           <Text className="text-gray-900 ml-2 font-medium text-sm">
@@ -865,7 +865,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
     return (
       <ScrollView
-        className="flex-1 px-5"
+        className="flex-1 px-8"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}
       >
@@ -881,7 +881,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
             }
             placeholder={t("GoviPensionForm.--Type here--")}
             placeholderTextColor="#585858"
-            className="bg-[#F4F4F4] rounded-2xl px-4 py-3 text-[#070707] text-sm"
+            className="bg-[#F4F4F4] rounded-2xl px-4 h-[50px] text-[#070707] text-sm"
             autoCapitalize="words"
           />
         </View>
@@ -942,7 +942,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           </Text>
           <TouchableOpacity
             onPress={() => setShowCustomSuccessorDobPicker(true)}
-            className="bg-[#F4F4F4] rounded-2xl px-4 py-3 flex-row justify-between items-center border border-gray-100"
+            className="bg-[#F4F4F4] rounded-2xl px-4 h-[50px] flex-row justify-between items-center border border-gray-100"
           >
             <Text
               className={`text-sm ${formData.successorDateOfBirth ? "text-[#070707]" : "text-[#585858]"}`}
@@ -1203,7 +1203,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       {/* Action Buttons */}
       <View className="px-5 pb-6 pt-4 bg-white">
         {currentSection === 1 ? (
-          <View className="flex-row space-x-3">
+          <View className="flex-row gap-4">
             <TouchableOpacity
               onPress={handleCancel}
               className="flex-1 bg-[#ECECEC] rounded-full py-4"
@@ -1238,7 +1238,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         ) : (
-          <View className="flex-row space-x-3">
+          <View className="flex-row gap-4">
             <TouchableOpacity
               onPress={handlePrevious}
               className="flex-1 bg-[#ECECEC] rounded-full py-4"

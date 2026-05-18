@@ -88,7 +88,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
     React.useCallback(() => {
       setSelectedDate(new Date());
       setShowDatePicker(false);
-      return () => { };
+      return () => {};
     }, []),
   );
 
@@ -209,19 +209,20 @@ const TransactionList: React.FC<TransactionListProps> = ({
       <View
         style={{
           backgroundColor: "#980775",
-          paddingTop: insets.top,
           paddingHorizontal: 16,
           paddingBottom: 40,
-          marginTop: 5,
+          marginTop: 10,
         }}
       >
         <View
           style={{
-            flexDirection: "row",
+            position: "relative",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "center",
+            marginBottom: 16,
           }}
         >
+          {/* Back Button - absolute left */}
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("OfficerSummary" as any, {
@@ -232,46 +233,46 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 officerName,
               })
             }
-            className="bg-[#FFFFFF1A] rounded-full p-2 justify-center  items-center"
+            style={{
+              position: "absolute",
+              left: 0,
+              backgroundColor: "#FFFFFF1A",
+              borderRadius: 999,
+              padding: 8,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
             <Entypo name="chevron-left" size={25} color="white" />
           </TouchableOpacity>
 
-          <Text
-            style={{
-              color: "white",
-              fontSize: 18,
-              fontWeight: "bold",
-              textAlign: "center",
-              flex: 1,
-            }}
-          >
-            EMP {t("ManagerTransactions.ID")} : {officerId}
-          </Text>
+          {/* Centered EMP ID + Selected Date */}
+          <View style={{ alignItems: "center" }}>
+            <Text
+              style={{
+                color: "white",
+                fontSize: 18,
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              EMP {t("ManagerTransactions.ID")} : {officerId}
+            </Text>
+            <Text style={{ color: "white", fontSize: 16, marginTop: 4 }}>
+              {t("ManagerTransactions.Selected Date")}{" "}
+              {selectedDate
+                ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+                : "N/A"}
+            </Text>
+          </View>
 
+          {/* Calendar Icon - absolute right */}
           <TouchableOpacity
             onPress={() => setShowDatePicker((prev) => !prev)}
-            style={{ marginRight: 8 }}
+            style={{ position: "absolute", right: 0 }}
           >
             <Ionicons name="calendar-outline" size={24} color="white" />
           </TouchableOpacity>
-        </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 8,
-            marginBottom: 16,
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 16 }}>
-            {t("ManagerTransactions.Selected Date")}{" "}
-            {selectedDate
-              ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
-              : "N/A"}
-          </Text>
         </View>
       </View>
 

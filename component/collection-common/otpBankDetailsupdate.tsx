@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -41,6 +42,7 @@ interface FailModalProps {
   onClose: () => void;
   onFail: () => void;
 }
+
 const ShowSuccessModal: React.FC<SuccessModalProps> = ({
   visible,
   onClose,
@@ -66,10 +68,16 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
-            {" "}
             {t("BankDetailsUpdate.Success")}
           </Text>
 
@@ -126,10 +134,16 @@ const ShowFailModal: React.FC<FailModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <View className="bg-white p-6 rounded-2xl items-center w-72 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
-            {" "}
             {t("BankDetailsUpdate.Failed")}
           </Text>
 
@@ -185,6 +199,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     PreferdLanguage,
     officerRole,
   } = route.params;
+
   const [otpCode, setOtpCode] = useState<string>("");
   const [maskedCode, setMaskedCode] = useState<string>("XXXXX");
   const [referenceId, setReferenceId] = useState<string | null>(null);
@@ -198,71 +213,91 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [failModalVisible, setFailModalVisible] = useState(false);
   const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
   const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
-
+  const [farmerData, setFarmerData] = useState<{
+    NICnumber: string;
+    userId: string;
+  } | null>(null);
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("blur", () => {
-      if (!isVerified) {
-        setOtpCode("");
-        setIsOtpValid(false);
-        setTimer(240);
-        setDisabledResend(true);
+  // Reset all OTP state and restart timer every time screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      setOtpCode("");
+      setIsOtpValid(false);
+      setTimer(240);
+      setDisabledResend(true);
+      setIsVerified(false);
+      setIsOtpExpired(false);
+      setVerificationAttempts(0);
+      setModalVisible(false);
+      setFailModalVisible(false);
+      inputRefs.current.forEach((ref) => ref?.clear());
 
-        inputRefs.current.forEach((ref) => ref?.clear());
-      }
-    });
+      const fetchReferenceId = async () => {
+        try {
+          const refId = await AsyncStorage.getItem("referenceId");
+          if (refId) setReferenceId(refId);
+        } catch (error) {
+          console.error("Failed to load referenceId:", error);
+        }
+      };
+      fetchReferenceId();
+    }, []),
+  );
 
-    return unsubscribe;
-  }, [navigation, isVerified]);
-
-  const handleSuccessCompletion = () => {
-    setModalVisible(false);
-
-    if (officerRole === "COO") {
-      navigation.navigate("FarmerQr" as any, {
-        NICnumber,
-        userId: farmerId,
-      });
-    } else if (officerRole === "CCM") {
-      navigation.navigate("SearchFarmerScreen" as any);
-    }
-  };
-
-  const handleFailCompletion = () => {
-    setModalVisible(false);
-  };
-
+  // Set language on mount
   useEffect(() => {
     const selectedLanguage = t("Otpverification.LNG");
     setLanguage(selectedLanguage);
-    const fetchReferenceId = async () => {
-      try {
-        const refId = await AsyncStorage.getItem("referenceId");
-        if (refId) {
-          setReferenceId(refId);
-        }
-      } catch (error) {
-        console.error("Failed to load referenceId:", error);
-      }
-    };
-
-    fetchReferenceId();
   }, []);
 
+  // Countdown timer
   useEffect(() => {
     if (timer > 0 && !isVerified) {
       const interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer - 1);
       }, 1000);
-
       setDisabledResend(true);
-
       return () => clearInterval(interval);
     } else if (timer === 0 && !isVerified) {
       setDisabledResend(false);
     }
   }, [timer, isVerified]);
+
+  // Hardware back button
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("UpdateFarmerBankDetails" as any, {
+        id: farmerId,
+        NICnumber: NICnumber,
+        phoneNumber: phoneNumber,
+        PreferdLanguage: PreferdLanguage,
+        officerRole: "COO",
+      });
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
+  const handleSuccessCompletion = () => {
+    setModalVisible(false);
+    if (farmerData) {
+      navigation.navigate("FarmerQr" as any, {
+        NICnumber: farmerData.NICnumber,
+        userId: farmerData.userId,
+      });
+    }
+  };
+
+  const handleFailCompletion = () => {
+    setFailModalVisible(false);
+  };
 
   const handleOtpChange = (text: string, index: number) => {
     const filtered = text.replace(/[^0-9]/g, "");
@@ -325,7 +360,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
     try {
       const refId = referenceId;
-
       const url = "https://api.getshoutout.com/otpservice/verify";
       const headers = {
         Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
@@ -359,12 +393,16 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           await AsyncStorage.removeItem("referenceId");
 
           if (saveResponse.status === 200) {
+            // ✅ Use data directly from saveResponse — no second API call needed
+            setFarmerData({
+              NICnumber: saveResponse.data.NICnumber,
+              userId: saveResponse.data.userId,
+            });
             setModalVisible(true);
           } else {
             setFailModalVisible(true);
           }
           break;
-
         case "1001":
           setVerificationAttempts((prev: number) => prev + 1);
 
@@ -436,44 +474,21 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       if (PreferdLanguage === "Sinhala") {
         companyName =
           (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
-        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  නිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
+        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (PreferdLanguage === "Tamil") {
         companyName =
           (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
-        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  சரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
+        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
         companyName =
           (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
-        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  If correct, share OTP only with the ${companyName} representative who contacts you.`;
+        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
       const body = {
         source: "PolygonAgro",
         transport: "sms",
-        content: {
-          sms: otpMessage,
-        },
+        content: { sms: otpMessage },
         destination: `${phoneNumber}`,
       };
 
@@ -482,16 +497,20 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       if (response.data.referenceId) {
         await AsyncStorage.setItem("referenceId", response.data.referenceId);
         setReferenceId(response.data.referenceId);
-
         Alert.alert(t("Otpverification.Success"), t("Error.otpResent"));
         setTimer(240);
         setDisabledResend(true);
+        setIsOtpExpired(false);
+        setVerificationAttempts(0);
+        setOtpCode("");
+        setIsOtpValid(false);
+        inputRefs.current.forEach((ref) => ref?.clear());
+        inputRefs.current[0]?.focus();
       } else {
         Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-
       Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
     }
   };
@@ -501,28 +520,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     const seconds = time % 60;
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
-
-
-
-  useEffect(() => {
-    const backAction = () => {
-      navigation.navigate("UpdateFarmerBankDetails" as any, {
-        id: farmerId,
-        NICnumber: NICnumber,
-        phoneNumber: phoneNumber,
-        PreferdLanguage: PreferdLanguage,
-        officerRole: "COO",
-      });
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, [navigation]);
 
   return (
     <KeyboardAvoidingView
@@ -555,9 +552,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           justifyContent: "center",
         }}
       >
-
-
-        <View className="flex justify-center items-center px-[20px] pt-[24px]">
+        <View className="flex justify-center items-center px-[20px] pt-[15px]">
           <View className="mb-[32px]">
             <Image
               source={require("../../assets/images/collection-common/opt.webp")}
@@ -592,6 +587,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                   shadowOpacity: 0.25,
                   shadowRadius: 4,
                   elevation: 4,
+                  textAlignVertical: "center",
                 }}
                 keyboardType="numeric"
                 maxLength={1}
@@ -626,13 +622,19 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </Text>
           </View>
 
+          <ShowSuccessModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            onComplete={handleSuccessCompletion}
+          />
+
           <ShowFailModal
             visible={failModalVisible}
             onClose={() => setFailModalVisible(false)}
             onFail={handleFailCompletion}
           />
 
-          <View className="w-full items-center" style={{ marginBottom: 16 }}>
+          <View className="w-full items-center" style={{ marginBottom: 52 }}>
             <TouchableOpacity
               className={`w-[281px] h-[50px] rounded-[20px] items-center justify-center ${
                 !isOtpValid || isVerified ? "bg-[#9CA3AF]" : "bg-black"

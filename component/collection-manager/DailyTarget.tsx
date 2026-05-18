@@ -326,7 +326,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
                 refreshControl={
                   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
-                contentContainerStyle={{ paddingBottom: 60 }}
+                contentContainerStyle={{ paddingBottom:80 }}
               >
                 {/* Table Data */}
                 {displayedData.length > 0 ? (

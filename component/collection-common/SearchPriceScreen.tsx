@@ -312,7 +312,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
       style={{ flex: 1, backgroundColor: "white" }}
     >
       <ScrollView
-        className="flex-1 bg-white"
+        className="flex-1 px-4 bg-white"
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled={true}
@@ -414,6 +414,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                 shadowRadius: 10,
                 elevation: 6,
                 height: 50,
+                borderRadius:30
               }}
             >
               {loading ? (
