@@ -234,7 +234,7 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
         loop
         style={{ width: 150, height: 150 }}
       />
-      <Text className="text-center text-gray-500 mt-4">
+      <Text className="text-center text-gray-500 mt-[-5%]">
         {t("ReplaceRequestsScreen.No replace requests found")}
       </Text>
     </View>

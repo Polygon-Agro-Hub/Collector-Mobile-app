@@ -751,7 +751,7 @@ const DailyTargetListOfficerDistribution: React.FC<
               loop
               style={{ width: 150, height: 150 }}
             />
-            <Text className="text-gray-500 mt-4 text-center">
+            <Text className="text-gray-500 mt-[-5%] text-center">
               {selectedToggle === "ToDo"
                 ? t("DailyTarget.NoTodoItems") || "No items to do"
                 : t("DailyTarget.noCompletedTargets") || "No completed items"}

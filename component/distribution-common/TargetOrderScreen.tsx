@@ -795,7 +795,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                 {/* Red dot indicator for locked packages */}
                 {item.packageIsLock === 1 &&
                   jobRole === "Distribution Officer" && (
-                    <View className="absolute right-[-2] top-3 w-3 h-3 bg-red-500 rounded-full"></View>
+                    <View className="absolute right-[-3] justify-center w-4 h-4 bg-red-500 rounded-full"></View>
                   )}
               </View>
 
@@ -877,7 +877,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
               loop
               style={{ width: 150, height: 150 }}
             />
-            <Text className="text-gray-500 mt-4 text-center">
+            <Text className="text-gray-500 mt-[-5%] text-center">
               {selectedToggle === "ToDo"
                 ? t("DailyTarget.NoTodoItems") || "No items to do"
                 : t("DailyTarget.noCompletedTargets") || "No completed items"}

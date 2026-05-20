@@ -122,23 +122,44 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     CurrentReplaceRequest[]
   >([]);
   const [submitting, setSubmitting] = useState(false);
-
   useFocusEffect(
-      useCallback(() => {
-        const handleBackPress = () => {
-         navigation.navigate("ReplaceRequestsScreen");
-          return true;
-        };
-  
-        const subscription = BackHandler.addEventListener(
-          "hardwareBackPress",
-          handleBackPress,
-        );
-  
-        return () => subscription.remove();
-      }, [navigation]),
-    );
-  
+    useCallback(() => {
+      // Back press handler
+      const handleBackPress = () => {
+        navigation.navigate("ReplaceRequestsScreen");
+        return true;
+      };
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      // Reset state on every focus
+      setReplaceData({
+        orderId:
+          replaceRequestData?.orderId || replaceRequestData?.invNo || "N/A",
+        selectedProduct: replaceRequestData?.productDisplayName || "N/A",
+        productTypeName: replaceRequestData?.productTypeName || "N/A",
+        newProduct: "",
+        newProductId: "",
+        quantity: "",
+        price: replaceRequestData?.price || "N/A",
+        invNo: replaceRequestData?.invNo || "N/A",
+        qty: replaceRequestData?.qty || "N/A",
+        replaceProductDisplayName:
+          replaceRequestData?.replaceProductDisplayName,
+        replaceQty: replaceRequestData?.replaceQty,
+        replacePrice: replaceRequestData?.replacePrice,
+      });
+      setCurrentReplaceRequests([]);
+      setRetailItems([]);
+
+      loadCurrentReplaceRequest();
+      loadRetailItems();
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const replaceRequestData = route.params
     ?.replaceRequestData as ReplaceRequestData;
@@ -158,10 +179,54 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     replacePrice: replaceRequestData?.replacePrice,
   });
 
+  useFocusEffect(
+    useCallback(() => {
+      // Reset replace data to initial values from route params
+      setReplaceData({
+        orderId:
+          replaceRequestData?.orderId || replaceRequestData?.invNo || "N/A",
+        selectedProduct: replaceRequestData?.productDisplayName || "N/A",
+        productTypeName: replaceRequestData?.productTypeName || "N/A",
+        newProduct: "",
+        newProductId: "",
+        quantity: "",
+        price: replaceRequestData?.price || "N/A",
+        invNo: replaceRequestData?.invNo || "N/A",
+        qty: replaceRequestData?.qty || "N/A",
+        replaceProductDisplayName:
+          replaceRequestData?.replaceProductDisplayName,
+        replaceQty: replaceRequestData?.replaceQty,
+        replacePrice: replaceRequestData?.replacePrice,
+      });
+
+      // Reload fresh data
+      loadCurrentReplaceRequest();
+      loadRetailItems();
+    }, [navigation]),
+  );
+
   useEffect(() => {
-    loadCurrentReplaceRequest();
-    loadRetailItems();
-  }, []);
+    if (currentReplaceRequests.length === 0 || retailItems.length === 0) return;
+
+    const currentRequest = currentReplaceRequests[0];
+
+    const matchedProduct = retailItems.find(
+      (p) =>
+        p.id === currentRequest.productId ||
+        p.displayName === currentRequest.displayName,
+    );
+
+    if (matchedProduct) {
+      const unitPrice =
+        matchedProduct.discountedPrice || matchedProduct.normalPrice || 0;
+      const qty = parseFloat(replaceData.quantity) || currentRequest.qty || 0;
+
+      setReplaceData((prev) => ({
+        ...prev,
+        price: `Rs. ${formatPrice(qty * unitPrice)}`,
+      }));
+    }
+  }, [currentReplaceRequests, retailItems]);
 
   const loadCurrentReplaceRequest = async () => {
     try {
@@ -215,7 +280,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
           newProduct: currentRequest.displayName || "",
           newProductId: currentRequest.productId || "",
           quantity: quantity,
-          price: `Rs. ${formatPrice(currentRequest.price)}`,
+          price: `Rs. ${formatPrice(currentRequest.price * currentRequest.qty)}`,
         }));
       }
     } catch (error) {
@@ -255,6 +320,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
       ...prev,
       newProduct: product.displayName,
       newProductId: product.id,
+      quantity: "",
       price: `Rs. ${formatPrice(currentQty * productPrice)}`,
     }));
     setShowProductModal(false);
@@ -271,7 +337,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
       if (!selectedProduct && currentReplaceRequests.length > 0) {
         const currentRequest = currentReplaceRequests[0];
         if (currentRequest.displayName === replaceData.newProduct) {
-          const unitPrice = currentRequest.price / currentRequest.qty;
+          const unitPrice = currentRequest.price;
 
           const qty = text === "" || text === "." ? 0 : parseFloat(text) || 0;
           setReplaceData((prev) => ({
@@ -308,10 +374,12 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   const isPriceExceeded = (): boolean => {
     if (!replaceData.newProduct || !replaceData.quantity) return false;
     const currentPrice = getNumericPrice(replaceData.price);
-    const definedPrice = getNumericPrice(
+    const definedUnitPrice = getNumericPrice(
       replaceRequestData.replacePrice || "0",
     );
-    return currentPrice > definedPrice;
+    const definedQty = parseFloat(replaceRequestData.replaceQty || "1");
+    const definedTotalPrice = definedUnitPrice * definedQty;
+    return currentPrice > definedTotalPrice;
   };
 
   const handleApprove = async () => {
@@ -368,7 +436,12 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         Alert.alert(
           t("Error.Success"),
           t("Error.Replace request approved successfully"),
-          [{ text: "OK", onPress: () => navigation.navigate("ReplaceRequestsScreen") }],
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("ReplaceRequestsScreen"),
+            },
+          ],
         );
       } else {
         Alert.alert(t("Error.Error"), t("Error.somethingWentWrong"));
@@ -428,13 +501,18 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         >
           <View className="px-5">
             <View className="border border-dashed border-[#FA0000] rounded-lg p-4 mb-6">
-              <Text className="text-center text-gray-600 mb-3">
+              <Text className="text-center text-gray-600 mb-1">
                 {t("ReplaceRequestsApprove.Defined product")}
               </Text>
+              <Text className="text-center font-medium mb-1">
+                {replaceData.replaceProductDisplayName}
+              </Text>
               <Text className="text-center font-medium mb-2">
-                {replaceData.replaceProductDisplayName} -{" "}
                 {replaceData.replaceQty} kg - Rs.{" "}
-                {formatPrice(parseFloat(replaceData.replacePrice || "0"))}
+                {formatPrice(
+                  parseFloat(replaceData.replacePrice || "0") *
+                    parseFloat(replaceData.replaceQty || "1"),
+                )}
               </Text>
               <Text className="text-center text-gray-600 text-sm mb-1">
                 {t("ReplaceRequestsApprove.Relevant Product Type")}
@@ -568,6 +646,13 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
               }`}
               onPress={isFormComplete ? handleApprove : undefined}
               disabled={!isFormComplete || submitting}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 10,
+                elevation: 4,
+              }}
             >
               {submitting ? (
                 <ActivityIndicator size="small" color="white" />

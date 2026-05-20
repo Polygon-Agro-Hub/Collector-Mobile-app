@@ -106,10 +106,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const [phoneCode2ModalVisible, setPhoneCode2ModalVisible] = useState(false);
 
   useFocusEffect(
-  useCallback(() => {
-    scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, [])
-);
+    useCallback(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    }, []),
+  );
 
   useMemo(() => {
     const initialItems = countryData.map((country) => ({
@@ -270,15 +270,54 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     return Object.keys(errors).length === 0;
   };
 
-  const handleNext = () => {
-    if (error1) return;
-    if (error2 && phoneNumber2.length > 0) return;
-    if (errorEmail) return;
-    if (error3) return;
+  const handleNext = async () => {
     if (!validateFields()) return;
 
     try {
       setIsValidating(true);
+
+      if (phoneNumber1.trim() && validatePhoneNumber(phoneNumber1)) {
+        const token = await AsyncStorage.getItem("token");
+
+        const phone1Res = await axios.get(
+          `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${phoneNumber1}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (phone1Res.data.exists) {
+          setError1(
+            t("Error.This phone number is already registered in the system."),
+          );
+          setIsValidating(false);
+          return;
+        }
+      }
+
+      if (phoneNumber2.trim() && validatePhoneNumber(phoneNumber2)) {
+        const token = await AsyncStorage.getItem("token");
+
+        const phone2Res = await axios.get(
+          `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode2}${phoneNumber2}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        if (phone2Res.data.exists) {
+          setError2(
+            t("Error.This phone number is already registered in the system."),
+          );
+          setIsValidating(false);
+          return;
+        }
+      }
+
+      if (
+        error1 ||
+        (error2 && phoneNumber2.length > 0) ||
+        errorEmail ||
+        error3
+      ) {
+        setIsValidating(false);
+        return;
+      }
+
       const updatedFormData = {
         ...formData,
         phoneCode1,
@@ -287,6 +326,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         phoneNumber2,
         profileImage: selectedImage || "",
       };
+
       navigation.navigate("AddOfficerAddressDetails", {
         formData: { ...updatedFormData },
         type,
@@ -427,21 +467,20 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           ),
         );
       } else {
-        setError2("");
-        checkPhone2Exists(numbersOnly);
+        checkPhone2Exists(numbersOnly, phoneCode2);
       }
     } else {
       setError2(t("Error.Invalid phone number"));
     }
   };
 
-  const checkPhone2Exists = async (phoneNumber: string) => {
+  const checkPhone2Exists = async (phoneNumber: string, dialCode: string) => {
     if (!validatePhoneNumber(phoneNumber)) return;
     try {
       setIsValidating(true);
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode2}${phoneNumber}`,
+        `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${dialCode}${phoneNumber}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.exists) {
@@ -1073,8 +1112,21 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         data={countryItems}
         selectedItems={[phoneCode2]}
         onSelect={(items) => {
-          setPhoneCode2(items[0] ?? "+94");
+          const newCode = items[0] ?? "+94";
+          setPhoneCode2(newCode);
           setPhoneCode2ModalVisible(false);
+
+          if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
+            if (phoneCode1 === newCode && phoneNumber2 === phoneNumber1) {
+              setError2(
+                t(
+                  "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+                ),
+              );
+            } else {
+              checkPhone2Exists(phoneNumber2, newCode);
+            }
+          }
         }}
         searchPlaceholder={t("AddOfficerBasicDetails.SearchCountry")}
         multiSelect={false}

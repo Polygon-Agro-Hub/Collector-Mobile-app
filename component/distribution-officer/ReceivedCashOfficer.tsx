@@ -306,7 +306,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
   const EmptyState = () => (
     <View className="flex-1 items-center justify-center mt-[50%]">
-      <View className=" items-center justify-center mb-4">
+      <View className=" items-center justify-center ">
         <LottieView
           source={require("../../assets/lottie/no-data.json")}
           autoPlay
@@ -314,7 +314,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           style={{ width: 150, height: 150 }}
         />
       </View>
-      <Text className="text-[#828282] text-base italic">
+      <Text className="text-[#828282] mt-[-5%] text-base italic">
         - {t("ReceivedCash.No cash was received recently")} -
       </Text>
     </View>
@@ -369,29 +369,33 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           </View>
         )}
 
-        {transactions.length > 0 && (
-          <View className="p-6">
-            <TouchableOpacity
-              onPress={allSelected ? handleDeselectAll : handleSelectAll}
-              className="flex-row items-center"
-            >
-              <View
-                className={`w-6 h-6 rounded  ${allSelected ? "" : " border bg-white border-black"} items-center justify-center mr-2`}
-              >
-                {allSelected && (
-                  <Entypo name="squared-minus" size={18} color="red" />
-                )}
-              </View>
-              <Text
-                className={`text-sm underline ${allSelected ? "text-[#000000]" : "text-[#000000]"} font-medium`}
-              >
-                {allSelected
-                  ? t("ReceivedCash.Deselect All")
-                  : t("ReceivedCash.Select All")}
-              </Text>
-            </TouchableOpacity>
-          </View>
+     {transactions.length > 0 && (
+  <View className="p-6">
+    <TouchableOpacity
+      onPress={allSelected ? handleDeselectAll : handleSelectAll}
+      className="flex-row items-center"
+    >
+      {/* Fixed: consistent w-6 h-6 box for both states */}
+      <View
+        className={`w-6 h-6 rounded border items-center justify-center mr-2 ${
+          allSelected
+            ? "bg-red-600 border-red-600"   // filled when selected
+            : "bg-white border-black"        // empty when unselected
+        }`}
+      >
+        {allSelected && (
+          // Fixed: icon sized to fit inside the 24px box
+          <Entypo name="minus" size={16} color="white" />
         )}
+      </View>
+      <Text className="text-sm underline text-black font-medium">
+        {allSelected
+          ? t("ReceivedCash.Deselect All")
+          : t("ReceivedCash.Select All")}
+      </Text>
+    </TouchableOpacity>
+  </View>
+)}
 
         {/* Transactions List */}
         {loading ? (
