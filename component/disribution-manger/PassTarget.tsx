@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "@/component/commons/GlobalSearchModal";
+import SuccessModal from "../commons/SuccessModal";
 
 interface PassTargetProps {
   navigation: any;
@@ -71,6 +72,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
   const [loadingOfficers, setLoadingOfficers] = useState<boolean>(false);
   const [officerModalVisible, setOfficerModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
+  const [successVisible, setSuccessVisible] = useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -252,6 +254,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
     useCallback(() => {
       prepareTargetItems();
       fetchOfficers();
+      setSelectedAssignee("");
     }, [prepareTargetItems, fetchOfficers]),
   );
 
@@ -301,10 +304,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
       );
 
       if (response.data.success) {
-        navigation.navigate("DailyTargetListOfficerDistribution", {
-          officerId,
-          collectionOfficerId,
-        });
+        setSuccessVisible(true);
       } else {
         setError(response.data.message || t("Error.Failed to save data."));
       }
@@ -497,6 +497,21 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           </View>
         )}
       </View>
+
+      <SuccessModal
+        visible={successVisible}
+        title={t("PassTarget.Success")}
+        message={t("PassTarget.Target passed successfully.")}
+        autoClose={true}
+        duration={3000}
+        onClose={() => {
+          setSuccessVisible(false);
+          navigation.navigate("DailyTargetListOfficerDistribution", {
+            officerId,
+            collectionOfficerId,
+          });
+        }}
+      />
 
       {/* Officer Modal */}
       <GlobalSearchModal

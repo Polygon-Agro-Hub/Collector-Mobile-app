@@ -166,6 +166,20 @@ export type RootStackParamList = {
     };
     jobRole: string;
   };
+  DistributionAddOfficerAddressDetails: {
+     formData: OfficerBasicDetailsFormData;
+    type: "Permanent" | "Temporary";
+    preferredLanguages: {
+      Sinhala: boolean;
+      English: boolean;
+      Tamil: boolean;
+    };
+    jobRole: string;
+  };
+  DistributionAddOfficerBasicDetails:{
+    jobRolle: String;
+    preservedData?: OfficerBasicDetailsFormData;
+  };
   FarmerReport: {
     registeredFarmerId: number;
     userId: number;

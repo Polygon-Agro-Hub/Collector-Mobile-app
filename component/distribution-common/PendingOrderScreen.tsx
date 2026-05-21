@@ -1555,9 +1555,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           //   paddingHorizontal: 24,
         }}
       >
-        <View className="bg-white rounded-2xl px-6 pb-6 mb-2 pt-8 w-full max-w-sm">
-          <View className="items-center"></View>
-          <Text className="text-xl font-bold text-center mb-2">
+       <View className="bg-white rounded-2xl px-6 py-8 w-full max-w-sm">
+  <Text className="text-xl font-bold text-center mb-2">
             {t("PendingOrderScreen.Completed Successfully")}
           </Text>
           <Text className="text-gray-600 text-center mb-6">
@@ -1574,7 +1573,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               }, 100);
             }}
           >
-            <Text className="text-white text-center font-medium">
+            <Text className="text-white text-center  font-medium">
               {t("PendingOrderScreen.OK")}
             </Text>
           </TouchableOpacity>

@@ -1630,12 +1630,12 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   onPress={() => setShowConfirmModal(false)}
                   disabled={loading}
                   style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 10,
-              elevation: 4,
-            }}
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
+                    elevation: 4,
+                  }}
                 >
                   <Text
                     className={`text-center font-medium ${
@@ -1646,21 +1646,21 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   </Text>
                 </TouchableOpacity>
 
-               <TouchableOpacity
-  className={`px-4 py-3 rounded-lg flex-1 ml-2 ${
-    loading ? "bg-gray-400" : "bg-[#980775]"
-  }`}
-  onPress={confirmAction}
-  disabled={loading}
-  style={{
-    opacity: loading ? 0.6 : 1,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
-  }}
->
+                <TouchableOpacity
+                  className={`px-4 py-3 rounded-lg flex-1 ml-2 ${
+                    loading ? "bg-gray-400" : "bg-[#980775]"
+                  }`}
+                  onPress={confirmAction}
+                  disabled={loading}
+                  style={{
+                    opacity: loading ? 0.6 : 1,
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
+                    elevation: 4,
+                  }}
+                >
                   <View className="flex-row justify-center items-center">
                     {loading && (
                       <ActivityIndicator

@@ -416,43 +416,45 @@ const DailyTargetListOfficerDistribution: React.FC<
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
 
-      <View className="bg-[#282828]  flex-row justify-center items-center">
-        <CustomHeader
-          title={officerId || ""}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() =>
-            navigation.navigate("Main" as any, {
-              screen: "DistributionOfficerSummary",
-              params: {
-                officerId,
-                officerName,
-                phoneNumber1,
-                phoneNumber2,
-                collectionOfficerId,
-                image,
-              },
-            })
-          }
-          textColor="white"
-          bgColor="#282828"
-          iconBgColor="#FFFFFF1A"
-        />
-
-        {isSelectionMode && (
-          <View className="absolute right-4 flex-row">
-            <TouchableOpacity onPress={clearSelection} className="mr-3 p-2">
-              <MaterialIcons name="clear" size={22} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleSelectedItemsAction}
-              className="p-2"
-            >
-              <MaterialIcons name="check" size={22} color="white" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+      <CustomHeader
+        title={officerId}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, {
+            screen: "DistributionOfficerSummary",
+            params: {
+              officerId,
+              officerName,
+              phoneNumber1,
+              phoneNumber2,
+              collectionOfficerId,
+              image,
+            },
+          })
+        }
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+        rightComponent={
+          isSelectionMode ? (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={clearSelection}
+                style={{ padding: 8, marginRight: 4 }}
+              >
+                <MaterialIcons name="clear" size={22} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSelectedItemsAction}
+                style={{ padding: 8 }}
+              >
+                <MaterialIcons name="check" size={22} color="white" />
+              </TouchableOpacity>
+            </View>
+          ) : undefined
+        }
+      />
 
       {/* Confirmation Modal */}
       <Modal
@@ -461,8 +463,8 @@ const DailyTargetListOfficerDistribution: React.FC<
         animationType="fade"
         onRequestClose={handleCancelPass}
       >
-        <View className="flex-1 justify-center items-center bg-[#000000BF] ">
-          <View className="bg-white mx-6 rounded-lg p-6 shadow-lg">
+        <View className="flex-1 justify-center items-center bg-[#00000040] ">
+          <View className="bg-white mx-10 h-[200px] rounded-lg p-6 shadow-lg">
             {/* Warning Icon */}
             <View className="items-center mb-4">
               <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg items-center justify-center">
@@ -479,7 +481,7 @@ const DailyTargetListOfficerDistribution: React.FC<
             <View className="flex-row justify-center space-x-4">
               <TouchableOpacity
                 onPress={handleCancelPass}
-                className="flex-1 mr-2 py-3 px-6 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                className="flex-1 mr-2 h-[50px] px-8 bg-[#F6F7F9] items-center justify-center border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
@@ -505,7 +507,7 @@ const DailyTargetListOfficerDistribution: React.FC<
 
               <TouchableOpacity
                 onPress={handleConfirmPass}
-                className="flex-1  py-3 px-6 bg-[#980775] border border-[#980775] rounded-lg items-center justify-center"
+                className="flex-1  h-[50px]  px-8 bg-[#980775] border border-[#980775] rounded-lg items-center justify-center"
                 style={{
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
