@@ -312,13 +312,12 @@ const AddOfficerAddressDetails: React.FC = () => {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
 
-      // ── Convert local image URI → base64 so backend can upload to S3 ──
       let profileImageBase64 = "";
       const imageUri = basicDetails.profileImage;
       if (imageUri) {
         const ext = imageUri.split(".").pop()?.toLowerCase() || "jpg";
         const base64 = await FileSystem.readAsStringAsync(imageUri, {
-          encoding: "base64", // ← string literal instead of FileSystem.EncodingType.Base64
+          encoding: "base64",
         });
         profileImageBase64 = `data:image/${ext};base64,${base64}`;
       }
@@ -334,7 +333,7 @@ const AddOfficerAddressDetails: React.FC = () => {
               preferredLanguages[lang as keyof typeof preferredLanguages],
           )
           .join(", "),
-        profileImage: profileImageBase64, // ← real base64 now, not a file:// URI
+        profileImage: profileImageBase64,
       };
 
       const response = await axios.post(
@@ -343,7 +342,7 @@ const AddOfficerAddressDetails: React.FC = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // ← stays JSON, backend handles base64
+            "Content-Type": "application/json",
           },
         },
       );

@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import axios from "axios";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -111,66 +112,64 @@ const DistributionAddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     }, []),
   );
 
- useFocusEffect(
-  useCallback(() => {
-    if (preservedData) {
-      // Coming back from AddressDetails — restore previously entered data
-      setFormData({
-        userId: preservedData.userId || "",
-        firstNameEnglish: preservedData.firstNameEnglish || "",
-        lastNameEnglish: preservedData.lastNameEnglish || "",
-        firstNameSinhala: preservedData.firstNameSinhala || "",
-        lastNameSinhala: preservedData.lastNameSinhala || "",
-        firstNameTamil: preservedData.firstNameTamil || "",
-        lastNameTamil: preservedData.lastNameTamil || "",
-        nicNumber: preservedData.nicNumber || "",
-        email: preservedData.email || "",
-        profileImage: preservedData.profileImage || "",
-        jobRole: preservedData.jobRole || "",
-        phoneCode1: preservedData.phoneCode1 || "+94",
-        phoneNumber1: preservedData.phoneNumber1 || "",
-        phoneCode2: preservedData.phoneCode2 || "+94",
-        phoneNumber2: preservedData.phoneNumber2 || "",
-      });
-      setPhoneNumber1(preservedData.phoneNumber1 || "");
-      setPhoneNumber2(preservedData.phoneNumber2 || "");
-      setPhoneCode1(preservedData.phoneCode1 || "+94");
-      setPhoneCode2(preservedData.phoneCode2 || "+94");
-      setSelectedImage(preservedData.profileImage || null);
-    } else {
-      // Fresh entry — clear everything
-      setFormData({
-        userId: "",
-        firstNameEnglish: "",
-        lastNameEnglish: "",
-        firstNameSinhala: "",
-        lastNameSinhala: "",
-        firstNameTamil: "",
-        lastNameTamil: "",
-        nicNumber: "",
-        email: "",
-        profileImage: "",
-        jobRole: "",
-        phoneCode1: "",
-        phoneNumber1: "",
-        phoneCode2: "",
-        phoneNumber2: "",
-      });
-      setPhoneNumber1("");
-      setPhoneNumber2("");
-      setPhoneCode1("+94");
-      setPhoneCode2("+94");
-      setSelectedImage(null);
-      setPreferredLanguages({ Sinhala: false, English: false, Tamil: false });
-      setType("Permanent");
-      setError1("");
-      setError2("");
-      setError3("");
-      setErrorEmail("");
-      setFieldErrors({});
-    }
-  }, [preservedData]),
-);
+  useFocusEffect(
+    useCallback(() => {
+      if (preservedData) {
+        setFormData({
+          userId: preservedData.userId || "",
+          firstNameEnglish: preservedData.firstNameEnglish || "",
+          lastNameEnglish: preservedData.lastNameEnglish || "",
+          firstNameSinhala: preservedData.firstNameSinhala || "",
+          lastNameSinhala: preservedData.lastNameSinhala || "",
+          firstNameTamil: preservedData.firstNameTamil || "",
+          lastNameTamil: preservedData.lastNameTamil || "",
+          nicNumber: preservedData.nicNumber || "",
+          email: preservedData.email || "",
+          profileImage: preservedData.profileImage || "",
+          jobRole: preservedData.jobRole || "",
+          phoneCode1: preservedData.phoneCode1 || "+94",
+          phoneNumber1: preservedData.phoneNumber1 || "",
+          phoneCode2: preservedData.phoneCode2 || "+94",
+          phoneNumber2: preservedData.phoneNumber2 || "",
+        });
+        setPhoneNumber1(preservedData.phoneNumber1 || "");
+        setPhoneNumber2(preservedData.phoneNumber2 || "");
+        setPhoneCode1(preservedData.phoneCode1 || "+94");
+        setPhoneCode2(preservedData.phoneCode2 || "+94");
+        setSelectedImage(preservedData.profileImage || null);
+      } else {
+        setFormData({
+          userId: "",
+          firstNameEnglish: "",
+          lastNameEnglish: "",
+          firstNameSinhala: "",
+          lastNameSinhala: "",
+          firstNameTamil: "",
+          lastNameTamil: "",
+          nicNumber: "",
+          email: "",
+          profileImage: "",
+          jobRole: "",
+          phoneCode1: "",
+          phoneNumber1: "",
+          phoneCode2: "",
+          phoneNumber2: "",
+        });
+        setPhoneNumber1("");
+        setPhoneNumber2("");
+        setPhoneCode1("+94");
+        setPhoneCode2("+94");
+        setSelectedImage(null);
+        setPreferredLanguages({ Sinhala: false, English: false, Tamil: false });
+        setType("Permanent");
+        setError1("");
+        setError2("");
+        setError3("");
+        setErrorEmail("");
+        setFieldErrors({});
+      }
+    }, [preservedData]),
+  );
 
   useMemo(() => {
     const initialItems = countryData.map((country) => ({
@@ -644,6 +643,28 @@ const DistributionAddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        (async () => {
+          try {
+            await AsyncStorage.removeItem("officerFormData");
+            navigation.navigate("Main", { screen: "DistributionOfficersList" });
+          } catch (error) {
+            console.error("Error clearing form data:", error);
+          }
+        })();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const renderCountryCodeItem = (item: any, isSelected: boolean) => (
     <TouchableOpacity
       className="px-4 py-3 border-b border-gray-200 flex-row items-center"
@@ -986,7 +1007,6 @@ const DistributionAddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
               )}
             </View>
 
-            {/* Phone Number 2 */}
             {/* Phone Number 2 */}
             <View>
               <View className="flex-row gap-2">

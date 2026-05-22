@@ -97,7 +97,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
       firstDot === -1
         ? sanitized
         : sanitized.slice(0, firstDot + 1) +
-        sanitized.slice(firstDot + 1).replace(/\./g, "");
+          sanitized.slice(firstDot + 1).replace(/\./g, "");
 
     const updatedPrices = [...editedPrices];
     updatedPrices[index].price = cleanedPrice;
@@ -235,9 +235,12 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         title={t("PriceChart.PriceChart")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
+        }
         textColor="white"
         bgColor="#313131"
+        iconBgColor="#FFFFFF1A"
       />
 
       {/* Content */}
@@ -246,9 +249,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
         <View className="mb-4 ">
-          <Text className="text-black text-sm mb-1">
-            {t("PriceChart.Crop")}
-          </Text>
+          <View className="items-center">
+            <Text className="text-[#7D7D7D] mb-1">{t("PriceChart.Crop")}</Text>
+          </View>
           <TextInput
             className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800 h-[50px]"
             value={cropName}
@@ -257,9 +260,11 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         </View>
 
         <View className="mb-4 ">
-          <Text className="text-black text-sm mb-1">
-            {t("PriceChart.Variety")}
-          </Text>
+          <View className="items-center">
+            <Text className="text-[#7D7D7D] mb-1">
+              {t("PriceChart.Variety")}
+            </Text>
+          </View>
           <TextInput
             className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4] h-[50px]"
             value={varietyName}
@@ -284,24 +289,24 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             <Text className="text-gray-600 text-sm mb-2">
               {t("PriceChart.UnitGrades")}
             </Text>
-            <View className="border border-[#E7E7E7] rounded-lg p-4">
+            <View className="border border-[#E7E7E7] rounded-xl p-4">
               {priceData.map((priceItem, index) => (
                 <View key={index} className="flex-row items-center mb-3">
-                  <Text className="w-32 text-gray-600">
+                  <Text className="w-32 font-medium text-[#7D7D7D]">
                     {`${t("PriceChart.Grade")} ${priceItem.grade}`}
                   </Text>
 
                   <View
-                    className="flex-1 flex-row items-center rounded-full px-4 h-[50px]"
+                    className="flex-1 flex-row items-center rounded-full px-4 h-[45px]"
                     style={{
                       borderWidth: 1,
                       borderColor: isEditable ? "#980775" : "#F4F4F4",
                       backgroundColor: "#F4F4F4",
                     }}
                   >
-                    <Text className="text-gray-800 mr-1">Rs.</Text>
+                    <Text className="text-[#000000] font-medium mr-1">Rs.</Text>
                     <TextInput
-                      className="flex-1 text-gray-800"
+                      className="flex-1 font-medium text-[#000000]"
                       value={editedPrices[index]?.price}
                       editable={isEditable}
                       onChangeText={(newPrice) =>
@@ -337,7 +342,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
 
         {/* Secondary Button - Changes based on state */}
         <TouchableOpacity
-          className="border border-[#606060] mt-4 py-3 h-12 rounded-full h-[50px] items-center justify-center w-3/4 mx-auto"
+          className="border border-[#606060] mt-4 py-3 h-12  rounded-full h-[50px] items-center justify-center w-3/4 mx-auto"
           onPress={() => {
             if (isEditable) {
               setIsEditable(false);
@@ -362,6 +367,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             shadowOpacity: 0.25,
             shadowRadius: 10,
             elevation: 5,
+            marginBottom: 20,
           }}
         >
           <Text
