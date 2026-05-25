@@ -2,7 +2,7 @@ import { View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../store/authSlice";
@@ -26,6 +26,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
     const timer = setTimeout(() => {
       handleTokenCheck();
     }, 5000);
+
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev < 1) {
@@ -56,7 +57,6 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
       );
       if (response.ok) {
         const data = await response.json();
-
         return data.data.passwordUpdated;
       } else {
         throw new Error("Failed to fetch password status");
@@ -69,10 +69,19 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
 
   const handleTokenCheck = async () => {
     try {
+    
+      const hasLaunched = await AsyncStorage.getItem("hasLaunched");
+      if (!hasLaunched) {
+        await AsyncStorage.setItem("hasLaunched", "true");
+        navigation.navigate("Lanuage"); 
+        return;
+      }
+
       const expirationTime = await AsyncStorage.getItem("tokenExpirationTime");
       const userToken = await AsyncStorage.getItem("token");
       const role = await AsyncStorage.getItem("jobRole");
       const emp = await AsyncStorage.getItem("empid");
+
       dispatch(
         setUser({
           token: userToken ?? "",
@@ -80,6 +89,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
           empId: emp ?? "",
         }),
       );
+
       if (expirationTime && userToken) {
         const currentTime = new Date();
         const tokenExpiry = new Date(expirationTime);
@@ -93,10 +103,13 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
           }
 
           const jobRole = await AsyncStorage.getItem("jobRole");
+
           if (jobRole === "Collection Officer") {
             navigation.reset({
               index: 0,
-              routes: [{ name: "Main", params: { screen: "CollectionOfficerDashboard" } }],
+              routes: [
+                { name: "Main", params: { screen: "CollectionOfficerDashboard" } },
+              ],
             });
           } else if (jobRole === "Collection Centre Manager") {
             navigation.reset({
@@ -107,7 +120,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
             });
           } else if (
             jobRole === "Distribution Officer" ||
-            "Distribution Centre Manager"
+            jobRole === "Distribution Centre Manager"
           ) {
             navigation.reset({
               index: 0,
@@ -135,6 +148,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
       navigation.navigate("Login");
     }
   };
+
   return (
     <View className="flex-1 bg-white relative justify-center">
       <Image

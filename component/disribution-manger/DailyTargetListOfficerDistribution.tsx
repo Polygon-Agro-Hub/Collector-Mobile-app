@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Alert,
   Modal,
+  BackHandler,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -14,7 +15,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
@@ -31,6 +32,10 @@ interface DailyTargetListOfficerDistributionProps {
     params: {
       collectionOfficerId: number;
       officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
     };
   };
 }
@@ -85,7 +90,41 @@ const DailyTargetListOfficerDistribution: React.FC<
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const { collectionOfficerId, officerId } = route.params;
+  const {
+    collectionOfficerId,
+    officerId,
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+    image,
+  } = route.params;
+
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("Main" as any, {
+          screen: "DistributionOfficerSummary",
+          params: {
+            officerId,
+            officerName,
+            phoneNumber1,
+            phoneNumber2,
+            collectionOfficerId,
+            image,
+          },
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const { t } = useTranslation();
 
   const getStatusColor = (status: string) => {
@@ -269,12 +308,15 @@ const DailyTargetListOfficerDistribution: React.FC<
       (item) => item.processOrderId,
     );
 
-    navigation.navigate("PassTarget" as any, {
-      officerId: officerId,
-      selectedItems: selectedItemsArray,
-      collectionOfficerId: collectionOfficerId,
-      invoiceNumbers: invoiceNumbers,
-      processOrderId: processOrderId,
+    navigation.navigate("Main" as any, {
+      screen: "PassTarget",
+      params: {
+        officerId: officerId,
+        selectedItems: selectedItemsArray,
+        collectionOfficerId: collectionOfficerId,
+        invoiceNumbers: invoiceNumbers,
+        processOrderId: processOrderId,
+      },
     });
 
     clearSelection();
@@ -379,7 +421,19 @@ const DailyTargetListOfficerDistribution: React.FC<
           title={officerId || ""}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={() =>
+            navigation.navigate("Main" as any, {
+              screen: "DistributionOfficerSummary",
+              params: {
+                officerId,
+                officerName,
+                phoneNumber1,
+                phoneNumber2,
+                collectionOfficerId,
+                image,
+              },
+            })
+          }
           textColor="white"
           bgColor="#282828"
           iconBgColor="#FFFFFF1A"
@@ -426,6 +480,13 @@ const DailyTargetListOfficerDistribution: React.FC<
               <TouchableOpacity
                 onPress={handleCancelPass}
                 className="flex-1 mr-2 py-3 px-6 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-center text-gray-700 font-medium"
@@ -444,7 +505,14 @@ const DailyTargetListOfficerDistribution: React.FC<
 
               <TouchableOpacity
                 onPress={handleConfirmPass}
-                className="flex-1 ml-2 py-3 px-6 bg-[#980775] border border-[#980775] rounded-lg"
+                className="flex-1  py-3 px-6 bg-[#980775] border border-[#980775] rounded-lg items-center justify-center"
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-center text-white font-medium"
@@ -468,45 +536,43 @@ const DailyTargetListOfficerDistribution: React.FC<
       {/* Toggle Buttons */}
       <View className="flex-row justify-center items-center py-4 bg-[#282828] px-4">
         <TouchableOpacity
-          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${
+            selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+          }`}
           onPress={() => handleToggleChange("ToDo")}
         >
           <Text
-            className={`font-bold mr-2 ${selectedToggle === "ToDo" ? "text-white" : "text-black"}`}
+            className={`font-bold ${selectedToggle === "ToDo" ? "text-white mr-2" : "text-black"}`}
           >
             {t("TargetOrderScreen.Todo")}
           </Text>
-          <View
-            className={`rounded-full px-2 py-1 ${selectedToggle === "ToDo" ? "bg-white" : "bg-[#980775]"}`}
-          >
-            <Text
-              className={`font-bold text-xs ${selectedToggle === "ToDo" ? "text-[#980775]" : "text-white"}`}
-            >
-              {todoData.length.toString().padStart(2, "0")}
-            </Text>
-          </View>
+          {selectedToggle === "ToDo" && (
+            <View className="rounded-full px-2 py-1 bg-white">
+              <Text className="font-bold text-xs text-[#980775]">
+                {todoData.length.toString().padStart(2, "0")}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+          className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${
+            selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+          }`}
           onPress={() => handleToggleChange("Completed")}
         >
           <Text
-            className={`font-bold mr-2 ${selectedToggle === "Completed" ? "text-white" : "text-black"}`}
+            className={`font-bold ${selectedToggle === "Completed" ? "text-white mr-2" : "text-black"}`}
           >
             {t("TargetOrderScreen.Completed")}
           </Text>
-          <View
-            className={`rounded-full px-2 py-1 ${selectedToggle === "Completed" ? "bg-white" : "bg-[#980775]"}`}
-          >
-            <Text
-              className={`font-bold text-xs ${selectedToggle === "Completed" ? "text-[#980775]" : "text-white"}`}
-            >
-              {completedData.length.toString().padStart(2, "0")}
-            </Text>
-          </View>
+          {selectedToggle === "Completed" && (
+            <View className="rounded-full px-2 py-1 bg-white">
+              <Text className="font-bold text-xs text-[#980775]">
+                {completedData.length.toString().padStart(2, "0")}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -530,12 +596,12 @@ const DailyTargetListOfficerDistribution: React.FC<
               <MaterialIcons
                 name={
                   pendingItemsCount > 0 &&
-                    todoData
-                      .filter((item) => canSelectItem(item))
-                      .every((item) =>
-                        selectedItems.has(item.distributedTargetItemId),
-                      ) &&
-                    selectedItems.size > 0
+                  todoData
+                    .filter((item) => canSelectItem(item))
+                    .every((item) =>
+                      selectedItems.has(item.distributedTargetItemId),
+                    ) &&
+                  selectedItems.size > 0
                     ? "check-box"
                     : "check-box-outline-blank"
                 }
@@ -550,7 +616,9 @@ const DailyTargetListOfficerDistribution: React.FC<
               {t("TargetOrderScreen.No")}
             </Text>
           ) : (
-            <Text className="flex-1 text-center text-white font-bold"></Text>
+            <Text className="flex-1 text-center text-white font-bold">
+              {t("TargetOrderScreen.No")}
+            </Text>
           )}
           <Text className="flex-[2] text-center text-white font-bold">
             {t("TargetOrderScreen.Invoice No")}
@@ -595,11 +663,13 @@ const DailyTargetListOfficerDistribution: React.FC<
           displayedData.map((item, index) => (
             <View
               key={`${item.distributedTargetItemId}-${index}`}
-              className={`flex-row py-4 border-b border-gray-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                } ${selectedItems.has(item.distributedTargetItemId)
+              className={`flex-row py-4 border-b border-gray-200 ${
+                index % 2 === 0 ? "bg-gray-50" : "bg-white"
+              } ${
+                selectedItems.has(item.distributedTargetItemId)
                   ? "bg-blue-50"
                   : ""
-                }`}
+              }`}
             >
               {/* Checkbox for ToDo items */}
               {selectedToggle === "ToDo" && (
@@ -636,7 +706,9 @@ const DailyTargetListOfficerDistribution: React.FC<
                     {(index + 1).toString().padStart(2, "0")}
                   </Text>
                 ) : (
-                  <Ionicons name="flag" size={20} color="#980775" />
+                  <Text className="text-center font-medium">
+                    {(index + 1).toString().padStart(2, "0")}
+                  </Text>
                 )}
               </View>
 
@@ -651,10 +723,10 @@ const DailyTargetListOfficerDistribution: React.FC<
               {selectedToggle === "ToDo" ? (
                 <View className="flex-[2] items-center justify-center px-2">
                   <View
-                    className={`px-3 py-2 rounded-full border ${getStatusColor(item.selectedStatus)}`}
+                    className={`px-7 py-2 rounded-full border ${getStatusColor(item.selectedStatus)}`}
                   >
                     <Text
-                      className={`text-xs font-medium text-center ${getStatusTextColor(item.selectedStatus)}`}
+                      className={`text-base font-medium text-center ${getStatusTextColor(item.selectedStatus)}`}
                     >
                       {getStatusText(item.selectedStatus)}
                     </Text>

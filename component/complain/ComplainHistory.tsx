@@ -14,7 +14,7 @@ import {
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import {
@@ -24,6 +24,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import CustomHeader from "../navigations/CustomHeader";
+import { AntDesign } from "@expo/vector-icons";
 
 interface complainItem {
   id: number;
@@ -307,7 +308,6 @@ ${signature}${replyTime}`,
       );
       setComplains(res.data);
     } catch (err) {
-      // Alert.alert(t("ReportHistory.sorry"), t("ReportHistory.noData"));
     } finally {
       setLoading(false);
     }
@@ -395,7 +395,7 @@ ${signature}${replyTime}`,
         </View>
       ) : (
         <ScrollView
-          className=" flex-1 mb-14"
+          className=" flex-1 mb-14 w-full max-w-[500px] mx-auto"
           contentContainerStyle={{
             paddingBottom: hp(4),
             paddingHorizontal: wp(4),
@@ -444,50 +444,39 @@ ${signature}${replyTime}`,
       )}
 
       <Modal
+        animationType="fade"
+        transparent={true}
         visible={modalVisible}
-        animationType="slide"
-        transparent={false}
         onRequestClose={() => setModalVisible(false)}
         statusBarTranslucent={false}
       >
-        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-        <View className="flex-1 bg-[#FFFFFF]">
-          <View
-            className="flex-1"
-            style={{
-              paddingTop:
-                Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0,
-              paddingBottom: Platform.OS === "android" ? 20 : 0,
-            }}
+        <View
+          className="flex-1 items-center bg-white bg-opacity-50"
+          style={{
+            paddingTop:
+              Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0,
+          }}
+        >
+          <ScrollView
+            className="bg-white rounded-lg shadow-lg w-full max-w-md"
+            contentContainerStyle={{ padding: 24, paddingBottom: 70 }}
+            showsVerticalScrollIndicator={false}
           >
-            <View className="flex-1" style={{ padding: wp(4) }}>
-              <View className="p-4 bg-white rounded-xl w-full mb-4">
-                <Text className="text-lg font-bold">{t("Thank You")}</Text>
+            <TouchableOpacity
+              className="absolute top-3 right-3 bg-gray-200 p-1 rounded-full"
+              onPress={() => setModalVisible(false)}
+            >
+              <AntDesign name="close" size={18} color="gray" />
+            </TouchableOpacity>
 
-                <ScrollView
-                  className="mt-8"
-                  style={{ maxHeight: Dimensions.get("window").height * 0.7 }}
-                >
-                  <Text className="pb-4" style={{ lineHeight: 24 }}>
-                    {selectedComplain
-                      ? getReplyTemplate(selectedComplain)
-                      : "Loading..."}
-                  </Text>
-                </ScrollView>
-              </View>
-
-              <View className="mt-auto" style={{ paddingBottom: 20 }}>
-                <TouchableOpacity
-                  className="bg-black py-4 rounded-lg items-center"
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text className="text-white text-lg">
-                    {t("ReportHistory.Closed")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+            <View className="mt-4">
+              <Text className="text-gray-800 text-base leading-relaxed text-left">
+                {selectedComplain
+                  ? getReplyTemplate(selectedComplain)
+                  : "Loading..."}
+              </Text>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>

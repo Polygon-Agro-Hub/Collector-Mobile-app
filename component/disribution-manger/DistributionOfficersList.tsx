@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
   Dimensions,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -165,6 +166,21 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     }, []),
   );
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   useEffect(() => {
     if (selectedJobRole) {
       const filtered = officers.filter(
@@ -193,6 +209,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         }
       }}
       disabled={item.status === "Not Approved"}
+      style={{
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 6,
+      }}
     >
       <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
         <Image
@@ -245,8 +268,8 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   );
 
   return (
-    <View className="flex-1 bg-[#313131]">
-      <View className="bg-[#313131] py-6 px-4  relative">
+    <View className="flex-1 bg-white">
+      <View className="bg-[#313131] py-6 px-4">
         <Text
           style={{ fontSize: 18 }}
           className="text-white text-center font-bold"
@@ -264,9 +287,30 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </TouchableOpacity>
 
         {showMenu && (
-          <View className="absolute top-14 right-4 bg-white shadow-lg rounded-lg">
+          <View
+            style={{
+              position: "absolute",
+              top: 56,
+              right: 16,
+              backgroundColor: "white",
+              zIndex: 50,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#00000040",
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 5,
+            }}
+          >
             <TouchableOpacity
-              className="px-4 py-2 bg-white rounded-lg shadow-lg"
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: "white",
+                borderRadius: 8,
+              }}
               onPress={() => navigation.navigate("ClaimDistribution")}
             >
               <Text className="text-gray-700 font-semibold">
@@ -277,7 +321,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         )}
       </View>
 
-      <View className="flex-1  mt-3 rounded-t-2xl bg-white">
+      <View className="flex-1 w-full max-w-[500px] mx-auto mt-3 rounded-t-2xl bg-white">
         <View className="mt-4 px-4">
           {selectedJobRole === "Collection Officer" ? (
             <>
@@ -327,7 +371,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
-              style={{ width: 350, height: 350 }}
+              style={{ width: 150, height: 150 }}
             />
           </View>
         ) : errorMessage ? (
@@ -372,6 +416,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           <Ionicons name="add" size={scale(24)} color="#fff" />
         </TouchableOpacity>
       </View>
+
     </View>
   );
 };

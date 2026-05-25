@@ -7,12 +7,13 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  BackHandler,
 } from "react-native";
 import { Entypo, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -176,6 +177,21 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
     fetchReceivedCash();
   }, []);
 
+    useFocusEffect(
+        React.useCallback(() => {
+          const onBackPress = () => {
+            navigation.navigate("DistridutionaDashboard");
+            return true;
+          };
+    
+          const subscription = BackHandler.addEventListener(
+            "hardwareBackPress",
+            onBackPress,
+          );
+          return () => subscription.remove();
+        }, [navigation]),
+      );
+
   useFocusEffect(
     useCallback(() => {
       fetchReceivedCash();
@@ -244,7 +260,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         activeOpacity={0.7}
       >
         <View
-          className={`bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} shadow-sm`}
+          className={`bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} `}
         >
           <View className="flex-row items-start">
             {/* Checkbox */}
@@ -310,125 +326,127 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         title={t("ReceivedCash.Received Cash")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
       />
 
-      {/* Filter Tabs */}
-      <View className="bg-white px-4 py-3 flex-row items-center justify-between">
-        <Text className="text-sm font-medium text-gray-900">
-          {t("ReceivedCash.All")} (
-          {transactions.length.toString().padStart(2, "0")})
-        </Text>
-      </View>
+      <View className="flex-1 w-full max-w-[500px] mx-auto">
+        {/* Filter Tabs */}
+        <View className="bg-white px-4 py-3 flex-row items-center justify-between">
+          <Text className="text-sm font-medium text-gray-900">
+            {t("ReceivedCash.All")} (
+            {transactions.length.toString().padStart(2, "0")})
+          </Text>
+        </View>
 
-      {/* Total Card */}
-      {transactions.length > 0 && (
-        <View className="px-4 py-4">
-          <View
-            style={{
-              borderStyle: "dashed",
-              borderWidth: 2,
-              borderColor: "#980775",
-              borderRadius: 12,
-              backgroundColor: "white",
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              marginHorizontal: 40,
-            }}
-          >
-            <View className="flex-row items-center justify-center">
-              <Text className=" font-medium text-black">
-                {t("ReceivedCash.Full Total")} :{" "}
+        {/* Total Card */}
+        {transactions.length > 0 && (
+          <View className="px-4 py-4">
+            <View
+              style={{
+                borderStyle: "dashed",
+                borderWidth: 2,
+                borderColor: "#980775",
+                borderRadius: 12,
+                backgroundColor: "white",
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                marginHorizontal: 40,
+              }}
+            >
+              <View className="flex-row items-center justify-center">
+                <Text className=" font-medium text-black">
+                  {t("ReceivedCash.Full Total")} :{" "}
+                </Text>
+                <Text className="text-xl font-bold text-[#980775]">
+                  {t("ReceivedCash.Rs")}
+                  {totalCash.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {transactions.length > 0 && (
+          <View className="p-6">
+            <TouchableOpacity
+              onPress={allSelected ? handleDeselectAll : handleSelectAll}
+              className="flex-row items-center"
+            >
+              <View
+                className={`w-6 h-6 rounded  ${allSelected ? "" : " border bg-white border-black"} items-center justify-center mr-2`}
+              >
+                {allSelected && (
+                  <Entypo name="squared-minus" size={18} color="red" />
+                )}
+              </View>
+              <Text
+                className={`text-sm underline ${allSelected ? "text-[#000000]" : "text-[#000000]"} font-medium`}
+              >
+                {allSelected
+                  ? t("ReceivedCash.Deselect All")
+                  : t("ReceivedCash.Select All")}
               </Text>
-              <Text className="text-xl font-bold text-[#980775]">
-                {t("ReceivedCash.Rs")}
-                {totalCash.toLocaleString("en-US", {
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Transactions List */}
+        {loading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="large" color="#980775" />
+          </View>
+        ) : (
+          <FlatList
+            data={transactions}
+            renderItem={renderTransaction}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{
+              paddingBottom: selectedTransactions.size > 0 ? 100 : 20,
+            }}
+            ListEmptyComponent={EmptyState}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#980775"
+                colors={["#980775"]}
+              />
+            }
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+
+        {/* Hand Over Button */}
+        {selectedTransactions.size > 0 && transactions.length > 0 && (
+          <View className="absolute bottom-0 left-0 right-0 bg-white px-5 py-4 ">
+            <TouchableOpacity
+              onPress={handleHandOver}
+              className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center h-[50px]"
+              activeOpacity={0.8}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 4,
+              }}
+            >
+              <FontAwesome6 name="hand-holding-hand" size={18} color="white" />
+              <Text className="text-white text-base  ml-4">
+                {t("ReceivedCash.Hand Over")} ({t("ReceivedCash.Rs")}
+                {selectedTotalCash.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
+                )
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
-        </View>
-      )}
-
-      {transactions.length > 0 && (
-        <View className="p-6">
-          <TouchableOpacity
-            onPress={allSelected ? handleDeselectAll : handleSelectAll}
-            className="flex-row items-center"
-          >
-            <View
-              className={`w-4 h-4 rounded  ${allSelected ? "" : " border bg-white border-black"} items-center justify-center mr-2`}
-            >
-              {allSelected && (
-                <Entypo name="squared-minus" size={18} color="red" />
-              )}
-            </View>
-            <Text
-              className={`text-sm underline ${allSelected ? "text-[#000000]" : "text-[#000000]"} font-medium`}
-            >
-              {allSelected
-                ? t("ReceivedCash.Deselect All")
-                : t("ReceivedCash.Select All")}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Transactions List */}
-      {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#980775" />
-        </View>
-      ) : (
-        <FlatList
-          data={transactions}
-          renderItem={renderTransaction}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            paddingBottom: selectedTransactions.size > 0 ? 100 : 20,
-          }}
-          ListEmptyComponent={EmptyState}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#980775"
-              colors={["#980775"]}
-            />
-          }
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-
-      {/* Hand Over Button */}
-      {selectedTransactions.size > 0 && transactions.length > 0 && (
-        <View className="absolute bottom-0 left-0 right-0 bg-white px-5 py-4">
-          <TouchableOpacity
-            onPress={handleHandOver}
-            className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center"
-            activeOpacity={0.8}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 4,
-              elevation: 4,
-            }}
-          >
-            <FontAwesome6 name="hand-holding-hand" size={18} color="white" />
-            <Text className="text-white text-base  ml-4">
-              {t("ReceivedCash.Hand Over")} ({t("ReceivedCash.Rs")}
-              {selectedTotalCash.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              )
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 };

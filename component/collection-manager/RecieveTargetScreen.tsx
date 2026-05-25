@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
+import { useFocusEffect } from "@react-navigation/native";
 
 type RecieveTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -182,8 +184,16 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
   }, []);
 
   const handleAmountChange = (text: string) => {
-    setAmount(text);
-    const numericValue = parseFloat(text);
+    let sanitized = text.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    setAmount(sanitized);
+
+    const numericValue = parseFloat(sanitized);
     if (isNaN(numericValue) || numericValue <= 0) {
       setError(t("Error.Please enter a valid amount."));
     } else if (numericValue > maxAmount) {
@@ -286,6 +296,43 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Main",
+              params: {
+                screen: "EditTargetManager",
+                params: {
+                  varietyId,
+                  varietyNameEnglish,
+                  grade,
+                  target,
+                  todo: route.params.todo,
+                  qty,
+                  varietyNameSinhala,
+                  varietyNameTamil,
+                  dailyTarget,
+                },
+              },
+            },
+          ],
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const getvarietyName = () => {
     switch (selectedLanguage) {
       case "si":
@@ -337,7 +384,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
             iconBgColor="#FFFFFF1A"
           />
 
-          <View className="bg-white rounded-lg p-4">
+          <View className="bg-white rounded-lg p-4 w-full max-w-[500px] mx-auto">
             <View className="p-5">
               <Text className="text-gray-700 mb-2">
                 {t("PassTargetBetweenOfficers.Short Stock Assignee")}
@@ -403,7 +450,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-2 text-gray-800"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-2 text-gray-800 h-[50px]"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}
@@ -416,11 +463,18 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
             </View>
           </View>
 
-          <View className="mt-6 items-center">
+          <View className="mt-6 items-center w-full max-w-[500px] mx-auto">
             <TouchableOpacity
-              className={`rounded-full w-64 py-3 ${isSaveButtonDisabled() ? "bg-gray-400" : "bg-[#000000]"}`}
+              className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveButtonDisabled() ? "bg-gray-400" : "bg-[#000000]"}`}
               onPress={receiveTarget}
               disabled={isSaveButtonDisabled()}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
             >
               {fetchingTarget ? (
                 <ActivityIndicator size="small" color="white" />
@@ -448,6 +502,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
         }}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
+        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </>
   );

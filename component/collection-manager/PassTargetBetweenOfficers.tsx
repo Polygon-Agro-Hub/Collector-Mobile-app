@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -158,8 +158,16 @@ const PassTargetBetweenOfficers: React.FC<
   );
 
   const handleAmountChange = (text: string) => {
-    setAmount(text);
-    const numericValue = parseFloat(text);
+    let sanitized = text.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    setAmount(sanitized);
+
+    const numericValue = parseFloat(sanitized);
     if (numericValue > maxAmount) {
       setError(t("Error.You have exceeded the maximum amount."));
     } else {
@@ -260,7 +268,7 @@ const PassTargetBetweenOfficers: React.FC<
         contentContainerStyle={{ paddingBottom: 20 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="bg-white rounded-lg p-4">
+        <View className="bg-white rounded-lg p-4 w-full max-w-[500px] mx-auto">
           <Text className="text-gray text-sm mb-2 text-center mt-5">
             {t("PassTargetBetweenOfficers.maximum amount")}
           </Text>
@@ -285,10 +293,10 @@ const PassTargetBetweenOfficers: React.FC<
                 onPress={() => setOfficerModalVisible(true)}
                 style={{
                   height: 50,
+                  backgroundColor: "#F4F4F4",
+                  borderRadius: 25,
                   borderWidth: 1,
-                  borderColor: "#CFCFCF",
-                  borderRadius: 8,
-                  backgroundColor: "white",
+                  borderColor: "#F4F4F4",
                   paddingHorizontal: 14,
                   flexDirection: "row",
                   alignItems: "center",
@@ -319,7 +327,7 @@ const PassTargetBetweenOfficers: React.FC<
               {t("PassTargetBetweenOfficers.Amount")}
             </Text>
             <TextInput
-              className="border border-gray-300 rounded-lg p-3 text-gray-800"
+              className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
               keyboardType="numeric"
               value={amount}
               onChangeText={handleAmountChange}
@@ -328,11 +336,18 @@ const PassTargetBetweenOfficers: React.FC<
           </View>
         </View>
 
-        <View className="mt-6 items-center">
+        <View className="mt-6 items-center w-full max-w-[500px] mx-auto">
           <TouchableOpacity
-            className={`rounded-full w-64 py-3 ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
+            className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
             onPress={passTarget}
             disabled={isSaveDisabled()}
+            style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
           >
             {submitting ? (
               <ActivityIndicator size="small" color="white" />
@@ -355,6 +370,7 @@ const PassTargetBetweenOfficers: React.FC<
         onSelect={(items) => setAssignee(items[0] ?? "")}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
+        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </View>
   );

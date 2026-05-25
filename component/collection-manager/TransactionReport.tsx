@@ -12,7 +12,7 @@ import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
@@ -531,13 +531,13 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         
         <div class="total-row">
           <div class="total-box">
-            <div class="total-label">${t("NewReport.Full Total (Rs.) Rs.")}</div>
-            <div class="total-value">Rs.${formatNumberWithCommas(totalSum)}</div>
+            <div class="total-label">${t("NewReport.Full Total (Rs.)")}</div>
+            <div class="total-value">Rs. ${formatNumberWithCommas(totalSum)}</div>
           </div>
         </div>
         
-        <div class="note">
-          <strong>${t("NewReport.Note")}</strong> ${t("NewReport.GRNnote")}
+        <div class="note" style="font-style: normal;">
+           <strong>${t("NewReport.Note")}</strong> <em>${t("NewReport.GRNnote")}</em>
         </div>
       </body>
     </html>
@@ -581,11 +581,6 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-          Alert.alert(
-            "PDF Ready",
-            "To save to Downloads, select 'Save to device' or similar option from the share menu",
-            [{ text: "OK" }],
-          );
         } else {
           Alert.alert("Error", "Sharing is not available on this device");
         }
@@ -657,7 +652,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         {/* GRN Header */}
         <View className="mb-4">
           <Text className="text-sm font-bold">
-            {t("NewReport.GRN No")}:{" "}
+            {t("NewReport.GRN No")}{" "}
             {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
           </Text>
           <Text className="text-sm">
@@ -705,7 +700,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         {/* Received Items */}
         <View className="mb-4">
           <Text className="font-bold text-sm mb-2">
-            {t("NewReport.Received Items")}
+            {t("NewReport.Received Items")} :
           </Text>
           <ScrollView horizontal className="border border-gray-300 rounded-lg">
             <View>
@@ -766,7 +761,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         <View className="mb-4 items-end">
           <Text className="font-bold">
             {t("NewReport.Full Total (Rs.) Rs.")}
-            {totalSum.toFixed(2)}
+            {formatNumberWithCommas(totalSum)}
           </Text>
         </View>
 
@@ -777,7 +772,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         <View className="mb-4">
           <Text className="text-xs">
             <Text className="font-bold">{t("NewReport.Note")}</Text>{" "}
-            {t("NewReport.GRNnote")}
+            <Text className="italic">{t("NewReport.GRNnote")}</Text>
           </Text>
         </View>
 
@@ -786,6 +781,13 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
           <TouchableOpacity
             className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
             onPress={handleDownloadPDF}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 6,
+              elevation: 4,
+            }}
           >
             <Image
               source={require("../../assets/images/collection-common/download.webp")}
@@ -799,6 +801,13 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
           <TouchableOpacity
             className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
             onPress={handleSharePDF}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 6,
+              elevation: 4,
+            }}
           >
             <Image
               source={require("../../assets/images/collection-common/share.webp")}

@@ -13,14 +13,12 @@ export type RootStackParamList = {
   Lanuage: undefined;
   SinDashboard: undefined;
   SinUfarmercropdetails: undefined;
-  SinUnregisteredFarmerDetails: undefined;
   SinRegisteredfarmer: undefined;
   TamChangePassword: undefined;
   TamLogin: undefined;
   TamDashboard: undefined;
   TamRegisteredfarmer: undefined;
   TamUfarmercropdetails: undefined;
-  TamUnregisteredFarmerDetails: undefined;
   TransportComponent: undefined;
   SinProfile: undefined;
   OfficerQr: undefined;
@@ -33,7 +31,9 @@ export type RootStackParamList = {
   ComplainHistory: undefined;
   ClaimOfficer: undefined;
   ClaimDistribution: undefined;
-  TransactionList: undefined;
+  TransactionList: {
+    empId: string
+  };
   DailyTarget: undefined;
   TargetValidPeriod: undefined;
   NoCollectionCenterScreen: undefined;
@@ -83,9 +83,9 @@ export type RootStackParamList = {
     userId: any;
   };
   FarmerQr: {
-    cropCount: number;
+    cropCount?: number;
     userId: any;
-    NICnumber: string;
+    NICnumber?: string;
   };
   ComplainPage: {
     farmerName: any;
@@ -226,6 +226,10 @@ export type RootStackParamList = {
   DailyTargetListForOfficers: {
     officerId: string;
     collectionOfficerId: number;
+    officerName: string;
+    phoneNumber1: string;
+    phoneNumber2: string;
+    image: string;
   };
   ReplaceRequestsApprove: {
     replaceRequestData: {
@@ -327,6 +331,10 @@ export type RootStackParamList = {
   DailyTargetListOfficerDistribution: {
     officerId: string;
     collectionOfficerId: number;
+    officerName: string;
+    phoneNumber1: string;
+    phoneNumber2: string;
+    image: string;
   };
   DigitalSignature: {
     orderId: Number;
@@ -353,7 +361,7 @@ export type RootStackParamList = {
     status: string;
     creatAt: string;
   };
-  NotEligibleScreen:undefined
+  NotEligibleScreen: undefined;
 };
 
 export interface OrderItem {

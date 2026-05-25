@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,10 @@ import {
   Alert,
   Modal,
   Animated,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
@@ -24,6 +25,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
+import { useFocusEffect } from "@react-navigation/native";
 
 type UnregisteredFarmerDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -82,8 +84,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       if (selectedBank) {
         try {
           const data = require("../../assets/jsons/branches.json");
-          const branches = data[selectedBank.ID] || [];
-          const sortedBranches = branches.sort(
+          const rawBranches = data[selectedBank.ID] || [];
+          const uniqueBranches = rawBranches.filter(
+            (branch: any, index: number, self: any[]) =>
+              index === self.findIndex((b) => b.name === branch.name),
+          );
+          const sortedBranches = uniqueBranches.sort(
             (a: { name: string }, b: { name: any }) =>
               a.name.localeCompare(b.name),
           );
@@ -180,19 +186,47 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     if (language === "si") return { fontSize: 14, lineHeight: 20 };
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      setAccNumber("");
+      setAccHolderName("");
+      setBankName("");
+      setBranchName("");
+      setAccNumberError("");
+
+      const handleBackPress = () => {
+        navigation.navigate("Main" as any, { screen: "SearchFarmer" });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [navigation]),
+  );
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       <CustomHeader
         title={t("UnregisteredFarmerDetails.FillDetails")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, {
+            screen: "SearchFarmer",
+          })
+        }
       />
-      <View className="flex-1 px-5 bg-white">
+      <View className="flex-1 w-full max-w-[500px] mx-auto px-5 bg-white">
         <ScrollView className="flex-1 p-3 mt-4">
           {/* Account Number */}
           <View className="mb-4">
@@ -204,7 +238,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 accNumberError
                   ? "border-red-500"
                   : "border-[#F4F4F4] bg-[#F4F4F4]"
-              } p-3 rounded-full`}
+              } p-3 rounded-full h-[50px]`}
               keyboardType="numeric"
               value={accNumber}
               onChangeText={(text) => {
@@ -226,7 +260,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountName")}
             </Text>
             <TextInput
-              className="border border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full"
+              className="border border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full h-[50px]"
               value={accHolderName}
               onChangeText={(text) => {
                 const filteredText = text
@@ -324,8 +358,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           </View>
 
           <TouchableOpacity
-            className={`p-3 rounded-full items-center mt-5 ${
-              loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"
+            className={`py-4 rounded-full items-center mt-5 h-[50px] ${
+              loading ? "bg-gray-400 opacity-50" : "bg-[#000000] "
             }`}
             style={{
               shadowColor: "#000000",
@@ -346,7 +380,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               <ActivityIndicator color="white" size="small" />
             ) : (
               <Text
-                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                style={[getTextStyle(selectedLanguage)]}
                 className="text-center text-xl font-semibold text-white"
               >
                 {t("UnregisteredFarmerDetails.Submit")}
@@ -361,7 +395,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           visible={isModalVisible}
           animationType="slide"
         >
-          <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#00000040",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
                 {t("UnregisteredFarmerDetails.Success")}
@@ -391,7 +432,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           visible={isUnsuccessfulModalVisible}
           animationType="slide"
         >
-          <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#00000040",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
                 {t("UnregisteredFarmerDetails.Oops")}

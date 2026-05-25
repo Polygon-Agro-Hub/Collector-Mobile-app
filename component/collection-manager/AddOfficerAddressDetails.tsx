@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,16 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { RootStackParamList } from "../types/types";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -24,6 +30,7 @@ import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 import provincesData from "../../assets/jsons/sri-lanka-provinces.json";
 import { Entypo } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
 
 type AddOfficerAddressDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -221,9 +228,13 @@ const AddOfficerAddressDetails: React.FC = () => {
       if (selectedBank) {
         try {
           const data = require("../../assets/jsons/branches.json");
-          const branches = data[selectedBank.ID] || [];
+          const rawBranches = data[selectedBank.ID] || [];
+          const uniqueBranches = rawBranches.filter(
+            (branch: any, index: number, self: any[]) =>
+              index === self.findIndex((b) => b.name === branch.name),
+          );
           setFilteredBranches(
-            branches.sort((a: { name: string }, b: { name: string }) =>
+            uniqueBranches.sort((a: { name: string }, b: { name: string }) =>
               a.name.localeCompare(b.name),
             ),
           );
@@ -294,32 +305,45 @@ const AddOfficerAddressDetails: React.FC = () => {
   const handleSubmit = async () => {
     if (!validateFields()) return;
 
-    const combinedData = {
-      ...basicDetails,
-      ...formData,
-      jobRole,
-      empType: type,
-      languages: Object.keys(preferredLanguages)
-        .filter(
-          (lang) => preferredLanguages[lang as keyof typeof preferredLanguages],
-        )
-        .join(", "),
-      profileImage: basicDetails.profileImage || "",
-    };
-
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) return;
 
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
+
+      // ── Convert local image URI → base64 so backend can upload to S3 ──
+      let profileImageBase64 = "";
+      const imageUri = basicDetails.profileImage;
+      if (imageUri) {
+        const ext = imageUri.split(".").pop()?.toLowerCase() || "jpg";
+        const base64 = await FileSystem.readAsStringAsync(imageUri, {
+          encoding: "base64", // ← string literal instead of FileSystem.EncodingType.Base64
+        });
+        profileImageBase64 = `data:image/${ext};base64,${base64}`;
+      }
+
+      const combinedData = {
+        ...basicDetails,
+        ...formData,
+        jobRole,
+        empType: type,
+        languages: Object.keys(preferredLanguages)
+          .filter(
+            (lang) =>
+              preferredLanguages[lang as keyof typeof preferredLanguages],
+          )
+          .join(", "),
+        profileImage: profileImageBase64, // ← real base64 now, not a file:// URI
+      };
+
       const response = await axios.post(
         `${environment.API_BASE_URL}api/collection-manager/collection-officer/add`,
         combinedData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", // ← stays JSON, backend handles base64
           },
         },
       );
@@ -375,6 +399,22 @@ const AddOfficerAddressDetails: React.FC = () => {
     value: b.name,
   }));
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.goBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const DropdownButton = ({
     placeholder,
     value,
@@ -408,26 +448,27 @@ const AddOfficerAddressDetails: React.FC = () => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
+      <CustomHeader
+        title={t("AddOfficerAddressDetails.AddOfficer")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
       <ScrollView
-        className="flex-1 bg-white"
+        className="flex-1 bg-white w-full max-w-[500px] mx-auto"
         keyboardShouldPersistTaps="handled"
       >
-        <CustomHeader
-          title={t("AddOfficerAddressDetails.AddOfficer")}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() => navigation.goBack()}
-        />
-
         {/* ── Address Details ── */}
         <View className="px-8 mt-4">
           {/* House Number */}
           <TextInput
             placeholder={t("AddOfficerAddressDetails.House")}
             value={formData.houseNumber}
-            onChangeText={(text) => handleInputChange("houseNumber", text)}
+            onChangeText={(text) =>
+              handleInputChange("houseNumber", text.replace(/^\s+/, ""))
+            }
             className={`border ${
               fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4]"
             } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
@@ -669,6 +710,13 @@ const AddOfficerAddressDetails: React.FC = () => {
           <TouchableOpacity
             className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
             onPress={() => navigation.goBack()}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
               className="text-[#686868]"
@@ -690,6 +738,13 @@ const AddOfficerAddressDetails: React.FC = () => {
             }`}
             onPress={handleSubmit}
             disabled={loading}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />
@@ -704,7 +759,7 @@ const AddOfficerAddressDetails: React.FC = () => {
                       : { fontSize: 14 },
                 ]}
               >
-                {t("AddOfficerBasicDetails.Next")}
+                {t("AddOfficerBasicDetails.Submit")}
               </Text>
             )}
           </TouchableOpacity>

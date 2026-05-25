@@ -12,7 +12,7 @@ import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
@@ -312,7 +312,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
       }_${date}.pdf`;
 
       try {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
+        const { status } = await MediaLibrary.requestPermissionsAsync(true);
 
         if (status === "granted") {
           const tempUri = `${(FileSystem as any).cacheDirectory}${fileName}`;

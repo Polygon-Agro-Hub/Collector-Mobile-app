@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,10 @@ import {
   Modal,
   Animated,
   Keyboard,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
@@ -26,6 +27,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { MaterialIcons } from "@expo/vector-icons";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
+import { useFocusEffect } from "@react-navigation/native";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -109,8 +111,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       if (selectedBank) {
         try {
           const data = require("../../assets/jsons/branches.json");
-          const branches = data[selectedBank.ID] || [];
-          const sortedBranches = branches.sort(
+          const rawBranches = data[selectedBank.ID] || [];
+          const uniqueBranches = rawBranches.filter(
+            (branch: any, index: number, self: any[]) =>
+              index === self.findIndex((b) => b.name === branch.name),
+          );
+          const sortedBranches = uniqueBranches.sort(
             (a: { name: string }, b: { name: any }) =>
               a.name.localeCompare(b.name),
           );
@@ -128,12 +134,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       setFilteredBranches([]);
     }
   }, [bankName]);
-
-  useEffect(() => {
-    if (NIC) {
-      setNICnumber(NIC);
-    }
-  }, [NIC]);
 
   const validateAllFields = () => {
     const errors: Record<string, string> = {};
@@ -252,17 +252,20 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       const response = await axios.post(apiUrl, body, { headers });
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
-      navigation.navigate("OTPE", {
-        firstName,
-        lastName,
-        NICnumber,
-        phoneNumber: `${callingCode}${phoneNumber}`,
-        district,
-        accNumber,
-        accHolderName,
-        bankName,
-        branchName,
-        PreferdLanguage,
+      navigation.navigate("Main" as any, {
+        screen: "OTPE",
+        params: {
+          firstName,
+          lastName,
+          NICnumber,
+          phoneNumber: `${callingCode}${phoneNumber}`,
+          district,
+          accNumber,
+          accHolderName,
+          bankName,
+          branchName,
+          PreferdLanguage,
+        },
       });
       setLoading(false);
     } catch (error) {
@@ -324,6 +327,44 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     if (fieldErrors.accHolderName)
       setFieldErrors((prev) => ({ ...prev, accHolderName: "" }));
   };
+  useFocusEffect(
+    useCallback(() => {
+      // ✅ Runs every time screen comes into focus — guarantees a clean form
+      setFirstName("");
+      setLastName("");
+      setNICnumber(NIC ?? ""); // re-apply NIC from route params
+      setPhoneNumber("");
+      setDistrict("");
+      setAccNumber("");
+      setAccHolderName("");
+      setBankName("");
+      setBranchName("");
+      setPreferdLanguage("");
+      setCallingCode("+94");
+      setNICError("");
+      setPhoneError("");
+      setAccNumberError("");
+      setFieldErrors({});
+      setLoading(false);
+      setIsModalVisible(false);
+      setIsUnsuccessfulModalVisible(false);
+      setErrorMessage(null);
+
+      const handleBackPress = () => {
+        navigation.navigate("Main" as any, { screen: "SearchFarmer" });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [navigation, NIC]), // ✅ NIC in deps so it's always fresh
+  );
 
   const SelectorButton = ({
     value,
@@ -370,13 +411,15 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         title={t("UnregisteredFarmerDetails.FillDetails")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, { screen: "SearchFarmer" })
+        }
       />
-      <View className="flex-1 bg-white px-4">
+      <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-10">
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 20, paddingTop: 16 }}
         >
           {/* First Name */}
           <View className="mb-4">
@@ -384,7 +427,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.FirstName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl h-[50px] px-4`}
               style={{ height: 50, fontSize: 16 }}
               value={firstName}
               onChangeText={handleFirstNameChange}
@@ -407,7 +450,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.LastName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
               style={{ height: 50, fontSize: 16 }}
               value={lastName}
               onChangeText={handleLastNameChange}
@@ -451,27 +494,29 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.NIC")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
               style={{ height: 50, fontSize: 16 }}
               placeholder={t("UnregisteredFarmerDetails.NIC")}
               placeholderTextColor="#9CA3AF"
               value={NICnumber}
               onChangeText={(text) => {
-                const updatedText = text.replace(/v$/, "V");
+                const sanitized = text.replace(/[^0-9vV]/g, "");
+                if (sanitized !== text) return;
+
+                if (
+                  /^\d{9}[vV]$/.test(NICnumber) &&
+                  sanitized.length > NICnumber.length
+                ) {
+                  return;
+                }
+
+                const updatedText = sanitized.replace(/v$/, "V");
                 setNICnumber(updatedText);
 
                 if (!updatedText) {
                   setNICError("");
                   if (fieldErrors.nic)
                     setFieldErrors((prev) => ({ ...prev, nic: "" }));
-                  return;
-                }
-
-                const isValidCharacters = /^(\d+|[\d]+[vV]?)$/.test(
-                  updatedText,
-                );
-                if (!isValidCharacters) {
-                  setNICError(t("UnregisteredFarmerDetails.InvalidNIC"));
                   return;
                 }
 
@@ -506,7 +551,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.Phone")}
             </Text>
             <View
-              className={`flex-row items-center border ${fieldErrors.phone || phoneError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              className={`flex-row items-center border ${fieldErrors.phone || phoneError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
               style={{ height: 50 }}
             >
               <TextInput
@@ -585,7 +630,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
               style={{ height: 50, fontSize: 16 }}
               keyboardType="numeric"
               placeholderTextColor="#9CA3AF"
@@ -594,12 +639,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 if (/^\d*$/.test(text)) {
                   setAccNumber(text);
                   setAccNumberError("");
-                  if (fieldErrors.accNumber)
-                    setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
-                } else {
-                  setAccNumberError(
-                    t("UnregisteredFarmerDetails.AccountNumberError"),
-                  );
+                  setFieldErrors((prev) => ({ ...prev, accNumber: "" }));
                 }
               }}
             />
@@ -616,7 +656,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl px-4`}
+              className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
               style={{ height: 50, fontSize: 16 }}
               value={accHolderName}
               onChangeText={handleAccountNameChange}
@@ -680,8 +720,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Submit Button */}
           <TouchableOpacity
-            className={`rounded-3xl items-center justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
-            style={{ height: 50 }}
+            className={`rounded-3xl h-[50px] items-center mb-[30%] justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
             onPress={() => {
               if (!loading) {
                 setLoading(true);
@@ -689,13 +728,22 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               }
             }}
             disabled={loading}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+              height: 50,
+              borderRadius: 30,
+            }}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />
             ) : (
               <Text
                 style={{ fontSize: 18 }}
-                className="text-center text-white font-light"
+                className="text-center text-white font-light "
               >
                 {t("UnregisteredFarmerDetails.Submit")}
               </Text>
@@ -709,7 +757,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           visible={isModalVisible}
           animationType="slide"
         >
-          <View className="flex-1 justify-center items-center bg-black/50 bg-opacity-50">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#00000040",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
                 {t("UnregisteredFarmerDetails.Success")}
@@ -739,7 +794,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           visible={isUnsuccessfulModalVisible}
           animationType="slide"
         >
-          <View className="flex-1 justify-center items-center bg-gray-900 bg-opacity-50">
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#00000040",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <View className="bg-white rounded-lg w-72 p-6 items-center">
               <Text className="text-xl font-bold mb-4">
                 {t("UnregisteredFarmerDetails.Oops")}

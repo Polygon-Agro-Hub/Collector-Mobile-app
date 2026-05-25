@@ -36,7 +36,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   onSelect,
   searchPlaceholder = "Search...",
   doneButtonText = "Done",
-  noResultsText = "No items found",
+  noResultsText = "No Search Result Found",
   multiSelect = false,
   renderItem,
   searchKeys = ["label"],
@@ -47,12 +47,13 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   const [filteredData, setFilteredData] = useState(data);
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedItems);
 
-  // Initialize selected values
   useEffect(() => {
     setSelectedValues(selectedItems);
+    if (!visible) {
+      setSearchValue("");
+    }
   }, [selectedItems, visible]);
 
-  // Filter data based on search (only if search is shown)
   useEffect(() => {
     if (!showSearch || !searchValue.trim()) {
       setFilteredData(data);
@@ -120,7 +121,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   const renderSearchInput = () => (
     <View className="px-4 py-2 border-b border-gray-200">
-      <View className="bg-gray-100 rounded-lg px-3 flex-row items-center">
+      <View className="bg-gray-100 rounded-lg px-3 flex-row items-center h-[50px]">
         <MaterialIcons name="search" size={20} color="#666" />
         <TextInput
           placeholder={searchPlaceholder}
@@ -185,8 +186,15 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center">
-        <View className="bg-white rounded-2xl w-11/12 max-h-3/4">
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <View className="bg-white rounded-2xl w-11/12 max-w-[500px] max-h-[80%]">
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>
@@ -212,7 +220,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {multiSelect && (
             <View className="px-4 py-3 border-t border-gray-200">
               <TouchableOpacity
-                className="bg-[#21202B] rounded-xl py-3 items-center"
+                className="bg-[#21202B] rounded-xl py-3 items-center h-[50px] justify-center"
                 onPress={handleDone}
               >
                 <Text className="text-white font-semibold text-base">

@@ -12,13 +12,10 @@ import {
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
@@ -126,7 +123,12 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
   };
 
   const handlePriceChange = (index: number, newPrice: string) => {
-    const cleanedPrice = newPrice.replace(/[^0-9.]/g, "");
+    const sanitized = newPrice.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    const cleanedPrice =
+      parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
+
     const updatedPrices = [...editedPrices];
     const originalPrice =
       updatedPrices[index].originalPrice || updatedPrices[index].price;
@@ -303,32 +305,35 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
   );
 
   return (
-    <View className="flex-1 bg-whitegray-100">
-      {/* Header */}
-
-      <CustomHeader
-        title={t("PriceChart.PriceChart")}
-        showBackButton={true}
-        navigation={navigation}
-        onBackPress={() =>
-          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
-        }
-        textColor="white"
-        bgColor="#282828"
-        iconBgColor="#FFFFFF1A"
-      />
+    <View className="flex-1 bg-white">
+      {/* Full-width dark header container */}
+      <View style={{ backgroundColor: "#282828", width: "100%" }}>
+        <View className="w-full mx-auto">
+          <CustomHeader
+            title={t("PriceChart.PriceChart")}
+            showBackButton={true}
+            navigation={navigation}
+            onBackPress={() =>
+              navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
+            }
+            textColor="white"
+            bgColor="#282828"
+            iconBgColor="#FFFFFF1A"
+          />
+        </View>
+      </View>
 
       {/* Content */}
       <ScrollView
-        className="flex-1 bg-white"
-        style={{ paddingHorizontal: wp(8), paddingVertical: hp(2) }}
+        className="flex-1 bg-white w-full max-w-[500px] mx-auto"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
         <View className="mb-4">
           <Text className="text-black text-sm mb-1">
             {t("PriceChart.Crop")}
           </Text>
           <TextInput
-            className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800"
+            className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800 h-[50px]"
             value={cropName}
             editable={false}
           />
@@ -339,7 +344,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
             {t("PriceChart.Variety")}
           </Text>
           <TextInput
-            className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4]"
+            className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4] h-[50px]"
             value={varietyName}
             editable={false}
           />
@@ -367,10 +372,11 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
                 <View key={index} className="mb-3">
                   <View className="flex-row items-center">
                     <Text className="w-32 text-gray-600">
-                      {`${t("PriceChart.Grade")} ${priceItem.grade}`} Rs.
+                      {`${t("PriceChart.Grade")} ${priceItem.grade}`}
                     </Text>
-                    <TextInput
-                      className="flex-1 rounded-full px-4 py-2 text-gray-800"
+
+                    <View
+                      className="flex-1 flex-row items-center rounded-full px-4 h-[50px]"
                       style={{
                         borderWidth: 1,
                         borderColor: isEditable
@@ -380,13 +386,19 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
                           : "#F4F4F4",
                         backgroundColor: "#F4F4F4",
                       }}
-                      value={editedPrices[index]?.price}
-                      editable={isEditable}
-                      onChangeText={(newPrice) =>
-                        handlePriceChange(index, newPrice)
-                      }
-                      keyboardType="numeric"
-                    />
+                    >
+                      <Text className="text-gray-800 mr-1">{t("ReplaceRequestsApprove.Rs")} </Text>
+                      <TextInput
+                        className="flex-1 text-gray-800"
+                        style={{ height: 50, padding: 0 }}
+                        value={editedPrices[index]?.price}
+                        editable={isEditable}
+                        onChangeText={(newPrice) =>
+                          handlePriceChange(index, newPrice)
+                        }
+                        keyboardType="numeric"
+                      />
+                    </View>
                   </View>
                   {isEditable && editedPrices[index]?.isValid === false && (
                     <Text className="text-red-500 text-xs mt-1 ml-32">
@@ -402,15 +414,21 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         )}
 
         <TouchableOpacity
-          className="rounded-[45px] py-3 h-12 mt-4 w-3/4 mx-auto"
+          className="rounded-[45px] py-3 h-12 mt-4 w-3/4 mx-auto h-[50px] justify-center"
+          onPress={handleButtonClick}
+          disabled={(isEditable && !areAllPricesValid()) || isSubmitting}
           style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 6,
+            height: 50,
             backgroundColor:
               (isEditable && !areAllPricesValid()) || isSubmitting
                 ? "#CCCCCC"
                 : "#000000",
           }}
-          onPress={handleButtonClick}
-          disabled={(isEditable && !areAllPricesValid()) || isSubmitting}
         >
           {isSubmitting ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
@@ -425,7 +443,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="border border-[#606060] mt-4 py-3 h-12 rounded-full items-center w-3/4 mx-auto"
+          className="border border-[#606060] mt-4 py-3 h-12 rounded-full items-center w-3/4 mx-auto h-[50px] justify-center"
           onPress={() => {
             if (isEditable) {
               setIsEditable(false);
@@ -438,6 +456,20 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
             }
           }}
           disabled={isSubmitting}
+          style={{
+            height: 50,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: "#000000",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#FFFFFF",
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 5,
+          }}
         >
           <Text
             style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}

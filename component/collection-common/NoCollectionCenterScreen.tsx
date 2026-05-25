@@ -1,7 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useEffect } from "react";
 import { View, Text, Image, BackHandler } from "react-native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 

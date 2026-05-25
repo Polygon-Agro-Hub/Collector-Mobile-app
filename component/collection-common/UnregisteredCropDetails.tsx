@@ -10,21 +10,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  BackHandler
 } from "react-native";
 import { Modal } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect, useRoute } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import Entypo from "react-native-vector-icons/Entypo";
 import MdIcons from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "../../environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+
 import DashedLine from "react-native-dashed-line";
 import generateInvoiceNumber from "@/utils/generateInvoiceNumber";
 import CameraComponent from "@/utils/CameraComponent";
@@ -83,7 +81,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
       animationType="fade"
       statusBarTranslucent={true}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center px-5">
+      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
         <View className="bg-white rounded-xl p-6 items-center min-w-[280px] max-w-[320px]">
           <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg justify-center items-center mb-4">
             <Image
@@ -269,7 +267,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const scrollToNext = () => {
     if (scrollViewRef.current) {
-      const newPosition = scrollPosition + wp(70) + 20;
+      const newPosition = scrollPosition + 300 + 20;
       scrollViewRef.current.scrollTo({ x: newPosition, animated: true });
       setScrollPosition(newPosition);
     }
@@ -277,7 +275,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const scrollToPrevious = () => {
     if (scrollViewRef.current) {
-      const newPosition = scrollPosition - (wp(70) + 20);
+      const newPosition = scrollPosition - (300 + 20);
       scrollViewRef.current.scrollTo({ x: newPosition, animated: true });
       setScrollPosition(newPosition);
     }
@@ -288,7 +286,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   }) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     setScrollPosition(contentOffsetX);
-    const itemWidth = wp(70) + 20;
+    const itemWidth = 300 + 20;
     const currentIndex = Math.round(contentOffsetX / itemWidth);
     const safeCurrentIndex = Math.max(
       0,
@@ -659,6 +657,22 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("FarmerQr", { userId } as any);
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const sendSMS = async (
     language: string | null,
     farmerPhone: number,
@@ -732,7 +746,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       setCrops(newCrops);
 
       if (scrollViewRef.current && newCrops.length > 0) {
-        const itemWidth = wp(70) + 20;
+        const itemWidth = 300 + 20;
         const currentIndex = Math.round(scrollPosition / itemWidth);
 
         if (currentIndex >= newCrops.length && newCrops.length > 0) {
@@ -776,6 +790,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setDeleteGradeModal({ visible: true, cropIndex, grade, varietyName });
   };
 
+
   const handleDeleteGrade = () => {
     const { cropIndex, grade } = deleteGradeModal;
     setDeletingGrade({ cropIndex, grade });
@@ -806,7 +821,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         setCropCount((prevCount) => prevCount - 1);
 
         if (scrollViewRef.current && newCrops.length > 0) {
-          const itemWidth = wp(70) + 20;
+          const itemWidth = 300 + 20;
           const currentIndex = Math.round(scrollPosition / itemWidth);
 
           if (currentIndex >= newCrops.length && newCrops.length > 0) {
@@ -844,6 +859,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }, 1000);
   };
 
+
+
   const selectedCropLabel = selectedCrop?.name || null;
   const selectedVarietyLabel = selectedVariety
     ? varieties.find((v) => v.id === selectedVariety)?.variety || null
@@ -857,19 +874,17 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     >
       <ScrollView
         className="flex-1 bg-white mb-8"
-        style={{ paddingVertical: hp(2) }}
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
       >
+        <View className="w-full max-w-[500px]">
         <CustomHeader
           title={t("UnregisteredCropDetails.FillDetails")}
           showBackButton={true}
           navigation={navigation}
           onBackPress={() => navigation.navigate("FarmerQr", { userId } as any)}
         />
-        <View
-          className="px-6 py-4"
-          style={{ paddingHorizontal: wp(6), paddingVertical: hp(2) }}
-        >
+        <View className="px-6 py-4">
           <View className="-mb-4">
             <View className="justify-center items-center">
               {crops.length > 1 && (
@@ -894,12 +909,12 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   showsHorizontalScrollIndicator={false}
                   style={{ marginBottom: 20 }}
                   contentContainerStyle={{
-                    paddingHorizontal: wp(6),
+                    paddingHorizontal: 24,
                     alignItems: "center",
                   }}
                   className="flex-row"
                   onScroll={onScroll}
-                  snapToInterval={wp(70) + 10}
+                  snapToInterval={300 + 10}
                   decelerationRate="fast"
                   snapToAlignment="center"
                 >
@@ -913,7 +928,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       <View
                         key={index}
                         style={{
-                          width: wp(70),
+                          width: 300,
                           marginHorizontal: 10,
                           padding: 12,
                           opacity: isVarietyDeleting ? 0.6 : 1,
@@ -1191,6 +1206,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               onPress={incrementCropCount}
               disabled={addbutton || loading}
               className={`bg-[#000000] rounded-full p-4 mt-2 ${addbutton || loading ? "opacity-25" : ""}`}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
             >
               <Text className="text-center text-white font-semibold text-base">
                 {t("UnregisteredCropDetails.Add")}
@@ -1202,6 +1224,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 onPress={handleSubmit}
                 disabled={donebutton2disabale || loading}
                 className={`bg-[#980775] rounded-full p-4 mt-4 mb-10 ${donebutton2disabale || loading ? "opacity-50" : ""}`}
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 {loading ? (
                   <View className="flex-row justify-center items-center">
@@ -1261,6 +1290,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
             }
             onDelete={handleDeleteGrade}
           />
+          </View>
         </View>
       </ScrollView>
 

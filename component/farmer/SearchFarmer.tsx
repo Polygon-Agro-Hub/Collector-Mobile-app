@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,19 +10,17 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  BackHandler,
 } from "react-native";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -54,6 +52,29 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   const [ere, setEre] = useState("");
   const [searchButtonClicked, setSearchButtonClicked] = useState(false);
   const { t } = useTranslation();
+  const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
+
+  const handleBackPress = () => {
+    if (jobRole === "Collection Officer") {
+      navigation.navigate("CollectionOfficerDashboard" as any);
+    } else if (jobRole === "Collection Centre Manager") {
+      navigation.navigate("ManagerDashboard" as any);
+    } else {
+      navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+    }
+  };
 
   const validateNic = (nic: string) => {
     const regex = /^(\d{12}|\d{9}V|\d{9}X|\d{9}v|\d{9}x)$/;
@@ -140,6 +161,28 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
+      const handleBackPress = () => {
+        if (jobRole === "Collection Officer") {
+          navigation.navigate("CollectionOfficerDashboard" as any);
+        } else if (jobRole === "Collection Centre Manager") {
+          navigation.navigate("ManagerDashboard" as any);
+        } else {
+          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
+        }
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation, jobRole]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
       setNICnumber("");
       setNoResults(false);
       setEre("");
@@ -169,7 +212,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -179,12 +222,9 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
           title={t("SearchFarmer.Search")}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={handleBackPress}
         />
-        <View
-          className="flex-1 bg-white"
-          style={{ paddingHorizontal: wp(4), paddingVertical: hp(2) }}
-        >
+        <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-4">
           {/* Search Form */}
           <View className="py-4">
             <Text
@@ -194,7 +234,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
               {t("SearchFarmer.EnterFarmer")}
             </Text>
 
-            <View className="flex-row items-center border border-[#A7A7A7] rounded-full mt-4 pl-4  bg-white">
+            <View className="flex-row items-center border border-[#A7A7A7] rounded-full mt-4 pl-3 bg-white h-[50px]">
               <TextInput
                 value={NICnumber}
                 onChangeText={handleNicChange}
@@ -207,11 +247,13 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                 spellCheck={false}
                 style={{
                   color: "#000",
-                  fontSize: 16,
+                  fontSize: 14,
+                  paddingVertical: 0,
                 }}
               />
+
               <TouchableOpacity
-                className="w-12 h-12 bg-[#F3F3F3] rounded-full items-center justify-center"
+                className="w-14 h-14 bg-[#F3F3F3] rounded-full items-center justify-center"
                 onPress={handleSearch}
               >
                 <FontAwesome name="search" size={16} color="black" />
@@ -263,7 +305,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                       NIC: NICnumber,
                     })
                   }
-                  className="mt-16 bg-[#000000] rounded-3xl w-full py-3 h-[50px]"
+                  className="mt-16 bg-[#000000] rounded-3xl w-full h-[50px] items-center justify-center"
                   style={{
                     shadowColor: "#000000",
                     shadowOffset: { width: 0, height: 4 },
@@ -274,7 +316,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                 >
                   <Text
                     style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                    className="text-center text-white text-lg"
+                    className="text-white text-lg"
                   >
                     {t("SearchFarmer.RegisterFarmer")}
                   </Text>
