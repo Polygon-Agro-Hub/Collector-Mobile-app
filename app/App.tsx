@@ -97,6 +97,8 @@ import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
+import DistributionAddOfficerAddressDetails from "@/component/disribution-manger/DistributionAddOfficerAddressDetails";
+import DistributionAddOfficerBasicDetails from "@/component/disribution-manger/DistributionAddOfficerBasicDetails";
 
 
 // LogBox.ignoreAllLogs(true);
@@ -240,6 +242,14 @@ function MainTabNavigator() {
       <Tab.Screen
         name="ReplaceRequestsApprove"
         component={ReplaceRequestsApprove as any}
+      />
+       <Tab.Screen
+        name="DistributionAddOfficerAddressDetails"
+        component={DistributionAddOfficerAddressDetails as any}
+      />
+       <Tab.Screen
+        name="DistributionAddOfficerBasicDetails"
+        component={DistributionAddOfficerBasicDetails as any}
       />
     </Tab.Navigator>
   );

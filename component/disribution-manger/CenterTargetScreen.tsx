@@ -1602,7 +1602,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
               alignItems: "center",
             }}
           >
-            <View className="bg-white rounded-lg p-6 w-11/12 max-w-sm">
+            <View className="bg-white rounded-lg p-6 mx-6 max-w-sm">
               <View className="items-center mb-2">
                 <View className="w-10 h-10 rounded-lg bg-[#F6F7F9] justify-center items-center ">
                   <Image
@@ -1629,6 +1629,13 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   }`}
                   onPress={() => setShowConfirmModal(false)}
                   disabled={loading}
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
+                    elevation: 4,
+                  }}
                 >
                   <Text
                     className={`text-center font-medium ${
@@ -1645,7 +1652,14 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   }`}
                   onPress={confirmAction}
                   disabled={loading}
-                  style={loading ? { opacity: 0.6 } : { opacity: 1 }}
+                  style={{
+                    opacity: loading ? 0.6 : 1,
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
+                    elevation: 4,
+                  }}
                 >
                   <View className="flex-row justify-center items-center">
                     {loading && (
@@ -1858,7 +1872,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                       return (
                         <View className={`px-3 py-2 rounded-full`}>
                           <Text
-                            className={`text-xs font-medium text-center ${
+                            className={`text-base font-medium text-center ${
                               isOnTime ? "text-[#980775]" : "text-[#FF0700]"
                             }`}
                           >

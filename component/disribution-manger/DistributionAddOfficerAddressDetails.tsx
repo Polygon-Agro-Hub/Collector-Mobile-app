@@ -32,9 +32,9 @@ import provincesData from "../../assets/jsons/sri-lanka-provinces.json";
 import { Entypo } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 
-type AddOfficerAddressDetailsNavigationProp = StackNavigationProp<
+type DistributionAddOfficerAddressDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "AddOfficerAddressDetails"
+  "DistributionAddOfficerAddressDetails"
 >;
 
 type City = {
@@ -57,10 +57,13 @@ type Province = {
 
 type ModalKey = "province" | "district" | "bank" | "branch" | null;
 
-const AddOfficerAddressDetails: React.FC = () => {
-  const navigation = useNavigation<AddOfficerAddressDetailsNavigationProp>();
+const DistributionAddOfficerAddressDetails: React.FC = () => {
+  const navigation =
+    useNavigation<DistributionAddOfficerAddressDetailsNavigationProp>();
   const route =
-    useRoute<RouteProp<RootStackParamList, "AddOfficerAddressDetails">>();
+    useRoute<
+      RouteProp<RootStackParamList, "DistributionAddOfficerAddressDetails">
+    >();
 
   const {
     formData: basicDetails,
@@ -401,7 +404,10 @@ const AddOfficerAddressDetails: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        navigation.goBack();
+        navigation.navigate("DistributionAddOfficerBasicDetails", {
+          jobRolle: "Distribution Officer",
+          preservedData: basicDetails,
+        });
         return true;
       };
 
@@ -453,10 +459,15 @@ const AddOfficerAddressDetails: React.FC = () => {
         title={t("AddOfficerAddressDetails.AddOfficer")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() =>
+          navigation.navigate("DistributionAddOfficerBasicDetails", {
+            jobRolle: "Distribution Officer",
+            preservedData: basicDetails,
+          })
+        }
       />
       <ScrollView
-        className="flex-1 bg-white w-full max-w-[500px] mx-auto"
+        className="flex-1 bg-white w-full max-w-[500px]  mx-auto"
         keyboardShouldPersistTaps="handled"
       >
         {/* ── Address Details ── */}
@@ -708,7 +719,12 @@ const AddOfficerAddressDetails: React.FC = () => {
         <View className="px-8 flex-col w-full gap-4 mt-5 mb-4">
           <TouchableOpacity
             className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
-            onPress={() => navigation.goBack()}
+            onPress={() =>
+              navigation.navigate("DistributionAddOfficerBasicDetails", {
+                jobRolle: "Distribution Officer",
+                preservedData: basicDetails,
+              })
+            }
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
@@ -732,7 +748,7 @@ const AddOfficerAddressDetails: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`bg-black rounded-3xl px-6 py-4 w-full items-center ${
+            className={`bg-black rounded-3xl px-6 mb-20 py-4 w-full items-center ${
               loading ? "opacity-50" : ""
             }`}
             onPress={handleSubmit}
@@ -816,4 +832,4 @@ const AddOfficerAddressDetails: React.FC = () => {
   );
 };
 
-export default AddOfficerAddressDetails;
+export default DistributionAddOfficerAddressDetails;

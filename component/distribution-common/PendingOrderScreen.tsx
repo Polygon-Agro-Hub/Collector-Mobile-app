@@ -282,7 +282,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         orderData.packageData.forEach(
           (packageInfo: any, packageIndex: number) => {
             if (packageInfo.items && Array.isArray(packageInfo.items)) {
-              packageInfo.items.forEach((item: any, itemIndex: number) => { });
+              packageInfo.items.forEach((item: any, itemIndex: number) => {});
             }
           },
         );
@@ -626,7 +626,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       } else {
         throw new Error(
           response.data.message ||
-          t("PendingOrderScreen.Failed to complete order"),
+            t("PendingOrderScreen.Failed to complete order"),
         );
       }
     } catch (error) {
@@ -745,16 +745,17 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }
 
     setTimeout(() => {
-      const itemPrice = parseFloat(item.price) || 0;
-      const numericPrice = itemPrice;
+      const unitPrice = parseFloat(item.price) || 0;
+      const itemQty = parseFloat(item.weight) || 1;
+      const totalPrice = unitPrice * itemQty;
 
       setReplaceData({
-        selectedProduct: `${item.name} - ${item.weight}Kg - Rs. ${formatPrice(itemPrice)}`,
-        selectedProductPrice: numericPrice.toString(),
+        selectedProduct: `${item.name} - ${item.weight}Kg - Rs. ${formatPrice(totalPrice)}`,
+        selectedProductPrice: totalPrice.toString(),
         productType: item.productType || 0,
         newProduct: "",
         quantity: "",
-        price: `Rs. ${formatPrice(itemPrice)}`,
+        price: `Rs. ${formatPrice(totalPrice)}`,
         productTypeName: item.productTypeName || "",
       });
 
@@ -882,7 +883,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       } else {
         throw new Error(
           response.data.message ||
-          t("PendingOrderScreen.Failed to submit replacement request"),
+            t("PendingOrderScreen.Failed to submit replacement request"),
         );
       }
     } catch (error) {
@@ -1191,8 +1192,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         visible={showReplaceModal}
         onRequestClose={handleModalClose}
       >
-        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
-          <View className="bg-white rounded-lg mx-6 p-6 w-80">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000040",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View className="bg-white rounded-3xl mx-6 p-6 w-80" style={{}}>
             <View className="justify-between items-center mb-4">
               <Text className="text-lg font-semibold">
                 {t("PendingOrderScreen.Replace Product")}
@@ -1200,17 +1208,28 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             </View>
 
             <View>
-              <View className="border border-red-300 rounded-lg p-3 mb-4 justify-center items-center">
-                <Text className="text-sm text-[#7B7B7B] mb-1">
+              <View className="border border-dashed border-red-300 rounded-lg p-3 mb-4">
+                <Text className="text-base text-[#7B7B7B] mb-1 text-center">
                   {t("PendingOrderScreen.Selected product")}
                 </Text>
-                <Text className="font-medium mb-2">
-                  {replaceData.selectedProduct}
+
+                <Text className="font-medium mb-2 text-center">
+                  {replaceData.selectedProduct?.split(" - ")[0] || ""}
                 </Text>
-                <Text className="text-sm text-[#7B7B7B] mb-1">
+
+                {replaceData.selectedProduct?.includes(" - ") && (
+                  <Text className="font-medium  text-center">
+                    {replaceData.selectedProduct
+                      .split(" - ")
+                      .slice(1)
+                      .join(" - ")}
+                  </Text>
+                )}
+
+                <Text className="text-base text-[#7B7B7B] mb-1 mt-3 text-center">
                   {t("PendingOrderScreen.Product Type")}
                 </Text>
-                <Text className="font-medium">
+                <Text className="font-medium text-center">
                   {replaceData.productTypeName}
                 </Text>
               </View>
@@ -1228,7 +1247,9 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                 >
                   <Text
                     className={
-                      replaceData.newProduct ? "text-black" : "text-gray-400"
+                      replaceData.newProduct
+                        ? "text-black  "
+                        : "text-gray-400 italic"
                     }
                   >
                     {replaceData.newProduct || "--Select New Product--"}
@@ -1271,9 +1292,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
               <View className="mb-4">
                 <TextInput
-                  className={`border rounded-full p-3 bg-white ${quantityError ? "border-red-500" : "border-black"
-                    }`}
+                  className={`border rounded-full p-3 bg-white ${
+                    quantityError ? "border-red-500" : "border-black"
+                  } ${!replaceData.quantity ? "italic" : "not-italic"}`}
                   placeholder="Enter Quantity"
+                  placeholderClassName="italic"
+                  placeholderTextColor="#9CA3AF"
                   value={replaceData.quantity}
                   onChangeText={handleQuantityChange}
                   keyboardType="numeric"
@@ -1296,10 +1320,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               {/* Action Buttons */}
               <View className="gap-y-3">
                 <TouchableOpacity
-                  className={`py-3 rounded-full px-3 ${isFormComplete && !isReplacementPriceHigher
+                  className={`py-3 rounded-full px-3 ${
+                    isFormComplete && !isReplacementPriceHigher
                       ? "bg-[#FA0000]"
                       : "bg-[#FA0000]/50"
-                    }`}
+                  }`}
                   onPress={
                     isFormComplete && !isReplacementPriceHigher
                       ? handleReplaceSubmit
@@ -1527,12 +1552,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           backgroundColor: "#00000040",
           justifyContent: "center",
           alignItems: "center",
-          paddingHorizontal: 24,
+          //   paddingHorizontal: 24,
         }}
       >
-        <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
-          <View className="items-center mb-4"></View>
-          <Text className="text-xl font-bold text-center mb-2">
+       <View className="bg-white rounded-2xl px-6 py-8 w-full max-w-sm">
+  <Text className="text-xl font-bold text-center mb-2">
             {t("PendingOrderScreen.Completed Successfully")}
           </Text>
           <Text className="text-gray-600 text-center mb-6">
@@ -1549,7 +1573,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               }, 100);
             }}
           >
-            <Text className="text-white text-center font-medium">
+            <Text className="text-white text-center  font-medium">
               {t("PendingOrderScreen.OK")}
             </Text>
           </TouchableOpacity>
@@ -1699,6 +1723,17 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         }}
       >
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
+          <Text className="text-[#000000] text-center font-bold mb-2">
+            {t("OpenedOrderScreen.You have unsubmitted changes")
+              .split(" ")
+              .slice(0, 3)
+              .join(" ")}
+            {"\n"}
+            {t("OpenedOrderScreen.You have unsubmitted changes")
+              .split(" ")
+              .slice(3)
+              .join(" ")}
+          </Text>
           <Text className="text-gray-600 text-center mb-6">
             {t("OpenedOrderScreen.If you leave this page now,")}
             {"\n"}
@@ -1753,7 +1788,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       animationType="fade"
       onRequestClose={() => setShowSubmitModal(false)}
     >
-      <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+          paddingHorizontal: 24,
+        }}
+      >
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
           <Text className="text-lg font-semibold text-center mb-2">
             {t("PendingOrderScreen.You have unsubmitted changes")}
@@ -1792,7 +1835,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     </Modal>
   );
 
-
   <Modal
     visible={showCompletionPrompt}
     transparent={true}
@@ -1801,7 +1843,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       handleBackToEdit();
     }}
   >
-    <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: "#00000040",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 24,
+      }}
+    >
       <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
         {/* Title */}
         <Text className="text-xl font-bold text-center mb-2">
@@ -1919,12 +1969,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     className={index > 0 ? "mt-3" : ""}
                   >
                     <TouchableOpacity
-                      className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${packageGroup.allSelected || orderStatus === "Completed"
+                      className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${
+                        packageGroup.allSelected || orderStatus === "Completed"
                           ? "bg-[#D4F7D4] border border-[#4CAF50]"
                           : packageGroup.someSelected
                             ? "bg-[#FFF9C4] border border-[#F9CC33]"
                             : "bg-[#FFF8F8] border border-[#D16D6A]"
-                        } ${orderStatus === "Completed" ? "opacity-100" : ""}`}
+                      } ${orderStatus === "Completed" ? "opacity-100" : ""}`}
                       onPress={() =>
                         togglePackageExpansion(packageGroup.packageId)
                       }
@@ -1959,13 +2010,14 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     {/* Expanded content remains the same */}
                     {isPackageExpanded(packageGroup.packageId) && (
                       <View
-                        className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${packageGroup.allSelected ||
-                            orderStatus === "Completed"
+                        className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${
+                          packageGroup.allSelected ||
+                          orderStatus === "Completed"
                             ? "border-[#4CAF50]"
                             : packageGroup.someSelected
                               ? "border-[#F9CC33]"
                               : "border-[#D16D6A]"
-                          }`}
+                        }`}
                       >
                         {packageGroup.items.map((item) => (
                           <View
@@ -1998,12 +2050,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                               )}
                               <View className="flex-1">
                                 <Text
-                                  className={`font-medium text-black ${orderStatus === "Completed" && item.selected
+                                  className={`font-medium text-black ${
+                                    orderStatus === "Completed" && item.selected
                                       ? "text-black"
                                       : orderStatus === "Completed"
                                         ? "text-black"
                                         : "text-black"
-                                    }`}
+                                  }`}
                                 >
                                   {item.name}
                                 </Text>
@@ -2049,14 +2102,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             {additionalItems.length > 0 && (
               <View className="mx-4 mb-6">
                 <TouchableOpacity
-                  className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${orderStatus === "Completed"
+                  className={`px-4 py-3 rounded-lg flex-row justify-between items-center ${
+                    orderStatus === "Completed"
                       ? "bg-[#D4F7D4] border border-[#4CAF50]"
                       : areAllAdditionalItemsSelected()
                         ? "bg-[#D4F7D4] border border-[#4CAF50]"
                         : hasAdditionalItemSelections()
                           ? "bg-[#FFF9C4] border border-[#F9CC33]"
                           : "bg-[#FFF8F8] border border-[#D16D6A]"
-                    }`}
+                  }`}
                   onPress={() =>
                     setAdditionalItemsExpanded(!additionalItemsExpanded)
                   }
@@ -2076,14 +2130,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
                 {additionalItemsExpanded && (
                   <View
-                    className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${orderStatus === "Completed"
+                    className={`bg-white border border-t-0 rounded-b-lg px-4 py-4 ${
+                      orderStatus === "Completed"
                         ? "border-[#4CAF50]"
                         : areAllAdditionalItemsSelected()
                           ? "border-[#4CAF50]"
                           : hasAdditionalItemSelections()
                             ? "border-[#F9CC33]"
                             : "border-[#D16D6A]"
-                      }`}
+                    }`}
                   >
                     {additionalItems.map((item) => (
                       <View
@@ -2092,12 +2147,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                       >
                         <View className="flex-1">
                           <Text
-                            className={`font-medium ${orderStatus === "Completed" && item.selected
+                            className={`font-medium ${
+                              orderStatus === "Completed" && item.selected
                                 ? "text-black"
                                 : orderStatus === "Completed"
                                   ? "text-gray-600 line-through"
                                   : "text-black"
-                              }`}
+                            }`}
                           >
                             {item.name}
                           </Text>
@@ -2159,7 +2215,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           <SuccessModal />
 
           {orderStatus !== "Completed" && (
-            <View className="absolute bottom-1 left-2 right-2 bg-white px-4 h-[50px]">
+            <View className="absolute bottom-10 left-2 right-2 bg-white px-4 h-[50px]">
               <TouchableOpacity
                 className={`h-[50px] justify-center rounded-full px-3 ${showWarning ? "bg-black" : "bg-gray-400"}`}
                 onPress={handleSubmitPress}
@@ -2195,7 +2251,15 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   animationType="fade"
                   onRequestClose={handleBackToEdit}
                 >
-                  <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#00000040",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      paddingHorizontal: 24,
+                    }}
+                  >
                     <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
                       <Text
                         className="text-xl font-bold text-center mb-2"

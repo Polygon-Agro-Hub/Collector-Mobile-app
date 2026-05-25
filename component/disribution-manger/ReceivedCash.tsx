@@ -366,7 +366,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
             }}
           >
             <View className="items-center justify-center py-20">
-              <View className="flex items-center justify-center mb-4">
+              <View className="flex items-center justify-center ">
                 <LottieView
                   source={require("../../assets/lottie/no-data.json")}
                   autoPlay
@@ -374,7 +374,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   style={{ width: 150, height: 150 }}
                 />
               </View>
-              <Text className="text-[#828282] text-base italic">
+              <Text className="text-[#828282] mt-[-5%] text-base italic">
                 - {t("ReceivedCash.No cash was received today")} -
               </Text>
             </View>
