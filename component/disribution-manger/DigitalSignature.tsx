@@ -11,7 +11,7 @@ import Signature from "react-native-signature-canvas";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "@/component/types";
+import { RootStackParamList } from "@/component/types/types";
 import * as ScreenOrientation from "expo-screen-orientation";
 import {
   widthPercentageToDP as wp,
@@ -21,7 +21,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -200,7 +200,7 @@ export default function DigitalSignature({
           ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
         );
 
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(() => resolve(null), 300));
 
         if (!isActive) return;
 

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type EditTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -94,14 +94,14 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
       />
 
       {/* Content */}
-      <View className="mt-6 space-y-6 p-8">
+      <View className="mt-6 gap-y-6 p-8 w-full max-w-[500px] mx-auto">
         {/* Total Target */}
         <View>
           <Text className="text-[#475A6A] font-medium">
             {t("EditTargetManager.TotalTarget")}
           </Text>
           <TextInput
-            className="border border-gray-300 rounded-md px-3 py-2 mt-2 text-gray-800"
+            className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 mt-2 text-gray-800 h-[50px] "
             value={qty.toString()}
             editable={false}
           />
@@ -112,7 +112,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
           <Text className="text-gray-600 font-medium">
             {t("EditTargetManager.Assigned Target")}
           </Text>
-          <View className="flex-row items-center mt-2 border border-gray-300 rounded-md px-3 py-2">
+          <View className="flex-row items-center mt-2 border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 h-[50px]">
             <Text className="flex-1 text-gray-800">
               {" "}
               {target ? target.toString() : "0"}{" "}
@@ -128,9 +128,9 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
 
           {/* Buttons in Edit Mode */}
           {isEditing && (
-            <View className="flex-row justify-center space-x-4 mt-4 p-5">
+            <View className="flex-row justify-center gap-4 mt-4 p-5">
               <TouchableOpacity
-                className="flex-1 bg-[#FF0700] px-6 py-2 rounded-full items-center"
+                className="flex-1 bg-[#FF0700] px-6 py-2 rounded-full items-center h-[50px] justify-center"
                 onPress={() =>
                   navigation.navigate("PassTargetBetweenOfficers" as any, {
                     varietyNameEnglish,
@@ -145,6 +145,13 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                     officerId,
                   })
                 }
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-white font-medium"
@@ -153,14 +160,14 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                       ? { fontSize: 13 }
                       : i18n.language === "ta"
                         ? { fontSize: 12 }
-                        : { fontSize: 14 },
+                        : { fontSize: 16 },
                   ]}
                 >
                   {t("EditTargetManager.Pass")}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="flex-1 bg-[#980775] px-6 py-2 rounded-full items-center"
+                className="flex-1 bg-[#980775] px-6 py-2 rounded-full items-center justify-center"
                 onPress={() =>
                   navigation.navigate("RecieveTargetBetweenOfficers" as any, {
                     varietyNameEnglish,
@@ -175,6 +182,13 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                     officerId,
                   })
                 }
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-white font-medium"
@@ -183,7 +197,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                       ? { fontSize: 13 }
                       : i18n.language === "ta"
                         ? { fontSize: 12 }
-                        : { fontSize: 14 },
+                        : { fontSize: 16 },
                   ]}
                 >
                   {t("EditTargetManager.Receive")}
@@ -199,7 +213,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
             {t("EditTargetManager.Amount")}
           </Text>
           <TextInput
-            className="border border-gray-300 rounded-md px-3 py-2 mt-2 text-gray-800"
+            className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 mt-2 text-gray-800 h-[50px]"
             value={todo.toString()}
             editable={false}
           />

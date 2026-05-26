@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
@@ -14,8 +15,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal"; 
+import CustomHeader from "../navigations/CustomHeader";
+import GlobalSearchModal from "@/component/commons/GlobalSearchModal";
+import SuccessModal from "../commons/SuccessModal";
 
 interface PassTargetProps {
   navigation: any;
@@ -56,6 +58,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
     invoiceNumbers = [],
     processOrderId = [],
     officerId,
+    collectionOfficerId,
   } = route.params;
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -63,10 +66,32 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedAssignee, setSelectedAssignee] = useState("");
   const [targetItems, setTargetItems] = useState<TargetItem[]>([]);
-  const [officers, setOfficers] = useState<{ label: string; value: string }[]>([]);
+  const [officers, setOfficers] = useState<{ label: string; value: string }[]>(
+    [],
+  );
   const [loadingOfficers, setLoadingOfficers] = useState<boolean>(false);
   const [officerModalVisible, setOfficerModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
+  const [successVisible, setSuccessVisible] = useState<boolean>(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("DailyTargetListOfficerDistribution", {
+          officerId,
+          collectionOfficerId,
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const getOfficerName = useCallback(
     (officer: Officer) => {
@@ -100,17 +125,51 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
 
   const getStatusColor = (status: string) => {
     const s = status?.toLowerCase();
-    if (["completed", "සම්පූර්ණ", "සම්පූර්ණයි", "முடிக்கப்பட்டது", "நிறைவு"].includes(s)) return "bg-[#BBFFC6]";
-    if (["opened", "විවෘත", "විවෘතයි", "திறக்கப்பட்டது", "திறந்த"].includes(s)) return "bg-[#F8FFA6]";
-    if (["pending", "අපේක්ෂිත", "පොරොත්තුවේ", "நிலுவையில்", "காத்திருக்கும்"].includes(s)) return "bg-[#FF070733]";
+    if (
+      [
+        "completed",
+        "සම්පූර්ණ",
+        "සම්පූර්ණයි",
+        "முடிக்கப்பட்டது",
+        "நிறைவு",
+      ].includes(s)
+    )
+      return "bg-[#BBFFC6]";
+    if (["opened", "විවෘත", "විවෘතයි", "திறக்கப்பட்டது", "திறந்த"].includes(s))
+      return "bg-[#F8FFA6]";
+    if (
+      [
+        "pending",
+        "අපේක්ෂිත",
+        "පොරොත්තුවේ",
+        "நிலுவையில்",
+        "காத்திருக்கும்",
+      ].includes(s)
+    )
+      return "bg-[#FF070733]";
     return "bg-gray-100";
   };
 
   const getStatusTextColor = (status: string) => {
     const s = status?.toLowerCase();
-    if (["completed", "සම්පූර්ණ", "සම්පූර්ණයි", "முடிக்கப்பட்டது", "நிறைவு"].includes(s)) return "text-[#6AD16D]";
-    if (["opened", "විවෘත", "විවෘතයි", "திறக்கப்பட்டது", "திறந்த"].includes(s)) return "text-[#A8A100]";
-    if (["pending", "අපේක්ෂිත", "பொரொ", "நிலுவையில்", "காத்திருக்கும்"].includes(s)) return "text-[#FF0700]";
+    if (
+      [
+        "completed",
+        "සම්පූර්ණ",
+        "සම්පූර්ණයි",
+        "முடிக்கப்பட்டது",
+        "நிறைவு",
+      ].includes(s)
+    )
+      return "text-[#6AD16D]";
+    if (["opened", "විවෘත", "විවෘතයි", "திறக்கப்பட்டது", "திறந்த"].includes(s))
+      return "text-[#A8A100]";
+    if (
+      ["pending", "අපේක්ෂිත", "பொரொ", "நிலுவையில்", "காத்திருக்கும்"].includes(
+        s,
+      )
+    )
+      return "text-[#FF0700]";
     return "text-gray-600";
   };
 
@@ -152,9 +211,12 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
       if (response.data.success && response.data.data) {
         const officerDropdownData = response.data.data
           .filter((officer: Officer) => {
-            const isCurrentById = officer.id?.toString() === officerId?.toString();
-            const isCurrentByEmpId = officer.empId?.toString() === officerId?.toString();
-            const isDistributionOfficer = officer.jobRole === "Distribution Officer";
+            const isCurrentById =
+              officer.id?.toString() === officerId?.toString();
+            const isCurrentByEmpId =
+              officer.empId?.toString() === officerId?.toString();
+            const isDistributionOfficer =
+              officer.jobRole === "Distribution Officer";
             return !isCurrentById && !isCurrentByEmpId && isDistributionOfficer;
           })
           .map((officer: Officer) => ({
@@ -178,7 +240,8 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
     if (passedSelectedItems && passedSelectedItems.length > 0) {
       const items: TargetItem[] = passedSelectedItems.map((itemId, index) => ({
         id: index + 1,
-        invoiceNumber: invoiceNumbers[index] || `INV${itemId.toString().padStart(6, "0")}`,
+        invoiceNumber:
+          invoiceNumbers[index] || `INV${itemId.toString().padStart(6, "0")}`,
         status: "Pending",
         processOrderId: itemId,
         distributedTargetItemId: itemId,
@@ -191,6 +254,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
     useCallback(() => {
       prepareTargetItems();
       fetchOfficers();
+      setSelectedAssignee("");
     }, [prepareTargetItems, fetchOfficers]),
   );
 
@@ -240,7 +304,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
       );
 
       if (response.data.success) {
-        navigation.goBack();
+        setSuccessVisible(true);
       } else {
         setError(response.data.message || t("Error.Failed to save data."));
       }
@@ -268,7 +332,8 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
     }
   };
 
-  const selectedOfficerLabel = officers.find((o) => o.value === selectedAssignee)?.label || null;
+  const selectedOfficerLabel =
+    officers.find((o) => o.value === selectedAssignee)?.label || null;
 
   return (
     <>
@@ -277,7 +342,12 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           title={`${t("PassTarget.EMP ID")} : ${officerId}`}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() => navigation.goBack()}
+          onBackPress={() =>
+            navigation.navigate("DailyTargetListOfficerDistribution", {
+              officerId,
+              collectionOfficerId,
+            })
+          }
           textColor="white"
           bgColor="#282828"
           iconBgColor="#FFFFFF1A"
@@ -289,7 +359,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           }
         >
           {/* Assignee Selection */}
-          <View className="bg-white mx-4 my-2 p-4 rounded-full shadow-sm">
+          <View className="bg-white mx-4 my-2 p-4 ">
             <View className="flex-row items-center mb-3">
               <Text className="text-[#475A6A] font-semibold flex-1">
                 {selectedAssignee
@@ -326,9 +396,14 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
                   }}
                   numberOfLines={1}
                 >
-                  {selectedOfficerLabel || t("PassTargetBetweenOfficers.Select an officer")}
+                  {selectedOfficerLabel ||
+                    t("PassTargetBetweenOfficers.Select an officer")}
                 </Text>
-                <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+                <MaterialIcons
+                  name="keyboard-arrow-down"
+                  size={22}
+                  color="#9CA3AF"
+                />
               </TouchableOpacity>
             )}
           </View>
@@ -336,7 +411,13 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           {/* Selected Targets */}
           <View className="bg-white my-2 rounded-lg mb-20">
             <View className="items-center justify-center">
-              <Text style={{ fontStyle: "italic", color: "#2d3748", marginBottom: 12 }}>
+              <Text
+                style={{
+                  fontStyle: "italic",
+                  color: "#2d3748",
+                  marginBottom: 12,
+                }}
+              >
                 --{t("PassTarget.Selected Targets")}--
               </Text>
             </View>
@@ -358,8 +439,12 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
                     </Text>
                   </View>
                   <View className="w-36 items-center justify-center py-3">
-                    <View className={`px-5 py-1 rounded-full ${getStatusColor(item.status)}`}>
-                      <Text className={`text-xs font-medium ${getStatusTextColor(item.status)}`}>
+                    <View
+                      className={`px-8 py-3 rounded-full ${getStatusColor(item.status)}`}
+                    >
+                      <Text
+                        className={`text-base font-medium ${getStatusTextColor(item.status)}`}
+                      >
                         {getStatusText(item.status)}
                       </Text>
                     </View>
@@ -374,14 +459,26 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
         <TouchableOpacity
           onPress={handleSave}
           disabled={loading || !selectedAssignee || loadingOfficers}
-          className={`absolute bottom-10 left-4 right-4 py-3 rounded-full items-center shadow-md mr-6 ml-6 ${
-            loading || !selectedAssignee || loadingOfficers ? "bg-white" : "bg-[#980775]"
+          className={`absolute left-4 right-4 py-3 h-[50px] rounded-full items-center justify-center mr-6 ml-6 ${
+            loading || !selectedAssignee || loadingOfficers
+              ? "bg-[#C0C0C0]"
+              : "bg-[#980775]"
           }`}
+          style={{
+            bottom: 100,
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 6,
+          }}
         >
           {loading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white font-bold">{t("PassTarget.Save")}</Text>
+            <Text className="text-white font-bold text-lg">
+              {t("PassTarget.Save")}
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -389,12 +486,32 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
         {error && (
           <View className="absolute top-20 left-4 right-4 bg-red-100 border border-red-400 px-4 py-3 rounded">
             <Text className="text-red-700 text-center">{error}</Text>
-            <TouchableOpacity onPress={() => setError(null)} className="mt-2 self-center">
-              <Text className="text-red-600 font-medium">{t("PassTarget.Dismiss")}</Text>
+            <TouchableOpacity
+              onPress={() => setError(null)}
+              className="mt-2 self-center"
+            >
+              <Text className="text-red-600 font-medium">
+                {t("PassTarget.Dismiss")}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
+
+      <SuccessModal
+        visible={successVisible}
+        title={t("PassTarget.Success")}
+        message={t("PassTarget.Target passed successfully.")}
+        autoClose={true}
+        duration={3000}
+        onClose={() => {
+          setSuccessVisible(false);
+          navigation.navigate("DailyTargetListOfficerDistribution", {
+            officerId,
+            collectionOfficerId,
+          });
+        }}
+      />
 
       {/* Officer Modal */}
       <GlobalSearchModal
@@ -406,6 +523,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
         onSelect={(items) => setSelectedAssignee(items[0] ?? "")}
         searchPlaceholder={t("PassTarget.Search officers")}
         multiSelect={false}
+        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,9 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  BackHandler,
 } from "react-native";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -23,7 +21,8 @@ import { Modal } from "react-native";
 import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -43,6 +42,7 @@ interface FailModalProps {
   onClose: () => void;
   onFail: () => void;
 }
+
 const ShowSuccessModal: React.FC<SuccessModalProps> = ({
   visible,
   onClose,
@@ -68,23 +68,29 @@ const ShowSuccessModal: React.FC<SuccessModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View className="flex-1 justify-center items-center bg-black/50">
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
-            {" "}
             {t("BankDetailsUpdate.Success")}
           </Text>
 
           <Image
             source={require("../../assets/images/collection-common/otpsuccess.webp")}
-            style={{ width: 100, height: 100 }}
+            style={{ width: 80, height: 80, marginVertical: 16 }}
+            resizeMode="contain"
           />
 
           <Text className="text-gray-500 mb-4">
             {t("BankDetailsUpdate.SuccessMessage")}
           </Text>
 
-          {/* Progress Bar - Fixed to Bottom */}
           <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
             <Animated.View
               style={{
@@ -128,16 +134,23 @@ const ShowFailModal: React.FC<FailModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View className="flex-1 justify-center items-center bg-black/50">
-        <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#00000040",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <View className="bg-white p-6 rounded-2xl items-center w-72 h-60 shadow-lg relative">
           <Text className="text-xl font-bold mt-4 text-center">
-            {" "}
             {t("BankDetailsUpdate.Failed")}
           </Text>
 
           <Image
             source={require("../../assets/images/collection-common/error.webp")}
-            style={{ width: 100, height: 100 }}
+            style={{ width: 80, height: 80, marginVertical: 16 }}
+            resizeMode="contain"
           />
 
           <Text className="text-gray-500 mb-4">
@@ -156,7 +169,6 @@ const ShowFailModal: React.FC<FailModalProps> = ({
             </Text>
           </TouchableOpacity>
 
-          {/* Progress Bar - Fixed to Bottom */}
           <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
             <Animated.View
               style={{
@@ -187,6 +199,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     PreferdLanguage,
     officerRole,
   } = route.params;
+
   const [otpCode, setOtpCode] = useState<string>("");
   const [maskedCode, setMaskedCode] = useState<string>("XXXXX");
   const [referenceId, setReferenceId] = useState<string | null>(null);
@@ -197,59 +210,101 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [language, setLanguage] = useState("en");
   const [isOtpValid, setIsOtpValid] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [failModalVisible, setFailModalVisible] = useState(false);
+  const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
+  const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
+  const [farmerData, setFarmerData] = useState<{
+    NICnumber: string;
+    userId: string;
+  } | null>(null);
   const inputRefs = useRef<Array<TextInput | null>>([]);
-  const handleSuccessCompletion = () => {
-    setModalVisible(false);
 
-    if (officerRole === "COO") {
-      navigation.navigate("FarmerQr" as any, {
-        NICnumber,
-        userId: farmerId,
-      });
-    } else if (officerRole === "CCM") {
-      navigation.navigate("SearchFarmerScreen" as any);
-    }
-  };
+  // Reset all OTP state and restart timer every time screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      setOtpCode("");
+      setIsOtpValid(false);
+      setTimer(240);
+      setDisabledResend(true);
+      setIsVerified(false);
+      setIsOtpExpired(false);
+      setVerificationAttempts(0);
+      setModalVisible(false);
+      setFailModalVisible(false);
+      inputRefs.current.forEach((ref) => ref?.clear());
 
-  const handleFailCompletion = () => {
-    setModalVisible(false);
-  };
+      const fetchReferenceId = async () => {
+        try {
+          const refId = await AsyncStorage.getItem("referenceId");
+          if (refId) setReferenceId(refId);
+        } catch (error) {
+          console.error("Failed to load referenceId:", error);
+        }
+      };
+      fetchReferenceId();
+    }, []),
+  );
 
+  // Set language on mount
   useEffect(() => {
     const selectedLanguage = t("Otpverification.LNG");
     setLanguage(selectedLanguage);
-    const fetchReferenceId = async () => {
-      try {
-        const refId = await AsyncStorage.getItem("referenceId");
-        if (refId) {
-          setReferenceId(refId);
-        }
-      } catch (error) {
-        console.error("Failed to load referenceId:", error);
-      }
-    };
-
-    fetchReferenceId();
   }, []);
 
+  // Countdown timer
   useEffect(() => {
     if (timer > 0 && !isVerified) {
       const interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer - 1);
       }, 1000);
-
       setDisabledResend(true);
-
       return () => clearInterval(interval);
     } else if (timer === 0 && !isVerified) {
       setDisabledResend(false);
     }
   }, [timer, isVerified]);
 
+  // Hardware back button
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("UpdateFarmerBankDetails" as any, {
+        id: farmerId,
+        NICnumber: NICnumber,
+        phoneNumber: phoneNumber,
+        PreferdLanguage: PreferdLanguage,
+        officerRole: "COO",
+      });
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
+  const handleSuccessCompletion = () => {
+    setModalVisible(false);
+    if (farmerData) {
+      navigation.navigate("FarmerQr" as any, {
+        NICnumber: farmerData.NICnumber,
+        userId: farmerData.userId,
+      });
+    }
+  };
+
+  const handleFailCompletion = () => {
+    setFailModalVisible(false);
+  };
+
   const handleOtpChange = (text: string, index: number) => {
+    const filtered = text.replace(/[^0-9]/g, "");
+    if (!filtered && text.length > 0) return;
+
     const updatedOtpCode = otpCode.split("");
-    updatedOtpCode[index] = text;
+    updatedOtpCode[index] = filtered;
 
     for (let i = 0; i < 5; i++) {
       if (updatedOtpCode[i] === undefined) updatedOtpCode[i] = "";
@@ -258,7 +313,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     setOtpCode(updatedOtpCode.join(""));
     setIsOtpValid(updatedOtpCode.every((c) => c !== ""));
 
-    if (text && index < 4) {
+    if (filtered && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
     if (updatedOtpCode.every((c) => c !== "")) {
@@ -294,64 +349,112 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
+      Alert.alert(t("Error.Sorry"), t("Error.noInternet"));
+      return;
+    }
+
+    if (isOtpExpired || timer === 0) {
+      Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
       return;
     }
 
     try {
       const refId = referenceId;
-
       const url = "https://api.getshoutout.com/otpservice/verify";
       const headers = {
         Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
         "Content-Type": "application/json",
       };
 
-      const body = {
-        code: code,
-        referenceId: refId,
-      };
+      const response = await axios.post(
+        url,
+        { code, referenceId: refId },
+        { headers },
+      );
 
-      const response = await axios.post(url, body, { headers });
+      const { statusCode, message } = response.data;
 
-      const { statusCode } = response.data;
+      switch (statusCode) {
+        case "1000":
+          setIsVerified(true);
 
-      if (statusCode === "1000") {
-        setIsVerified(true);
-        setModalVisible(true);
+          const saveResponse = await axios.post(
+            `${environment.API_BASE_URL}api/farmer/FarmerBankDetails`,
+            {
+              accNumber,
+              accHolderName,
+              bankName,
+              branchName,
+              userId: farmerId,
+              NICnumber,
+            },
+          );
 
-        const response = await axios.post(
-          `${environment.API_BASE_URL}api/farmer/FarmerBankDetails`,
-          {
-            accNumber: accNumber,
-            accHolderName: accHolderName,
-            bankName: bankName,
-            branchName: branchName,
-            userId: farmerId,
-            NICnumber: NICnumber,
-          },
-        );
-
-        if (response.status === 200) {
           await AsyncStorage.removeItem("referenceId");
-          <ShowSuccessModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onComplete={handleSuccessCompletion}
-          />;
-        } else {
-          <ShowFailModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onFail={handleFailCompletion}
-          />;
-        }
-      } else if (statusCode === "1001") {
+
+          if (saveResponse.status === 200) {
+            // ✅ Use data directly from saveResponse — no second API call needed
+            setFarmerData({
+              NICnumber: saveResponse.data.NICnumber,
+              userId: saveResponse.data.userId,
+            });
+            setModalVisible(true);
+          } else {
+            setFailModalVisible(true);
+          }
+          break;
+        case "1001":
+          setVerificationAttempts((prev: number) => prev + 1);
+
+          if (verificationAttempts >= 2) {
+            Alert.alert(
+              t("Error.Sorry"),
+              t("Otpverification.OTPExpiredOrInvalid"),
+              [
+                {
+                  text: t("Otpverification.ResendOTP"),
+                  onPress: handleResendOTP,
+                },
+                {
+                  text: t("Otpverification.TryAgain"),
+                  onPress: () => {
+                    setOtpCode("");
+                    setIsOtpValid(false);
+                    inputRefs.current.forEach((ref) => ref?.clear());
+                    inputRefs.current[0]?.focus();
+                  },
+                },
+              ],
+            );
+          } else {
+            Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+          }
+          break;
+
+        case "1002":
+          setIsOtpExpired(true);
+          Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+          break;
+
+        default:
+          Alert.alert(
+            t("Error.Sorry"),
+            message || t("Error.somethingWentWrong"),
+          );
+      }
+    } catch (error: any) {
+      console.error("OTP Verification Error:", error);
+
+      const errStatusCode = error.response?.data?.statusCode;
+
+      if (errStatusCode === "1002") {
+        setIsOtpExpired(true);
+        Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+      } else if (errStatusCode === "1001") {
         Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       } else {
         Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
       }
-    } catch (error) {
-      Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
     }
   };
 
@@ -371,44 +474,21 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       if (PreferdLanguage === "Sinhala") {
         companyName =
           (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
-        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  නිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
+        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (PreferdLanguage === "Tamil") {
         companyName =
           (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
-        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  சரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
+        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
         companyName =
           (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
-        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  If correct, share OTP only with the ${companyName} representative who contacts you.`;
+        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
       const body = {
         source: "PolygonAgro",
         transport: "sms",
-        content: {
-          sms: otpMessage,
-        },
+        content: { sms: otpMessage },
         destination: `${phoneNumber}`,
       };
 
@@ -417,16 +497,20 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       if (response.data.referenceId) {
         await AsyncStorage.setItem("referenceId", response.data.referenceId);
         setReferenceId(response.data.referenceId);
-
         Alert.alert(t("Otpverification.Success"), t("Error.otpResent"));
         setTimer(240);
         setDisabledResend(true);
+        setIsOtpExpired(false);
+        setVerificationAttempts(0);
+        setOtpCode("");
+        setIsOtpValid(false);
+        inputRefs.current.forEach((ref) => ref?.clear());
+        inputRefs.current[0]?.focus();
       } else {
         Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-
       Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
     }
   };
@@ -437,13 +521,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
-  const dynamicStyles = {
-    imageWidth: screenWidth < 400 ? wp(28) : wp(35),
-    imageHeight: screenWidth < 400 ? wp(28) : wp(28),
-    margingTopForImage: screenWidth < 400 ? wp(1) : wp(16),
-    margingTopForBtn: screenWidth < 400 ? wp(0) : wp(10),
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -451,60 +528,67 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       className="bg-white"
       style={{ flex: 1 }}
     >
-      <ScrollView className="flex-1 " keyboardShouldPersistTaps="handled">
-        <CustomHeader
-          title={t("")}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() => navigation.goBack()}
-        />
+      <CustomHeader
+        title={t("")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.navigate("UpdateFarmerBankDetails" as any, {
+            id: farmerId,
+            NICnumber: NICnumber,
+            phoneNumber: phoneNumber,
+            PreferdLanguage: PreferdLanguage,
+            officerRole: "COO",
+          })
+        }
+      />
+      <ScrollView
+        className="flex-1 bg-white w-full max-w-[500px] mx-auto"
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 32,
+          justifyContent: "center",
+        }}
+      >
+        <View className="flex justify-center items-center px-[20px] pt-[15px]">
+          <View className="mb-[32px]">
+            <Image
+              source={require("../../assets/images/collection-common/opt.webp")}
+              className="w-[180px] h-[160px]"
+              resizeMode="contain"
+            />
+          </View>
 
-        <View
-          className="flex justify-center items-center"
-          style={{
-            marginTop: dynamicStyles.margingTopForImage,
-            paddingHorizontal: wp(4),
-            paddingVertical: hp(2),
-          }}
-        >
-          <Image
-            source={require("../../assets/images/collection-common/opt.webp")}
-            style={{
-              width: dynamicStyles.imageWidth,
-              height: dynamicStyles.imageHeight,
-            }}
-          />
-
-          <View className="">
-            <Text className="mt-3 text-lg text-black text-center font-bold">
+          <View className="mb-7">
+            <Text className="text-black text-center font-bold text-[22px]">
               {t("Otpverification.EnterCode")}
             </Text>
           </View>
-          {language === "en" ? (
-            <View className="mt-4">
-              <Text className="text-md text-[#0085FF] text-center pt-1 ">
-                {phoneNumber}
-              </Text>
-            </View>
-          ) : (
-            <View className="mt-5">
-              <Text className="text-md text-[#0085FF] text-center ">
-                {phoneNumber}
-              </Text>
-            </View>
-          )}
-          <View className="flex-row justify-center gap-3 mt-4 px-4">
+
+          <View className="mb-5">
+            <Text className="text-[#0085FF] text-center text-[18px]">
+              {phoneNumber}
+            </Text>
+          </View>
+
+          <View className="flex-row justify-center gap-x-[10px] mb-[32px]">
             {Array.from({ length: 5 }).map((_, index) => (
               <TextInput
                 key={index}
                 ref={(el: TextInput | null) => {
                   inputRefs.current[index] = el;
                 }}
-                className={`w-12 h-12 text-lg text-center rounded-lg shadow-[#00000040] ${
-                  otpCode[index]
-                    ? "bg-[#FFFFFF] text-black pb-2"
-                    : "bg-[#FFFFFF] text-black"
-                }`}
+                className="w-[51px] h-[48px] text-[24px] text-center rounded-[10px] bg-white text-black border-[#FFC738] border-[1px]"
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 4,
+                  elevation: 4,
+                  textAlignVertical: "center",
+                }}
                 keyboardType="numeric"
                 maxLength={1}
                 value={otpCode[index] || ""}
@@ -512,35 +596,25 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                 onKeyPress={(e) => handleKeyPress(e, index)}
                 placeholder={maskedCode[index] || "_"}
                 placeholderTextColor="lightgray"
-                style={{
-                  borderColor: "#FFC738",
-                  borderWidth: 1,
-
-                  shadowColor: "#000000",
-                  shadowOffset: {
-                    width: 0,
-                    height: 4,
-                  },
-
-                  shadowRadius: 4,
-
-                  elevation: 4,
-                }}
               />
             ))}
           </View>
 
-          <View className="mt-5">
-            <Text className="text-md text-[#707070] pt-1">
+          <View className="mb-[16px]">
+            <Text className="text-[#707070] text-center text-[18px]">
               {t("Otpverification.Didreceive")}
             </Text>
           </View>
 
-          <View className="mt-1 mb-9">
+          <View className="mb-[64px]">
             <Text
-              className="mt-3 text-lg text-black text-center underline"
+              className="text-center underline"
               onPress={disabledResend ? undefined : handleResendOTP}
-              style={{ color: disabledResend ? "gray" : "black" }}
+              style={{
+                fontSize: 16,
+                color: disabledResend ? "#9CA3AF" : "#000000",
+                fontWeight: "600",
+              }}
             >
               {timer > 0
                 ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
@@ -553,23 +627,30 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             onClose={() => setModalVisible(false)}
             onComplete={handleSuccessCompletion}
           />
-          <View style={{ marginTop: dynamicStyles.margingTopForBtn }}>
+
+          <ShowFailModal
+            visible={failModalVisible}
+            onClose={() => setFailModalVisible(false)}
+            onFail={handleFailCompletion}
+          />
+
+          <View className="w-full items-center" style={{ marginBottom: 52 }}>
             <TouchableOpacity
+              className={`w-[281px] h-[50px] rounded-[20px] items-center justify-center ${
+                !isOtpValid || isVerified ? "bg-[#9CA3AF]" : "bg-black"
+              }`}
               style={{
-                height: hp(7),
-                width: wp(80),
-                backgroundColor: "#000000",
-                shadowColor: "#000",
+                shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 8,
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 4,
               }}
-              className="flex items-center justify-center mx-auto rounded-full mb-8"
               onPress={handleVerify}
-              disabled={isVerified}
+              disabled={!isOtpValid || isVerified}
+              activeOpacity={0.8}
             >
-              <Text className="text-white text-lg">
+              <Text className="text-white font-semibold text-[18px]">
                 {t("Otpverification.Verify")}
               </Text>
             </TouchableOpacity>

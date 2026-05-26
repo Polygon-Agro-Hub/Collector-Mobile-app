@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { MaterialIcons } from "@expo/vector-icons";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import GlobalSearchModal from "../common/GlobalSearchModal"; 
+import GlobalSearchModal from "@/component/commons/GlobalSearchModal";  
 
 type SetTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,

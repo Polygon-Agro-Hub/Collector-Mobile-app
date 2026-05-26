@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,8 +16,8 @@ import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../navigations/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 type RecieveTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -50,14 +50,15 @@ interface Officer {
   fullNameTamil: string;
 }
 
-const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenProps> = ({
-  navigation,
-  route,
-}) => {
+const RecieveTargetBetweenOfficers: React.FC<
+  RecieveTargetBetweenOfficersScreenProps
+> = ({ navigation, route }) => {
   const [assignee, setAssignee] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
-  const [officers, setOfficers] = useState<{ label: string; value: string }[]>([]);
+  const [officers, setOfficers] = useState<{ label: string; value: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [fetchingTarget, setFetchingTarget] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -84,9 +85,12 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
 
   const getOfficerName = (officer: Officer) => {
     switch (selectedLanguage) {
-      case "si": return officer.fullNameSinhala;
-      case "ta": return officer.fullNameTamil;
-      default: return officer.fullNameEnglish;
+      case "si":
+        return officer.fullNameSinhala;
+      case "ta":
+        return officer.fullNameTamil;
+      default:
+        return officer.fullNameEnglish;
     }
   };
 
@@ -172,8 +176,16 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
   }, []);
 
   const handleAmountChange = (text: string) => {
-    setAmount(text);
-    const numericValue = parseFloat(text);
+    let sanitized = text.replace(/[^0-9.]/g, "");
+
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    setAmount(sanitized);
+
+    const numericValue = parseFloat(sanitized);
     if (numericValue > maxAmount) {
       setError(t("Error.You have exceeded the maximum amount."));
     } else {
@@ -236,7 +248,10 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
       );
 
       if (response.status === 200) {
-        Alert.alert(t("Error.Success"), t("Error.Target received successfully."));
+        Alert.alert(
+          t("Error.Success"),
+          t("Error.Target received successfully."),
+        );
         navigation.navigate("DailyTargetListForOfficers" as any, {
           officerId,
           collectionOfficerId,
@@ -246,7 +261,10 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
       }
     } catch (error: any) {
       console.error("Receive Target Error:", error);
-      Alert.alert(t("Error.error"), t("Error.An error occurred while transferring the target."));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.An error occurred while transferring the target."),
+      );
     } finally {
       setFetchingTarget(false);
     }
@@ -254,17 +272,24 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
 
   const getvarietyName = () => {
     switch (selectedLanguage) {
-      case "si": return route.params.varietyNameSinhala;
-      case "ta": return route.params.varietyNameTamil;
-      default: return route.params.varietyNameEnglish;
+      case "si":
+        return route.params.varietyNameSinhala;
+      case "ta":
+        return route.params.varietyNameTamil;
+      default:
+        return route.params.varietyNameEnglish;
     }
   };
 
-  const selectedOfficerLabel = officers.find((o) => o.value === assignee)?.label || null;
+  const selectedOfficerLabel =
+    officers.find((o) => o.value === assignee)?.label || null;
 
   return (
     <>
-      <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        className="flex-1 bg-white"
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="flex-1 bg-white mb-4">
           <CustomHeader
             title={getvarietyName() || ""}
@@ -276,7 +301,7 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
             iconBgColor="#FFFFFF1A"
           />
 
-          <View className="bg-white rounded-lg p-4">
+          <View className="bg-white rounded-lg p-4 w-full max-w-[500px] mx-auto">
             <View className="p-5">
               <Text className="text-gray-700 mb-2">
                 {t("PassTargetBetweenOfficers.Short Stock Assignee")}
@@ -291,10 +316,10 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
                   onPress={() => setOfficerModalVisible(true)}
                   style={{
                     height: 50,
+                    backgroundColor: "#F4F4F4",
+                    borderRadius: 25,
                     borderWidth: 1,
-                    borderColor: "#CFCFCF",
-                    borderRadius: 8,
-                    backgroundColor: "white",
+                    borderColor: "#F4F4F4",
                     paddingHorizontal: 14,
                     flexDirection: "row",
                     alignItems: "center",
@@ -310,9 +335,14 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
                     }}
                     numberOfLines={1}
                   >
-                    {selectedOfficerLabel || t("PassTargetBetweenOfficers.Select an officer")}
+                    {selectedOfficerLabel ||
+                      t("PassTargetBetweenOfficers.Select an officer")}
                   </Text>
-                  <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
+                  <MaterialIcons
+                    name="keyboard-arrow-down"
+                    size={22}
+                    color="#9CA3AF"
+                  />
                 </TouchableOpacity>
               )}
 
@@ -325,7 +355,9 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
                 <ActivityIndicator size="small" color="#313131" />
               ) : (
                 <Text className="text-xl font-bold text-center text-black mb-4">
-                  {maxAmount ? `${maxAmount} ${t("PassTargetBetweenOfficers.kg")}` : "--"}
+                  {maxAmount
+                    ? `${maxAmount} ${t("PassTargetBetweenOfficers.kg")}`
+                    : "--"}
                 </Text>
               )}
             </View>
@@ -335,22 +367,31 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                className="border border-gray-300 rounded-lg p-2 text-gray-800"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}
                 placeholder="--"
                 editable={assignee === "0" || !!errorMessage ? false : true}
               />
-              {error ? <Text className="text-red-500 mt-2">{error}</Text> : null}
+              {error ? (
+                <Text className="text-red-500 mt-2">{error}</Text>
+              ) : null}
             </View>
           </View>
 
-          <View className="mt-6 items-center">
+          <View className="mt-6 items-center w-full max-w-[500px] mx-auto">
             <TouchableOpacity
-              className={`rounded-full w-64 py-3 ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
+              className={`rounded-full w-64 py-3 h-[50px] justify-center ${isSaveDisabled() ? "bg-gray-400" : "bg-[#313131]"}`}
               onPress={receiveTarget}
               disabled={isSaveDisabled()}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6, 
+              }}
             >
               {fetchingTarget ? (
                 <ActivityIndicator size="small" color="white" />
@@ -378,6 +419,7 @@ const RecieveTargetBetweenOfficers: React.FC<RecieveTargetBetweenOfficersScreenP
         }}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
+        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </>
   );

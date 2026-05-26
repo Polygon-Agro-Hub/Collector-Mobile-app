@@ -11,22 +11,18 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
-import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import GlobalSearchModal from "../common/GlobalSearchModal";
-import CustomHeader from "../common/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
+import CustomHeader from "../navigations/CustomHeader";
+import LoadingPage from "../commons/LoadingPage";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -73,13 +69,12 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   }, []);
 
   useEffect(() => {
-    let appName = userId === 0 ? "CollectionOfficer" : "PlantCare";
     const selectedLanguage = t("ReportComplaint.LNG");
 
     const fetchComplainCategory = async () => {
       try {
         const response = await axios.get(
-          `${environment.API_BASE_URL}api/complain/get-complain-category/${appName}`,
+          `${environment.API_BASE_URL}api/complain/get-complain-category/Collection`,
         );
         if (response.data.status === "success") {
           const categoryField =
@@ -179,21 +174,15 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         enabled
-        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        className="flex-1 bg-white"
       >
         <View className="flex-1 bg-white">
           {loading ? (
-            <View className="flex-1 justify-center items-center">
-              <LottieView
-                source={require("../../assets/lottie/newLottie.json")}
-                autoPlay
-                loop
-                style={{ width: 300, height: 300 }}
-              />
-            </View>
+            <LoadingPage fullScreen />
           ) : (
             <ScrollView
               className="flex-1 bg-white"
+              contentContainerStyle={{ flexGrow: 1, backgroundColor: "#F6F6F6" }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
@@ -202,94 +191,86 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 showBackButton={true}
                 navigation={navigation}
                 onBackPress={() => navigation.goBack()}
+                transparent
               />
 
-              <View
-                className="items-center bg-white"
-                style={{ paddingHorizontal: wp(4) }}
-              >
+              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-[#F6F6F6] justify-center">
                 <Image
                   source={require("../../assets/images/complain/complain.webp")}
-                  className="w-36 h-36"
+                  className="w-48 h-48 mx-auto"
                   resizeMode="contain"
                 />
 
-                <View className="w-[100%] items-center p-6 shadow-2xl bg-white rounded-xl">
-                  <View className="flex-row">
-                    <Text className="text-2xl font-semibold text-center mb-4 color-[#424242]">
-                      {t("ReportComplaint.Tellus")}
-                    </Text>
-                    <Text className="text-2xl font-semibold text-center mb-4 pl-2 color-[#D72C62]">
-                      {t("ReportComplaint.Problem")}
-                    </Text>
-                  </View>
+                <View className="items-center bg-white rounded-3xl w-full p-4">
+                  <View className="w-full items-center mt-10">
+                    <View className="flex-row">
+                      <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">
+                        {t("ReportComplaint.Tellus")}
+                      </Text>
+                      <Text className="text-2xl font-semibold text-center mb-4 pl-2 text-[#D72C62]">
+                        {t("ReportComplaint.Problem")}
+                      </Text>
+                    </View>
 
-                  {/* Category Selector */}
-                  <View className="w-full mb-4">
+                    {/* Category Selector */}
+                    <View className="w-full mb-4">
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (Category.length > 0)
+                            setCategoryModalVisible(true);
+                        }}
+                        className="border border-gray-300 rounded-3xl px-2 h-[50px] flex-row items-center justify-between bg-white w-full"
+                      >
+                        <Text
+                          className={`flex-1 ml-2 text-base ${selectedCategoryLabel ? "text-[#424242]" : "text-[#434343]"}`}
+                          numberOfLines={1}
+                        >
+                          {selectedCategoryLabel
+                            ? t(selectedCategoryLabel)
+                            : t("ReportComplaint.selectCategory")}
+                        </Text>
+                        <MaterialIcons
+                          name="arrow-drop-down"
+                          size={24}
+                          color="#9CA3AF"
+                        />
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text className="text-sm text-gray-600 text-center mb-4">
+                      {t("ReportComplaint.WewilRespond")}
+                    </Text>
+
+                    <TextInput
+                      className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8 text-[#424242]"
+                      style={{ textAlignVertical: "top" }}
+                      placeholder={t("ReportComplaint.Kindlysubmit")}
+                      placeholderTextColor="#434343"
+                      multiline
+                      value={complain}
+                      onChangeText={(text) => setComplain(text.trimStart())}
+                    />
+
                     <TouchableOpacity
-                      onPress={() => {
-                        if (Category.length > 0) setCategoryModalVisible(true);
-                      }}
+                      className="w-full bg-black rounded-3xl items-center justify-center mb-20 h-[50px]"
+                      onPress={handleSubmit}
                       style={{
-                        borderWidth: 1,
-                        borderColor: "#ccc",
-                        borderRadius: 25,
-                        paddingHorizontal: 16,
-                        paddingVertical: 12,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        backgroundColor: "white",
+                        shadowColor: "#000000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 10,
+                        elevation: 6,
                       }}
                     >
-                      <Text
-                        style={{
-                          color: selectedCategoryLabel ? "#424242" : "#434343",
-                          fontSize: 12,
-                          flex: 1,
-                          marginLeft: 8,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {selectedCategoryLabel
-                          ? t(selectedCategoryLabel)
-                          : t("ReportComplaint.selectCategory")}
-                      </Text>
-                      <MaterialIcons
-                        name="keyboard-arrow-down"
-                        size={22}
-                        color="#9CA3AF"
-                        style={{ paddingRight: 10 }}
-                      />
+                      {isLoading ? (
+                        <ActivityIndicator size="small" color="white" />
+                      ) : (
+                        <Text className="text-white font-bold text-lg">
+                          {t("ReportComplaint.Submit")}
+                        </Text>
+                      )}
                     </TouchableOpacity>
                   </View>
-
-                  <Text className="text-sm text-gray-600 text-center mb-4">
-                    {t("ReportComplaint.WewilRespond")}
-                  </Text>
-
-                  <TextInput
-                    className="w-full h-60 border border-[#F6F6F6] rounded-lg p-3 bg-[#F6F6F6] mb-8"
-                    placeholder={t("ReportComplaint.Kindlysubmit")}
-                    placeholderTextColor="#434343"
-                    multiline
-                    value={complain}
-                    onChangeText={(text) => setComplain(text)}
-                    style={{ textAlignVertical: "top", color: "#424242" }}
-                  />
-
-                  <TouchableOpacity
-                    className="w-full bg-[#000000] py-4 rounded-full items-center mb-20"
-                    onPress={handleSubmit}
-                  >
-                    {isLoading ? (
-                      <ActivityIndicator size="small" color="white" />
-                    ) : (
-                      <Text className="text-white font-bold text-lg">
-                        {t("ReportComplaint.Submit")}
-                      </Text>
-                    )}
-                  </TouchableOpacity>
                 </View>
               </View>
             </ScrollView>
@@ -306,7 +287,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
         selectedItems={selectedCategory ? [selectedCategory] : []}
         onSelect={(items) => setSelectedCategory(items[0] ?? null)}
         multiSelect={false}
-        showSearch={false}
+        showSearch={true}
       />
     </>
   );

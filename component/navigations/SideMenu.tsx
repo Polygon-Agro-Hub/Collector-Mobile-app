@@ -1,0 +1,537 @@
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Alert,
+  BackHandler,
+} from "react-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../types/types";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { environment } from "@/environment/environment";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import { useTranslation } from "react-i18next";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
+import { ScrollView } from "react-native-gesture-handler";
+import { LanguageContext } from "@/context/LanguageContext";
+import LottieView from "lottie-react-native";
+import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "@/component/navigations/CustomHeader";
+
+type SideMenuNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "SideMenu"
+>;
+
+interface SideMenuProps {
+  navigation: SideMenuNavigationProp;
+}
+
+const api = axios.create({
+  baseURL: environment.API_BASE_URL,
+});
+
+interface UserProfile {
+  firstNameEnglish: string;
+  lastNameEnglish: string;
+  companyName: string;
+  image: string;
+  firstNameSinhala: string;
+  lastNameSinhala: string;
+  firstNameTamil: string;
+  lastNameTamil: string;
+  companyNameSinhala: string;
+  companyNameEnglish: string;
+  companyNameTamil: string;
+  empId: string;
+  jobRole: string;
+}
+
+const icon = require("@/assets/images/common/eng-profile-icon.webp");
+
+const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
+  const [isLanguageDropdownOpen, setLanguageDropdownOpen] =
+    useState<boolean>(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  const [selectedComplaint, setSelectedComplaint] = useState<string | null>(
+    null,
+  );
+  const [isComplaintDropdownOpen, setComplaintDropdownOpen] =
+    useState<boolean>(false);
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
+  const { t, i18n } = useTranslation();
+  const { changeLanguage } = useContext(LanguageContext);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+  const [jobRole, setJobRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchJobRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem("jobRole");
+        setJobRole(role);
+      } catch (error) {
+        console.error("Error fetching job role:", error);
+      }
+    };
+    fetchJobRole();
+  }, []);
+
+  const fetchSelectedLanguage = async () => {
+    try {
+      const lang = await AsyncStorage.getItem("@user_language");
+      setSelectedLanguage(lang || "en");
+    } catch (error) {
+      console.error("Error fetching language preference:", error);
+    }
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      setComplaintDropdownOpen(false);
+      setLanguageDropdownOpen(false);
+      if (i18n.language === "en") {
+        LanguageSelect("en");
+        setSelectedLanguage("ENGLISH");
+      } else if (i18n.language === "si") {
+        LanguageSelect("si");
+        setSelectedLanguage("SINHALA");
+      } else if (i18n.language === "ta") {
+        LanguageSelect("ta");
+        setSelectedLanguage("TAMIL");
+      }
+    }, [i18n.language]),
+  );
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchSelectedLanguage();
+    };
+    fetchData();
+  }, []);
+
+  const route = useRoute();
+  const currentScreen = route.name;
+
+  const complaintOptions = [
+    t("SideMenu.Report Complaint"),
+    t("SideMenu.View Complaint History"),
+  ];
+
+  const handleComplaintSelect = (complaint: string) => {
+    setComplaintDropdownOpen(false);
+
+    if (complaint === t("SideMenu.Report Complaint")) {
+      navigation.navigate("ComplainPage" as any, { userId: 0 });
+    } else if (complaint === t("SideMenu.View Complaint History")) {
+      navigation.navigate("Main", {
+        screen: "ComplainHistory",
+        params: { fullname: getFullName },
+      });
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (token) {
+          const response = await api.get(
+            "api/collection-officer/user-profile",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+          setProfile(response.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const HanldeAsynStorage = async (lng: string) => {
+    await AsyncStorage.setItem("@user_language", lng);
+  };
+
+  const LanguageSelect = async (language: string) => {
+    try {
+      await AsyncStorage.setItem("@user_language", language);
+      changeLanguage(language);
+    } catch (error) {}
+  };
+
+  const handleLanguageSelect = (language: string) => {
+    setSelectedLanguage(language);
+    setLanguageDropdownOpen(false);
+    try {
+      if (language === "ENGLISH") {
+        LanguageSelect("en");
+        HanldeAsynStorage("en");
+      } else if (language === "TAMIL") {
+        LanguageSelect("ta");
+        HanldeAsynStorage("ta");
+      } else if (language === "SINHALA") {
+        LanguageSelect("si");
+        HanldeAsynStorage("si");
+      }
+    } catch (error) {}
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      const empId = await AsyncStorage.getItem("empid");
+      await status(empId!, false);
+
+      await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("jobRole");
+      await AsyncStorage.removeItem("companyNameEnglish");
+      await AsyncStorage.removeItem("companyNameSinhala");
+      await AsyncStorage.removeItem("companyNameTamil");
+      await AsyncStorage.removeItem("empid");
+
+      setTimeout(() => {
+        setIsLoggingOut(false);
+        navigation.navigate("Login");
+      }, 2000);
+    } catch (error) {
+      console.error("An error occurred during logout:", error);
+      setIsLoggingOut(false);
+      Alert.alert(t("Error.error"), t("Error.Failed to log out."));
+    }
+  };
+
+  const handleEditClick = () => {
+    navigation.navigate("Profile" as any, { jobRole: profile?.jobRole });
+  };
+
+  const status = async (empId: string, status: boolean) => {
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        console.error("Token not found");
+        return;
+      }
+
+      const response = await fetch(
+        `${environment.API_BASE_URL}api/collection-officer/online-status`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            empId: empId,
+            status: status,
+          }),
+        },
+      );
+    } catch (error) {
+      console.error("Online status error:", error);
+    }
+  };
+
+  const getTextStyle = (language: string) => {
+    if (language === "si") {
+      return {
+        fontSize: 14,
+        lineHeight: 20,
+      };
+    }
+    return {
+      fontSize: 16,
+      lineHeight: 25,
+    };
+  };
+
+  const getFullName = () => {
+    if (!profile) return "Loading...";
+    switch (selectedLanguage) {
+      case "si":
+        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
+      case "ta":
+        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
+      default:
+        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+    }
+  };
+
+  const handleBackPress = () => {
+    if (
+      profile?.jobRole === "Distribution Officer" ||
+      profile?.jobRole === "Distribution Centre Manager"
+    ) {
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+    } else if (profile?.jobRole === "Collection Officer") {
+      navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
+    } else if (profile?.jobRole === "Collection Centre Manager") {
+      navigation.navigate("Main", { screen: "ManagerDashboard" });
+    }
+    return true;
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation, jobRole, profile, currentScreen]),
+  );
+
+  return (
+    <View className="flex-1 bg-white ">
+      <CustomHeader
+        title=""
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={handleBackPress}
+      />
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Profile Card */}
+        <View className="flex-row items-center px-8 mb-4">
+          <Image
+            source={
+              profile?.image
+                ? { uri: profile.image }
+                : require("../../assets/images/auth/my-profile.webp")
+            }
+            className="w-16 h-16 rounded-full mr-3"
+          />
+
+          <View className="flex-1">
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-lg font-bold"
+            >
+              {getFullName()}
+            </Text>
+            <Text className="text-gray-500">{profile?.empId}</Text>
+          </View>
+
+          <TouchableOpacity onPress={handleEditClick}>
+            <Image
+              source={icon}
+              style={{ width: 30, height: 30 }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View className="flex-1 py-4 px-8 mt-[-30]">
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          <TouchableOpacity
+            onPress={() => setLanguageDropdownOpen(!isLanguageDropdownOpen)}
+            className="flex-row items-center py-3"
+          >
+            <Ionicons name="globe-outline" size={20} color="black" />
+            <Text className="flex-1 text-lg ml-2">
+              {t("SideMenu.Language")}
+            </Text>
+            <MaterialIcons
+              name={
+                isLanguageDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"
+              }
+              size={30}
+              color="black"
+            />
+          </TouchableOpacity>
+
+          {/* Then render dropdown AFTER the trigger */}
+          {isLanguageDropdownOpen && (
+            <View className="pl-8 bg-white  rounded-lg mt-2">
+              {["ENGLISH", "SINHALA", "TAMIL"].map((language) => {
+                const displayLanguage =
+                  language === "SINHALA"
+                    ? "සිංහල"
+                    : language === "TAMIL"
+                      ? "தமிழ்"
+                      : language === "ENGLISH"
+                        ? "English"
+                        : language;
+                return (
+                  <TouchableOpacity
+                    key={language}
+                    onPress={() => handleLanguageSelect(language)}
+                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
+                      selectedLanguage === language
+                        ? "bg-[#FFDFF7]"
+                        : "bg-transparent"
+                    }`}
+                  >
+                    <Text
+                      className={`text-base ${
+                        selectedLanguage === language
+                          ? "text-black"
+                          : "text-[#434343]"
+                      }`}
+                    >
+                      {displayLanguage}
+                    </Text>
+                    {selectedLanguage === language && (
+                      <View className="absolute right-4">
+                        <Ionicons name="checkmark" size={20} color="black" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 12,
+            }}
+            onPress={() => navigation.navigate("OfficerQr")}
+          >
+            <Ionicons name="qr-code" size={20} color="black" />
+            <Text className="flex-1 text-lg ml-2">{t("SideMenu.View")}</Text>
+          </TouchableOpacity>
+
+          {/* Horizontal Line */}
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          {/* Change Password */}
+          <TouchableOpacity
+            className="flex-row items-center py-3"
+            onPress={() => navigation.navigate("ChangePassword")}
+          >
+            <Ionicons name="lock-closed-outline" size={20} color="black" />
+            <Text className="flex-1 text-lg ml-2">
+              {t("SideMenu.ChangePassword")}
+            </Text>
+          </TouchableOpacity>
+
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          <TouchableOpacity
+            className="flex-row items-center py-3"
+            onPress={() => navigation.navigate("PrivacyPolicy")}
+          >
+            <MaterialIcons name="privacy-tip" size={20} color="black" />
+            <Text className="flex-1 text-lg ml-2">
+              {t("PrivacyPlicy.PrivacyPolicy")}
+            </Text>
+          </TouchableOpacity>
+
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          <TouchableOpacity
+            onPress={() => setComplaintDropdownOpen(!isComplaintDropdownOpen)}
+            className="flex-row items-center py-3"
+          >
+            <AntDesign name="warning" size={20} color="black" />
+            <Text className="flex-1 text-lg ml-2">
+              {t("SideMenu.Complaints")}
+            </Text>
+            <MaterialIcons
+              name={
+                isComplaintDropdownOpen ? "arrow-drop-up" : "arrow-drop-down"
+              }
+              size={30}
+              color="black"
+            />
+          </TouchableOpacity>
+
+          {isComplaintDropdownOpen && (
+            <View className="pl-8">
+              {complaintOptions.map((complaint) => (
+                <TouchableOpacity
+                  key={complaint}
+                  onPress={() => handleComplaintSelect(complaint)}
+                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
+                    selectedComplaint === complaint ? "bg-green-200" : ""
+                  }`}
+                >
+                  <Text
+                    className={`text-base ${
+                      selectedComplaint === complaint ? "text-black" : "#434343"
+                    }`}
+                  >
+                    {complaint}
+                  </Text>
+                  {selectedComplaint === complaint && (
+                    <View className="absolute right-4">
+                      <Ionicons name="checkmark" size={20} color="black" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          {/* Logout Button */}
+          <TouchableOpacity
+            className="flex-row items-center py-3 mb-20"
+            onPress={handleLogout}
+            disabled={isLoggingOut}
+          >
+            <Ionicons name="log-out-outline" size={20} color="red" />
+            <Text className="flex-1 text-lg ml-2 text-red-500">
+              {t("SideMenu.Logout")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Logout Lottie Animation Overlay */}
+      {isLoggingOut && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "white",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <LottieView
+            source={require("../../assets/lottie/loading.json")}
+            autoPlay
+            loop
+            style={{ width: 150, height: 150 }}
+          />
+          <Text
+            style={{
+              fontSize: 18,
+              color: "#374151",
+              marginTop: 20,
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
+            {t("SideMenu.Logging out")}
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+};
+
+export default SideMenu;

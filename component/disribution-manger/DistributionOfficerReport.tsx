@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { handleGeneratePDF } from "./ReportPDF";
 import * as Sharing from "expo-sharing";
 import { RouteProp } from "@react-navigation/native";
@@ -12,7 +12,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type DistributionOfficerReportNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -54,7 +54,6 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     colomboTime.setHours(0, 0, 0, 0);
     return colomboTime;
   };
-
 
   const handleGenerate = async () => {
     setReportGenerated(false);
@@ -194,12 +193,9 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     setReportGenerated(false);
   };
 
-  const formatDate = (date: Date | undefined) => {
-    if (!date) return "Select Date";
-    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(
-      2,
-      "0",
-    )}/${String(date.getDate()).padStart(2, "0")}`;
+  const formatDate = (date: Date | undefined, placeholder?: string) => {
+    if (!date) return placeholder || "Select Date";
+    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
   const handleDateChange = (
@@ -209,6 +205,9 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
   ) => {
     if (event.type === "set") {
       if (type === "start") {
+        if (endDate !== undefined) {
+          setEndDate(undefined);
+        }
         setStartDate(selectedDate || startDate);
         setShowStartPicker(false);
       } else {
@@ -278,18 +277,25 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
         </View>
 
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">
-            {t("ReportGenerator.End Date")}
+          <Text className="text-sm mb-2" style={{ color: "#374151" }}>
+            {t("ReportGenerator.End Date")} :
           </Text>
           <TouchableOpacity
-            onPress={() => setShowEndPicker((prev) => !prev)}
-            className="bg-[#F4F4F4] rounded-full px-4 py-3 flex-row justify-between items-center"
+            onPress={() => {
+              if (startDate) setShowEndPicker((prev) => !prev);
+            }}
+            disabled={!startDate}
+            className="border border-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-row justify-between items-center"
+            style={{ backgroundColor: startDate ? "#F4F4F4" : "#F9F9F9" }}
           >
-            <Text className="text-gray-500">{formatDate(endDate)}</Text>
+            <Text style={{ color: startDate ? "#6B7280" : "#C4C4C4" }}>
+              {formatDate(endDate, t("ReportGenerator.End Date"))}
+            </Text>
             <Image
               source={require("../../assets/images/collection-manager/rescheduling.webp")}
               className="w-6 h-6"
               resizeMode="contain"
+              style={{ opacity: startDate ? 1 : 0.25 }}
             />
           </TouchableOpacity>
 
@@ -304,31 +310,34 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
             />
           )}
           {showEndPicker && Platform.OS === "ios" && (
-            <>
-              <View className=" justify-center items-center z-50 absolute -ml-2 mt-[30%] bg-gray-100  rounded-lg">
-                <DateTimePicker
-                  value={endDate || new Date()}
-                  mode="date"
-                  display="inline"
-                  style={{ width: 320, height: 260 }}
-                  maximumDate={getTodayInColombo()}
-                  minimumDate={startDate}
-                  onChange={(event, date) =>
-                    handleDateChange(event, date, "end")
-                  }
-                />
-              </View>
-            </>
+            <View className="justify-center items-center z-50 absolute -ml-2 mt-[30%] bg-gray-100 rounded-lg">
+              <DateTimePicker
+                value={endDate || new Date()}
+                mode="date"
+                display="inline"
+                style={{ width: 320, height: 260 }}
+                maximumDate={getTodayInColombo()}
+                minimumDate={startDate}
+                onChange={(event, date) => handleDateChange(event, date, "end")}
+              />
+            </View>
           )}
         </View>
 
         <View className="flex-row justify-center gap-2 items-center mt-2">
           <TouchableOpacity
             onPress={handleReset}
-            className="border border-[#6B6B6B] py-2 rounded-full w-40 items-center"
+            className="border border-[#6B6B6B] bg-[white] py-2 rounded-full w-40 items-center h-[50px] justify-center items-center "
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
-              className="text-[#858585] text-center text-base"
+              className="text-[#858585] text-center text-lg"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -338,7 +347,14 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
 
           <TouchableOpacity
             onPress={handleGenerate}
-            className="bg-[#980775] py-2 rounded-full w-40 items-center"
+            className="bg-[#980775] py-2 rounded-full w-40 items-center h-[50px] justify-center items-center"
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
               className="text-white font-semibold text-center text-base"
@@ -375,11 +391,19 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
             {t("ReportGenerator.Report has been generated")}
           </Text>
 
-          <View className="flex-row space-x-8">
+          <View className="flex-row gap-4">
             <TouchableOpacity
               onPress={handleDownload}
               className="bg-[#000000] rounded-lg items-center justify-center"
-              style={{ width: 100, height: 70 }}
+              style={{
+                width: 100,
+                height: 70,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
             >
               <Ionicons name="download" size={24} color="white" />
               <Text className="text-sm text-white mt-1">
@@ -390,7 +414,15 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
             <TouchableOpacity
               onPress={handleShare}
               className="bg-[#000000] rounded-lg items-center justify-center"
-              style={{ width: 100, height: 70 }}
+              style={{
+                width: 100,
+                height: 70,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
             >
               <Ionicons name="share-social" size={24} color="white" />
               <Text className="text-sm text-white mt-1">
@@ -402,7 +434,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
       ) : generateAgain ? (
         <View className="items-center justify-center flex-1">
           <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
+            source={require("../../assets/lottie/loading.json")}
             autoPlay
             loop
             style={{ width: 250, height: 250 }}

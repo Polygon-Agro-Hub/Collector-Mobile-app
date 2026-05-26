@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from "react-native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type CenterTargetNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -173,7 +173,6 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
   return (
     <View className="flex-1 bg-[#282828] ">
       {/* Header */}
-
       <CustomHeader
         title={centerCode || ""}
         showBackButton={true}
@@ -181,9 +180,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         onBackPress={() => navigation.goBack()}
         textColor="white"
         bgColor="#282828"
-        iconBgColor="#FFFFFF1A"
       />
-
       <View className="flex-row justify-center items-center py-4 bg-[#282828]">
         {/* To Do Button */}
         <Animated.View
@@ -192,9 +189,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+              }`}
             style={{
               height: 40,
               shadowColor:
@@ -207,9 +203,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("ToDo")}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "ToDo" ? "text-white" : "text-black"
-              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
+                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -219,7 +214,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
             {selectedToggle === "ToDo" && (
               <Animated.View
-                className="bg-white rounded-full px-2 overflow-hidden"
+                className="bg-white rounded-full px-2 py-1 ml-2 overflow-hidden"
                 style={{
                   opacity: 1,
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
@@ -240,9 +235,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
-              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+              }`}
             style={{
               height: 40,
               shadowColor:
@@ -255,9 +249,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("Completed")}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
+              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
+                }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -267,7 +260,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
             {selectedToggle === "Completed" && (
               <Animated.View
-                className="bg-white rounded-full px-2 ml-2 overflow-hidden"
+                className="bg-white rounded-full px-2 py-1 ml-2 overflow-hidden"
                 style={{
                   opacity: 1,
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
@@ -285,13 +278,13 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
       <View className="flex-1 bg-white">
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-          <View style={{ minWidth: "100%" }}>
+          <View style={{ minWidth: 800, width: "100%" }}>
             {/* Table Header */}
-            <View className="flex-row bg-[#980775] h-[50px] ">
+            <View className="flex-row bg-[#980775] h-[60px] items-center">
               <Text className="w-16 p-2 text-center text-white">
                 {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
               </Text>
-              <Text className="w-40 p-2 text-center text-white">
+              <Text className="flex-1 p-2 text-center text-white">
                 {t("CenterTarget.Variety")}
               </Text>
               <Text className="w-32 p-2 text-center text-white">
@@ -302,90 +295,91 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
               </Text>
               <Text className="w-32 p-2 text-center text-white">
                 {selectedToggle === "ToDo"
-                  ? t("DailyTarget.Todo")
-                  : t("DailyTarget.Completed")}
+                  ? t("DailyTarget.Todo()")
+                  : t("DailyTarget.Completedkg")}
               </Text>
             </View>
 
-            <ScrollView
-              className="flex-1 bg-white "
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-              contentContainerStyle={{ paddingBottom: 20 }}
-            >
-              {/* Table Content */}
-              {loading ? (
-                <View className="flex-1 justify-center items-center py-10">
-                  <LottieView
-                    source={require("../../assets/lottie/newLottie.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 350, height: 350 }}
-                  />
-                </View>
-              ) : displayedData.length > 0 ? (
-                displayedData.map((item, index) => (
-                  <View
-                    key={index}
-                    className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
-                    style={{ minHeight: 48 }}
-                  >
-                    {/* No. */}
-                    <View className="w-16 justify-center items-center border-r border-gray-300">
-                      {selectedToggle === "ToDo" ? (
-                        <Text className="text-center">{index + 1}</Text>
-                      ) : (
-                        <Ionicons name="flag" size={20} color="purple" />
-                      )}
-                    </View>
+            {loading ? (
+              <View className="flex-1 justify-center items-center">
+                <LottieView
+                  source={require("../../assets/lottie/loading.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 150, height: 150 }}
+                />
+              </View>
+            ) : (
+              <ScrollView
+                className="flex-1 bg-white "
+                refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                contentContainerStyle={{ paddingBottom: 20 }}
+              >
+                {/* Table Content */}
+                {displayedData.length > 0 ? (
+                  displayedData.map((item, index) => (
+                    <View
+                      key={index}
+                      className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                    >
+                      {/* No. */}
+                      <View className="w-16 justify-center items-center border-r border-gray-300">
+                        {selectedToggle === "ToDo" ? (
+                          <Text className="text-center">{index + 1}</Text>
+                        ) : (
+                          <Ionicons name="flag" size={20} color="purple" />
+                        )}
+                      </View>
 
-                    {/* Variety */}
-                    <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
-                      <Text className="text-center">
-                        {getvarietyName(item)}
-                      </Text>
-                    </View>
+                      {/* Variety */}
+                      <View className="flex-1 justify-center items-center border-r border-gray-300 p-2">
+                        <Text className="text-center">
+                          {getvarietyName(item)}
+                        </Text>
+                      </View>
 
-                    {/* Grade */}
-                    <View className="w-32 justify-center items-center border-r border-gray-300">
-                      <Text className="text-center">{item.grade}</Text>
-                    </View>
+                      {/* Grade */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">{item.grade}</Text>
+                      </View>
 
-                    {/* Target */}
-                    <View className="w-32 justify-center items-center border-r border-gray-300">
-                      <Text className="text-center">
-                        {item.target.toFixed(2)}
-                      </Text>
-                    </View>
+                      {/* Target */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">
+                          {item.target.toFixed(2)}
+                        </Text>
+                      </View>
 
-                    {/* Todo / Completed */}
-                    <View className="w-32 justify-center items-center">
-                      <Text className="text-center">
-                        {selectedToggle === "Completed"
-                          ? item.complete.toFixed(2)
-                          : item.todo.toFixed(2)}
-                      </Text>
+                      {/* Todo / Completed */}
+                      <View className="w-32 justify-center items-center">
+                        <Text className="text-center">
+                          {selectedToggle === "Completed"
+                            ? item.complete.toFixed(2)
+                            : item.todo.toFixed(2)}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                ))
-              ) : (
-                <View className="flex-1 justify-center items-center py-10">
-                  <LottieView
-                    source={require("../../assets/lottie/NoComplaints.json")}
-                    autoPlay
-                    loop
-                    style={{ width: 150, height: 150 }}
-                  />
-                  <Text className="text-gray-500 mt-4">
-                    {selectedToggle === "ToDo"
-                      ? t("DailyTarget.NoTodoItems") || "No items to do"
-                      : t("DailyTarget.noCompletedTargets") ||
+                  ))
+                ) : (
+                  <View className="flex-1 justify-center items-center py-10">
+                    <LottieView
+                      source={require("../../assets/lottie/no-data.json")}
+                      autoPlay
+                      loop
+                      style={{ width: 150, height: 150 }}
+                    />
+                    <Text className="text-gray-500 mt-4">
+                      {selectedToggle === "ToDo"
+                        ? t("DailyTarget.NoTodoItems") || "No items to do"
+                        : t("DailyTarget.noCompletedTargets") ||
                         "No completed items"}
-                  </Text>
-                </View>
-              )}
-            </ScrollView>
+                    </Text>
+                  </View>
+                )}
+              </ScrollView>
+            )}
           </View>
         </ScrollView>
       </View>

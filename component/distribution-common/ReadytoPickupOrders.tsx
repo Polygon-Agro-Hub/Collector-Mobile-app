@@ -7,6 +7,7 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import {
   FontAwesome5,
@@ -16,13 +17,13 @@ import {
 } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type CollectionOfficersListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -297,12 +298,27 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const NoOrdersState = () => {
     return (
       <View className="flex-1 justify-center items-center mt-[-25%] px-4">
         <View className="items-center">
           <LottieView
-            source={require("../../assets/lottie/NoComplaints.json")}
+            source={require("../../assets/lottie/no-data.json")}
             autoPlay
             loop
             style={{ width: 150, height: 150 }}
@@ -323,7 +339,12 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   if (loading) {
     return (
       <View className="flex-1 bg-white justify-center items-center">
-        <ActivityIndicator size="large" color="#000" />
+        <LottieView
+          source={require("../../assets/lottie/loading.json")}
+          autoPlay
+          loop
+          style={{ width: 200, height: 200 }}
+        />
         <Text className="mt-4 text-gray-600">
           {t("ReadytoPickupOrders.Loading orders")}
         </Text>
@@ -337,112 +358,117 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         title={t("ReadytoPickupOrders.Ready to Pickup Orders")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
       />
 
-      {/* Search Bar */}
-      <View className="flex-row items-center mx-4 mt-4 pl-3 border border-[#C0C0C0] rounded-full">
-        <TextInput
-          className="flex-1 text-base text-black py-2"
-          placeholder={t("ReadytoPickupOrders.Search by phone number")}
-          value={searchPhone}
-          onChangeText={handleSearchChange}
-          keyboardType="phone-pad"
-          maxLength={9}
-          returnKeyType="search"
-        />
-        {searchPhone ? (
-          <TouchableOpacity
-            className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center"
-            onPress={handleClearSearch}
+      <View className="flex-1 w-full max-w-[500px] mx-auto">
+        {/* Search Bar */}
+        <View className="flex-row items-center mx-4 mt-4 pl-3 border border-[#C0C0C0] rounded-full">
+          <TextInput
+            className="flex-1 text-base text-black py-2"
+            placeholder={t("ReadytoPickupOrders.Search by phone number")}
+            value={searchPhone}
+            onChangeText={handleSearchChange}
+            keyboardType="phone-pad"
+            maxLength={9}
+            returnKeyType="search"
+          />
+          {searchPhone ? (
+            <TouchableOpacity
+              className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center"
+              onPress={handleClearSearch}
+            >
+              <MaterialIcons name="close" size={24} color="black" />
+            </TouchableOpacity>
+          ) : (
+            <View className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center">
+              <Ionicons name="search" size={20} color="black" />
+            </View>
+          )}
+        </View>
+
+        {!isSearching && (
+          <View className="px-4 py-3 flex-row items-center">
+            <Text className="text-sm font-medium text-gray-900">
+              {t("ReadytoPickupOrders.All")} ({formatCount(orders.length)})
+            </Text>
+          </View>
+        )}
+        {isSearching && (
+          <View className="px-4 py-3 flex-row items-center">
+            <Text className="text-sm font-medium text-gray-900"></Text>
+          </View>
+        )}
+
+        {/* Content Area */}
+        <View className="flex-1">
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
           >
-            <MaterialIcons name="close" size={24} color="black" />
-          </TouchableOpacity>
-        ) : (
-          <View className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center">
-            <Ionicons name="search" size={20} color="black" />
+            {searchState === "no-orders-at-all" && <NoOrdersState />}
+
+            {(searchState === "initial" || searchState === "results") &&
+              orders.length > 0 && (
+                <View className="p-4 pb-24">
+                  {filteredOrders.map((order, index) => (
+                    <OrderCard
+                      key={`${order.orderId}-${index}`}
+                      order={order}
+                      onPress={() => handleOrderClick(order)}
+                    />
+                  ))}
+                </View>
+              )}
+
+            {searchState === "no-orders" && (
+              <EmptyState
+                message={t(
+                  "ReadytoPickupOrders.No orders from this user for pickup",
+                )}
+              />
+            )}
+
+            {searchState === "no-user" && (
+              <EmptyState
+                message={t(
+                  "ReadytoPickupOrders.No registered customer using this phone number",
+                )}
+              />
+            )}
+          </ScrollView>
+        </View>
+
+        {/* Clear Search Button - Fixed at bottom when searching */}
+        {isSearching && (
+          <View className="absolute bottom-20 left-0 right-0 bg-white px-6 pb-6 pt-2  border-gray-100">
+            <TouchableOpacity
+              onPress={handleClearSearch}
+              style={{
+                backgroundColor: "#000000",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
+              className="bg-black px-8 py-3 rounded-full w-full items-center"
+            >
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="close"
+                  size={20}
+                  color="#fff"
+                  style={{ marginRight: 8 }}
+                />
+                <Text className="text-white text-base font-semibold">
+                  {t("ReadytoPickupOrders.Clear Search")}
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
         )}
       </View>
-
-      {!isSearching && (
-        <View className="px-4 py-3 flex-row items-center">
-          <Text className="text-sm font-medium text-gray-900">
-            {t("ReadytoPickupOrders.All")} ({formatCount(orders.length)})
-          </Text>
-        </View>
-      )}
-      {isSearching && (
-        <View className="px-4 py-3 flex-row items-center">
-          <Text className="text-sm font-medium text-gray-900"></Text>
-        </View>
-      )}
-
-      {/* Content Area */}
-      <View className="flex-1">
-        <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-          {searchState === "no-orders-at-all" && <NoOrdersState />}
-
-          {(searchState === "initial" || searchState === "results") &&
-            orders.length > 0 && (
-              <View className="p-4 pb-24">
-                {filteredOrders.map((order, index) => (
-                  <OrderCard
-                    key={`${order.orderId}-${index}`}
-                    order={order}
-                    onPress={() => handleOrderClick(order)}
-                  />
-                ))}
-              </View>
-            )}
-
-          {searchState === "no-orders" && (
-            <EmptyState
-              message={t(
-                "ReadytoPickupOrders.No orders from this user for pickup",
-              )}
-            />
-          )}
-
-          {searchState === "no-user" && (
-            <EmptyState
-              message={t(
-                "ReadytoPickupOrders.No registered customer using this phone number",
-              )}
-            />
-          )}
-        </ScrollView>
-      </View>
-
-      {/* Clear Search Button - Fixed at bottom when searching */}
-      {isSearching && (
-        <View className="absolute bottom-20 left-0 right-0 bg-white px-6 pb-6 pt-2  border-gray-100">
-          <TouchableOpacity
-            onPress={handleClearSearch}
-            style={{
-              backgroundColor: "#000000",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 6,
-              elevation: 8,
-            }}
-            className="bg-black px-8 py-3 rounded-full w-full items-center"
-          >
-            <View className="flex-row items-center">
-              <Ionicons
-                name="close"
-                size={20}
-                color="#fff"
-                style={{ marginRight: 8 }}
-              />
-              <Text className="text-white text-base font-semibold">
-                {t("ReadytoPickupOrders.Clear Search")}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 };

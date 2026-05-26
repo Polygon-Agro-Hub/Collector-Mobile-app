@@ -6,21 +6,22 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  SafeAreaView,
+  Platform,
   ScrollView,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { scale } from "react-native-size-matters";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Entypo } from "@expo/vector-icons";
+import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
-import LottieView from "lottie-react-native";
-import { Platform } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import LottieView from "lottie-react-native";
+import { Entypo } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ManagerTransactionsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -29,11 +30,14 @@ type ManagerTransactionsNavigationProp = StackNavigationProp<
 
 interface ManagerTransactionsProps {
   navigation: ManagerTransactionsNavigationProp;
-  route: any;
+  route: {
+    params: {
+      empId: string
+    };
+  };
 }
 
 interface Transaction {
-  id: number;
   registeredFarmerId: number;
   userId: number;
   phoneNumber: string;
@@ -43,44 +47,28 @@ interface Transaction {
   accountHolderName: string | null;
   bankName: string | null;
   branchName: string | null;
-  empId: string;
+  id: number;
   firstName: string;
   lastName: string;
   NICnumber: string;
   totalAmount: number;
-  image: string | null;
 }
 
 const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
   route,
   navigation,
 }) => {
+  const {
+    empId
+  } = route.params;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [filteredTransactions, setFilteredTransactions] = useState<
-    Transaction[]
-  >([]);
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-
-  const fetchSelectedLanguage = async () => {
-    try {
-      const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
-    } catch (error) {
-      console.error("Error fetching language preference:", error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchSelectedLanguage();
-    };
-    fetchData();
-  }, []);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -90,7 +78,15 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     return `${year}-${month}-${day}`;
   };
 
-  const sortTransactionsByName = (data: Transaction[]) => {
+  useFocusEffect(
+    React.useCallback(() => {
+      setSelectedDate(new Date());
+      setShowDatePicker(false);
+      return () => { };
+    }, [])
+  );
+
+   const sortTransactionsByName = (data: Transaction[]) => {
     return [...data].sort((a, b) => {
       const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
       const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
@@ -98,7 +94,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     });
   };
 
-  const fetchTransactions = async (date: string) => {
+ const fetchTransactions = async (date: string) => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
@@ -158,41 +154,35 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    const filtered = transactions.filter((transaction) => {
-      const searchTerm = query.toLowerCase();
-      const firstName = transaction.firstName?.toLowerCase() || "";
-      const lastName = transaction.lastName?.toLowerCase() || "";
-      const fullName = `${firstName} ${lastName}`;
+    const normalizedQuery = query.trim().toLowerCase().replace(/\s+/g, " ");
 
-      const nicNumberMatch = transaction.NICnumber?.replace(/[^\w\s]/gi, "")
-        .toLowerCase()
-        .includes(searchTerm);
+    if (!normalizedQuery) {
+      setFilteredTransactions(transactions);
+      return;
+    }
+
+    const filtered = transactions.filter((transaction: any) => {
+      const firstName = (transaction.firstName || "").trim().toLowerCase();
+      const lastName = (transaction.lastName || "").trim().toLowerCase();
+      const nicNumber = (transaction.NICnumber || "")
+        .replace(/[^\w\s]/gi, "")
+        .toLowerCase();
+      const fullName = `${firstName} ${lastName}`.trim().replace(/\s+/g, " ");
 
       return (
-        firstName.includes(searchTerm) ||
-        lastName.includes(searchTerm) ||
-        fullName.includes(searchTerm) ||
-        nicNumberMatch
+        firstName.includes(normalizedQuery) ||
+        lastName.includes(normalizedQuery) ||
+        fullName.includes(normalizedQuery) ||
+        nicNumber.includes(normalizedQuery)
       );
     });
 
-    setFilteredTransactions(sortTransactionsByName(filtered));
+    setFilteredTransactions(filtered);
   };
 
   useEffect(() => {
     fetchTransactions(getCurrentDate());
   }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchData = async () => {
-        await fetchSelectedLanguage();
-        fetchTransactions(getCurrentDate());
-        setSearchQuery("");
-      };
-      fetchData();
-    }, []),
-  );
 
   useEffect(() => {
     if (selectedDate) {
@@ -201,65 +191,71 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     }
   }, [selectedDate]);
 
-  const getTextStyle = (language: string) => {
-    if (language === "si") {
-      return {
-        fontSize: 14,
-        lineHeight: 20,
-      };
-    }
-  };
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTransactions(getCurrentDate());
+      setSearchQuery("");
+    }, [])
+  );
+
+
+
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View>
-        {/* Header */}
-        <View className="bg-[#313131] p-4  rounded-b-[35px] shadow-md">
-          <View className="flex-row items-center justify-between">
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              className=" bg-[#FFFFFF1A] rounded-full  p-2 justify-center w-10"
-            >
-              <Entypo name="chevron-left" size={25} color="white" />
-            </TouchableOpacity>
 
-            <Text className="text-white text-lg font-bold text-center flex-1">
-              {t("ManagerDashboard.MyCollection")}
-            </Text>
+    <View className="flex-1">
+      {/* ── Purple Header ── */}
+      <View className="bg-[#313131] px-4 pt-4 pb-10">
+        <View className="flex-row items-center justify-between">
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("Main" as any, {
+                screen: "ManagerDashboard",
+              })
+            }
+            className="bg-[#FFFFFF1A] rounded-full p-2 justify-center  items-center"
+          >
+            <Entypo name="chevron-left" size={25} color="white" />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => setShowDatePicker((prev) => !prev)}
-              className="mr-2"
-            >
-              <Ionicons name="calendar-outline" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
+          <Text className="text-white text-lg font-bold text-center flex-1">
+            My Collection
+          </Text>
 
-          <View className="flex-row items-center justify-between mb-2">
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-white text-lg ml-[20%]"
-            >
-              {t("ManagerTransactions.Selected Date")}{" "}
-              {selectedDate
-                ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
-                : "N/A"}
-            </Text>
-          </View>
+          <TouchableOpacity
+            onPress={() => setShowDatePicker((prev) => !prev)}
+            className="mr-2"
+          >
+            <Ionicons name="calendar-outline" size={24} color="white" />
+          </TouchableOpacity>
         </View>
 
-        <View className="flex-row items-center bg-[#F7F7F7] px-4 py-2  rounded-full border border-[#444444] mt-[-18] mx-auto w-[90%] shadow-sm">
+        <View className="flex-row items-center justify-center mt-2 mb-4">
+          <Text className="text-white" style={{ fontSize: 16 }}>
+            {t("ManagerTransactions.Selected Date")}{" "}
+            {selectedDate
+              ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+              : "N/A"}
+          </Text>
+        </View>
+      </View>
+
+      {/* ── White curved body — matches ManagerTransactions exactly ── */}
+      <View className="flex-1 bg-white rounded-t-[40px] mt-[-20px]">
+
+        {/* Floating search bar */}
+        <View
+          className="flex-row items-center bg-white px-4 py-2 rounded-full border border-[#444444] mx-4 shadow-md"
+          style={{ marginTop: -22 }}
+        >
           <TextInput
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            style={{ flex: 1, fontSize: 16, fontStyle: "italic" }}
             placeholder={t("ManagerTransactions.Search")}
             placeholderTextColor="grey"
-            className="flex-1 text-sm text-gray-800"
             value={searchQuery}
             onChangeText={(text) => {
               const cleanedText = text.replace(/[^a-zA-Z0-9\s]/g, "");
-
               const finalText = cleanedText.replace(/^\s+/, "");
-
               handleSearch(finalText);
             }}
           />
@@ -272,6 +268,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* Android date picker */}
         {showDatePicker && Platform.OS === "android" && (
           <DateTimePicker
             value={selectedDate}
@@ -283,8 +280,10 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             }}
           />
         )}
+
+        {/* iOS date picker */}
         {showDatePicker && Platform.OS === "ios" && (
-          <View className=" justify-center items-center z-50 absolute ml-6 mt-[52%] bg-gray-100  rounded-lg">
+          <View className="justify-center items-center z-50 absolute ml-6 mt-[52%] bg-gray-100 rounded-lg">
             <DateTimePicker
               value={selectedDate}
               mode="date"
@@ -297,36 +296,34 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             />
           </View>
         )}
-      </View>
 
-      <View className="px-4 mt-4">
-        <Text
-          style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-          className="text-lg font-bold text-black mb-4"
-        >
-          {t("ManagerTransactions.Transaction List")}{" "}
-          <Text className="font-normal">
-            ({t("ManagerTransactions.All")} {filteredTransactions.length})
-          </Text>
-        </Text>
-      </View>
-
-      {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <LottieView
-            source={require("../../assets/lottie/newLottie.json")}
-            autoPlay
-            loop
-            style={{ width: 150, height: 150 }}
-          />
-          <Text className="text-gray-500 mt-4">
-            {t("ManagerTransactions.Loading")}
+        {/* List header */}
+        <View className="px-4 mt-4">
+          <Text className="text-lg font-bold text-black mb-4">
+            {t("ManagerTransactions.Transaction List")}{" "}
+            <Text className="font-normal">
+              ({t("ManagerTransactions.All")} {filteredTransactions.length})
+            </Text>
           </Text>
         </View>
-      ) : (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View className="flex-1 mb-2">
+
+        {/* Content — FlatList replaces the redundant ScrollView to fix nesting error */}
+        <View className="flex-1 mb-2">
+          {loading ? (
+            <View className="flex-1 justify-center items-center">
+              <LottieView
+                source={require("../../assets/lottie/loading.json")}
+                autoPlay
+                loop
+                style={{ width: 150, height: 150 }}
+              />
+              <Text className="text-gray-500 mt-4">
+                {t("ManagerTransactions.Loading")}
+              </Text>
+            </View>
+          ) : (
             <FlatList
+              keyboardShouldPersistTaps="handled"
               data={filteredTransactions}
               keyExtractor={(item) =>
                 item.id ? item.id.toString() : Math.random().toString()
@@ -338,8 +335,15 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
               renderItem={({ item }) => (
                 <TouchableOpacity
                   className="flex-row items-center p-4 mb-3 rounded-[35px] bg-gray-100 shadow-sm"
+                  style={{
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 6,
+                    elevation: 4,
+                  }}
                   onPress={() => {
-                    navigation.navigate("TransactionReport", {
+                    navigation.navigate("TransactionReport" as any, {
                       registeredFarmerId: item.registeredFarmerId,
                       userId: item.userId,
                       firstName: item.firstName,
@@ -361,18 +365,14 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                           hour12: true,
                         })
                         .toUpperCase(),
-                      empId: item.empId,
                     });
                   }}
                 >
                   <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
                     <Image
-                      source={
-                        item.image
-                          ? { uri: item.image }
-                          : require("../../assets/images/collection-manager/avetar.webp")
-                      }
-                      className="w-16 h-16 rounded-full mr-3"
+                      source={require("../../assets/images/collection-manager/avetar.webp")}
+                      className="w-full h-full"
+                      resizeMode="cover"
                     />
                   </View>
                   <View className="flex-1">
@@ -397,26 +397,26 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
-                <View className="items-center mt-[50%]">
+                <View className="items-center mt-[40%]">
                   <LottieView
-                    source={require("../../assets/lottie/NoComplaints.json")}
+                    source={require("../../assets/lottie/no-data.json")}
                     autoPlay
                     loop
                     style={{ width: 150, height: 150 }}
                   />
                   <Text
-                    style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                    className="text-gray-500 text-lg"
+                    style={{ fontSize: 14, marginTop: -20 }}
+                    className="text-gray-500"
                   >
                     {t("ManagerTransactions.Notransactions")}
                   </Text>
                 </View>
               }
             />
-          </View>
-        </ScrollView>
-      )}
-    </SafeAreaView>
+          )}
+        </View>
+      </View>
+    </View>
   );
 };
 

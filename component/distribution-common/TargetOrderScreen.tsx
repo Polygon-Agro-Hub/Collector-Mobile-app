@@ -1,6 +1,6 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, AppStateStatus } from "react-native";
+import { AppState, AppStateStatus, BackHandler } from "react-native";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type TargetOrderScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -551,13 +551,28 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     }
   };
 
+    useFocusEffect(
+      React.useCallback(() => {
+        const onBackPress = () => {
+          navigation.navigate("DistridutionaDashboard");
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          onBackPress,
+        );
+        return () => subscription.remove();
+      }, [navigation]),
+    );
+
   return (
     <View className="flex-1 bg-[#282828]">
       <CustomHeader
-        title={t("TargetOrderScreen.My Daily Target")}
+        title={t("TargetOrderScreen.My Target")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
         textColor="white"
         bgColor="#282828"
         iconBgColor="#FFFFFF1A"
@@ -570,9 +585,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+              }`}
             onPress={() => setSelectedToggle("ToDo")}
             style={{
               shadowColor:
@@ -584,9 +598,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
             }}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "ToDo" ? "text-white" : "text-black"
-              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
+                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -616,9 +629,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
-              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+              }`}
             onPress={() => setSelectedToggle("Completed")}
             style={{
               shadowColor:
@@ -630,9 +642,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
             }}
           >
             <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
+              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
+                }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -668,7 +679,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           ]}
           className="flex-1 text-center text-white font-bold"
         >
-          {selectedToggle === "ToDo" ? t("TargetOrderScreen.No") : ""}
+          {selectedToggle === "ToDo" ? t("TargetOrderScreen.No") : t("TargetOrderScreen.No")}
         </Text>
         <Text
           style={[
@@ -750,7 +761,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         {loading ? (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
+              source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 200, height: 200 }}
@@ -760,9 +771,8 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
           displayedData.map((item, index) => (
             <TouchableOpacity
               key={item.id || index}
-              className={`flex-row py-4 border-b border-gray-200 ${
-                index % 2 === 0 ? "bg-gray-50" : "bg-white"
-              }`}
+              className={`flex-row py-4 border-b border-gray-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                }`}
               onPress={() => handleRowPress(item)}
             >
               <View className="flex-1 items-center justify-center relative">
@@ -771,7 +781,9 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                     {(index + 1).toString().padStart(2, "0")}
                   </Text>
                 ) : (
-                  <Ionicons name="flag" size={20} color="#980775" />
+                   <Text className="text-center font-medium">
+                    {(index + 1).toString().padStart(2, "0")}
+                  </Text>
                 )}
               </View>
 
@@ -783,7 +795,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                 {/* Red dot indicator for locked packages */}
                 {item.packageIsLock === 1 &&
                   jobRole === "Distribution Officer" && (
-                    <View className="absolute right-[-2] top-3 w-3 h-3 bg-red-500 rounded-full"></View>
+                    <View className="absolute right-[-3] justify-center w-4 h-4 bg-red-500 rounded-full"></View>
                   )}
               </View>
 
@@ -860,12 +872,12 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         ) : (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/NoComplaints.json")}
+              source={require("../../assets/lottie/no-data.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}
             />
-            <Text className="text-gray-500 mt-4 text-center">
+            <Text className="text-gray-500 mt-[-5%] text-center">
               {selectedToggle === "ToDo"
                 ? t("DailyTarget.NoTodoItems") || "No items to do"
                 : t("DailyTarget.noCompletedTargets") || "No completed items"}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,18 +9,19 @@ import {
   Keyboard,
   Modal,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 interface OfficerDetails {
   id: number;
@@ -67,7 +68,8 @@ const ClaimOfficer: React.FC = () => {
 
   const handleEmpIDChange = (text: string) => {
     const trimmedText = text.replace(/^\s+/, "");
-    setEmpID(trimmedText);
+    const numericOnly = trimmedText.replace(/[^0-9]/g, "");
+    setEmpID(numericOnly);
     setOfficerFound(false);
     setSearchPerformed(false);
   };
@@ -192,6 +194,20 @@ const ClaimOfficer: React.FC = () => {
     setModalVisible(false);
   };
 
+  useEffect(() => {
+    const backAction = () => {
+      navigation.goBack();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
   const ConfirmationModal = ({
     visible,
     onConfirm,
@@ -205,21 +221,28 @@ const ClaimOfficer: React.FC = () => {
         animationType="fade"
         onRequestClose={onCancel}
       >
-        <View className="flex-1 justify-center items-center bg-black/60 bg-opacity-50">
+        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
           <View className="bg-white items-center rounded-lg w-80  p-6">
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
             </View>
-            <Text className="text-center text-sm font-semibold mb-4">
+            <Text className="text-center text-base font-semibold mb-4">
               {t("ClaimOfficer.Are you sure you want to claim this officer?")}
             </Text>
 
             <View className="flex-row  justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-2 bg-gray-300 rounded-lg"
+                className="p-2 py-3 px-8 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                style={{
+                  shadowColor: "#8f8a8a",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
-                <Text className="text-sm text-gray-700">
+                <Text className="text-lg text-gray-700">
                   {t("ClaimOfficer.Cancel")}
                 </Text>
               </TouchableOpacity>
@@ -227,11 +250,18 @@ const ClaimOfficer: React.FC = () => {
               <TouchableOpacity
                 onPress={onConfirm}
                 disabled={onLoading}
-                className={`p-2 py-2 rounded-lg ${
+                className={`p-2 py-3 px-9 rounded-lg ${
                   onLoading ? "bg-gray-400" : "bg-[#313131]"
                 }`}
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
-                <Text className="text-sm text-white">
+                <Text className="text-lg text-white">
                   {t("ClaimOfficer.Claim")}
                 </Text>
               </TouchableOpacity>
@@ -258,8 +288,8 @@ const ClaimOfficer: React.FC = () => {
         <Text className="font-semibold text-gray-800  mb-2 text-center">
           {t("ClaimOfficer.EMPID")}
         </Text>
-        <View className="flex-row items-center border border-[#CFCFCF] rounded-full mb-4">
-          <View className="bg-[#D2DADD] px-4 py-3 rounded-full">
+        <View className="flex-row items-center justify-center border border-[#CFCFCF] rounded-full mb-4">
+          <View className="bg-[#D2DADD] px-4 h-[50px] rounded-full items-center justify-center">
             <Text className="text-gray-600 font-bold">{empPrefix}</Text>
           </View>
           <TextInput
@@ -272,13 +302,20 @@ const ClaimOfficer: React.FC = () => {
         </View>
 
         <TouchableOpacity
-          className={`py-2 rounded-full items-center mt-7 ${
+          className={`py-2 rounded-full items-center mt-7 h-[50px] justify-center ${
             !empID || officerFound || searchLoading
               ? "bg-gray-300"
               : "bg-[#313131]"
           }`}
           disabled={!empID || officerFound}
           onPress={handleSearch}
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 6,
+            elevation: 4,
+          }}
         >
           {searchLoading ? (
             <ActivityIndicator size="small" color="#ffffff" />
@@ -290,14 +327,25 @@ const ClaimOfficer: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      {searchPerformed && !searchLoading && (
+        <View
+          style={{
+            height: 1,
+            backgroundColor: "#ADADAD",
+
+            marginTop: 24,
+          }}
+        />
+      )}
+
       {!officerFound && searchPerformed && !searchLoading && (
-        <View className="flex items-center justify-center mt-24">
+        <View className="flex items-center justify-center mt-24 ">
           <Image
             source={require("../../assets/images/collection-manager/delete-icon.webp")}
             className="w-28 h-28"
             resizeMode="contain"
           />
-          <Text className="text-gray-500 mt-2">
+          <Text className="text-gray-500 mt-2 italic">
             {t("ClaimOfficer.No Disclaimed")}
           </Text>
         </View>
@@ -370,6 +418,13 @@ const ClaimOfficer: React.FC = () => {
           <TouchableOpacity
             className="mt-6 mb-10 bg-[#313131]    py-4 rounded-full"
             onPress={() => setModalVisible(true)}
+            style={{
+              shadowColor: "#0b0a0a",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
               className={`text-white text-lg ${

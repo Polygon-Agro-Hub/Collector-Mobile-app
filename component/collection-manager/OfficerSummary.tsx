@@ -15,7 +15,7 @@ import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { CircularProgress } from "react-native-circular-progress";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
@@ -79,7 +79,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
         animationType="fade"
         onRequestClose={onCancel}
       >
-        <View className="flex-1 justify-center items-center bg-black/60 bg-opacity-50">
+        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
           <View className="bg-white items-center rounded-lg w-80 p-6">
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
@@ -93,18 +93,32 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
             <View className="flex-row justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-2 bg-gray-300 rounded-lg"
+                className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                style={{
+                  shadowColor: "#8f8a8a",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
-                <Text className="text-sm text-gray-700">
+                <Text className="text-lg text-gray-700">
                   {t("ClaimOfficer.Cancel")}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={onConfirm}
-                className="p-2 py-2 bg-[#FF0700] rounded-lg"
+                className="p-2 py-3 px-6 bg-[#FF0700] rounded-lg"
+                style={{
+                  shadowColor: "#8f8a8a",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
-                <Text className="text-sm text-white">
+                <Text className="text-lg text-white">
                   {t("DisclaimOfficer.Disclaim")}
                 </Text>
               </TouchableOpacity>
@@ -446,15 +460,26 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
             </Text>
           </View>
 
-          <View className="mt-6 mb-10 items-center">
+          <View className="mt-6 mb-10 items-center justify-center">
             <TouchableOpacity
-              className="bg-[#000000] rounded-full w-64 py-3 h-12"
+              className="bg-[#000000] rounded-full w-64 py-3 h-[50px] justify-center"
               onPress={() =>
                 navigation.navigate("DailyTargetListForOfficers", {
                   officerId,
+                  officerName,
+                  phoneNumber1,
+                  phoneNumber2,
                   collectionOfficerId,
+                  image,
                 })
               }
+              style={{
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+                elevation: 8,
+              }}
             >
               <Text className="text-white text-center font-medium">
                 {t("OfficerSummary.OpenTarget")}

@@ -1,13 +1,13 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import React, { useState, useEffect } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
 import * as ImagePicker from "react-native-image-picker";
 import { useTranslation } from "react-i18next";
 import { MaterialIcons } from "@expo/vector-icons";
-import CustomHeader from "../common/CustomHeader";
-import GlobalSearchModal from "../common/GlobalSearchModal";
+import CustomHeader from "../navigations/CustomHeader";
+import GlobalSearchModal from "../commons/GlobalSearchModal";
 
 type UfarmercropdetailsNavigationProp = StackNavigationProp<
   RootStackParamList,

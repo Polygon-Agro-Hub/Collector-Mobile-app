@@ -13,18 +13,17 @@ import {
 } from "react-native";
 import React, { useCallback, useState } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ScrollView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import LottieView from "lottie-react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "../../store/authSlice";
 import { useDispatch } from "react-redux";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -56,6 +55,22 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     setEmpIdError("");
     return true;
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("Lanuage");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const checkDCMAccess = async (empId: string, pass: string) => {
     if (!empId.trim() || !pass.trim()) return;
@@ -276,7 +291,9 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           ) {
             navigation.navigate("Main", { screen: "DistridutionaDashboard" });
           } else if (jobRole === "Collection Officer") {
-            navigation.navigate("Main", { screen: "Dashboard" });
+            navigation.navigate("Main", {
+              screen: "CollectionOfficerDashboard",
+            });
           } else {
             navigation.navigate("Main", { screen: "ManagerDashboard" });
           }
@@ -327,28 +344,19 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     await AsyncStorage.removeItem("@user_language");
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const onBackPress = () => true;
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress,
-      );
-      return () => subscription.remove();
-    }, []),
-  );
+
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1, backgroundColor: "white" }}
+      className="flex-1 bg-white"
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
-        className=" bg-white"
+        className="bg-white flex-1"
+        showsVerticalScrollIndicator={false}
       >
         <CustomHeader
           title=""
@@ -357,47 +365,33 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           onBackPress={() => handleNavBack()}
         />
 
-        <View className="items-center ">
-          <Image
-            source={loginImage}
-            style={{ width: 270, height: 270 }}
-            resizeMode="contain"
-          />
-          <Text className="font-bold text-2xl pt-[7%]">
-            {t("SignIn.Wellcome")}
-          </Text>
-        </View>
-
-        <View className="mt-2 items-center">
-          <Text>{t("SignIn.SigntoLogin")}</Text>
-        </View>
-
-        {loading ? (
-          <View className="flex-1 justify-center items-center ">
-            <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
-              autoPlay
-              loop
-              style={{ width: 300, height: 300 }}
+        <View className="flex-1 justify-center px-5">
+          <View className="items-center">
+            <Image
+              source={loginImage}
+              className="w-[270px] h-[270px]"
+              resizeMode="contain"
             />
+            <Text className="font-bold text-2xl pt-[7%]">
+              {t("SignIn.Wellcome")}
+            </Text>
           </View>
-        ) : (
-          <View className="p-6">
+
+          <View className="mt-2 items-center">
+            <Text>{t("SignIn.SigntoLogin")}</Text>
+          </View>
+
+          <View className="px-4 py-6 max-w-[500px] w-full mx-auto ">
             <Text className="text-base pb-[2%] font-light">
               {t("SignIn.Employee")}
             </Text>
             <View
-              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl h-[53px] mb-2 px-3 ${
-                empIdError ? "border-red-500" : "border-[#F4F4F4]"
-              }`}
+              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
+                }`}
             >
-              <Image
-                source={user}
-                style={{ width: 24, height: 24 }}
-                resizeMode="contain"
-              />
+              <Image source={user} className="w-6 h-6" resizeMode="contain" />
               <TextInput
-                className="flex-1 h-[40px] text-base pl-2"
+                className="flex-1 text-base pl-2"
                 onChangeText={handleEmpIdChange}
                 autoCapitalize="characters"
                 value={empid}
@@ -415,14 +409,14 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             <Text className="text-base pb-[2%] font-light">
               {t("SignIn.Password")}
             </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl h-[53px] mb-8 px-3">
+            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <Image
                 source={passwordicon}
-                style={{ width: 24, height: 24 }}
+                className="w-6 h-6"
                 resizeMode="contain"
               />
               <TextInput
-                className="flex-1 h-[40px] text-base pl-2"
+                className="flex-1 text-base pl-2"
                 secureTextEntry={secureTextEntry}
                 onChangeText={handlePasswordChange}
                 value={password}
@@ -439,20 +433,27 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             </View>
 
             <TouchableOpacity
-              className="bg-[#000000] w-full p-3 rounded-3xl shadow-2xl items-center justify-center mb-[20%]"
+              className="bg-black w-full  rounded-3xl items-center justify-center mb-[20%] h-[50px]"
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
               onPress={handleLogin}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="white" size="small" />
               ) : (
-                <Text className="text-center text-xl font-light text-white">
+                <Text className="text-center font-semibold text-white text-lg">
                   {t("SignIn.Sign")}
                 </Text>
               )}
             </TouchableOpacity>
           </View>
-        )}
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

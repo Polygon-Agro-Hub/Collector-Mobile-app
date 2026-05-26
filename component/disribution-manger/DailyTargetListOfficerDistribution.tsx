@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Alert,
   Modal,
+  BackHandler,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -14,11 +15,11 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types";
+import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
-import CustomHeader from "../common/CustomHeader";
+import CustomHeader from "../navigations/CustomHeader";
 
 type DailyTargetListOfficerDistributiontNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -31,6 +32,10 @@ interface DailyTargetListOfficerDistributionProps {
     params: {
       collectionOfficerId: number;
       officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
     };
   };
 }
@@ -85,7 +90,41 @@ const DailyTargetListOfficerDistribution: React.FC<
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const { collectionOfficerId, officerId } = route.params;
+  const {
+    collectionOfficerId,
+    officerId,
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+    image,
+  } = route.params;
+
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("Main" as any, {
+          screen: "DistributionOfficerSummary",
+          params: {
+            officerId,
+            officerName,
+            phoneNumber1,
+            phoneNumber2,
+            collectionOfficerId,
+            image,
+          },
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const { t } = useTranslation();
 
   const getStatusColor = (status: string) => {
@@ -269,12 +308,15 @@ const DailyTargetListOfficerDistribution: React.FC<
       (item) => item.processOrderId,
     );
 
-    navigation.navigate("PassTarget" as any, {
-      officerId: officerId,
-      selectedItems: selectedItemsArray,
-      collectionOfficerId: collectionOfficerId,
-      invoiceNumbers: invoiceNumbers,
-      processOrderId: processOrderId,
+    navigation.navigate("Main" as any, {
+      screen: "PassTarget",
+      params: {
+        officerId: officerId,
+        selectedItems: selectedItemsArray,
+        collectionOfficerId: collectionOfficerId,
+        invoiceNumbers: invoiceNumbers,
+        processOrderId: processOrderId,
+      },
     });
 
     clearSelection();
@@ -374,31 +416,45 @@ const DailyTargetListOfficerDistribution: React.FC<
     <View className="flex-1 bg-[#282828]">
       {/* Header */}
 
-      <View className="bg-[#282828]  flex-row justify-center items-center">
-        <CustomHeader
-          title={officerId || ""}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() => navigation.goBack()}
-          textColor="white"
-          bgColor="#282828"
-          iconBgColor="#FFFFFF1A"
-        />
-
-        {isSelectionMode && (
-          <View className="absolute right-4 flex-row">
-            <TouchableOpacity onPress={clearSelection} className="mr-3 p-2">
-              <MaterialIcons name="clear" size={22} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleSelectedItemsAction}
-              className="p-2"
-            >
-              <MaterialIcons name="check" size={22} color="white" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+      <CustomHeader
+        title={officerId}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, {
+            screen: "DistributionOfficerSummary",
+            params: {
+              officerId,
+              officerName,
+              phoneNumber1,
+              phoneNumber2,
+              collectionOfficerId,
+              image,
+            },
+          })
+        }
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+        rightComponent={
+          isSelectionMode ? (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={clearSelection}
+                style={{ padding: 8, marginRight: 4 }}
+              >
+                <MaterialIcons name="clear" size={22} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSelectedItemsAction}
+                style={{ padding: 8 }}
+              >
+                <MaterialIcons name="check" size={22} color="white" />
+              </TouchableOpacity>
+            </View>
+          ) : undefined
+        }
+      />
 
       {/* Confirmation Modal */}
       <Modal
@@ -407,8 +463,8 @@ const DailyTargetListOfficerDistribution: React.FC<
         animationType="fade"
         onRequestClose={handleCancelPass}
       >
-        <View className="flex-1 justify-center items-center bg-[#000000BF] ">
-          <View className="bg-white mx-6 rounded-lg p-6 shadow-lg">
+        <View className="flex-1 justify-center items-center bg-[#00000040] ">
+          <View className="bg-white mx-10 h-[200px] rounded-lg p-6 shadow-lg">
             {/* Warning Icon */}
             <View className="items-center mb-4">
               <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg items-center justify-center">
@@ -425,7 +481,14 @@ const DailyTargetListOfficerDistribution: React.FC<
             <View className="flex-row justify-center space-x-4">
               <TouchableOpacity
                 onPress={handleCancelPass}
-                className="flex-1 mr-2 py-3 px-6 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                className="flex-1 mr-2 h-[50px] px-8 bg-[#F6F7F9] items-center justify-center border border-[#95A1AC] rounded-lg"
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-center text-gray-700 font-medium"
@@ -444,7 +507,14 @@ const DailyTargetListOfficerDistribution: React.FC<
 
               <TouchableOpacity
                 onPress={handleConfirmPass}
-                className="flex-1 ml-2 py-3 px-6 bg-[#980775] border border-[#980775] rounded-lg"
+                className="flex-1  h-[50px]  px-8 bg-[#980775] border border-[#980775] rounded-lg items-center justify-center"
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
               >
                 <Text
                   className="text-center text-white font-medium"
@@ -474,19 +544,17 @@ const DailyTargetListOfficerDistribution: React.FC<
           onPress={() => handleToggleChange("ToDo")}
         >
           <Text
-            className={`font-bold mr-2 ${selectedToggle === "ToDo" ? "text-white" : "text-black"}`}
+            className={`font-bold ${selectedToggle === "ToDo" ? "text-white mr-2" : "text-black"}`}
           >
             {t("TargetOrderScreen.Todo")}
           </Text>
-          <View
-            className={`rounded-full px-2 py-1 ${selectedToggle === "ToDo" ? "bg-white" : "bg-[#980775]"}`}
-          >
-            <Text
-              className={`font-bold text-xs ${selectedToggle === "ToDo" ? "text-[#980775]" : "text-white"}`}
-            >
-              {todoData.length.toString().padStart(2, "0")}
-            </Text>
-          </View>
+          {selectedToggle === "ToDo" && (
+            <View className="rounded-full px-2 py-1 bg-white">
+              <Text className="font-bold text-xs text-[#980775]">
+                {todoData.length.toString().padStart(2, "0")}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -496,19 +564,17 @@ const DailyTargetListOfficerDistribution: React.FC<
           onPress={() => handleToggleChange("Completed")}
         >
           <Text
-            className={`font-bold mr-2 ${selectedToggle === "Completed" ? "text-white" : "text-black"}`}
+            className={`font-bold ${selectedToggle === "Completed" ? "text-white mr-2" : "text-black"}`}
           >
             {t("TargetOrderScreen.Completed")}
           </Text>
-          <View
-            className={`rounded-full px-2 py-1 ${selectedToggle === "Completed" ? "bg-white" : "bg-[#980775]"}`}
-          >
-            <Text
-              className={`font-bold text-xs ${selectedToggle === "Completed" ? "text-[#980775]" : "text-white"}`}
-            >
-              {completedData.length.toString().padStart(2, "0")}
-            </Text>
-          </View>
+          {selectedToggle === "Completed" && (
+            <View className="rounded-full px-2 py-1 bg-white">
+              <Text className="font-bold text-xs text-[#980775]">
+                {completedData.length.toString().padStart(2, "0")}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -552,7 +618,9 @@ const DailyTargetListOfficerDistribution: React.FC<
               {t("TargetOrderScreen.No")}
             </Text>
           ) : (
-            <Text className="flex-1 text-center text-white font-bold"></Text>
+            <Text className="flex-1 text-center text-white font-bold">
+              {t("TargetOrderScreen.No")}
+            </Text>
           )}
           <Text className="flex-[2] text-center text-white font-bold">
             {t("TargetOrderScreen.Invoice No")}
@@ -587,7 +655,7 @@ const DailyTargetListOfficerDistribution: React.FC<
         {loading ? (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/newLottie.json")}
+              source={require("../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 200, height: 200 }}
@@ -640,7 +708,9 @@ const DailyTargetListOfficerDistribution: React.FC<
                     {(index + 1).toString().padStart(2, "0")}
                   </Text>
                 ) : (
-                  <Ionicons name="flag" size={20} color="#980775" />
+                  <Text className="text-center font-medium">
+                    {(index + 1).toString().padStart(2, "0")}
+                  </Text>
                 )}
               </View>
 
@@ -655,10 +725,10 @@ const DailyTargetListOfficerDistribution: React.FC<
               {selectedToggle === "ToDo" ? (
                 <View className="flex-[2] items-center justify-center px-2">
                   <View
-                    className={`px-3 py-2 rounded-full border ${getStatusColor(item.selectedStatus)}`}
+                    className={`px-7 py-2 rounded-full border ${getStatusColor(item.selectedStatus)}`}
                   >
                     <Text
-                      className={`text-xs font-medium text-center ${getStatusTextColor(item.selectedStatus)}`}
+                      className={`text-base font-medium text-center ${getStatusTextColor(item.selectedStatus)}`}
                     >
                       {getStatusText(item.selectedStatus)}
                     </Text>
@@ -678,12 +748,12 @@ const DailyTargetListOfficerDistribution: React.FC<
         ) : (
           <View className="flex-1 justify-center items-center py-20">
             <LottieView
-              source={require("../../assets/lottie/NoComplaints.json")}
+              source={require("../../assets/lottie/no-data.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}
             />
-            <Text className="text-gray-500 mt-4 text-center">
+            <Text className="text-gray-500 mt-[-5%] text-center">
               {selectedToggle === "ToDo"
                 ? t("DailyTarget.NoTodoItems") || "No items to do"
                 : t("DailyTarget.noCompletedTargets") || "No completed items"}

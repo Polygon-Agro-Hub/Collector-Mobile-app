@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "@/component/types";
+import { RootStackParamList } from "@/component/types/types";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
@@ -20,11 +20,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
+import CameraAccess from "../permission/CameraAccess";
 
-type qrcodeNavigationProp = StackNavigationProp<RootStackParamList, "qrcode">;
+type QrcodeNavigationProp = StackNavigationProp<RootStackParamList, "qrcode">;
 
-interface qrcodeProps {
-  navigation: qrcodeNavigationProp;
+interface QrcodeProps {
+  navigation: QrcodeNavigationProp;
   route: RouteProp<RootStackParamList, "qrcode">;
 }
 
@@ -316,7 +317,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   );
 };
 
-const qrcode: React.FC<qrcodeProps> = ({ navigation, route }) => {
+const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
@@ -365,10 +366,6 @@ const qrcode: React.FC<qrcodeProps> = ({ navigation, route }) => {
   );
 
   useEffect(() => {
-    if (permission && !permission.granted && permission.canAskAgain) {
-      requestPermission();
-    }
-
     startScanAnimation();
 
     return () => {
@@ -815,26 +812,14 @@ const qrcode: React.FC<qrcodeProps> = ({ navigation, route }) => {
 
   if (!permission.granted) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center px-6">
-        <StatusBar barStyle="light-content" />
-        <View className="bg-red-500/20 p-6 rounded-full mb-6">
-          <Ionicons name="camera" size={wp(15)} color="#EF4444" />
-        </View>
-        <Text className="text-white text-2xl font-bold mb-3 text-center">
-          Camera Permission Required
-        </Text>
-        <Text className="text-gray-400 text-center mb-8 px-4">
-          Please grant camera permission to scan QR codes.
-        </Text>
-        <TouchableOpacity
-          className="bg-[black] py-4 px-12 rounded-xl"
-          onPress={requestPermission}
-        >
-          <Text className="text-black font-bold text-base">
-            Grant Permission
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+      <CameraAccess
+        navigation={navigation as any}
+        onPermissionGranted={() => {
+          // Force a re-request to update the useCameraPermissions hook state
+          requestPermission();
+        }}
+        returnScreen="qrcode"
+      />
     );
   }
 
@@ -1089,4 +1074,4 @@ const qrcode: React.FC<qrcodeProps> = ({ navigation, route }) => {
   );
 };
 
-export default qrcode;
+export default Qrcode;
