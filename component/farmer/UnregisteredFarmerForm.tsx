@@ -329,10 +329,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   };
   useFocusEffect(
     useCallback(() => {
-      // ✅ Runs every time screen comes into focus — guarantees a clean form
       setFirstName("");
       setLastName("");
-      setNICnumber(NIC ?? ""); // re-apply NIC from route params
+      setNICnumber(NIC ?? "");
       setPhoneNumber("");
       setDistrict("");
       setAccNumber("");

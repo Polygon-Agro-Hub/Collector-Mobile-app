@@ -355,7 +355,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
-        className="bg-white flex-1 px-5"
+        className="bg-white flex-1"
         showsVerticalScrollIndicator={false}
       >
         <CustomHeader
@@ -365,7 +365,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           onBackPress={() => handleNavBack()}
         />
 
-        <View className="flex-1 justify-center">
+        <View className="flex-1 justify-center px-5">
           <View className="items-center">
             <Image
               source={loginImage}
