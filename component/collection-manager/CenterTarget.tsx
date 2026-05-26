@@ -278,13 +278,13 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
       <View className="flex-1 bg-white">
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-          <View style={{ minWidth: 800, width: "100%" }}>
+          <View style={{  width: "100%" }}>
             {/* Table Header */}
             <View className="flex-row bg-[#980775] h-[60px] items-center">
               <Text className="w-16 p-2 text-center text-white">
                 {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
               </Text>
-              <Text className="flex-1 p-2 text-center text-white">
+              <Text className="w-40 p-2 text-center text-white">
                 {t("CenterTarget.Variety")}
               </Text>
               <Text className="w-32 p-2 text-center text-white">
@@ -334,7 +334,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       </View>
 
                       {/* Variety */}
-                      <View className="flex-1 justify-center items-center border-r border-gray-300 p-2">
+                      <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
                         <Text className="text-center">
                           {getvarietyName(item)}
                         </Text>

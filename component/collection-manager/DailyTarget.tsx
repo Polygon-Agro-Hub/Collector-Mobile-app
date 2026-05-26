@@ -289,13 +289,13 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
       <View className="flex-1 bg-white">
         {/* Horizontal ScrollView for wide table */}
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-          <View style={{ minWidth: 800, width: "100%" }}>
+          <View style={{ width: "100%" }}>
             {/* Table Header */}
             <View className="flex-row bg-[#980775] h-[60px] items-center">
               <Text className="w-16 p-2 text-center text-white font-bold">
                 {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
               </Text>
-              <Text className="flex-1 p-2 text-center text-white font-bold">
+             <Text className="w-40 p-2 text-center text-white font-bold">
                 {t("DailyTarget.Variety")}
               </Text>
               <Text className="w-32 p-2 text-center text-white font-bold">
@@ -360,7 +360,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
                       </View>
 
                       {/* Variety */}
-                      <View className="flex-1 justify-center items-center border-r border-gray-300 p-2">
+                      <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
                         <Text className="text-center">{getvarietyName(item)}</Text>
                       </View>
 
