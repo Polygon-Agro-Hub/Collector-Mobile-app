@@ -5,8 +5,6 @@ import {
   TouchableOpacity,
   Alert,
   Image,
-  Platform,
-  KeyboardAvoidingView,
   BackHandler,
   Keyboard,
 } from "react-native";
@@ -15,13 +13,13 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import axios from "axios";
-import { ScrollView } from "react-native-gesture-handler";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomHeader from "@/component/navigations/CustomHeader";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type ChangePasswordNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -169,135 +167,134 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      enabled
+  <KeyboardAwareScrollView
+    contentContainerStyle={{ flexGrow: 1, backgroundColor: "white" }}
+    enableOnAndroid={true}
+    extraScrollHeight={20}
+    keyboardShouldPersistTaps="handled"
+    bounces={false}
+    showsVerticalScrollIndicator={false}
+  >
+    {passwordUpdate === 1 ? (
+      <CustomHeader
+        title=""
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.goBack()}
+      />
+    ) : (
+      <View className="h-[70px]" />
+    )}
+
+    {/* ❌ Removed inner <ScrollView> — replaced with plain <View> */}
+    <View
       className="flex-1 bg-white"
+      style={{ padding: 4, flexGrow: 1 }}
     >
-      {passwordUpdate === 1 ? (
-        <CustomHeader
-          title=""
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() => navigation.goBack()}
-        />
-      ) : (
-        <View className="h-[70px]" />
-      )}
-      <ScrollView
-        className="flex-1 bg-white"
-        contentContainerStyle={{ padding: 4, flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="flex-1 justify-center mx-auto w-full max-w-[500px]">
-          <View className="items-center mt-[-5%]">
-            <Image
-              source={require("@/assets/images/auth/change-password.webp")}
-              resizeMode="contain"
-              className="w-[220px] h-[140px]"
+      <View className="flex-1 justify-center mx-auto w-full max-w-[500px]">
+        <View className="items-center mt-[-5%]">
+          <Image
+            source={require("@/assets/images/auth/change-password.webp")}
+            resizeMode="contain"
+            className="w-[220px] h-[140px]"
+          />
+        </View>
+
+        <View className="items-center pt-[5%]">
+          <Text className="font-bold text-2xl">
+            {t("ChangePassword.ChoosePassword")}
+          </Text>
+          <Text className="text-center font-light pt-3">
+            {t("ChangePassword.Changepassword")}
+          </Text>
+        </View>
+
+        <View className="px-4 py-6">
+          <Text className="font-normal pb-2">
+            {t("ChangePassword.CurrentPassword")}
+          </Text>
+          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
+            <TextInput
+              className="flex-1 bg-[#F4F4F4] text-base"
+              secureTextEntry={secureCurrent}
+              onChangeText={setCurrentPassword}
+              value={currentPassword}
             />
+            <TouchableOpacity onPress={() => setSecureCurrent(!secureCurrent)}>
+              <Icon
+                name={secureCurrent ? "eye-off-outline" : "eye-outline"}
+                size={24}
+                color="#000000"
+              />
+            </TouchableOpacity>
           </View>
 
-          <View className="items-center pt-[5%]">
-            <Text className="font-bold text-2xl">
-              {t("ChangePassword.ChoosePassword")}
-            </Text>
-            <Text className="text-center font-light pt-3">
-              {t("ChangePassword.Changepassword")}
-            </Text>
-          </View>
-
-          <View className="px-4 py-6">
-            <Text className="font-normal pb-2">
-              {t("ChangePassword.CurrentPassword")}
-            </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
-              <TextInput
-                className="flex-1 bg-[#F4F4F4] text-base"
-                secureTextEntry={secureCurrent}
-                onChangeText={setCurrentPassword}
-                value={currentPassword}
-              />
-              <TouchableOpacity
-                onPress={() => setSecureCurrent(!secureCurrent)}
-              >
-                <Icon
-                  name={secureCurrent ? "eye-off-outline" : "eye-outline"}
-                  size={24}
-                  color="#000000"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="font-normal pb-2">
-              {t("ChangePassword.NewPassword")}
-            </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
-              <TextInput
-                className="flex-1 text-base"
-                secureTextEntry={secureNew}
-                value={newPassword}
-                onChangeText={(text) => {
-                  const cleanText = text.replace(/\s/g, "");
-                  setNewPassword(cleanText);
-                }}
-              />
-              <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
-                <Icon
-                  name={secureNew ? "eye-off-outline" : "eye-outline"}
-                  size={24}
-                  color="#000000"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="font-normal pb-2">
-              {t("ChangePassword.ConfirmNewPassword")}
-            </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
-              <TextInput
-                className="flex-1 bg-[#F4F4F4] text-base"
-                secureTextEntry={secureConfirm}
-                onChangeText={(text) => {
-                  const cleanText = text.replace(/\s/g, "");
-                  setConfirmPassword(cleanText);
-                }}
-                value={confirmPassword}
-              />
-              <TouchableOpacity
-                onPress={() => setSecureConfirm(!secureConfirm)}
-              >
-                <Icon
-                  name={secureConfirm ? "eye-off-outline" : "eye-outline"}
-                  size={24}
-                  color="#000000"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View className="px-4 pb-20">
-            <TouchableOpacity
-              className="bg-black w-full rounded-3xl items-center justify-center h-[50px]"
-              onPress={handleChangePassword}
-              style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 10,
-                elevation: 6,
+          <Text className="font-normal pb-2">
+            {t("ChangePassword.NewPassword")}
+          </Text>
+          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
+            <TextInput
+              className="flex-1 text-base"
+              secureTextEntry={secureNew}
+              value={newPassword}
+              onChangeText={(text) => {
+                const cleanText = text.replace(/\s/g, "");
+                setNewPassword(cleanText);
               }}
-            >
-              <Text className="font-light text-white text-lg">
-                {t("ChangePassword.Next")}
-              </Text>
+            />
+            <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
+              <Icon
+                name={secureNew ? "eye-off-outline" : "eye-outline"}
+                size={24}
+                color="#000000"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <Text className="font-normal pb-2">
+            {t("ChangePassword.ConfirmNewPassword")}
+          </Text>
+          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
+            <TextInput
+              className="flex-1 bg-[#F4F4F4] text-base"
+              secureTextEntry={secureConfirm}
+              onChangeText={(text) => {
+                const cleanText = text.replace(/\s/g, "");
+                setConfirmPassword(cleanText);
+              }}
+              value={confirmPassword}
+            />
+            <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
+              <Icon
+                name={secureConfirm ? "eye-off-outline" : "eye-outline"}
+                size={24}
+                color="#000000"
+              />
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+
+        <View className="px-4 pb-20">
+          <TouchableOpacity
+            className="bg-black w-full rounded-3xl items-center justify-center h-[50px]"
+            onPress={handleChangePassword}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
+          >
+            <Text className="font-light text-white text-lg">
+              {t("ChangePassword.Next")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  </KeyboardAwareScrollView>
+);
 };
 
 export default ChangePassword;

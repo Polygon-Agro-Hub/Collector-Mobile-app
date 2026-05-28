@@ -506,10 +506,12 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
         duration={3000}
         onClose={() => {
           setSuccessVisible(false);
-          navigation.navigate("DailyTargetListOfficerDistribution", {
-            officerId,
-            collectionOfficerId,
-          });
+          setTimeout(() => {
+            navigation.navigate("DailyTargetListOfficerDistribution", {
+              officerId,
+              collectionOfficerId,
+            });
+          }, 0);
         }}
       />
 

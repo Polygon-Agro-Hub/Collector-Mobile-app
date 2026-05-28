@@ -7,6 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 interface CustomHeaderProps {
   title: string;
+  subtitle?: string;
   showBackButton?: boolean;
   navigation?: StackNavigationProp<any>;
   onBackPress?: () => void;
@@ -20,6 +21,7 @@ interface CustomHeaderProps {
 
 const CustomHeader: React.FC<CustomHeaderProps> = ({
   title,
+  subtitle,
   showBackButton = true,
   navigation,
   onBackPress,
@@ -64,6 +66,18 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       {/* Title */}
       <View style={styles.titleContainer}>
         <Text style={[styles.title, { color: textColor }]}>{title}</Text>
+        {subtitle ? (
+          <Text
+            style={{
+              color: textColor,
+              fontSize: 15,
+              opacity: 0.85,
+              marginTop: 2,
+            }}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
       </View>
 
       {/* Right Spacer */}

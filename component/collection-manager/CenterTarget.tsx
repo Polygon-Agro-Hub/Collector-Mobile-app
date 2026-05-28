@@ -181,7 +181,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         textColor="white"
         bgColor="#282828"
       />
-      <View className="flex-row justify-center items-center py-4 bg-[#282828]">
+      <View className="flex-row justify-center items-center pb-4 bg-[#282828]">
         {/* To Do Button */}
         <Animated.View
           style={{
@@ -280,7 +280,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
           <View style={{  width: "100%" }}>
             {/* Table Header */}
-            <View className="flex-row bg-[#980775] h-[60px] items-center">
+            <View className="flex-row bg-[#980775] h-[50px] items-center">
               <Text className="w-16 p-2 text-center text-white">
                 {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
               </Text>
@@ -363,14 +363,14 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                     </View>
                   ))
                 ) : (
-                  <View className="flex-1 justify-center items-center py-10">
+  <View className="flex-1 justify-center py-[30%] items-center ">
                     <LottieView
                       source={require("../../assets/lottie/no-data.json")}
                       autoPlay
                       loop
                       style={{ width: 150, height: 150 }}
                     />
-                    <Text className="text-gray-500 mt-4">
+                    <Text className="text-gray-500 mt-[-5%] text-center">
                       {selectedToggle === "ToDo"
                         ? t("DailyTarget.NoTodoItems") || "No items to do"
                         : t("DailyTarget.noCompletedTargets") ||

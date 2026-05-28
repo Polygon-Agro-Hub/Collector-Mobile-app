@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  BackHandler,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -8,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "../navigations/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
 
 type EditTargetManagerNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -37,7 +44,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,6 +81,42 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Main",
+              params: {
+                screen: "DailyTarget",
+                params: {
+                  varietyId,
+                  varietyNameEnglish,
+                  grade,
+                  target,
+                  todo,
+                  dailyTarget,
+                  varietyNameSinhala,
+                  varietyNameTamil,
+                },
+              },
+            },
+          ],
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   return (
     <ScrollView className="bg-white">
       <View className="flex-1 bg-white">
@@ -81,6 +124,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
 
         <CustomHeader
           title={getvarietyName() || ""}
+          subtitle={grade ? `Grade : ${grade}` : ""}
           showBackButton={true}
           navigation={navigation}
           onBackPress={() =>
@@ -147,9 +191,9 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
 
             {/* Buttons in Edit Mode */}
             {isEditing && (
-              <View className="flex-row justify-center space-x-5 mt-4 p-5">
+              <View className="flex-row justify-center gap-4 mt-4 p-5">
                 <TouchableOpacity
-                  className="flex-1 bg-[#FF0700] px-6 py-2 mr-2 rounded-full justify-center items-center h-[50px]"
+                  className="flex-1 bg-[#FF0700] px-6 py-2  rounded-full justify-center items-center h-[50px]"
                   onPress={() =>
                     navigation.navigate("Main", {
                       screen: "PassTargetScreen",

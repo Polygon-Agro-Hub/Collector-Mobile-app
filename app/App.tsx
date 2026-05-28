@@ -100,7 +100,6 @@ import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficerAddressDetails from "@/component/disribution-manger/DistributionAddOfficerAddressDetails";
 import DistributionAddOfficerBasicDetails from "@/component/disribution-manger/DistributionAddOfficerBasicDetails";
 
-
 // LogBox.ignoreAllLogs(true);
 // (Text as any).defaultProps = {
 //   ...(Text as any).defaultProps,
@@ -243,13 +242,18 @@ function MainTabNavigator() {
         name="ReplaceRequestsApprove"
         component={ReplaceRequestsApprove as any}
       />
-       <Tab.Screen
+      <Tab.Screen
         name="DistributionAddOfficerAddressDetails"
         component={DistributionAddOfficerAddressDetails as any}
       />
-       <Tab.Screen
+      <Tab.Screen
         name="DistributionAddOfficerBasicDetails"
         component={DistributionAddOfficerBasicDetails as any}
+      />
+      <Tab.Screen name="EditTargetScreen" component={EditTargetScreen as any} />
+      <Tab.Screen
+        name="PassTargetBetweenOfficers"
+        component={PassTargetBetweenOfficers as any}
       />
     </Tab.Navigator>
   );
@@ -397,19 +401,12 @@ function AppContent() {
               name="ReceivedCashQrCode"
               component={ReceivedCashQrCode as any}
             />
-            <Stack.Screen
-              name="EditTargetScreen"
-              component={EditTargetScreen as any}
-            />
+
             <Stack.Screen
               name="NoCollectionCenterScreen"
               component={NoCollectionCenterScreen}
             />
 
-            <Stack.Screen
-              name="PassTargetBetweenOfficers"
-              component={PassTargetBetweenOfficers as any}
-            />
             <Stack.Screen
               name="RecieveTargetBetweenOfficers"
               component={RecieveTargetBetweenOfficers as any}
@@ -421,17 +418,10 @@ function AppContent() {
               options={{ headerShown: false }}
             />
 
-
-
-
-
             <Stack.Screen
               name="TransactionReport"
               component={TransactionReport as any}
             />
-
-
-
 
             <Stack.Screen
               name="DigitalSignature"

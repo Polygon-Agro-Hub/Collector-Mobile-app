@@ -380,51 +380,34 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const validatePhoneNumber = (input: string) => /^7[0-9]{8}$/.test(input);
 
   const handlePhoneNumber1Change = (input: string) => {
-    clearFieldError("phoneNumber1");
-    let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
-    setPhoneNumber1(numbersOnly);
+  clearFieldError("phoneNumber1");
+  let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
+  setPhoneNumber1(numbersOnly);
 
-    if (numbersOnly.length === 0) {
-      setError1("");
+  if (numbersOnly.length === 0) {
+    setError1("");
+    setError2("");
+  } else if (!numbersOnly.startsWith("7")) {
+    setError1(t("Error.Invalid phone number"));
+  } else if (numbersOnly.length < 9) {
+    setError1(t("Error.Phone number must be 9 digits long"));
+  } else if (validatePhoneNumber(numbersOnly)) {
+    setError1("");
 
-      if (
-        error2 ===
-        t(
-          "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
-        )
-      ) {
-        setError2("");
+    if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
+      if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber2) {
+        setError2(
+          t("AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.")
+        );
+      } else {
+        setError2(""); 
       }
-    } else if (!numbersOnly.startsWith("7")) {
-      setError1(t("Error.Invalid phone number"));
-    } else if (numbersOnly.length < 9) {
-      setError1(t("Error.Phone number must be 9 digits long"));
-    } else if (validatePhoneNumber(numbersOnly)) {
-      setError1("");
-
-      if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
-        if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber2) {
-          setError2(
-            t(
-              "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
-            ),
-          );
-        } else {
-          setError2((prev) =>
-            prev ===
-            t(
-              "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
-            )
-              ? ""
-              : prev,
-          );
-        }
-      }
-      checkPhoneExists(numbersOnly);
-    } else {
-      setError1(t("Error.Invalid phone number"));
     }
-  };
+    checkPhoneExists(numbersOnly);
+  } else {
+    setError1(t("Error.Invalid phone number"));
+  }
+};
 
   const checkPhoneExists = async (phoneNumber: string) => {
     if (!validatePhoneNumber(phoneNumber)) return;
@@ -450,29 +433,28 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const handlePhoneNumber2Change = (input: string) => {
-    let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
-    setPhoneNumber2(numbersOnly);
+  let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
+  setPhoneNumber2(numbersOnly);
 
-    if (numbersOnly.length === 0) {
-      setError2("");
-    } else if (!numbersOnly.startsWith("7")) {
-      setError2(t("Error.Invalid phone number"));
-    } else if (numbersOnly.length < 9) {
-      setError2(t("Error.Phone number must be 9 digits long"));
-    } else if (validatePhoneNumber(numbersOnly)) {
-      if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber1) {
-        setError2(
-          t(
-            "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
-          ),
-        );
-      } else {
-        checkPhone2Exists(numbersOnly, phoneCode2);
-      }
+  if (numbersOnly.length === 0) {
+    setError2("");
+  } else if (!numbersOnly.startsWith("7")) {
+    setError2(t("Error.Invalid phone number"));
+  } else if (numbersOnly.length < 9) {
+    setError2(t("Error.Phone number must be 9 digits long"));
+  } else if (validatePhoneNumber(numbersOnly)) {
+    if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber1) {
+      setError2(
+        t("AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.")
+      );
     } else {
-      setError2(t("Error.Invalid phone number"));
+      setError2(""); 
+      checkPhone2Exists(numbersOnly, phoneCode2);
     }
-  };
+  } else {
+    setError2(t("Error.Invalid phone number"));
+  }
+};
 
   const checkPhone2Exists = async (phoneNumber: string, dialCode: string) => {
     if (!validatePhoneNumber(phoneNumber)) return;

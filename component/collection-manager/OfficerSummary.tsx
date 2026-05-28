@@ -93,7 +93,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
             <View className="flex-row justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                className="p-2 py-2 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
@@ -102,14 +102,14 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-gray-700">
+                <Text className="text-sm text-gray-700">
                   {t("ClaimOfficer.Cancel")}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={onConfirm}
-                className="p-2 py-3 px-6 bg-[#FF0700] rounded-lg"
+                className="p-2 py-2 px-6 bg-[#FF0700] rounded-lg"
                 style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
@@ -118,7 +118,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-white">
+                <Text className="text-sm text-white">
                   {t("DisclaimOfficer.Disclaim")}
                 </Text>
               </TouchableOpacity>

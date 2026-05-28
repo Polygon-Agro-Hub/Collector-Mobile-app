@@ -163,7 +163,6 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   const selectedCategoryLabel =
     Category.find((c) => c.value === selectedCategory)?.label || null;
 
-  // Build modal data with translated labels
   const categoryModalData = Category.map((item) => ({
     label: t(item.label),
     value: item.value,
@@ -182,7 +181,10 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
           ) : (
             <ScrollView
               className="flex-1 bg-white"
-              contentContainerStyle={{ flexGrow: 1, backgroundColor: "#F6F6F6" }}
+              contentContainerStyle={{
+                flexGrow: 1,
+                backgroundColor: "#F6F6F6",
+              }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
@@ -201,7 +203,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                   resizeMode="contain"
                 />
 
-                <View className="items-center bg-white rounded-3xl w-full p-4">
+                <View className="items-center bg-white rounded-3xl w-full mb-10 p-4">
                   <View className="w-full items-center mt-10">
                     <View className="flex-row">
                       <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">

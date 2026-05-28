@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -18,6 +19,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
+import { useFocusEffect } from "@react-navigation/native";
 
 type RecieveTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -66,7 +68,18 @@ const RecieveTargetBetweenOfficers: React.FC<
   const [officerModalVisible, setOfficerModalVisible] = useState(false);
   const { t } = useTranslation();
 
-  const { grade, varietyId, collectionOfficerId, officerId } = route.params;
+  const {
+    grade,
+    todo,
+    varietyId,
+    collectionOfficerId,
+    officerId,
+    varietyNameEnglish,
+    varietyNameSinhala,
+    varietyNameTamil,
+    target,
+    qty,
+  } = route.params;
   const toOfficerId = collectionOfficerId;
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -82,6 +95,45 @@ const RecieveTargetBetweenOfficers: React.FC<
     };
     fetchData();
   }, []);
+
+   const goBackToEditTarget = () => {
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "Main",
+            params: {
+              screen: "EditTargetScreen",
+              params: {
+                varietyId,
+                officerId,
+                collectionOfficerId,
+                varietyNameEnglish,
+                varietyNameSinhala,
+                varietyNameTamil,
+                grade,
+                target,
+                todo,
+                qty,
+              },
+            },
+          },
+        ],
+      });
+    };
+  
+    useFocusEffect(
+      useCallback(() => {
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          () => {
+            goBackToEditTarget();
+            return true; 
+          },
+        );
+        return () => subscription.remove();
+      }, [navigation]),
+    );
 
   const getOfficerName = (officer: Officer) => {
     switch (selectedLanguage) {
@@ -252,9 +304,9 @@ const RecieveTargetBetweenOfficers: React.FC<
           t("Error.Success"),
           t("Error.Target received successfully."),
         );
-        navigation.navigate("DailyTargetListForOfficers" as any, {
-          officerId,
-          collectionOfficerId,
+        navigation.navigate("Main" as any, {
+          screen: "DailyTargetListForOfficers",
+          params: { officerId, collectionOfficerId },
         });
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
@@ -293,9 +345,10 @@ const RecieveTargetBetweenOfficers: React.FC<
         <View className="flex-1 bg-white mb-4">
           <CustomHeader
             title={getvarietyName() || ""}
+            subtitle={grade ? `Grade : ${grade}` : ""}
             showBackButton={true}
             navigation={navigation}
-            onBackPress={() => navigation.goBack()}
+            onBackPress={goBackToEditTarget}
             textColor="white"
             bgColor="#282828"
             iconBgColor="#FFFFFF1A"
@@ -360,7 +413,9 @@ const RecieveTargetBetweenOfficers: React.FC<
                     : "--"}
                 </Text>
               )}
+              <View className="border-b border-gray-300 my-4" />
             </View>
+         
 
             <View className="p-5">
               <Text className="text-gray-700 mb-2">
@@ -390,7 +445,7 @@ const RecieveTargetBetweenOfficers: React.FC<
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,
-                elevation: 6, 
+                elevation: 6,
               }}
             >
               {fetchingTarget ? (
@@ -419,7 +474,7 @@ const RecieveTargetBetweenOfficers: React.FC<
         }}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
-        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
+        noResultsText={t("Error.No officers available.")}
       />
     </>
   );

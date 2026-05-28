@@ -436,12 +436,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       };
     }, [navigation]),
   );
-  // Track whether the user left this screen without completing verification
+
   const hasLeftUnverified = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
-      // Reset state if the user left without verifying
       if (hasLeftUnverified.current && !isVerified) {
         setOtpDigits(["", "", "", "", ""]);
         setIsOtpValid(false);
@@ -453,7 +452,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       }
 
       return () => {
-        // Mark that the user navigated away (only if not yet verified)
         if (!isVerified) {
           hasLeftUnverified.current = true;
         }
@@ -498,21 +496,31 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
 
           <View className="mb-5">
-            <Text className="text-[#0085FF] text-center text-[18px]">
-              {phoneNumber}
+            <Text className="text-[#0085FF] text-center text-[16px]">
+              {phoneNumber
+                ? phoneNumber.replace(
+                    /^(\+94|94|0)?(\d{2})(\d{3})(\d{4})$/,
+                    "+94 $2 $3 $4",
+                  )
+                : phoneNumber}
             </Text>
           </View>
 
           {/* OTP Input Boxes */}
-         <View className="flex-row justify-center gap-x-[10px] mb-[32px] pr-[16px]">
+          <View className="flex-row justify-center gap-x-[10px] mb-[32px] pr-[16px]">
             {Array.from({ length: 5 }).map((_, index) => (
               <TextInput
                 key={index}
                 ref={(el: TextInput | null) => {
                   inputRefs.current[index] = el;
                 }}
-                className="w-[51px] h-[48px] text-[20px] text-center rounded-[10px] bg-white text-black border-[#FFC738]"
+                className="w-[51px] text-[20px] text-center rounded-[10px] bg-white text-black border-[#FFC738]"
                 style={{
+                  height: 52,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
                   borderWidth: otpDigits[index] !== "" ? 2 : 1,
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
@@ -540,19 +548,24 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
 
           <View className="mb-[64px]">
-            <Text
-              className="text-center underline text-base"
-              onPress={disabledResend ? undefined : handleResendOTP}
-              style={{
-                fontSize: 16,
-                color: disabledResend ? "#9CA3AF" : "#000000",
-                fontWeight: "600",
-              }}
+            <TouchableOpacity
+              onPress={handleResendOTP}
+              disabled={disabledResend}
+              activeOpacity={0.7}
             >
-              {timer > 0
-                ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
-                : `${t("Otpverification.Resend again")}`}
-            </Text>
+              <Text
+                className="text-center underline"
+                style={{
+                  fontSize: 16,
+                  color: disabledResend ? "#9CA3AF" : "#000000",
+                  fontWeight: "600",
+                }}
+              >
+                {timer > 0
+                  ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
+                  : `${t("Otpverification.Resend again")}`}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <View className="w-full items-center" style={{ marginBottom: 8 }}>

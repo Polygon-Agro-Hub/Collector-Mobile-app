@@ -126,7 +126,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       const asset = await MediaLibrary.createAssetAsync(response.uri);
       await MediaLibrary.createAlbumAsync("Download", asset, false);
 
-      Alert.alert(t("Error.Success"), t("Error.QR Code saved to gallery."));
+      Alert.alert(t("Error.Success"), t("Error.QR Code saved to the gallery."));
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(t("Error.error"), t("Error.failedSaveQRCode"));

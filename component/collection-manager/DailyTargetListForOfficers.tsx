@@ -232,43 +232,53 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
       />
 
       {/* Toggle Buttons */}
-      <View className="flex-row justify-center items-center py-4 bg-[#282828]">
+      <View className="flex-row justify-center items-center pb-4 bg-[#282828]">
         <TouchableOpacity
-          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-            }`}
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+            selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+          }`}
           style={{ height: 40 }}
           onPress={() => setSelectedToggle("ToDo")}
         >
           <Text
-            className={`font-bold mr-2 ${selectedToggle === "ToDo" ? "text-white" : "text-black"
-              }`}
+            className={`font-bold mr-2 ${
+              selectedToggle === "ToDo" ? "text-white" : "text-black"
+            }`}
           >
             {t("DailyTarget.Todo")}
           </Text>
-          <View className="bg-white rounded-full px-2 py-1">
-            <Text className="text-black font-bold text-xs">
-              {todoData.length}
-            </Text>
-          </View>
+          {/* Only show count badge when ToDo tab is active */}
+          {selectedToggle === "ToDo" && (
+            <View className="bg-white rounded-full px-2 py-1">
+              <Text className="text-black font-bold text-xs">
+                {todoData.length}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-            }`}
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+            selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+          }`}
           style={{ height: 40 }}
           onPress={() => setSelectedToggle("Completed")}
         >
           <Text
-            className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
+            className={`font-bold ${
+              selectedToggle === "Completed" ? "text-white" : "text-black"
+            }`}
           >
             {t("DailyTarget.Completed")}
           </Text>
-          <View className="bg-white rounded-full px-2 py-1 ml-2">
-            <Text className="text-black font-bold text-xs">
-              {completedData.length}
-            </Text>
-          </View>
+          {/* Only show count badge when Completed tab is active */}
+          {selectedToggle === "Completed" && (
+            <View className="bg-white rounded-full px-2 py-1 ml-2">
+              <Text className="text-black font-bold text-xs">
+                {completedData.length}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -284,14 +294,16 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
             />
           </View>
         ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={true}
-          style={{
-            marginBottom:40
-          }}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={true}
+            style={{
+              marginBottom: 40,
+            }}
           >
-            <View style={{  width: "100%" }}>
+            <View style={{ width: "100%" }}>
               {/* Table Header */}
-              <View className="flex-row bg-[#980775] h-[60px] items-center">
+              <View className="flex-row bg-[#980775] h-[50px] items-center">
                 <Text className="w-16 p-2 text-center text-white font-bold">
                   {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
                 </Text>
@@ -314,17 +326,21 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
               <ScrollView
                 className="flex-1 bg-white"
                 refreshControl={
-                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
                 }
-                contentContainerStyle={{ paddingBottom: 60 }}
+                contentContainerStyle={{ paddingBottom: 20 }}
               >
                 {/* Table Data */}
                 {displayedData.length > 0 ? (
                   displayedData.map((item, index) => (
                     <TouchableOpacity
                       key={index}
-                      className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                        }`}
+                      className={`flex-row border-b border-gray-300 ${
+                        index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      }`}
                       onPress={() => {
                         if (selectedToggle === "Completed") return;
 
@@ -339,6 +355,10 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                           varietyNameSinhala: item.varietyNameSinhala,
                           varietyNameTamil: item.varietyNameTamil,
                           officerId: officerId,
+                          officerName,
+                          phoneNumber1,
+                          phoneNumber2,
+                          image,
                         });
                       }}
                     >
@@ -353,7 +373,9 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
 
                       {/* Variety */}
                       <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
-                        <Text className="text-center">{getvarietyName(item)}</Text>
+                        <Text className="text-center">
+                          {getvarietyName(item)}
+                        </Text>
                       </View>
 
                       {/* Grade */}
@@ -379,18 +401,18 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                     </TouchableOpacity>
                   ))
                 ) : (
-                  <View className="flex-1 justify-center items-center py-16">
+                  <View className="flex-1 justify-center py-[30%] items-center ">
                     <LottieView
                       source={require("../../assets/lottie/no-data.json")}
                       autoPlay
                       loop
                       style={{ width: 150, height: 150 }}
                     />
-                    <Text className="text-gray-500 mt-4 text-center">
+                    <Text className="text-gray-500 mt-[-5%] text-center">
                       {selectedToggle === "ToDo"
                         ? t("DailyTarget.NoTodoItems") || "No items to do"
                         : t("DailyTarget.noCompletedTargets") ||
-                        "No completed items"}
+                          "No completed items"}
                     </Text>
                   </View>
                 )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -67,11 +68,61 @@ const PassTargetBetweenOfficers: React.FC<
   const [officerModalVisible, setOfficerModalVisible] = useState(false);
   const { t } = useTranslation();
 
-  const { grade, todo, varietyId, collectionOfficerId, officerId } =
-    route.params;
+  const {
+    grade,
+    todo,
+    varietyId,
+    collectionOfficerId,
+    officerId,
+    varietyNameEnglish,
+    varietyNameSinhala,
+    varietyNameTamil,
+    target,
+    qty,
+  } = route.params;
 
   const maxAmount = parseFloat(todo);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+
+  const goBackToEditTarget = () => {
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "Main",
+          params: {
+            screen: "EditTargetScreen",
+            params: {
+              varietyId,
+              officerId,
+              collectionOfficerId,
+              varietyNameEnglish,
+              varietyNameSinhala,
+              varietyNameTamil,
+              grade,
+              target,
+              todo,
+              qty,
+            },
+          },
+        },
+      ],
+    });
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          goBackToEditTarget();
+          return true; 
+        },
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -218,11 +269,17 @@ const PassTargetBetweenOfficers: React.FC<
         Alert.alert(
           t("Error.Success"),
           t("Error.Target transferred successfully."),
+          [
+            {
+              text: t("Error.Ok"),
+              onPress: () =>
+                navigation.navigate("Main", {
+                  screen: "DailyTargetListForOfficers",
+                  params: { officerId, collectionOfficerId },
+                }),
+            },
+          ],
         );
-        navigation.navigate("DailyTargetListForOfficers" as any, {
-          officerId,
-          collectionOfficerId,
-        });
       } else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
       }
@@ -255,9 +312,10 @@ const PassTargetBetweenOfficers: React.FC<
     <View className="flex-1 bg-white">
       <CustomHeader
         title={getvarietyName() || ""}
+        subtitle={grade ? `Grade : ${grade}` : ""}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={goBackToEditTarget}
         textColor="white"
         bgColor="#282828"
         iconBgColor="#FFFFFF1A"
@@ -280,7 +338,7 @@ const PassTargetBetweenOfficers: React.FC<
           <View className="border-b border-gray-300 my-4" />
 
           <View className="p-5">
-            <Text className="text-gray-700 mb-2 mt-[20%]">
+            <Text className="text-gray-700 mb-2 mt-[3%]">
               {t("PassTargetBetweenOfficers.Short Stock Assignee")}
             </Text>
 
@@ -342,12 +400,12 @@ const PassTargetBetweenOfficers: React.FC<
             onPress={passTarget}
             disabled={isSaveDisabled()}
             style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 10,
-                elevation: 6, 
-              }}
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             {submitting ? (
               <ActivityIndicator size="small" color="white" />

@@ -88,17 +88,33 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   };
 
   const handleNicChange = (text: string) => {
-    const filteredText = text.replace(/[^0-9Vv]/g, "");
+    const normalized = text.toUpperCase();
 
-    const normalizedText = filteredText.replace(/[vV]/g, "V");
+    const cleaned = normalized.replace(/[^0-9V]/g, "");
 
-    setNICnumber(normalizedText);
+    let result = "";
+    let hasVX = false;
 
-    if (ere) {
-      setEre("");
+    for (let i = 0; i < cleaned.length; i++) {
+      const char = cleaned[i];
+
+      if (char === "V") {
+        if (result.length === 9 && !hasVX) {
+          result += char;
+          hasVX = true;
+        }
+      } else {
+        if (!hasVX && result.length < 12) {
+          result += char;
+        }
+      }
     }
 
-    if (searchButtonClicked && normalizedText.length === 0) {
+    setNICnumber(result);
+
+    if (ere) setEre("");
+
+    if (searchButtonClicked && result.length === 0) {
       setSearchButtonClicked(false);
     }
 
@@ -108,6 +124,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
       setFarmers(null);
     }
   };
+
   const handleSearch = async () => {
     setSearchButtonClicked(true);
 
