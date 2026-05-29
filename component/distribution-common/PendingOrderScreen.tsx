@@ -326,9 +326,9 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   return {
                     id: `${packageInfo.id}_${item.id}`,
                     name: item.productName,
-                    weight: `${item.qty} `,
+                    weight: `${item.qty}`,
                     selected: isPackedValue,
-                    price: item.price || item.normalPrice || "0",
+                    price: item.price ?? item.normalPrice ?? "0",
                     productType: item.productType,
                     productTypeName: item.productTypeName,
                     packageId: packageInfo.id,
@@ -745,9 +745,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }
 
     setTimeout(() => {
-      const unitPrice = parseFloat(item.price) || 0;
-      const itemQty = parseFloat(item.weight) || 1;
-      const totalPrice = unitPrice * itemQty;
+      const totalPrice = parseFloat(item.price) || 0;
 
       setReplaceData({
         selectedProduct: `${item.name} - ${item.weight}Kg - Rs. ${formatPrice(totalPrice)}`,
@@ -800,11 +798,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
       const priceValue = (() => {
         if (!replaceData.price) return 0;
-        const priceString = replaceData.price.toString();
-        const match = priceString.match(/\d+\.?\d*/);
-        if (!match) return 0;
-        const numericValue = match[0];
-        const parsed = parseFloat(numericValue);
+        const cleaned = replaceData.price.toString().replace(/[^0-9.]/g, "");
+        const parsed = parseFloat(cleaned);
         return isNaN(parsed) ? 0 : parsed;
       })();
 
@@ -865,11 +860,9 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         });
 
         if (jobRole === "Distribution Centre Manager") {
-          // Manager stays on screen and refreshes
           await loadOrderData(true);
           Alert.alert(t("Error.Success"), successMessage);
         } else {
-          // Distribution Officer → navigate to TargetOrderScreen
           Alert.alert(t("Error.Success"), successMessage, [
             {
               text: t("Error.Ok"),
@@ -1555,8 +1548,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           //   paddingHorizontal: 24,
         }}
       >
-       <View className="bg-white rounded-2xl px-6 py-8 w-full max-w-sm">
-  <Text className="text-xl font-bold text-center mb-2">
+        <View className="bg-white rounded-2xl px-6 py-8 w-full max-w-sm">
+          <Text className="text-xl font-bold text-center mb-2">
             {t("PendingOrderScreen.Completed Successfully")}
           </Text>
           <Text className="text-gray-600 text-center mb-6">

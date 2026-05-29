@@ -189,8 +189,9 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+            }`}
             style={{
               height: 40,
               shadowColor:
@@ -203,8 +204,9 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("ToDo")}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
-                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${
+                selectedToggle === "ToDo" ? "text-white" : "text-black"
+              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -235,8 +237,9 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+            }`}
             style={{
               height: 40,
               shadowColor:
@@ -249,8 +252,9 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("Completed")}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
-                }`}
+              className={`font-bold ${
+                selectedToggle === "Completed" ? "text-white" : "text-black"
+              }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -278,7 +282,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
       <View className="flex-1 bg-white">
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-          <View style={{  width: "100%" }}>
+          <View style={{ width: "100%" }}>
             {/* Table Header */}
             <View className="flex-row bg-[#980775] h-[50px] items-center">
               <Text className="w-16 p-2 text-center text-white">
@@ -313,7 +317,10 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
               <ScrollView
                 className="flex-1 bg-white "
                 refreshControl={
-                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                  />
                 }
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
@@ -363,7 +370,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                     </View>
                   ))
                 ) : (
-  <View className="flex-1 justify-center py-[30%] items-center ">
+                  <View className="flex-1 justify-center py-[30%] items-center ">
                     <LottieView
                       source={require("../../assets/lottie/no-data.json")}
                       autoPlay
@@ -374,7 +381,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       {selectedToggle === "ToDo"
                         ? t("DailyTarget.NoTodoItems") || "No items to do"
                         : t("DailyTarget.noCompletedTargets") ||
-                        "No completed items"}
+                          "No completed items"}
                     </Text>
                   </View>
                 )}

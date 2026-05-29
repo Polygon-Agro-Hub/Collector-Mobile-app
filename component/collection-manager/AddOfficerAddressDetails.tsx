@@ -376,17 +376,19 @@ const AddOfficerAddressDetails: React.FC = () => {
     }
   };
 
-  const provinceModalData = (provincesData.provinces as Province[]).map(
-    (p) => ({
-      label: p.name[selectedLanguage as keyof typeof p.name] || p.name.en,
-      value: p.name.en,
-    }),
-  );
+  const provinceModalData = (provincesData.provinces as Province[])
+  .map((p) => ({
+    label: p.name[selectedLanguage as keyof typeof p.name] || p.name.en,
+    value: p.name.en,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
-  const districtModalData = districts.map((d) => ({
+ const districtModalData = districts
+  .map((d) => ({
     label: (d[selectedLanguage as keyof typeof d] as string) || d.en,
     value: d.en,
-  }));
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
   const bankModalData = bankNames
     .slice()
@@ -401,7 +403,11 @@ const AddOfficerAddressDetails: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        navigation.goBack();
+        if (jobRole === "Collection Officer") {
+          navigation.navigate("Main", { screen: "CollectionOfficersList" });
+        } else if (jobRole === "Distribution Officer") {
+          navigation.navigate("Main", { screen: "DistributionOfficersList" });
+        }
         return true;
       };
 
@@ -453,11 +459,18 @@ const AddOfficerAddressDetails: React.FC = () => {
         title={t("AddOfficerAddressDetails.AddOfficer")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => {
+          if (jobRole === "Collection Officer") {
+            navigation.navigate("Main", { screen: "CollectionOfficersList" });
+          } else if (jobRole === "Distribution Officer") {
+            navigation.navigate("Main", { screen: "DistributionOfficersList" });
+          }
+        }}
       />
       <ScrollView
         className="flex-1 bg-white w-full max-w-[500px] mx-auto"
         keyboardShouldPersistTaps="handled"
+        style={{ marginBottom: 50 }}
       >
         {/* ── Address Details ── */}
         <View className="px-8 mt-4">
@@ -708,7 +721,12 @@ const AddOfficerAddressDetails: React.FC = () => {
         <View className="px-8 flex-col w-full gap-4 mt-5 mb-4">
           <TouchableOpacity
             className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
-            onPress={() => navigation.goBack()}
+            onPress={() =>
+              navigation.navigate("AddOfficerBasicDetails", {
+                jobRolle: jobRole,
+                preservedData: basicDetails,
+              })
+            }
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },

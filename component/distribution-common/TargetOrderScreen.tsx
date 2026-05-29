@@ -578,7 +578,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         iconBgColor="#FFFFFF1A"
       />
 
-      <View className="flex-row justify-center items-center py-4 bg-[#282828]">
+      <View className="flex-row justify-center items-center pb-8 bg-[#282828]">
         <Animated.View
           style={{
             transform: [{ scale: selectedToggle === "ToDo" ? 1.05 : 1 }],
@@ -870,7 +870,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
             </TouchableOpacity>
           ))
         ) : (
-          <View className="flex-1 justify-center items-center py-20">
+          <View className="flex-1 justify-center items-center pt-[35%] ">
             <LottieView
               source={require("../../assets/lottie/no-data.json")}
               autoPlay

@@ -154,8 +154,15 @@ export type RootStackParamList = {
     phoneNumber1: number;
   };
   AddOfficerBasicDetails: {
-    jobRolle: String;
+  jobRolle: string;
+  preservedData?: OfficerBasicDetailsFormData & {
+    phoneCode1?: string;
+    phoneNumber1?: string;
+    phoneCode2?: string;
+    phoneNumber2?: string;
+    profileImage?: string;
   };
+};
   AddOfficerAddressDetails: {
     formData: OfficerBasicDetailsFormData;
     type: "Permanent" | "Temporary";

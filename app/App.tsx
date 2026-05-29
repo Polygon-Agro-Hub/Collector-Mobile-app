@@ -255,6 +255,20 @@ function MainTabNavigator() {
         name="PassTargetBetweenOfficers"
         component={PassTargetBetweenOfficers as any}
       />
+      <Tab.Screen name="SideMenu" component={SideMenu} />
+      <Tab.Screen name="OfficerQr" component={OfficerQr} />
+      <Tab.Screen
+        name="AddOfficerBasicDetails"
+        component={AddOfficerBasicDetails as any}
+      />
+      <Tab.Screen
+        name="AddOfficerAddressDetails"
+        component={AddOfficerAddressDetails}
+      />
+      <Tab.Screen
+        name="CenterTargetScreen"
+        component={CenterTargetScreen as any}
+      />
     </Tab.Navigator>
   );
 }
@@ -361,11 +375,10 @@ function AppContent() {
             <Stack.Screen name="FormScreen" component={FormScreen} />
             <Stack.Screen name="Lanuage" component={Lanuage} />
             <Stack.Screen name="FarmerQr" component={FarmerQr} />
-            <Stack.Screen name="OfficerQr" component={OfficerQr} />
+
             <Stack.Screen name="ComplainPage" component={ComplainPage} />
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="ReportPage" component={ReportPage} />
-            <Stack.Screen name="SideMenu" component={SideMenu} />
 
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
             <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
@@ -389,14 +402,6 @@ function AppContent() {
               component={Ufarmercropdetails}
             />
 
-            <Stack.Screen
-              name="AddOfficerBasicDetails"
-              component={AddOfficerBasicDetails as any}
-            />
-            <Stack.Screen
-              name="AddOfficerAddressDetails"
-              component={AddOfficerAddressDetails}
-            />
             <Stack.Screen
               name="ReceivedCashQrCode"
               component={ReceivedCashQrCode as any}
@@ -436,10 +441,7 @@ function AppContent() {
               name="TimerContainer"
               component={TimerContainer as any}
             />
-            <Stack.Screen
-              name="CenterTargetScreen"
-              component={CenterTargetScreen as any}
-            />
+
             <Stack.Screen
               name="ReplaceRequestsApprove"
               component={ReplaceRequestsApprove as any}

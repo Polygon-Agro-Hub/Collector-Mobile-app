@@ -71,6 +71,7 @@ interface ReplaceRequestData {
   replaceProductDisplayName: string;
   replaceQty?: string;
   replacePrice?: string;
+  replceId?: string;
 }
 
 interface ReplaceData {
@@ -79,6 +80,7 @@ interface ReplaceData {
   productTypeName: string;
   newProduct: string;
   newProductId: string;
+  selectedProductUnitPrice: number;
   quantity: string;
   price: string;
   invNo: string;
@@ -102,6 +104,18 @@ interface CurrentReplaceRequest {
   displayName: string;
 }
 
+interface OriginalPackageItem {
+  id: number;
+  productType: number;
+  productId: number;
+  qty: number;
+  price: number;
+  isPacked: number;
+  orderPackageId: number;
+  displayName: string;
+  productTypeName: string;
+}
+
 const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   route,
   navigation,
@@ -118,48 +132,10 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   const [loadingRetailItems, setLoadingRetailItems] = useState(false);
   const [loadingCurrentReplace, setLoadingCurrentReplace] = useState(false);
   const [retailItems, setRetailItems] = useState<RetailItem[]>([]);
-  const [currentReplaceRequests, setCurrentReplaceRequests] = useState<
-    CurrentReplaceRequest[]
-  >([]);
+  const [currentReplaceRequests, setCurrentReplaceRequests] = useState < CurrentReplaceRequest[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  useFocusEffect(
-    useCallback(() => {
-      // Back press handler
-      const handleBackPress = () => {
-        navigation.navigate("ReplaceRequestsScreen");
-        return true;
-      };
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        handleBackPress,
-      );
-
-      // Reset state on every focus
-      setReplaceData({
-        orderId:
-          replaceRequestData?.orderId || replaceRequestData?.invNo || "N/A",
-        selectedProduct: replaceRequestData?.productDisplayName || "N/A",
-        productTypeName: replaceRequestData?.productTypeName || "N/A",
-        newProduct: "",
-        newProductId: "",
-        quantity: "",
-        price: replaceRequestData?.price || "N/A",
-        invNo: replaceRequestData?.invNo || "N/A",
-        qty: replaceRequestData?.qty || "N/A",
-        replaceProductDisplayName:
-          replaceRequestData?.replaceProductDisplayName,
-        replaceQty: replaceRequestData?.replaceQty,
-        replacePrice: replaceRequestData?.replacePrice,
-      });
-      setCurrentReplaceRequests([]);
-      setRetailItems([]);
-
-      loadCurrentReplaceRequest();
-      loadRetailItems();
-
-      return () => subscription.remove();
-    }, [navigation]),
-  );
+  const [originalItemPrice, setOriginalItemPrice] = useState<number>(0);
+  const [originalItemQty, setOriginalItemQty] = useState<number>(0);
 
   const replaceRequestData = route.params
     ?.replaceRequestData as ReplaceRequestData;
@@ -170,18 +146,28 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     productTypeName: replaceRequestData?.productTypeName || "N/A",
     newProduct: "",
     newProductId: "",
+    selectedProductUnitPrice: 0,
     quantity: "",
-    price: replaceRequestData?.price || "N/A",
+    price: "Rs. 0.00",
     invNo: replaceRequestData?.invNo || "N/A",
     qty: replaceRequestData?.qty || "N/A",
-    replaceProductDisplayName: replaceRequestData?.replaceProductDisplayName,
+    replaceProductDisplayName:
+      replaceRequestData?.replaceProductDisplayName || "",
     replaceQty: replaceRequestData?.replaceQty,
     replacePrice: replaceRequestData?.replacePrice,
   });
 
   useFocusEffect(
     useCallback(() => {
-      // Reset replace data to initial values from route params
+      const handleBackPress = () => {
+        navigation.navigate("ReplaceRequestsScreen");
+        return true;
+      };
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
       setReplaceData({
         orderId:
           replaceRequestData?.orderId || replaceRequestData?.invNo || "N/A",
@@ -189,44 +175,72 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         productTypeName: replaceRequestData?.productTypeName || "N/A",
         newProduct: "",
         newProductId: "",
+        selectedProductUnitPrice: 0,
         quantity: "",
-        price: replaceRequestData?.price || "N/A",
+        price: "Rs. 0.00",
         invNo: replaceRequestData?.invNo || "N/A",
         qty: replaceRequestData?.qty || "N/A",
         replaceProductDisplayName:
-          replaceRequestData?.replaceProductDisplayName,
+          replaceRequestData?.replaceProductDisplayName || "",
         replaceQty: replaceRequestData?.replaceQty,
         replacePrice: replaceRequestData?.replacePrice,
       });
+      setCurrentReplaceRequests([]);
+      setRetailItems([]);
+      setOriginalItemPrice(0);
+      setOriginalItemQty(0);
 
-      // Reload fresh data
+      loadOriginalPackageItem();
       loadCurrentReplaceRequest();
       loadRetailItems();
+
+      return () => subscription.remove();
     }, [navigation]),
   );
 
-  useEffect(() => {
-    if (currentReplaceRequests.length === 0 || retailItems.length === 0) return;
-
-    const currentRequest = currentReplaceRequests[0];
-
-    const matchedProduct = retailItems.find(
-      (p) =>
-        p.id === currentRequest.productId ||
-        p.displayName === currentRequest.displayName,
-    );
-
-    if (matchedProduct) {
-      const unitPrice =
-        matchedProduct.discountedPrice || matchedProduct.normalPrice || 0;
-      const qty = parseFloat(replaceData.quantity) || currentRequest.qty || 0;
-
-      setReplaceData((prev) => ({
-        ...prev,
-        price: `Rs. ${formatPrice(qty * unitPrice)}`,
-      }));
+  const formatQuantity = (qty: string | number): string => {
+    if (!qty && qty !== 0) return "0";
+    const num = typeof qty === "string" ? parseFloat(qty) : qty;
+    if (isNaN(num)) return "0";
+    let formatted = num.toString();
+    if (formatted.includes(".")) {
+      formatted = formatted.replace(/\.?0+$/, "");
+      if (formatted.endsWith(".")) {
+        formatted = formatted.slice(0, -1);
+      }
     }
-  }, [currentReplaceRequests, retailItems]);
+    return formatted;
+  };
+
+  const loadOriginalPackageItem = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!replaceRequestData?.replceId) {
+        console.warn("replceId is missing from replaceRequestData");
+        return;
+      }
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/distribution-manager/order-package-item/${replaceRequestData.replceId}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      if (response.data.success && response.data.data) {
+        const item: OriginalPackageItem = response.data.data;
+        setOriginalItemPrice(item.price);
+        setOriginalItemQty(item.qty);
+
+        setReplaceData((prev) => ({
+          ...prev,
+          replaceQty: item.qty.toString(),
+          replacePrice: item.price.toString(),
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading original package item:", error);
+    }
+  };
 
   const loadCurrentReplaceRequest = async () => {
     try {
@@ -234,53 +248,25 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `${environment.API_BASE_URL}api/distribution-manager/ordre-replace/${replaceRequestData.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data.success && response.data.data.length > 0) {
         setCurrentReplaceRequests(response.data.data);
-
         const currentRequest = response.data.data[0];
 
-        const formatQuantity = (qty: string | number): string => {
-          if (!qty && qty !== 0) return "0";
-
-          const num = typeof qty === "string" ? parseFloat(qty) : qty;
-
-          if (isNaN(num)) return "0";
-
-          let formatted = num.toString();
-
-          if (formatted.includes(".")) {
-            formatted = formatted.replace(/\.?0+$/, "");
-
-            if (formatted.endsWith(".")) {
-              formatted = formatted.slice(0, -1);
-            }
-
-            const decimalPart = formatted.split(".")[1];
-            if (!decimalPart) {
-              return formatted;
-            } else if (decimalPart.length === 1 && decimalPart === "0") {
-              return formatted + "0";
-            }
-          }
-
-          return formatted;
-        };
-
-        const quantity = formatQuantity(replaceRequestData.qty || "0");
+        const qty = formatQuantity(currentRequest.qty || "0");
+        const qtyNum = parseFloat(qty) || 0;
+        const totalPrice = parseFloat(currentRequest.price) || 0;
+        const unitPrice = qtyNum > 0 ? totalPrice / qtyNum : totalPrice;
 
         setReplaceData((prev) => ({
           ...prev,
           newProduct: currentRequest.displayName || "",
           newProductId: currentRequest.productId || "",
-          quantity: quantity,
-          price: `Rs. ${formatPrice(currentRequest.price * currentRequest.qty)}`,
+          selectedProductUnitPrice: unitPrice,
+          quantity: qty,
+          price: `Rs. ${formatPrice(totalPrice)}`,
         }));
       }
     } catch (error) {
@@ -289,17 +275,14 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
       setLoadingCurrentReplace(false);
     }
   };
+
   const loadRetailItems = async () => {
     try {
       setLoadingRetailItems(true);
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
         `${environment.API_BASE_URL}api/distribution-manager/retail-items/${replaceRequestData.orderId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data.success) {
@@ -313,74 +296,59 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   };
 
   const handleProductSelect = (product: RetailItem) => {
-    const currentQty = parseFloat(replaceData.quantity) || 0;
-    const productPrice = product.discountedPrice || product.normalPrice || 0;
+    const unitPrice = product.discountedPrice ?? product.normalPrice ?? 0;
+    const qtyNum = parseFloat(replaceData.quantity) || 0;
+    const totalPrice = unitPrice * qtyNum;
 
     setReplaceData((prev) => ({
       ...prev,
       newProduct: product.displayName,
       newProductId: product.id,
-      quantity: "",
-      price: `Rs. ${formatPrice(currentQty * productPrice)}`,
+      selectedProductUnitPrice: unitPrice,
+      price: `Rs. ${formatPrice(totalPrice)}`,
     }));
     setShowProductModal(false);
   };
 
   const handleQuantityChange = (text: string) => {
     if (text === "" || /^\d*\.?\d*$/.test(text)) {
-      let selectedProduct = retailItems.find(
-        (item) =>
-          item.displayName === replaceData.newProduct ||
-          item.id === replaceData.newProductId,
-      );
+      const qtyNum = parseFloat(text) || 0;
+      const totalPrice = replaceData.selectedProductUnitPrice * qtyNum;
 
-      if (!selectedProduct && currentReplaceRequests.length > 0) {
-        const currentRequest = currentReplaceRequests[0];
-        if (currentRequest.displayName === replaceData.newProduct) {
-          const unitPrice = currentRequest.price;
-
-          const qty = text === "" || text === "." ? 0 : parseFloat(text) || 0;
-          setReplaceData((prev) => ({
-            ...prev,
-            quantity: text,
-            price: `Rs. ${formatPrice(qty * unitPrice)}`,
-          }));
-          return;
-        }
-      }
-
-      const price = selectedProduct
-        ? selectedProduct.discountedPrice || selectedProduct.normalPrice || 0
-        : 0;
-
-      const qty = text === "" || text === "." ? 0 : parseFloat(text) || 0;
       setReplaceData((prev) => ({
         ...prev,
         quantity: text,
-        price: `Rs. ${formatPrice(qty * price)}`,
+        price:
+          text === "" || qtyNum === 0
+            ? "Rs. 0.00"
+            : `Rs. ${formatPrice(totalPrice)}`,
       }));
     }
   };
 
-  const getNumericPrice = (priceString: string): number => {
-    if (!priceString) return 0;
-    const cleanPrice = priceString
-      .replace(/Rs\.?\s*/gi, "")
-      .replace(/,/g, "")
-      .trim();
-    return parseFloat(cleanPrice) || 0;
-  };
+  // Use originalItemPrice directly from orderpackageitems
+  const definedTotalPrice =
+    originalItemPrice > 0
+      ? originalItemPrice
+      : parseFloat(replaceData.replacePrice || "0");
 
-  const isPriceExceeded = (): boolean => {
-    if (!replaceData.newProduct || !replaceData.quantity) return false;
-    const currentPrice = getNumericPrice(replaceData.price);
-    const definedUnitPrice = getNumericPrice(
-      replaceRequestData.replacePrice || "0",
-    );
-    const definedQty = parseFloat(replaceRequestData.replaceQty || "1");
-    const definedTotalPrice = definedUnitPrice * definedQty;
-    return currentPrice > definedTotalPrice;
-  };
+  const currentTotalPrice =
+    replaceData.selectedProductUnitPrice *
+    (parseFloat(replaceData.quantity) || 0);
+
+  const isPriceExceeded =
+    replaceData.quantity !== "" &&
+    parseFloat(replaceData.quantity) > 0 &&
+    replaceData.newProduct !== "" &&
+    currentTotalPrice > definedTotalPrice;
+
+  const isQuantityValid = parseFloat(replaceData.quantity) > 0;
+
+  const isFormComplete =
+    !!replaceData.newProduct &&
+    !!replaceData.quantity &&
+    isQuantityValid &&
+    !isPriceExceeded;
 
   const handleApprove = async () => {
     if (!replaceData.newProduct || !replaceData.quantity) {
@@ -391,30 +359,23 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
       return;
     }
 
-    if (isPriceExceeded()) {
-      Alert.alert(
-        t("Error.Error"),
-        t("Error.Price exceeds defined product price"),
-      );
-      return;
-    }
-
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
+    if (!netState.isConnected) return;
 
     try {
       setSubmitting(true);
       const token = await AsyncStorage.getItem("token");
+
+      const qtyNum = parseFloat(replaceData.quantity);
+      const calculatedPrice = replaceData.selectedProductUnitPrice * qtyNum;
 
       const approvalData = {
         orderId: replaceData.orderId,
         replaceRequestId: replaceRequestData.id,
         newProduct: replaceData.newProduct,
         newProductId: replaceData.newProductId,
-        quantity: parseFloat(replaceData.quantity),
-        price: parseFloat(replaceData.price.replace(/Rs\.?\s*/gi, "")),
+        quantity: qtyNum,
+        price: calculatedPrice,
         originalProductId: replaceRequestData.productId,
         originalProductName: replaceRequestData.productDisplayName,
         originalQuantity: replaceRequestData.qty,
@@ -454,18 +415,10 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
-  const isQuantityValid = parseFloat(replaceData.quantity) > 0;
-
-  const isFormComplete =
-    !!replaceData.newProduct &&
-    !!replaceData.quantity &&
-    isQuantityValid &&
-    !isPriceExceeded();
-
   const modalItems = retailItems.map((item) => ({
     label: item.displayName,
     value: item.id,
-    price: formatPrice(item.discountedPrice || item.normalPrice || 0),
+    price: formatPrice(item.discountedPrice ?? item.normalPrice ?? 0),
   }));
 
   if (loadingCurrentReplace) {
@@ -500,18 +453,24 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
           keyboardShouldPersistTaps="handled"
         >
           <View className="px-5">
+            {/* Defined product box */}
             <View className="border border-dashed border-[#FA0000] rounded-lg p-4 mb-6">
               <Text className="text-center text-gray-600 mb-1">
                 {t("ReplaceRequestsApprove.Defined product")}
               </Text>
               <Text className="text-center font-medium mb-1">
-                {replaceData.replaceProductDisplayName}
+                {replaceData.replaceProductDisplayName ||
+                  replaceData.selectedProduct}
               </Text>
               <Text className="text-center font-medium mb-2">
-                {replaceData.replaceQty} kg - Rs.{" "}
+                {originalItemQty > 0
+                  ? originalItemQty
+                  : replaceData.replaceQty}{" "}
+                kg - Rs.{" "}
                 {formatPrice(
-                  parseFloat(replaceData.replacePrice || "0") *
-                    parseFloat(replaceData.replaceQty || "1"),
+                  originalItemPrice > 0
+                    ? originalItemPrice
+                    : parseFloat(replaceData.replacePrice || "0"),
                 )}
               </Text>
               <Text className="text-center text-gray-600 text-sm mb-1">
@@ -525,9 +484,10 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
 
           <View className="px-2 mt-2">
             <Text className="text-center text-black mb-4 font-medium">
-              -- {t("ReplaceRequestsApprove.Replacing Product Details")}--
+              -- {t("ReplaceRequestsApprove.Replacing Product Details")} --
             </Text>
 
+            {/* Product selector */}
             <View className="mb-4">
               <TouchableOpacity
                 className="border border-gray-300 rounded-full p-4 flex-row justify-between items-center bg-white"
@@ -572,7 +532,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
                 isLoading={loadingRetailItems}
                 renderItem={(item, isSelected) => (
                   <TouchableOpacity
-                    className={`px-4 py-3 flex-row items-center justify-between border-b border-gray-100`}
+                    className="px-4 py-3 flex-row items-center justify-between border-b border-gray-100"
                     onPress={() => {
                       const product = retailItems.find(
                         (p) => p.id === item.value,
@@ -599,6 +559,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
               />
             </View>
 
+            {/* Quantity input */}
             <View className="mb-4">
               <TextInput
                 className="border border-gray-300 rounded-full p-4 bg-white"
@@ -607,7 +568,6 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
                 onChangeText={handleQuantityChange}
                 keyboardType="decimal-pad"
               />
-              {/* Quantity validation message */}
               {replaceData.quantity !== "" && !isQuantityValid && (
                 <Text className="text-red-600 text-sm text-center mt-1 px-2">
                   {t(
@@ -617,29 +577,32 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
               )}
             </View>
 
-            <View className="mb-2">
+            {/* Price display */}
+            <View className="mb-6">
               <View
-                className={`border border-gray-300 rounded-full p-4 ${isPriceExceeded() ? "bg-red-50" : "bg-gray-50"}`}
+                className={`border rounded-full p-4 ${
+                  isPriceExceeded
+                    ? "border-red-500 bg-red-50"
+                    : "border-gray-300 bg-gray-50"
+                }`}
               >
                 <Text
-                  className={isPriceExceeded() ? "text-red-600" : "text-black"}
+                  className={isPriceExceeded ? "text-red-500" : "text-black"}
                 >
-                  {replaceData.newProduct && replaceData.quantity
-                    ? replaceData.price
-                    : "Rs. 0.00"}
+                  {replaceData.price}
                 </Text>
               </View>
+
+              {isPriceExceeded && (
+                <Text className="text-red-600 text-sm text-center mt-1 px-2">
+                  {t(
+                    "ReplaceRequestsApprove.Price must match defined product price",
+                  )}
+                </Text>
+              )}
             </View>
 
-            {/* Price warning message */}
-            {isPriceExceeded() && (
-              <View className="mb-4 px-2">
-                <Text className="text-red-600 text-sm text-center">
-                  Price must match defined product price
-                </Text>
-              </View>
-            )}
-
+            {/* Approve button */}
             <TouchableOpacity
               className={`py-3 ml-3 mr-3 rounded-full mb-4 h-[50px] justify-center mt-[5%] ${
                 isFormComplete ? "bg-black" : "bg-gray-300"

@@ -984,7 +984,9 @@
     "Retry": "නැවත උත්සාහ කරන්න"
   },
   "DistributionOfficersList": {
-    "EMPID": "සේවක අංකය :"
+    "EMPID": "සේවක අංකය :",
+    "Officers":"නිලධාරීන්",
+    "Drivers":"රියදුරන්"
   },
   "PassTarget": {
     "EMP ID": "සේවක අංකය",

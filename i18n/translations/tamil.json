@@ -983,7 +983,9 @@
     "Retry": "மீண்டும் முயற்சிக்கவும்"
   },
   "DistributionOfficersList": {
-    "EMPID": "பணியாளர் எண் :"
+    "EMPID": "பணியாளர் எண் :",
+    "Officers":"அதிகாரிகள்",
+    "Drivers":"ஓட்டுநர்கள்"
   },
   "PassTarget": {
     "EMP ID": "பணியாளர் எண்",

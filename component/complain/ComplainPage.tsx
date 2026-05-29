@@ -73,8 +73,12 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
 
     const fetchComplainCategory = async () => {
       try {
+         const token = await AsyncStorage.getItem("token");
+    console.log("TOKEN:", token);
+
         const response = await axios.get(
-          `${environment.API_BASE_URL}api/complain/get-complain-category/Collection`,
+          `${environment.API_BASE_URL}api/complain/get-complain-category`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         if (response.data.status === "success") {
           const categoryField =

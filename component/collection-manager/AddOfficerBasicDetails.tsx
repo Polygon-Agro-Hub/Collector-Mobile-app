@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import axios from "axios";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -56,7 +57,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   route,
   navigation,
 }) => {
-  const { jobRolle } = route.params;
+  const { jobRolle, preservedData } = route.params;
   const [type, setType] = useState<"Permanent" | "Temporary">("Permanent");
   const [preferredLanguages, setPreferredLanguages] = useState({
     Sinhala: false,
@@ -104,6 +105,38 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const [countryItems, setCountryItems] = useState<CountryItem[]>([]);
   const [phoneCode1ModalVisible, setPhoneCode1ModalVisible] = useState(false);
   const [phoneCode2ModalVisible, setPhoneCode2ModalVisible] = useState(false);
+
+  const resetForm = () => {
+    setFormData({
+      userId: "",
+      firstNameEnglish: "",
+      lastNameEnglish: "",
+      firstNameSinhala: "",
+      lastNameSinhala: "",
+      firstNameTamil: "",
+      lastNameTamil: "",
+      nicNumber: "",
+      email: "",
+      profileImage: "",
+      jobRole: "",
+      phoneCode1: "",
+      phoneNumber1: "",
+      phoneCode2: "",
+      phoneNumber2: "",
+    });
+    setPhoneCode1("+94");
+    setPhoneCode2("+94");
+    setPhoneNumber1("");
+    setPhoneNumber2("");
+    setSelectedImage(null);
+    setFieldErrors({});
+    setError1("");
+    setError2("");
+    setError3("");
+    setErrorEmail("");
+    setType("Permanent");
+    setPreferredLanguages({ Sinhala: false, English: false, Tamil: false });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -204,8 +237,34 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     useCallback(() => {
       setJobRole(String(jobRolle));
       fetchEmpId(String(jobRolle));
+
+      if (preservedData) {
+        setFormData((prev) => ({
+          ...prev,
+          firstNameEnglish: preservedData.firstNameEnglish ?? "",
+          lastNameEnglish: preservedData.lastNameEnglish ?? "",
+          firstNameSinhala: preservedData.firstNameSinhala ?? "",
+          lastNameSinhala: preservedData.lastNameSinhala ?? "",
+          firstNameTamil: preservedData.firstNameTamil ?? "",
+          lastNameTamil: preservedData.lastNameTamil ?? "",
+          nicNumber: preservedData.nicNumber ?? "",
+          email: preservedData.email ?? "",
+          userId: preservedData.userId ?? "",
+        }));
+        if (preservedData.phoneCode1) setPhoneCode1(preservedData.phoneCode1);
+        if (preservedData.phoneNumber1)
+          setPhoneNumber1(preservedData.phoneNumber1);
+        if (preservedData.phoneCode2) setPhoneCode2(preservedData.phoneCode2);
+        if (preservedData.phoneNumber2)
+          setPhoneNumber2(preservedData.phoneNumber2);
+        if (preservedData.profileImage)
+          setSelectedImage(preservedData.profileImage);
+      } else {
+        resetForm();
+      }
+
       return () => {};
-    }, []),
+    }, [jobRolle, preservedData]),
   );
 
   const handleImagePick = async () => {
@@ -380,34 +439,36 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const validatePhoneNumber = (input: string) => /^7[0-9]{8}$/.test(input);
 
   const handlePhoneNumber1Change = (input: string) => {
-  clearFieldError("phoneNumber1");
-  let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
-  setPhoneNumber1(numbersOnly);
+    clearFieldError("phoneNumber1");
+    let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
+    setPhoneNumber1(numbersOnly);
 
-  if (numbersOnly.length === 0) {
-    setError1("");
-    setError2("");
-  } else if (!numbersOnly.startsWith("7")) {
-    setError1(t("Error.Invalid phone number"));
-  } else if (numbersOnly.length < 9) {
-    setError1(t("Error.Phone number must be 9 digits long"));
-  } else if (validatePhoneNumber(numbersOnly)) {
-    setError1("");
+    if (numbersOnly.length === 0) {
+      setError1("");
+      setError2("");
+    } else if (!numbersOnly.startsWith("7")) {
+      setError1(t("Error.Invalid phone number"));
+    } else if (numbersOnly.length < 9) {
+      setError1(t("Error.Phone number must be 9 digits long"));
+    } else if (validatePhoneNumber(numbersOnly)) {
+      setError1("");
 
-    if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
-      if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber2) {
-        setError2(
-          t("AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.")
-        );
-      } else {
-        setError2(""); 
+      if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
+        if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber2) {
+          setError2(
+            t(
+              "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+            ),
+          );
+        } else {
+          setError2("");
+        }
       }
+      checkPhoneExists(numbersOnly);
+    } else {
+      setError1(t("Error.Invalid phone number"));
     }
-    checkPhoneExists(numbersOnly);
-  } else {
-    setError1(t("Error.Invalid phone number"));
-  }
-};
+  };
 
   const checkPhoneExists = async (phoneNumber: string) => {
     if (!validatePhoneNumber(phoneNumber)) return;
@@ -433,28 +494,30 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   const handlePhoneNumber2Change = (input: string) => {
-  let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
-  setPhoneNumber2(numbersOnly);
+    let numbersOnly = input.replace(/[^0-9]/g, "").replace(/^0+/, "");
+    setPhoneNumber2(numbersOnly);
 
-  if (numbersOnly.length === 0) {
-    setError2("");
-  } else if (!numbersOnly.startsWith("7")) {
-    setError2(t("Error.Invalid phone number"));
-  } else if (numbersOnly.length < 9) {
-    setError2(t("Error.Phone number must be 9 digits long"));
-  } else if (validatePhoneNumber(numbersOnly)) {
-    if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber1) {
-      setError2(
-        t("AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.")
-      );
+    if (numbersOnly.length === 0) {
+      setError2("");
+    } else if (!numbersOnly.startsWith("7")) {
+      setError2(t("Error.Invalid phone number"));
+    } else if (numbersOnly.length < 9) {
+      setError2(t("Error.Phone number must be 9 digits long"));
+    } else if (validatePhoneNumber(numbersOnly)) {
+      if (phoneCode1 === phoneCode2 && numbersOnly === phoneNumber1) {
+        setError2(
+          t(
+            "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+          ),
+        );
+      } else {
+        setError2("");
+        checkPhone2Exists(numbersOnly, phoneCode2);
+      }
     } else {
-      setError2(""); 
-      checkPhone2Exists(numbersOnly, phoneCode2);
+      setError2(t("Error.Invalid phone number"));
     }
-  } else {
-    setError2(t("Error.Invalid phone number"));
-  }
-};
+  };
 
   const checkPhone2Exists = async (phoneNumber: string, dialCode: string) => {
     if (!validatePhoneNumber(phoneNumber)) return;
@@ -565,6 +628,63 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        AsyncStorage.removeItem("officerFormData").then(() => {
+          resetForm();
+          if (jobRole === "Collection Officer") {
+            navigation.navigate("Main", { screen: "CollectionOfficersList" });
+          } else if (jobRole === "Distribution Officer") {
+            navigation.navigate("Main", { screen: "DistributionOfficersList" });
+          }
+        });
+        return true;
+      };
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+      return () => backHandler.remove();
+    }, [jobRole]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      setJobRole(String(jobRolle));
+      fetchEmpId(String(jobRolle));
+
+      if (preservedData) {
+        setFormData((prev) => ({
+          ...prev,
+          firstNameEnglish:
+            preservedData.firstNameEnglish ?? prev.firstNameEnglish,
+          lastNameEnglish:
+            preservedData.lastNameEnglish ?? prev.lastNameEnglish,
+          firstNameSinhala:
+            preservedData.firstNameSinhala ?? prev.firstNameSinhala,
+          lastNameSinhala:
+            preservedData.lastNameSinhala ?? prev.lastNameSinhala,
+          firstNameTamil: preservedData.firstNameTamil ?? prev.firstNameTamil,
+          lastNameTamil: preservedData.lastNameTamil ?? prev.lastNameTamil,
+          nicNumber: preservedData.nicNumber ?? prev.nicNumber,
+          email: preservedData.email ?? prev.email,
+          userId: preservedData.userId ?? prev.userId,
+        }));
+        if (preservedData.phoneCode1) setPhoneCode1(preservedData.phoneCode1);
+        if (preservedData.phoneNumber1)
+          setPhoneNumber1(preservedData.phoneNumber1);
+        if (preservedData.phoneCode2) setPhoneCode2(preservedData.phoneCode2);
+        if (preservedData.phoneNumber2)
+          setPhoneNumber2(preservedData.phoneNumber2);
+        if (preservedData.profileImage)
+          setSelectedImage(preservedData.profileImage);
+      }
+
+      return () => {};
+    }, []),
+  );
+
   const renderCountryCodeItem = (item: any, isSelected: boolean) => (
     <TouchableOpacity
       className="px-4 py-3 border-b border-gray-200 flex-row items-center"
@@ -596,7 +716,14 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         onBackPress={async () => {
           try {
             await AsyncStorage.removeItem("officerFormData");
-            navigation.goBack();
+            resetForm();
+            if (jobRole === "Collection Officer") {
+              navigation.navigate("Main", { screen: "CollectionOfficersList" });
+            } else if (jobRole === "Distribution Officer") {
+              navigation.navigate("Main", {
+                screen: "DistributionOfficersList",
+              });
+            }
           } catch (error) {
             console.error("Error clearing form data:", error);
           }
@@ -1011,7 +1138,23 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           <View className="px-4 flex-col w-full gap-4 mt-6">
             <TouchableOpacity
               className="bg-[#D9D9D9] rounded-3xl px-6 h-[50px] w-full justify-center items-center"
-              onPress={() => navigation.goBack()}
+              onPress={async () => {
+                try {
+                  await AsyncStorage.removeItem("officerFormData");
+                  resetForm();
+                  if (jobRole === "Collection Officer") {
+                    navigation.navigate("Main", {
+                      screen: "CollectionOfficersList",
+                    });
+                  } else if (jobRole === "Distribution Officer") {
+                    navigation.navigate("Main", {
+                      screen: "DistributionOfficersList",
+                    });
+                  }
+                } catch (error) {
+                  console.error("Error clearing form data:", error);
+                }
+              }}
               style={{
                 shadowColor: "#8f8a8a",
                 shadowOffset: { width: 0, height: 4 },

@@ -980,7 +980,9 @@
     "Retry": "Retry"
   },
   "DistributionOfficersList": {
-    "EMPID": "EMP ID :"
+    "EMPID": "EMP ID :",
+    "Officers":"Officers",
+    "Drivers":"Drivers"
   },
   "PassTarget": {
     "EMP ID": "EMP ID",

@@ -212,7 +212,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View className="bg-white rounded-3xl mt-5 p-4 mx-5 shadow-lg">
+        <View className="bg-white rounded-3xl mt-5 p-4 mx-5 border-[1px] border-[#DF9301] shadow-lg">
           <Text className="text-center text-yellow-600 font-bold text-base">
             🚀 {t("CollectionOfficerDashboard.Keep")}
           </Text>
@@ -223,7 +223,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
       );
     } else if (targetPercentage === 100) {
       return (
-        <View className="bg-white rounded-3xl mt-3 p-4 mx-4 shadow-lg">
+         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
           <View className="flex-row justify-center items-center mb-2">
             <Image
               source={require("../../assets/images/dashboard/hand.webp")}

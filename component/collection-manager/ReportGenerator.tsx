@@ -70,8 +70,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   };
 
   const handleGenerate = async () => {
-    setReportGenerated(false);
-    setGenerateAgain(true);
     if (!startDate || !endDate) {
       Alert.alert(
         t("Error.error"),
@@ -88,16 +86,17 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       return;
     }
 
+    setReportGenerated(false);
+    setGenerateAgain(true);
+
     const fileUri = await handleGeneratePDF(
       formatDate(startDate),
       formatDate(endDate),
       officerId,
       collectionOfficerId,
     );
-    if (fileUri) {
-      const reportIdMatch = fileUri.match(/report_(.+)\.pdf/);
-      const reportId = reportIdMatch ? reportIdMatch[1] : null;
 
+    if (fileUri) {
       setReportGenerated(true);
       setGenerateAgain(false);
     } else {
@@ -294,7 +293,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
       <View className="px-8 mt-8">
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">
+          <Text className=" text-gray-700 mb-2">
             {t("ReportGenerator.Start Date")} :
           </Text>
           <View className="flex-row items-center">
@@ -302,7 +301,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               onPress={() => setShowStartPicker((prev) => !prev)}
               className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-1 flex-row justify-between items-center"
             >
-              <Text className="text-gray-500">
+              <Text className="text-[#858585] italic">
                 {formatDate(startDate, t("ReportGenerator.Start Date"))}
               </Text>
               <Image
@@ -341,7 +340,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         </View>
 
         <View className="mb-6">
-          <Text className="text-sm mb-2" style={{ color: "#374151" }}>
+          <Text className=" mb-2" style={{ color: "#374151" }}>
             {t("ReportGenerator.End Date")} :
           </Text>
           <TouchableOpacity
@@ -352,7 +351,10 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             className="border border-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-row justify-between items-center"
             style={{ backgroundColor: startDate ? "#F4F4F4" : "#EBEBEB" }}
           >
-            <Text style={{ color: startDate ? "#6B7280" : "#D1D5DB" }}>
+            <Text
+              style={{ color: startDate ? "#858585" : "#858585" }}
+              className="italic"
+            >
               {formatDate(endDate, t("ReportGenerator.End Date"))}
             </Text>
             <Image
@@ -397,12 +399,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             onPress={handleReset}
             className="border border-[#6B6B6B] bg-[white] py-3 rounded-full w-40 items-center h-[50px] justify-center"
             style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 10,
-                elevation: 6, 
-              }}
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
               className="text-gray-700 text-center text-lg"
@@ -417,12 +419,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             onPress={handleGenerate}
             className="bg-[#980775] py-3 rounded-full w-40 h-[50px] justify-center items-center"
             style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 10,
-                elevation: 6, 
-              }}
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
           >
             <Text
               className="text-white font-semibold text-center text-lg"

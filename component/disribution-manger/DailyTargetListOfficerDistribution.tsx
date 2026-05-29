@@ -463,8 +463,15 @@ const DailyTargetListOfficerDistribution: React.FC<
         animationType="fade"
         onRequestClose={handleCancelPass}
       >
-        <View className="flex-1 justify-center items-center bg-[#00000040] ">
-          <View className="bg-white mx-10 h-[200px] rounded-lg p-6 shadow-lg">
+        <View
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#00000040",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <View className="bg-white rounded-lg p-6 mx-6 max-w-sm">
             {/* Warning Icon */}
             <View className="items-center mb-4">
               <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg items-center justify-center">
@@ -478,10 +485,10 @@ const DailyTargetListOfficerDistribution: React.FC<
             </Text>
 
             {/* Buttons */}
-            <View className="flex-row justify-center space-x-4">
+            <View className="flex-row justify-center gap-x-4">
               <TouchableOpacity
                 onPress={handleCancelPass}
-                className="flex-1 mr-2 h-[50px] px-8 bg-[#F6F7F9] items-center justify-center border border-[#95A1AC] rounded-lg"
+                className="  py-3 rounded-lg flex-1 mr-2  bg-[#F6F7F9] items-center justify-center border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
@@ -507,7 +514,7 @@ const DailyTargetListOfficerDistribution: React.FC<
 
               <TouchableOpacity
                 onPress={handleConfirmPass}
-                className="flex-1  h-[50px]  px-8 bg-[#980775] border border-[#980775] rounded-lg items-center justify-center"
+                className="flex-1  py-3 bg-[#980775] border border-[#980775] rounded-lg items-center justify-center"
                 style={{
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
@@ -536,7 +543,7 @@ const DailyTargetListOfficerDistribution: React.FC<
       </Modal>
 
       {/* Toggle Buttons */}
-      <View className="flex-row justify-center items-center py-4 bg-[#282828] px-4">
+      <View className="flex-row justify-center items-center pb-8 bg-[#282828] px-4">
         <TouchableOpacity
           className={`flex-1 mx-2 py-3 rounded-full flex-row items-center justify-center ${
             selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
@@ -746,7 +753,7 @@ const DailyTargetListOfficerDistribution: React.FC<
             </View>
           ))
         ) : (
-          <View className="flex-1 justify-center items-center py-20">
+          <View className="flex-1 justify-center items-center pt-[35%] ">
             <LottieView
               source={require("../../assets/lottie/no-data.json")}
               autoPlay
