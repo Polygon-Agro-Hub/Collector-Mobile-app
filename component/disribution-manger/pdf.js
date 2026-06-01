@@ -150,22 +150,29 @@ export const processOrdersForDelivery = async (
         let orderForPDF = order;
         let deliveryFee = 0;
 
-        try {
-          const deliveryResult = await getDeliveryFeeFromOrder(
-            order,
-            authToken,
-          );
-          deliveryFee = parseFloat(deliveryResult.deliveryFee) || 0;
-          if (isNaN(deliveryFee) || deliveryFee < 0) {
-            console.warn(`⚠️ Invalid delivery fee for ${invoiceNo}, using 0`);
+        const isFreeDelivery =
+          order.isCoupon === 1 && order.couponType === "Free Delivery";
+
+        if (isFreeDelivery) {
+          deliveryFee = 0;
+        } else {
+          try {
+            const deliveryResult = await getDeliveryFeeFromOrder(
+              order,
+              authToken,
+            );
+            deliveryFee = parseFloat(deliveryResult.deliveryFee) || 0;
+            if (isNaN(deliveryFee) || deliveryFee < 0) {
+              console.warn(`⚠️ Invalid delivery fee for ${invoiceNo}, using 0`);
+              deliveryFee = 0;
+            }
+          } catch (deliveryError) {
+            console.error(
+              `❌ Error fetching delivery fee for ${invoiceNo}:`,
+              deliveryError.message,
+            );
             deliveryFee = 0;
           }
-        } catch (deliveryError) {
-          console.error(
-            `❌ Error fetching delivery fee for ${invoiceNo}:`,
-            deliveryError.message,
-          );
-          deliveryFee = 0;
         }
 
         const pdfBase64 = await generateOrderPDF(orderForPDF, deliveryFee);
@@ -183,22 +190,17 @@ export const processOrdersForDelivery = async (
           emailAddress = "hashinikadilrukshi15@gmail.com";
         }
 
-        const firstName =
-          order.customerInfo?.firstName ||
-          order.firstName ||
-          (order.customerName ? order.customerName.split(" ")[0] : "") ||
-          "Valued";
-
-        const lastName =
-          order.customerInfo?.lastName ||
-          order.lastName ||
-          (order.customerName && order.customerName.split(" ").length > 1
-            ? order.customerName.split(" ").slice(1).join(" ")
-            : "") ||
-          "Customer";
-
         const customerName =
-          `${firstName} ${lastName}`.trim() || "Valued Customer";
+          order.customerInfo?.fullName ||
+          order.fullName ||
+          order.customerName ||
+          "Valued Customer";
+
+        const firstName = customerName.split(" ")[0] || "Valued";
+        const lastName =
+          customerName.split(" ").length > 1
+            ? customerName.split(" ").slice(1).join(" ")
+            : "Customer";
 
         let calculatedTotal = 0;
 
@@ -218,7 +220,9 @@ export const processOrdersForDelivery = async (
           });
         }
 
-        calculatedTotal += deliveryFee;
+        if (!isFreeDelivery) {
+          calculatedTotal += deliveryFee;
+        }
 
         if (
           order.orderApp === "Dash" &&
@@ -438,7 +442,12 @@ const generateInvoiceHTML = (
   }
 
   const subtotal = totalPackagePrice + additionalItemsTotal;
-  const deliveryFeeAmount = parseFloat(deliveryFee || 0);
+
+  // ✅ Free delivery coupon check
+  const isFreeDelivery =
+    order.isCoupon === 1 && order.couponType === "Free Delivery";
+  const deliveryFeeAmount = isFreeDelivery ? 0 : parseFloat(deliveryFee || 0);
+
   let totalAmount = subtotal + deliveryFeeAmount;
 
   const shouldAddServiceFee =
@@ -530,21 +539,38 @@ const generateInvoiceHTML = (
       .join("");
   };
 
+  // ✅ Additional items rows with correct unit price, qty+unit, amount
   let additionalItemsRows = "";
   if (order?.additionalItems && order.additionalItems.length > 0) {
     order.additionalItems.forEach((item, index) => {
       const price = parseFloat(item.price?.toString() || "0");
       const discount = parseFloat(item.discount?.toString() || "0");
-      const quantity = parseFloat(item.qty?.toString() || "0");
+      const qty = parseFloat(item.qty?.toString() || "0");
+      const unit = (item.unit || "kg").toLowerCase().trim();
       const actualAmount = price + discount;
-      const unitPrice = quantity > 0 ? actualAmount / quantity : 0;
+
+      // ✅ Unit price from normalPrice
+      const unitPrice = parseFloat(item.normalPrice?.toString() || "0");
+
+      // ✅ Format QTY with unit — convert g to kg if >= 1000
+      let formattedQty = "";
+      if (unit === "g") {
+        if (qty >= 1000) {
+          formattedQty = `${(qty / 1000).toFixed(qty % 1000 === 0 ? 0 : 1)}kg`;
+        } else {
+          formattedQty = `${qty}g`;
+        }
+      } else {
+        formattedQty = `${qty}${unit}`;
+      }
+
       additionalItemsRows += `
         <tr>
           <td style="text-align:center">${index + 1}</td>
           <td class="tabledata">${item.displayName || item.name || "Item"}</td>
-          <td class="tabledata">${formatNumber(unitPrice)}</td>
-          <td class="tabledata">${quantity}</td>
-          <td class="tabledata">${formatNumber(actualAmount)}</td>
+          <td class="tabledata"> ${formatNumber(unitPrice)}</td>
+          <td class="tabledata">${formattedQty}</td>
+          <td class="tabledata">Rs. ${formatNumber(actualAmount)}</td>
         </tr>`;
     });
   }
@@ -576,105 +602,57 @@ const generateInvoiceHTML = (
   const isPickup = order.delivaryMethod === "Pickup";
   const deliveryMethodLabel = isPickup ? "Instore Pickup" : "Home Delivery";
 
-  const addrLine = (label, value) =>
-    value
-      ? `<p class="addr-line"><span class="addr-label">${label} :</span> ${value}</p>`
-      : "";
-
+  // ✅ Fixed buildAddressBlock using apartmentAddress object from DAO
   const buildAddressBlock = () => {
-    const info = {
-      buildingType: customerInfo.buildingType || order.buildingType,
-      no: customerInfo.no || order.no,
-      unitNo: customerInfo.unitNo || order.unitNo,
-      buildingName: customerInfo.buildingName || order.buildingName,
-      apartmentName: customerInfo.apartmentName || order.apartmentName,
-      flatNo: customerInfo.flatNo || order.flatNo,
-      flat: customerInfo.flat || order.flat,
-      unit: customerInfo.unit || order.unit,
-      floor: customerInfo.floor || order.floor,
-      floorNo: customerInfo.floorNo || order.floorNo,
-      houseNo: customerInfo.houseNo || order.houseNo,
-      houseNumber: customerInfo.houseNumber || order.houseNumber,
-      streetName: customerInfo.streetName || order.streetName,
-      street: customerInfo.street || order.street,
-      city: customerInfo.city || order.city,
-    };
+    const buildingType = orderData.customerInfo?.buildingType;
 
-    if (
-      !info.houseNo &&
-      !info.houseNumber &&
-      !info.streetName &&
-      !info.street &&
-      !info.city
-    ) {
-      if (order.fullAddress && typeof order.fullAddress === "string") {
-        const parts = order.fullAddress
-          .split(",")
-          .map((p) => p.trim())
-          .filter(Boolean);
-        if (parts.length >= 3) {
-          info.houseNo = parts[0];
-          info.streetName = parts[1];
-          info.city = parts[parts.length - 1];
-        } else if (parts.length === 2) {
-          info.streetName = parts[0];
-          info.city = parts[1];
-        } else if (parts.length === 1) {
-          info.streetName = parts[0];
-        }
-      }
-    }
+    if (buildingType === "Apartment" && orderData.apartmentAddress) {
+      const apt = orderData.apartmentAddress;
+      const hasData =
+        apt.buildingNo ||
+        apt.buildingName ||
+        apt.unitNo ||
+        apt.floorNo ||
+        apt.houseNo ||
+        apt.streetName ||
+        apt.city;
 
-    if (info.buildingType === "Apartment") {
-      const hasApartmentData =
-        info.no ||
-        info.unitNo ||
-        info.buildingName ||
-        info.apartmentName ||
-        info.flatNo ||
-        info.flat ||
-        info.unit ||
-        info.floor ||
-        info.floorNo ||
-        info.houseNo ||
-        info.houseNumber ||
-        info.streetName ||
-        info.street ||
-        info.city;
-
-      if (!hasApartmentData) {
+      if (!hasData) {
         return `<p class="addr-line" style="color:#999;">Address not provided</p>`;
       }
 
       return `
         <p class="bold" style="margin-bottom:4px;">Apartment Address :</p>
-        ${addrLine("No", info.no || info.unitNo)}
-        ${addrLine("Name", info.buildingName || info.apartmentName)}
-        ${addrLine("Flat", info.flatNo || info.flat || info.unit)}
-        ${addrLine("Floor", info.floor || info.floorNo)}
-        ${addrLine("House No", info.houseNo || info.houseNumber)}
-        ${addrLine("Street Name", info.streetName || info.street)}
-        ${addrLine("City", info.city)}
-      `;
-    } else {
-      const hasHouseData =
-        info.houseNo ||
-        info.houseNumber ||
-        info.streetName ||
-        info.street ||
-        info.city;
-
-      if (!hasHouseData) {
-        return `<p class="addr-line" style="color:#999;">Address not provided</p>`;
-      }
-
-      return `
-        <p class="bold" style="margin-bottom:4px;">House Address :</p>
-        ${addrLine("House No", info.houseNo || info.houseNumber)}
-        ${addrLine("Street Name", info.streetName || info.street)}
-        ${addrLine("City", info.city)}
+        ${apt.buildingNo ? `<p class="addr-line"><span class="addr-label">No :</span> ${apt.buildingNo}</p>` : ""}
+        ${apt.buildingName ? `<p class="addr-line"><span class="addr-label">Name :</span> ${apt.buildingName}</p>` : ""}
+        ${apt.unitNo ? `<p class="addr-line"><span class="addr-label">Flat :</span> ${apt.unitNo}</p>` : ""}
+        ${apt.floorNo ? `<p class="addr-line"><span class="addr-label">Floor :</span> ${apt.floorNo}</p>` : ""}
+        ${apt.houseNo ? `<p class="addr-line"><span class="addr-label">House No :</span> ${apt.houseNo}</p>` : ""}
+        ${apt.streetName ? `<p class="addr-line"><span class="addr-label">Street Name :</span> ${apt.streetName}</p>` : ""}
+        ${apt.city ? `<p class="addr-line"><span class="addr-label">City :</span> ${apt.city}</p>` : ""}
       `;
     }
+
+    // ✅ House — parse from fullAddress
+    const parts = (orderData.fullAddress || "")
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    const houseNo = parts[0] || null;
+    const streetName = parts[1] || null;
+    const city = parts[parts.length - 1] || null;
+
+    if (!houseNo && !streetName && !city) {
+      return `<p class="addr-line" style="color:#999;">Address not provided</p>`;
+    }
+
+    return `
+      <p class="bold" style="margin-bottom:4px;">House Address :</p>
+      ${houseNo ? `<p class="addr-line"><span class="addr-label">House No :</span> ${houseNo}</p>` : ""}
+      ${streetName ? `<p class="addr-line"><span class="addr-label">Street Name :</span> ${streetName}</p>` : ""}
+      ${city ? `<p class="addr-line"><span class="addr-label">City :</span> ${city}</p>` : ""}
+    `;
   };
 
   return `
@@ -721,9 +699,9 @@ const generateInvoiceHTML = (
           <p class="headerp">Contact No : +94 770 111 999</p>
           <p class="headerp">Email Address : info@polygon.lk</p>
         </div>
-       <div>
-  ${logoBase64 ? `<img src="${logoBase64}" alt="Polygon Logo" class="logo" />` : ""}
-</div>
+        <div>
+          ${logoBase64 ? `<img src="${logoBase64}" alt="Polygon Logo" class="logo" />` : ""}
+        </div>
       </div>
 
       ${isPickup
@@ -731,9 +709,9 @@ const generateInvoiceHTML = (
       <div class="section1" style="display:flex;justify-content:space-between;margin-top:20px;">
         <div>
           <p class="bold">Bill To :</p>
-          <p class="headerp">${customerInfo.title || ""}.${customerInfo.firstName || ""} ${customerInfo.lastName || ""}</p>
+          <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+          <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
           <p class="headerp">${customerEmail}</p>
-          <p class="headerp">+94 ${customerInfo.phoneNumber || ""}</p>
           <div style="margin-top:16px;">
             <p class="bold">Invoice No :</p>
             <p class="headerp">${invoiceNumber}</p>
@@ -770,8 +748,8 @@ const generateInvoiceHTML = (
       <div class="section1" style="display:flex;justify-content:space-between;">
         <div>
           <p class="bold">Bill To :</p>
-          <p class="headerp">${customerInfo.title || ""}.${customerInfo.firstName || ""} ${customerInfo.lastName || ""}</p>
-          <p class="headerp">+94 ${customerInfo.phoneNumber || ""}</p>
+          <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+          <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
           <p class="headerp">${customerEmail}</p>
           <div style="margin-top:10px;">
             ${buildAddressBlock()}
@@ -827,7 +805,7 @@ const generateInvoiceHTML = (
                   <th style="text-align:center;border-top-left-radius:10px">Index</th>
                   <th>Item Description</th>
                   <th>Unit Price (Rs.)</th>
-                  <th>QTY (Kg)</th>
+                  <th>QTY</th>
                   <th style="border-top-right-radius:10px">Amount (Rs.)</th>
                 </tr>
                 ${additionalItemsRows}
@@ -863,7 +841,7 @@ const generateInvoiceHTML = (
             </div>`
       : ""
     }
-        ${deliveryFeeAmount > 0
+        ${!isFreeDelivery && deliveryFeeAmount > 0
       ? `<div style="display:flex;justify-content:space-between;margin-right:20px;" class="ptext">
               <p>Delivery Fee</p><p>${formatCurrency(deliveryFeeAmount)}</p>
             </div>`
@@ -920,8 +898,6 @@ export const generateOrderPDF = async (orderData, deliveryFee = 0) => {
       );
       await asset.downloadAsync();
 
-
-
       const uri = asset.localUri || asset.uri;
       if (!uri) throw new Error("No URI available for logo asset");
 
@@ -929,7 +905,6 @@ export const generateOrderPDF = async (orderData, deliveryFee = 0) => {
         encoding: FileSystem.EncodingType.Base64,
       });
       logoBase64 = `data:image/webp;base64,${base64}`;
-
     } catch (logoError) {
       console.warn("⚠️ Failed to load local logo:", logoError.message);
       logoBase64 = null;

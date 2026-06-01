@@ -132,7 +132,9 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   const [loadingRetailItems, setLoadingRetailItems] = useState(false);
   const [loadingCurrentReplace, setLoadingCurrentReplace] = useState(false);
   const [retailItems, setRetailItems] = useState<RetailItem[]>([]);
-  const [currentReplaceRequests, setCurrentReplaceRequests] = useState < CurrentReplaceRequest[]>([]);
+  const [currentReplaceRequests, setCurrentReplaceRequests] = useState<
+    CurrentReplaceRequest[]
+  >([]);
   const [submitting, setSubmitting] = useState(false);
   const [originalItemPrice, setOriginalItemPrice] = useState<number>(0);
   const [originalItemQty, setOriginalItemQty] = useState<number>(0);
@@ -160,7 +162,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        navigation.navigate("ReplaceRequestsScreen");
+        navigation.navigate("Main" as any, { screen: "ReplaceRequestsScreen" });
         return true;
       };
       const subscription = BackHandler.addEventListener(
@@ -168,34 +170,37 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         handleBackPress,
       );
 
+      const freshData = route.params?.replaceRequestData as ReplaceRequestData;
+
+      if (!freshData) return () => subscription.remove();
+
       setReplaceData({
-        orderId:
-          replaceRequestData?.orderId || replaceRequestData?.invNo || "N/A",
-        selectedProduct: replaceRequestData?.productDisplayName || "N/A",
-        productTypeName: replaceRequestData?.productTypeName || "N/A",
+        orderId: freshData?.orderId || freshData?.invNo || "N/A",
+        selectedProduct: freshData?.productDisplayName || "N/A",
+        productTypeName: freshData?.productTypeName || "N/A",
         newProduct: "",
         newProductId: "",
         selectedProductUnitPrice: 0,
         quantity: "",
         price: "Rs. 0.00",
-        invNo: replaceRequestData?.invNo || "N/A",
-        qty: replaceRequestData?.qty || "N/A",
-        replaceProductDisplayName:
-          replaceRequestData?.replaceProductDisplayName || "",
-        replaceQty: replaceRequestData?.replaceQty,
-        replacePrice: replaceRequestData?.replacePrice,
+        invNo: freshData?.invNo || "N/A",
+        qty: freshData?.qty || "N/A",
+        replaceProductDisplayName: freshData?.replaceProductDisplayName || "",
+        replaceQty: freshData?.replaceQty,
+        replacePrice: freshData?.replacePrice,
       });
+
       setCurrentReplaceRequests([]);
       setRetailItems([]);
       setOriginalItemPrice(0);
       setOriginalItemQty(0);
 
-      loadOriginalPackageItem();
-      loadCurrentReplaceRequest();
-      loadRetailItems();
+      loadOriginalPackageItem(freshData);
+      loadCurrentReplaceRequest(freshData);
+      loadRetailItems(freshData);
 
       return () => subscription.remove();
-    }, [navigation]),
+    }, [navigation, route.params]),
   );
 
   const formatQuantity = (qty: string | number): string => {
@@ -211,18 +216,19 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
     return formatted;
   };
-
-  const loadOriginalPackageItem = async () => {
+  const loadOriginalPackageItem = async (freshData?: ReplaceRequestData) => {
+    const data =
+      freshData ?? (route.params?.replaceRequestData as ReplaceRequestData);
     try {
       const token = await AsyncStorage.getItem("token");
 
-      if (!replaceRequestData?.replceId) {
+      if (!data?.replceId) {
         console.warn("replceId is missing from replaceRequestData");
         return;
       }
 
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/distribution-manager/order-package-item/${replaceRequestData.replceId}`,
+        `${environment.API_BASE_URL}api/distribution-manager/order-package-item/${data.replceId}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
@@ -242,12 +248,14 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
-  const loadCurrentReplaceRequest = async () => {
+  const loadCurrentReplaceRequest = async (freshData?: ReplaceRequestData) => {
+    const data =
+      freshData ?? (route.params?.replaceRequestData as ReplaceRequestData);
     try {
       setLoadingCurrentReplace(true);
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/distribution-manager/ordre-replace/${replaceRequestData.id}`,
+        `${environment.API_BASE_URL}api/distribution-manager/ordre-replace/${data.id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
@@ -276,12 +284,14 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
-  const loadRetailItems = async () => {
+  const loadRetailItems = async (freshData?: ReplaceRequestData) => {
+    const data =
+      freshData ?? (route.params?.replaceRequestData as ReplaceRequestData);
     try {
       setLoadingRetailItems(true);
       const token = await AsyncStorage.getItem("token");
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/distribution-manager/retail-items/${replaceRequestData.orderId}`,
+        `${environment.API_BASE_URL}api/distribution-manager/retail-items/${data.orderId}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
@@ -326,7 +336,6 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
-  // Use originalItemPrice directly from orderpackageitems
   const definedTotalPrice =
     originalItemPrice > 0
       ? originalItemPrice
@@ -400,7 +409,10 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
           [
             {
               text: "OK",
-              onPress: () => navigation.navigate("ReplaceRequestsScreen"),
+              onPress: () =>
+                navigation.navigate("Main" as any, {
+                  screen: "ReplaceRequestsScreen",
+                }),
             },
           ],
         );
@@ -443,7 +455,11 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         title={`${t("ReplaceRequestsApprove.Order ID")} ${replaceData.invNo}`}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("ReplaceRequestsScreen")}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, {
+            screen: "ReplaceRequestsScreen",
+          })
+        }
       />
 
       <View className="flex-1 w-full max-w-[500px] mx-auto">
@@ -463,9 +479,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
                   replaceData.selectedProduct}
               </Text>
               <Text className="text-center font-medium mb-2">
-                {originalItemQty > 0
-                  ? originalItemQty
-                  : replaceData.replaceQty}{" "}
+                {originalItemQty > 0 ? originalItemQty : replaceData.replaceQty}{" "}
                 kg - Rs.{" "}
                 {formatPrice(
                   originalItemPrice > 0

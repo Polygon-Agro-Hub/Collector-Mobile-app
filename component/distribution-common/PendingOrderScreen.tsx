@@ -323,10 +323,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     item.isPacked === "1" ||
                     item.isPacked === true;
 
+                  // In the packageItems mapping inside loadOrderData, add unit field:
                   return {
                     id: `${packageInfo.id}_${item.id}`,
                     name: item.productName,
-                    weight: `${item.qty}`,
+                    weight: `${item.qty}`, // qty is already normalized to kg from DAO
+                    unit: item.unit || "kg", // store unit
                     selected: isPackedValue,
                     price: item.price ?? item.normalPrice ?? "0",
                     productType: item.productType,
@@ -357,10 +359,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             item.isPacked === "1" ||
             item.isPacked === true;
 
+          // In mappedAdditionalItems map, add unit:
           return {
             id: item.id.toString(),
             name: item.productName,
-            weight: `${item.qty}`,
+            weight: `${item.qty}`, // already normalized
+            unit: item.unit || "kg",
             selected: isPackedValue,
             price: item.price || item.normalPrice || "0",
           };
@@ -412,6 +416,22 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   }, [orderStatus]);
 
   const [refreshing, setRefreshing] = useState(false);
+
+  // Add this helper function inside the component (or above it)
+  const formatQty = (qty: number | string, unit?: string): string => {
+    const numQty = parseFloat(String(qty)) || 0;
+    // If unit comes through as "g", convert to kg
+    const normalizedQty =
+      unit && unit.toLowerCase().trim() === "g" ? numQty / 1000 : numQty;
+
+    // Format: remove trailing zeros but keep up to 3 decimal places
+    const formatted =
+      normalizedQty % 1 === 0
+        ? normalizedQty.toString()
+        : parseFloat(normalizedQty.toFixed(3)).toString();
+
+    return `${formatted}Kg`;
+  };
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -786,6 +806,14 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       return;
     }
 
+    if (quantityError) {
+      Alert.alert(
+        t("Error.Error"),
+        t("Error.Please fix quantity error before submitting"),
+      );
+      return;
+    }
+
     setRequestLoading(true);
     try {
       const selectedRetailItem = retailItems.find(
@@ -796,12 +824,19 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         throw new Error(t("PendingOrderScreen.Selected product not found"));
       }
 
-      const priceValue = (() => {
-        if (!replaceData.price) return 0;
-        const cleaned = replaceData.price.toString().replace(/[^0-9.]/g, "");
-        const parsed = parseFloat(cleaned);
-        return isNaN(parsed) ? 0 : parsed;
-      })();
+      // ✅ FIX: Calculate price directly from unit price × quantity
+      const unitPrice =
+        selectedRetailItem.discountedPrice ||
+        selectedRetailItem.normalPrice ||
+        0;
+      const quantity = parseFloat(replaceData.quantity) || 0;
+      const priceValue = parseFloat((unitPrice * quantity).toFixed(2));
+
+      if (priceValue <= 0) {
+        Alert.alert(t("Error.Error"), t("Error.Invalid price calculation"));
+        setRequestLoading(false);
+        return;
+      }
 
       const replacementRequest = {
         orderPackageId: selectedItemForReplace.packageId,
@@ -810,13 +845,14 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         productType: selectedItemForReplace.productType,
         productId: selectedRetailItem.id,
         qty: replaceData.quantity,
-        price: priceValue,
+        price: priceValue, // ✅ unitPrice × qty directly
         status: "Pending",
       };
 
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.User not authenticated."));
+        setRequestLoading(false);
         return;
       }
 
@@ -2054,7 +2090,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                                   {item.name}
                                 </Text>
                                 <Text className="text-gray-500 text-sm">
-                                  {item.weight}Kg
+                                  {parseFloat(item.weight) % 1 === 0
+                                    ? parseFloat(item.weight).toString()
+                                    : parseFloat(
+                                        parseFloat(item.weight).toFixed(3),
+                                      ).toString()}
+                                  Kg
                                 </Text>
                               </View>
                             </View>

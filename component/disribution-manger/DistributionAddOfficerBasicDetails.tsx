@@ -1110,7 +1110,7 @@ const DistributionAddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           <View className="px-4 flex-col w-full gap-4 mt-6">
             <TouchableOpacity
               className="bg-[#D9D9D9] rounded-3xl px-6 h-[50px] w-full justify-center items-center"
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate("Main", { screen: "DistributionOfficersList" })}
               style={{
                 shadowColor: "#8f8a8a",
                 shadowOffset: { width: 0, height: 4 },
