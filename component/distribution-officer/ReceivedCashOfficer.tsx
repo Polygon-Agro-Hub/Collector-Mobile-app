@@ -162,7 +162,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           Alert.alert(
             "Error",
             error.response?.data?.message ||
-            "Failed to fetch received cash data",
+              "Failed to fetch received cash data",
           );
         }
       } else {
@@ -177,20 +177,20 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
     fetchReceivedCash();
   }, []);
 
-    useFocusEffect(
-        React.useCallback(() => {
-          const onBackPress = () => {
-            navigation.navigate("DistridutionaDashboard");
-            return true;
-          };
-    
-          const subscription = BackHandler.addEventListener(
-            "hardwareBackPress",
-            onBackPress,
-          );
-          return () => subscription.remove();
-        }, [navigation]),
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
       );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -350,14 +350,20 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
                 backgroundColor: "white",
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                marginHorizontal: 40,
+                alignSelf: "center",
+                maxWidth: "90%",
               }}
             >
-              <View className="flex-row items-center justify-center">
-                <Text className=" font-medium text-black">
+              <View className="flex-row items-center justify-center flex-wrap">
+                <Text className="font-medium text-black" numberOfLines={1}>
                   {t("ReceivedCash.Full Total")} :{" "}
                 </Text>
-                <Text className="text-xl font-bold text-[#980775]">
+                <Text
+                  className="text-xl font-bold text-[#980775]"
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  minimumFontScale={0.6}
+                >
                   {t("ReceivedCash.Rs")}
                   {totalCash.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
@@ -369,33 +375,29 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           </View>
         )}
 
-     {transactions.length > 0 && (
-  <View className="p-6">
-    <TouchableOpacity
-      onPress={allSelected ? handleDeselectAll : handleSelectAll}
-      className="flex-row items-center"
-    >
-      {/* Fixed: consistent w-6 h-6 box for both states */}
-      <View
-        className={`w-6 h-6 rounded border items-center justify-center mr-2 ${
-          allSelected
-            ? "bg-red-600 border-red-600"   // filled when selected
-            : "bg-white border-black"        // empty when unselected
-        }`}
-      >
-        {allSelected && (
-          // Fixed: icon sized to fit inside the 24px box
-          <Entypo name="minus" size={16} color="white" />
+        {transactions.length > 0 && (
+          <View className="p-6">
+            <TouchableOpacity
+              onPress={allSelected ? handleDeselectAll : handleSelectAll}
+              className="flex-row items-center"
+            >
+              <View
+                className={`w-6 h-6 rounded border items-center justify-center mr-2 ${
+                  allSelected
+                    ? "bg-red-600 border-red-600"
+                    : "bg-white border-black"
+                }`}
+              >
+                {allSelected && <Entypo name="minus" size={16} color="white" />}
+              </View>
+              <Text className="text-sm underline text-black font-medium">
+                {allSelected
+                  ? t("ReceivedCash.Deselect All")
+                  : t("ReceivedCash.Select All")}
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
-      </View>
-      <Text className="text-sm underline text-black font-medium">
-        {allSelected
-          ? t("ReceivedCash.Deselect All")
-          : t("ReceivedCash.Select All")}
-      </Text>
-    </TouchableOpacity>
-  </View>
-)}
 
         {/* Transactions List */}
         {loading ? (

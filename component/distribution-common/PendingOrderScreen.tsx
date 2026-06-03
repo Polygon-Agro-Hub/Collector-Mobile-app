@@ -11,6 +11,7 @@ import {
   Modal,
   Image,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { RootStackParamList } from "../types/types";
 import axios from "axios";
@@ -323,12 +324,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                     item.isPacked === "1" ||
                     item.isPacked === true;
 
-                  // In the packageItems mapping inside loadOrderData, add unit field:
                   return {
                     id: `${packageInfo.id}_${item.id}`,
                     name: item.productName,
-                    weight: `${item.qty}`, // qty is already normalized to kg from DAO
-                    unit: item.unit || "kg", // store unit
+                    weight: `${item.qty}`,
+                    unit: item.unit || "kg",
                     selected: isPackedValue,
                     price: item.price ?? item.normalPrice ?? "0",
                     productType: item.productType,
@@ -359,11 +359,10 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
             item.isPacked === "1" ||
             item.isPacked === true;
 
-          // In mappedAdditionalItems map, add unit:
           return {
             id: item.id.toString(),
             name: item.productName,
-            weight: `${item.qty}`, // already normalized
+            weight: `${item.qty}`,
             unit: item.unit || "kg",
             selected: isPackedValue,
             price: item.price || item.normalPrice || "0",
@@ -417,14 +416,12 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 
   const [refreshing, setRefreshing] = useState(false);
 
-  // Add this helper function inside the component (or above it)
   const formatQty = (qty: number | string, unit?: string): string => {
     const numQty = parseFloat(String(qty)) || 0;
-    // If unit comes through as "g", convert to kg
+
     const normalizedQty =
       unit && unit.toLowerCase().trim() === "g" ? numQty / 1000 : numQty;
 
-    // Format: remove trailing zeros but keep up to 3 decimal places
     const formatted =
       normalizedQty % 1 === 0
         ? normalizedQty.toString()
@@ -824,7 +821,6 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         throw new Error(t("PendingOrderScreen.Selected product not found"));
       }
 
-      // ✅ FIX: Calculate price directly from unit price × quantity
       const unitPrice =
         selectedRetailItem.discountedPrice ||
         selectedRetailItem.normalPrice ||
@@ -845,7 +841,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         productType: selectedItemForReplace.productType,
         productId: selectedRetailItem.id,
         qty: replaceData.quantity,
-        price: priceValue, // ✅ unitPrice × qty directly
+        price: priceValue,
         status: "Pending",
       };
 
@@ -960,6 +956,21 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
       navigation.goBack();
     }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        handleBackPress();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [hasUnsavedChanges, navigation]),
+  );
 
   const handleSubmit = async () => {
     const netState = await NetInfo.fetch();
@@ -1591,9 +1602,9 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           <Text className="text-gray-600 text-center mb-6">
             {t("PendingOrderScreen.TheOrder")}
           </Text>
-
           <TouchableOpacity
             className="bg-black py-3 rounded-full"
+            style={{ alignSelf: "center", paddingHorizontal: 80 }}
             onPress={() => {
               setShowSuccessModal(false);
               setOrderCompletionState("idle");
@@ -1752,7 +1763,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
         }}
       >
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
-          <Text className="text-[#000000] text-center font-bold mb-2">
+          <Text className="text-[#000000] text-center text-xl font-bold mb-2">
             {t("OpenedOrderScreen.You have unsubmitted changes")
               .split(" ")
               .slice(0, 3)

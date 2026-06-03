@@ -397,13 +397,14 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         <View className="flex-row justify-center gap-2 items-center">
           <TouchableOpacity
             onPress={handleReset}
-            className="border border-[#6B6B6B] bg-[white] py-3 rounded-full w-40 items-center h-[50px] justify-center"
+            className="border border-[#6B6B6B] bg-[white] py-3 rounded-full items-center h-[45px] justify-center"
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.25,
               shadowRadius: 10,
               elevation: 6,
+              width:120
             }}
           >
             <Text
@@ -417,13 +418,16 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
           <TouchableOpacity
             onPress={handleGenerate}
-            className="bg-[#980775] py-3 rounded-full w-40 h-[50px] justify-center items-center"
+            disabled={!startDate || !endDate}
+            className="bg-[#980775] py-3 rounded-full w-40 h-[45px] justify-center items-center"
             style={{
+              backgroundColor: startDate && endDate ? "#980775" : "#D3A0C5",
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
+              shadowOpacity: startDate && endDate ? 0.25 : 0,
               shadowRadius: 10,
-              elevation: 6,
+              elevation: startDate && endDate ? 6 : 0,
+              width:120
             }}
           >
             <Text

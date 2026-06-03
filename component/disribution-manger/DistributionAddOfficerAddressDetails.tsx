@@ -379,17 +379,19 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
     }
   };
 
-  const provinceModalData = (provincesData.provinces as Province[]).map(
-    (p) => ({
-      label: p.name[selectedLanguage as keyof typeof p.name] || p.name.en,
-      value: p.name.en,
-    }),
-  );
+  const provinceModalData = (provincesData.provinces as Province[])
+  .map((p) => ({
+    label: p.name[selectedLanguage as keyof typeof p.name] || p.name.en,
+    value: p.name.en,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
-  const districtModalData = districts.map((d) => ({
+  const districtModalData = districts
+  .map((d) => ({
     label: (d[selectedLanguage as keyof typeof d] as string) || d.en,
     value: d.en,
-  }));
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
   const bankModalData = bankNames
     .slice()

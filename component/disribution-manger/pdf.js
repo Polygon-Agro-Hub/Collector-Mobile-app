@@ -540,26 +540,27 @@ const generateInvoiceHTML = (
 
   let additionalItemsRows = "";
   if (order?.additionalItems && order.additionalItems.length > 0) {
-    additionalItemsRows = order.additionalItems.map((item, index) => {
-      const price = parseFloat(item.price?.toString() || "0");
-      const discount = parseFloat(item.discount?.toString() || "0");
-      const qty = parseFloat(item.qty?.toString() || "0");
-      const unit = (item.unit || "kg").toLowerCase().trim();
-      const actualAmount = price + discount;
-      const unitPrice = parseFloat(item.normalPrice?.toString() || "0");
+    additionalItemsRows = order.additionalItems
+      .map((item, index) => {
+        const price = parseFloat(item.price?.toString() || "0");
+        const discount = parseFloat(item.discount?.toString() || "0");
+        const qty = parseFloat(item.qty?.toString() || "0");
+        const unit = (item.unit || "kg").toLowerCase().trim();
+        const actualAmount = price + discount;
+        const unitPrice = parseFloat(item.normalPrice?.toString() || "0");
 
-      let formattedQty = "";
-      if (unit === "g") {
-        if (qty >= 1000) {
-          formattedQty = `${(qty / 1000).toFixed(qty % 1000 === 0 ? 0 : 1)}kg`;
+        let formattedQty = "";
+        if (unit === "g") {
+          if (qty >= 1000) {
+            formattedQty = `${(qty / 1000).toFixed(qty % 1000 === 0 ? 0 : 1)}kg`;
+          } else {
+            formattedQty = `${qty}g`;
+          }
         } else {
-          formattedQty = `${qty}g`;
+          formattedQty = `${qty}${unit}`;
         }
-      } else {
-        formattedQty = `${qty}${unit}`;
-      }
 
-      return `
+        return `
       <tr>
         <td style="text-align: center; padding: 12px 8px;" class="tabledata">${index + 1}</td>
         <td style="padding: 12px 8px;" class="tabledata">${item.displayName || item.name || "Item"}</td>
@@ -567,7 +568,8 @@ const generateInvoiceHTML = (
         <td style="text-align: center; padding: 12px 8px;" class="tabledata">${formattedQty}</td>
         <td style="text-align: right; padding: 12px 8px;" class="tabledata">${formatCurrency(actualAmount)}</td>
       </tr>`;
-    }).join("");
+      })
+      .join("");
   }
 
   const formatDate = (dateString) => {
@@ -596,6 +598,26 @@ const generateInvoiceHTML = (
 
   const isPickup = order.delivaryMethod === "Pickup";
   const deliveryMethodLabel = isPickup ? "Instore Pickup" : "Home Delivery";
+
+  const buildCentreBlock = () => {
+    if (!isPickup) return "";
+
+    const centreName = order.centerName || null;
+    const city = order.centerCity || null;
+    const district = order.centerDistrict || null;
+    const province = order.centerProvince || null;
+    const country = order.centerCountry || "Sri Lanka";
+
+    if (!centreName && !city && !district && !province) return "";
+
+    return `
+    <div style="margin-top:16px;">
+      <p class="bold">Centre : <span style="font-weight:550;">${centreName || ""}</span></p>
+      ${city ? `<p class="headerp">${city}${district ? `, ${district}` : ""}</p>` : ""}
+      ${province ? `<p class="headerp">${province}${country ? `, ${country}` : ""}</p>` : ""}
+    </div>
+  `;
+  };
 
   const buildAddressBlock = () => {
     const buildingType = orderData.customerInfo?.buildingType;
@@ -648,15 +670,6 @@ const generateInvoiceHTML = (
     `;
   };
 
-  const grandTotalPackageLabel = (() => {
-    if (!order.packages || order.packages.length === 0) return "Package";
-    if (order.packages.length === 1)
-      return order.packages[0].displayName || "Package";
-    const uniquePackageIds = new Set(order.packages.map((p) => p.packageId));
-    if (uniquePackageIds.size === 1) return "Total Price for Packages";
-    return "Total Price for Packages";
-  })();
-
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -669,11 +682,7 @@ const generateInvoiceHTML = (
         margin-top: 20px;
         size: A4;
       }
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       body { 
         font-family: Arial, sans-serif; 
         padding: 10px; 
@@ -686,12 +695,6 @@ const generateInvoiceHTML = (
         margin: 0 auto; 
         background: white; 
         padding: 20px; 
-      }
-      .header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: flex-start; 
-        margin-top: 30px; 
       }
       .top h1 { 
         color: #3e206d; 
@@ -716,66 +719,25 @@ const generateInvoiceHTML = (
         min-width: 85px;
         display: inline-block;
       }
-      .label { 
-        color: #929292; 
-        font-weight: 500; 
-      }
-      .value { 
-        color: #000000; 
-        font-weight: normal; 
-      }
-      .logo { 
-        width: 120px; 
-        height: auto; 
-      }
-      .bold { 
-        font-weight: 550; 
-        font-size: 14px; 
-        margin: 6px 0 2px 0; 
-      }
-      .table { 
-        width: 100%; 
-        border-collapse: collapse; 
-        margin-bottom: 0px; 
-      }
-      .table th, .table td { 
-        border: none;
-        padding: 12px 8px;
-      }
+      .logo { width: 120px; height: auto; }
+      .bold { font-weight: 550; font-size: 14px; margin: 6px 0 2px 0; }
+      .table { width: 100%; border-collapse: collapse; margin-bottom: 0px; }
+      .table th, .table td { border: none; padding: 12px 8px; }
       .table th { 
         background-color: #f8f8f8; 
         font-size: 14px; 
         font-weight: 600;
         border-bottom: 1px solid #ddd; 
       }
-      .tabledata { 
-        font-size: 14px; 
-        font-weight: normal; 
-        color: #666666; 
-      }
+      .tabledata { font-size: 14px; font-weight: normal; color: #666666; }
       .footer { text-align: center; font-size: 12px; margin-top: 60px; color: #8492A3; }
-      .remarks-text p {
-        margin: 8px 0;
-        line-height: 1.6;
-      }
-      .section1 { margin-top: 20px; }
-      .section2 { margin-top: 10px; }
-      .section3 { margin-top: 10px; }
+      .remarks-text p { margin: 8px 0; line-height: 1.6; }
       .section { page-break-inside: avoid; }
       .section4 { page-break-inside: avoid; margin-bottom: 20px; }
-      .ptext { 
-        font-size: 14px; 
-        margin: 0px 0; 
-        padding: 6px 0;
-      }
+      .ptext { font-size: 14px; margin: 0px 0; padding: 6px 0; }
       @media print {
-        body {
-          padding: 0;
-          margin: 0;
-        }
-        .invoice-container {
-          padding: 10px;
-        }
+        body { padding: 0; margin: 0; }
+        .invoice-container { padding: 10px; }
       }
     </style>
   </head>
@@ -783,7 +745,7 @@ const generateInvoiceHTML = (
     <div class="invoice-container">
       <div class="top"><h1>INVOICE</h1></div>
       
-      <!-- Header Section -->
+      <!-- Company Header -->
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-top:10px;">
         <div>
           <p style="margin:0 0 4px 0;"><span style="font-weight:550;font-size:16px">Polygon Holdings (Private) Ltd</span></p>
@@ -798,116 +760,117 @@ const generateInvoiceHTML = (
 
       ${isPickup
       ? `
-<!-- Delivery Layout -->
-<div style="display:flex;justify-content:space-between;margin-top:30px;">
-  <div style="flex: 1;">
-    <p class="bold">Bill To :</p>
-    <p class="headerp">${customerInfo.fullName || "N/A"}</p>
-    <p class="headerp">${customerEmail}</p>
-    <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>    
-    <div style="margin-top:12px;">
-      ${buildAddressBlock()}
+         <!-- Pickup Layout -->
+  <div style="position:relative; margin-top:30px; min-height:80px;">
+    <div style="display:inline-block; max-width:55%;">
+      <p class="bold">Bill To :</p>
+      <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+      <p class="headerp">${customerEmail}</p>
+      <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
     </div>
-    <div style="margin-top:16px;">
-      <p class="bold">Invoice No :</p>
-      <p class="headerp">${invoiceNumber}</p>
-    </div>
-    <div style="margin-top:12px;">
-      <p class="bold">Delivery Method :</p>
-      <p class="headerp">${deliveryMethodLabel}</p>
+    <div style="position:absolute; top:0; right:0; text-align:right; min-width:200px;">
+      <p class="bold">Grand Total :</p>
+      <p style="font-weight:550;font-size:18px;margin:2px 0 0 0;">${formatCurrency(totalAmount)}</p>
+      <div style="margin-top:12px;">
+        <p class="bold">Payment Method :</p>
+        <p class="headerp" style="margin-bottom:8px;">${formatPaymentMethod(orderData.orderStatus?.paymentMethod)}</p>
+      </div>
+      <div style="margin-top:8px;">
+        <p class="bold">Ordered Date :</p>
+        <p class="headerp" style="margin-bottom:8px;">${formatDate(order.createdAt)}</p>
+      </div>
+      <div style="margin-top:8px;">
+        <p class="bold">Scheduled Date :</p>
+        <p class="headerp">${formatDate(order.scheduleDate)}</p>
+      </div>
     </div>
   </div>
-  <div style="text-align: right; min-width: 200px;">
-    <p class="bold">Grand Total :</p>
-    <p style="font-weight:550;font-size:18px;margin:2px 0 16px 0;">${formatCurrency(totalAmount)}</p>
-    
-    <p class="bold">Payment Method :</p>
-    <p class="headerp" style="margin-bottom:16px;">${formatPaymentMethod(orderData.orderStatus?.paymentMethod)}</p>
-    
-    <p class="bold">Ordered Date :</p>
-    <p class="headerp" style="margin-bottom:16px;">${formatDate(order.createdAt)}</p>
-    
-    <p class="bold">Scheduled Date :</p>
-    <p class="headerp">${formatDate(order.scheduleDate)}</p>
+
+  <!-- Invoice No, Delivery Method, Centre -->
+  <div style="margin-top:20px;">
+    <p class="bold">Invoice No :</p>
+    <p class="headerp">${invoiceNumber}</p>
   </div>
-</div>
-`
-      : `
-      <!-- Delivery Layout -->
-      <div style="display:flex;justify-content:space-between;margin-top:30px;">
-        <div style="flex: 1;">
-          <p class="bold">Bill To :</p>
-          <p class="headerp">${customerInfo.fullName || "N/A"}</p>
-          <p class="headerp">${customerEmail}</p>
-          <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>    
           <div style="margin-top:16px;">
-            ${buildAddressBlock()}
+            <p class="bold">Delivery Method :</p>
+            <p class="headerp">${deliveryMethodLabel}</p>
           </div>
-        </div>
-        <div style="text-align: right; min-width: 180px;">
-          <p class="bold">Grand Total :</p>
-          <p style="font-weight:550;font-size:18px;margin:2px 0 0 0;">${formatCurrency(totalAmount)}</p>
+          ${buildCentreBlock()}
+        `
+      : `
+          <!-- Delivery Layout -->
+          <div style="display:flex;justify-content:space-between;margin-top:30px;">
+            <div style="flex: 1;">
+              <p class="bold">Bill To :</p>
+              <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+              <p class="headerp">${customerEmail}</p>
+              <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
+              <div style="margin-top:16px;">
+                ${buildAddressBlock()}
+              </div>
+            </div>
+            <div style="text-align: right; min-width: 200px;">
+              <p class="bold">Grand Total :</p>
+              <p style="font-weight:550;font-size:18px;margin:2px 0 0 0;">${formatCurrency(totalAmount)}</p>
+              <div style="margin-top:12px;">
+                <p class="bold">Payment Method :</p>
+                <p class="headerp" style="margin-bottom:8px;">${formatPaymentMethod(orderData.orderStatus?.paymentMethod)}</p>
+              </div>
+              <div style="margin-top:8px;">
+                <p class="bold">Ordered Date :</p>
+                <p class="headerp" style="margin-bottom:8px;">${formatDate(order.createdAt)}</p>
+              </div>
+              <div style="margin-top:8px;">
+                <p class="bold">Scheduled Date :</p>
+                <p class="headerp">${formatDate(order.scheduleDate)}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice No & Delivery Method -->
           <div style="margin-top:24px;">
-            <p class="bold">Payment Method :</p>
-            <p class="headerp">${formatPaymentMethod(orderData.orderStatus?.paymentMethod)}</p>
+            <p class="bold">Invoice No :</p>
+            <p class="headerp">${invoiceNumber}</p>
           </div>
-        </div>
-      </div>
-      
-      <!-- Info Row -->
-      <div style="display:flex;justify-content:space-between;margin-top:24px;">
-        <div>
-          <p class="bold">Invoice No :</p>
-          <p class="headerp">${invoiceNumber}</p>
-        </div>
-        <div style="text-align: right;">
-          <p class="bold">Ordered Date :</p>
-          <p class="headerp">${formatDate(order.createdAt)}</p>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:16px;">
-        <div>
-          <p class="bold">Delivery Method :</p>
-          <p class="headerp">${deliveryMethodLabel}</p>
-        </div>
-        <div style="text-align: right;">
-          <p class="bold">Scheduled Date :</p>
-          <p class="headerp">${formatDate(order.scheduleDate)}</p>
-        </div>
-      </div>
-      `
+          <div style="margin-top:16px;">
+            <p class="bold">Delivery Method :</p>
+            <p class="headerp">${deliveryMethodLabel}</p>
+          </div>
+        `
     }
 
       ${generatePackageSections()}
 
-     ${order.additionalItems && Array.isArray(order.additionalItems) && order.additionalItems.length > 0
+      ${order.additionalItems &&
+      Array.isArray(order.additionalItems) &&
+      order.additionalItems.length > 0
       ? `<div class="section4">
-        <div style="display:flex;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid #ccc;padding-bottom:10px;margin-top:40px;">
-          <div class="bold">Additional Items (${order.additionalItems.length} Items)</div>
-          <div style="font-weight:550;font-size:16px">${formatCurrency(additionalItemsTotal)}</div>
-        </div>
-        <div style="border:1px solid #ddd;border-radius:10px;overflow-x:auto;">
-          <table style="width: 100%; border-collapse: collapse;" class="table">
-            <thead>
-              <tr>
-                <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">#</th>
-                <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Item Description</th>
-                <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Unit Price (Rs.)</th>
-                <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">QTY</th>
-                <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Amount (Rs.)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${additionalItemsRows}
-            </tbody>
-          </table>
-        </div>
-      </div>`
+            <div style="display:flex;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid #ccc;padding-bottom:10px;margin-top:40px;">
+              <div class="bold">Additional Items (${order.additionalItems.length} Items)</div>
+              <div style="font-weight:550;font-size:16px">${formatCurrency(additionalItemsTotal)}</div>
+            </div>
+            <div style="border:1px solid #ddd;border-radius:10px;overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;" class="table">
+                <thead>
+                  <tr>
+                    <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">#</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Item Description</th>
+                    <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Unit Price (Rs.)</th>
+                    <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">QTY</th>
+                    <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Amount (Rs.)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${additionalItemsRows}
+                </tbody>
+              </table>
+            </div>
+          </div>`
       : ""
     }
 
       <!-- Totals Section -->
-       <div class="section" style="margin-top:30px;">
+      <div class="section" style="margin-top:30px;">
         <div style="margin-bottom:20px;border-bottom:1px solid #ccc;padding-bottom:10px;">
           <div class="bold">Grand Total for all items</div>
         </div>
@@ -961,22 +924,21 @@ const generateInvoiceHTML = (
         <p>${formatCurrency(totalAmount)}</p>
       </div>
 
-
-     <!-- Remarks Section -->
-<div class="section">
-  <p style="margin-top:50px;font-size:14px;font-weight:600;margin-bottom:12px;">Remarks :</p>
-  <div class="remarks-text" style="color:#666666;font-size:12px;">
-    <p style="margin-bottom: 12px;">Kindly inspect all goods at the time of delivery to ensure accuracy and condition.</p>
-    <p style="margin-bottom: 12px;">Polygon does not accept returns under any circumstances.</p>
-    <p style="margin-bottom: 12px;">Please report any issues or discrepancies within 24 hours of delivery to ensure prompt attention.</p>
-    <p style="margin-bottom: 12px;">For any assistance, feel free to contact our customer service team.</p>
-  </div>
-</div>
+      <!-- Remarks Section -->
+      <div class="section">
+        <p style="margin-top:50px;font-size:14px;font-weight:600;margin-bottom:12px;">Remarks :</p>
+        <div class="remarks-text" style="color:#666666;font-size:12px;">
+          <p style="margin-bottom:12px;">Kindly inspect all goods at the time of delivery to ensure accuracy and condition.</p>
+          <p style="margin-bottom:12px;">Polygon does not accept returns under any circumstances.</p>
+          <p style="margin-bottom:12px;">Please report any issues or discrepancies within 24 hours of delivery to ensure prompt attention.</p>
+          <p style="margin-bottom:12px;">For any assistance, feel free to contact our customer service team.</p>
+        </div>
+      </div>
 
       <!-- Footer -->
-       <div class="footer">
+      <div class="footer">
         <p style="margin-top:50px;font-size:16px;font-weight:600;color:#000;font-style:italic">Thank you for shopping with us!</p>
-        <p style="margin-top:-5px;font-size:14px;font-weight:500;color:#4B4B4B;font-style:italic">WE WILL SEND YOU MORE OFFERS, LOWEST PRICED VEGGIES FROM US.</p>
+<p style="margin-top:6px;font-size:14px;font-weight:500;color:#4B4B4B;font-style:italic">WE WILL SEND YOU MORE OFFERS, LOWEST PRICED VEGGIES FROM US.</p>
         <p style="margin-top:50px;font-style:italic">- THIS IS A COMPUTER GENERATED INVOICE, THUS NO SIGNATURE REQUIRED -</p>
       </div>
     </div>

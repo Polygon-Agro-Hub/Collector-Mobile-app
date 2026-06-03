@@ -11,6 +11,7 @@ import {
   Animated,
 } from "react-native";
 import {
+  Entypo,
   FontAwesome5,
   FontAwesome6,
   Foundation,
@@ -192,29 +193,37 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+    
 
       {/* Header */}
 
-      <CustomHeader
-        title={`${t("ViewPickupOrders.ID")} ${order.invNo}`}
-        showBackButton={true}
-        navigation={navigation}
-        onBackPress={() => navigation.navigate("ReadytoPickupOrders")}
-      />
+      <View className="bg-white py-6 flex-row items-center ">
+        
+        <TouchableOpacity
+          className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
+          onPress={() => navigation.navigate("ReadytoPickupOrders")}
+        >
+          <Entypo name="chevron-left" size={25} color="#000" />
+        </TouchableOpacity>
+        <View className="flex-1 items-center justify-center ml-2">
+          <Text className="text-lg font-semibold text-gray-900">
+            {t("ViewPickupOrders.ID")} : #{order.invNo}
+          </Text>
+        </View>
+      </View>
 
-      <View className="flex-1 w-full max-w-[500px] mx-auto">
-        <View className="px-4 ">
-          <View className="flex-row items-center justify-center">
-            <View className="px-3 py-1.5 rounded-full flex-row items-center">
-              <Text className="text-[#565559] mr-2">
-                {t("ViewPickupOrders.Ready") || "Ready"} :
-              </Text>
-              <Text className="font-semibold text-[#000000]">{readyTime}</Text>
-            </View>
+      <View className="px-4">
+        <View className="flex-row mt-[-4%] items-center justify-center">
+          <View className="px-3 rounded-full flex-row items-center">
+            <Text className="text-[#565559] mr-2">
+              {t("ViewPickupOrders.Ready") || "Ready"} :
+            </Text>
+            <Text className="font-semibold text-[#000000]">{readyTime}</Text>
           </View>
         </View>
+      </View>
 
+      <View className="flex-1 w-full max-w-[500px] mt-6 mx-auto">
         <View className="flex-1 ">
           <View className="px-4">
             <View className="bg-white rounded-2xl p-4  shadow-sm">
@@ -305,7 +314,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
                   }}
                 >
                   {/* CENTER TEXT */}
-                  <View className="absolute left-0 right-0 items-center">
+                  <View className="absolute left-0 right-0 h-[50px] justify-center items-center">
                     <Text className="text-base font-semibold text-black">
                       {`${
                         t("ViewPickupOrders.Make Phone Call") ||
@@ -325,7 +334,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
             {/* Scan Order Button */}
             <TouchableOpacity
               onPress={handleScanOrder}
-              className="bg-[#980775] rounded-full py-3 px-7 mx-4 mb-20 shadow-md"
+              className="bg-[#980775] rounded-full h-[50px] justify-center px-7 mx-4 mb-20 shadow-md"
               activeOpacity={0.8}
               disabled={isProcessing}
               style={{

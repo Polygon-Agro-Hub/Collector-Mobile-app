@@ -357,9 +357,12 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          style={{
+            marginBottom: 60,
+          }}
         >
           {/* Assignee Selection */}
-          <View className="bg-white mx-4 my-2 p-4 ">
+          <View className="bg-white mx-4 my-2 p-4">
             <View className="flex-row items-center mb-3">
               <Text className="text-[#475A6A] font-semibold flex-1">
                 {selectedAssignee
@@ -391,7 +394,6 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
                 <Text
                   style={{
                     color: selectedOfficerLabel ? "#374151" : "#9CA3AF",
-                    fontSize: 16,
                     flex: 1,
                   }}
                   numberOfLines={1}
@@ -409,7 +411,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           </View>
 
           {/* Selected Targets */}
-          <View className="bg-white my-2 rounded-lg mb-20">
+          <View className="bg-white my-2 rounded-lg">
             <View className="items-center justify-center">
               <Text
                 style={{
@@ -426,7 +428,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
               {targetItems.map((item: TargetItem) => (
                 <View
                   key={item.distributedTargetItemId}
-                  className="flex-row border-b border-gray-300 px-[-19]"
+                  className="flex-row border-b border-gray-300"
                 >
                   <View className="w-16 items-center justify-center border-r border-gray-300 py-3">
                     <Text className="text-[#606060] font-medium">
@@ -453,34 +455,33 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
               ))}
             </View>
           </View>
-        </ScrollView>
 
-        {/* Save Button */}
-        <TouchableOpacity
-          onPress={handleSave}
-          disabled={loading || !selectedAssignee || loadingOfficers}
-          className={`absolute left-4 right-4 py-3 h-[50px] rounded-full items-center justify-center mr-6 ml-6 ${
-            loading || !selectedAssignee || loadingOfficers
-              ? "bg-[#C0C0C0]"
-              : "bg-[#980775]"
-          }`}
-          style={{
-            bottom: 100,
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-            elevation: 6,
-          }}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text className="text-white font-bold text-lg">
-              {t("PassTarget.Save")}
-            </Text>
-          )}
-        </TouchableOpacity>
+          {/* Save Button */}
+          <TouchableOpacity
+            onPress={handleSave}
+            disabled={loading || !selectedAssignee || loadingOfficers}
+            className={`py-3 h-[50px] rounded-full items-center justify-center mx-6 my-6 ${
+              loading || !selectedAssignee || loadingOfficers
+                ? "bg-[#C0C0C0]"
+                : "bg-[#980775]"
+            }`}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white font-bold text-lg">
+                {t("PassTarget.Save")}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
 
         {/* Error Message */}
         {error && (

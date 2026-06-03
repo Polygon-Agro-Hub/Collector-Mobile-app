@@ -594,6 +594,7 @@
   "ClaimOfficer": {
     "LNG": "en",
     "ClaimOfficers": "Claim Officers",
+    "Driver":"Driver",
     "JobRole": "Job Role",
     "EMPID": "EMP ID",
     "Search": "Search",

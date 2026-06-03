@@ -30,7 +30,7 @@ export type RootStackParamList = {
   DailyTargetList: undefined;
   ComplainHistory: undefined;
   ClaimOfficer: undefined;
-  ClaimDistribution: undefined;
+ ClaimDistribution: { activeTab?: "Officers" | "Drivers" };
   TransactionList: {
     empId: string
   };
@@ -364,6 +364,10 @@ export type RootStackParamList = {
   DistributionOfficerReport: {
     officerId: string;
     collectionOfficerId: number;
+    officerName:string,
+    phoneNumber1:string,
+    phoneNumber2:string,        
+    image:string,
   };
   qrcode: {
     expectedOrderId?: string;

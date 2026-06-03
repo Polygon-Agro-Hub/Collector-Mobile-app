@@ -150,7 +150,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     }
   };
 
-  // Derive counts per tab
   const officersList = officers.filter(
     (o) =>
       o.jobRole === "Collection Officer" ||
@@ -158,14 +157,11 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   );
   const driversList = officers.filter((o) => o.jobRole === "Driver");
 
-  // If your API uses different jobRole strings, adjust the filter above accordingly.
-  // Fallback: if no jobRole distinction exists, split by empId prefix or treat all as officers.
   const officersCount = officersList.length || officers.length;
   const driversCount = driversList.length;
 
   useEffect(() => {
     if (activeTab === "Officers") {
-      // Show all if no distinction, otherwise filter
       setFilteredOfficers(officersList.length > 0 ? officersList : officers);
     } else {
       setFilteredOfficers(driversList);
@@ -193,30 +189,30 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   );
 
   const renderOfficer = ({ item }: { item: Officer }) => (
-  <TouchableOpacity
-    className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 bg-gray-100`}
-    onPress={() => {
-      if (item.status !== "Not Approved" && item.jobRole !== "Driver") { // ← add Driver check
-        navigation.navigate("DistributionOfficerSummary" as any, {
-          officerId: item.empId,
-          officerName: getOfficerName(item),
-          phoneNumber1: item.phoneNumber1,
-          phoneNumber2: item.phoneNumber2,
-          collectionOfficerId: item.collectionOfficerId,
-          image: item.image,
-        });
-      }
-    }}
-    disabled={item.status === "Not Approved" || item.jobRole === "Driver"} // ← add Driver check
-    style={{
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.25,
-      shadowRadius: 10,
-      elevation: 6,
-      opacity: item.jobRole === "Driver" ? 1 : 1, // drivers still look normal
-    }}
-  >
+    <TouchableOpacity
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 bg-gray-100`}
+      onPress={() => {
+        if (item.status !== "Not Approved" && item.jobRole !== "Driver") {
+          navigation.navigate("DistributionOfficerSummary" as any, {
+            officerId: item.empId,
+            officerName: getOfficerName(item),
+            phoneNumber1: item.phoneNumber1,
+            phoneNumber2: item.phoneNumber2,
+            collectionOfficerId: item.collectionOfficerId,
+            image: item.image,
+          });
+        }
+      }}
+      disabled={item.status === "Not Approved" || item.jobRole === "Driver"}
+      style={{
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 6,
+        opacity: item.jobRole === "Driver" ? 1 : 1,
+      }}
+    >
       <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
         <Image
           source={
@@ -260,7 +256,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         </Text>
       </View>
 
-        {item.status !== "Not Approved" && item.jobRole !== "Driver" && (
+      {item.status !== "Not Approved" && item.jobRole !== "Driver" && (
         <Ionicons name="chevron-forward" size={scale(20)} color="#9CA3AF" />
       )}
     </TouchableOpacity>
@@ -362,7 +358,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                   justifyContent: "center",
                   alignItems: "center",
                   paddingHorizontal: 5,
-                  
                 }}
               >
                 <Text
@@ -408,7 +403,9 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                 backgroundColor: "white",
                 borderRadius: 8,
               }}
-              onPress={() => navigation.navigate("ClaimDistribution")}
+              onPress={() =>
+                navigation.navigate("ClaimDistribution", { activeTab })
+              }
             >
               <Text className="text-gray-700 font-semibold">
                 {t("CollectionOfficersList.Claim Officer")}
@@ -423,7 +420,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         className="flex-1 w-full max-w-[500px] mx-auto bg-white "
         style={{
           marginTop: 0,
-          borderRadius:25
+          borderRadius: 25,
         }}
       >
         {/* List title */}

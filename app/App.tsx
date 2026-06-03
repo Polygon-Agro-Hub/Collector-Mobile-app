@@ -269,6 +269,10 @@ function MainTabNavigator() {
         name="CenterTargetScreen"
         component={CenterTargetScreen as any}
       />
+      <Tab.Screen
+        name="DistributionOfficerReport"
+        component={DistributionOfficerReport as any}
+      />
     </Tab.Navigator>
   );
 }
@@ -450,10 +454,7 @@ function AppContent() {
               name="DailyTargetListOfficerDistribution"
               component={DailyTargetListOfficerDistribution as any}
             />
-            <Stack.Screen
-              name="DistributionOfficerReport"
-              component={DistributionOfficerReport as any}
-            />
+
             <Stack.Screen
               name="GoviPensionForm"
               component={GoviPensionForm as any}
