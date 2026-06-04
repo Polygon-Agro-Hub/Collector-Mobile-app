@@ -226,8 +226,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           })
         }
       />
-      <View className="flex-1 w-full max-w-[500px] mx-auto px-5 bg-white">
-        <ScrollView className="flex-1 p-3 mt-4">
+      <View className="flex-1 w-full max-w-[500px] mx-auto px-6 bg-white">
+        <ScrollView className="flex-1 mt-4">
           {/* Account Number */}
           <View className="mb-4">
             <Text className="text-[#434343] mb-2">

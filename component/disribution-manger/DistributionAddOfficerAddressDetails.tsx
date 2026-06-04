@@ -29,7 +29,7 @@ import i18n from "@/i18n/i18n";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 import provincesData from "../../assets/jsons/sri-lanka-provinces.json";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 
 type DistributionAddOfficerAddressDetailsNavigationProp = StackNavigationProp<
@@ -440,14 +440,17 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
       disabled={disabled}
       className={`border ${
         hasError ? "border-red-500" : "border-[#F4F4F4]"
-      } bg-[#F4F4F4] rounded-2xl px-4 h-[46px] flex-row items-center justify-between ${
+      } bg-[#F4F4F4] rounded-full px-4 h-[50px] flex-row items-center justify-between ${
         disabled ? "opacity-50" : ""
       }`}
     >
-      <Text className={value ? "text-gray-700" : "text-gray-400"}>
+      <Text
+        className={value ? "text-gray-700" : "text-gray-400"}
+        style={{ fontSize: 14 }}
+      >
         {value || placeholder}
       </Text>
-      <Entypo name="chevron-small-down" size={20} color="#666" />
+      <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
     </TouchableOpacity>
   );
 
@@ -468,306 +471,283 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
           })
         }
       />
-      <ScrollView
-        className="flex-1 bg-white w-full max-w-[500px]  mx-auto"
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* ── Address Details ── */}
-        <View className="px-8 mt-4">
-          {/* House Number */}
-          <TextInput
-            placeholder={t("AddOfficerAddressDetails.House")}
-            value={formData.houseNumber}
-            onChangeText={(text) =>
-              handleInputChange("houseNumber", text.replace(/^\s+/, ""))
-            }
-            className={`border ${
-              fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
-          />
-          {fieldErrors.houseNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.houseNumber}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Street Name */}
-          <TextInput
-            placeholder={t("AddOfficerAddressDetails.Street Name")}
-            value={formData.streetName}
-            onChangeText={(text) =>
-              handleInputChange("streetName", formatText(text))
-            }
-            className={`border ${
-              fieldErrors.streetName ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
-            autoCorrect={false}
-          />
-          {fieldErrors.streetName ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.streetName}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* City */}
-          <TextInput
-            placeholder={t("AddOfficerAddressDetails.City")}
-            value={formData.city}
-            onChangeText={(text) => handleInputChange("city", formatText(text))}
-            className={`border ${
-              fieldErrors.city ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
-            autoCorrect={false}
-          />
-          {fieldErrors.city ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.city}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Country */}
-          <TextInput
-            placeholder={t("AddOfficerAddressDetails.Country")}
-            value={t("AddOfficerAddressDetails.Country")}
-            editable={false}
-            className="border-[#F4F4F4] bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-4 text-gray-700"
-          />
-
-          {/* Province */}
-          <View className="mb-1">
-            <DropdownButton
-              placeholder={t("AddOfficerAddressDetails.Select Province")}
-              value={
-                formData.province
-                  ? (() => {
-                      const p = (provincesData.provinces as Province[]).find(
-                        (pr) => pr.name.en === formData.province,
-                      );
-                      return p
-                        ? p.name[selectedLanguage as keyof typeof p.name] ||
-                            p.name.en
-                        : formData.province;
-                    })()
-                  : ""
+      <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-6">
+        <ScrollView
+          className="flex-1 bg-white"
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* ── Address Details ── */}
+          <View className="px-0 mt-4">
+            {/* House Number */}
+            <TextInput
+              placeholder={t("AddOfficerAddressDetails.House")}
+              value={formData.houseNumber}
+              onChangeText={(text) =>
+                handleInputChange("houseNumber", text.replace(/^\s+/, ""))
               }
-              hasError={!!fieldErrors.province}
-              onPress={() => setActiveModal("province")}
+              className={`border ${
+                fieldErrors.houseNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+              } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
+              style={{ fontSize: 14 }}
             />
-          </View>
-          {fieldErrors.province ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.province}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* District */}
-          {formData.province && (
-            <>
-              <View className="mb-1">
-                <DropdownButton
-                  placeholder={t("AddOfficerAddressDetails.Select District")}
-                  value={
-                    formData.district
-                      ? (() => {
-                          const d = districts.find(
-                            (dis) => dis.en === formData.district,
-                          );
-                          return d
-                            ? (d[
-                                selectedLanguage as keyof typeof d
-                              ] as string) || d.en
-                            : formData.district;
-                        })()
-                      : ""
-                  }
-                  hasError={!!fieldErrors.district}
-                  onPress={() => setActiveModal("district")}
-                />
-              </View>
-              {fieldErrors.district ? (
-                <Text className="text-red-500 text-sm mb-3 ml-3">
-                  {fieldErrors.district}
-                </Text>
-              ) : (
-                <View className="mb-3" />
-              )}
-            </>
-          )}
-        </View>
-
-        <View className="h-0.5 bg-[#ADADAD] my-4" />
-
-        {/* ── Bank Details ── */}
-        <View className="px-8 mt-4">
-          {/* Account Holder Name */}
-          <TextInput
-            placeholder={t("AddOfficerAddressDetails.AccountName")}
-            value={formData.accountHolderName}
-            onChangeText={(text) => {
-              let filtered = text.replace(/[^a-zA-Z\s]/g, "").trimStart();
-              const capitalized = filtered
-                .toLowerCase()
-                .split(" ")
-                .map((w) =>
-                  w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w,
-                )
-                .join(" ");
-              handleInputChange("accountHolderName", capitalized);
-            }}
-            keyboardType="default"
-            autoCapitalize="words"
-            autoCorrect={false}
-            className={`border ${
-              fieldErrors.accountHolderName
-                ? "border-red-500"
-                : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
-          />
-          {fieldErrors.accountHolderName ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.accountHolderName}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Account Number */}
-          <TextInput
-            placeholder={t("AddOfficerAddressDetails.AccountNum")}
-            keyboardType="numeric"
-            value={formData.accountNumber}
-            onChangeText={(text) => handleValidation("accountNumber", text)}
-            className={`border ${
-              fieldErrors.accountNumber ? "border-red-500" : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
-          />
-          {fieldErrors.accountNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.accountNumber}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Confirm Account Number */}
-          <TextInput
-            placeholder={t("AddOfficerAddressDetails.Confirm AccountNum")}
-            keyboardType="numeric"
-            value={formData.confirmAccountNumber}
-            onChangeText={(text) =>
-              handleValidation("confirmAccountNumber", text)
-            }
-            className={`border ${
-              error || fieldErrors.confirmAccountNumber
-                ? "border-red-500"
-                : "border-[#F4F4F4]"
-            } bg-[#F4F4F4] rounded-2xl px-3 py-3 mb-1 text-gray-700`}
-          />
-          {error || fieldErrors.confirmAccountNumber ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.confirmAccountNumber || error}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Bank Name */}
-          <View className="mb-1">
-            <DropdownButton
-              placeholder={t("AddOfficerAddressDetails.BankName")}
-              value={formData.bankName}
-              hasError={!!fieldErrors.bankName}
-              onPress={() => setActiveModal("bank")}
-            />
-          </View>
-          {fieldErrors.bankName ? (
-            <Text className="text-red-500 text-sm mb-3 ml-3">
-              {fieldErrors.bankName}
-            </Text>
-          ) : (
-            <View className="mb-3" />
-          )}
-
-          {/* Branch Name */}
-          {filteredBranches.length > 0 && (
-            <>
-              <View className="mb-1">
-                <DropdownButton
-                  placeholder={t("AddOfficerAddressDetails.BranchName")}
-                  value={formData.branchName}
-                  hasError={!!fieldErrors.branchName}
-                  onPress={() => setActiveModal("branch")}
-                />
-              </View>
-              {fieldErrors.branchName ? (
-                <Text className="text-red-500 text-sm mt-1 ml-3">
-                  {fieldErrors.branchName}
-                </Text>
-              ) : null}
-            </>
-          )}
-        </View>
-
-        {/* ── Buttons ── */}
-
-        <View className="px-8 flex-col w-full gap-4 mt-5 mb-4">
-          <TouchableOpacity
-            className="bg-[#D9D9D9] rounded-3xl px-6 py-4 w-full items-center"
-            onPress={() =>
-              navigation.navigate("DistributionAddOfficerBasicDetails", {
-                jobRolle: "Distribution Officer",
-                preservedData: basicDetails,
-              })
-            }
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 6,
-            }}
-          >
-            <Text
-              className="text-[#686868]"
-              style={[
-                i18n.language === "si"
-                  ? { fontSize: 13 }
-                  : i18n.language === "ta"
-                    ? { fontSize: 10 }
-                    : { fontSize: 14 },
-              ]}
-            >
-              {t("AddOfficerAddressDetails.Go")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className={`bg-black rounded-3xl px-6 mb-20 py-4 w-full items-center ${
-              loading ? "opacity-50" : ""
-            }`}
-            onPress={handleSubmit}
-            disabled={loading}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 6,
-            }}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" size="small" />
+            {fieldErrors.houseNumber ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.houseNumber}
+              </Text>
             ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* Street Name */}
+            <TextInput
+              placeholder={t("AddOfficerAddressDetails.Street Name")}
+              value={formData.streetName}
+              onChangeText={(text) =>
+                handleInputChange("streetName", formatText(text))
+              }
+              className={`border ${
+                fieldErrors.streetName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+              } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
+              style={{ fontSize: 14 }}
+              autoCorrect={false}
+            />
+            {fieldErrors.streetName ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.streetName}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* City */}
+            <TextInput
+              placeholder={t("AddOfficerAddressDetails.City")}
+              value={formData.city}
+              onChangeText={(text) => handleInputChange("city", formatText(text))}
+              className={`border ${
+                fieldErrors.city ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+              } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
+              style={{ fontSize: 14 }}
+              autoCorrect={false}
+            />
+            {fieldErrors.city ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.city}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* Country */}
+            <TextInput
+              placeholder={t("AddOfficerAddressDetails.Country")}
+              value={t("AddOfficerAddressDetails.Country")}
+              editable={false}
+              className="border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full h-[50px] mb-4 text-gray-700"
+              style={{ fontSize: 14 }}
+            />
+
+            {/* Province */}
+            <View className="mb-1">
+              <DropdownButton
+                placeholder={t("AddOfficerAddressDetails.Select Province")}
+                value={
+                  formData.province
+                    ? (() => {
+                        const p = (provincesData.provinces as Province[]).find(
+                          (pr) => pr.name.en === formData.province,
+                        );
+                        return p
+                          ? p.name[selectedLanguage as keyof typeof p.name] ||
+                              p.name.en
+                          : formData.province;
+                      })()
+                    : ""
+                }
+                hasError={!!fieldErrors.province}
+                onPress={() => setActiveModal("province")}
+              />
+            </View>
+            {fieldErrors.province ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.province}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* District */}
+            {formData.province && (
+              <>
+                <View className="mb-1">
+                  <DropdownButton
+                    placeholder={t("AddOfficerAddressDetails.Select District")}
+                    value={
+                      formData.district
+                        ? (() => {
+                            const d = districts.find(
+                              (dis) => dis.en === formData.district,
+                            );
+                            return d
+                              ? (d[
+                                  selectedLanguage as keyof typeof d
+                                ] as string) || d.en
+                              : formData.district;
+                          })()
+                        : ""
+                    }
+                    hasError={!!fieldErrors.district}
+                    onPress={() => setActiveModal("district")}
+                  />
+                </View>
+                {fieldErrors.district ? (
+                  <Text className="text-red-500 text-sm mb-3 ml-3">
+                    {fieldErrors.district}
+                  </Text>
+                ) : (
+                  <View className="mb-3" />
+                )}
+              </>
+            )}
+          </View>
+
+          <View className="h-0.5 bg-[#ADADAD] my-4" />
+
+          {/* ── Bank Details ── */}
+          <View className="px-0 mt-4">
+            {/* Account Holder Name */}
+            <TextInput
+              placeholder={t("AddOfficerAddressDetails.AccountName")}
+              value={formData.accountHolderName}
+              onChangeText={(text) => {
+                let filtered = text.replace(/[^a-zA-Z\s]/g, "").trimStart();
+                const capitalized = filtered
+                  .toLowerCase()
+                  .split(" ")
+                  .map((w) =>
+                    w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w
+                  )
+                  .join(" ");
+                handleInputChange("accountHolderName", capitalized);
+              }}
+              keyboardType="default"
+              autoCapitalize="words"
+              autoCorrect={false}
+              className={`border ${
+                fieldErrors.accountHolderName
+                  ? "border-red-500"
+                  : "border-[#F4F4F4] bg-[#F4F4F4]"
+              } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
+              style={{ fontSize: 14 }}
+            />
+            {fieldErrors.accountHolderName ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.accountHolderName}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* Account Number */}
+            <TextInput
+              placeholder={t("AddOfficerAddressDetails.AccountNum")}
+              keyboardType="numeric"
+              value={formData.accountNumber}
+              onChangeText={(text) => handleValidation("accountNumber", text)}
+              className={`border ${
+                fieldErrors.accountNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+              } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
+              style={{ fontSize: 14 }}
+            />
+            {fieldErrors.accountNumber ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.accountNumber}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* Confirm Account Number */}
+            <TextInput
+              placeholder={t("AddOfficerAddressDetails.Confirm AccountNum")}
+              keyboardType="numeric"
+              value={formData.confirmAccountNumber}
+              onChangeText={(text) =>
+                handleValidation("confirmAccountNumber", text)
+              }
+              className={`border ${
+                error || fieldErrors.confirmAccountNumber
+                  ? "border-red-500"
+                  : "border-[#F4F4F4] bg-[#F4F4F4]"
+              } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
+              style={{ fontSize: 14 }}
+            />
+            {error || fieldErrors.confirmAccountNumber ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.confirmAccountNumber || error}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* Bank Name */}
+            <View className="mb-1">
+              <DropdownButton
+                placeholder={t("AddOfficerAddressDetails.BankName")}
+                value={formData.bankName}
+                hasError={!!fieldErrors.bankName}
+                onPress={() => setActiveModal("bank")}
+              />
+            </View>
+            {fieldErrors.bankName ? (
+              <Text className="text-red-500 text-sm mb-3 ml-3">
+                {fieldErrors.bankName}
+              </Text>
+            ) : (
+              <View className="mb-3" />
+            )}
+
+            {/* Branch Name */}
+            {filteredBranches.length > 0 && (
+              <>
+                <View className="mb-1">
+                  <DropdownButton
+                    placeholder={t("AddOfficerAddressDetails.BranchName")}
+                    value={formData.branchName}
+                    hasError={!!fieldErrors.branchName}
+                    onPress={() => setActiveModal("branch")}
+                  />
+                </View>
+                {fieldErrors.branchName ? (
+                  <Text className="text-red-500 text-sm mt-1 ml-3">
+                    {fieldErrors.branchName}
+                  </Text>
+                ) : null}
+              </>
+            )}
+          </View>
+
+          {/* ── Buttons ── */}
+
+          <View className="px-0 flex-col w-full gap-4 mt-5 mb-4">
+            <TouchableOpacity
+              className="bg-[#D9D9D9] rounded-full px-6 py-4 w-full items-center"
+              onPress={() =>
+                navigation.navigate("DistributionAddOfficerBasicDetails", {
+                  jobRolle: "Distribution Officer",
+                  preservedData: basicDetails,
+                })
+              }
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
+            >
               <Text
-                className="text-white"
+                className="text-[#686868]"
                 style={[
                   i18n.language === "si"
                     ? { fontSize: 13 }
@@ -776,12 +756,44 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
                       : { fontSize: 14 },
                 ]}
               >
-                {t("AddOfficerBasicDetails.Submit")}
+                {t("AddOfficerAddressDetails.Go")}
               </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`bg-black rounded-full px-6 mb-20 py-4 w-full items-center ${
+                loading ? "opacity-50" : ""
+              }`}
+              onPress={handleSubmit}
+              disabled={loading}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
+            >
+              {loading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text
+                  className="text-white"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 10 }
+                        : { fontSize: 14 },
+                  ]}
+                >
+                  {t("AddOfficerBasicDetails.Submit")}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
 
       {/* Province Modal */}
       <GlobalSearchModal

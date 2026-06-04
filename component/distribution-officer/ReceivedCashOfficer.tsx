@@ -269,10 +269,10 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
               className="mr-3 mt-0.5"
             >
               <View
-                className={`w-5 h-5 rounded border ${isSelected ? "bg-black border-black" : "bg-white border-black"} items-center justify-center`}
+                className={`w-6 h-6 rounded border ${isSelected ? "bg-black border-black" : "bg-white border-black"} items-center justify-center`}
               >
                 {isSelected && (
-                  <Ionicons name="checkmark" size={14} color="white" />
+                  <Ionicons name="checkmark" size={16} color="white" />
                 )}
               </View>
             </TouchableOpacity>

@@ -264,14 +264,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           );
           await AsyncStorage.removeItem("referenceId");
 
-          pendingNavigation.current = () => {
-            navigation.navigate("FarmerQr" as any, {
-              NICnumber: response1.data.NICnumber,
-              userId: response1.data.userId,
-            });
-          };
-
           setModalVisible(true);
+          navigation.navigate("FarmerQr" as any, {
+            NICnumber: response1.data.NICnumber,
+            userId: response1.data.userId,
+          });
           break;
 
         case "1001":

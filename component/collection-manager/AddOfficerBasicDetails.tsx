@@ -735,9 +735,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        className="w-full max-w-[500px] mx-auto"
+        className="w-full max-w-[500px] mx-auto px-6"
       >
-        <View className="items-center mt-6">
+        <View className="items-center mt-6 w-full">
           <TouchableOpacity onPress={handleImagePick}>
             <View className="relative">
               <View className="w-20 h-20 bg-gray-300 rounded-full overflow-hidden items-center justify-center">
@@ -758,7 +758,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           </TouchableOpacity>
         </View>
 
-        <View className="p-2 px-4">
+        <View className="">
           <View className="px-2 mt-6 items-center">
             <View className="flex flex-row items-center gap-2 justify-between">
               <Text className="text-base font-medium">
@@ -849,7 +849,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
-          <View className="px-4 mt-4 gap-4">
+          <View className="mt-4 gap-4">
             <View>
               <TextInput
                 placeholder={t("AddOfficerBasicDetails.FirstNameEnglish")}
@@ -858,9 +858,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleEnglishNameChange(text, "firstNameEnglish")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.firstNameEnglish ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 keyboardType="default"
                 autoCapitalize="words"
                 autoCorrect={false}
@@ -881,9 +882,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleEnglishNameChange(text, "lastNameEnglish")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.lastNameEnglish ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 keyboardType="default"
                 autoCapitalize="words"
                 autoCorrect={false}
@@ -905,9 +907,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleSinhalaNameChange(text, "firstNameSinhala")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.firstNameSinhala ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -927,9 +930,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleSinhalaNameChange(text, "lastNameSinhala")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.lastNameSinhala ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -949,9 +953,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleTamilNameChange(text, "firstNameTamil")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.firstNameTamil ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -971,9 +976,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 onChangeText={(text) =>
                   handleTamilNameChange(text, "lastNameTamil")
                 }
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.lastNameTamil ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 autoCorrect={false}
                 underlineColorAndroid="transparent"
               />
@@ -989,12 +995,12 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
           {/* ── Phone & Contact Fields ── */}
-          <View className="px-4 mt-4 gap-4">
+          <View className="mt-4 gap-4">
             {/* Phone Number 1 */}
             <View>
               <View className="flex-row gap-2">
                 <TouchableOpacity
-                  className="bg-[#F4F4F4] rounded-2xl px-3 h-[50px] w-24 flex-row justify-between items-center"
+                  className="bg-[#F4F4F4] rounded-full px-3 h-[50px] w-24 flex-row justify-between items-center"
                   onPress={() => {
                     setCurrentCountryCodeModal("phone1");
                     setPhoneCode1ModalVisible(true);
@@ -1005,7 +1011,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   </Text>
                   <Text className="text-black text-xs">{phoneCode1}</Text>
                   <MaterialIcons
-                    name="arrow-drop-down"
+                    name="keyboard-arrow-down"
                     size={18}
                     color="#666"
                   />
@@ -1014,11 +1020,12 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   <TextInput
                     placeholder="7XXXXXXXX"
                     placeholderTextColor="#7D7D7D"
-                    className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] flex-1 ${
+                    className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] flex-1 ${
                       error1 || fieldErrors.phoneNumber1
                         ? "border border-red-500"
                         : ""
                     }`}
+                    style={{ fontSize: 14 }}
                     value={phoneNumber1}
                     onChangeText={handlePhoneNumber1Change}
                     keyboardType="phone-pad"
@@ -1039,7 +1046,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             <View>
               <View className="flex-row gap-2">
                 <TouchableOpacity
-                  className="bg-[#F4F4F4] rounded-2xl px-3 h-[50px] w-24 flex-row justify-between items-center"
+                  className="bg-[#F4F4F4] rounded-full px-3 h-[50px] w-24 flex-row justify-between items-center"
                   onPress={() => {
                     setCurrentCountryCodeModal("phone2");
                     setPhoneCode2ModalVisible(true);
@@ -1050,7 +1057,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   </Text>
                   <Text className="text-black text-xs">{phoneCode2}</Text>
                   <MaterialIcons
-                    name="arrow-drop-down"
+                    name="keyboard-arrow-down"
                     size={18}
                     color="#666"
                   />
@@ -1059,11 +1066,12 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                   <TextInput
                     placeholder="7XXXXXXXX"
                     placeholderTextColor="#7D7D7D"
-                    className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] flex-1 ${
+                    className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] flex-1 ${
                       error2 || fieldErrors.phoneNumber2Duplicate
                         ? "border border-red-500"
                         : ""
                     }`}
+                    style={{ fontSize: 14 }}
                     value={phoneNumber2}
                     onChangeText={handlePhoneNumber2Change}
                     keyboardType="phone-pad"
@@ -1093,9 +1101,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 keyboardType="default"
                 autoCapitalize="characters"
                 autoCorrect={false}
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 underlineColorAndroid="transparent"
               />
               {(error3 || fieldErrors.nicNumber) && (
@@ -1112,9 +1121,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
                 placeholderTextColor="#7D7D7D"
                 value={formData.email}
                 onChangeText={handleEmailChange}
-                className={`bg-[#F4F4F4] rounded-2xl px-4 h-[50px] ${
+                className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                   fieldErrors.email || errorEmail ? "border border-red-500" : ""
                 }`}
+                style={{ fontSize: 14 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -1135,9 +1145,9 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           </View>
 
           {/* ── Buttons ── */}
-          <View className="px-4 flex-col w-full gap-4 mt-6">
+          <View className="flex-col w-full gap-4 mt-6">
             <TouchableOpacity
-              className="bg-[#D9D9D9] rounded-3xl px-6 h-[50px] w-full justify-center items-center"
+              className="bg-[#D9D9D9] rounded-full px-6 h-[50px] w-full justify-center items-center"
               onPress={async () => {
                 try {
                   await AsyncStorage.removeItem("officerFormData");
@@ -1178,7 +1188,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              className={`bg-black rounded-3xl px-6 h-[50px] w-full justify-center items-center ${
+              className={`bg-black rounded-full px-6 h-[50px] w-full justify-center items-center ${
                 isValidating ? "opacity-50" : ""
               }`}
               onPress={handleNext}

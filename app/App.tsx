@@ -361,7 +361,6 @@ function AppContent() {
       <SafeAreaView
         style={{
           flex: 1,
-          paddingBottom: insets.bottom,
           backgroundColor: "#fff",
         }}
         edges={["top", "right", "left"]}
