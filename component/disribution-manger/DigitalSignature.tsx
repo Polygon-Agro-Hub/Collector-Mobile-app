@@ -6,6 +6,7 @@ import {
   Alert,
   ActivityIndicator,
   BackHandler,
+  useWindowDimensions,
 } from "react-native";
 import Signature from "react-native-signature-canvas";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
@@ -21,7 +22,6 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import CustomHeader from "../navigations/CustomHeader";
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -66,6 +66,7 @@ const DashedBorder = ({
           right: 0,
           height: borderWidth,
           flexDirection: "row",
+          zIndex: 1,
         }}
       >
         {Array.from({ length: Math.ceil(1000 / (dashWidth + gapWidth)) }).map(
@@ -92,6 +93,7 @@ const DashedBorder = ({
           bottom: 0,
           width: borderWidth,
           alignItems: "center",
+          zIndex: 1,
         }}
       >
         {Array.from({ length: Math.ceil(1000 / (dashWidth + gapWidth)) }).map(
@@ -118,6 +120,7 @@ const DashedBorder = ({
           right: 0,
           height: borderWidth,
           flexDirection: "row",
+          zIndex: 1,
         }}
       >
         {Array.from({ length: Math.ceil(1000 / (dashWidth + gapWidth)) }).map(
@@ -144,6 +147,7 @@ const DashedBorder = ({
           bottom: 0,
           width: borderWidth,
           alignItems: "center",
+          zIndex: 1,
         }}
       >
         {Array.from({ length: Math.ceil(1000 / (dashWidth + gapWidth)) }).map(
@@ -179,8 +183,11 @@ export default function DigitalSignature({
   const [successMessage, setSuccessMessage] = useState<
     string | React.ReactNode
   >("");
-
   const [shouldRenderSignature, setShouldRenderSignature] = useState(false);
+
+  const { width, height } = useWindowDimensions();
+
+  const signatureHeight = height - 56 - 64 - 40;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -193,14 +200,13 @@ export default function DigitalSignature({
         setLoading(false);
         setShowSuccessModal(false);
         setSuccessMessage("");
-
         setShouldRenderSignature(false);
 
         await ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
         );
 
-        await new Promise((resolve) => setTimeout(() => resolve(null), 300));
+        await new Promise<void>((resolve) => setTimeout(() => resolve(), 700));
 
         if (!isActive) return;
 
@@ -211,9 +217,7 @@ export default function DigitalSignature({
 
       return () => {
         isActive = false;
-
         setShouldRenderSignature(false);
-
         ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.PORTRAIT_UP,
         );
@@ -268,7 +272,6 @@ export default function DigitalSignature({
       };
 
       formData.append("signature", file as any);
-
       formData.append("orderId", orderId.toString());
 
       const response = await axios.post(
@@ -319,7 +322,6 @@ export default function DigitalSignature({
 
       if (error.response) {
         errorMessage = error.response.data?.message || errorMessage;
-        console.error("Server error response:", error.response.data);
       } else if (error.request) {
         errorMessage = "No response from server. Please check your connection.";
       } else if (error.message) {
@@ -340,10 +342,7 @@ export default function DigitalSignature({
       "Cancel Signature",
       "Are you sure you want to cancel? Your signature will not be saved.",
       [
-        {
-          text: "No, Continue",
-          style: "cancel",
-        },
+        { text: "No, Continue", style: "cancel" },
         {
           text: "Yes, Cancel",
           onPress: () => {
@@ -384,10 +383,7 @@ export default function DigitalSignature({
       "Confirm Signature",
       "Are you sure you want to save this signature for pickup?",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Yes, Save",
           onPress: async () => {
@@ -403,72 +399,118 @@ export default function DigitalSignature({
   };
 
   const signatureStyle = `
-    .m-signature-pad {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      margin: 0;
-      padding: 0;
-      width: 100% !important;
-      height: 100% !important;
-      box-shadow: none;
-    }
-    .m-signature-pad--body {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      margin: 0;
-      padding: 0;
-      border: none;
-      width: 100% !important;
-      height: 100% !important;
-    }
-    .m-signature-pad--footer {
-      display: none;
-    }
+    * { box-sizing: border-box; }
     body, html {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
+      overflow: hidden;
       background-color: #DFEDFC;
     }
+    .m-signature-pad {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      margin: 0; padding: 0;
+      width: 100% !important;
+      height: 100% !important;
+      box-shadow: none;
+      border: none;
+    }
+    .m-signature-pad--body {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      border: none !important;
+      margin: 0; padding: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .m-signature-pad--footer {
+      display: none !important;
+    }
     canvas {
-      background-color: #DFEDFC;
+      background-color: #DFEDFC !important;
       width: 100% !important;
       height: 100% !important;
       touch-action: none;
+      display: block;
     }
   `;
 
   if (!shouldRenderSignature) {
     return (
-      <View className="flex-1 bg-white justify-center items-center">
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#ffffff",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <ActivityIndicator size="large" color="#2D7BFF" />
-        <Text className="mt-4 text-gray-600">Preparing signature pad...</Text>
+        <Text style={{ marginTop: 16, color: "#6B7280" }}>
+          Preparing signature pad...
+        </Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-white">
-      {/* HEADER */}
-      <View className="flex-row items-center justify-between px-4 pb-3">
-        <CustomHeader
-          title={"Customer's Digital Signature"}
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={handleBackPress}
-        />
+    <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
+      {/* ── HEADER ── */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          backgroundColor: "#ffffff",
+          borderBottomWidth: 1,
+          borderBottomColor: "#F0F0F0",
+        }}
+      >
+        {/* Back button */}
+        <TouchableOpacity
+          onPress={handleBackPress}
+          disabled={loading}
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 19,
+            backgroundColor: "#F7FAFF",
+            justifyContent: "center",
+            alignItems: "center",
+            marginRight: 10,
+          }}
+        >
+          <Ionicons name="chevron-back" size={22} color="#000000" />
+        </TouchableOpacity>
 
-        <View style={{ width: wp(15) }} />
+        {/* Title */}
+        <Text
+          style={{
+            flex: 1,
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#1A1A1A",
+            textAlign: "center",
+          }}
+          numberOfLines={1}
+        >
+          Customer's Digital Signature
+        </Text>
       </View>
 
-      <View className="flex-1 mx-10 mb-4 mt-2 rounded rounded-full">
+      {/* ── SIGNATURE CANVAS AREA ── */}
+      <View
+        style={{
+          flex: 1,
+          marginHorizontal: 16,
+          marginBottom: 8,
+          borderRadius: 10,
+          overflow: "hidden",
+        }}
+      >
         <DashedBorder
           style={{
             backgroundColor: "#DFEDFC",
@@ -481,23 +523,42 @@ export default function DigitalSignature({
           gapWidth={8}
           borderWidth={3}
         >
+          {/* Clear button — floats inside canvas */}
           <TouchableOpacity
             onPress={handleClear}
-            className="absolute top-4 right-4 bg-white px-4 py-2 rounded-lg flex-row items-center z-10"
+            disabled={loading}
             style={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              backgroundColor: "white",
+              paddingHorizontal: 14,
+              paddingVertical: 8,
+              borderRadius: 8,
+              flexDirection: "row",
+              alignItems: "center",
+              zIndex: 10,
               elevation: 10,
               shadowColor: "#000",
-              shadowOpacity: 0.3,
+              shadowOpacity: 0.25,
               shadowRadius: 4,
               shadowOffset: { width: 0, height: 2 },
             }}
-            disabled={loading}
           >
             <FontAwesome6 name="eraser" size={16} color="#2D7BFF" />
-            <Text className="ml-2 text-[#2D7BFF] font-semibold">Clear</Text>
+            <Text
+              style={{
+                marginLeft: 8,
+                color: "#2D7BFF",
+                fontWeight: "600",
+              }}
+            >
+              Clear
+            </Text>
           </TouchableOpacity>
 
-          <View style={{ flex: 1 }}>
+          {/* Signature WebView — explicit pixel dimensions prevent blank render */}
+          <View style={{ width: "100%", height: signatureHeight }}>
             <Signature
               ref={signatureRef}
               onOK={handleOK}
@@ -506,7 +567,8 @@ export default function DigitalSignature({
               autoClear={false}
               descriptionText=""
               style={{
-                flex: 1,
+                width: "100%",
+                height: signatureHeight,
                 backgroundColor: "#DFEDFC",
               }}
             />
@@ -514,30 +576,59 @@ export default function DigitalSignature({
         </DashedBorder>
       </View>
 
-      <View className="flex-row justify-between items-center px-4 pb-4">
+      {/* ── FOOTER BUTTONS ── */}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 16,
+          paddingBottom: 12,
+          height: 64,
+        }}
+      >
+        {/* Cancel */}
         <TouchableOpacity
           onPress={handleBackPress}
-          className="flex-row items-center bg-[#DFE5F2] border border-[#DFE5F2] px-6 py-3 rounded-full"
           disabled={loading}
           style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: "#DFE5F2",
+            borderColor: "#DFE5F2",
+            borderWidth: 1,
+            paddingHorizontal: 24,
+            paddingVertical: 12,
+            borderRadius: 999,
             shadowColor: "#000000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
+            shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.15,
             shadowRadius: 4,
             elevation: 3,
           }}
         >
           <Ionicons name="close" size={20} color="black" />
-          <Text className="text-black font-bold ml-2">Cancel</Text>
+          <Text style={{ color: "black", fontWeight: "700", marginLeft: 8 }}>
+            Cancel
+          </Text>
         </TouchableOpacity>
 
+        {/* Done / Saving */}
         {loading ? (
-          <View className="flex-row items-center bg-gray-300 px-6 py-3 rounded-full">
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: "#D1D5DB",
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: 999,
+            }}
+          >
             <ActivityIndicator size="small" color="#000" />
-            <Text className="font-semibold text-black ml-2">Saving...</Text>
+            <Text style={{ fontWeight: "600", color: "black", marginLeft: 8 }}>
+              Saving...
+            </Text>
           </View>
         ) : (
           <TouchableOpacity
@@ -549,15 +640,16 @@ export default function DigitalSignature({
                 );
                 return;
               }
-
-              if (signatureRef.current) {
-                signatureRef.current.readSignature();
-              }
+              signatureRef.current?.readSignature();
             }}
-            className="flex-row items-center px-6 py-3 rounded-full"
             disabled={!signatureDrawn || loading}
             style={{
+              flexDirection: "row",
+              alignItems: "center",
               backgroundColor: signatureDrawn ? "#980775" : "#DCDCDC",
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: 999,
               shadowColor: "#000000",
               shadowOffset: { width: 2, height: 2 },
               shadowOpacity: 0.2,
@@ -571,8 +663,11 @@ export default function DigitalSignature({
               color={signatureDrawn ? "white" : "#000000"}
             />
             <Text
-              style={{ color: signatureDrawn ? "white" : "#000000" }}
-              className="font-semibold ml-2"
+              style={{
+                color: signatureDrawn ? "white" : "#000000",
+                fontWeight: "600",
+                marginLeft: 8,
+              }}
             >
               Done
             </Text>
@@ -580,6 +675,7 @@ export default function DigitalSignature({
         )}
       </View>
 
+      {/* ── SUCCESS MODAL ── */}
       {showSuccessModal && (
         <View
           style={{
@@ -591,23 +687,40 @@ export default function DigitalSignature({
             backgroundColor: "rgba(0,0,0,0.5)",
             justifyContent: "center",
             alignItems: "center",
+            zIndex: 100,
           }}
         >
           <View
             style={{
               backgroundColor: "white",
-              padding: 20,
-              borderRadius: 10,
-              width: "80%",
-              maxWidth: 400,
+              padding: 24,
+              borderRadius: 16,
+              width: "70%",
+              maxWidth: 420,
+              alignItems: "center",
             }}
           >
             {successMessage}
             <TouchableOpacity
               onPress={handleSuccessModalClose}
-              className="bg-[#980775] px-6 py-3 rounded-full mt-4"
+              style={{
+                backgroundColor: "#980775",
+                paddingHorizontal: 24,
+                paddingVertical: 12,
+                borderRadius: 999,
+                marginTop: 16,
+                minWidth: 120,
+              }}
             >
-              <Text className="text-center font-semibold text-white">OK</Text>
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "600",
+                  color: "white",
+                }}
+              >
+                OK
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

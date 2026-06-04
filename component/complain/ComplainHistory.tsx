@@ -382,14 +382,14 @@ ${signature}${replyTime}`,
           />
         </View>
       ) : complains.length === 0 ? (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center mt-[-25%] justify-center">
           <LottieView
             source={require("../../assets/lottie/no-data.json")}
             style={{ width: wp(50), height: hp(20) }}
             autoPlay
             loop
           />
-          <Text className="text-center text-gray-600 mt-4">
+          <Text className="text-center mt-[-5%] text-gray-600 mt-4">
             {t("ReportHistory.noData")}
           </Text>
         </View>

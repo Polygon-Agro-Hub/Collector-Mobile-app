@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   View,
   TouchableOpacity,
@@ -11,6 +11,7 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../services/reducxStore";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const homeIcon = require("../../assets/images/common/nav-bar/navhome.webp");
 const searchIcon = require("../../assets/images/common/nav-bar/navsearch.webp");
@@ -21,6 +22,7 @@ const dataTransfer = require("../../assets/images/common/nav-bar/transfer.webp")
 const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const userRole = useSelector((state: RootState) => state.auth.jobRole);
+  const insets = useSafeAreaInsets();
 
   // Keyboard handling
   useEffect(() => {
@@ -156,30 +158,34 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
 
   // UI
   return (
-    <View className="bg-white">
-      <View className="absolute bottom-0 flex-row justify-between items-center bg-white py-3 px-6 rounded-t-3xl w-full border-t border-r border-l border-[#00000040] shadow-md">
-        {tabs.map((tab, index) => {
-          const isFocused = currentTabName === tab.name;
+    <View
+      className="flex-row justify-between items-center bg-white px-6 rounded-t-3xl w-full border-t border-r border-l border-[#00000040] shadow-md"
+      style={{
+        paddingTop: 12,
+        paddingBottom: Math.max(insets.bottom, 12),
+      }}
+    >
+      {tabs.map((tab, index) => {
+        const isFocused = currentTabName === tab.name;
 
-          return (
-            <TouchableOpacity
-              key={index}
-              onPress={() => navigation?.navigate?.(tab.name)}
-              className={isFocused ? "bg-[#FAE432] p-3 rounded-full" : ""}
-              style={{
-                backgroundColor: isFocused ? "#FAE432" : "white",
-                padding: isFocused ? 8 : 6,
-                borderRadius: 50,
-              }}
-            >
-              <Image
-                source={tab.icon}
-                style={{ width: 24, height: 24, resizeMode: "contain" }}
-              />
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+        return (
+          <TouchableOpacity
+            key={index}
+            onPress={() => navigation?.navigate?.(tab.name)}
+            className={isFocused ? "bg-[#FAE432] p-3 rounded-full" : ""}
+            style={{
+              backgroundColor: isFocused ? "#FAE432" : "white",
+              padding: isFocused ? 8 : 6,
+              borderRadius: 50,
+            }}
+          >
+            <Image
+              source={tab.icon}
+              style={{ width: 24, height: 24, resizeMode: "contain" }}
+            />
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 };

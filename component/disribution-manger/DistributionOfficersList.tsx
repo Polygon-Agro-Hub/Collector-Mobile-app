@@ -45,6 +45,8 @@ interface Officer {
   jobRole: string;
 }
 
+type ActiveTab = "Officers" | "Drivers";
+
 const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   navigation,
 }) => {
@@ -55,8 +57,8 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  const [selectedJobRole, setSelectedJobRole] = useState<string | null>(null);
-  const [filteredOfficers, setFilteredOfficers] = useState<Officer[]>(officers);
+  const [activeTab, setActiveTab] = useState<ActiveTab>("Officers");
+  const [filteredOfficers, setFilteredOfficers] = useState<Officer[]>([]);
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -72,14 +74,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
       setShowMenu(false);
     }, []),
   );
+
   const getTextStyle = (language: string) => {
     if (language === "si") {
-      return {
-        fontSize: 14,
-        lineHeight: 20,
-      };
+      return { fontSize: 14, lineHeight: 20 };
     }
   };
+
   const fetchOfficers = async () => {
     try {
       setLoading(true);
@@ -89,9 +90,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/collection-officerslist`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
 
@@ -103,17 +102,15 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           (officer: Officer) => officer.status === "Not Approved",
         );
 
-        const sortedApprovedOfficers = approvedOfficers.sort(
+        const sortedApproved = approvedOfficers.sort((a: Officer, b: Officer) =>
+          getOfficerName(a).localeCompare(getOfficerName(b)),
+        );
+        const sortedNotApproved = notApprovedOfficers.sort(
           (a: Officer, b: Officer) =>
             getOfficerName(a).localeCompare(getOfficerName(b)),
         );
 
-        const sortedNotApprovedOfficers = notApprovedOfficers.sort(
-          (a: Officer, b: Officer) =>
-            getOfficerName(a).localeCompare(getOfficerName(b)),
-        );
-
-        setOfficers([...sortedApprovedOfficers, ...sortedNotApprovedOfficers]);
+        setOfficers([...sortedApproved, ...sortedNotApproved]);
       } else {
         setErrorMessage(t("Error.Failed to fetch officers."));
       }
@@ -131,6 +128,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       fetchOfficers();
+      setActiveTab("Officers");
     }, []),
   );
 
@@ -152,8 +150,25 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     }
   };
 
+  const officersList = officers.filter(
+    (o) =>
+      o.jobRole === "Collection Officer" ||
+      o.jobRole === "Distribution Officer",
+  );
+  const driversList = officers.filter((o) => o.jobRole === "Driver");
+
+  const officersCount = officersList.length || officers.length;
+  const driversCount = driversList.length;
+
+  useEffect(() => {
+    if (activeTab === "Officers") {
+      setFilteredOfficers(officersList.length > 0 ? officersList : officers);
+    } else {
+      setFilteredOfficers(driversList);
+    }
+  }, [activeTab, officers]);
+
   const onRefresh = async () => {
-    setSelectedJobRole(null);
     setRefreshing(true);
     await fetchOfficers();
     setRefreshing(false);
@@ -161,18 +176,10 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchOfficers();
-      setSelectedJobRole(null);
-    }, []),
-  );
-
-  useFocusEffect(
-    React.useCallback(() => {
       const onBackPress = () => {
         navigation.navigate("DistridutionaDashboard");
         return true;
       };
-
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress,
@@ -181,23 +188,11 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     }, [navigation]),
   );
 
-  useEffect(() => {
-    if (selectedJobRole) {
-      const filtered = officers.filter(
-        (officer) => officer.jobRole === selectedJobRole,
-      );
-      setFilteredOfficers(filtered);
-    } else {
-      setFilteredOfficers(officers);
-    }
-  }, [selectedJobRole, officers]);
-
-  const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
+  const renderOfficer = ({ item }: { item: Officer }) => (
     <TouchableOpacity
-      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 ${item.status === "Not Approved" ? "bg-gray-100" : "bg-gray-100"
-        }`}
+      className={`flex-row items-center p-4 mb-4 rounded-[35px] shadow-sm mx-4 bg-gray-100`}
       onPress={() => {
-        if (item.status !== "Not Approved") {
+        if (item.status !== "Not Approved" && item.jobRole !== "Driver") {
           navigation.navigate("DistributionOfficerSummary" as any, {
             officerId: item.empId,
             officerName: getOfficerName(item),
@@ -208,13 +203,14 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           });
         }
       }}
-      disabled={item.status === "Not Approved"}
+      disabled={item.status === "Not Approved" || item.jobRole === "Driver"}
       style={{
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.25,
         shadowRadius: 10,
         elevation: 6,
+        opacity: item.jobRole === "Driver" ? 1 : 1,
       }}
     >
       <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
@@ -244,7 +240,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           </Text>
         )}
         <Text
-          className="text-[18px] font-semibold text-gray-900"
+          className="font-semibold text-gray-900"
           style={[
             i18n.language === "si"
               ? { fontSize: 16 }
@@ -256,32 +252,128 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           {getOfficerName(item)}
         </Text>
         <Text className="text-sm text-gray-500">
-          {" "}
           {t("DistributionOfficersList.EMPID")} {item.empId}
         </Text>
       </View>
 
-      {item.status !== "Not Approved" && (
+      {item.status !== "Not Approved" && item.jobRole !== "Driver" && (
         <Ionicons name="chevron-forward" size={scale(20)} color="#9CA3AF" />
       )}
     </TouchableOpacity>
   );
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="bg-[#313131] py-6 px-4">
+    <View className="flex-1 bg-[#313131]">
+      {/* Header */}
+      <View className="bg-[#313131] pt-6 pb-3 px-4">
         <Text
           style={{ fontSize: 18 }}
-          className="text-white text-center font-bold"
+          className="text-white text-center font-bold mb-3"
         >
           {t("CollectionOfficersList.Collection Officers")}
         </Text>
 
+        {/* Tabs */}
+        <View className="flex-row justify-center items-center gap-2 mt-1">
+          {/* Officers Tab */}
+          <TouchableOpacity
+            onPress={() => setActiveTab("Officers")}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 16,
+              paddingVertical: 7,
+              borderRadius: 999,
+              backgroundColor:
+                activeTab === "Officers" ? "#980775" : "transparent",
+              borderWidth: activeTab === "Officers" ? 0 : 1,
+              borderColor: "#ffffff50",
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontWeight: "600",
+                fontSize: 13,
+                marginRight: officersCount > 0 ? 6 : 0,
+              }}
+            >
+              {t("DistributionOfficersList.Officers") || "Officers"}
+            </Text>
+            {activeTab === "Officers" && officersCount > 0 && (
+              <View
+                style={{
+                  backgroundColor:
+                    activeTab === "Officers" ? "#FFFFFF" : "#ffffff20",
+                  borderRadius: 999,
+                  minWidth: 20,
+                  height: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingHorizontal: 5,
+                }}
+              >
+                <Text
+                  style={{ color: "#000000", fontSize: 11, fontWeight: "700" }}
+                >
+                  {String(officersCount).padStart(2, "0")}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {/* Drivers Tab */}
+          <TouchableOpacity
+            onPress={() => setActiveTab("Drivers")}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 16,
+              paddingVertical: 7,
+              borderRadius: 999,
+              backgroundColor:
+                activeTab === "Drivers" ? "#980775" : "transparent",
+              borderWidth: activeTab === "Drivers" ? 0 : 1,
+              borderColor: "#ffffff50",
+            }}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontWeight: "600",
+                fontSize: 13,
+                marginRight: driversCount > 0 ? 6 : 0,
+              }}
+            >
+              {t("DistributionOfficersList.Drivers") || "Drivers"}
+            </Text>
+            {activeTab === "Drivers" && driversCount > 0 && (
+              <View
+                style={{
+                  backgroundColor:
+                    activeTab === "Drivers" ? "#FFFFFF" : "#ffffff20",
+                  borderRadius: 999,
+                  minWidth: 20,
+                  height: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingHorizontal: 5,
+                }}
+              >
+                <Text
+                  style={{ color: "#000000", fontSize: 11, fontWeight: "700" }}
+                >
+                  {String(driversCount).padStart(2, "0")}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* 3-dot menu */}
         <TouchableOpacity
           className="absolute top-6 right-4"
-          onPress={() => {
-            setShowMenu((prev) => !prev);
-          }}
+          onPress={() => setShowMenu((prev) => !prev)}
         >
           <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
         </TouchableOpacity>
@@ -311,7 +403,9 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                 backgroundColor: "white",
                 borderRadius: 8,
               }}
-              onPress={() => navigation.navigate("ClaimDistribution")}
+              onPress={() =>
+                navigation.navigate("ClaimDistribution", { activeTab })
+              }
             >
               <Text className="text-gray-700 font-semibold">
                 {t("CollectionOfficersList.Claim Officer")}
@@ -321,48 +415,29 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         )}
       </View>
 
-      <View className="flex-1 w-full max-w-[500px] mx-auto mt-3 rounded-t-2xl bg-white">
+      {/* Body */}
+      <View
+        className="flex-1 w-full max-w-[500px] mx-auto bg-white "
+        style={{
+          marginTop: 0,
+          borderRadius: 25,
+        }}
+      >
+        {/* List title */}
         <View className="mt-4 px-4">
-          {selectedJobRole === "Collection Officer" ? (
-            <>
-              <Text
-                style={[
-                  { fontSize: scale(16) },
-                  getTextStyle(selectedLanguage),
-                ]}
-                className="font-bold text-[#21202B] mb-2"
-              >
-                {t("CollectionOfficersList.Officers List")}
-                <Text className="text-[#21202B] font-semibold">
-                  ({filteredOfficers.length})
-                </Text>
-              </Text>
-            </>
-          ) : selectedJobRole === "Driver" ? (
-            <>
-              <Text
-                style={{ fontSize: scale(16) }}
-                className="font-bold text-[#21202B] mb-2"
-              >
-                {t("CollectionOfficersList.Drivers List")}
-                <Text className="text-[#21202B] font-semibold">
-                  ({filteredOfficers.length})
-                </Text>
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text
-                style={{ fontSize: 16 }}
-                className="font-bold text-[#21202B] mb-2"
-              >
-                {t("CollectionOfficersList.Officers / Drivers List")}
-                <Text className="text-[#21202B] font-normal">
-                  ({t("ManagerTransactions.All")} {officers.length})
-                </Text>
-              </Text>
-            </>
-          )}
+          <Text
+            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            className="font-bold text-[#21202B] mb-2"
+          >
+            {activeTab === "Officers"
+              ? t("CollectionOfficersList.Officers List") || "Officers List"
+              : t("CollectionOfficersList.Drivers List") || "Drivers List"}
+            {"  "}
+            <Text className="text-[#21202B] font-normal">
+              ({t("ManagerTransactions.All") || "All"} {filteredOfficers.length}
+              )
+            </Text>
+          </Text>
         </View>
 
         {loading ? (
@@ -380,7 +455,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           </View>
         ) : (
           <FlatList
-            data={filteredOfficers.length > 0 ? filteredOfficers : officers}
+            data={filteredOfficers}
             keyExtractor={(item) => item.empId}
             renderItem={renderOfficer}
             contentContainerStyle={{
@@ -399,24 +474,25 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           />
         )}
 
-        <TouchableOpacity
-          onPress={async () => {
-            try {
-              await AsyncStorage.removeItem("officerFormData");
-
-              navigation.navigate("AddOfficerBasicDetails", {
-                jobRolle: "Distribution Officer",
-              });
-            } catch (error) {
-              console.error("Error clearing form data:", error);
-            }
-          }}
-          className="absolute bottom-20 right-5 bg-black w-14 h-14 rounded-full justify-center items-center shadow-lg"
-        >
-          <Ionicons name="add" size={scale(24)} color="#fff" />
-        </TouchableOpacity>
+        {/* FAB */}
+        {activeTab === "Officers" && (
+          <TouchableOpacity
+            onPress={async () => {
+              try {
+                await AsyncStorage.removeItem("officerFormData");
+                navigation.navigate("DistributionAddOfficerBasicDetails", {
+                  jobRolle: "Distribution Officer",
+                });
+              } catch (error) {
+                console.error("Error clearing form data:", error);
+              }
+            }}
+            className="absolute bottom-20 right-5 bg-black w-14 h-14 rounded-full justify-center items-center shadow-lg"
+          >
+            <Ionicons name="add" size={scale(24)} color="#fff" />
+          </TouchableOpacity>
+        )}
       </View>
-
     </View>
   );
 };

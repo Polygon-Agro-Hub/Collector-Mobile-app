@@ -253,8 +253,6 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
         </TouchableOpacity>
       </View>
       <View className="flex-1 w-full max-w-[500px] mx-auto">
-
-
         <View className="bg-white px-4 py-3 flex-row items-center ">
           <Text className="text-sm font-medium text-gray-900">
             {t("ReceivedCash.All")} (
@@ -283,14 +281,20 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   backgroundColor: "white",
                   paddingHorizontal: 16,
                   paddingVertical: 8,
-                  marginHorizontal: 40,
+                  alignSelf: "center",
+                  maxWidth: "90%",
                 }}
               >
-                <View className="flex-row items-center justify-center">
-                  <Text className=" font-medium text-black">
+                <View className="flex-row items-center justify-center flex-wrap">
+                  <Text className="font-medium text-black" numberOfLines={1}>
                     {t("ReceivedCash.Full Total")} :{" "}
                   </Text>
-                  <Text className="text-xl font-bold text-[#980775]">
+                  <Text
+                    className="text-xl font-bold text-[#980775]"
+                    adjustsFontSizeToFit 
+                    numberOfLines={1}
+                    minimumFontScale={0.6}
+                  >
                     {t("ReceivedCash.Rs")}
                     {totalCash.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
@@ -365,8 +369,8 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
               alignItems: "center",
             }}
           >
-            <View className="items-center justify-center py-20">
-              <View className="flex items-center justify-center mb-4">
+            <View className="items-center justify-center mt-[-35%] ">
+              <View className="flex items-center justify-center ">
                 <LottieView
                   source={require("../../assets/lottie/no-data.json")}
                   autoPlay
@@ -374,7 +378,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   style={{ width: 150, height: 150 }}
                 />
               </View>
-              <Text className="text-[#828282] text-base italic">
+              <Text className="text-[#828282] mt-[-5%] text-base italic">
                 - {t("ReceivedCash.No cash was received today")} -
               </Text>
             </View>

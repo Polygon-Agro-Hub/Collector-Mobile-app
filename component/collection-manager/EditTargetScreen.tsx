@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  BackHandler,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -7,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "../navigations/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
 
 type EditTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -27,6 +34,10 @@ interface EditTargetScreenProps {
       qty: string;
       collectionOfficerId: number;
       officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
     };
   };
 }
@@ -66,6 +77,12 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
     varietyNameSinhala,
     varietyNameTamil,
     officerId,
+
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+
+    image,
   } = route.params;
 
   const getvarietyName = () => {
@@ -79,15 +96,85 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Main",
+              params: {
+                screen: "DailyTargetListForOfficers",
+                params: {
+                  varietyId,
+                  officerId,
+                  officerName,
+                  phoneNumber1,
+                  phoneNumber2,
+                  collectionOfficerId,
+                  image,
+                  varietyNameEnglish,
+                  grade,
+                  target,
+                  todo,
+                  varietyNameSinhala,
+                  varietyNameTamil,
+                },
+              },
+            },
+          ],
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
 
       <CustomHeader
         title={getvarietyName() || ""}
+        subtitle={grade ? `Grade : ${grade}` : ""}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() =>
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Main",
+                params: {
+                  screen: "DailyTargetListForOfficers",
+                  params: {
+                    varietyId,
+                    officerId,
+                    officerName,
+                    phoneNumber1,
+                    phoneNumber2,
+                    collectionOfficerId,
+                    image,
+                    varietyNameEnglish,
+                    grade,
+                    target,
+                    todo,
+
+                    varietyNameSinhala,
+                    varietyNameTamil,
+                  },
+                },
+              },
+            ],
+          })
+        }
         textColor="white"
         bgColor="#282828"
         iconBgColor="#FFFFFF1A"
@@ -140,9 +227,13 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                     qty,
                     varietyId,
                     collectionOfficerId,
+                    officerName,
                     varietyNameSinhala,
                     varietyNameTamil,
                     officerId,
+                    phoneNumber1,
+                    phoneNumber2,
+                    image,
                   })
                 }
                 style={{

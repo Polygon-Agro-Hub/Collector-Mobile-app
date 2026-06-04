@@ -232,16 +232,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View
-          className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-4 mb-8 p-4"
-          style={{
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4,
-          }}
-        >
+        <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 mb-5 p-4 border-[1px] border-[#DF9301]">
           <Text className="text-center text-yellow-600 font-bold">
             🚀{t("DistridutionaDashboard.Keep")}
           </Text>
@@ -252,16 +243,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       );
     } else {
       return (
-        <View
-          className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-4 mb-8 p-4"
-          style={{
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4,
-          }}
-        >
+         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
           <View className="flex-row justify-center items-center mb-2">
             <Image
               source={require("../../assets/images/dashboard/Applause.webp")}
@@ -318,7 +300,6 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
         </View>
       </TouchableOpacity>
 
-
       <View className="w-full max-w-[500px] mx-auto">
         {renderTargetStatus()}
 
@@ -366,8 +347,6 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
           </Text>
         </View>
 
-
-
         <View className="flex-row px-4 pb-4 gap-4 justify-center mt-8">
           {jobRole === "Distribution Centre Manager" ? (
             <TouchableOpacity
@@ -377,6 +356,13 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
                   centerId: centerId,
                 } as any)
               }
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 10,
+                elevation: 4,
+              }}
             >
               <Image
                 source={require("../../assets/images/dashboard/center-target.webp")}
@@ -393,6 +379,13 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
             <TouchableOpacity
               className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg border border-[#980775] relative"
               onPress={() => navigation.navigate("TargetOrderScreen" as any)}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 10,
+                elevation: 4,
+              }}
             >
               <Image
                 source={require("../../assets/images/dashboard/packing.webp")}
@@ -418,9 +411,20 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
                 navigation.navigate("ReceivedCash" as any);
               }
             }}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 4,
+            }}
           >
             <View className="absolute top-2 right-2">
-              <FontAwesome6 name="hand-holding-hand" size={24} color="#980775" />
+              <FontAwesome6
+                name="hand-holding-hand"
+                size={24}
+                color="#980775"
+              />
             </View>
             <Text
               style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
@@ -435,6 +439,13 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
           <TouchableOpacity
             className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative"
             onPress={() => navigation.navigate("ReadytoPickupOrders" as any)}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 4,
+            }}
           >
             <View className="absolute top-2 right-2">
               <FontAwesome6 name="qrcode" size={24} color="#980775" />

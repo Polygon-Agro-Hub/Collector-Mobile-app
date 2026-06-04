@@ -578,7 +578,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         iconBgColor="#FFFFFF1A"
       />
 
-      <View className="flex-row justify-center items-center py-4 bg-[#282828]">
+      <View className="flex-row justify-center items-center pb-8 bg-[#282828]">
         <Animated.View
           style={{
             transform: [{ scale: selectedToggle === "ToDo" ? 1.05 : 1 }],
@@ -795,7 +795,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                 {/* Red dot indicator for locked packages */}
                 {item.packageIsLock === 1 &&
                   jobRole === "Distribution Officer" && (
-                    <View className="absolute right-[-2] top-3 w-3 h-3 bg-red-500 rounded-full"></View>
+                    <View className="absolute right-[-3] justify-center w-4 h-4 bg-red-500 rounded-full"></View>
                   )}
               </View>
 
@@ -870,14 +870,14 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
             </TouchableOpacity>
           ))
         ) : (
-          <View className="flex-1 justify-center items-center py-20">
+          <View className="flex-1 justify-center items-center pt-[35%] ">
             <LottieView
               source={require("../../assets/lottie/no-data.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}
             />
-            <Text className="text-gray-500 mt-4 text-center">
+            <Text className="text-gray-500 mt-[-5%] text-center">
               {selectedToggle === "ToDo"
                 ? t("DailyTarget.NoTodoItems") || "No items to do"
                 : t("DailyTarget.noCompletedTargets") || "No completed items"}

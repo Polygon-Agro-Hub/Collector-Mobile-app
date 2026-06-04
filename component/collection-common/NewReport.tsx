@@ -506,9 +506,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         
         <div class="total-row">
           <div class="total-box">
-            <div class="total-label">${t(
-              "NewReport.Full Total (Rs.)",
-            )}</div>
+            <div class="total-label">${t("NewReport.Full Total (Rs.)")}</div>
             <div class="total-value">Rs. ${formatNumberWithCommas(
               totalSum,
             )}</div>
@@ -516,7 +514,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         </div>
         
         <div class="note">
-          <strong>${t("NewReport.Note")}</strong> ${t("NewReport.GRNnote")}
+          <strong style="font-style: normal;">${t("NewReport.Note")}</strong> ${t("NewReport.GRNnote")}
         </div>
       </body>
     </html>
@@ -734,8 +732,10 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               {/* Table Rows */}
               {crops.map((crop, index) => (
                 <View key={`${crop.id}-${index}`} className="flex-row">
-                  <Text className="w-24 p-2 border-b border-gray-300">
-                    {" "}
+                  <Text
+                    className="w-24 p-2 border-b border-gray-300 text-left"
+                    style={{ flexWrap: "wrap" }}
+                  >
                     {getCropName(crop)}
                   </Text>
                   <Text className="w-24 p-2 border-b border-gray-300">
@@ -762,7 +762,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         {/* Divider */}
         <View className="border-t border-gray-400 my-2"></View>
 
-        <View className="mb-4 items-end">
+        <View className="py-2 items-end justify-center ">
           <Text className="font-bold">
             {t("NewReport.Full Total (Rs.) Rs.")}
             {totalSum.toLocaleString("en-IN", {
@@ -777,9 +777,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
 
         {/* Note */}
         <View className="mb-4">
-          <Text className="text-xs italic">
-            <Text className="font-bold">{t("NewReport.Note")}</Text>{" "}
-            {t("NewReport.GRNnote")}
+          <Text className="text-xs ">
+            <Text className="font-bold">{t("NewReport.Note")}</Text>
+            <Text className="italic"> {t("NewReport.GRNnote")}</Text>
           </Text>
         </View>
 

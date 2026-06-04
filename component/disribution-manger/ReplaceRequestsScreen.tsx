@@ -158,7 +158,7 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   }, [fetchReplaceRequests]);
 
   const handleNavigateToApprove = (item: ReplaceRequestItem) => {
-    navigation.navigate("ReplaceRequestsApprove" as any, {
+    navigation.replace("ReplaceRequestsApprove" as any, {
       replaceRequestData: {
         id: item.id,
         orderId: item.orderId || item.invNo,
@@ -185,7 +185,10 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
   };
 
   const renderRequestItem = ({ item }: { item: ReplaceRequestItem }) => (
-    <TouchableOpacity activeOpacity={1} onPress={() => handleNavigateToApprove(item)}>
+    <TouchableOpacity
+      activeOpacity={1}
+      onPress={() => handleNavigateToApprove(item)}
+    >
       <View
         className="flex-row items-center bg-white p-3 px-4 mb-4 rounded-xl"
         style={{
@@ -234,7 +237,7 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
         loop
         style={{ width: 150, height: 150 }}
       />
-      <Text className="text-center text-gray-500 mt-4">
+      <Text className="text-center text-gray-500 mt-[-5%]">
         {t("ReplaceRequestsScreen.No replace requests found")}
       </Text>
     </View>

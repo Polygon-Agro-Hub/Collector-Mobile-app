@@ -32,9 +32,9 @@ import provincesData from "../../assets/jsons/sri-lanka-provinces.json";
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 
-type AddOfficerAddressDetailsNavigationProp = StackNavigationProp<
+type DistributionAddOfficerAddressDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "AddOfficerAddressDetails"
+  "DistributionAddOfficerAddressDetails"
 >;
 
 type City = {
@@ -57,10 +57,13 @@ type Province = {
 
 type ModalKey = "province" | "district" | "bank" | "branch" | null;
 
-const AddOfficerAddressDetails: React.FC = () => {
-  const navigation = useNavigation<AddOfficerAddressDetailsNavigationProp>();
+const DistributionAddOfficerAddressDetails: React.FC = () => {
+  const navigation =
+    useNavigation<DistributionAddOfficerAddressDetailsNavigationProp>();
   const route =
-    useRoute<RouteProp<RootStackParamList, "AddOfficerAddressDetails">>();
+    useRoute<
+      RouteProp<RootStackParamList, "DistributionAddOfficerAddressDetails">
+    >();
 
   const {
     formData: basicDetails,
@@ -383,7 +386,7 @@ const AddOfficerAddressDetails: React.FC = () => {
   }))
   .sort((a, b) => a.label.localeCompare(b.label));
 
- const districtModalData = districts
+  const districtModalData = districts
   .map((d) => ({
     label: (d[selectedLanguage as keyof typeof d] as string) || d.en,
     value: d.en,
@@ -403,11 +406,10 @@ const AddOfficerAddressDetails: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("Main", { screen: "CollectionOfficersList" });
-        } else if (jobRole === "Distribution Officer") {
-          navigation.navigate("Main", { screen: "DistributionOfficersList" });
-        }
+        navigation.navigate("DistributionAddOfficerBasicDetails", {
+          jobRolle: "Distribution Officer",
+          preservedData: basicDetails,
+        });
         return true;
       };
 
@@ -462,13 +464,12 @@ const AddOfficerAddressDetails: React.FC = () => {
         title={t("AddOfficerAddressDetails.AddOfficer")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => {
-          if (jobRole === "Collection Officer") {
-            navigation.navigate("Main", { screen: "CollectionOfficersList" });
-          } else if (jobRole === "Distribution Officer") {
-            navigation.navigate("Main", { screen: "DistributionOfficersList" });
-          }
-        }}
+        onBackPress={() =>
+          navigation.navigate("DistributionAddOfficerBasicDetails", {
+            jobRolle: "Distribution Officer",
+            preservedData: basicDetails,
+          })
+        }
       />
       <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-6">
         <ScrollView
@@ -732,8 +733,8 @@ const AddOfficerAddressDetails: React.FC = () => {
             <TouchableOpacity
               className="bg-[#D9D9D9] rounded-full px-6 py-4 w-full items-center"
               onPress={() =>
-                navigation.navigate("AddOfficerBasicDetails", {
-                  jobRolle: jobRole,
+                navigation.navigate("DistributionAddOfficerBasicDetails", {
+                  jobRolle: "Distribution Officer",
                   preservedData: basicDetails,
                 })
               }
@@ -760,7 +761,7 @@ const AddOfficerAddressDetails: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className={`bg-black rounded-full px-6 py-4 w-full items-center ${
+              className={`bg-black rounded-full px-6 mb-20 py-4 w-full items-center ${
                 loading ? "opacity-50" : ""
               }`}
               onPress={handleSubmit}
@@ -845,4 +846,4 @@ const AddOfficerAddressDetails: React.FC = () => {
   );
 };
 
-export default AddOfficerAddressDetails;
+export default DistributionAddOfficerAddressDetails;

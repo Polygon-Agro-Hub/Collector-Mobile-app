@@ -97,7 +97,8 @@ import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
-
+import DistributionAddOfficerAddressDetails from "@/component/disribution-manger/DistributionAddOfficerAddressDetails";
+import DistributionAddOfficerBasicDetails from "@/component/disribution-manger/DistributionAddOfficerBasicDetails";
 
 // LogBox.ignoreAllLogs(true);
 // (Text as any).defaultProps = {
@@ -241,6 +242,37 @@ function MainTabNavigator() {
         name="ReplaceRequestsApprove"
         component={ReplaceRequestsApprove as any}
       />
+      <Tab.Screen
+        name="DistributionAddOfficerAddressDetails"
+        component={DistributionAddOfficerAddressDetails as any}
+      />
+      <Tab.Screen
+        name="DistributionAddOfficerBasicDetails"
+        component={DistributionAddOfficerBasicDetails as any}
+      />
+      <Tab.Screen name="EditTargetScreen" component={EditTargetScreen as any} />
+      <Tab.Screen
+        name="PassTargetBetweenOfficers"
+        component={PassTargetBetweenOfficers as any}
+      />
+      <Tab.Screen name="SideMenu" component={SideMenu} />
+      <Tab.Screen name="OfficerQr" component={OfficerQr} />
+      <Tab.Screen
+        name="AddOfficerBasicDetails"
+        component={AddOfficerBasicDetails as any}
+      />
+      <Tab.Screen
+        name="AddOfficerAddressDetails"
+        component={AddOfficerAddressDetails}
+      />
+      <Tab.Screen
+        name="CenterTargetScreen"
+        component={CenterTargetScreen as any}
+      />
+      <Tab.Screen
+        name="DistributionOfficerReport"
+        component={DistributionOfficerReport as any}
+      />
     </Tab.Navigator>
   );
 }
@@ -329,7 +361,6 @@ function AppContent() {
       <SafeAreaView
         style={{
           flex: 1,
-          paddingBottom: insets.bottom,
           backgroundColor: "#fff",
         }}
         edges={["top", "right", "left"]}
@@ -347,11 +378,10 @@ function AppContent() {
             <Stack.Screen name="FormScreen" component={FormScreen} />
             <Stack.Screen name="Lanuage" component={Lanuage} />
             <Stack.Screen name="FarmerQr" component={FarmerQr} />
-            <Stack.Screen name="OfficerQr" component={OfficerQr} />
+
             <Stack.Screen name="ComplainPage" component={ComplainPage} />
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="ReportPage" component={ReportPage} />
-            <Stack.Screen name="SideMenu" component={SideMenu} />
 
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
             <Stack.Screen name="CenterTarget" component={CenterTarget as any} />
@@ -376,30 +406,15 @@ function AppContent() {
             />
 
             <Stack.Screen
-              name="AddOfficerBasicDetails"
-              component={AddOfficerBasicDetails as any}
-            />
-            <Stack.Screen
-              name="AddOfficerAddressDetails"
-              component={AddOfficerAddressDetails}
-            />
-            <Stack.Screen
               name="ReceivedCashQrCode"
               component={ReceivedCashQrCode as any}
             />
-            <Stack.Screen
-              name="EditTargetScreen"
-              component={EditTargetScreen as any}
-            />
+
             <Stack.Screen
               name="NoCollectionCenterScreen"
               component={NoCollectionCenterScreen}
             />
 
-            <Stack.Screen
-              name="PassTargetBetweenOfficers"
-              component={PassTargetBetweenOfficers as any}
-            />
             <Stack.Screen
               name="RecieveTargetBetweenOfficers"
               component={RecieveTargetBetweenOfficers as any}
@@ -411,17 +426,10 @@ function AppContent() {
               options={{ headerShown: false }}
             />
 
-
-
-
-
             <Stack.Screen
               name="TransactionReport"
               component={TransactionReport as any}
             />
-
-
-
 
             <Stack.Screen
               name="DigitalSignature"
@@ -436,10 +444,7 @@ function AppContent() {
               name="TimerContainer"
               component={TimerContainer as any}
             />
-            <Stack.Screen
-              name="CenterTargetScreen"
-              component={CenterTargetScreen as any}
-            />
+
             <Stack.Screen
               name="ReplaceRequestsApprove"
               component={ReplaceRequestsApprove as any}
@@ -448,10 +453,7 @@ function AppContent() {
               name="DailyTargetListOfficerDistribution"
               component={DailyTargetListOfficerDistribution as any}
             />
-            <Stack.Screen
-              name="DistributionOfficerReport"
-              component={DistributionOfficerReport as any}
-            />
+
             <Stack.Screen
               name="GoviPensionForm"
               component={GoviPensionForm as any}

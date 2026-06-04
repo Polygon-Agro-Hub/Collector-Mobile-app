@@ -150,7 +150,7 @@
     "Phone number 2 is invalid.": "தொலைபேசி எண் 2 தவறானது.",
     "Email is invalid.": "மின்னஞ்சல் தவறானது.",
     "NIC number is invalid.": "தேசிய அடையாள அட்டை எண் தவறானது.",
-    "QR Code saved to gallery.": "QR குறியீடு கேலரியில்(கலை காட்சி கூடம்) சேமிக்கப்பட்டது.",
+    "QR Code saved to the gallery.": "QR குறியீடு கேலரியில்(கலை காட்சி கூடம்) சேமிக்கப்பட்டது.",
     "User ID not found in QR code": "QR குறியீட்டில் பயனர் எண் இல்லை.",
     "Downloaded PDF": "{{fileName}} உங்கள் பதிவிறக்கங்கள் கோப்புறையில் சேமிக்கப்பட்டுள்ளது.",
     "This Phone Number already exists.": "இந்த தொலைபேசி எண் ஏற்கனவே உள்ளது.",
@@ -593,6 +593,7 @@
   "ClaimOfficer": {
     "LNG": "ta",
     "ClaimOfficers": "ஒரு அதிகாரியை கோருங்கள்",
+    "Driver":"டிரைவர்",
     "JobRole": "Job Role",
     "EMPID": "பணியாளர் எண்",
     "Search": "தேடு",
@@ -661,6 +662,8 @@
     "maximum amount": "நீங்கள் கொடுக்கக்கூடிய அதிகபட்ச தொகை:",
     "kg": "kg",
     "Short Stock Assignee": "குறுகிய பங்கு ஒதுக்கீட்டாளர்",
+    "Success": "வெற்றி!",
+    "Target passed successfully.": "இலக்கு வெற்றிகரமாகக் கடக்கப்பட்டது.",
     "Amount": "அளவு (Kg)",
     "Save": "சேமிக்க",
     "maximum amount receive": "அதிகபட்ச பெறத்தக்க தொகை (Kg):",
@@ -794,13 +797,13 @@
   "NewReport": {
     "LNG": "ta",
     "Goods Received Note": "பொருட்கள் பெற்ற குறிப்பு",
-    "GRN No": "GRN எண்:",
+    "GRN No": "GRN எண் :",
     "Date": "திகதி:",
-    "Supplier Details": "விற்பனையாளரின் விவரம்:",
+    "Supplier Details": "விற்பனையாளரின் விவரம் :",
     "Name": "பெயர்:",
-    "Phone": "தொலைபேசி எண்:",
-    "Received By": "பெறப்பட்டது:",
-    "Company Name": "நிறுவனத்தின் பெயர்:",
+    "Phone": "தொலைபேசி எண் :",
+    "Received By": "பெறப்பட்டது :",
+    "Company Name": "நிறுவனத்தின் பெயர் :",
     "Centre": "மத்திய நிலையம்:",
     "Received Items": "பெறப்பட்ட பொருட்கள்:",
     "Crop Name": "பயிர் பெயர்",
@@ -981,7 +984,9 @@
     "Retry": "மீண்டும் முயற்சிக்கவும்"
   },
   "DistributionOfficersList": {
-    "EMPID": "பணியாளர் எண் :"
+    "EMPID": "பணியாளர் எண் :",
+    "Officers":"அதிகாரிகள்",
+    "Drivers":"ஓட்டுநர்கள்"
   },
   "PassTarget": {
     "EMP ID": "பணியாளர் எண்",

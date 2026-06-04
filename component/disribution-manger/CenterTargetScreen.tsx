@@ -16,6 +16,7 @@ import {
   Image,
   Modal,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { RootStackParamList } from "../types/types";
 import axios from "axios";
@@ -24,7 +25,7 @@ import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { Animated } from "react-native";
 import {
   fetchOrderDetailsByIds,
@@ -1132,11 +1133,26 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       return "N/A";
     }
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
   return (
     <View className="flex-1 bg-[#282828]">
       <View className="bg-[#282828] px-4 py-6 flex-row justify-center items-center">
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate("DistridutionaDashboard")}
           className="absolute left-4 bg-white/10 rounded-full  justify-center items-center"
           style={{ width: 40, height: 40 }}
         >
@@ -1243,7 +1259,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         </View>
       </View>
 
-      <View className="flex-row justify-center items-center py-4 bg-[#282828]">
+      <View className="flex-row justify-center items-center pb-6 bg-[#282828]">
         <Animated.View
           style={{
             transform: [{ scale: selectedToggle === "ToDo" ? 1.05 : 1 }],
@@ -1602,7 +1618,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
               alignItems: "center",
             }}
           >
-            <View className="bg-white rounded-lg p-6 w-11/12 max-w-sm">
+            <View className="bg-white rounded-lg p-6 mx-6 max-w-sm">
               <View className="items-center mb-2">
                 <View className="w-10 h-10 rounded-lg bg-[#F6F7F9] justify-center items-center ">
                   <Image
@@ -1629,6 +1645,13 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   }`}
                   onPress={() => setShowConfirmModal(false)}
                   disabled={loading}
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
+                    elevation: 4,
+                  }}
                 >
                   <Text
                     className={`text-center font-medium ${
@@ -1645,7 +1668,14 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                   }`}
                   onPress={confirmAction}
                   disabled={loading}
-                  style={loading ? { opacity: 0.6 } : { opacity: 1 }}
+                  style={{
+                    opacity: loading ? 0.6 : 1,
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
+                    elevation: 4,
+                  }}
                 >
                   <View className="flex-row justify-center items-center">
                     {loading && (
@@ -1858,7 +1888,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                       return (
                         <View className={`px-3 py-2 rounded-full`}>
                           <Text
-                            className={`text-xs font-medium text-center ${
+                            className={`text-base font-medium text-center ${
                               isOnTime ? "text-[#980775]" : "text-[#FF0700]"
                             }`}
                           >
@@ -1950,14 +1980,14 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             </TouchableOpacity>
           ))
         ) : (
-          <View className="flex-1 justify-center items-center py-20">
+          <View className="flex-1 justify-center items-center pt-[35%] ">
             <LottieView
               source={require("../../assets/lottie/no-data.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}
             />
-            <Text className="text-gray-500 mt-4 text-center">
+            <Text className="text-gray-500 mt-[-5%] text-center">
               {selectedToggle === "ToDo"
                 ? t("DailyTarget.NoTodoItems") || t("DailyTarget.NoTodoItems")
                 : selectedToggle === "Completed"

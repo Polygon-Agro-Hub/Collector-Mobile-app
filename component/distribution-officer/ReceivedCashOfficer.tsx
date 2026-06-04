@@ -162,7 +162,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           Alert.alert(
             "Error",
             error.response?.data?.message ||
-            "Failed to fetch received cash data",
+              "Failed to fetch received cash data",
           );
         }
       } else {
@@ -177,20 +177,20 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
     fetchReceivedCash();
   }, []);
 
-    useFocusEffect(
-        React.useCallback(() => {
-          const onBackPress = () => {
-            navigation.navigate("DistridutionaDashboard");
-            return true;
-          };
-    
-          const subscription = BackHandler.addEventListener(
-            "hardwareBackPress",
-            onBackPress,
-          );
-          return () => subscription.remove();
-        }, [navigation]),
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("DistridutionaDashboard");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
       );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -269,10 +269,10 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
               className="mr-3 mt-0.5"
             >
               <View
-                className={`w-5 h-5 rounded border ${isSelected ? "bg-black border-black" : "bg-white border-black"} items-center justify-center`}
+                className={`w-6 h-6 rounded border ${isSelected ? "bg-black border-black" : "bg-white border-black"} items-center justify-center`}
               >
                 {isSelected && (
-                  <Ionicons name="checkmark" size={14} color="white" />
+                  <Ionicons name="checkmark" size={16} color="white" />
                 )}
               </View>
             </TouchableOpacity>
@@ -306,7 +306,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
   const EmptyState = () => (
     <View className="flex-1 items-center justify-center mt-[50%]">
-      <View className=" items-center justify-center mb-4">
+      <View className=" items-center justify-center ">
         <LottieView
           source={require("../../assets/lottie/no-data.json")}
           autoPlay
@@ -314,7 +314,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
           style={{ width: 150, height: 150 }}
         />
       </View>
-      <Text className="text-[#828282] text-base italic">
+      <Text className="text-[#828282] mt-[-5%] text-base italic">
         - {t("ReceivedCash.No cash was received recently")} -
       </Text>
     </View>
@@ -350,14 +350,20 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
                 backgroundColor: "white",
                 paddingHorizontal: 16,
                 paddingVertical: 8,
-                marginHorizontal: 40,
+                alignSelf: "center",
+                maxWidth: "90%",
               }}
             >
-              <View className="flex-row items-center justify-center">
-                <Text className=" font-medium text-black">
+              <View className="flex-row items-center justify-center flex-wrap">
+                <Text className="font-medium text-black" numberOfLines={1}>
                   {t("ReceivedCash.Full Total")} :{" "}
                 </Text>
-                <Text className="text-xl font-bold text-[#980775]">
+                <Text
+                  className="text-xl font-bold text-[#980775]"
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  minimumFontScale={0.6}
+                >
                   {t("ReceivedCash.Rs")}
                   {totalCash.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
@@ -376,15 +382,15 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
               className="flex-row items-center"
             >
               <View
-                className={`w-6 h-6 rounded  ${allSelected ? "" : " border bg-white border-black"} items-center justify-center mr-2`}
+                className={`w-6 h-6 rounded border items-center justify-center mr-2 ${
+                  allSelected
+                    ? "bg-red-600 border-red-600"
+                    : "bg-white border-black"
+                }`}
               >
-                {allSelected && (
-                  <Entypo name="squared-minus" size={18} color="red" />
-                )}
+                {allSelected && <Entypo name="minus" size={16} color="white" />}
               </View>
-              <Text
-                className={`text-sm underline ${allSelected ? "text-[#000000]" : "text-[#000000]"} font-medium`}
-              >
+              <Text className="text-sm underline text-black font-medium">
                 {allSelected
                   ? t("ReceivedCash.Deselect All")
                   : t("ReceivedCash.Select All")}

@@ -363,7 +363,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
       <View className="flex-1 w-full max-w-[500px] mx-auto">
         {/* Search Bar */}
-        <View className="flex-row items-center mx-4 mt-4 pl-3 border border-[#C0C0C0] rounded-full">
+        <View className="flex-row items-center h-[50px]  mx-8 mt-2 pl-3 border border-[#C0C0C0] rounded-full">
           <TextInput
             className="flex-1 text-base text-black py-2"
             placeholder={t("ReadytoPickupOrders.Search by phone number")}
@@ -375,21 +375,21 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           />
           {searchPhone ? (
             <TouchableOpacity
-              className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center"
+              className="w-[50px] h-[50px] bg-[#C0C0C0] rounded-full items-center justify-center"
               onPress={handleClearSearch}
             >
               <MaterialIcons name="close" size={24} color="black" />
             </TouchableOpacity>
           ) : (
-            <View className="w-12 h-12 bg-[#C0C0C0] rounded-full items-center justify-center">
+            <View className="w-[50px] h-[50px] bg-[#C0C0C0] rounded-full items-center justify-center">
               <Ionicons name="search" size={20} color="black" />
             </View>
           )}
         </View>
 
         {!isSearching && (
-          <View className="px-4 py-3 flex-row items-center">
-            <Text className="text-sm font-medium text-gray-900">
+          <View className="px-8  mt-6 flex-row items-center">
+            <Text className="text-base font-medium text-gray-900">
               {t("ReadytoPickupOrders.All")} ({formatCount(orders.length)})
             </Text>
           </View>
@@ -541,10 +541,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
       }}
     >
       <View className="flex-row mb-2">
-        <Text className="text-sm font-semibold">
+        <Text className="text-base font-semibold">
           {t("ReadytoPickupOrders.Order ID")} :
         </Text>
-        <Text className="text-sm font-semibold ml-1">{order.invNo}</Text>
+        <Text className="text-base font-semibold ml-1">{order.invNo}</Text>
       </View>
 
       <View className="flex-row mb-2 items-center">

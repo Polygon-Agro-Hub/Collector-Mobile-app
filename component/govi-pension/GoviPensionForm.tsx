@@ -989,7 +989,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
                 </Text>
                 <TouchableOpacity
                   onPress={() => pickImageFromGallery("successorNicFront")}
-                  className="bg-white border border-gray-300 rounded-2xl px-6 py-3 flex-row justify-center items-center mb-4"
+                  className="bg-white border border-gray-300 rounded-2xl px-6 h-[50px] flex-row justify-center items-center mb-4"
                 >
                   <FontAwesome6 name="cloud-arrow-up" size={22} color="black" />
                   <Text className="text-gray-900 ml-2 font-medium text-sm">
@@ -1026,7 +1026,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
                 </Text>
                 <TouchableOpacity
                   onPress={() => pickImageFromGallery("successorNicBack")}
-                  className="bg-white border border-gray-300 rounded-2xl px-6 py-3 flex-row justify-center items-center mb-4"
+                  className="bg-white border border-gray-300 rounded-2xl px-6 h-[50px] flex-row justify-center items-center mb-4"
                 >
                   <FontAwesome6 name="cloud-arrow-up" size={22} color="black" />
                   <Text className="text-gray-900 ml-2 font-medium text-sm">

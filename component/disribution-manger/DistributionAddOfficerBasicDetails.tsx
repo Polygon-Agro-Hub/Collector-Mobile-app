@@ -30,19 +30,19 @@ import countryData from "../../assets/jsons/countryflag.json";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 
-type AddOfficerBasicDetailsNavigationProp = StackNavigationProp<
+type DistributionAddOfficerBasicDetailsNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "AddOfficerBasicDetails"
+  "DistributionAddOfficerBasicDetails"
 >;
 
-type AddOfficerRouteProp = RouteProp<
+type DistributionAddOfficerBasicDetailsRouteProp = RouteProp<
   RootStackParamList,
-  "AddOfficerBasicDetails"
+  "DistributionAddOfficerBasicDetails"
 >;
 
 interface AddOfficerProp {
-  navigation: AddOfficerBasicDetailsNavigationProp;
-  route: AddOfficerRouteProp;
+  navigation: DistributionAddOfficerBasicDetailsNavigationProp;
+  route: DistributionAddOfficerBasicDetailsRouteProp;
 }
 
 interface CountryItem {
@@ -53,7 +53,7 @@ interface CountryItem {
   dialCode: string;
 }
 
-const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
+const DistributionAddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   route,
   navigation,
 }) => {
@@ -106,42 +106,69 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   const [phoneCode1ModalVisible, setPhoneCode1ModalVisible] = useState(false);
   const [phoneCode2ModalVisible, setPhoneCode2ModalVisible] = useState(false);
 
-  const resetForm = () => {
-    setFormData({
-      userId: "",
-      firstNameEnglish: "",
-      lastNameEnglish: "",
-      firstNameSinhala: "",
-      lastNameSinhala: "",
-      firstNameTamil: "",
-      lastNameTamil: "",
-      nicNumber: "",
-      email: "",
-      profileImage: "",
-      jobRole: "",
-      phoneCode1: "",
-      phoneNumber1: "",
-      phoneCode2: "",
-      phoneNumber2: "",
-    });
-    setPhoneCode1("+94");
-    setPhoneCode2("+94");
-    setPhoneNumber1("");
-    setPhoneNumber2("");
-    setSelectedImage(null);
-    setFieldErrors({});
-    setError1("");
-    setError2("");
-    setError3("");
-    setErrorEmail("");
-    setType("Permanent");
-    setPreferredLanguages({ Sinhala: false, English: false, Tamil: false });
-  };
-
   useFocusEffect(
     useCallback(() => {
       scrollRef.current?.scrollTo({ y: 0, animated: false });
     }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (preservedData) {
+        setFormData({
+          userId: preservedData.userId || "",
+          firstNameEnglish: preservedData.firstNameEnglish || "",
+          lastNameEnglish: preservedData.lastNameEnglish || "",
+          firstNameSinhala: preservedData.firstNameSinhala || "",
+          lastNameSinhala: preservedData.lastNameSinhala || "",
+          firstNameTamil: preservedData.firstNameTamil || "",
+          lastNameTamil: preservedData.lastNameTamil || "",
+          nicNumber: preservedData.nicNumber || "",
+          email: preservedData.email || "",
+          profileImage: preservedData.profileImage || "",
+          jobRole: preservedData.jobRole || "",
+          phoneCode1: preservedData.phoneCode1 || "+94",
+          phoneNumber1: preservedData.phoneNumber1 || "",
+          phoneCode2: preservedData.phoneCode2 || "+94",
+          phoneNumber2: preservedData.phoneNumber2 || "",
+        });
+        setPhoneNumber1(preservedData.phoneNumber1 || "");
+        setPhoneNumber2(preservedData.phoneNumber2 || "");
+        setPhoneCode1(preservedData.phoneCode1 || "+94");
+        setPhoneCode2(preservedData.phoneCode2 || "+94");
+        setSelectedImage(preservedData.profileImage || null);
+      } else {
+        setFormData({
+          userId: "",
+          firstNameEnglish: "",
+          lastNameEnglish: "",
+          firstNameSinhala: "",
+          lastNameSinhala: "",
+          firstNameTamil: "",
+          lastNameTamil: "",
+          nicNumber: "",
+          email: "",
+          profileImage: "",
+          jobRole: "",
+          phoneCode1: "",
+          phoneNumber1: "",
+          phoneCode2: "",
+          phoneNumber2: "",
+        });
+        setPhoneNumber1("");
+        setPhoneNumber2("");
+        setPhoneCode1("+94");
+        setPhoneCode2("+94");
+        setSelectedImage(null);
+        setPreferredLanguages({ Sinhala: false, English: false, Tamil: false });
+        setType("Permanent");
+        setError1("");
+        setError2("");
+        setError3("");
+        setErrorEmail("");
+        setFieldErrors({});
+      }
+    }, [preservedData]),
   );
 
   useMemo(() => {
@@ -237,34 +264,8 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
     useCallback(() => {
       setJobRole(String(jobRolle));
       fetchEmpId(String(jobRolle));
-
-      if (preservedData) {
-        setFormData((prev) => ({
-          ...prev,
-          firstNameEnglish: preservedData.firstNameEnglish ?? "",
-          lastNameEnglish: preservedData.lastNameEnglish ?? "",
-          firstNameSinhala: preservedData.firstNameSinhala ?? "",
-          lastNameSinhala: preservedData.lastNameSinhala ?? "",
-          firstNameTamil: preservedData.firstNameTamil ?? "",
-          lastNameTamil: preservedData.lastNameTamil ?? "",
-          nicNumber: preservedData.nicNumber ?? "",
-          email: preservedData.email ?? "",
-          userId: preservedData.userId ?? "",
-        }));
-        if (preservedData.phoneCode1) setPhoneCode1(preservedData.phoneCode1);
-        if (preservedData.phoneNumber1)
-          setPhoneNumber1(preservedData.phoneNumber1);
-        if (preservedData.phoneCode2) setPhoneCode2(preservedData.phoneCode2);
-        if (preservedData.phoneNumber2)
-          setPhoneNumber2(preservedData.phoneNumber2);
-        if (preservedData.profileImage)
-          setSelectedImage(preservedData.profileImage);
-      } else {
-        resetForm();
-      }
-
       return () => {};
-    }, [jobRolle, preservedData]),
+    }, []),
   );
 
   const handleImagePick = async () => {
@@ -386,7 +387,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         profileImage: selectedImage || "",
       };
 
-      navigation.navigate("AddOfficerAddressDetails", {
+      navigation.navigate("DistributionAddOfficerAddressDetails", {
         formData: { ...updatedFormData },
         type,
         preferredLanguages,
@@ -445,7 +446,15 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
     if (numbersOnly.length === 0) {
       setError1("");
-      setError2("");
+
+      if (
+        error2 ===
+        t(
+          "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+        )
+      ) {
+        setError2("");
+      }
     } else if (!numbersOnly.startsWith("7")) {
       setError1(t("Error.Invalid phone number"));
     } else if (numbersOnly.length < 9) {
@@ -461,7 +470,14 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
             ),
           );
         } else {
-          setError2("");
+          setError2((prev) =>
+            prev ===
+            t(
+              "AddOfficerBasicDetails.Phone Number 01 and Phone Number 02 cannot be the same.",
+            )
+              ? ""
+              : prev,
+          );
         }
       }
       checkPhoneExists(numbersOnly);
@@ -511,7 +527,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           ),
         );
       } else {
-        setError2("");
         checkPhone2Exists(numbersOnly, phoneCode2);
       }
     } else {
@@ -629,60 +644,25 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   };
 
   useFocusEffect(
-    useCallback(() => {
-      const handleBackPress = () => {
-        AsyncStorage.removeItem("officerFormData").then(() => {
-          resetForm();
-          if (jobRole === "Collection Officer") {
-            navigation.navigate("Main", { screen: "CollectionOfficersList" });
-          } else if (jobRole === "Distribution Officer") {
+    React.useCallback(() => {
+      const onBackPress = () => {
+        (async () => {
+          try {
+            await AsyncStorage.removeItem("officerFormData");
             navigation.navigate("Main", { screen: "DistributionOfficersList" });
+          } catch (error) {
+            console.error("Error clearing form data:", error);
           }
-        });
+        })();
         return true;
       };
-      const backHandler = BackHandler.addEventListener(
+
+      const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        handleBackPress,
+        onBackPress,
       );
-      return () => backHandler.remove();
-    }, [jobRole]),
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      setJobRole(String(jobRolle));
-      fetchEmpId(String(jobRolle));
-
-      if (preservedData) {
-        setFormData((prev) => ({
-          ...prev,
-          firstNameEnglish:
-            preservedData.firstNameEnglish ?? prev.firstNameEnglish,
-          lastNameEnglish:
-            preservedData.lastNameEnglish ?? prev.lastNameEnglish,
-          firstNameSinhala:
-            preservedData.firstNameSinhala ?? prev.firstNameSinhala,
-          lastNameSinhala:
-            preservedData.lastNameSinhala ?? prev.lastNameSinhala,
-          firstNameTamil: preservedData.firstNameTamil ?? prev.firstNameTamil,
-          lastNameTamil: preservedData.lastNameTamil ?? prev.lastNameTamil,
-          nicNumber: preservedData.nicNumber ?? prev.nicNumber,
-          email: preservedData.email ?? prev.email,
-          userId: preservedData.userId ?? prev.userId,
-        }));
-        if (preservedData.phoneCode1) setPhoneCode1(preservedData.phoneCode1);
-        if (preservedData.phoneNumber1)
-          setPhoneNumber1(preservedData.phoneNumber1);
-        if (preservedData.phoneCode2) setPhoneCode2(preservedData.phoneCode2);
-        if (preservedData.phoneNumber2)
-          setPhoneNumber2(preservedData.phoneNumber2);
-        if (preservedData.profileImage)
-          setSelectedImage(preservedData.profileImage);
-      }
-
-      return () => {};
-    }, []),
+      return () => subscription.remove();
+    }, [navigation]),
   );
 
   const renderCountryCodeItem = (item: any, isSelected: boolean) => (
@@ -716,14 +696,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         onBackPress={async () => {
           try {
             await AsyncStorage.removeItem("officerFormData");
-            resetForm();
-            if (jobRole === "Collection Officer") {
-              navigation.navigate("Main", { screen: "CollectionOfficersList" });
-            } else if (jobRole === "Distribution Officer") {
-              navigation.navigate("Main", {
-                screen: "DistributionOfficersList",
-              });
-            }
+            navigation.navigate("Main", { screen: "DistributionOfficersList" });
           } catch (error) {
             console.error("Error clearing form data:", error);
           }
@@ -737,7 +710,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         showsVerticalScrollIndicator={false}
         className="w-full max-w-[500px] mx-auto px-6"
       >
-        <View className="items-center mt-6 w-full">
+        <View className="items-center mt-6">
           <TouchableOpacity onPress={handleImagePick}>
             <View className="relative">
               <View className="w-20 h-20 bg-gray-300 rounded-full overflow-hidden items-center justify-center">
@@ -758,7 +731,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           </TouchableOpacity>
         </View>
 
-        <View className="">
+        <View className="p-2 px-4">
           <View className="px-2 mt-6 items-center">
             <View className="flex flex-row items-center gap-2 justify-between">
               <Text className="text-base font-medium">
@@ -849,7 +822,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
 
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
-          <View className="mt-4 gap-4">
+          <View className="px-4 mt-4 gap-4">
             <View>
               <TextInput
                 placeholder={t("AddOfficerBasicDetails.FirstNameEnglish")}
@@ -995,7 +968,7 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           <View className="border border-[#ADADAD] border-b-0 mt-4" />
 
           {/* ── Phone & Contact Fields ── */}
-          <View className="mt-4 gap-4">
+          <View className="px-4 mt-4 gap-4">
             {/* Phone Number 1 */}
             <View>
               <View className="flex-row gap-2">
@@ -1041,7 +1014,6 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
               )}
             </View>
 
-            {/* Phone Number 2 */}
             {/* Phone Number 2 */}
             <View>
               <View className="flex-row gap-2">
@@ -1145,26 +1117,10 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           </View>
 
           {/* ── Buttons ── */}
-          <View className="flex-col w-full gap-4 mt-6">
+          <View className="px-4 flex-col w-full gap-4 mt-6">
             <TouchableOpacity
               className="bg-[#D9D9D9] rounded-full px-6 h-[50px] w-full justify-center items-center"
-              onPress={async () => {
-                try {
-                  await AsyncStorage.removeItem("officerFormData");
-                  resetForm();
-                  if (jobRole === "Collection Officer") {
-                    navigation.navigate("Main", {
-                      screen: "CollectionOfficersList",
-                    });
-                  } else if (jobRole === "Distribution Officer") {
-                    navigation.navigate("Main", {
-                      screen: "DistributionOfficersList",
-                    });
-                  }
-                } catch (error) {
-                  console.error("Error clearing form data:", error);
-                }
-              }}
+              onPress={() => navigation.navigate("Main", { screen: "DistributionOfficersList" })}
               style={{
                 shadowColor: "#8f8a8a",
                 shadowOffset: { width: 0, height: 4 },
@@ -1272,4 +1228,4 @@ const AddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
   );
 };
 
-export default AddOfficerBasicDetails;
+export default DistributionAddOfficerBasicDetails;

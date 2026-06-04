@@ -226,14 +226,14 @@ const ClaimOfficer: React.FC = () => {
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
             </View>
-            <Text className="text-center text-base font-semibold mb-4">
+            <Text className="text-center text-sm font-semibold mb-4">
               {t("ClaimOfficer.Are you sure you want to claim this officer?")}
             </Text>
 
             <View className="flex-row  justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-3 px-8 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                className="p-2 py-2 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
@@ -242,7 +242,7 @@ const ClaimOfficer: React.FC = () => {
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-gray-700">
+                <Text className="text-sm text-gray-700">
                   {t("ClaimOfficer.Cancel")}
                 </Text>
               </TouchableOpacity>
@@ -250,7 +250,7 @@ const ClaimOfficer: React.FC = () => {
               <TouchableOpacity
                 onPress={onConfirm}
                 disabled={onLoading}
-                className={`p-2 py-3 px-9 rounded-lg ${
+                className={`p-2 py-2 px-9 rounded-lg ${
                   onLoading ? "bg-gray-400" : "bg-[#313131]"
                 }`}
                 style={{
@@ -261,7 +261,7 @@ const ClaimOfficer: React.FC = () => {
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-white">
+                <Text className="text-sm text-white">
                   {t("ClaimOfficer.Claim")}
                 </Text>
               </TouchableOpacity>
@@ -398,17 +398,17 @@ const ClaimOfficer: React.FC = () => {
             </>
           ) : (
             <>
-              <Text className="text-lg font-bold text-gray-800">
+              <Text className="text-xl font-bold text-gray-800">
                 {officerDetails?.firstNameEnglish}{" "}
                 {officerDetails?.lastNameEnglish}
               </Text>
-              <Text className="text-sm text-gray-500">
+              <Text className="text-lg text-[#627189]">
                 {t(`ClaimOfficer.${officerDetails?.jobRole}`)} -{" "}
                 <Text className="font-bold text-black">
                   {officerDetails?.empId}
                 </Text>
               </Text>
-              <Text className="text-sm text-gray-500">
+              <Text className="text-sm mt-1 text-gray-500">
                 {officerDetails?.companyNameEnglish}
               </Text>
             </>

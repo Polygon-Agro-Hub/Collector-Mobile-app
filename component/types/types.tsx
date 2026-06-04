@@ -30,7 +30,7 @@ export type RootStackParamList = {
   DailyTargetList: undefined;
   ComplainHistory: undefined;
   ClaimOfficer: undefined;
-  ClaimDistribution: undefined;
+ ClaimDistribution: { activeTab?: "Officers" | "Drivers" };
   TransactionList: {
     empId: string
   };
@@ -154,8 +154,15 @@ export type RootStackParamList = {
     phoneNumber1: number;
   };
   AddOfficerBasicDetails: {
-    jobRolle: String;
+  jobRolle: string;
+  preservedData?: OfficerBasicDetailsFormData & {
+    phoneCode1?: string;
+    phoneNumber1?: string;
+    phoneCode2?: string;
+    phoneNumber2?: string;
+    profileImage?: string;
   };
+};
   AddOfficerAddressDetails: {
     formData: OfficerBasicDetailsFormData;
     type: "Permanent" | "Temporary";
@@ -165,6 +172,20 @@ export type RootStackParamList = {
       Tamil: boolean;
     };
     jobRole: string;
+  };
+  DistributionAddOfficerAddressDetails: {
+     formData: OfficerBasicDetailsFormData;
+    type: "Permanent" | "Temporary";
+    preferredLanguages: {
+      Sinhala: boolean;
+      English: boolean;
+      Tamil: boolean;
+    };
+    jobRole: string;
+  };
+  DistributionAddOfficerBasicDetails:{
+    jobRolle: String;
+    preservedData?: OfficerBasicDetailsFormData;
   };
   FarmerReport: {
     registeredFarmerId: number;
@@ -343,6 +364,10 @@ export type RootStackParamList = {
   DistributionOfficerReport: {
     officerId: string;
     collectionOfficerId: number;
+    officerName:string,
+    phoneNumber1:string,
+    phoneNumber2:string,        
+    image:string,
   };
   qrcode: {
     expectedOrderId?: string;

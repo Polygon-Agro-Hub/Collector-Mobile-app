@@ -314,7 +314,9 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
             showBackButton={true}
             navigation={navigation}
             onBackPress={() =>
-              navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
+              navigation.navigate("Main" as any, {
+                screen: "SearchPriceScreen",
+              })
             }
             textColor="white"
             bgColor="#282828"
@@ -329,9 +331,9 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
         <View className="mb-4">
-          <Text className="text-black text-sm mb-1">
-            {t("PriceChart.Crop")}
-          </Text>
+          <View className="items-center">
+            <Text className="text-[#7D7D7D] mb-1">{t("PriceChart.Crop")}</Text>
+          </View>
           <TextInput
             className="border border-[#F4F4F4] rounded-full bg-[#F4F4F4] px-4 py-2 text-gray-800 h-[50px]"
             value={cropName}
@@ -340,9 +342,11 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         </View>
 
         <View className="mb-4">
-          <Text className="text-black text-sm mb-1">
-            {t("PriceChart.Variety")}
-          </Text>
+          <View className="items-center">
+            <Text className="text-[#7D7D7D] mb-1">
+              {t("PriceChart.Variety")}
+            </Text>
+          </View>
           <TextInput
             className="border border-[#F4F4F4] rounded-full px-4 py-2 text-gray-800 bg-[#F4F4F4] h-[50px]"
             value={varietyName}
@@ -367,16 +371,16 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
             <Text className="text-gray-600 text-sm mb-2">
               {t("PriceChart.UnitGrades")}
             </Text>
-            <View className="border border-[#E7E7E7] rounded-lg p-4">
+            <View className="border border-[#E7E7E7] rounded-xl p-4">
               {priceData.map((priceItem, index) => (
                 <View key={index} className="mb-3">
                   <View className="flex-row items-center">
-                    <Text className="w-32 text-gray-600">
+                    <Text className="w-32 font-medium text-[#7D7D7D]">
                       {`${t("PriceChart.Grade")} ${priceItem.grade}`}
                     </Text>
 
                     <View
-                      className="flex-1 flex-row items-center rounded-full px-4 h-[50px]"
+                      className="flex-1 flex-row items-center rounded-full px-4 h-[45px]"
                       style={{
                         borderWidth: 1,
                         borderColor: isEditable
@@ -387,9 +391,11 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
                         backgroundColor: "#F4F4F4",
                       }}
                     >
-                      <Text className="text-gray-800 mr-1">{t("ReplaceRequestsApprove.Rs")} </Text>
+                      <Text className="text-[#000000] font-medium mr-1">
+                        {t("ReplaceRequestsApprove.Rs")}{" "}
+                      </Text>
                       <TextInput
-                        className="flex-1 text-gray-800"
+                        className="flex-1 text-[#000000] font-medium"
                         style={{ height: 50, padding: 0 }}
                         value={editedPrices[index]?.price}
                         editable={isEditable}
@@ -469,6 +475,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
             shadowOpacity: 0.25,
             shadowRadius: 10,
             elevation: 5,
+            marginBottom: 20,
           }}
         >
           <Text

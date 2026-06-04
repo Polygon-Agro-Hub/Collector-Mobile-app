@@ -18,7 +18,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
 
-
 type ManagerDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
   "ManagerDashboard"
@@ -271,7 +270,10 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
 
         <View>
           <Text
-            style={[{ fontSize: 18, fontWeight: "bold" }, getTextStyle(selectedLanguage)]}
+            style={[
+              { fontSize: 18, fontWeight: "bold" },
+              getTextStyle(selectedLanguage),
+            ]}
             className="text-black"
           >
             {getFullName()}
@@ -291,7 +293,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
       )}
 
       <View className="flex-1 w-full max-w-[500px] mx-auto">
-
         {/* Target Progress */}
         <View className="flex-row items-center justify-center gap-4 mt-10 mb-10">
           <Text
@@ -328,6 +329,13 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           <TouchableOpacity
             className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#980775]"
             onPress={() => navigation.navigate("CenterTarget" as any)}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 5,
+              elevation: 3,
+            }}
           >
             <Image
               source={require("../../assets/images/dashboard/center-target.webp")}
@@ -346,6 +354,13 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
             onPress={() =>
               navigation.navigate("ManagerTransactions" as any, { empId })
             }
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 5,
+              elevation: 3,
+            }}
           >
             <Image
               source={require("../../assets/images/dashboard/collection.webp")}
@@ -364,6 +379,13 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           <TouchableOpacity
             className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#FFE300]"
             onPress={() => navigation.navigate("QRScanner" as any)}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 5,
+              elevation: 3,
+            }}
           >
             <Image
               source={require("../../assets/images/dashboard/qr.webp")}
@@ -380,6 +402,13 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
           <TouchableOpacity
             className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#FF0086]"
             onPress={() => navigation.navigate("SearchFarmer" as any)}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 5,
+              elevation: 3,
+            }}
           >
             <Image
               source={require("../../assets/images/dashboard/search-client.webp")}
@@ -393,7 +422,6 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         </View>
-
       </View>
     </ScrollView>
   );
