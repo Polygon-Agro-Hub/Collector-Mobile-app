@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Alert,
+  BackHandler,
+} from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
@@ -13,6 +20,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "../navigations/CustomHeader";
 import LoadingPage from "../commons/LoadingPage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -126,7 +134,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       const asset = await MediaLibrary.createAssetAsync(response.uri);
       await MediaLibrary.createAlbumAsync("Download", asset, false);
 
-      Alert.alert(t("Error.Success"), t("Error.QR Code saved to gallery."));
+      Alert.alert(t("Error.Success"), t("Error.QR Code saved to the gallery."));
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(t("Error.error"), t("Error.failedSaveQRCode"));
@@ -160,13 +168,29 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("SideMenu");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   return (
     <View className="flex-1 bg-white">
       <CustomHeader
         title={t("OfficerQr.QRCode")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("SideMenu")}
       />
 
       {isLoading ? (

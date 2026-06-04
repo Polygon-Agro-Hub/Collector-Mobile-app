@@ -353,6 +353,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
         <View className="flex-1 bg-white">
           <CustomHeader
             title={getvarietyName() || ""}
+            subtitle={grade ? `Grade : ${grade}` : ""}
             showBackButton={true}
             navigation={navigation}
             onBackPress={() =>
@@ -443,6 +444,8 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
                     : "--"}
                 </Text>
               )}
+
+              <View className="border-b border-gray-300 my-4" />
             </View>
 
             <View className="p-5">
@@ -502,7 +505,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
         }}
         searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
         multiSelect={false}
-        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
+        noResultsText={t("Error.No officers available.")}
       />
     </>
   );

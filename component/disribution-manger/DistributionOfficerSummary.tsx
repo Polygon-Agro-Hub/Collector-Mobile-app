@@ -81,21 +81,28 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
         animationType="fade"
         onRequestClose={onCancel}
       >
-        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000040",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <View className="bg-white items-center rounded-lg w-80 p-6">
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
             </View>
-            <Text className="text-center text-lg font-semibold mb-4">
+            <Text className="text-center text-sm font-semibold mb-4">
               {t(
                 "DisclaimOfficer.Are you sure you want to disclaim this officer?",
               )}
             </Text>
 
-            <View className="flex-row  justify-center gap-4">
+            <View className="flex-row items-center  justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-3 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                className="p-2 py-2 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
@@ -104,14 +111,14 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-[#6B7D8C] font-semibold">
+                <Text className="text-sm text-gray-700">
                   {t("ClaimOfficer.Cancel")}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={onConfirm}
-                className="p-2 py-3 px-6 bg-[#FF0700] rounded-lg"
+                className="p-2 py-2 px-6 bg-[#FF0700] rounded-lg"
                 style={{
                   shadowColor: "#8f8a8a",
                   shadowOffset: { width: 0, height: 4 },
@@ -120,7 +127,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-white font-semibold">
+                <Text className="text-sm text-white">
                   {t("DisclaimOfficer.Disclaim")}
                 </Text>
               </TouchableOpacity>
@@ -381,6 +388,10 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
               navigation.navigate("DistributionOfficerReport" as any, {
                 officerId,
                 collectionOfficerId,
+                officerName,
+                phoneNumber1,
+                phoneNumber2,
+                image,
               })
             }
           >

@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Alert,
+  BackHandler,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import { handleGeneratePDF } from "./ReportPDF";
 import * as Sharing from "expo-sharing";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { Platform } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
 import { ScrollView } from "react-native-gesture-handler";
@@ -42,16 +49,22 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
   const [generateAgain, setGenerateAgain] = useState(false);
   const { t } = useTranslation();
 
-  const { officerId, collectionOfficerId } = route.params;
+  const {
+    officerId,
+    collectionOfficerId,
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+
+    image,
+  } = route.params;
 
   const getTodayInColombo = () => {
     const now = new Date();
     const colomboOffset = 330;
-    const utcOffset = now.getTimezoneOffset();
-    const colomboTime = new Date(
-      now.getTime() + (colomboOffset - utcOffset) * 60 * 1000,
-    );
-    colomboTime.setHours(0, 0, 0, 0);
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+    const colomboTime = new Date(utcMs + colomboOffset * 60 * 1000);
+    colomboTime.setHours(23, 59, 59, 999);
     return colomboTime;
   };
 
@@ -187,6 +200,31 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("Main" as any, {
+          screen: "DistributionOfficerSummary",
+          params: {
+            officerId,
+            officerName,
+            phoneNumber1,
+            phoneNumber2,
+            collectionOfficerId,
+            image,
+          },
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const handleReset = () => {
     setStartDate(undefined);
     setEndDate(undefined);
@@ -226,21 +264,35 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
         title={officerId}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() =>
+          navigation.navigate("Main" as any, {
+            screen: "DistributionOfficerSummary",
+            params: {
+              officerId,
+              officerName,
+              phoneNumber1,
+              phoneNumber2,
+              collectionOfficerId,
+              image,
+            },
+          })
+        }
       />
 
       {/* Form Section */}
       <View className="px-8 mt-8">
         <View className="mb-6">
-          <Text className="text-sm text-gray-700 mb-2">
-            {t("ReportGenerator.Start Date")}
+          <Text className=" text-gray-700 mb-2">
+            {t("ReportGenerator.Start Date")} :
           </Text>
           <View className="flex-row items-center">
             <TouchableOpacity
               onPress={() => setShowStartPicker((prev) => !prev)}
               className="bg-[#F4F4F4] rounded-full px-4 py-3 flex-1 flex-row justify-between items-center"
             >
-              <Text className="text-gray-500">{formatDate(startDate)}</Text>
+              <Text className="text-gray-500 italic ">
+                {formatDate(startDate)}
+              </Text>
               <Image
                 source={require("../../assets/images/collection-manager/rescheduling.webp")}
                 className="w-6 h-6"
@@ -277,7 +329,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
         </View>
 
         <View className="mb-6">
-          <Text className="text-sm mb-2" style={{ color: "#374151" }}>
+          <Text className=" mb-2" style={{ color: "#374151" }}>
             {t("ReportGenerator.End Date")} :
           </Text>
           <TouchableOpacity
@@ -288,7 +340,10 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
             className="border border-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-row justify-between items-center"
             style={{ backgroundColor: startDate ? "#F4F4F4" : "#F9F9F9" }}
           >
-            <Text style={{ color: startDate ? "#6B7280" : "#C4C4C4" }}>
+            <Text
+              style={{ color: startDate ? "#6B7280" : "#C4C4C4" }}
+              className="italic"
+            >
               {formatDate(endDate, t("ReportGenerator.End Date"))}
             </Text>
             <Image
@@ -324,20 +379,21 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
           )}
         </View>
 
-        <View className="flex-row justify-center gap-2 items-center mt-2">
+        <View className="flex-row  justify-center gap-2 items-center mt-2">
           <TouchableOpacity
             onPress={handleReset}
-            className="border border-[#6B6B6B] bg-[white] py-2 rounded-full w-40 items-center h-[50px] justify-center items-center "
+            className="border border-[#6B6B6B] bg-[white]  rounded-full  items-center h-[45px] justify-center"
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.25,
               shadowRadius: 10,
               elevation: 6,
+              width:120
             }}
           >
             <Text
-              className="text-[#858585] text-center text-lg"
+              className="text-gray-700 text-center text-lg"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -347,13 +403,16 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
 
           <TouchableOpacity
             onPress={handleGenerate}
-            className="bg-[#980775] py-2 rounded-full w-40 items-center h-[50px] justify-center items-center"
+            disabled={!startDate || !endDate}
+            className="bg-[#980775]  rounded-full h-[45px] justify-center items-center"
             style={{
+              backgroundColor: startDate && endDate ? "#980775" : "#D3A0C5",
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
+              shadowOpacity: startDate && endDate ? 0.25 : 0,
               shadowRadius: 10,
-              elevation: 6,
+              elevation: startDate && endDate ? 6 : 0,
+              width:120
             }}
           >
             <Text

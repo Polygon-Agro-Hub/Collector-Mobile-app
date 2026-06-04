@@ -381,22 +381,22 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       style={{
         height: 50,
         backgroundColor: "#F4F4F4",
-        borderRadius: 24,
+        borderRadius: 50,
         borderWidth: 1,
         borderColor: hasError ? "#ef4444" : "#F4F4F4",
-        paddingHorizontal: 16,
+        paddingHorizontal: 14,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
       }}
     >
       <Text
-        style={{ color: value ? "#000" : "#9CA3AF", fontSize: 16, flex: 1 }}
+        style={{ color: value ? "#000" : "#9CA3AF", fontSize: 14, flex: 1 }}
         numberOfLines={1}
       >
         {value || placeholder}
       </Text>
-      <MaterialIcons name="arrow-drop-down" size={24} color="#9CA3AF" />
+      <MaterialIcons name="keyboard-arrow-down" size={22} color="#9CA3AF" />
     </TouchableOpacity>
   );
 
@@ -414,7 +414,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           navigation.navigate("Main" as any, { screen: "SearchFarmer" })
         }
       />
-      <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-10">
+      <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-6">
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
@@ -426,8 +426,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.FirstName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] rounded-3xl h-[50px] px-4`}
-              style={{ height: 50, fontSize: 16 }}
+              className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
+              style={{ fontSize: 14 }}
               value={firstName}
               onChangeText={handleFirstNameChange}
               keyboardType="default"
@@ -449,8 +449,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.LastName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
-              style={{ height: 50, fontSize: 16 }}
+              className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
+              style={{ fontSize: 14 }}
               value={lastName}
               onChangeText={handleLastNameChange}
               keyboardType="default"
@@ -493,8 +493,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.NIC")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
-              style={{ height: 50, fontSize: 16 }}
+              className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
+              style={{ fontSize: 14 }}
               placeholder={t("UnregisteredFarmerDetails.NIC")}
               placeholderTextColor="#9CA3AF"
               value={NICnumber}
@@ -550,8 +550,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.Phone")}
             </Text>
             <View
-              className={`flex-row items-center border ${fieldErrors.phone || phoneError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
-              style={{ height: 50 }}
+              className={`flex-row items-center border ${
+                fieldErrors.phone || phoneError
+                  ? "border-red-500"
+                  : "border-[#F4F4F4] bg-[#F4F4F4]"
+              } px-4 rounded-full h-[50px]`}
             >
               <TextInput
                 placeholder="7XXXXXXXX"
@@ -591,8 +594,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                     );
                   }
                 }}
-                className="flex-1"
-                style={{ fontSize: 16, height: 50 }}
+                className="flex-1 h-full"
+                style={{ fontSize: 14, height: 50, paddingVertical: 0 }}
                 maxLength={9}
               />
             </View>
@@ -629,8 +632,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
-              style={{ height: 50, fontSize: 16 }}
+              className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
+              style={{ fontSize: 14 }}
               keyboardType="numeric"
               placeholderTextColor="#9CA3AF"
               value={accNumber}
@@ -655,8 +658,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountName")}
             </Text>
             <TextInput
-              className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4]"} bg-[#F4F4F4] h-[50px] rounded-3xl px-4`}
-              style={{ height: 50, fontSize: 16 }}
+              className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
+              style={{ fontSize: 14 }}
               value={accHolderName}
               onChangeText={handleAccountNameChange}
               keyboardType="default"
@@ -719,7 +722,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
           {/* Submit Button */}
           <TouchableOpacity
-            className={`rounded-3xl h-[50px] items-center mb-[30%] justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
+            className={`rounded-full h-[50px] items-center mb-[30%] justify-center mt-4 ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000]"}`}
             onPress={() => {
               if (!loading) {
                 setLoading(true);
@@ -731,18 +734,17 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 6,
+              shadowRadius: 4,
+              elevation: 4,
               height: 50,
-              borderRadius: 30,
             }}
           >
             {loading ? (
               <ActivityIndicator color="white" size="small" />
             ) : (
               <Text
-                style={{ fontSize: 18 }}
-                className="text-center text-white font-light "
+                style={{ fontSize: 16 }}
+                className="text-center text-white font-semibold"
               >
                 {t("UnregisteredFarmerDetails.Submit")}
               </Text>

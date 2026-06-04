@@ -256,7 +256,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 textAlign: "center",
               }}
             >
-              EMP {t("ManagerTransactions.ID")} : {officerId}
+              EMP {t("ManagerTransactions.ID")} : {officerId} 
             </Text>
             <Text style={{ color: "white", fontSize: 16, marginTop: 4 }}>
               {t("ManagerTransactions.Selected Date")}{" "}
@@ -302,7 +302,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
             shadowOpacity: 0.1,
             shadowRadius: 4,
             elevation: 4,
+            height: 50
           }}
+          className="items-center justify-center"
         >
           <TextInput
             style={{ flex: 1, fontSize: 16, fontStyle: "italic" }}
@@ -314,6 +316,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
               const finalText = cleanedText.replace(/^\s+/, "");
               handleSearch(finalText);
             }}
+            className="h-[50px]"
           />
           <TouchableOpacity onPress={() => handleSearch(searchQuery)}>
             <Image

@@ -457,7 +457,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             style={{
               flex: 1,
               justifyContent: "center",
-              alignItems: "center"
+              alignItems: "center",
             }}
           >
             <LottieView
@@ -502,6 +502,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               await AsyncStorage.removeItem("officerFormData");
               navigation.navigate("AddOfficerBasicDetails", {
                 jobRolle: "Collection Officer",
+                preservedData: undefined,
               });
             } catch (error) {
               console.error("Error clearing form data:", error);

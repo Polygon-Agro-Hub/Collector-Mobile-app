@@ -210,8 +210,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+            }`}
             style={{
               height: 40,
               shadowColor:
@@ -224,8 +225,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("ToDo")}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "ToDo" ? "text-white" : "text-black"
-                } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
+              className={`font-bold ${
+                selectedToggle === "ToDo" ? "text-white" : "text-black"
+              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
               style={{
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
@@ -255,8 +257,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
           }}
         >
           <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-              }`}
+            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+            }`}
             style={{
               height: 40,
               shadowColor:
@@ -269,8 +272,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
             onPress={() => setSelectedToggle("Completed")}
           >
             <Animated.Text
-              className={`font-bold ${selectedToggle === "Completed" ? "text-white" : "text-black"
-                }`}
+              className={`font-bold ${
+                selectedToggle === "Completed" ? "text-white" : "text-black"
+              }`}
               style={{
                 opacity: selectedToggle === "Completed" ? 1 : 0.7,
               }}
@@ -297,17 +301,14 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
 
       {/* Table - Now with proper scrolling */}
       <View className="flex-1 bg-white">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={true}
-        >
-          <View style={{ minWidth: 800, width: "100%" }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+          <View style={{ width: "100%" }}>
             {/* Table Header */}
-            <View className="flex-row bg-[#980775] h-[60px] items-center">
+            <View className="flex-row bg-[#980775] h-[50px] items-center">
               <Text className="w-16 p-2 text-center text-white font-bold">
                 {selectedToggle === "ToDo" ? t("DailyTarget.No") : ""}
               </Text>
-              <Text className="flex-1 p-2 text-center text-white font-bold">
+              <Text className="w-40 p-2 text-center text-white font-bold">
                 {t("DailyTarget.Variety")}
               </Text>
               <Text className="w-32 p-2 text-center text-white font-bold">
@@ -342,15 +343,18 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                   />
                 </View>
               ) : selectedToggle === "ToDo" && todoData.length === 0 ? (
-                <View className="flex-1 justify-center items-center py-20">
+                <View className="flex-1 justify-center py-[30%] items-center ">
                   <LottieView
                     source={require("../../assets/lottie/no-data.json")}
                     autoPlay
                     loop
                     style={{ width: 150, height: 150 }}
                   />
-                  <Text className="text-gray-500 mt-4">
-                    {t("DailyTarget.NoTodoItems")}
+                  <Text className="text-gray-500 mt-[-5%] text-center">
+                    {selectedToggle === "ToDo"
+                      ? t("DailyTarget.NoTodoItems") || "No items to do"
+                      : t("DailyTarget.noCompletedTargets") ||
+                        "No completed items"}
                   </Text>
                 </View>
               ) : selectedToggle === "Completed" &&
@@ -370,8 +374,9 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 displayedData.map((item, index) => (
                   <View
                     key={index}
-                    className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                      }`}
+                    className={`flex-row border-b border-gray-300 ${
+                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                    }`}
                   >
                     {/* No. */}
                     <View className="w-16 justify-center items-center border-r border-gray-300 py-3">
@@ -383,8 +388,10 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                     </View>
 
                     {/* Variety */}
-                    <View className="flex-1 justify-center items-center border-r border-gray-300 p-2">
-                      <Text className="text-center">{getvarietyName(item)}</Text>
+                    <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
+                      <Text className="text-center">
+                        {getvarietyName(item)}
+                      </Text>
                     </View>
 
                     {/* Grade */}

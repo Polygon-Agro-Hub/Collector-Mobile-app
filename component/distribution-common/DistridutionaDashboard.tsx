@@ -232,16 +232,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View
-          className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-4 mb-8 p-4"
-          style={{
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4,
-          }}
-        >
+        <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 mb-5 p-4 border-[1px] border-[#DF9301]">
           <Text className="text-center text-yellow-600 font-bold">
             🚀{t("DistridutionaDashboard.Keep")}
           </Text>
@@ -252,16 +243,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       );
     } else {
       return (
-        <View
-          className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-4 mb-8 p-4"
-          style={{
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4,
-          }}
-        >
+         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
           <View className="flex-row justify-center items-center mb-2">
             <Image
               source={require("../../assets/images/dashboard/Applause.webp")}

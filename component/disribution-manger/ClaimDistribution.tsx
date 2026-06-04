@@ -15,13 +15,17 @@ import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
+import CustomHeader from "../navigations/CustomHeader";
 
 interface OfficerDetails {
   id: number;
@@ -38,14 +42,30 @@ interface OfficerDetails {
   lastNameTamil: string;
   image: string;
 }
-type ClaimOfficerNavigationProp = StackNavigationProp<
+type ClaimDistributionNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "ClaimOfficer"
+  "ClaimDistribution"
 >;
 
-const ClaimOfficer: React.FC = () => {
-  const navigation = useNavigation<ClaimOfficerNavigationProp>();
-  const [jobRole, setJobRole] = useState("Distribution Officer");
+type ClaimDistributionRouteProp = RouteProp<
+  RootStackParamList,
+  "ClaimDistribution"
+>;
+
+interface Props {
+  route: ClaimDistributionRouteProp;
+}
+
+const ClaimDistribution: React.FC<Props> = ({ route }) => {
+  const navigation = useNavigation<ClaimDistributionNavigationProp>();
+
+  const activeTab = route.params?.activeTab;
+  const isDriver = activeTab === "Drivers";
+
+  const [jobRole, setJobRole] = useState(
+    isDriver ? "Driver" : "Distribution Officer",
+  );
+  const [empPrefix, setEmpPrefix] = useState(isDriver ? "DRV" : "DIO");
   const [empID, setEmpID] = useState("");
   const [officerFound, setOfficerFound] = useState(false);
   const [officerDetails, setOfficerDetails] = useState<OfficerDetails | null>(
@@ -53,12 +73,20 @@ const ClaimOfficer: React.FC = () => {
   );
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const empPrefix = "DIO";
+  const resetState = useCallback(() => {
+    const currentTab = route.params?.activeTab;
+    const currentIsDriver = currentTab === "Drivers";
+    setJobRole(currentIsDriver ? "Driver" : "Distribution Officer");
+    setEmpPrefix(currentIsDriver ? "DRV" : "DIO");
+    setEmpID("");
+    setOfficerFound(false);
+    setOfficerDetails(null);
+    setHasSearched(false);
+  }, [route.params?.activeTab]);
 
   const handleEmpIDChange = (text: string) => {
     const numericOnly = text.replace(/[^0-9]/g, "");
@@ -73,6 +101,7 @@ const ClaimOfficer: React.FC = () => {
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
+      setSearchLoading(false);
       return;
     }
     try {
@@ -87,7 +116,7 @@ const ClaimOfficer: React.FC = () => {
       }
 
       const response = await fetch(
-        `${environment.API_BASE_URL}api/collection-manager/get-claim-officer`,
+        `${environment.API_BASE_URL}api/distribution-manager/get-claim-officer`,
         {
           method: "POST",
           headers: {
@@ -117,13 +146,10 @@ const ClaimOfficer: React.FC = () => {
           lastNameSinhala: officer.lastNameSinhala,
           lastNameTamil: officer.lastNameTamil,
         });
-
         setOfficerFound(true);
-        setSearchLoading(false);
         setHasSearched(true);
       } else {
         setOfficerFound(false);
-        setSearchLoading(false);
         setHasSearched(true);
       }
     } catch (err) {
@@ -148,7 +174,7 @@ const ClaimOfficer: React.FC = () => {
       setLoading(true);
 
       const response = await fetch(
-        `${environment.API_BASE_URL}api/collection-manager/claim-officer`,
+        `${environment.API_BASE_URL}api/distribution-manager/claim-officer`,
         {
           method: "POST",
           headers: {
@@ -170,10 +196,8 @@ const ClaimOfficer: React.FC = () => {
           t("Error.Success"),
           t("Error.Officer successfully claimed."),
         );
-        setOfficerFound(false);
-        setOfficerDetails(null);
-        setEmpID("");
         setModalVisible(false);
+        resetState();
         navigation.navigate("Main", { screen: "DistributionOfficersList" });
       }
     } catch (err) {
@@ -190,6 +214,8 @@ const ClaimOfficer: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
+      resetState();
+
       const handleBackPress = () => {
         navigation.navigate("DistributionOfficersList");
         return true;
@@ -201,7 +227,7 @@ const ClaimOfficer: React.FC = () => {
       );
 
       return () => subscription.remove();
-    }, [navigation]),
+    }, [navigation, resetState]),
   );
 
   const ConfirmationModal = ({
@@ -217,7 +243,14 @@ const ClaimOfficer: React.FC = () => {
         animationType="fade"
         onRequestClose={onCancel}
       >
-        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000040",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <View className="bg-white items-center rounded-lg w-80  p-6">
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
@@ -226,10 +259,10 @@ const ClaimOfficer: React.FC = () => {
               {t("ClaimOfficer.Are you sure you want to claim this officer?")}
             </Text>
 
-            <View className="flex-row  justify-center gap-4">
+            <View className="flex-row justify-center gap-4">
               <TouchableOpacity
                 onPress={onCancel}
-                className="p-2 py-3 px-8 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
+                className="p-2 py-2 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#060606",
                   shadowOffset: { width: 0, height: 4 },
@@ -238,7 +271,7 @@ const ClaimOfficer: React.FC = () => {
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-[#6B7D8C]">
+                <Text className="text-sm text-[#6B7D8C]">
                   {t("ClaimOfficer.Cancel")}
                 </Text>
               </TouchableOpacity>
@@ -246,7 +279,7 @@ const ClaimOfficer: React.FC = () => {
               <TouchableOpacity
                 onPress={onConfirm}
                 disabled={onLoading}
-                className={`p-2 py-3 px-9 rounded-lg ${
+                className={`p-2 py-2 px-9 rounded-lg ${
                   onLoading ? "bg-gray-400" : "bg-[#313131]"
                 }`}
                 style={{
@@ -257,7 +290,7 @@ const ClaimOfficer: React.FC = () => {
                   elevation: 6,
                 }}
               >
-                <Text className="text-lg text-white">
+                <Text className="text-sm text-white">
                   {t("ClaimOfficer.Claim")}
                 </Text>
               </TouchableOpacity>
@@ -274,25 +307,16 @@ const ClaimOfficer: React.FC = () => {
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-4 bg-white shadow-sm">
-        <TouchableOpacity
-          className="bg-[#F6F6F680] rounded-full p-2"
-          onPress={() => navigation.navigate("DistributionOfficersList")}
-        >
-          <AntDesign name="left" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <View className="flex-1 ">
-          <Text className="text-lg font-bold text-center">
-            {t("ClaimOfficer.ClaimOfficers")}
-          </Text>
-        </View>
-      </View>
+      <CustomHeader
+        title={t("ClaimOfficer.ClaimOfficers")}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => navigation.navigate("DistributionOfficersList")}
+      />
 
       {/* Form */}
       <View className="px-8 mt-7">
-        <Text className="font-semibold text-gray-800  mb-2 text-center">
+        <Text className="font-semibold text-gray-800 mb-2 text-center">
           {t("ClaimOfficer.EMPID")}
         </Text>
         <View className="flex-row items-center border border-gray-300 rounded-full mb-4">
@@ -309,20 +333,16 @@ const ClaimOfficer: React.FC = () => {
         </View>
 
         <TouchableOpacity
-          className={`py-4 rounded-full items-center mt-7  ${
+          className={`py-4 rounded-full items-center mt-7 ${
             !empID || officerFound || searchLoading
               ? "bg-[#ABABAB]"
               : "bg-[#980775]"
           }`}
           style={{
             shadowColor: "#000000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
+            shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 2,
             shadowRadius: 3.84,
-
             elevation: 5,
           }}
           disabled={!empID || officerFound}
@@ -350,7 +370,7 @@ const ClaimOfficer: React.FC = () => {
       )}
 
       {/* No Officer Found */}
-      {!officerFound && empID && (
+      {!officerFound && hasSearched && empID && (
         <View className="flex items-center justify-center mt-24">
           <Image
             source={require("../../assets/images/collection-manager/delete-icon.webp")}
@@ -364,7 +384,7 @@ const ClaimOfficer: React.FC = () => {
       )}
 
       {officerFound && (
-        <View className=" mt-10 items-center">
+        <View className="mt-10 items-center">
           <Image
             source={
               officerDetails?.image
@@ -407,34 +427,30 @@ const ClaimOfficer: React.FC = () => {
             </>
           ) : (
             <>
-              <Text className="text-lg font-bold text-gray-800">
+              <Text className="text-xl font-bold text-gray-800">
                 {officerDetails?.firstNameEnglish}{" "}
                 {officerDetails?.lastNameEnglish}
               </Text>
-              <Text className="text-sm text-gray-500">
+              <Text className="text-lg text-[#627189]">
                 {t(`ClaimOfficer.${officerDetails?.jobRole}`)} -{" "}
                 <Text className="font-bold text-black">
                   {officerDetails?.empId}
                 </Text>
               </Text>
-              <Text className="text-sm text-gray-500">
+              <Text className="text-sm mt-1 text-gray-500">
                 {officerDetails?.companyNameEnglish}
               </Text>
             </>
           )}
 
           <TouchableOpacity
-            className="mt-6 mb-10 bg-[#000000]    py-4 rounded-full"
+            className="mt-6 mb-10 bg-[#000000] py-4 rounded-full"
             onPress={() => setModalVisible(true)}
             style={{
               shadowColor: "#000000",
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
+              shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.25,
               shadowRadius: 3.84,
-
               elevation: 5,
             }}
           >
@@ -442,13 +458,14 @@ const ClaimOfficer: React.FC = () => {
               className={`text-white text-lg ${
                 i18n.language === "en" ? "px-28" : "px-24"
               } font-semibold text-center`}
-              style={[{ fontSize: 16 }]}
+              style={{ fontSize: 16 }}
             >
               {t("ClaimOfficer.Claim Officer")}
             </Text>
           </TouchableOpacity>
         </View>
       )}
+
       <ConfirmationModal
         visible={modalVisible}
         onConfirm={handleClaimOfficer}
@@ -459,4 +476,4 @@ const ClaimOfficer: React.FC = () => {
   );
 };
 
-export default ClaimOfficer;
+export default ClaimDistribution;

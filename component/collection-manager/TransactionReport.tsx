@@ -729,8 +729,10 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
               {/* Table Rows */}
               {crops.map((crop, index) => (
                 <View key={`${crop.id}-${index}`} className="flex-row">
-                  <Text className="w-24 p-2 border-b border-gray-300">
-                    {" "}
+                  <Text
+                    className="w-24 p-2 border-b border-gray-300 text-left"
+                    style={{ flexWrap: "wrap" }}
+                  >
                     {getCropName(crop)}
                   </Text>
                   <Text className="w-24 p-2 border-b border-gray-300">
@@ -758,7 +760,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         <View className="border-t border-gray-400 my-2"></View>
 
         {/* Total */}
-        <View className="mb-4 items-end">
+        <View className="py-2 items-end justify-center ">
           <Text className="font-bold">
             {t("NewReport.Full Total (Rs.) Rs.")}
             {formatNumberWithCommas(totalSum)}

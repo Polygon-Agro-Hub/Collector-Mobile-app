@@ -219,7 +219,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   } | null>(null);
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
-  // Reset all OTP state and restart timer every time screen is focused
   useFocusEffect(
     useCallback(() => {
       setOtpCode("");
@@ -245,13 +244,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     }, []),
   );
 
-  // Set language on mount
   useEffect(() => {
     const selectedLanguage = t("Otpverification.LNG");
     setLanguage(selectedLanguage);
   }, []);
 
-  // Countdown timer
   useEffect(() => {
     if (timer > 0 && !isVerified) {
       const interval = setInterval(() => {
@@ -264,7 +261,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     }
   }, [timer, isVerified]);
 
-  // Hardware back button
   useEffect(() => {
     const backAction = () => {
       navigation.navigate("UpdateFarmerBankDetails" as any, {
@@ -393,7 +389,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           await AsyncStorage.removeItem("referenceId");
 
           if (saveResponse.status === 200) {
-            // ✅ Use data directly from saveResponse — no second API call needed
             setFarmerData({
               NICnumber: saveResponse.data.NICnumber,
               userId: saveResponse.data.userId,
@@ -568,8 +563,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
 
           <View className="mb-5">
-            <Text className="text-[#0085FF] text-center text-[18px]">
-              {phoneNumber}
+            <Text className="text-[#0085FF] text-center text-[16px]">
+              {phoneNumber
+                ? phoneNumber.replace(
+                    /^(\+94|94|0)?(\d{2})(\d{3})(\d{4})$/,
+                    "+94 $2 $3 $4",
+                  )
+                : phoneNumber}
             </Text>
           </View>
 
@@ -582,12 +582,16 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                 }}
                 className="w-[51px] h-[48px] text-[24px] text-center rounded-[10px] bg-white text-black border-[#FFC738] border-[1px]"
                 style={{
+                  height: 52,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.25,
                   shadowRadius: 4,
                   elevation: 4,
-                  textAlignVertical: "center",
                 }}
                 keyboardType="numeric"
                 maxLength={1}
@@ -601,25 +605,30 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           </View>
 
           <View className="mb-[16px]">
-            <Text className="text-[#707070] text-center text-[18px]">
+            <Text className="text-[#707070] text-center text-base font-medium">
               {t("Otpverification.Didreceive")}
             </Text>
           </View>
 
           <View className="mb-[64px]">
-            <Text
-              className="text-center underline"
-              onPress={disabledResend ? undefined : handleResendOTP}
-              style={{
-                fontSize: 16,
-                color: disabledResend ? "#9CA3AF" : "#000000",
-                fontWeight: "600",
-              }}
+            <TouchableOpacity
+              onPress={handleResendOTP}
+              disabled={disabledResend}
+              activeOpacity={0.7}
             >
-              {timer > 0
-                ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
-                : `${t("Otpverification.Resend again")}`}
-            </Text>
+              <Text
+                className="text-center underline"
+                style={{
+                  fontSize: 18,
+                  color: disabledResend ? "#9CA3AF" : "#000000",
+                  fontWeight: "600",
+                }}
+              >
+                {timer > 0
+                  ? `${t("Otpverification.Resend in")} ${formatTime(timer)}`
+                  : `${t("Otpverification.Resend again")}`}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           <ShowSuccessModal
