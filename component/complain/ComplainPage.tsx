@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -19,7 +20,12 @@ import { environment } from "@/environment/environment";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  RouteProp,
+  useFocusEffect,
+} from "@react-navigation/native";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 import CustomHeader from "../navigations/CustomHeader";
 import LoadingPage from "../commons/LoadingPage";
@@ -73,12 +79,12 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
 
     const fetchComplainCategory = async () => {
       try {
-         const token = await AsyncStorage.getItem("token");
-    console.log("TOKEN:", token);
+        const token = await AsyncStorage.getItem("token");
+        console.log("TOKEN:", token);
 
         const response = await axios.get(
           `${environment.API_BASE_URL}api/complain/get-complain-category`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (response.data.status === "success") {
           const categoryField =
@@ -172,6 +178,22 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     value: item.value,
   }));
 
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("SideMenu");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   return (
     <>
       <KeyboardAvoidingView
@@ -196,7 +218,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 title=""
                 showBackButton={true}
                 navigation={navigation}
-                onBackPress={() => navigation.goBack()}
+                onBackPress={() => navigation.navigate("SideMenu")}
                 transparent
               />
 

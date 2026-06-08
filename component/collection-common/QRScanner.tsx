@@ -145,7 +145,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
         throw new Error(t("Error.User ID not found in QR code"));
       }
 
-      navigation.navigate("FarmerQr" as any, { userId });
+      navigation.navigate("Main" as any, { screen: "FarmerQr", params: { userId } });
     } catch (error) {
       console.error("QR Parsing Error:", error);
 

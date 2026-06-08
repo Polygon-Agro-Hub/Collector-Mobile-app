@@ -105,6 +105,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         phoneNumber: phoneNumber,
         PreferdLanguage: PreferdLanguage,
         officerRole: "COO",
+        comingFromOtp: true,
       });
       return true;
     };
@@ -370,6 +371,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             phoneNumber: phoneNumber,
             PreferdLanguage: PreferdLanguage,
             officerRole: "COO",
+            comingFromOtp: true,
           })
         }
       />

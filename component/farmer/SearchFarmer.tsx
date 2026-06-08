@@ -153,9 +153,12 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
           setFarmers(farmer);
         } else {
           setIsSearching(false);
-          navigation.navigate("FarmerQr" as any, {
-            NICnumber: farmer.NICnumber,
-            userId: farmer.id,
+          navigation.navigate("Main" as any, {
+            screen: "FarmerQr",
+            params: {
+              NICnumber: farmer.NICnumber,
+              userId: farmer.id,
+            },
           });
         }
       }
@@ -381,7 +384,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                       officerRole: "COO",
                     })
                   }
-                  className="mt-8 bg-[#000000]  rounded-full  p-3"
+                  className="mt-8 bg-[#000000] rounded-full p-3 w-full h-[50px] items-center justify-center"
                   style={{
                     backgroundColor: "#000000",
                     shadowColor: "#000",
@@ -393,7 +396,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                 >
                   <Text
                     style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                    className="text-center text-white font-semibold text-lg mx-[32%]"
+                    className="text-center text-white font-semibold text-lg"
                   >
                     {t("SearchFarmer.Set QR Code")}
                   </Text>
