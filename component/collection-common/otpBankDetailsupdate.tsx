@@ -16,176 +16,12 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import { Dimensions } from "react-native";
-import { Modal } from "react-native";
-import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
-
-const { width: screenWidth } = Dimensions.get("window");
-
-type RootStackParamList = {
-  OtpVerification: undefined;
-  NextScreen: undefined;
-};
-
-interface SuccessModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onComplete: () => void;
-}
-
-interface FailModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onFail: () => void;
-}
-
-const ShowSuccessModal: React.FC<SuccessModalProps> = ({
-  visible,
-  onClose,
-  onComplete,
-}) => {
-  const progress = useRef(new Animated.Value(0)).current;
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    if (visible) {
-      progress.setValue(0);
-      Animated.timing(progress, {
-        toValue: 100,
-        duration: 2000,
-        useNativeDriver: false,
-      }).start(() => {
-        setTimeout(() => {
-          onComplete();
-        }, 500);
-      });
-    }
-  }, [visible]);
-
-  return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
-          <Text className="text-xl font-bold mt-4 text-center">
-            {t("BankDetailsUpdate.Success")}
-          </Text>
-
-          <Image
-            source={require("../../assets/images/collection-common/otpsuccess.webp")}
-            style={{ width: 80, height: 80, marginVertical: 16 }}
-            resizeMode="contain"
-          />
-
-          <Text className="text-gray-500 mb-4">
-            {t("BankDetailsUpdate.SuccessMessage")}
-          </Text>
-
-          <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
-            <Animated.View
-              style={{
-                height: "100%",
-                backgroundColor: "#980775",
-                width: progress.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ["0%", "100%"],
-                }),
-              }}
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
-const ShowFailModal: React.FC<FailModalProps> = ({
-  visible,
-  onClose,
-  onFail,
-}) => {
-  const progress = useRef(new Animated.Value(0)).current;
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    if (visible) {
-      progress.setValue(0);
-      Animated.timing(progress, {
-        toValue: 100,
-        duration: 2000,
-        useNativeDriver: false,
-      }).start(() => {
-        setTimeout(() => {
-          onFail();
-        }, 500);
-      });
-    }
-  }, [visible]);
-
-  return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <View className="bg-white p-6 rounded-2xl items-center w-72 h-60 shadow-lg relative">
-          <Text className="text-xl font-bold mt-4 text-center">
-            {t("BankDetailsUpdate.Failed")}
-          </Text>
-
-          <Image
-            source={require("../../assets/images/collection-common/error.webp")}
-            style={{ width: 80, height: 80, marginVertical: 16 }}
-            resizeMode="contain"
-          />
-
-          <Text className="text-gray-500 mb-4">
-            {t("BankDetailsUpdate.FailedMessage")}
-          </Text>
-
-          <TouchableOpacity
-            className="bg-[#ef4444] px-6 py-2 rounded-full mt-6"
-            onPress={() => {
-              onClose();
-              onFail();
-            }}
-          >
-            <Text className="text-white font-semibold">
-              {t("Otpverification.OK")}
-            </Text>
-          </TouchableOpacity>
-
-          <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
-            <Animated.View
-              style={{
-                height: "100%",
-                backgroundColor: "#ef4444",
-                width: progress.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ["0%", "100%"],
-                }),
-              }}
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
+import SuccessModal from "../commons/SuccessModal";
+import FailedModal from "../commons/FailedModal";
 
 const Otpverification: React.FC = ({ navigation, route }: any) => {
   const {
@@ -631,16 +467,20 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </TouchableOpacity>
           </View>
 
-          <ShowSuccessModal
+          <SuccessModal
             visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onComplete={handleSuccessCompletion}
+            title={t("BankDetailsUpdate.Success")}
+            message={t("BankDetailsUpdate.SuccessMessage")}
+            duration={2000}
+            onClose={handleSuccessCompletion}
           />
 
-          <ShowFailModal
+          <FailedModal
             visible={failModalVisible}
-            onClose={() => setFailModalVisible(false)}
-            onFail={handleFailCompletion}
+            title={t("BankDetailsUpdate.Failed")}
+            message={t("BankDetailsUpdate.FailedMessage")}
+            duration={2000}
+            onClose={handleFailCompletion}
           />
 
           <View className="w-full items-center" style={{ marginBottom: 52 }}>
