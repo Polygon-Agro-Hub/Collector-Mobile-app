@@ -297,9 +297,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={true}
-            style={{
-              marginBottom: 40,
-            }}
           >
             <View style={{ width: "100%" }}>
               {/* Table Header */}
@@ -331,7 +328,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                     onRefresh={onRefresh}
                   />
                 }
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom:80 }}
               >
                 {/* Table Data */}
                 {displayedData.length > 0 ? (

@@ -419,7 +419,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
         <ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 70 }}
         >
           <View className="items-center mb-6 mt-4 max-w-[500px] w-full mx-auto">
             <View className="items-center relative">

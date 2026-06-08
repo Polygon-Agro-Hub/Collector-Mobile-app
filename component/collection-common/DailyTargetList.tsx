@@ -330,7 +330,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               showsVerticalScrollIndicator={true}
-              contentContainerStyle={{ paddingBottom: 60 }}
+              contentContainerStyle={{ paddingBottom:80 }}
             >
               {/* Table Data */}
               {loading ? (

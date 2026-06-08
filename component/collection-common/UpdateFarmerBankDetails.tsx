@@ -47,7 +47,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   navigation,
   route,
 }) => {
-  const { id, phoneNumber, PreferdLanguage, officerRole } = route.params;
+  const { id, phoneNumber, PreferdLanguage, officerRole, comingFromOtp } =
+    route.params;
 
   const [accNumber, setAccNumber] = useState("");
   const [accHolderName, setAccHolderName] = useState("");
@@ -67,6 +68,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
   const [bankModalVisible, setBankModalVisible] = useState(false);
   const [branchModalVisible, setBranchModalVisible] = useState(false);
+  const isFirstMount = useRef(true);
 
   const bankModalData = bankNames.map((bank) => ({
     label: bank.name,
@@ -188,11 +190,13 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
   useFocusEffect(
     useCallback(() => {
-      setAccNumber("");
-      setAccHolderName("");
-      setBankName("");
-      setBranchName("");
-      setAccNumberError("");
+      if (!comingFromOtp) {
+        setAccNumber("");
+        setAccHolderName("");
+        setBankName("");
+        setBranchName("");
+        setAccNumberError("");
+      }
 
       const handleBackPress = () => {
         navigation.navigate("Main" as any, { screen: "SearchFarmer" });
@@ -207,7 +211,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       return () => {
         subscription.remove();
       };
-    }, [navigation]),
+    }, [navigation, comingFromOtp]),
   );
 
   return (

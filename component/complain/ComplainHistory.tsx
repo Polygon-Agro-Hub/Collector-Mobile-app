@@ -8,7 +8,6 @@ import {
   Modal,
   StatusBar,
   Platform,
-  Dimensions,
   BackHandler,
 } from "react-native";
 import axios from "axios";
@@ -395,7 +394,7 @@ ${signature}${replyTime}`,
         </View>
       ) : (
         <ScrollView
-          className=" flex-1 mb-14 w-full max-w-[500px] mx-auto"
+          className=" flex-1  w-full max-w-[500px] mx-auto"
           contentContainerStyle={{
             paddingBottom: hp(4),
             paddingHorizontal: wp(4),
@@ -420,7 +419,7 @@ ${signature}${replyTime}`,
                     className="bg-black px-3 py-2 rounded"
                     onPress={() => handleViewReply(complain)}
                   >
-                    <Text className="text-white text-xs">
+                    <Text className="text-white text-s">
                       {t("ReportHistory.View")}
                     </Text>
                   </TouchableOpacity>
