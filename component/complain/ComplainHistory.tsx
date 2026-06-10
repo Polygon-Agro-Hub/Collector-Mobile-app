@@ -388,7 +388,7 @@ ${signature}${replyTime}`,
             autoPlay
             loop
           />
-          <Text className="text-center mt-[-5%] text-gray-600 mt-4">
+          <Text className="text-center mt-[-5%] text-gray-600">
             {t("ReportHistory.noData")}
           </Text>
         </View>

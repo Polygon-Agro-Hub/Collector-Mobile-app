@@ -269,13 +269,17 @@ function MainTabNavigator() {
         name="CenterTargetScreen"
         component={CenterTargetScreen as any}
       />
-       <Tab.Screen name="FarmerQr" component={FarmerQr} />
-       <Tab.Screen name="CenterTarget" component={CenterTarget as any} />
+      <Tab.Screen name="FarmerQr" component={FarmerQr} />
+      <Tab.Screen name="CenterTarget" component={CenterTarget as any} />
       <Tab.Screen
         name="DistributionOfficerReport"
         component={DistributionOfficerReport as any}
       />
-       <Tab.Screen name="ComplainPage" component={ComplainPage} />
+      <Tab.Screen name="ComplainPage" component={ComplainPage} />
+      <Tab.Screen
+        name="RecieveTargetBetweenOfficers"
+        component={RecieveTargetBetweenOfficers as any}
+      />
     </Tab.Navigator>
   );
 }
@@ -380,14 +384,11 @@ function AppContent() {
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="FormScreen" component={FormScreen} />
             <Stack.Screen name="Lanuage" component={Lanuage} />
-           
 
-           
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="ReportPage" component={ReportPage} />
 
             <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
-           
 
             <Stack.Screen name="NewReport" component={NewReport as any} />
             <Stack.Screen name="qrcode" component={Qrcode as any} />
@@ -416,11 +417,6 @@ function AppContent() {
             <Stack.Screen
               name="NoCollectionCenterScreen"
               component={NoCollectionCenterScreen}
-            />
-
-            <Stack.Screen
-              name="RecieveTargetBetweenOfficers"
-              component={RecieveTargetBetweenOfficers as any}
             />
 
             <Stack.Screen

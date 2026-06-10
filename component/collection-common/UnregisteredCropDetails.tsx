@@ -875,7 +875,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1 }}
+      style={{ flex: 1 ,backgroundColor:'white' }}
     >
       <ScrollView
         className="flex-1 bg-white mb-8"
@@ -891,7 +891,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               navigation.navigate("FarmerQr", { userId } as any)
             }
           />
-          <View className="px-6 py-4">
+          <View className="px-6 ">
             {/* ── Added-crops carousel ── */}
             {crops.length > 0 && (
               <View className="mb-2">
@@ -1028,9 +1028,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                   </Text>
 
                                   {/* Quantity */}
-                                  <Text style={{ fontWeight: "bold", flex: 1 }}>
-                                    {crop[`grade${grade}quan`]}kg
-                                  </Text>
+                                  {/* Quantity */}
+<Text style={{ fontWeight: "bold", flex: 1, textAlign: "center" }}>
+  {crop[`grade${grade}quan`]}kg
+</Text>
 
                                   {/* Delete-grade button / spinner */}
                                   {isGradeDeleting ? (
@@ -1266,7 +1267,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 <TouchableOpacity
                   onPress={handleSubmit}
                   disabled={donebutton2disabale || loading}
-                  className={`bg-[#980775] rounded-full p-4 mt-4 mb-10 ${donebutton2disabale || loading ? "opacity-50" : ""}`}
+                  className={`bg-[#980775] rounded-full p-4 mt-4  ${donebutton2disabale || loading ? "opacity-50" : ""}`}
                   style={{
                     shadowColor: "#000000",
                     shadowOffset: { width: 0, height: 4 },

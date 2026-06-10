@@ -87,7 +87,7 @@
     "Failed to disclaim officer.": "Failed to disclaim officer.",
     "Failed to get officer status.": "Failed to get officer status.",
     "Failed to fetch officers.": "Failed to fetch officers.",
-    "No officers available.": "No targets have been assigned today for the selected crop.",
+    "No officers available.": "No Search Results Found.",
     "An error occurred while fetching officers.": "An error occurred while fetching officers.",
     "You have exceeded the maximum amount.": "You have exceeded maximum amount",
     "Please select an officer.": "Please select an officer.",
@@ -247,7 +247,8 @@
     "Confirm account number is required": "Confirm account number is required",
     "Bank name is required": "Bank name is required",
     "Branch name is required": "Branch name is required",
-    "Price updated successfully": "Price updated successfully"
+    "Price updated successfully": "Price updated successfully",
+    "No targets have been assigned today for the selected crop.":"No targets have been assigned today for the selected crop."
   },
   "SideMenu": {
     "LNG": "en",

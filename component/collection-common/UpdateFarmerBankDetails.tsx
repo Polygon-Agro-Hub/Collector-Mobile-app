@@ -407,11 +407,18 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               alignItems: "center",
             }}
           >
-            <View className="bg-white rounded-lg w-72 p-6 items-center">
-              <Text className="text-xl font-bold mb-4">
+            <View
+              className="bg-white rounded-lg w-72 items-center"
+              style={{
+                paddingHorizontal: 24,
+                paddingTop: 20,
+                paddingBottom: 16,
+              }}
+            >
+              <Text className="text-xl font-bold mb-2">
                 {t("UnregisteredFarmerDetails.Success")}
               </Text>
-              <View className="mb-4">
+              <View className="mb-2">
                 <Image
                   source={require("../../assets/images/collection-common/tick.webp")}
                   className="w-24 h-24"
@@ -420,7 +427,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               <Text className="text-gray-700">
                 {t("UnregisteredFarmerDetails.Successful")}
               </Text>
-              <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
+              <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-3">
                 <Animated.View
                   className="h-full bg-green-500"
                   style={{ width: loadingBarWidth }}

@@ -87,7 +87,7 @@
     "Failed to disclaim officer.": "නිලධාරියා ප්‍රතික්ෂේප කිරීමට අපොහොසත් විය.",
     "Failed to get officer status.": "නිලධාරිගේ ක්‍රියාකාරිත්වය ලබා ගැනීමට අපොහොසත් විය.",
     "Failed to fetch officers.": "නිලධාරීන් සම්බන්ධ කර ගැනීමට අපොහොසත් විය.",
-    "No officers available.": "ලබා ගත හැකි නිලධාරීන් නොමැත.",
+    "No officers available.": "සෙවුම් ප්‍රතිඵල හමු නොවීය.",
     "An error occurred while fetching officers.": "නිලධාරීන් ලබා ගැනීමේදි ගැටළුවක් ඇති විය",
     "You have exceeded the maximum amount.": "ඔබ පැවරිය හැකි උපරිම ප්‍රමාණය ඉක්මවා ඇත",
     "Please select an officer.": "කරුණාකර නිලධාරියෙකු තෝරන්න.",
@@ -247,7 +247,8 @@
     "Confirm account number is required": "ගිණුම් අංකය තහවුරු කිරීම අවශ්‍යයි.",
     "Bank name is required": "බැංකුවේ නම අවශ්‍යයි",
     "Branch name is required": "ශාඛාවේ නම අවශ්‍යයි",
-    "Price updated successfully": "මිල සාර්ථකව යාවත්කාලීන කරන ලදී"
+    "Price updated successfully": "මිල සාර්ථකව යාවත්කාලීන කරන ලදී",
+    "No targets have been assigned today for the selected crop.":"තෝරාගත් බෝගය සඳහා අද දින කිසිදු ඉලක්කයක් පවරා නොමැත."
   },
   "SideMenu": {
     "LNG": "si",

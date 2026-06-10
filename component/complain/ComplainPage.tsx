@@ -280,7 +280,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     />
 
                     <TouchableOpacity
-                      className="w-full bg-black rounded-3xl items-center justify-center mb-20 h-[50px]"
+                      className="w-full bg-black rounded-3xl items-center justify-center mb-10 h-[50px]"
                       onPress={handleSubmit}
                       style={{
                         shadowColor: "#000000",

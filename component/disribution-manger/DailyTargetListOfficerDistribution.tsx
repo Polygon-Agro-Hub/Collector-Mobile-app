@@ -488,7 +488,7 @@ const DailyTargetListOfficerDistribution: React.FC<
             <View className="flex-row justify-center gap-x-4">
               <TouchableOpacity
                 onPress={handleCancelPass}
-                className="  py-3 rounded-lg flex-1 mr-2  bg-[#F6F7F9] items-center justify-center border border-[#95A1AC] rounded-lg"
+                className="  py-3 flex-1 mr-2  bg-[#F6F7F9] items-center justify-center border border-[#95A1AC] rounded-lg"
                 style={{
                   shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 4 },
