@@ -7,22 +7,17 @@ import {
   TouchableOpacity,
   Alert,
   Keyboard,
-  Platform,
   BackHandler,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import { Dimensions } from "react-native";
-import { Modal } from "react-native";
-import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+import SuccessModal from "../commons/SuccessModal";
 
 interface userItem {
   firstName: string;
@@ -36,74 +31,6 @@ interface userItem {
   branchName: string;
   PreferdLanguage: string;
 }
-
-interface SuccessModalProps {
-  visible: boolean;
-  onClose: () => void;
-}
-
-const ShowSuccessModal: React.FC<SuccessModalProps> = ({
-  visible,
-  onClose,
-}) => {
-  const progress = useRef(new Animated.Value(0)).current;
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    if (visible) {
-      progress.setValue(0);
-      Animated.timing(progress, {
-        toValue: 100,
-        duration: 2000,
-        useNativeDriver: false,
-      }).start(() => {
-        onClose();
-      });
-    }
-  }, [visible]);
-
-  return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <View className="bg-white p-6 rounded-2xl items-center w-80 h-60 shadow-lg relative">
-          <Text className="text-xl font-bold mt-4 text-center">
-            {t("Otpverification.Success")}
-          </Text>
-
-          <Image
-            source={require("../../assets/images/collection-common/otpsuccess.webp")}
-            style={{ width: 80, height: 80, marginVertical: 16 }}
-            resizeMode="contain"
-          />
-
-          <Text className="text-gray-500 mb-6 text-center">
-            {t("Otpverification.Registration")}
-          </Text>
-
-          <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
-            <Animated.View
-              style={{
-                height: "100%",
-                backgroundColor: "#980775",
-                width: progress.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ["0%", "100%"],
-                }),
-              }}
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 const Otpverification: React.FC = ({ navigation, route }: any) => {
   const {
@@ -589,8 +516,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         </View>
       </ScrollView>
 
-      <ShowSuccessModal
+      <SuccessModal
         visible={modalVisible}
+        title={t("Otpverification.Success")}
+        message={t("Otpverification.Registration")}
+        duration={2000}
         onClose={() => {
           setModalVisible(false);
           pendingNavigation.current?.();

@@ -20,10 +20,6 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
 import FarmerQrSkeletonLoader from "../skeletons/FarmerQrSkeletonLoader";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
@@ -203,10 +199,6 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
       const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== "granted") {
-        Alert.alert(
-          "QRcode.permissionDeniedTitle",
-          "QRcode.permissionDeniedMessage",
-        );
         return;
       }
 

@@ -246,7 +246,8 @@
     "Confirm account number is required": "கணக்கு எண்ணை உறுதிப்படுத்துவது அவசியம்.",
     "Bank name is required": "வங்கியின் பெயர் அவசியம்",
     "Branch name is required": "கிளையின் பெயர் அவசியம்.",
-    "Price updated successfully": "விலை வெற்றிகரமாக புதுப்பிக்கப்பட்டது."
+    "Price updated successfully": "விலை வெற்றிகரமாக புதுப்பிக்கப்பட்டது.",
+    "No targets have been assigned today for the selected crop.":"தேர்ந்தெடுக்கப்பட்ட பயிருக்கு இன்று எந்த இலக்குகளும் நிர்ணயிக்கப்படவில்லை."
   },
   "SideMenu": {
     "LNG": "en",

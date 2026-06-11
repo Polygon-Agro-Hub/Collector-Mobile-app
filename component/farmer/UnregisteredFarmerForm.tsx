@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -54,6 +54,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   route,
 }) => {
   const { NIC } = route.params;
+
+  // ─── ref to track if we navigated to OTP (so we don't reset on return) ───
+  const cameFromOTP = useRef(false);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [NICnumber, setNICnumber] = useState("");
@@ -252,6 +256,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       const response = await axios.post(apiUrl, body, { headers });
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
+      // ─── Mark that we are navigating to OTP so useFocusEffect won't reset ───
+      cameFromOTP.current = true;
+
       navigation.navigate("Main" as any, {
         screen: "OTPE",
         params: {
@@ -327,27 +334,36 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     if (fieldErrors.accHolderName)
       setFieldErrors((prev) => ({ ...prev, accHolderName: "" }));
   };
+
   useFocusEffect(
     useCallback(() => {
-      setFirstName("");
-      setLastName("");
-      setNICnumber(NIC ?? "");
-      setPhoneNumber("");
-      setDistrict("");
-      setAccNumber("");
-      setAccHolderName("");
-      setBankName("");
-      setBranchName("");
-      setPreferdLanguage("");
-      setCallingCode("+94");
-      setNICError("");
-      setPhoneError("");
-      setAccNumberError("");
-      setFieldErrors({});
+      if (!cameFromOTP.current) {
+        // ─── Fresh entry from SearchFarmer — reset all fields ───
+        setFirstName("");
+        setLastName("");
+        setNICnumber(NIC ?? "");
+        setPhoneNumber("");
+        setDistrict("");
+        setAccNumber("");
+        setAccHolderName("");
+        setBankName("");
+        setBranchName("");
+        setPreferdLanguage("");
+        setCallingCode("+94");
+        setNICError("");
+        setPhoneError("");
+        setAccNumberError("");
+        setFieldErrors({});
+        setIsModalVisible(false);
+        setIsUnsuccessfulModalVisible(false);
+        setErrorMessage(null);
+      } else {
+        // ─── Returning from OTP screen — keep all form data as-is ───
+        cameFromOTP.current = false;
+      }
+
+      // Always reset loading state regardless of navigation origin
       setLoading(false);
-      setIsModalVisible(false);
-      setIsUnsuccessfulModalVisible(false);
-      setErrorMessage(null);
 
       const handleBackPress = () => {
         navigation.navigate("Main" as any, { screen: "SearchFarmer" });
@@ -362,7 +378,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       return () => {
         subscription.remove();
       };
-    }, [navigation, NIC]), // ✅ NIC in deps so it's always fresh
+    }, [navigation, NIC]),
   );
 
   const SelectorButton = ({

@@ -7,6 +7,7 @@ import {
   Image,
   Alert,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -79,6 +80,7 @@ interface officerDetails {
 const TransactionReport: React.FC<TransactionReportProps> = ({
   navigation,
 }) => {
+  const insets = useSafeAreaInsets();
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
   const [officerDetails, setOfficerDetails] = useState<officerDetails | null>(
     null,
@@ -374,21 +376,15 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
       border: 1px solid #000;
       font-size: 10px;
     }
-    
-    /* Alternating row colors */
     tbody tr:nth-child(odd) {
-      background-color: #f9f9f9; /* Light gray for odd rows */
+      background-color: #f9f9f9;
     }
-    
     tbody tr:nth-child(even) {
-      background-color: #ffffff; /* White for even rows */
+      background-color: #ffffff;
     }
-    
-    /* Optional: Hover effect for better interactivity */
     tbody tr:hover {
-      background-color: #e6f3ff; /* Light blue on hover */
+      background-color: #e6f3ff;
     }
-    
     .total-row {
       display: flex;
       justify-content: flex-end;
@@ -641,7 +637,12 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
   };
 
   return (
-    <ScrollView className="flex-1 bg-white ">
+    <ScrollView
+      className="flex-1 bg-white"
+      contentContainerStyle={{
+        paddingBottom: (insets.bottom || 20) + 40,
+      }}
+    >
       <CustomHeader
         title={t("NewReport.Goods Received Note")}
         showBackButton={true}
@@ -695,7 +696,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         </View>
 
         {/* Divider */}
-        <View className="border-t border-gray-400 my-2"></View>
+        <View className="border-t border-gray-400 my-2" />
 
         {/* Received Items */}
         <View className="mb-4">
@@ -757,10 +758,10 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         </View>
 
         {/* Divider */}
-        <View className="border-t border-gray-400 my-2"></View>
+        <View className="border-t border-gray-400 my-2" />
 
         {/* Total */}
-        <View className="py-2 items-end justify-center ">
+        <View className="py-2 items-end justify-center">
           <Text className="font-bold">
             {t("NewReport.Full Total (Rs.) Rs.")}
             {formatNumberWithCommas(totalSum)}
@@ -768,7 +769,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         </View>
 
         {/* Divider */}
-        <View className="border-t border-gray-400 my-2"></View>
+        <View className="border-t border-gray-400 my-2" />
 
         {/* Note */}
         <View className="mb-4">
@@ -779,7 +780,10 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         </View>
 
         {/* Action Buttons */}
-        <View className="flex-row justify-around w-full mb-7">
+        <View
+          className="flex-row justify-around w-full mt-4"
+          style={{ paddingBottom: insets.bottom || 20 }}
+        >
           <TouchableOpacity
             className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
             onPress={handleDownloadPDF}

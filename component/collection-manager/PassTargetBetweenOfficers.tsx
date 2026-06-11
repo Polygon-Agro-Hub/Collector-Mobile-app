@@ -41,6 +41,10 @@ interface PassTargetBetweenOfficersScreenProps {
       collectionOfficerId: number;
       dailyTarget: number;
       officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
     };
   };
 }
@@ -73,7 +77,11 @@ const PassTargetBetweenOfficers: React.FC<
     todo,
     varietyId,
     collectionOfficerId,
+    officerName,
     officerId,
+    phoneNumber1,
+    phoneNumber2,
+    image,
     varietyNameEnglish,
     varietyNameSinhala,
     varietyNameTamil,
@@ -83,7 +91,6 @@ const PassTargetBetweenOfficers: React.FC<
 
   const maxAmount = parseFloat(todo);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-
 
   const goBackToEditTarget = () => {
     navigation.reset({
@@ -117,7 +124,7 @@ const PassTargetBetweenOfficers: React.FC<
         "hardwareBackPress",
         () => {
           goBackToEditTarget();
-          return true; 
+          return true;
         },
       );
       return () => subscription.remove();
@@ -135,10 +142,6 @@ const PassTargetBetweenOfficers: React.FC<
     };
     fetchData();
   }, []);
-
-  useEffect(() => {
-    setAmount(maxAmount.toString());
-  }, [maxAmount]);
 
   const getOfficerName = (officer: Officer) => {
     switch (selectedLanguage) {
@@ -204,8 +207,11 @@ const PassTargetBetweenOfficers: React.FC<
 
   useFocusEffect(
     React.useCallback(() => {
+      setAssignee("");
+      setAmount(maxAmount.toString()); 
+      setError("");
       fetchOfficers();
-    }, []),
+    }, [maxAmount]), 
   );
 
   const handleAmountChange = (text: string) => {
@@ -275,7 +281,14 @@ const PassTargetBetweenOfficers: React.FC<
               onPress: () =>
                 navigation.navigate("Main", {
                   screen: "DailyTargetListForOfficers",
-                  params: { officerId, collectionOfficerId },
+                  params: {
+                    officerId,
+                    collectionOfficerId,
+                    officerName,
+                    phoneNumber1,
+                    phoneNumber2,
+                    image,
+                  },
                 }),
             },
           ],

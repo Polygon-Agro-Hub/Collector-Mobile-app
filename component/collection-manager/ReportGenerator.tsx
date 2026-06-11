@@ -137,7 +137,9 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       }
 
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `Report_${officerId}_${date}.pdf`;
+      const fmtForFileName = (d: Date) =>
+        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const fileName = `Report_${officerId}_From_${fmtForFileName(startDate!)}_To_${fmtForFileName(endDate!)}.pdf`;
 
       let tempFilePath = uri;
 
@@ -404,7 +406,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               shadowOpacity: 0.25,
               shadowRadius: 10,
               elevation: 6,
-              width:120
+              width: 120,
             }}
           >
             <Text
@@ -427,7 +429,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               shadowOpacity: startDate && endDate ? 0.25 : 0,
               shadowRadius: 10,
               elevation: startDate && endDate ? 6 : 0,
-              width:120
+              width: 120,
             }}
           >
             <Text
