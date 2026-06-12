@@ -16,8 +16,8 @@ import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
+import { AlertModal } from "../commons/AlertModal";
 import GlobalSearchModal from "@/component/commons/GlobalSearchModal";
-import SuccessModal from "../commons/SuccessModal";
 
 interface PassTargetProps {
   navigation: any;
@@ -499,10 +499,11 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
         )}
       </View>
 
-      <SuccessModal
+      <AlertModal
         visible={successVisible}
         title={t("PassTarget.Success")}
         message={t("PassTarget.Target passed successfully.")}
+        type="success"
         autoClose={true}
         duration={3000}
         onClose={() => {

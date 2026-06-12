@@ -17,7 +17,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
-import SuccessModal from "../commons/SuccessModal";
+import { AlertModal } from "../commons/AlertModal";
 
 interface userItem {
   firstName: string;
@@ -516,15 +516,14 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         </View>
       </ScrollView>
 
-      <SuccessModal
+      <AlertModal
+        type="success"
         visible={modalVisible}
         title={t("Otpverification.Success")}
         message={t("Otpverification.Registration")}
         duration={2000}
         onClose={() => {
           setModalVisible(false);
-          pendingNavigation.current?.();
-          pendingNavigation.current = null;
         }}
       />
     </View>

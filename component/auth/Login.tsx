@@ -207,14 +207,20 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         setLoading(false);
 
         let errorMessage = t("Error.This EMP ID is not approved.");
+        let statusType = "not_approved";
 
         if (data.accountStatus === "Rejected") {
           errorMessage = t("Error.This EMP ID is Rejected");
+          statusType = "rejected";
         } else if (data.accountStatus === "Not Approved") {
           errorMessage = t("Error.This EMP ID is not approved.");
+          statusType = "not_approved";
         }
 
-        Alert.alert(t("Error.error"), errorMessage);
+        navigation.navigate("BannedScreen", {
+          statusType,
+          message: errorMessage,
+        });
         return;
       }
 

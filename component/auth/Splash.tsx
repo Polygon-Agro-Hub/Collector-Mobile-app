@@ -57,7 +57,14 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
       );
       if (response.ok) {
         const data = await response.json();
-        return data.data.passwordUpdated;
+        return { passwordUpdated: data.data.passwordUpdated };
+      } else if (response.status === 403 || response.status === 401) {
+        const data = await response.json();
+        return {
+          isBanned: true,
+          accountStatus: data.accountStatus,
+          message: data.message,
+        };
       } else {
         throw new Error("Failed to fetch password status");
       }
@@ -95,7 +102,35 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         const tokenExpiry = new Date(expirationTime);
 
         if (currentTime < tokenExpiry) {
-          const passwordUpdated = await checkPasswordStatus(userToken);
+          const result = await checkPasswordStatus(userToken);
+
+          if (result.isBanned) {
+            await AsyncStorage.multiRemove([
+              "token",
+              "tokenStoredTime",
+              "tokenExpirationTime",
+              "jobRole",
+              "empid",
+              "companyNameEnglish",
+              "companyNameSinhala",
+              "companyNameTamil",
+            ]);
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "BannedScreen",
+                  params: {
+                    statusType: result.accountStatus === "Rejected" ? "rejected" : "not_approved",
+                    message: result.message,
+                  },
+                },
+              ],
+            });
+            return;
+          }
+
+          const passwordUpdated = result.passwordUpdated;
 
           if (passwordUpdated === 0) {
             navigation.navigate("Login");

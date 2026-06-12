@@ -22,6 +22,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import { AlertModal } from "../commons/AlertModal";
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -676,55 +677,16 @@ export default function DigitalSignature({
       </View>
 
       {/* ── SUCCESS MODAL ── */}
-      {showSuccessModal && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 100,
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "white",
-              padding: 24,
-              borderRadius: 16,
-              width: "70%",
-              maxWidth: 420,
-              alignItems: "center",
-            }}
-          >
-            {successMessage}
-            <TouchableOpacity
-              onPress={handleSuccessModalClose}
-              style={{
-                backgroundColor: "#980775",
-                paddingHorizontal: 24,
-                paddingVertical: 12,
-                borderRadius: 999,
-                marginTop: 16,
-                minWidth: 120,
-              }}
-            >
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontWeight: "600",
-                  color: "white",
-                }}
-              >
-                OK
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      <AlertModal
+        visible={showSuccessModal}
+        title="Success"
+        message={successMessage}
+        type="success"
+        duration={4000}
+        onClose={handleSuccessModalClose}
+        showOkButton={true}
+        autoClose={true}
+      />
     </View>
   );
 }

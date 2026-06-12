@@ -32,6 +32,7 @@ import {
   processOrdersForDelivery,
 } from "@/component/disribution-manger/pdf";
 import i18n from "@/i18n/i18n";
+import { AlertModal } from "../commons/AlertModal";
 
 type CenterTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -1050,71 +1051,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  const SuccessModal = () => {
-    const progress = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-      if (showSuccessModal) {
-        Animated.timing(progress, {
-          toValue: 100,
-          duration: 3000,
-          useNativeDriver: false,
-        }).start();
-      } else {
-        progress.setValue(0);
-      }
-    }, [showSuccessModal]);
-
-    return (
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showSuccessModal}
-        onRequestClose={() => setShowSuccessModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "#00000040",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View className="bg-white rounded-2xl p-8 w-11/12 max-w-sm items-center">
-            <Text className="text-2xl font-bold mb-6 text-center text-gray-800">
-              {t("CenterTargetScreen.Success")}
-            </Text>
-
-            <Image
-              source={require("../../assets/images/collection-common/otpsuccess.webp")}
-              style={{ width: 100, height: 100 }}
-            />
-
-            <Text className="text-center text-gray-600 mb-6">
-              {successCount === 1
-                ? t("CenterTargetScreen.order one", { count: successCount })
-                : t("CenterTargetScreen.orders out for delivery", {
-                    count: successCount,
-                  })}
-            </Text>
-
-            <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
-              <Animated.View
-                style={{
-                  height: "100%",
-                  backgroundColor: "#980775",
-                  width: progress.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ["0%", "100%"],
-                  }),
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
 
   const formatOutTime = (dateString: string | null): string => {
     if (!dateString) return "N/A";
@@ -1998,7 +1935,20 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           </View>
         )}
       </ScrollView>
-      {showSuccessModal && <SuccessModal />}
+      <AlertModal
+        visible={showSuccessModal}
+        title={t("CenterTargetScreen.Success")}
+        message={
+          successCount === 1
+            ? t("CenterTargetScreen.order one", { count: successCount })
+            : t("CenterTargetScreen.orders out for delivery", {
+                count: successCount,
+              })
+        }
+        type="success"
+        duration={4000}
+        onClose={() => setShowSuccessModal(false)}
+      />
     </View>
   );
 };

@@ -19,8 +19,7 @@ import { environment } from "../../environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomHeader from "../navigations/CustomHeader";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import SuccessModal from "../commons//SuccessModal";
-import FailedModal from "../commons//FailedModal";
+import { AlertModal } from "../commons/AlertModal";
 
 interface GoviPensionFormProps {
   navigation: any;
@@ -1177,23 +1176,22 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         maximumDate={new Date()}
       />
 
-      <SuccessModal
+      <AlertModal
+        type="success"
         visible={showSuccessModal}
         title={modalTitle}
         message={modalMessage}
         onClose={handleNavigateToFarmerQr}
-        onNavigate={handleNavigateToFarmerQr}
-        showNavigateButton={true}
         autoClose={true}
         duration={5000}
       />
 
-      <FailedModal
+      <AlertModal
+        type="error"
         visible={showErrorModal}
         title={modalTitle}
         message={modalMessage}
         onClose={() => setShowErrorModal(false)}
-        showRetryButton={false}
         autoClose={true}
         duration={4000}
       />

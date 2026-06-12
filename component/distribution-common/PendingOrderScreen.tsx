@@ -26,6 +26,7 @@ import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
+import { AlertModal } from "../commons/AlertModal";
 
 interface OrderItem {
   id: string;
@@ -1577,49 +1578,17 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   };
 
   const SuccessModal = () => (
-    <Modal
+    <AlertModal
+      type="success"
       visible={showSuccessModal && orderCompletionState === "completed"}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={() => {
+      title={t("PendingOrderScreen.Completed Successfully")}
+      message={t("PendingOrderScreen.TheOrder")}
+      onClose={() => {
         setShowSuccessModal(false);
+        setOrderCompletionState("idle");
         navigation.goBack();
       }}
-    >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-          //   paddingHorizontal: 24,
-        }}
-      >
-        <View className="bg-white rounded-2xl px-6 py-8 w-full max-w-sm">
-          <Text className="text-xl font-bold text-center mb-2">
-            {t("PendingOrderScreen.Completed Successfully")}
-          </Text>
-          <Text className="text-gray-600 text-center mb-6">
-            {t("PendingOrderScreen.TheOrder")}
-          </Text>
-          <TouchableOpacity
-            className="bg-black py-3 rounded-full"
-            style={{ alignSelf: "center", paddingHorizontal: 80 }}
-            onPress={() => {
-              setShowSuccessModal(false);
-              setOrderCompletionState("idle");
-              setTimeout(() => {
-                navigation.goBack();
-              }, 100);
-            }}
-          >
-            <Text className="text-white text-center  font-medium">
-              {t("PendingOrderScreen.OK")}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+    />
   );
 
   useEffect(() => {

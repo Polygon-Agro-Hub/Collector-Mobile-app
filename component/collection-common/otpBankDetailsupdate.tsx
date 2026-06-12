@@ -20,8 +20,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
-import SuccessModal from "../commons/SuccessModal";
-import FailedModal from "../commons/FailedModal";
+import { AlertModal } from "../commons/AlertModal";
 
 const Otpverification: React.FC = ({ navigation, route }: any) => {
   const {
@@ -469,18 +468,20 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </TouchableOpacity>
           </View>
 
-          <SuccessModal
+          <AlertModal
             visible={modalVisible}
             title={t("BankDetailsUpdate.Success")}
             message={t("BankDetailsUpdate.SuccessMessage")}
+            type="success"
             duration={2000}
             onClose={handleSuccessCompletion}
           />
 
-          <FailedModal
+          <AlertModal
             visible={failModalVisible}
             title={t("BankDetailsUpdate.Failed")}
             message={t("BankDetailsUpdate.FailedMessage")}
+            type="error"
             duration={2000}
             onClose={handleFailCompletion}
           />

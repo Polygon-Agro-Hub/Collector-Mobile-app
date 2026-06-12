@@ -2,6 +2,10 @@ export type RootStackParamList = {
   BottomNav: undefined;
   Splash: undefined;
   Login: undefined;
+  BannedScreen: {
+    statusType: string;
+    message?: string;
+  } | undefined;
   ChangePassword: undefined;
   Registeredfarmer: undefined;
   Ufarmercropdetails: undefined;
