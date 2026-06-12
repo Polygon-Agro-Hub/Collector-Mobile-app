@@ -54,12 +54,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [accHolderName, setAccHolderName] = useState("");
   const [bankName, setBankName] = useState("");
   const [branchName, setBranchName] = useState("");
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
-    useState(false);
   const [loading, setLoading] = useState(false);
-  const [progress] = useState(new Animated.Value(0));
-  const [unsuccessfulProgress] = useState(new Animated.Value(0));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { t } = useTranslation();
   const [filteredBranches, setFilteredBranches] = useState<allBranches[]>([]);
@@ -174,15 +169,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     }
   };
 
-  const loadingBarWidth = progress.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-  });
 
-  const unsuccessfulLoadingBarWidth = unsuccessfulProgress.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-  });
 
   const getTextStyle = (language: string) => {
     if (language === "si") return { fontSize: 14, lineHeight: 20 };
@@ -393,103 +380,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           </TouchableOpacity>
         </ScrollView>
 
-        {/* Success Modal */}
-        <Modal
-          transparent={true}
-          visible={isModalVisible}
-          animationType="slide"
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#00000040",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View
-              className="bg-white rounded-lg w-72 items-center"
-              style={{
-                paddingHorizontal: 24,
-                paddingTop: 20,
-                paddingBottom: 16,
-              }}
-            >
-              <Text className="text-xl font-bold mb-2">
-                {t("UnregisteredFarmerDetails.Success")}
-              </Text>
-              <View className="mb-2">
-                <Image
-                  source={require("../../assets/images/collection-common/tick.webp")}
-                  className="w-24 h-24"
-                />
-              </View>
-              <Text className="text-gray-700">
-                {t("UnregisteredFarmerDetails.Successful")}
-              </Text>
-              <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-3">
-                <Animated.View
-                  className="h-full bg-green-500"
-                  style={{ width: loadingBarWidth }}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
 
-        {/* Unsuccessful Modal */}
-        <Modal
-          transparent={true}
-          visible={isUnsuccessfulModalVisible}
-          animationType="slide"
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#00000040",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View className="bg-white rounded-lg w-72 p-6 items-center">
-              <Text className="text-xl font-bold mb-4">
-                {t("UnregisteredFarmerDetails.Oops")}
-              </Text>
-              <View className="mb-4">
-                <Image
-                  source={require("../../assets/images/collection-common/error-unregister.webp")}
-                  className="w-24 h-24"
-                />
-              </View>
-              <Text className="text-gray-700">
-                {t("UnregisteredFarmerDetails.Unsuccessful")}
-              </Text>
-              {errorMessage && (
-                <Text className="text-red-600 text-center mt-2">
-                  {errorMessage}
-                </Text>
-              )}
-              <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
-                <Animated.View
-                  className="h-full bg-red-500"
-                  style={{ width: unsuccessfulLoadingBarWidth }}
-                />
-              </View>
-              <TouchableOpacity
-                className="bg-red-500 p-2 rounded-full mt-4"
-                onPress={() => {
-                  setIsUnsuccessfulModalVisible(false);
-                  setErrorMessage(null);
-                  unsuccessfulProgress.setValue(0);
-                }}
-              >
-                <Text className="text-white">
-                  {t("UnregisteredFarmerDetails.Close")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
 
       {/* Bank Modal */}
