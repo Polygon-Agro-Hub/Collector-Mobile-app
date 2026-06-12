@@ -439,17 +439,14 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
 
   const extractCashOfficerCode = (qrData: string): string | null => {
     try {
-      const dcmOfficerPattern = /DCM\d{5}/gi;
-      const dcmMatch = qrData.match(dcmOfficerPattern);
-      if (dcmMatch) {
-        return dcmMatch[0];
-      }
-
+      // First try to parse as JSON — handles {"empId":"DCM00044"} format
       if (qrData.startsWith("{") && qrData.endsWith("}")) {
         try {
           const parsed = JSON.parse(qrData);
 
+          // ✅ empId is checked first to match {"empId":"DCM00044"} QR format
           const fieldsToCheck = [
+            parsed.empId,
             parsed.officerId,
             parsed.officerCode,
             parsed.employeeId,
@@ -472,6 +469,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
         }
       }
 
+      // Fallback: scan the raw string for a DCM code
       const dcmPatternGlobal = /DCM\d{5}/gi;
       const allMatches = qrData.match(dcmPatternGlobal);
       if (allMatches && allMatches.length > 0) {
@@ -708,7 +706,6 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
       <CameraAccess
         navigation={navigation as any}
         onPermissionGranted={() => {
-          // Force a re-request to update the useCameraPermissions hook state
           requestPermission();
         }}
         returnScreen="ReceivedCashQrCode"
