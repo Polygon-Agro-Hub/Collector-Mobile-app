@@ -708,7 +708,7 @@ const DistributionAddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        className="w-full max-w-[500px] mx-auto px-6"
+        className="w-full max-w-[500px] mx-auto"
       >
         <View className="items-center mt-6">
           <TouchableOpacity onPress={handleImagePick}>

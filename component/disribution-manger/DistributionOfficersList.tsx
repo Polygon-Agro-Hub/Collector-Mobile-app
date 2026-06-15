@@ -263,14 +263,14 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   );
 
   return (
-    <View className="flex-1 bg-[#313131]">
+    <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="bg-[#313131] pt-6 pb-3 px-4">
+      <View className="bg-[#313131] pt-6 pb-8 px-4">
         <Text
           style={{ fontSize: 18 }}
           className="text-white text-center font-bold mb-3"
         >
-          {t("CollectionOfficersList.Collection Officers")}
+          {t("CollectionOfficersList.Manage Staff")}
         </Text>
 
         {/* Tabs */}
@@ -417,10 +417,11 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
       {/* Body */}
       <View
-        className="flex-1 w-full max-w-[500px] mx-auto bg-white "
+        className="flex-1 w-full max-w-[500px] mx-auto bg-white"
         style={{
-          marginTop: 0,
-          borderRadius: 25,
+          marginTop: -20,
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
         }}
       >
         {/* List title */}

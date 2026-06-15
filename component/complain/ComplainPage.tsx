@@ -163,7 +163,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       );
       setComplain("");
       setSelectedCategory(null);
-      navigation.goBack();
+      navigation.navigate("SideMenu");
     } catch (error) {
       console.error("Error submitting complaint:", error);
       Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
@@ -209,7 +209,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
               className="flex-1 bg-white"
               contentContainerStyle={{
                 flexGrow: 1,
-                backgroundColor: "#F6F6F6",
+                backgroundColor: "white",
               }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
@@ -222,14 +222,23 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 transparent
               />
 
-              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-[#F6F6F6] justify-center">
+              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-white justify-center">
                 <Image
                   source={require("../../assets/images/complain/complain.webp")}
                   className="w-48 h-48 mx-auto"
                   resizeMode="contain"
                 />
 
-                <View className="items-center bg-white rounded-3xl w-full mb-10 p-4">
+                <View
+                  className="items-center bg-white rounded-3xl w-full mb-10 p-4"
+                  style={{
+                    shadowColor: "#070707",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
+                >
                   <View className="w-full items-center mt-10">
                     <View className="flex-row">
                       <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">

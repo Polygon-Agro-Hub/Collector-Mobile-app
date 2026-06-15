@@ -731,15 +731,15 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
 
           <View className="px-0 flex-col w-full gap-4 mt-5 mb-4">
             <TouchableOpacity
-              className="bg-[#D9D9D9] rounded-full px-6 py-4 w-full items-center"
+              className="bg-[#D9D9D9] rounded-full px-6 h-[50px] w-full justify-center items-center"
               onPress={() =>
                 navigation.navigate("DistributionAddOfficerBasicDetails", {
                   jobRolle: "Distribution Officer",
                   preservedData: basicDetails,
                 })
               }
-              style={{
-                shadowColor: "#000000",
+               style={{
+                shadowColor: "#8f8a8a",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,
@@ -761,13 +761,13 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className={`bg-black rounded-full px-6 mb-20 py-4 w-full items-center ${
+              className={`bg-black rounded-full px-6 mb-20 h-[50px] justify-center w-full items-center ${
                 loading ? "opacity-50" : ""
               }`}
               onPress={handleSubmit}
               disabled={loading}
-              style={{
-                shadowColor: "#000000",
+             style={{
+                shadowColor: "#070707",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,

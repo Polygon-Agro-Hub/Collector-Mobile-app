@@ -132,6 +132,13 @@ const RecieveTargetBetweenOfficers: React.FC<
 
   useFocusEffect(
     useCallback(() => {
+      setAssignee("");
+      setAmount("");
+      setError("");
+      setMaxAmount(0);
+      setErrorMessage(null);
+      fetchOfficers();
+
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         () => {
@@ -229,11 +236,6 @@ const RecieveTargetBetweenOfficers: React.FC<
       setFetchingTarget(false);
     }
   };
-
-  useEffect(() => {
-    fetchOfficers();
-    if (assignee === "0") setAmount("");
-  }, []);
 
   const handleAmountChange = (text: string) => {
     let sanitized = text.replace(/[^0-9.]/g, "");
@@ -440,7 +442,7 @@ const RecieveTargetBetweenOfficers: React.FC<
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] px-4 rounded-full p-3.5 text-gray-800"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}

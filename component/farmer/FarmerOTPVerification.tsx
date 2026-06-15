@@ -192,10 +192,16 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           await AsyncStorage.removeItem("referenceId");
 
           setModalVisible(true);
-          navigation.navigate("FarmerQr" as any, {
-            NICnumber: response1.data.NICnumber,
-            userId: response1.data.userId,
-          });
+
+          
+          setTimeout(() => {
+            setModalVisible(false);
+            navigation.navigate("FarmerQr" as any, {
+              NICnumber: response1.data.NICnumber,
+              userId: response1.data.userId,
+            });
+          }, 2000); 
+
           break;
 
         case "1001":
@@ -235,7 +241,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         default:
           Alert.alert(
             t("Error.Sorry"),
-            message || t("Error.somethingWentWrong"),
+            t("Otpverification.invalidOTP"),
           );
       }
     } catch (error: any) {
@@ -251,7 +257,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       } else if (errStatusCode === "1001") {
         Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       } else {
-        Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
+        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       }
     }
   };
@@ -522,9 +528,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         title={t("Otpverification.Success")}
         message={t("Otpverification.Registration")}
         duration={2000}
-        onClose={() => {
-          setModalVisible(false);
-        }}
+        onClose={() => setModalVisible(false)}
       />
     </View>
   );

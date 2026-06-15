@@ -617,6 +617,7 @@
   "CollectionOfficersList": {
     "LNG": "ta",
     "Collection Officers": "அதிகாரிகள்",
+    "Manage Staff":"பணியாளர்களை நிர்வகிக்கவும்",
     "Claim Officer": "ஒரு அதிகாரியை கோருங்கள்",
     "Officers List": "அதிகாரிகளின் பட்டியல்",
     "Drivers List": "இயக்குனர்கள் பட்டியல்",
@@ -1009,7 +1010,8 @@
     "No products available": "பொருட்கள் இல்லை",
     "Approve": "ஒப்புதல்",
     "Rs": "Rs.",
-    "Please enter a value greater than 0":"0-ஐ விடப் பெரிய மதிப்பை உள்ளிடவும்."
+    "Please enter a value greater than 0":"0-ஐ விடப் பெரிய மதிப்பை உள்ளிடவும்.",
+    "Price must match defined product price":"விலையானது வரையறுக்கப்பட்ட பொருளின் விலையுடன் பொருந்த வேண்டும்."
   },
   "ReplaceRequestsScreen": {
     "Order ID": "ஆர்டர் இல்லை:",

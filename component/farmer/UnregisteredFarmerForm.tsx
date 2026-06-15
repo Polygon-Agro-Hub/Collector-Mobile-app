@@ -55,8 +55,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 }) => {
   const { NIC } = route.params;
 
-  // ─── ref to track if we navigated to OTP (so we don't reset on return) ───
   const cameFromOTP = useRef(false);
+
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -251,7 +252,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       const response = await axios.post(apiUrl, body, { headers });
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
-      // ─── Mark that we are navigating to OTP so useFocusEffect won't reset ───
       cameFromOTP.current = true;
 
       navigation.navigate("Main" as any, {
@@ -275,8 +275,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       setLoading(false);
     }
   };
-
-
 
   const getTextStyle = (language: string) => {
     if (language === "si") return { fontSize: 14, lineHeight: 20 };
@@ -324,8 +322,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
   useFocusEffect(
     useCallback(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+
       if (!cameFromOTP.current) {
-        // ─── Fresh entry from SearchFarmer — reset all fields ───
         setFirstName("");
         setLastName("");
         setNICnumber(NIC ?? "");
@@ -343,11 +342,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         setFieldErrors({});
         setErrorMessage(null);
       } else {
-        // ─── Returning from OTP screen — keep all form data as-is ───
         cameFromOTP.current = false;
       }
 
-      // Always reset loading state regardless of navigation origin
       setLoading(false);
 
       const handleBackPress = () => {
@@ -417,6 +414,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       />
       <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-6">
         <ScrollView
+          ref={scrollViewRef}
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20, paddingTop: 16 }}
@@ -752,8 +750,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             )}
           </TouchableOpacity>
         </ScrollView>
-
-
       </View>
 
       {/* Language Modal */}

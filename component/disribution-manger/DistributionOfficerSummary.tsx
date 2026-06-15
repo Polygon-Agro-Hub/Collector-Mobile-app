@@ -275,7 +275,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      className="flex-1 bg-white mb-10 "
+      className="flex-1 bg-white"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }

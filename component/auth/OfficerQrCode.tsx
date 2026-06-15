@@ -235,7 +235,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
               </View>
             </View>
 
-            <View className="flex-row w-full px-8 pb-8 gap-4 max-w-[500px] w-full mx-auto">
+            <View className="flex-row w-full px-8 pb-8 gap-4 max-w-[500px] mx-auto">
               <TouchableOpacity
                 className="bg-black rounded-lg items-center justify-center flex-1 py-3 h-[70px]"
                 onPress={downloadQRCode}

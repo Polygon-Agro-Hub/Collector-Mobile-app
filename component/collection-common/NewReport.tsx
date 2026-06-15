@@ -525,7 +525,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `PurchaseReport_${
+      const fileName = `GRN_${
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 

@@ -618,6 +618,7 @@
   "CollectionOfficersList": {
     "LNG": "si",
     "Collection Officers": "නිලධාරීන්",
+    "Manage Staff":"කාර්ය මණ්ඩලය කළමනාකරණය කරන්න",
     "Claim Officer": "නිලධාරියෙකුට හිමිකම් කියන්න",
     "Officers List": "නිලධාරීන්ගේ ලැයිස්තුව",
     "Drivers List": "රියදුරු ලැයිස්තුව",
@@ -1010,7 +1011,8 @@
     "No products available": "නිෂ්පාදන නොමැත",
     "Approve": "අනුමත කරන්න",
     "Rs": "රු.",
-    "Please enter a value greater than 0": "කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න."
+    "Please enter a value greater than 0": "කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න.",
+    "Price must match defined product price":"මිල නිර්වචනය කරන ලද නිෂ්පාදන මිලට ගැළපිය යුතුය"
   },
   "ReplaceRequestsScreen": {
     "Order ID": "ඇණවුම් අංකය:",

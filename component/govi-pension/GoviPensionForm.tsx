@@ -20,6 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomHeader from "../navigations/CustomHeader";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { AlertModal } from "../commons/AlertModal";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface GoviPensionFormProps {
   navigation: any;
@@ -71,6 +72,7 @@ const CustomDatePicker = ({
   const [selectedDay, setSelectedDay] = useState(currentDate.getDate());
 
   const { t } = useTranslation();
+
 
   const startYear = minimumDate ? minimumDate.getFullYear() : 1900;
   const endYear = maximumDate.getFullYear();
@@ -251,6 +253,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [successorNicError, setSuccessorNicError] = useState("");
+    const insets = useSafeAreaInsets();
 
   const route = useRoute<GoviPensionFormProps["route"]>();
   const { farmerNIC, farmerName, farmerPhone, userId } = route.params || {};
@@ -528,11 +531,8 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
   const handleNavigateToFarmerQr = () => {
     setShowSuccessModal(false);
-    navigation.navigate("FarmerQr", {
-      cropCount: 1,
-      userId: userId,
-      NICnumber: farmerNIC,
-    });
+    navigation.navigate("Main" as any, { screen: "FarmerQr", params: { userId } })
+  
   };
 
   const handleSubmit = () => {
@@ -735,7 +735,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     <ScrollView
       className="flex-1 px-8"
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={{ paddingBottom: 100 }}
     >
       {/* Your Full Name */}
       <View className="mb-5 mt-4">
@@ -866,7 +866,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       <ScrollView
         className="flex-1 px-8"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* Successor's Full Name */}
         <View className="mb-5 mt-4">
@@ -1199,7 +1199,8 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       {currentSection === 1 ? renderSection1() : renderSection2()}
 
       {/* Action Buttons */}
-      <View className="px-5 pb-6 pt-4 bg-white">
+     <View className="px-5 pt-3 bg-white " style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
+
         {currentSection === 1 ? (
           <View className="flex-row gap-4">
             <TouchableOpacity

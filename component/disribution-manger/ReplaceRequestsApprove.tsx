@@ -132,7 +132,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   const [loadingRetailItems, setLoadingRetailItems] = useState(false);
   const [loadingCurrentReplace, setLoadingCurrentReplace] = useState(false);
   const [retailItems, setRetailItems] = useState<RetailItem[]>([]);
-  const [currentReplaceRequests, setCurrentReplaceRequests] = useState<
+    const [currentReplaceRequests, setCurrentReplaceRequests] = useState<
     CurrentReplaceRequest[]
   >([]);
   const [submitting, setSubmitting] = useState(false);
@@ -203,19 +203,6 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }, [navigation, route.params]),
   );
 
-  const formatQuantity = (qty: string | number): string => {
-    if (!qty && qty !== 0) return "0";
-    const num = typeof qty === "string" ? parseFloat(qty) : qty;
-    if (isNaN(num)) return "0";
-    let formatted = num.toString();
-    if (formatted.includes(".")) {
-      formatted = formatted.replace(/\.?0+$/, "");
-      if (formatted.endsWith(".")) {
-        formatted = formatted.slice(0, -1);
-      }
-    }
-    return formatted;
-  };
   const loadOriginalPackageItem = async (freshData?: ReplaceRequestData) => {
     const data =
       freshData ?? (route.params?.replaceRequestData as ReplaceRequestData);
@@ -263,7 +250,8 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         setCurrentReplaceRequests(response.data.data);
         const currentRequest = response.data.data[0];
 
-        const qty = formatQuantity(currentRequest.qty || "0");
+        const rawQty = currentRequest.qty?.toString() || "0";
+        const qty = parseFloat(rawQty) > 0 ? parseFloat(rawQty).toString() : "0";
         const qtyNum = parseFloat(qty) || 0;
         const totalPrice = parseFloat(currentRequest.price) || 0;
         const unitPrice = qtyNum > 0 ? totalPrice / qtyNum : totalPrice;

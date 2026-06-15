@@ -443,6 +443,12 @@ const generateInvoiceHTML = (
 
   const subtotal = totalPackagePrice + additionalItemsTotal;
 
+  const formatCustomerName = (info) => {
+    const title = info.title ? info.title.trim() : "";
+    const name = info.fullName || "N/A";
+    return title ? `${title}. ${name}` : name;
+  };
+
   const isFreeDelivery =
     order.isCoupon === 1 && order.couponType === "Free Delivery";
   const deliveryFeeAmount = isFreeDelivery ? 0 : parseFloat(deliveryFee || 0);
@@ -483,6 +489,7 @@ const generateInvoiceHTML = (
     ) {
       return "";
     }
+
     return order.packages
       .map((pkg, packageIndex) => {
         const packageTotal = calculatePackageTotal(pkg);
@@ -495,45 +502,46 @@ const generateInvoiceHTML = (
         if (pkg.packageItems && Array.isArray(pkg.packageItems)) {
           packageDetailsRows = pkg.packageItems
             .map((item, itemIndex) => {
-              const itemPrice = parseFloat(item.price || 0);
+              const itemTotal = parseFloat(item.price || 0);
               const itemQty = parseFloat(item.qty || 0);
-              const itemTotal = itemPrice * itemQty;
+              const itemUnitPrice = itemQty > 0 ? itemTotal / itemQty : 0;
+
               return `
-                <tr>
-                  <td style="text-align: center" class="tabledata">${itemIndex + 1}</td>
-                  <td class="tabledata">${item.productTypeName || item.category || "N/A"}</td>
-                  <td class="tabledata">${item.productDisplayName || "N/A"}</td>
-                  <td class="tabledata">${formatNumber(itemPrice)}</td>
-                  <td class="tabledata">${itemQty}${item.unit || ""}</td>
-                  <td class="tabledata">${formatNumber(itemTotal)}</td>
-                </tr>`;
+              <tr>
+                <td style="text-align: center" class="tabledata">${itemIndex + 1}</td>
+                <td class="tabledata">${item.productTypeName || item.category || "N/A"}</td>
+                <td class="tabledata">${item.productDisplayName || "N/A"}</td>
+                <td class="tabledata">${formatNumber(itemUnitPrice)}</td>
+                <td class="tabledata">${itemQty}${item.unit || ""}</td>
+                <td class="tabledata">${formatNumber(itemTotal)}</td>
+              </tr>`;
             })
             .join("");
         }
 
         return `
-          <div class="section4">
-            <div style="display:flex;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid #ccc;padding-bottom:10px;margin-top:40px;">
-              <div class="bold">${pkg.displayName || `Package ${packageIndex + 1}`} (${formatItemCount(packageItemsCount)} Items)</div>
-              <div style="font-weight:550;font-size:16px">${formatCurrency(packageTotal)}</div>
-            </div>
-            <div style="border:1px solid #ddd;border-radius:10px">
-              ${packageDetailsRows
+        <div class="section4">
+          <div style="display:flex;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid #ccc;padding-bottom:10px;margin-top:40px;">
+            <div class="bold">${pkg.displayName || `Package ${packageIndex + 1}`} (${formatItemCount(packageItemsCount)} Items)</div>
+            <div style="font-weight:550;font-size:16px">${formatCurrency(packageTotal)}</div>
+          </div>
+          <div style="border:1px solid #ddd;border-radius:10px">
+            ${packageDetailsRows
             ? `<table class="table">
-                    <tr>
-                      <th style="text-align:center;border-top-left-radius:10px">Index</th>
-                      <th>Category</th>
-                      <th>Item Description</th>
-                      <th>Unit Price (Rs.)</th>
-                      <th>QTY (Kg)</th>
-                      <th style="border-top-right-radius:10px">Amount (Rs.)</th>
-                    </tr>
-                    ${packageDetailsRows}
-                  </table>`
+                  <tr>
+                    <th style="text-align:left;border-top-left-radius:10px">Index</th>
+                    <th style="text-align:left">Category</th>
+                    <th style="text-align:left">Item Description</th>
+                    <th style="text-align:left">Unit Price (Rs.)</th>
+                    <th style="text-align:left">QTY (Kg)</th>
+                    <th style="text-align:left;border-top-right-radius:10px">Amount (Rs.)</th>
+                  </tr>
+                  ${packageDetailsRows}
+                </table>`
             : `<div style="padding:20px;text-align:center;color:#666;">Package items not available</div>`
           }
-            </div>
-          </div>`;
+          </div>
+        </div>`;
       })
       .join("");
   };
@@ -549,24 +557,15 @@ const generateInvoiceHTML = (
         const actualAmount = price + discount;
         const unitPrice = parseFloat(item.normalPrice?.toString() || "0");
 
-        let formattedQty = "";
-        if (unit === "g") {
-          if (qty >= 1000) {
-            formattedQty = `${(qty / 1000).toFixed(qty % 1000 === 0 ? 0 : 1)}kg`;
-          } else {
-            formattedQty = `${qty}g`;
-          }
-        } else {
-          formattedQty = `${qty}${unit}`;
-        }
+        const formattedQty = `${qty}${unit}`;
 
         return `
       <tr>
-        <td style="text-align: center; padding: 12px 8px;" class="tabledata">${index + 1}</td>
-        <td style="padding: 12px 8px;" class="tabledata">${item.displayName || item.name || "Item"}</td>
-        <td style="text-align: right; padding: 12px 8px;" class="tabledata">${formatNumber(unitPrice)}</td>
-        <td style="text-align: center; padding: 12px 8px;" class="tabledata">${formattedQty}</td>
-        <td style="text-align: right; padding: 12px 8px;" class="tabledata">${formatCurrency(actualAmount)}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${index + 1}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${item.displayName || item.name || "Item"}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${formatNumber(unitPrice)}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${formattedQty}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${formatCurrency(actualAmount)}</td>
       </tr>`;
       })
       .join("");
@@ -727,7 +726,8 @@ const generateInvoiceHTML = (
         background-color: #f8f8f8; 
         font-size: 14px; 
         font-weight: 600;
-        border-bottom: 1px solid #ddd; 
+        border-bottom: 1px solid #ddd;
+        text-align: left;
       }
       .tabledata { font-size: 14px; font-weight: normal; color: #666666; }
       .footer { text-align: center; font-size: 12px; margin-top: 60px; color: #8492A3; }
@@ -764,7 +764,7 @@ const generateInvoiceHTML = (
   <div style="position:relative; margin-top:30px; min-height:80px;">
     <div style="display:inline-block; max-width:55%;">
       <p class="bold">Bill To :</p>
-      <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+      <p class="headerp">${formatCustomerName(customerInfo)}</p>
       <p class="headerp">${customerEmail}</p>
       <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
     </div>
@@ -802,7 +802,7 @@ const generateInvoiceHTML = (
           <div style="display:flex;justify-content:space-between;margin-top:30px;">
             <div style="flex: 1;">
               <p class="bold">Bill To :</p>
-              <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+             <p class="headerp">${formatCustomerName(customerInfo)}</p>
               <p class="headerp">${customerEmail}</p>
               <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
               <div style="margin-top:16px;">
@@ -853,11 +853,11 @@ const generateInvoiceHTML = (
               <table style="width:100%;border-collapse:collapse;" class="table">
                 <thead>
                   <tr>
-                    <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">#</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">#</th>
                     <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Item Description</th>
-                    <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Unit Price (Rs.)</th>
-                    <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">QTY</th>
-                    <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Amount (Rs.)</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Unit Price (Rs.)</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">QTY</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Amount (Rs.)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -938,7 +938,7 @@ const generateInvoiceHTML = (
       <!-- Footer -->
       <div class="footer">
         <p style="margin-top:50px;font-size:16px;font-weight:600;color:#000;font-style:italic">Thank you for shopping with us!</p>
-<p style="margin-top:6px;font-size:14px;font-weight:500;color:#4B4B4B;font-style:italic">WE WILL SEND YOU MORE OFFERS, LOWEST PRICED VEGGIES FROM US.</p>
+        <p style="margin-top:6px;font-size:14px;font-weight:500;color:#4B4B4B;font-style:italic">WE WILL SEND YOU MORE OFFERS, LOWEST PRICED VEGGIES FROM US.</p>
         <p style="margin-top:50px;font-style:italic">- THIS IS A COMPUTER GENERATED INVOICE, THUS NO SIGNATURE REQUIRED -</p>
       </div>
     </div>
