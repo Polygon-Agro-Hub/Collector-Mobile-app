@@ -262,11 +262,11 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         <View
           className={`bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} `}
         >
-          <View className="flex-row items-start">
+          <View className="flex-row items-center">
             {/* Checkbox */}
             <TouchableOpacity
               onPress={() => toggleTransactionSelection(item.id)}
-              className="mr-3 mt-0.5"
+              className="mr-3"
             >
               <View
                 className={`w-6 h-6 rounded border ${isSelected ? "bg-black border-black" : "bg-white border-black"} items-center justify-center`}
@@ -279,7 +279,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
             {/* Transaction Details */}
             <View className="flex-1">
-              <Text className="text-sm font-medium text-gray-900 mb-1">
+              <Text className="text-base font-medium text-gray-900 mb-1">
                 {t("ReceivedCash.Order ID")} : {item.orderId}
               </Text>
               <View className="flex-row">

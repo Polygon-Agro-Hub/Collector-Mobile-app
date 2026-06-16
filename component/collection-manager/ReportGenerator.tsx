@@ -16,6 +16,7 @@ import * as Sharing from "expo-sharing";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { Platform } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
@@ -136,36 +137,79 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         return;
       }
 
-      const date = new Date().toISOString().slice(0, 10);
       const fmtForFileName = (d: Date) =>
         `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       const fileName = `Report_${officerId}_From_${fmtForFileName(startDate!)}_To_${fmtForFileName(endDate!)}.pdf`;
 
-      let tempFilePath = uri;
-
       if (Platform.OS === "android") {
-        tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
+        let directoryUri = await AsyncStorage.getItem("download_directory_uri");
+        
+        if (!directoryUri) {
+          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (permissions.granted) {
+            directoryUri = permissions.directoryUri;
+            await AsyncStorage.setItem("download_directory_uri", directoryUri);
+          }
+        }
 
-        await FileSystem.copyAsync({
-          from: uri,
-          to: tempFilePath,
-        });
+        if (directoryUri) {
+          try {
+            const base64 = await FileSystem.readAsStringAsync(uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+              directoryUri,
+              fileName,
+              "application/pdf"
+            );
+            await FileSystem.writeAsStringAsync(fileUri, base64, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
 
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
-            dialogTitle: t("Save PDF"),
-            mimeType: "application/pdf",
-            UTI: "com.adobe.pdf",
-          });
+            Alert.alert(
+              t("Error.Success") || "Success",
+              "Attachment has been saved to your selected folder",
+            );
+          } catch (e) {
+            // Permission might have been revoked, try to request again
+            await AsyncStorage.removeItem("download_directory_uri");
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted && permissions.directoryUri) {
+              const newDirectoryUri = permissions.directoryUri;
+              await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+
+              const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                newDirectoryUri,
+                fileName,
+                "application/pdf"
+              );
+              await FileSystem.writeAsStringAsync(fileUri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+
+              Alert.alert(
+                t("Error.Success") || "Success",
+                "Attachment has been saved to your selected folder",
+              );
+            } else {
+              Alert.alert(
+                t("Error.Permission Denied") || "Permission Denied",
+                "Storage permission is required to save the PDF."
+              );
+            }
+          }
         } else {
           Alert.alert(
-            t("Error.error"),
-            t("Error.Failed to save PDF to Downloads folder."),
+            t("Error.Permission Denied") || "Permission Denied",
+            "Storage permission is required to save the PDF."
           );
         }
       } else if (Platform.OS === "ios") {
         if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
+          await Sharing.shareAsync(uri, {
             dialogTitle: t("Save PDF"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",

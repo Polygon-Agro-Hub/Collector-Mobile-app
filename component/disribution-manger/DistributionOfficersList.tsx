@@ -407,7 +407,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                 navigation.navigate("ClaimDistribution", { activeTab })
               }
             >
-              <Text className="text-gray-700 font-semibold">
+              <Text style={{ color: "#374151", fontWeight: "600" }}>
                 {t("CollectionOfficersList.Claim Officer")}
               </Text>
             </TouchableOpacity>

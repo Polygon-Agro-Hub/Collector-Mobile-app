@@ -601,7 +601,6 @@ const DailyTargetListOfficerDistribution: React.FC<
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* Table Header */}
         <View className="flex-row bg-[#980775] py-3">

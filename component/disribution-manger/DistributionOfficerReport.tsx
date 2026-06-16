@@ -8,7 +8,7 @@ import {
   BackHandler,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import { handleGeneratePDF } from "./ReportPDF";
@@ -16,6 +16,8 @@ import * as Sharing from "expo-sharing";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { Platform } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
+import * as MediaLibrary from "expo-media-library";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
@@ -47,7 +49,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
   const [showEndPicker, setShowEndPicker] = useState(false);
 
   const [generateAgain, setGenerateAgain] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const {
     officerId,
@@ -94,7 +96,7 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
       collectionOfficerId,
     );
     if (fileUri) {
-      const reportIdMatch = fileUri.match(/report_(.+)\.pdf/);
+      const reportIdMatch = fileUri.match(/Report_(.+)\.pdf/i);
       const reportId = reportIdMatch ? reportIdMatch[1] : null;
 
       setReportGenerated(true);
@@ -127,34 +129,80 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
         return;
       }
 
-      const date = new Date().toISOString().slice(0, 10);
-      const fileName = `Report_${officerId}_${date}.pdf`;
-
-      let tempFilePath = uri;
+      const formattedFromDate = formatDate(startDate).replace(/\//g, "-");
+      const formattedToDate = formatDate(endDate).replace(/\//g, "-");
+      const fileName = `Report_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
 
       if (Platform.OS === "android") {
-        tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
+        let directoryUri = await AsyncStorage.getItem("download_directory_uri");
+        
+        if (!directoryUri) {
+          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (permissions.granted) {
+            directoryUri = permissions.directoryUri;
+            await AsyncStorage.setItem("download_directory_uri", directoryUri);
+          }
+        }
 
-        await FileSystem.copyAsync({
-          from: uri,
-          to: tempFilePath,
-        });
+        if (directoryUri) {
+          try {
+            const base64 = await FileSystem.readAsStringAsync(uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+              directoryUri,
+              fileName,
+              "application/pdf"
+            );
+            await FileSystem.writeAsStringAsync(fileUri, base64, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
 
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
-            dialogTitle: t("Save PDF"),
-            mimeType: "application/pdf",
-            UTI: "com.adobe.pdf",
-          });
+            Alert.alert(
+              t("Error.Success") || "Success",
+              "Attachment has been saved to your selected folder",
+            );
+          } catch (e) {
+            // Permission might have been revoked, try to request again
+            await AsyncStorage.removeItem("download_directory_uri");
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted && permissions.directoryUri) {
+              const newDirectoryUri = permissions.directoryUri;
+              await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+
+              const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                newDirectoryUri,
+                fileName,
+                "application/pdf"
+              );
+              await FileSystem.writeAsStringAsync(fileUri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+
+              Alert.alert(
+                t("Error.Success") || "Success",
+                "Attachment has been saved to your selected folder",
+              );
+            } else {
+              Alert.alert(
+                t("Error.Permission Denied") || "Permission Denied",
+                "Storage permission is required to save the PDF."
+              );
+            }
+          }
         } else {
           Alert.alert(
-            t("Error.error"),
-            t("Error.Failed to save PDF to Downloads folder."),
+            t("Error.Permission Denied") || "Permission Denied",
+            "Storage permission is required to save the PDF."
           );
         }
-      } else if (Platform.OS === "ios") {
+      } else {
+        // iOS: Use Sharing
         if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
+          await Sharing.shareAsync(uri, {
             dialogTitle: t("Save PDF"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
@@ -450,43 +498,63 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
             {t("ReportGenerator.Report has been generated")}
           </Text>
 
-          <View className="flex-row gap-4">
+          <View className="flex-row w-full px-12 pb-8 gap-8 max-w-[500px] mx-auto">
             <TouchableOpacity
+              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
               onPress={handleDownload}
-              className="bg-[#000000] rounded-lg items-center justify-center"
+              disabled={generateAgain}
               style={{
-                width: 100,
-                height: 70,
-                shadowColor: "#000",
+                shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 8,
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
               }}
             >
-              <Ionicons name="download" size={24} color="white" />
-              <Text className="text-sm text-white mt-1">
-                {t("ReportGenerator.Download")}
-              </Text>
+              <View className="flex-col items-center justify-center gap-2">
+                <MaterialIcons name="download" size={20} color="white" />
+                <Text
+                  className="text-white text-base"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 12 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 11 }
+                        : { fontSize: 15 },
+                  ]}
+                >
+                  {t("ReportGenerator.Download")}
+                </Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
+              className="bg-black rounded-lg items-center justify-center flex-1 py-4"
               onPress={handleShare}
-              className="bg-[#000000] rounded-lg items-center justify-center"
+              disabled={generateAgain}
               style={{
-                width: 100,
-                height: 70,
-                shadowColor: "#000",
+                shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 8,
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
               }}
             >
-              <Ionicons name="share-social" size={24} color="white" />
-              <Text className="text-sm text-white mt-1">
-                {t("ReportGenerator.Share")}
-              </Text>
+              <View className="flex-col items-center justify-center gap-2">
+                <MaterialIcons name="share" size={20} color="white" />
+                <Text
+                  className="text-white text-base"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 12 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 11 }
+                        : { fontSize: 15 },
+                  ]}
+                >
+                  {t("ReportGenerator.Share")}
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>

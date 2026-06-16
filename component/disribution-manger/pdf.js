@@ -1,9 +1,9 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system/legacy";
 import axios from "axios";
 import { Asset } from "expo-asset";
 import { environment } from "@/environment/environment";
+import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 
 export const fetchOrderDetailsByIds = async (orderIds, authToken) => {
   try {
@@ -246,7 +246,7 @@ export const processOrdersForDelivery = async (
         emailsData.push({
           email: emailAddress,
           subject: `Order ${invoiceNo} - Out for Delivery`,
-          fileName: `Invoice_${invoiceNo}_${new Date().toISOString().split("T")[0]}.pdf`,
+          fileName: `Post_Invoice_${invoiceNo}.pdf`,
           pdfBase64,
           customerName,
           firstName,
@@ -508,7 +508,7 @@ const generateInvoiceHTML = (
 
               return `
               <tr>
-                <td style="text-align: center" class="tabledata">${itemIndex + 1}</td>
+                <td style="text-align: left" class="tabledata">${itemIndex + 1}</td>
                 <td class="tabledata">${item.productTypeName || item.category || "N/A"}</td>
                 <td class="tabledata">${item.productDisplayName || "N/A"}</td>
                 <td class="tabledata">${formatNumber(itemUnitPrice)}</td>
@@ -623,28 +623,27 @@ const generateInvoiceHTML = (
 
     if (buildingType === "Apartment" && orderData.apartmentAddress) {
       const apt = orderData.apartmentAddress;
-      const hasData =
-        apt.buildingNo ||
-        apt.buildingName ||
-        apt.unitNo ||
-        apt.floorNo ||
-        apt.houseNo ||
-        apt.streetName ||
-        apt.city;
+      const addressParts = [];
+      if (apt.buildingNo) addressParts.push({ label: "No:", value: apt.buildingNo });
+      if (apt.buildingName) addressParts.push({ label: "Name:", value: apt.buildingName });
+      if (apt.unitNo) addressParts.push({ label: "Flat:", value: apt.unitNo });
+      if (apt.floorNo) addressParts.push({ label: "Floor:", value: apt.floorNo });
+      if (apt.houseNo) addressParts.push({ label: "House No:", value: apt.houseNo });
+      if (apt.streetName) addressParts.push({ label: "Street Name:", value: apt.streetName });
+      if (apt.city) addressParts.push({ label: "City:", value: apt.city });
 
-      if (!hasData) {
+      if (addressParts.length === 0) {
         return `<p class="addr-line" style="color:#999;">Address not provided</p>`;
       }
 
+      const linesHtml = addressParts.map((part, index) => {
+        const comma = index < addressParts.length - 1 ? "," : "";
+        return `<p class="addr-line" style="margin:2px 0;"><span style="color:#666666;font-weight:550;">${part.label}</span> ${part.value}${comma}</p>`;
+      }).join("\n");
+
       return `
         <p class="bold" style="margin-bottom:4px;">Apartment Address :</p>
-        ${apt.buildingNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">No :</span> ${apt.buildingNo}</p>` : ""}
-        ${apt.buildingName ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Name :</span> ${apt.buildingName}</p>` : ""}
-        ${apt.unitNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Flat :</span> ${apt.unitNo}</p>` : ""}
-        ${apt.floorNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Floor :</span> ${apt.floorNo}</p>` : ""}
-        ${apt.houseNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">House No :</span> ${apt.houseNo}</p>` : ""}
-        ${apt.streetName ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Street Name :</span> ${apt.streetName}</p>` : ""}
-        ${apt.city ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">City :</span> ${apt.city}</p>` : ""}
+        ${linesHtml}
       `;
     }
 
@@ -661,11 +660,19 @@ const generateInvoiceHTML = (
       return `<p class="addr-line" style="color:#999;">Address not provided</p>`;
     }
 
+    const addressParts = [];
+    if (houseNo) addressParts.push({ label: "House No:", value: houseNo });
+    if (streetName) addressParts.push({ label: "Street Name:", value: streetName });
+    if (city) addressParts.push({ label: "City:", value: city });
+
+    const linesHtml = addressParts.map((part, index) => {
+      const comma = index < addressParts.length - 1 ? "," : "";
+      return `<p class="addr-line" style="margin:2px 0;"><span style="color:#666666;font-weight:555;">${part.label}</span> ${part.value}${comma}</p>`;
+    }).join("\n");
+
     return `
       <p class="bold" style="margin-bottom:4px;">House Address :</p>
-      ${houseNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">House No :</span> ${houseNo}</p>` : ""}
-      ${streetName ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Street Name :</span> ${streetName}</p>` : ""}
-      ${city ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">City :</span> ${city}</p>` : ""}
+      ${linesHtml}
     `;
   };
 
@@ -958,10 +965,12 @@ export const generateOrderPDF = async (orderData, deliveryFee = 0) => {
       const uri = asset.localUri || asset.uri;
       if (!uri) throw new Error("No URI available for logo asset");
 
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      logoBase64 = `data:image/webp;base64,${base64}`;
+      const result = await manipulateAsync(
+        uri,
+        [],
+        { base64: true, format: SaveFormat.PNG }
+      );
+      logoBase64 = `data:image/png;base64,${result.base64}`;
     } catch (logoError) {
       console.warn("⚠️ Failed to load local logo:", logoError.message);
       logoBase64 = null;

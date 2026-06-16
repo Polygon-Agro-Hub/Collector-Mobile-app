@@ -327,7 +327,7 @@ const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
                   key={item.id}
                   className="bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border border-[#738FAE] "
                 >
-                  <Text className="text-sm font-medium text-gray-900 mb-1">
+                  <Text className="text-base font-medium text-gray-900 mb-1">
                     {t("ReceivedCash.Order ID")} : {item.invoiceNo}
                   </Text>
                   <View className="flex-row">

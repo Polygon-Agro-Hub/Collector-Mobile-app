@@ -160,10 +160,18 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       Alert.alert(
         t("Error.Success"),
         t("Error.Your complaint has Submit successfuly"),
+        [
+          {
+            text: t("Error.Ok") || "OK",
+            onPress: () => {
+              navigation.navigate("SideMenu");
+            },
+          },
+        ],
+        { cancelable: false }
       );
       setComplain("");
       setSelectedCategory(null);
-      navigation.navigate("SideMenu");
     } catch (error) {
       console.error("Error submitting complaint:", error);
       Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));

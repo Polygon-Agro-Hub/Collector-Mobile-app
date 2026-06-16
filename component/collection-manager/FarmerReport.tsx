@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Platform,
 } from "react-native";
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -14,7 +15,7 @@ import { environment } from "@/environment/environment";
 import { RootStackParamList } from "../types/types";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
@@ -354,34 +355,86 @@ const FarmerReport: React.FC<FarmerReportProps> = ({ navigation }) => {
       }_${date}.pdf`;
 
       try {
-        const { status } = await MediaLibrary.requestPermissionsAsync(true);
-
-        if (status === "granted") {
-          const tempUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
-
-          await FileSystem.copyAsync({
-            from: uri,
-            to: tempUri,
-          });
-
-          const asset = await MediaLibrary.createAssetAsync(tempUri);
-
-          const album = await MediaLibrary.getAlbumAsync("Download");
-          if (!album) {
-            await MediaLibrary.createAlbumAsync("Download", asset, false);
-          } else {
-            await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+        if (Platform.OS === "android") {
+          let directoryUri = await AsyncStorage.getItem("download_directory_uri");
+          
+          if (!directoryUri) {
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted) {
+              directoryUri = permissions.directoryUri;
+              await AsyncStorage.setItem("download_directory_uri", directoryUri);
+            }
           }
 
-          Alert.alert(
-            t("Error.Success"),
-            t('Error.Downloaded PDF"', { fileName }),
-          );
+          if (directoryUri) {
+            try {
+              const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                directoryUri,
+                fileName,
+                "application/pdf"
+              );
+              await FileSystem.writeAsStringAsync(fileUri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+
+              Alert.alert(
+                t("Error.Success") || "Success",
+                "Attachment has been saved to your selected folder",
+              );
+            } catch (e) {
+              // Permission might have been revoked, try to request again
+              await AsyncStorage.removeItem("download_directory_uri");
+              const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+              if (permissions.granted && permissions.directoryUri) {
+                const newDirectoryUri = permissions.directoryUri;
+                await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+
+                const base64 = await FileSystem.readAsStringAsync(uri, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+                const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                  newDirectoryUri,
+                  fileName,
+                  "application/pdf"
+                );
+                await FileSystem.writeAsStringAsync(fileUri, base64, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+
+                Alert.alert(
+                  t("Error.Success") || "Success",
+                  "Attachment has been saved to your selected folder",
+                );
+              } else {
+                Alert.alert(
+                  t("Error.Permission Denied"),
+                  t("Error.Permission Denied Message"),
+                );
+              }
+            }
+          } else {
+            Alert.alert(
+              t("Error.Permission Denied"),
+              t("Error.Permission Denied Message"),
+            );
+          }
         } else {
-          Alert.alert(
-            t("Error.Permission Denied"),
-            t("Error.Permission Denied Message"),
-          );
+          // iOS: Use Sharing
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(uri, {
+              dialogTitle: t("Save PDF"),
+              mimeType: "application/pdf",
+              UTI: "com.adobe.pdf",
+            });
+          } else {
+            Alert.alert(
+              t("Error.error"),
+              t("Error.Failed to save PDF to Downloads folder."),
+            );
+          }
         }
       } catch (error) {
         console.error("Error saving PDF:", error);

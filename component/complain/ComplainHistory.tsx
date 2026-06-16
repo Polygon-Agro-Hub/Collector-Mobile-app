@@ -82,9 +82,13 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
   const [userFullNameTa, setUserFullNameTa] = useState<string>("");
   const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+  const [jobRole, setJobRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const getUserName = async () => {
+    const getUserNameAndRole = async () => {
+      const role = await AsyncStorage.getItem("jobRole");
+      setJobRole(role);
+
       if (route?.params?.fullname) {
         setUserFullName(route.params.fullname);
       } else {
@@ -97,7 +101,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         if (storedNameTa) setUserFullNameTa(storedNameTa);
       }
     };
-    getUserName();
+    getUserNameAndRole();
   }, [route?.params?.fullname]);
 
   const getReplierName = (complain: complainItem): string => {
@@ -396,7 +400,7 @@ ${signature}${replyTime}`,
         <ScrollView
           className=" flex-1  w-full max-w-[500px] mx-auto"
           contentContainerStyle={{
-            paddingBottom: hp(4),
+            paddingBottom: jobRole === "Distribution Officer" ? hp(12) : hp(4),
             paddingHorizontal: wp(4),
           }}
         >

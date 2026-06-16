@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -312,34 +313,86 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
       }_${date}.pdf`;
 
       try {
-        const { status } = await MediaLibrary.requestPermissionsAsync(true);
-
-        if (status === "granted") {
-          const tempUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
-
-          await FileSystem.copyAsync({
-            from: uri,
-            to: tempUri,
-          });
-
-          const asset = await MediaLibrary.createAssetAsync(tempUri);
-
-          const album = await MediaLibrary.getAlbumAsync("Download");
-          if (!album) {
-            await MediaLibrary.createAlbumAsync("Download", asset, false);
-          } else {
-            await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+        if (Platform.OS === "android") {
+          let directoryUri = await AsyncStorage.getItem("download_directory_uri");
+          
+          if (!directoryUri) {
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted) {
+              directoryUri = permissions.directoryUri;
+              await AsyncStorage.setItem("download_directory_uri", directoryUri);
+            }
           }
 
-          Alert.alert(
-            t("Error.Success"),
-            t('Error.Downloaded PDF"', { fileName }),
-          );
+          if (directoryUri) {
+            try {
+              const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                directoryUri,
+                fileName,
+                "application/pdf"
+              );
+              await FileSystem.writeAsStringAsync(fileUri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+
+              Alert.alert(
+                t("Error.Success") || "Success",
+                "Attachment has been saved to your selected folder",
+              );
+            } catch (e) {
+              // Permission might have been revoked, try to request again
+              await AsyncStorage.removeItem("download_directory_uri");
+              const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+              if (permissions.granted && permissions.directoryUri) {
+                const newDirectoryUri = permissions.directoryUri;
+                await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+
+                const base64 = await FileSystem.readAsStringAsync(uri, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+                const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                  newDirectoryUri,
+                  fileName,
+                  "application/pdf"
+                );
+                await FileSystem.writeAsStringAsync(fileUri, base64, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+
+                Alert.alert(
+                  t("Error.Success") || "Success",
+                  "Attachment has been saved to your selected folder",
+                );
+              } else {
+                Alert.alert(
+                  t("Error.Permission Denied") || "Permission Denied",
+                  "Storage permission is required to save the PDF."
+                );
+              }
+            }
+          } else {
+            Alert.alert(
+              t("Error.Permission Denied") || "Permission Denied",
+              "Storage permission is required to save the PDF."
+            );
+          }
         } else {
-          Alert.alert(
-            t("Error.Permission Denied"),
-            t("Error.Permission Denied Message"),
-          );
+          // iOS: Use Sharing
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(uri, {
+              dialogTitle: t("Save PDF"),
+              mimeType: "application/pdf",
+              UTI: "com.adobe.pdf",
+            });
+          } else {
+            Alert.alert(
+              t("Error.error"),
+              t("Error.Failed to save PDF to Downloads folder."),
+            );
+          }
         }
       } catch (error) {
         console.error("Error saving PDF:", error);

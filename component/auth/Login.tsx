@@ -6,8 +6,6 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
   BackHandler,
 } from "react-native";
@@ -15,7 +13,7 @@ import React, { useCallback, useState } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { ScrollView } from "react-native-gesture-handler";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
@@ -353,115 +351,111 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      enabled
-      className="flex-1 bg-white"
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1, backgroundColor: "white" }}
+      enableOnAndroid={true}
+      extraScrollHeight={20}
+      keyboardShouldPersistTaps="handled"
+      bounces={false}
+      showsVerticalScrollIndicator={false}
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        className="bg-white flex-1"
-        showsVerticalScrollIndicator={false}
-      >
-        <CustomHeader
-          title=""
-          showBackButton={true}
-          navigation={navigation}
-          onBackPress={() => handleNavBack()}
-        />
+      <CustomHeader
+        title=""
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() => handleNavBack()}
+      />
 
-        <View className="flex-1 justify-center px-5">
-          <View className="items-center">
+      <View className="flex-1 justify-center px-5 bg-white">
+        <View className="items-center">
+          <Image
+            source={loginImage}
+            className="w-[270px] h-[270px]"
+            resizeMode="contain"
+          />
+          <Text className="font-bold text-2xl pt-[7%]">
+            {t("SignIn.Wellcome")}
+          </Text>
+        </View>
+
+        <View className="mt-2 items-center">
+          <Text>{t("SignIn.SigntoLogin")}</Text>
+        </View>
+
+        <View className="px-4 py-6 max-w-[500px] w-full mx-auto ">
+          <Text className="text-base pb-[2%] font-light">
+            {t("SignIn.Employee")}
+          </Text>
+          <View
+            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
+              }`}
+          >
+            <Image source={user} className="w-6 h-6" resizeMode="contain" />
+            <TextInput
+              className="flex-1 text-base pl-2"
+              onChangeText={handleEmpIdChange}
+              autoCapitalize="characters"
+              value={empid}
+            />
+          </View>
+
+          {empIdError ? (
+            <View className="mb-4">
+              <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>
+            </View>
+          ) : (
+            <View className="mb-6" />
+          )}
+
+          <Text className="text-base pb-[2%] font-light">
+            {t("SignIn.Password")}
+          </Text>
+          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
             <Image
-              source={loginImage}
-              className="w-[270px] h-[270px]"
+              source={passwordicon}
+              className="w-6 h-6"
               resizeMode="contain"
             />
-            <Text className="font-bold text-2xl pt-[7%]">
-              {t("SignIn.Wellcome")}
-            </Text>
-          </View>
-
-          <View className="mt-2 items-center">
-            <Text>{t("SignIn.SigntoLogin")}</Text>
-          </View>
-
-          <View className="px-4 py-6 max-w-[500px] w-full mx-auto ">
-            <Text className="text-base pb-[2%] font-light">
-              {t("SignIn.Employee")}
-            </Text>
-            <View
-              className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
-                }`}
-            >
-              <Image source={user} className="w-6 h-6" resizeMode="contain" />
-              <TextInput
-                className="flex-1 text-base pl-2"
-                onChangeText={handleEmpIdChange}
-                autoCapitalize="characters"
-                value={empid}
-              />
-            </View>
-
-            {empIdError ? (
-              <View className="mb-4">
-                <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>
-              </View>
-            ) : (
-              <View className="mb-6" />
-            )}
-
-            <Text className="text-base pb-[2%] font-light">
-              {t("SignIn.Password")}
-            </Text>
-            <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
-              <Image
-                source={passwordicon}
-                className="w-6 h-6"
-                resizeMode="contain"
-              />
-              <TextInput
-                className="flex-1 text-base pl-2"
-                secureTextEntry={secureTextEntry}
-                onChangeText={handlePasswordChange}
-                value={password}
-              />
-              <TouchableOpacity
-                onPress={() => setSecureTextEntry(!secureTextEntry)}
-              >
-                <Icon
-                  name={secureTextEntry ? "eye-off-outline" : "eye-outline"}
-                  size={24}
-                  color="black"
-                />
-              </TouchableOpacity>
-            </View>
-
+            <TextInput
+              className="flex-1 text-base pl-2"
+              secureTextEntry={secureTextEntry}
+              onChangeText={handlePasswordChange}
+              value={password}
+            />
             <TouchableOpacity
-              className="bg-black w-full  rounded-3xl items-center justify-center mb-[20%] h-[50px]"
-              style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 10,
-                elevation: 6,
-              }}
-              onPress={handleLogin}
-              disabled={loading}
+              onPress={() => setSecureTextEntry(!secureTextEntry)}
             >
-              {loading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <Text className="text-center font-semibold text-white text-lg">
-                  {t("SignIn.Sign")}
-                </Text>
-              )}
+              <Icon
+                name={secureTextEntry ? "eye-off-outline" : "eye-outline"}
+                size={24}
+                color="black"
+              />
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            className="bg-black w-full  rounded-3xl items-center justify-center mb-[20%] h-[50px]"
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 6,
+            }}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-center font-semibold text-white text-lg">
+                {t("SignIn.Sign")}
+              </Text>
+            )}
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+    </KeyboardAwareScrollView>
   );
 };
 

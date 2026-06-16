@@ -20,6 +20,7 @@ import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import Timer from "@/component/distribution-common/TimerContainer";
 import NetInfo from "@react-native-community/netinfo";
@@ -130,6 +131,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 }) => {
   const { item, status } = route.params;
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const [orderData, setOrderData] = useState<OrderItem>(
     item as unknown as OrderItem,
@@ -2229,7 +2231,10 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           <SuccessModal />
 
           {orderStatus !== "Completed" && (
-            <View className="absolute bottom-10 left-2 right-2 bg-white px-4 h-[50px]">
+            <View
+              className="absolute bottom-2 left-0 right-0 bg-white px-6 pt-3 shadow-lg"
+              style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            >
               <TouchableOpacity
                 className={`h-[50px] justify-center rounded-full px-3 ${showWarning ? "bg-black" : "bg-gray-400"}`}
                 onPress={handleSubmitPress}
