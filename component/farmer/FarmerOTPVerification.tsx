@@ -56,7 +56,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [language, setLanguage] = useState("en");
   const [isOtpValid, setIsOtpValid] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
+  //const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
   const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
@@ -204,32 +204,32 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
           break;
 
-        case "1001":
-          setVerificationAttempts((prev) => prev + 1);
+        // case "1001":
+        //   setVerificationAttempts((prev) => prev + 1);
 
-          if (verificationAttempts >= 2) {
-            Alert.alert(
-              t("Error.Sorry"),
-              t("Otpverification.OTPExpiredOrInvalid"),
-              [
-                {
-                  text: t("Otpverification.ResendOTP"),
-                  onPress: handleResendOTP,
-                },
-                {
-                  text: t("Otpverification.TryAgain"),
-                  onPress: () => {
-                    setOtpDigits(["", "", "", "", ""]);
-                    setIsOtpValid(false);
-                    inputRefs.current[0]?.focus();
-                  },
-                },
-              ],
-            );
-          } else {
-            Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
-          }
-          break;
+        //   if (verificationAttempts >= 2) {
+        //     Alert.alert(
+        //       t("Error.Sorry"),
+        //       t("Otpverification.OTPExpiredOrInvalid"),
+        //       [
+        //         {
+        //           text: t("Otpverification.ResendOTP"),
+        //           onPress: handleResendOTP,
+        //         },
+        //         {
+        //           text: t("Otpverification.TryAgain"),
+        //           onPress: () => {
+        //             setOtpDigits(["", "", "", "", ""]);
+        //             setIsOtpValid(false);
+        //             inputRefs.current[0]?.focus();
+        //           },
+        //         },
+        //       ],
+        //     );
+        //   } else {
+        //     Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+        //   }
+        //   break;
 
         case "1002":
           setIsOtpExpired(true);
@@ -303,7 +303,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         setReferenceId(response.data.referenceId);
 
         setIsOtpExpired(false);
-        setVerificationAttempts(0);
+      //  setVerificationAttempts(0);
         setOtpDigits(["", "", "", "", ""]);
         setIsOtpValid(false);
         setTimer(240);
@@ -356,7 +356,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         setTimer(240);
         setDisabledResend(true);
         setIsOtpExpired(false);
-        setVerificationAttempts(0);
+     //   setVerificationAttempts(0);
         setTimeout(() => inputRefs.current[0]?.focus(), 100);
       }
 

@@ -98,6 +98,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
 
   useFocusEffect(
     useCallback(() => {
+      setIsEditing(false);
       const handleBackPress = () => {
         navigation.reset({
           index: 0,

@@ -310,22 +310,30 @@ const RecieveTargetBetweenOfficers: React.FC<
       );
 
       if (response.status === 200) {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Target received successfully."),
-        );
-        navigation.navigate("Main" as any, {
-          screen: "DailyTargetListForOfficers",
-          params: {
-            officerId,
-            collectionOfficerId,
-            officerName,
-            phoneNumber1,
-            phoneNumber2,
-            image,
-          },
-        });
-      } else {
+  Alert.alert(
+    t("Error.Success"),
+    t("Error.Target received successfully."),
+    [
+      {
+        text: t("Error.OK"),
+        onPress: () => {
+          navigation.navigate("Main" as any, {
+            screen: "DailyTargetListForOfficers",
+            params: {
+              officerId,
+              collectionOfficerId,
+              officerName,
+              phoneNumber1,
+              phoneNumber2,
+              image,
+            },
+          });
+        },
+      },
+    ],
+    { cancelable: false }
+  );
+}else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
       }
     } catch (error: any) {
