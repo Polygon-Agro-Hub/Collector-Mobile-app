@@ -76,7 +76,7 @@
     "User token not found. Please log in again.": "பயனர் குறி அடையாளம்(டோக்கன்) கிடைக்கவில்லை. மீண்டும் உள்நுழையவும்.",
     "Failed to claim the officer. Please try again later.": "அதிகாரியை உரிமை கோர முடியவில்லை. பிறகு முயற்சிக்கவும்.",
     "Success": "வெற்றி",
-    "Officer successfully claimed.": "அதிகாரியை வெற்றிகரமாக ஏற்கப்பட்டது.",
+    "Staff successfully claimed.": "அதிகாரியை வெற்றிகரமாக ஏற்கப்பட்டது.",
     "Failed to generate PDF": "PDF ஐ உருவாக்க முடியவில்லை.",
     "Sharing is not available on this device": "இந்தச் சாதனத்தில் பகிர்தல் கிடைக்கவில்லை.",
     "User not authenticated.": "பயனர் அங்கீகரிக்கப்படவில்லை.",
@@ -246,7 +246,8 @@
     "Confirm account number is required": "கணக்கு எண்ணை உறுதிப்படுத்துவது அவசியம்.",
     "Bank name is required": "வங்கியின் பெயர் அவசியம்",
     "Branch name is required": "கிளையின் பெயர் அவசியம்.",
-    "Price updated successfully": "விலை வெற்றிகரமாக புதுப்பிக்கப்பட்டது."
+    "Price updated successfully": "விலை வெற்றிகரமாக புதுப்பிக்கப்பட்டது.",
+    "No targets have been assigned today for the selected crop.":"தேர்ந்தெடுக்கப்பட்ட பயிருக்கு இன்று எந்த இலக்குகளும் நிர்ணயிக்கப்படவில்லை."
   },
   "SideMenu": {
     "LNG": "en",
@@ -610,12 +611,13 @@
   "DisclaimOfficer": {
     "Are you sure you want to disclaim this officer?": "இந்த அதிகாரியை நீங்கள் நிச்சயமாக மறுக்க விரும்புகிறீர்களா?",
     "Disclaim": "மறுப்பு",
-    "Officer disclaimed successfully.": "அதிகாரி வெற்றிகரமாக மறுத்துவிட்டார்.",
+    "Staff disclaimed successfully.": "அதிகாரி வெற்றிகரமாக மறுத்துவிட்டார்.",
     "Failed to disclaim officer.": "அதிகாரியை மறுக்க முடியவில்லை."
   },
   "CollectionOfficersList": {
     "LNG": "ta",
     "Collection Officers": "அதிகாரிகள்",
+    "Manage Staff":"பணியாளர்களை நிர்வகிக்கவும்",
     "Claim Officer": "ஒரு அதிகாரியை கோருங்கள்",
     "Officers List": "அதிகாரிகளின் பட்டியல்",
     "Drivers List": "இயக்குனர்கள் பட்டியல்",
@@ -1008,7 +1010,8 @@
     "No products available": "பொருட்கள் இல்லை",
     "Approve": "ஒப்புதல்",
     "Rs": "Rs.",
-    "Please enter a value greater than 0":"0-ஐ விடப் பெரிய மதிப்பை உள்ளிடவும்."
+    "Please enter a value greater than 0":"0-ஐ விடப் பெரிய மதிப்பை உள்ளிடவும்.",
+    "Price must match defined product price":"விலையானது வரையறுக்கப்பட்ட பொருளின் விலையுடன் பொருந்த வேண்டும்."
   },
   "ReplaceRequestsScreen": {
     "Order ID": "ஆர்டர் இல்லை:",

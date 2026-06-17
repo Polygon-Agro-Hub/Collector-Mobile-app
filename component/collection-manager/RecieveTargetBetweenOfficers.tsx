@@ -40,6 +40,10 @@ interface RecieveTargetBetweenOfficersScreenProps {
       qty: string;
       collectionOfficerId: number;
       officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
     };
   };
 }
@@ -79,6 +83,10 @@ const RecieveTargetBetweenOfficers: React.FC<
     varietyNameTamil,
     target,
     qty,
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+    image,
   } = route.params;
   const toOfficerId = collectionOfficerId;
 
@@ -96,44 +104,51 @@ const RecieveTargetBetweenOfficers: React.FC<
     fetchData();
   }, []);
 
-   const goBackToEditTarget = () => {
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: "Main",
+  const goBackToEditTarget = () => {
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "Main",
+          params: {
+            screen: "EditTargetScreen",
             params: {
-              screen: "EditTargetScreen",
-              params: {
-                varietyId,
-                officerId,
-                collectionOfficerId,
-                varietyNameEnglish,
-                varietyNameSinhala,
-                varietyNameTamil,
-                grade,
-                target,
-                todo,
-                qty,
-              },
+              varietyId,
+              officerId,
+              collectionOfficerId,
+              varietyNameEnglish,
+              varietyNameSinhala,
+              varietyNameTamil,
+              grade,
+              target,
+              todo,
+              qty,
             },
           },
-        ],
-      });
-    };
-  
-    useFocusEffect(
-      useCallback(() => {
-        const subscription = BackHandler.addEventListener(
-          "hardwareBackPress",
-          () => {
-            goBackToEditTarget();
-            return true; 
-          },
-        );
-        return () => subscription.remove();
-      }, [navigation]),
-    );
+        },
+      ],
+    });
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setAssignee("");
+      setAmount("");
+      setError("");
+      setMaxAmount(0);
+      setErrorMessage(null);
+      fetchOfficers();
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          goBackToEditTarget();
+          return true;
+        },
+      );
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   const getOfficerName = (officer: Officer) => {
     switch (selectedLanguage) {
@@ -222,11 +237,6 @@ const RecieveTargetBetweenOfficers: React.FC<
     }
   };
 
-  useEffect(() => {
-    fetchOfficers();
-    if (assignee === "0") setAmount("");
-  }, []);
-
   const handleAmountChange = (text: string) => {
     let sanitized = text.replace(/[^0-9.]/g, "");
 
@@ -300,15 +310,30 @@ const RecieveTargetBetweenOfficers: React.FC<
       );
 
       if (response.status === 200) {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Target received successfully."),
-        );
-        navigation.navigate("Main" as any, {
-          screen: "DailyTargetListForOfficers",
-          params: { officerId, collectionOfficerId },
-        });
-      } else {
+  Alert.alert(
+    t("Error.Success"),
+    t("Error.Target received successfully."),
+    [
+      {
+        text: t("Error.OK"),
+        onPress: () => {
+          navigation.navigate("Main" as any, {
+            screen: "DailyTargetListForOfficers",
+            params: {
+              officerId,
+              collectionOfficerId,
+              officerName,
+              phoneNumber1,
+              phoneNumber2,
+              image,
+            },
+          });
+        },
+      },
+    ],
+    { cancelable: false }
+  );
+}else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
       }
     } catch (error: any) {
@@ -362,8 +387,12 @@ const RecieveTargetBetweenOfficers: React.FC<
 
               {loading ? (
                 <ActivityIndicator size="large" color="#313131" />
-              ) : errorMessage ? (
-                <Text className="text-red-500 mb-4">{errorMessage}</Text>
+              ) : errorMessage || officers.length === 0 ? (
+                <Text className="text-red-500 mb-4">
+                  {t(
+                    "Error.No targets have been assigned today for the selected crop.",
+                  )}
+                </Text>
               ) : (
                 <TouchableOpacity
                   onPress={() => setOfficerModalVisible(true)}
@@ -415,14 +444,13 @@ const RecieveTargetBetweenOfficers: React.FC<
               )}
               <View className="border-b border-gray-300 my-4" />
             </View>
-         
 
             <View className="p-5">
               <Text className="text-gray-700 mb-2">
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] px-4 rounded-full p-3.5 text-gray-800"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}

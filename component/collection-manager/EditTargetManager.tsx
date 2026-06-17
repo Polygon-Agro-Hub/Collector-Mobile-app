@@ -44,7 +44,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -83,6 +83,8 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
 
   useFocusEffect(
     useCallback(() => {
+      setIsEditing(false);
+
       const handleBackPress = () => {
         navigation.reset({
           index: 0,
@@ -113,15 +115,27 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
         handleBackPress,
       );
 
-      return () => subscription.remove();
-    }, [navigation]),
+      return () => {
+        subscription.remove();
+        setIsEditing(false);
+      };
+    }, [
+      navigation,
+      varietyId,
+      varietyNameEnglish,
+      grade,
+      target,
+      todo,
+      dailyTarget,
+      varietyNameSinhala,
+      varietyNameTamil,
+    ]),
   );
 
   return (
     <ScrollView className="bg-white">
       <View className="flex-1 bg-white">
         {/* Header */}
-
         <CustomHeader
           title={getvarietyName() || ""}
           subtitle={grade ? `Grade : ${grade}` : ""}
@@ -193,7 +207,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
             {isEditing && (
               <View className="flex-row justify-center gap-4 mt-4 p-5">
                 <TouchableOpacity
-                  className="flex-1 bg-[#FF0700] px-6 py-2  rounded-full justify-center items-center h-[50px]"
+                  className="flex-1 bg-[#FF0700] px-6 py-2 rounded-full justify-center items-center h-[50px]"
                   onPress={() =>
                     navigation.navigate("Main", {
                       screen: "PassTargetScreen",
@@ -230,8 +244,9 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
                     {t("EditTargetManager.Pass")}
                   </Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                  className="flex-1 bg-[#980775] px-6 py-2 rounded-full items-center justify-center "
+                  className="flex-1 bg-[#980775] px-6 py-2 rounded-full items-center justify-center"
                   onPress={() =>
                     navigation.navigate("Main", {
                       screen: "RecieveTargetScreen",

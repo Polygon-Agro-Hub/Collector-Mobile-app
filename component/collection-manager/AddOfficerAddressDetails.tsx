@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -72,6 +72,7 @@ const AddOfficerAddressDetails: React.FC = () => {
   const [filteredBranches, setFilteredBranches] = useState<any[]>([]);
   const [bankName, setBankName] = useState<string>("");
   const { t } = useTranslation();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const [formData, setFormData] = useState({
     houseNumber: "",
@@ -402,6 +403,8 @@ const AddOfficerAddressDetails: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
+      scrollViewRef.current?.scrollTo({ x: 0, y: 0, animated: false });
+
       const handleBackPress = () => {
         if (jobRole === "Collection Officer") {
           navigation.navigate("Main", { screen: "CollectionOfficersList" });
@@ -474,6 +477,9 @@ const AddOfficerAddressDetails: React.FC = () => {
         <ScrollView
           className="flex-1 bg-white"
           keyboardShouldPersistTaps="handled"
+          ref={scrollViewRef}  
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={{ paddingBottom: 100 }}
         >
           {/* ── Address Details ── */}
           <View className="px-0 mt-4">
@@ -730,15 +736,15 @@ const AddOfficerAddressDetails: React.FC = () => {
 
           <View className="px-0 flex-col w-full gap-4 mt-5 mb-4">
             <TouchableOpacity
-              className="bg-[#D9D9D9] rounded-full px-6 py-4 w-full items-center"
+              className="bg-[#D9D9D9] rounded-full px-6 h-[50px] w-full justify-center items-center"
               onPress={() =>
                 navigation.navigate("AddOfficerBasicDetails", {
                   jobRolle: jobRole,
                   preservedData: basicDetails,
                 })
               }
-              style={{
-                shadowColor: "#000000",
+                style={{
+                shadowColor: "#8f8a8a",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,
@@ -760,13 +766,13 @@ const AddOfficerAddressDetails: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className={`bg-black rounded-full px-6 py-4 w-full items-center ${
+              className={`bg-black rounded-full px-6 h-[50px] justify-center w-full items-center ${
                 loading ? "opacity-50" : ""
               }`}
               onPress={handleSubmit}
               disabled={loading}
               style={{
-                shadowColor: "#000000",
+                shadowColor: "#8f8a8a",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,

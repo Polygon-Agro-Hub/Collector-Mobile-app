@@ -54,7 +54,16 @@
         "READ_MEDIA_IMAGES",
         "READ_MEDIA_VIDEO",
         "READ_MEDIA_AUDIO",
-        "CALL_PHONE"
+        "CALL_PHONE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -112,7 +121,7 @@
     "experiments": {},
     "extra": {
       "eas": {
-        "projectId": "eeb35db0-1f3f-4393-91c1-c816247ec8c9"
+        "projectId": "5c42bb2c-2ff1-44a4-bf37-5f0a7f422c2f"
       }
     }
   }

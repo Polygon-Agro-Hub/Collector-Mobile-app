@@ -394,7 +394,9 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
               {loading ? (
                 <ActivityIndicator size="large" color="#313131" />
               ) : errorMessage ? (
-                <Text className="text-red-500 mb-4">{errorMessage}</Text>
+                <Text className="text-red-500 mb-4">{t(
+                    "Error.No targets have been assigned today for the selected crop.",
+                  )}</Text>
               ) : (
                 <TouchableOpacity
                   onPress={() => setOfficerModalVisible(true)}
@@ -453,7 +455,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-2 text-gray-800 h-[50px]"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-2 px-5 text-gray-800 h-[50px]"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -54,6 +54,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   route,
 }) => {
   const { NIC } = route.params;
+
+  const cameFromOTP = useRef(false);
+
+  const scrollViewRef = useRef<ScrollView>(null);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [NICnumber, setNICnumber] = useState("");
@@ -63,12 +68,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [accHolderName, setAccHolderName] = useState("");
   const [bankName, setBankName] = useState("");
   const [branchName, setBranchName] = useState("");
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
-    useState(false);
   const [loading, setLoading] = useState(false);
-  const [progress] = useState(new Animated.Value(0));
-  const [unsuccessfulProgress] = useState(new Animated.Value(0));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { t } = useTranslation();
   const [filteredBranches, setFilteredBranches] = useState<allBranches[]>([]);
@@ -252,6 +252,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       const response = await axios.post(apiUrl, body, { headers });
       await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
+      cameFromOTP.current = true;
+
       navigation.navigate("Main" as any, {
         screen: "OTPE",
         params: {
@@ -273,16 +275,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       setLoading(false);
     }
   };
-
-  const loadingBarWidth = progress.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-  });
-
-  const unsuccessfulLoadingBarWidth = unsuccessfulProgress.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-  });
 
   const getTextStyle = (language: string) => {
     if (language === "si") return { fontSize: 14, lineHeight: 20 };
@@ -327,27 +319,33 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     if (fieldErrors.accHolderName)
       setFieldErrors((prev) => ({ ...prev, accHolderName: "" }));
   };
+
   useFocusEffect(
     useCallback(() => {
-      setFirstName("");
-      setLastName("");
-      setNICnumber(NIC ?? "");
-      setPhoneNumber("");
-      setDistrict("");
-      setAccNumber("");
-      setAccHolderName("");
-      setBankName("");
-      setBranchName("");
-      setPreferdLanguage("");
-      setCallingCode("+94");
-      setNICError("");
-      setPhoneError("");
-      setAccNumberError("");
-      setFieldErrors({});
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+
+      if (!cameFromOTP.current) {
+        setFirstName("");
+        setLastName("");
+        setNICnumber(NIC ?? "");
+        setPhoneNumber("");
+        setDistrict("");
+        setAccNumber("");
+        setAccHolderName("");
+        setBankName("");
+        setBranchName("");
+        setPreferdLanguage("");
+        setCallingCode("+94");
+        setNICError("");
+        setPhoneError("");
+        setAccNumberError("");
+        setFieldErrors({});
+        setErrorMessage(null);
+      } else {
+        cameFromOTP.current = false;
+      }
+
       setLoading(false);
-      setIsModalVisible(false);
-      setIsUnsuccessfulModalVisible(false);
-      setErrorMessage(null);
 
       const handleBackPress = () => {
         navigation.navigate("Main" as any, { screen: "SearchFarmer" });
@@ -362,7 +360,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       return () => {
         subscription.remove();
       };
-    }, [navigation, NIC]), // ✅ NIC in deps so it's always fresh
+    }, [navigation, NIC]),
   );
 
   const SelectorButton = ({
@@ -416,6 +414,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       />
       <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-6">
         <ScrollView
+          ref={scrollViewRef}
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20, paddingTop: 16 }}
@@ -751,97 +750,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             )}
           </TouchableOpacity>
         </ScrollView>
-
-        {/* Success Modal */}
-        <Modal
-          transparent={true}
-          visible={isModalVisible}
-          animationType="slide"
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#00000040",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View className="bg-white rounded-lg w-72 p-6 items-center">
-              <Text className="text-xl font-bold mb-4">
-                {t("UnregisteredFarmerDetails.Success")}
-              </Text>
-              <View className="mb-4">
-                <Image
-                  source={require("../../assets/images/collection-common/tick.webp")}
-                  className="w-24 h-24"
-                />
-              </View>
-              <Text className="text-gray-700">
-                {t("UnregisteredFarmerDetails.Successful")}
-              </Text>
-              <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
-                <Animated.View
-                  className="h-full bg-green-500"
-                  style={{ width: loadingBarWidth }}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Unsuccessful Modal */}
-        <Modal
-          transparent={true}
-          visible={isUnsuccessfulModalVisible}
-          animationType="slide"
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#00000040",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View className="bg-white rounded-lg w-72 p-6 items-center">
-              <Text className="text-xl font-bold mb-4">
-                {t("UnregisteredFarmerDetails.Oops")}
-              </Text>
-              <View className="mb-4">
-                <Image
-                  source={require("../../assets/images/collection-common/error-unregister.webp")}
-                  className="w-24 h-24"
-                />
-              </View>
-              <Text className="text-gray-700">
-                {t("UnregisteredFarmerDetails.Unsuccessful")}
-              </Text>
-              {errorMessage && (
-                <Text className="text-red-600 text-center mt-2">
-                  {errorMessage}
-                </Text>
-              )}
-              <View className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mt-6">
-                <Animated.View
-                  className="h-full bg-red-500"
-                  style={{ width: unsuccessfulLoadingBarWidth }}
-                />
-              </View>
-              <TouchableOpacity
-                className="bg-red-500 p-2 rounded-full mt-4"
-                onPress={() => {
-                  setIsUnsuccessfulModalVisible(false);
-                  setErrorMessage(null);
-                  unsuccessfulProgress.setValue(0);
-                }}
-              >
-                <Text className="text-white">
-                  {t("UnregisteredFarmerDetails.Close")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
 
       {/* Language Modal */}

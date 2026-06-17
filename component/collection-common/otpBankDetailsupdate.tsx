@@ -16,176 +16,11 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
-import { Dimensions } from "react-native";
-import { Modal } from "react-native";
-import { Animated } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
-
-const { width: screenWidth } = Dimensions.get("window");
-
-type RootStackParamList = {
-  OtpVerification: undefined;
-  NextScreen: undefined;
-};
-
-interface SuccessModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onComplete: () => void;
-}
-
-interface FailModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onFail: () => void;
-}
-
-const ShowSuccessModal: React.FC<SuccessModalProps> = ({
-  visible,
-  onClose,
-  onComplete,
-}) => {
-  const progress = useRef(new Animated.Value(0)).current;
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    if (visible) {
-      progress.setValue(0);
-      Animated.timing(progress, {
-        toValue: 100,
-        duration: 2000,
-        useNativeDriver: false,
-      }).start(() => {
-        setTimeout(() => {
-          onComplete();
-        }, 500);
-      });
-    }
-  }, [visible]);
-
-  return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <View className="bg-white p-6 rounded-2xl items-center w-72 h-80 shadow-lg relative">
-          <Text className="text-xl font-bold mt-4 text-center">
-            {t("BankDetailsUpdate.Success")}
-          </Text>
-
-          <Image
-            source={require("../../assets/images/collection-common/otpsuccess.webp")}
-            style={{ width: 80, height: 80, marginVertical: 16 }}
-            resizeMode="contain"
-          />
-
-          <Text className="text-gray-500 mb-4">
-            {t("BankDetailsUpdate.SuccessMessage")}
-          </Text>
-
-          <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
-            <Animated.View
-              style={{
-                height: "100%",
-                backgroundColor: "#980775",
-                width: progress.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ["0%", "100%"],
-                }),
-              }}
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
-const ShowFailModal: React.FC<FailModalProps> = ({
-  visible,
-  onClose,
-  onFail,
-}) => {
-  const progress = useRef(new Animated.Value(0)).current;
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    if (visible) {
-      progress.setValue(0);
-      Animated.timing(progress, {
-        toValue: 100,
-        duration: 2000,
-        useNativeDriver: false,
-      }).start(() => {
-        setTimeout(() => {
-          onFail();
-        }, 500);
-      });
-    }
-  }, [visible]);
-
-  return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <View className="bg-white p-6 rounded-2xl items-center w-72 h-60 shadow-lg relative">
-          <Text className="text-xl font-bold mt-4 text-center">
-            {t("BankDetailsUpdate.Failed")}
-          </Text>
-
-          <Image
-            source={require("../../assets/images/collection-common/error.webp")}
-            style={{ width: 80, height: 80, marginVertical: 16 }}
-            resizeMode="contain"
-          />
-
-          <Text className="text-gray-500 mb-4">
-            {t("BankDetailsUpdate.FailedMessage")}
-          </Text>
-
-          <TouchableOpacity
-            className="bg-[#ef4444] px-6 py-2 rounded-full mt-6"
-            onPress={() => {
-              onClose();
-              onFail();
-            }}
-          >
-            <Text className="text-white font-semibold">
-              {t("Otpverification.OK")}
-            </Text>
-          </TouchableOpacity>
-
-          <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
-            <Animated.View
-              style={{
-                height: "100%",
-                backgroundColor: "#ef4444",
-                width: progress.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: ["0%", "100%"],
-                }),
-              }}
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
+import { AlertModal } from "../commons/AlertModal";
 
 const Otpverification: React.FC = ({ navigation, route }: any) => {
   const {
@@ -211,7 +46,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [isOtpValid, setIsOtpValid] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [failModalVisible, setFailModalVisible] = useState(false);
-  const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
+  // const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
   const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
   const [farmerData, setFarmerData] = useState<{
     NICnumber: string;
@@ -227,7 +62,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       setDisabledResend(true);
       setIsVerified(false);
       setIsOtpExpired(false);
-      setVerificationAttempts(0);
+      //  setVerificationAttempts(0);
       setModalVisible(false);
       setFailModalVisible(false);
       inputRefs.current.forEach((ref) => ref?.clear());
@@ -269,6 +104,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         phoneNumber: phoneNumber,
         PreferdLanguage: PreferdLanguage,
         officerRole: "COO",
+        comingFromOtp: true,
       });
       return true;
     };
@@ -398,33 +234,33 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             setFailModalVisible(true);
           }
           break;
-        case "1001":
-          setVerificationAttempts((prev: number) => prev + 1);
+        // case "1001":
+        //   setVerificationAttempts((prev: number) => prev + 1);
 
-          if (verificationAttempts >= 2) {
-            Alert.alert(
-              t("Error.Sorry"),
-              t("Otpverification.OTPExpiredOrInvalid"),
-              [
-                {
-                  text: t("Otpverification.ResendOTP"),
-                  onPress: handleResendOTP,
-                },
-                {
-                  text: t("Otpverification.TryAgain"),
-                  onPress: () => {
-                    setOtpCode("");
-                    setIsOtpValid(false);
-                    inputRefs.current.forEach((ref) => ref?.clear());
-                    inputRefs.current[0]?.focus();
-                  },
-                },
-              ],
-            );
-          } else {
-            Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
-          }
-          break;
+        //   if (verificationAttempts >= 2) {
+        //     Alert.alert(
+        //       t("Error.Sorry"),
+        //       t("Otpverification.OTPExpiredOrInvalid"),
+        //       [
+        //         {
+        //           text: t("Otpverification.ResendOTP"),
+        //           onPress: handleResendOTP,
+        //         },
+        //         {
+        //           text: t("Otpverification.TryAgain"),
+        //           onPress: () => {
+        //             setOtpCode("");
+        //             setIsOtpValid(false);
+        //             inputRefs.current.forEach((ref) => ref?.clear());
+        //             inputRefs.current[0]?.focus();
+        //           },
+        //         },
+        //       ],
+        //     );
+        //   } else {
+        //     Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+        //   }
+        //   break;
 
         case "1002":
           setIsOtpExpired(true);
@@ -432,10 +268,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           break;
 
         default:
-          Alert.alert(
-            t("Error.Sorry"),
-            message || t("Error.somethingWentWrong"),
-          );
+          Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       }
     } catch (error: any) {
       console.error("OTP Verification Error:", error);
@@ -496,7 +329,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         setTimer(240);
         setDisabledResend(true);
         setIsOtpExpired(false);
-        setVerificationAttempts(0);
+        //  setVerificationAttempts(0);
         setOtpCode("");
         setIsOtpValid(false);
         inputRefs.current.forEach((ref) => ref?.clear());
@@ -534,6 +367,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             phoneNumber: phoneNumber,
             PreferdLanguage: PreferdLanguage,
             officerRole: "COO",
+            comingFromOtp: true,
           })
         }
       />
@@ -631,16 +465,22 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             </TouchableOpacity>
           </View>
 
-          <ShowSuccessModal
+          <AlertModal
             visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            onComplete={handleSuccessCompletion}
+            title={t("BankDetailsUpdate.Success")}
+            message={t("BankDetailsUpdate.SuccessMessage")}
+            type="success"
+            duration={2000}
+            onClose={handleSuccessCompletion}
           />
 
-          <ShowFailModal
+          <AlertModal
             visible={failModalVisible}
-            onClose={() => setFailModalVisible(false)}
-            onFail={handleFailCompletion}
+            title={t("BankDetailsUpdate.Failed")}
+            message={t("BankDetailsUpdate.FailedMessage")}
+            type="error"
+            duration={2000}
+            onClose={handleFailCompletion}
           />
 
           <View className="w-full items-center" style={{ marginBottom: 52 }}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
@@ -19,7 +20,12 @@ import { environment } from "@/environment/environment";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  RouteProp,
+  useFocusEffect,
+} from "@react-navigation/native";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
 import CustomHeader from "../navigations/CustomHeader";
 import LoadingPage from "../commons/LoadingPage";
@@ -73,12 +79,12 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
 
     const fetchComplainCategory = async () => {
       try {
-         const token = await AsyncStorage.getItem("token");
-    console.log("TOKEN:", token);
+        const token = await AsyncStorage.getItem("token");
+        console.log("TOKEN:", token);
 
         const response = await axios.get(
           `${environment.API_BASE_URL}api/complain/get-complain-category`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (response.data.status === "success") {
           const categoryField =
@@ -154,10 +160,18 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       Alert.alert(
         t("Error.Success"),
         t("Error.Your complaint has Submit successfuly"),
+        [
+          {
+            text: t("Error.Ok") || "OK",
+            onPress: () => {
+              navigation.navigate("SideMenu");
+            },
+          },
+        ],
+        { cancelable: false }
       );
       setComplain("");
       setSelectedCategory(null);
-      navigation.goBack();
     } catch (error) {
       console.error("Error submitting complaint:", error);
       Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
@@ -171,6 +185,22 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     label: t(item.label),
     value: item.value,
   }));
+
+  useFocusEffect(
+    useCallback(() => {
+      const handleBackPress = () => {
+        navigation.navigate("SideMenu");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
 
   return (
     <>
@@ -187,7 +217,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
               className="flex-1 bg-white"
               contentContainerStyle={{
                 flexGrow: 1,
-                backgroundColor: "#F6F6F6",
+                backgroundColor: "white",
               }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
@@ -196,18 +226,27 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 title=""
                 showBackButton={true}
                 navigation={navigation}
-                onBackPress={() => navigation.goBack()}
+                onBackPress={() => navigation.navigate("SideMenu")}
                 transparent
               />
 
-              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-[#F6F6F6] justify-center">
+              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-white justify-center">
                 <Image
                   source={require("../../assets/images/complain/complain.webp")}
                   className="w-48 h-48 mx-auto"
                   resizeMode="contain"
                 />
 
-                <View className="items-center bg-white rounded-3xl w-full mb-10 p-4">
+                <View
+                  className="items-center bg-white rounded-3xl w-full mb-10 p-4"
+                  style={{
+                    shadowColor: "#070707",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 10,
+                    elevation: 6,
+                  }}
+                >
                   <View className="w-full items-center mt-10">
                     <View className="flex-row">
                       <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">
@@ -258,7 +297,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     />
 
                     <TouchableOpacity
-                      className="w-full bg-black rounded-3xl items-center justify-center mb-20 h-[50px]"
+                      className="w-full bg-black rounded-3xl items-center justify-center mb-10 h-[50px]"
                       onPress={handleSubmit}
                       style={{
                         shadowColor: "#000000",

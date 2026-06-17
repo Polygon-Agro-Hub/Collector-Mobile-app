@@ -2,10 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
-  Modal,
   TouchableOpacity,
-  Animated,
-  Image,
   Dimensions,
   BackHandler,
 } from "react-native";
@@ -17,6 +14,7 @@ import CustomHeader from "../navigations/CustomHeader";
 import CameraAccess from "../permission/CameraAccess";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AlertModal } from "../commons/AlertModal";
 
 type QRScannerNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -39,9 +37,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
   const [isUnsuccessfulModalVisible, setIsUnsuccessfulModalVisible] =
     useState<boolean>(false);
-
-  const [unsuccessfulLoadingBarWidth, setUnsuccessfulLoadingBarWidth] =
-    useState(new Animated.Value(100));
 
   const [jobRole, setJobRole] = useState<string | null>(null);
 
@@ -145,23 +140,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
         throw new Error(t("Error.User ID not found in QR code"));
       }
 
-      navigation.navigate("FarmerQr" as any, { userId });
+      navigation.navigate("Main" as any, { screen: "FarmerQr", params: { userId } });
     } catch (error) {
       console.error("QR Parsing Error:", error);
 
       setIsUnsuccessfulModalVisible(true);
-
-      unsuccessfulLoadingBarWidth.setValue(100);
-      Animated.timing(unsuccessfulLoadingBarWidth, {
-        toValue: 0,
-        duration: 5000,
-        useNativeDriver: false,
-      }).start();
-
-      setTimeout(() => {
-        setIsUnsuccessfulModalVisible(false);
-        navigation.navigate("SearchFarmer" as any);
-      }, 5000);
     }
   };
 
@@ -225,39 +208,17 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
           />
         </View>
 
-        <Modal
-          transparent={true}
+        <AlertModal
           visible={isUnsuccessfulModalVisible}
-          animationType="slide"
-        >
-          <View className="flex-1 justify-center items-center bg-black bg-opacity-70">
-            <View className="bg-white rounded-lg w-72 h-80 items-center relative overflow-hidden">
-              <View className="p-6 items-center">
-                <Text className="text-xl font-bold mb-4">
-                  {t("QRScanner.Failed")}
-                </Text>
-                <View className="mb-4">
-                  <Image
-                    source={require("../../assets/images/collection-common/error.webp")}
-                    className="w-32 h-32"
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text className="text-gray-700">
-                  {t("QRScanner.SearchNIC")}
-                </Text>
-              </View>
-
-              {/* Red Loading Bar at bottom */}
-              <View className="absolute bottom-0 left-0 w-full h-2 bg-gray-300">
-                <Animated.View
-                  className="h-full bg-red-500"
-                  style={{ width: unsuccessfulLoadingBarWidth }}
-                />
-              </View>
-            </View>
-          </View>
-        </Modal>
+          title={t("QRScanner.Failed")}
+          message={t("QRScanner.SearchNIC")}
+          type="error"
+          duration={5000}
+          onClose={() => {
+            setIsUnsuccessfulModalVisible(false);
+            navigation.navigate("SearchFarmer" as any);
+          }}
+        />
       </View>
     );
   }

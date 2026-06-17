@@ -1,9 +1,10 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system/legacy";
 import axios from "axios";
 import { Asset } from "expo-asset";
 import { environment } from "@/environment/environment";
+import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+import { logoBase64 as logoBase64Fallback } from "./logoBase64";
 
 export const fetchOrderDetailsByIds = async (orderIds, authToken) => {
   try {
@@ -246,7 +247,7 @@ export const processOrdersForDelivery = async (
         emailsData.push({
           email: emailAddress,
           subject: `Order ${invoiceNo} - Out for Delivery`,
-          fileName: `Invoice_${invoiceNo}_${new Date().toISOString().split("T")[0]}.pdf`,
+          fileName: `Post_Invoice_${invoiceNo}.pdf`,
           pdfBase64,
           customerName,
           firstName,
@@ -443,6 +444,12 @@ const generateInvoiceHTML = (
 
   const subtotal = totalPackagePrice + additionalItemsTotal;
 
+  const formatCustomerName = (info) => {
+    const title = info.title ? info.title.trim() : "";
+    const name = info.fullName || "N/A";
+    return title ? `${title}. ${name}` : name;
+  };
+
   const isFreeDelivery =
     order.isCoupon === 1 && order.couponType === "Free Delivery";
   const deliveryFeeAmount = isFreeDelivery ? 0 : parseFloat(deliveryFee || 0);
@@ -483,6 +490,7 @@ const generateInvoiceHTML = (
     ) {
       return "";
     }
+
     return order.packages
       .map((pkg, packageIndex) => {
         const packageTotal = calculatePackageTotal(pkg);
@@ -495,45 +503,46 @@ const generateInvoiceHTML = (
         if (pkg.packageItems && Array.isArray(pkg.packageItems)) {
           packageDetailsRows = pkg.packageItems
             .map((item, itemIndex) => {
-              const itemPrice = parseFloat(item.price || 0);
+              const itemTotal = parseFloat(item.price || 0);
               const itemQty = parseFloat(item.qty || 0);
-              const itemTotal = itemPrice * itemQty;
+              const itemUnitPrice = itemQty > 0 ? itemTotal / itemQty : 0;
+
               return `
-                <tr>
-                  <td style="text-align: center" class="tabledata">${itemIndex + 1}</td>
-                  <td class="tabledata">${item.productTypeName || item.category || "N/A"}</td>
-                  <td class="tabledata">${item.productDisplayName || "N/A"}</td>
-                  <td class="tabledata">${formatNumber(itemPrice)}</td>
-                  <td class="tabledata">${itemQty}${item.unit || ""}</td>
-                  <td class="tabledata">${formatNumber(itemTotal)}</td>
-                </tr>`;
+              <tr>
+                <td style="text-align: left" class="tabledata">${itemIndex + 1}</td>
+                <td class="tabledata">${item.productTypeName || item.category || "N/A"}</td>
+                <td class="tabledata">${item.productDisplayName || "N/A"}</td>
+                <td class="tabledata">${formatNumber(itemUnitPrice)}</td>
+                <td class="tabledata">${itemQty}${item.unit || ""}</td>
+                <td class="tabledata">${formatNumber(itemTotal)}</td>
+              </tr>`;
             })
             .join("");
         }
 
         return `
-          <div class="section4">
-            <div style="display:flex;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid #ccc;padding-bottom:10px;margin-top:40px;">
-              <div class="bold">${pkg.displayName || `Package ${packageIndex + 1}`} (${formatItemCount(packageItemsCount)} Items)</div>
-              <div style="font-weight:550;font-size:16px">${formatCurrency(packageTotal)}</div>
-            </div>
-            <div style="border:1px solid #ddd;border-radius:10px">
-              ${packageDetailsRows
+        <div class="section4">
+          <div style="display:flex;justify-content:space-between;margin-bottom:20px;border-bottom:1px solid #ccc;padding-bottom:10px;margin-top:40px;">
+            <div class="bold">${pkg.displayName || `Package ${packageIndex + 1}`} (${formatItemCount(packageItemsCount)} Items)</div>
+            <div style="font-weight:550;font-size:16px">${formatCurrency(packageTotal)}</div>
+          </div>
+          <div style="border:1px solid #ddd;border-radius:10px">
+            ${packageDetailsRows
             ? `<table class="table">
-                    <tr>
-                      <th style="text-align:center;border-top-left-radius:10px">Index</th>
-                      <th>Category</th>
-                      <th>Item Description</th>
-                      <th>Unit Price (Rs.)</th>
-                      <th>QTY (Kg)</th>
-                      <th style="border-top-right-radius:10px">Amount (Rs.)</th>
-                    </tr>
-                    ${packageDetailsRows}
-                  </table>`
+                  <tr>
+                    <th style="text-align:left;border-top-left-radius:10px">Index</th>
+                    <th style="text-align:left">Category</th>
+                    <th style="text-align:left">Item Description</th>
+                    <th style="text-align:left">Unit Price (Rs.)</th>
+                    <th style="text-align:left">QTY (Kg)</th>
+                    <th style="text-align:left;border-top-right-radius:10px">Amount (Rs.)</th>
+                  </tr>
+                  ${packageDetailsRows}
+                </table>`
             : `<div style="padding:20px;text-align:center;color:#666;">Package items not available</div>`
           }
-            </div>
-          </div>`;
+          </div>
+        </div>`;
       })
       .join("");
   };
@@ -549,24 +558,15 @@ const generateInvoiceHTML = (
         const actualAmount = price + discount;
         const unitPrice = parseFloat(item.normalPrice?.toString() || "0");
 
-        let formattedQty = "";
-        if (unit === "g") {
-          if (qty >= 1000) {
-            formattedQty = `${(qty / 1000).toFixed(qty % 1000 === 0 ? 0 : 1)}kg`;
-          } else {
-            formattedQty = `${qty}g`;
-          }
-        } else {
-          formattedQty = `${qty}${unit}`;
-        }
+        const formattedQty = `${qty}${unit}`;
 
         return `
       <tr>
-        <td style="text-align: center; padding: 12px 8px;" class="tabledata">${index + 1}</td>
-        <td style="padding: 12px 8px;" class="tabledata">${item.displayName || item.name || "Item"}</td>
-        <td style="text-align: right; padding: 12px 8px;" class="tabledata">${formatNumber(unitPrice)}</td>
-        <td style="text-align: center; padding: 12px 8px;" class="tabledata">${formattedQty}</td>
-        <td style="text-align: right; padding: 12px 8px;" class="tabledata">${formatCurrency(actualAmount)}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${index + 1}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${item.displayName || item.name || "Item"}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${formatNumber(unitPrice)}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${formattedQty}</td>
+        <td style="text-align: left; padding: 12px 8px;" class="tabledata">${formatCurrency(actualAmount)}</td>
       </tr>`;
       })
       .join("");
@@ -624,28 +624,27 @@ const generateInvoiceHTML = (
 
     if (buildingType === "Apartment" && orderData.apartmentAddress) {
       const apt = orderData.apartmentAddress;
-      const hasData =
-        apt.buildingNo ||
-        apt.buildingName ||
-        apt.unitNo ||
-        apt.floorNo ||
-        apt.houseNo ||
-        apt.streetName ||
-        apt.city;
+      const addressParts = [];
+      if (apt.buildingNo) addressParts.push({ label: "No:", value: apt.buildingNo });
+      if (apt.buildingName) addressParts.push({ label: "Name:", value: apt.buildingName });
+      if (apt.unitNo) addressParts.push({ label: "Flat:", value: apt.unitNo });
+      if (apt.floorNo) addressParts.push({ label: "Floor:", value: apt.floorNo });
+      if (apt.houseNo) addressParts.push({ label: "House No:", value: apt.houseNo });
+      if (apt.streetName) addressParts.push({ label: "Street Name:", value: apt.streetName });
+      if (apt.city) addressParts.push({ label: "City:", value: apt.city });
 
-      if (!hasData) {
+      if (addressParts.length === 0) {
         return `<p class="addr-line" style="color:#999;">Address not provided</p>`;
       }
 
+      const linesHtml = addressParts.map((part, index) => {
+        const comma = index < addressParts.length - 1 ? "," : "";
+        return `<p class="addr-line" style="margin:2px 0;"><span style="color:#666666;font-weight:550;">${part.label}</span> ${part.value}${comma}</p>`;
+      }).join("\n");
+
       return `
         <p class="bold" style="margin-bottom:4px;">Apartment Address :</p>
-        ${apt.buildingNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">No :</span> ${apt.buildingNo}</p>` : ""}
-        ${apt.buildingName ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Name :</span> ${apt.buildingName}</p>` : ""}
-        ${apt.unitNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Flat :</span> ${apt.unitNo}</p>` : ""}
-        ${apt.floorNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Floor :</span> ${apt.floorNo}</p>` : ""}
-        ${apt.houseNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">House No :</span> ${apt.houseNo}</p>` : ""}
-        ${apt.streetName ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Street Name :</span> ${apt.streetName}</p>` : ""}
-        ${apt.city ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">City :</span> ${apt.city}</p>` : ""}
+        ${linesHtml}
       `;
     }
 
@@ -662,11 +661,19 @@ const generateInvoiceHTML = (
       return `<p class="addr-line" style="color:#999;">Address not provided</p>`;
     }
 
+    const addressParts = [];
+    if (houseNo) addressParts.push({ label: "House No:", value: houseNo });
+    if (streetName) addressParts.push({ label: "Street Name:", value: streetName });
+    if (city) addressParts.push({ label: "City:", value: city });
+
+    const linesHtml = addressParts.map((part, index) => {
+      const comma = index < addressParts.length - 1 ? "," : "";
+      return `<p class="addr-line" style="margin:2px 0;"><span style="color:#666666;font-weight:555;">${part.label}</span> ${part.value}${comma}</p>`;
+    }).join("\n");
+
     return `
       <p class="bold" style="margin-bottom:4px;">House Address :</p>
-      ${houseNo ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">House No :</span> ${houseNo}</p>` : ""}
-      ${streetName ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">Street Name :</span> ${streetName}</p>` : ""}
-      ${city ? `<p class="addr-line" style="margin:2px 0;"><span class="addr-label">City :</span> ${city}</p>` : ""}
+      ${linesHtml}
     `;
   };
 
@@ -727,7 +734,8 @@ const generateInvoiceHTML = (
         background-color: #f8f8f8; 
         font-size: 14px; 
         font-weight: 600;
-        border-bottom: 1px solid #ddd; 
+        border-bottom: 1px solid #ddd;
+        text-align: left;
       }
       .tabledata { font-size: 14px; font-weight: normal; color: #666666; }
       .footer { text-align: center; font-size: 12px; margin-top: 60px; color: #8492A3; }
@@ -764,7 +772,7 @@ const generateInvoiceHTML = (
   <div style="position:relative; margin-top:30px; min-height:80px;">
     <div style="display:inline-block; max-width:55%;">
       <p class="bold">Bill To :</p>
-      <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+      <p class="headerp">${formatCustomerName(customerInfo)}</p>
       <p class="headerp">${customerEmail}</p>
       <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
     </div>
@@ -802,7 +810,7 @@ const generateInvoiceHTML = (
           <div style="display:flex;justify-content:space-between;margin-top:30px;">
             <div style="flex: 1;">
               <p class="bold">Bill To :</p>
-              <p class="headerp">${customerInfo.fullName || "N/A"}</p>
+             <p class="headerp">${formatCustomerName(customerInfo)}</p>
               <p class="headerp">${customerEmail}</p>
               <p class="headerp">${customerInfo.phoneCode1 || "+94"} ${customerInfo.phone1 || ""}${customerInfo.phone2 ? ` / ${customerInfo.phoneCode2 || "+94"} ${customerInfo.phone2}` : ""}</p>
               <div style="margin-top:16px;">
@@ -853,11 +861,11 @@ const generateInvoiceHTML = (
               <table style="width:100%;border-collapse:collapse;" class="table">
                 <thead>
                   <tr>
-                    <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">#</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">#</th>
                     <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Item Description</th>
-                    <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Unit Price (Rs.)</th>
-                    <th style="text-align:center;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">QTY</th>
-                    <th style="text-align:right;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Amount (Rs.)</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Unit Price (Rs.)</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">QTY</th>
+                    <th style="text-align:left;padding:12px 8px;background-color:#f8f8f8;border-bottom:1px solid #ddd;">Amount (Rs.)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -938,7 +946,7 @@ const generateInvoiceHTML = (
       <!-- Footer -->
       <div class="footer">
         <p style="margin-top:50px;font-size:16px;font-weight:600;color:#000;font-style:italic">Thank you for shopping with us!</p>
-<p style="margin-top:6px;font-size:14px;font-weight:500;color:#4B4B4B;font-style:italic">WE WILL SEND YOU MORE OFFERS, LOWEST PRICED VEGGIES FROM US.</p>
+        <p style="margin-top:6px;font-size:14px;font-weight:500;color:#4B4B4B;font-style:italic">WE WILL SEND YOU MORE OFFERS, LOWEST PRICED VEGGIES FROM US.</p>
         <p style="margin-top:50px;font-style:italic">- THIS IS A COMPUTER GENERATED INVOICE, THUS NO SIGNATURE REQUIRED -</p>
       </div>
     </div>
@@ -958,13 +966,15 @@ export const generateOrderPDF = async (orderData, deliveryFee = 0) => {
       const uri = asset.localUri || asset.uri;
       if (!uri) throw new Error("No URI available for logo asset");
 
-      const base64 = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      logoBase64 = `data:image/webp;base64,${base64}`;
+      const result = await manipulateAsync(
+        uri,
+        [],
+        { base64: true, format: SaveFormat.PNG }
+      );
+      logoBase64 = `data:image/png;base64,${result.base64}`;
     } catch (logoError) {
-      console.warn("⚠️ Failed to load local logo:", logoError.message);
-      logoBase64 = null;
+      console.warn("⚠️ Failed to load local logo, using fallback:", logoError.message);
+      logoBase64 = logoBase64Fallback;
     }
 
     const htmlContent = generateInvoiceHTML(

@@ -322,7 +322,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                     onRefresh={onRefresh}
                   />
                 }
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom:80 }}
               >
                 {/* Table Content */}
                 {displayedData.length > 0 ? (

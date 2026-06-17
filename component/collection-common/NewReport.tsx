@@ -8,6 +8,7 @@ import {
   Alert,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -66,6 +67,7 @@ interface Crop {
 }
 
 const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
 
   const route = useRoute<ReportPageRouteProp>();
@@ -230,33 +232,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       return "";
     }
 
-    const cropsTableRows = crops
-      .map(
-        (crop) => `
-          <tr>
-            <td style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">${getCropName(
-              crop,
-            )}</td>
-            <td style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">${getVarietyName(
-              crop,
-            )}</td>
-            <td style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">${
-              crop.grade
-            }</td>
-            <td style="text-align: right; padding: 5px; border-bottom: 1px solid #ddd;">${
-              crop.unitPrice
-            }</td>
-            <td style="text-align: right; padding: 5px; border-bottom: 1px solid #ddd;">${
-              crop.quantity
-            }</td>
-            <td style="text-align: right; padding: 5px; border-bottom: 1px solid #ddd;">${
-              crop.subTotal
-            }</td>
-          </tr>
-        `,
-      )
-      .join("");
-
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
       return sum + Number(crop.subTotal);
     }, 0);
@@ -268,7 +243,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            font-size: 10px; /* Base font size for body text */
+            font-size: 10px;
             background-color: white;
             max-width: 800px;
             margin: 0 auto;
@@ -279,7 +254,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           }
           h1 {
             text-align: center;
-            font-size: 22px; /* Increased main title size */
+            font-size: 22px;
             margin-bottom: 15px;
             font-weight: bold;
           }
@@ -294,12 +269,12 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           }
           .header-item {
             margin-bottom: 5px;
-            font-size: 11px; /* Slightly larger for header items */
+            font-size: 11px;
           }
           .section-title {
             font-weight: bold;
             margin-bottom: 5px;
-            font-size: 14px; /* Larger for section titles */
+            font-size: 14px;
           }
           .supplier-section {
             display: flex;
@@ -307,7 +282,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             margin-bottom: 15px;
           }
           .supplier-section div div:not(.section-title) {
-            font-size: 10px; /* Regular size for supplier details */
+            font-size: 10px;
           }
           .received-by-section {
             display: flex;
@@ -315,7 +290,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             margin-bottom: 15px;
           }
           .received-by-section div div:not(.section-title) {
-            font-size: 10px; /* Regular size for receiver details */
+            font-size: 10px;
           }
           .table-title {
             font-weight: bold;
@@ -324,7 +299,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             background-color: #D6E6F4;
             padding: 8px;
             border: 1px solid #000;
-            font-size: 16px; /* Larger font for table title */
+            font-size: 16px;
           }
           table {
             width: 100%;
@@ -333,19 +308,19 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             background-color: white;
           }
           th {
-            background-color:rgb(255, 255, 255);
+            background-color: rgb(255, 255, 255);
             text-align: center;
             padding: 8px;
             border: 1px solid #000;
             font-weight: bold;
-            font-size: 12px; /* Larger for table headers */
+            font-size: 12px;
           }
           td {
             padding: 8px;
             text-align: center;
             border: 1px solid #000;
             background-color: white;
-            font-size: 10px; /* Normal size for table data */
+            font-size: 10px;
           }
           .total-row {
             display: flex;
@@ -362,62 +337,20 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             font-weight: bold;
             border-right: 1px solid #000;
             background-color: #D6E6F4;
-            font-size: 13px; /* Larger for total label */
+            font-size: 13px;
           }
           .total-value {
             padding: 8px;
             min-width: 150px;
             text-align: center;
             font-weight: bold;
-            font-size: 13px; /* Larger for total value */
+            font-size: 13px;
           }
           .note {
-            font-size: 11px; /* Smaller for the note text */
+            font-size: 11px;
             margin: 15px 0;
             font-style: italic;
             text-align: justify;
-          }
-          .qr-section {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-          }
-          .qr-container {
-            text-align: center;
-          }
-          .qr-code {
-            width: 100px;
-            height: 100px;
-            display: block;
-            margin: 0 auto;
-          }
-          .qr-label {
-            margin-top: 5px;
-            font-weight: bold;
-            font-size: 11px; /* Slightly larger for QR labels */
-          }
-          .button-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 20px;
-          }
-          .button {
-            width: 40px;
-            height: 40px;
-            background-color: black;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 8px;
-            text-align: center;
-          }
-          .button-icon {
-            font-size: 14px;
-            margin-bottom: 3px;
           }
         </style>
       </head>
@@ -449,9 +382,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="supplier-section">
           <div>
             <div class="section-title">${t("NewReport.Supplier Details")}</div>
-            <div>${t("NewReport.Name")} ${details.firstName} ${
-              details.lastName
-            }</div>
+            <div>${t("NewReport.Name")} ${details.firstName} ${details.lastName}</div>
           </div>
           <div>
             <div>&nbsp;</div>
@@ -462,15 +393,11 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="received-by-section">
           <div>
             <div class="section-title">${t("NewReport.Received By")}</div>
-            <div>${t("NewReport.Company Name")} ${
-              details.companyNameEnglish || ""
-            }</div>
+            <div>${t("NewReport.Company Name")} ${details.companyNameEnglish || ""}</div>
           </div>
           <div>
             <div>&nbsp;</div>
-            <div>${t("NewReport.Centre")} ${
-              details.collectionCenterName || "Collection Centre"
-            }</div>
+            <div>${t("NewReport.Centre")} ${details.collectionCenterName || "Collection Centre"}</div>
           </div>
         </div>
         
@@ -507,9 +434,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="total-row">
           <div class="total-box">
             <div class="total-label">${t("NewReport.Full Total (Rs.)")}</div>
-            <div class="total-value">Rs. ${formatNumberWithCommas(
-              totalSum,
-            )}</div>
+            <div class="total-value">Rs. ${formatNumberWithCommas(totalSum)}</div>
           </div>
         </div>
         
@@ -547,39 +472,79 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
-      let tempFilePath = uri;
-
       if (Platform.OS === "android") {
-        tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
+        let directoryUri = await AsyncStorage.getItem("download_directory_uri");
+        
+        if (!directoryUri) {
+          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (permissions.granted) {
+            directoryUri = permissions.directoryUri;
+            await AsyncStorage.setItem("download_directory_uri", directoryUri);
+          }
+        }
 
-        await FileSystem.copyAsync({
-          from: uri,
-          to: tempFilePath,
-        });
+        if (directoryUri) {
+          try {
+            const base64 = await FileSystem.readAsStringAsync(uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+              directoryUri,
+              fileName,
+              "application/pdf"
+            );
+            await FileSystem.writeAsStringAsync(fileUri, base64, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
 
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
-            dialogTitle: t("NewReport.Save GRN Report"),
-            mimeType: "application/pdf",
-            UTI: "com.adobe.pdf",
-          });
+            Alert.alert(
+              t("Error.Success") || "Success",
+              "Attachment has been saved to your selected folder",
+            );
+          } catch (e) {
+            // Permission might have been revoked, try to request again
+            await AsyncStorage.removeItem("download_directory_uri");
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted && permissions.directoryUri) {
+              const newDirectoryUri = permissions.directoryUri;
+              await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+
+              const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                newDirectoryUri,
+                fileName,
+                "application/pdf"
+              );
+              await FileSystem.writeAsStringAsync(fileUri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+
+              Alert.alert(
+                t("Error.Success") || "Success",
+                "Attachment has been saved to your selected folder",
+              );
+            } else {
+              Alert.alert(
+                t("Error.Permission Denied") || "Permission Denied",
+                "Storage permission is required to save the PDF."
+              );
+            }
+          }
         } else {
           Alert.alert(
-            t("Error.error"),
-            t("NewReport.Sharing is not available on this device"),
+            t("Error.Permission Denied") || "Permission Denied",
+            "Storage permission is required to save the PDF."
           );
         }
       } else if (Platform.OS === "ios") {
         if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
+          await Sharing.shareAsync(uri, {
             dialogTitle: t("NewReport.Save GRN Report"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-          Alert.alert(
-            t("NewReport.Info"),
-            t("NewReport.Use the 'Save to Files' option to save to Downloads"),
-          );
         } else {
           Alert.alert(
             t("Error.error"),
@@ -600,7 +565,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `PurchaseReport_${
+      const fileName = `GRN_${
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
@@ -632,199 +597,215 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <View style={{ flex: 1 }}>
       <CustomHeader
         title={t("NewReport.Goods Received Note")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <View className="p-4">
-        {/* GRN Header */}
-        <View className="mb-4">
-          <Text className="text-sm font-bold">
-            {t("NewReport.GRN No")}{" "}
-            {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
-          </Text>
-          <Text className="text-sm">
-            {t("NewReport.Date")}{" "}
-            {new Date()
-              .toLocaleDateString("en-GB")
-              .split("/")
-              .reverse()
-              .join("/")}{" "}
-            {new Date()
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })
-              .toUpperCase()}
-          </Text>
-        </View>
-
-        {/* Supplier Details */}
-        <View className="mb-4">
-          <Text className="font-bold text-sm mb-1">
-            {t("NewReport.Supplier Details")}
-          </Text>
-          <View className="border border-gray-300 rounded-lg p-2">
-            <Text>
-              <Text className="">{t("NewReport.Name")}</Text>{" "}
-              {details?.firstName} {details?.lastName}
+      <ScrollView
+        className="flex-1 bg-white"
+        contentContainerStyle={{
+          paddingBottom: (insets.bottom || 20) + 40,
+        }}
+      >
+        <View className="p-4">
+          {/* GRN Header */}
+          <View className="mb-4">
+            <Text className="text-sm font-bold">
+              {t("NewReport.GRN No")}{" "}
+              {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
             </Text>
-            <Text>
-              <Text className="">{t("NewReport.Phone")}</Text>{" "}
-              {details?.phoneNumber}
+            <Text className="text-sm">
+              {t("NewReport.Date")}{" "}
+              {new Date()
+                .toLocaleDateString("en-GB")
+                .split("/")
+                .reverse()
+                .join("/")}{" "}
+              {new Date()
+                .toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })
+                .toUpperCase()}
             </Text>
           </View>
-        </View>
 
-        {/* Received By */}
-        <View className="mb-4">
-          <Text className="font-bold text-sm mb-1">
-            {t("NewReport.Received By")}
-          </Text>
-          <View className="border border-gray-300 rounded-lg p-2">
-            <Text>
-              <Text className="">{t("NewReport.Company Name")}</Text>{" "}
-              {details?.companyNameEnglish || ""}
+          {/* Supplier Details */}
+          <View className="mb-4">
+            <Text className="font-bold text-sm mb-1">
+              {t("NewReport.Supplier Details")}
             </Text>
-            <Text>
-              <Text className="">{t("NewReport.Centre")}</Text>{" "}
-              {details?.collectionCenterName || "Collection Centre"}
-            </Text>
+            <View className="border border-gray-300 rounded-lg p-2">
+              <Text>
+                <Text className="">{t("NewReport.Name")}</Text>{" "}
+                {details?.firstName} {details?.lastName}
+              </Text>
+              <Text>
+                <Text className="">{t("NewReport.Phone")}</Text>{" "}
+                {details?.phoneNumber}
+              </Text>
+            </View>
           </View>
-        </View>
 
-        {/* Divider */}
-        <View className="border-t border-gray-400 my-2"></View>
+          {/* Received By */}
+          <View className="mb-4">
+            <Text className="font-bold text-sm mb-1">
+              {t("NewReport.Received By")}
+            </Text>
+            <View className="border border-gray-300 rounded-lg p-2">
+              <Text>
+                <Text className="">{t("NewReport.Company Name")}</Text>{" "}
+                {details?.companyNameEnglish || ""}
+              </Text>
+              <Text>
+                <Text className="">{t("NewReport.Centre")}</Text>{" "}
+                {details?.collectionCenterName || "Collection Centre"}
+              </Text>
+            </View>
+          </View>
 
-        {/* Received Items */}
-        <View className="mb-4">
-          <Text className="font-bold text-sm mb-2">
-            {t("NewReport.Received Items")} :
-          </Text>
-          <ScrollView horizontal className="border border-gray-300 rounded-lg">
-            <View>
-              {/* Table Header */}
-              <View className="flex-row bg-gray-200">
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Crop Name")}
-                </Text>
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Variety")}
-                </Text>
-                <Text className="w-20 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Grade")}
-                </Text>
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Unit Price(Rs.)")}
-                </Text>
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Quantity(kg)")}
-                </Text>
-                <Text className="w-24 p-2 font-bold">
-                  {t("NewReport.Sub Total(Rs.)")}
-                </Text>
-              </View>
+          {/* Divider */}
+          <View className="border-t border-gray-400 my-2" />
 
-              {/* Table Rows */}
-              {crops.map((crop, index) => (
-                <View key={`${crop.id}-${index}`} className="flex-row">
-                  <Text
-                    className="w-24 p-2 border-b border-gray-300 text-left"
-                    style={{ flexWrap: "wrap" }}
-                  >
-                    {getCropName(crop)}
+          {/* Received Items */}
+          <View className="mb-4">
+            <Text className="font-bold text-sm mb-2">
+              {t("NewReport.Received Items")} :
+            </Text>
+            <ScrollView
+              horizontal
+              className="border border-gray-300 rounded-lg"
+            >
+              <View>
+                {/* Table Header */}
+                <View className="flex-row bg-gray-200">
+                  <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                    {t("NewReport.Crop Name")}
                   </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300">
-                    {getVarietyName(crop)}
+                  <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                    {t("NewReport.Variety")}
                   </Text>
-                  <Text className="w-20 p-2 border-b border-gray-300">
-                    {crop.grade || "-"}
+                  <Text className="w-20 p-2 font-bold border-r border-gray-300">
+                    {t("NewReport.Grade")}
                   </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                    {formatNumber(crop.unitPrice)}
+                  <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                    {t("NewReport.Unit Price(Rs.)")}
                   </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                    {formatNumber(crop.quantity)}
+                  <Text className="w-24 p-2 font-bold border-r border-gray-300">
+                    {t("NewReport.Quantity(kg)")}
                   </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                    {formatNumber(crop.subTotal)}
+                  <Text className="w-24 p-2 font-bold">
+                    {t("NewReport.Sub Total(Rs.)")}
                   </Text>
                 </View>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
 
-        {/* Divider */}
-        <View className="border-t border-gray-400 my-2"></View>
+                {/* Table Rows */}
+                {crops.map((crop, index) => (
+                  <View key={`${crop.id}-${index}`} className="flex-row">
+                    <Text
+                      className="w-24 p-2 border-b border-gray-300 text-left"
+                      style={{ flexWrap: "wrap" }}
+                    >
+                      {getCropName(crop)}
+                    </Text>
+                    <Text className="w-24 p-2 border-b border-gray-300">
+                      {getVarietyName(crop)}
+                    </Text>
+                    <Text className="w-20 p-2 border-b border-gray-300">
+                      {crop.grade || "-"}
+                    </Text>
+                    <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                      {formatNumber(crop.unitPrice)}
+                    </Text>
+                    <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                      {formatNumber(crop.quantity)}
+                    </Text>
+                    <Text className="w-24 p-2 border-b border-gray-300 text-right">
+                      {formatNumber(crop.subTotal)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
 
-        <View className="py-2 items-end justify-center ">
-          <Text className="font-bold">
-            {t("NewReport.Full Total (Rs.) Rs.")}
-            {totalSum.toLocaleString("en-IN", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </Text>
-        </View>
+          {/* Divider */}
+          <View className="border-t border-gray-400 my-2" />
 
-        {/* Divider */}
-        <View className="border-t border-gray-400 my-2"></View>
-
-        {/* Note */}
-        <View className="mb-4">
-          <Text className="text-xs ">
-            <Text className="font-bold">{t("NewReport.Note")}</Text>
-            <Text className="italic"> {t("NewReport.GRNnote")}</Text>
-          </Text>
-        </View>
-
-        {/* Action Buttons */}
-        <View className="flex-row justify-around w-full mb-7">
-          <TouchableOpacity
-            className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
-            onPress={handleDownloadPDF}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 6,
-            }}
-          >
-            <Image
-              source={require("../../assets/images/collection-common/download.webp")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text className="text-sm text-cyan-50">
-              {t("NewReport.Download")}
+          {/* Total */}
+          <View className="py-2 items-end justify-center">
+            <Text className="font-bold">
+              {t("NewReport.Full Total (Rs.) Rs.")}
+              {totalSum.toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </Text>
-          </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
-            onPress={handleSharePDF}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 6,
-            }}
+          {/* Divider */}
+          <View className="border-t border-gray-400 my-2" />
+
+          {/* Note */}
+          <View className="mb-4">
+            <Text className="text-xs">
+              <Text className="font-bold">{t("NewReport.Note")}</Text>
+              <Text className="italic"> {t("NewReport.GRNnote")}</Text>
+            </Text>
+          </View>
+
+          {/* Action Buttons */}
+          <View
+            className="flex-row justify-around w-full mt-4"
+            style={{ paddingBottom: insets.bottom || 20 }}
           >
-            <Image
-              source={require("../../assets/images/collection-common/share.webp")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
+              onPress={handleDownloadPDF}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
+            >
+              <Image
+                source={require("../../assets/images/collection-common/download.webp")}
+                style={{ width: 24, height: 24 }}
+              />
+              <Text className="text-sm text-cyan-50">
+                {t("NewReport.Download")}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="bg-[#000000] p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
+              onPress={handleSharePDF}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
+            >
+              <Image
+                source={require("../../assets/images/collection-common/share.webp")}
+                style={{ width: 24, height: 24 }}
+              />
+              <Text className="text-sm text-cyan-50">
+                {t("NewReport.Share")}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

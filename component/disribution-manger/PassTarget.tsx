@@ -14,10 +14,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
+import { AlertModal } from "../commons/AlertModal";
 import GlobalSearchModal from "@/component/commons/GlobalSearchModal";
-import SuccessModal from "../commons/SuccessModal";
 
 interface PassTargetProps {
   navigation: any;
@@ -72,6 +73,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
   const [loadingOfficers, setLoadingOfficers] = useState<boolean>(false);
   const [officerModalVisible, setOfficerModalVisible] = useState(false);
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [successVisible, setSuccessVisible] = useState<boolean>(false);
 
   useFocusEffect(
@@ -357,9 +359,10 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          style={{
-            marginBottom: 60,
+          contentContainerStyle={{
+            paddingBottom: 100,
           }}
+          showsVerticalScrollIndicator={false}
         >
           {/* Assignee Selection */}
           <View className="bg-white mx-4 my-2 p-4">
@@ -456,11 +459,17 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
             </View>
           </View>
 
-          {/* Save Button */}
+        </ScrollView>
+
+        {/* Save Button Footer */}
+        <View
+          className="absolute bottom-0 left-0 right-0 bg-white px-6 pt-3 shadow-lg"
+          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+        >
           <TouchableOpacity
             onPress={handleSave}
             disabled={loading || !selectedAssignee || loadingOfficers}
-            className={`py-3 h-[50px] rounded-full items-center justify-center mx-6 my-6 ${
+            className={`py-3 h-[50px] rounded-full items-center justify-center ${
               loading || !selectedAssignee || loadingOfficers
                 ? "bg-[#C0C0C0]"
                 : "bg-[#980775]"
@@ -481,7 +490,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
               </Text>
             )}
           </TouchableOpacity>
-        </ScrollView>
+        </View>
 
         {/* Error Message */}
         {error && (
@@ -499,10 +508,11 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
         )}
       </View>
 
-      <SuccessModal
+      <AlertModal
         visible={successVisible}
         title={t("PassTarget.Success")}
         message={t("PassTarget.Target passed successfully.")}
+        type="success"
         autoClose={true}
         duration={3000}
         onClose={() => {

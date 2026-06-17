@@ -98,6 +98,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
 
   useFocusEffect(
     useCallback(() => {
+      setIsEditing(false);
       const handleBackPress = () => {
         navigation.reset({
           index: 0,
@@ -261,16 +262,20 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
                 className="flex-1 bg-[#980775] px-6 py-2 rounded-full items-center justify-center"
                 onPress={() =>
                   navigation.navigate("RecieveTargetBetweenOfficers" as any, {
-                    varietyNameEnglish,
+                     varietyNameEnglish,
                     grade,
                     target,
                     todo,
                     qty,
                     varietyId,
                     collectionOfficerId,
+                    officerName,
                     varietyNameSinhala,
                     varietyNameTamil,
                     officerId,
+                    phoneNumber1,
+                    phoneNumber2,
+                    image,
                   })
                 }
                 style={{

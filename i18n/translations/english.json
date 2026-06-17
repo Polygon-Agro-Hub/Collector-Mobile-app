@@ -77,17 +77,17 @@
     "User token not found. Please log in again.": "User token not found. Please log in again.",
     "Failed to claim the officer. Please try again later.": "Failed to claim the officer. Please try again later.",
     "Success": "Success",
-    "Officer successfully claimed.": "Officer successfully claimed.",
+    "Staff successfully claimed.": "Staff successfully claimed.",
     "Failed to generate PDF": "Failed to generate PDF",
     "Sharing is not available on this device": "Sharing is not available on this device",
     "User not authenticated.": "User not authenticated.",
     "No task summary found for this officer.": "No task summary found for this officer.",
     "Failed to fetch task summary.": "Failed to fetch task summary.",
     "Missing collectionOfficerId": "Missing collectionOfficerId. Please try again.",
-    "Failed to disclaim officer.": "Failed to disclaim officer.",
+    "Failed to disclaim officer.": "Failed to disclaim staff.",
     "Failed to get officer status.": "Failed to get officer status.",
     "Failed to fetch officers.": "Failed to fetch officers.",
-    "No officers available.": "No targets have been assigned today for the selected crop.",
+    "No officers available.": "No Search Results Found.",
     "An error occurred while fetching officers.": "An error occurred while fetching officers.",
     "You have exceeded the maximum amount.": "You have exceeded maximum amount",
     "Please select an officer.": "Please select an officer.",
@@ -247,7 +247,8 @@
     "Confirm account number is required": "Confirm account number is required",
     "Bank name is required": "Bank name is required",
     "Branch name is required": "Branch name is required",
-    "Price updated successfully": "Price updated successfully"
+    "Price updated successfully": "Price updated successfully",
+    "No targets have been assigned today for the selected crop.":"No targets have been assigned today for the selected crop."
   },
   "SideMenu": {
     "LNG": "en",
@@ -593,31 +594,32 @@
   },
   "ClaimOfficer": {
     "LNG": "en",
-    "ClaimOfficers": "Claim Officers",
+    "ClaimOfficers": "Claim Staff",
     "Driver":"Driver",
     "JobRole": "Job Role",
     "EMPID": "EMP ID",
     "Search": "Search",
-    "Claim Officer": "Claim Officer",
+    "Claim Officer": "Claim Staff",
     "No Disclaimed": "- No Disclaimed officer was found -",
-    "Are you sure you want to claim this officer?": "Are you sure you want to claim this officer?",
+    "Are you sure you want to claim this officer?": "Are you sure you want to claim this staff?",
     "Cancel": "Cancel",
-    "Claim": "Claim",
+    "Claim": "Claim Staff",
     "Select Job Role": "Select Job Role",
     "Collection Officer": "Collection Officer",
     "Customer Officer": "Customer Officer",
     "Distribution Officer": "Distribution Officer"
   },
   "DisclaimOfficer": {
-    "Are you sure you want to disclaim this officer?": "Are you sure you want to disclaim this officer?",
+    "Are you sure you want to disclaim this officer?": "Are you sure you want to disclaim this staff?",
     "Disclaim": "Disclaim",
-    "Officer disclaimed successfully.": "Officer disclaimed successfully.",
-    "Failed to disclaim officer.": "Failed to disclaim officer."
+    "Staff disclaimed successfully.": "Staff disclaimed successfully.",
+    "Failed to disclaim officer.": "Failed to disclaim staff."
   },
   "CollectionOfficersList": {
     "LNG": "en",
     "Collection Officers": "Officers",
-    "Claim Officer": "Claim Officer",
+    "Manage Staff":"Manage Staff",
+    "Claim Officer": "Claim Staff",
     "Officers List": "Officers List",
     "Drivers List": "Drivers List",
     "Officers / Drivers List": "Officers List ",
@@ -1007,7 +1009,8 @@
     "No products available": "No products available",
     "Approve": "Approve",
     "Rs": "Rs.",
-    "Please enter a value greater than 0":"Please enter a value greater than 0"
+    "Please enter a value greater than 0":"Please enter a value greater than 0",
+     "Price must match defined product price":"Price must match defined product price"
   },
   "ReplaceRequestsScreen": {
     "Order ID": "Order ID:",
@@ -1016,6 +1019,7 @@
     "Replace Requests": "Replace Requests",
     "All": "All",
     "No replace requests found": "No replace requests found"
+   
   },
   "CenterTargetScreen": {
     "Success": "Success!",

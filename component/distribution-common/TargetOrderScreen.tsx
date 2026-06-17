@@ -615,7 +615,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
                 }}
               >
-                <Text className="text-[#000000] font-bold text-xs">
+                <Text className="text-[#000000] font-bold text-xs py-1">
                   {todoData.length}
                 </Text>
               </Animated.View>
@@ -653,7 +653,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
 
             {selectedToggle === "Completed" && (
               <Animated.View
-                className="bg-white rounded-full px-2 ml-2 overflow-hidden"
+                className="bg-white rounded-full px-2 py-1 ml-2 overflow-hidden"
                 style={{
                   opacity: 1,
                   transform: [{ scaleX: 1 }, { scaleY: 1 }],
@@ -742,7 +742,6 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 100 }}
       >
         {error && (
           <View className="bg-red-100 border border-red-400 px-4 py-3 mx-4 mt-4 rounded">

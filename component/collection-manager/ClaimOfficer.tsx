@@ -173,7 +173,7 @@ const ClaimOfficer: React.FC = () => {
       } else {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Officer successfully claimed."),
+          t("Error.Staff successfully claimed."),
         );
         setOfficerFound(false);
         setOfficerDetails(null);
@@ -196,7 +196,7 @@ const ClaimOfficer: React.FC = () => {
 
   useEffect(() => {
     const backAction = () => {
-      navigation.goBack();
+      navigation.navigate("Main", { screen: "CollectionOfficersList" });
       return true;
     };
 
@@ -278,7 +278,7 @@ const ClaimOfficer: React.FC = () => {
         title={t("ClaimOfficer.ClaimOfficers")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("Main", { screen: "CollectionOfficersList" })}
       />
 
       <View className="px-8 mt-2">

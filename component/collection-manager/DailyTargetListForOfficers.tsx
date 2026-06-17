@@ -12,7 +12,12 @@ import LottieView from "lottie-react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useFocusEffect } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useIsFocused,
+  useRoute,
+  RouteProp,
+} from "@react-navigation/native";
 import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
@@ -52,13 +57,9 @@ interface TargetData {
 
 const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
   navigation,
-  route,
 }) => {
-  const [todoData, setTodoData] = useState<TargetData[]>([]);
-  const [completedData, setCompletedData] = useState<TargetData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedToggle, setSelectedToggle] = useState("ToDo");
-  const [refreshing, setRefreshing] = useState(false);
+  const route =
+    useRoute<RouteProp<RootStackParamList, "DailyTargetListForOfficers">>();
   const {
     collectionOfficerId,
     officerId,
@@ -67,7 +68,13 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     phoneNumber2,
     image,
   } = route.params;
+  const [todoData, setTodoData] = useState<TargetData[]>([]);
+  const [completedData, setCompletedData] = useState<TargetData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedToggle, setSelectedToggle] = useState("ToDo");
+  const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
+  const isFocused = useIsFocused();
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
@@ -119,7 +126,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     }
   };
 
-  const fetchTargets = async () => {
+  const fetchTargets = useCallback(async () => {
     setLoading(true);
     const startTime = Date.now();
     try {
@@ -152,25 +159,23 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         remainingTime > 0 ? remainingTime : 0,
       );
     }
-  };
+  }, [collectionOfficerId, selectedLanguage, t]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchTargets();
-    }, []),
-  );
+  useEffect(() => {
+    if (!isFocused) return;
+    fetchTargets();
+  }, [isFocused, collectionOfficerId]);
 
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        navigation.popToTop();
         navigation.navigate("OfficerSummary" as any, {
-          officerId: officerId,
-          officerName: officerName,
-          phoneNumber1: phoneNumber1,
-          phoneNumber2: phoneNumber2,
-          collectionOfficerId: collectionOfficerId,
-          image: image,
+          officerId,
+          officerName,
+          phoneNumber1,
+          phoneNumber2,
+          collectionOfficerId,
+          image,
         });
         return true;
       };
@@ -180,14 +185,21 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         onBackPress,
       );
       return () => subscription.remove();
-    }, [navigation]),
+    }, [
+      navigation,
+      officerId,
+      officerName,
+      phoneNumber1,
+      phoneNumber2,
+      collectionOfficerId,
+      image,
+    ]),
   );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchTargets();
-    setRefreshing(false);
-  }, [collectionOfficerId]);
+    fetchTargets().finally(() => setRefreshing(false));
+  }, [fetchTargets]);
 
   const displayedData = selectedToggle === "ToDo" ? todoData : completedData;
 
@@ -218,12 +230,12 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         navigation={navigation}
         onBackPress={() => {
           navigation.navigate("OfficerSummary" as any, {
-            officerId: officerId,
-            officerName: officerName,
-            phoneNumber1: phoneNumber1,
-            phoneNumber2: phoneNumber2,
-            collectionOfficerId: collectionOfficerId,
-            image: image,
+            officerId,
+            officerName,
+            phoneNumber1,
+            phoneNumber2,
+            collectionOfficerId,
+            image,
           });
         }}
         textColor="white"
@@ -294,13 +306,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
             />
           </View>
         ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={true}
-            style={{
-              marginBottom: 40,
-            }}
-          >
+          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <View style={{ width: "100%" }}>
               {/* Table Header */}
               <View className="flex-row bg-[#980775] h-[50px] items-center">
@@ -331,7 +337,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                     onRefresh={onRefresh}
                   />
                 }
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom: 80 }}
               >
                 {/* Table Data */}
                 {displayedData.length > 0 ? (

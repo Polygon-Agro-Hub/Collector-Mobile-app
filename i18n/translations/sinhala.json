@@ -77,7 +77,7 @@
     "User token not found. Please log in again.": "පරිශීලක ටෝකනය හමු නොවීය. කරුණාකර නැවත උතිසහ කරන්න.",
     "Failed to claim the officer. Please try again later.": "නිලධාරියාට හිමිකම් පෑමට අපොහොසත් විය. කරුණාකර පසුව උත්සාහ කරන්න.",
     "Success": "සාර්ථකයි!",
-    "Officer successfully claimed.": "නිලධාරියාට හිමිකම් පෑම සාර්ථකයි.",
+    "Staff successfully claimed.": "නිලධාරියාට හිමිකම් පෑම සාර්ථකයි.",
     "Failed to generate PDF": "PDF ජනනය කිරීමට අසමත් විය.",
     "Sharing is not available on this device": "මෙම උපාංගෙන් බෙදාගැනීම සිදු කල නොහැක.",
     "User not authenticated.": "පරිශීලකයා සත්‍යාපනය කර නොමැත.",
@@ -87,7 +87,7 @@
     "Failed to disclaim officer.": "නිලධාරියා ප්‍රතික්ෂේප කිරීමට අපොහොසත් විය.",
     "Failed to get officer status.": "නිලධාරිගේ ක්‍රියාකාරිත්වය ලබා ගැනීමට අපොහොසත් විය.",
     "Failed to fetch officers.": "නිලධාරීන් සම්බන්ධ කර ගැනීමට අපොහොසත් විය.",
-    "No officers available.": "ලබා ගත හැකි නිලධාරීන් නොමැත.",
+    "No officers available.": "සෙවුම් ප්‍රතිඵල හමු නොවීය.",
     "An error occurred while fetching officers.": "නිලධාරීන් ලබා ගැනීමේදි ගැටළුවක් ඇති විය",
     "You have exceeded the maximum amount.": "ඔබ පැවරිය හැකි උපරිම ප්‍රමාණය ඉක්මවා ඇත",
     "Please select an officer.": "කරුණාකර නිලධාරියෙකු තෝරන්න.",
@@ -247,7 +247,8 @@
     "Confirm account number is required": "ගිණුම් අංකය තහවුරු කිරීම අවශ්‍යයි.",
     "Bank name is required": "බැංකුවේ නම අවශ්‍යයි",
     "Branch name is required": "ශාඛාවේ නම අවශ්‍යයි",
-    "Price updated successfully": "මිල සාර්ථකව යාවත්කාලීන කරන ලදී"
+    "Price updated successfully": "මිල සාර්ථකව යාවත්කාලීන කරන ලදී",
+    "No targets have been assigned today for the selected crop.":"තෝරාගත් බෝගය සඳහා අද දින කිසිදු ඉලක්කයක් පවරා නොමැත."
   },
   "SideMenu": {
     "LNG": "si",
@@ -611,12 +612,13 @@
   "DisclaimOfficer": {
     "Are you sure you want to disclaim this officer?": "ඔබට මෙම නිලධාරියා ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?",
     "Disclaim": "ඉවත් කරන්න",
-    "Officer disclaimed successfully.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
+    "Staff disclaimed successfully.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
     "Failed to disclaim officer.": "නිලධාරියා හිමිකම ඉවත් කිරීම කිරීමට අපොහොසත් විය."
   },
   "CollectionOfficersList": {
     "LNG": "si",
     "Collection Officers": "නිලධාරීන්",
+    "Manage Staff":"කාර්ය මණ්ඩලය කළමනාකරණය කරන්න",
     "Claim Officer": "නිලධාරියෙකුට හිමිකම් කියන්න",
     "Officers List": "නිලධාරීන්ගේ ලැයිස්තුව",
     "Drivers List": "රියදුරු ලැයිස්තුව",
@@ -1009,7 +1011,8 @@
     "No products available": "නිෂ්පාදන නොමැත",
     "Approve": "අනුමත කරන්න",
     "Rs": "රු.",
-    "Please enter a value greater than 0": "කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න."
+    "Please enter a value greater than 0": "කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න.",
+    "Price must match defined product price":"මිල නිර්වචනය කරන ලද නිෂ්පාදන මිලට ගැළපිය යුතුය"
   },
   "ReplaceRequestsScreen": {
     "Order ID": "ඇණවුම් අංකය:",

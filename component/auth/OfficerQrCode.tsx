@@ -134,7 +134,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       const asset = await MediaLibrary.createAssetAsync(response.uri);
       await MediaLibrary.createAlbumAsync("Download", asset, false);
 
-      Alert.alert(t("Error.Success"), t("Error.QR Code saved to the gallery."));
+      Alert.alert(t("Error.Success") || "Success", "Attachment has been saved to your selected folder");
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(t("Error.error"), t("Error.failedSaveQRCode"));
@@ -235,7 +235,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
               </View>
             </View>
 
-            <View className="flex-row w-full px-8 pb-8 gap-4 max-w-[500px] w-full mx-auto">
+            <View className="flex-row w-full px-8 pb-8 gap-4 max-w-[500px] mx-auto">
               <TouchableOpacity
                 className="bg-black rounded-lg items-center justify-center flex-1 py-3 h-[70px]"
                 onPress={downloadQRCode}
