@@ -4,6 +4,7 @@ import axios from "axios";
 import { Asset } from "expo-asset";
 import { environment } from "@/environment/environment";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+import { logoBase64 as logoBase64Fallback } from "./logoBase64";
 
 export const fetchOrderDetailsByIds = async (orderIds, authToken) => {
   try {
@@ -972,8 +973,8 @@ export const generateOrderPDF = async (orderData, deliveryFee = 0) => {
       );
       logoBase64 = `data:image/png;base64,${result.base64}`;
     } catch (logoError) {
-      console.warn("⚠️ Failed to load local logo:", logoError.message);
-      logoBase64 = null;
+      console.warn("⚠️ Failed to load local logo, using fallback:", logoError.message);
+      logoBase64 = logoBase64Fallback;
     }
 
     const htmlContent = generateInvoiceHTML(
