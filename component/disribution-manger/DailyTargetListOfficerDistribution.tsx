@@ -122,7 +122,15 @@ const DailyTargetListOfficerDistribution: React.FC<
       );
 
       return () => subscription.remove();
-    }, [navigation]),
+    }, [
+      navigation,
+      officerId,
+      officerName,
+      phoneNumber1,
+      phoneNumber2,
+      collectionOfficerId,
+      image,
+    ]),
   );
 
   const { t } = useTranslation();
@@ -464,14 +472,14 @@ const DailyTargetListOfficerDistribution: React.FC<
         onRequestClose={handleCancelPass}
       >
         <View
-                    style={{
-                      flex: 1,
-                      backgroundColor: "#00000040",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <View className="bg-white rounded-lg p-6 mx-6 max-w-sm">
+          style={{
+            flex: 1,
+            backgroundColor: "#00000040",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View className="bg-white rounded-lg p-6 mx-6 max-w-sm">
             {/* Warning Icon */}
             <View className="items-center mb-4">
               <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg items-center justify-center">
@@ -543,48 +551,48 @@ const DailyTargetListOfficerDistribution: React.FC<
       </Modal>
 
       {/* Toggle Buttons */}
-     {/* Toggle Buttons */}
-<View className="flex-row justify-center items-center pb-8 bg-[#282828] px-8">
-  <TouchableOpacity
-    className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-      selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
-    }`}
-    onPress={() => handleToggleChange("ToDo")}
-  >
-    <Text
-      className={`font-bold ${selectedToggle === "ToDo" ? "text-white mr-2" : "text-black"}`}
-    >
-      {t("TargetOrderScreen.Todo")}
-    </Text>
-    {selectedToggle === "ToDo" && (
-      <View className="rounded-full px-2 py-1 bg-white">
-        <Text className="font-bold text-xs text-[#980775]">
-          {todoData.length.toString().padStart(2, "0")}
-        </Text>
-      </View>
-    )}
-  </TouchableOpacity>
+      {/* Toggle Buttons */}
+      <View className="flex-row justify-center items-center pb-8 bg-[#282828] px-8">
+        <TouchableOpacity
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+            selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+          }`}
+          onPress={() => handleToggleChange("ToDo")}
+        >
+          <Text
+            className={`font-bold ${selectedToggle === "ToDo" ? "text-white mr-2" : "text-black"}`}
+          >
+            {t("TargetOrderScreen.Todo")}
+          </Text>
+          {selectedToggle === "ToDo" && (
+            <View className="rounded-full px-2 py-1 bg-white">
+              <Text className="font-bold text-xs text-[#980775]">
+                {todoData.length.toString().padStart(2, "0")}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
-  <TouchableOpacity
-    className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-      selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
-    }`}
-    onPress={() => handleToggleChange("Completed")}
-  >
-    <Text
-      className={`font-bold ${selectedToggle === "Completed" ? "text-white mr-2" : "text-black"}`}
-    >
-      {t("TargetOrderScreen.Completed")}
-    </Text>
-    {selectedToggle === "Completed" && (
-      <View className="rounded-full px-2 py-1 bg-white">
-        <Text className="font-bold text-xs text-[#980775]">
-          {completedData.length.toString().padStart(2, "0")}
-        </Text>
+        <TouchableOpacity
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+            selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+          }`}
+          onPress={() => handleToggleChange("Completed")}
+        >
+          <Text
+            className={`font-bold ${selectedToggle === "Completed" ? "text-white mr-2" : "text-black"}`}
+          >
+            {t("TargetOrderScreen.Completed")}
+          </Text>
+          {selectedToggle === "Completed" && (
+            <View className="rounded-full px-2 py-1 bg-white">
+              <Text className="font-bold text-xs text-[#980775]">
+                {completedData.length.toString().padStart(2, "0")}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
-    )}
-  </TouchableOpacity>
-</View>
 
       {/* Content */}
       <ScrollView
@@ -593,7 +601,6 @@ const DailyTargetListOfficerDistribution: React.FC<
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* Table Header */}
         <View className="flex-row bg-[#980775] py-3">

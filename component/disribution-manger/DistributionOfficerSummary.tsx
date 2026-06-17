@@ -223,7 +223,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
         setModalVisible(false);
         Alert.alert(
           t("Error.Success"),
-          t("DisclaimOfficer.Officer disclaimed successfully."),
+          t("DisclaimOfficer.Staff disclaimed successfully."),
         );
         navigation.navigate("Main", { screen: "DistributionOfficersList" });
       } else {
@@ -275,7 +275,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      className="flex-1 bg-white mb-10 "
+      className="flex-1 bg-white"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -304,7 +304,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
           {showMenu && (
             <View className="absolute z-50 top-14 right-4 bg-white shadow-lg rounded-lg">
               <TouchableOpacity
-                className="p-2 py-2 px-4 bg-white rounded-lg  border-[#00000040] shadow-lg"
+                className="p-2 py-2 px-4 bg-white rounded-lg border border-[#00000040] shadow-lg"
                 onPress={() => setModalVisible(true)}
               >
                 <Text className="text-gray-700 font-semibold">

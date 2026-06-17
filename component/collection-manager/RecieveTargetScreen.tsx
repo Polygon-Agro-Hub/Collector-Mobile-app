@@ -394,7 +394,9 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
               {loading ? (
                 <ActivityIndicator size="large" color="#313131" />
               ) : errorMessage ? (
-                <Text className="text-red-500 mb-4">{errorMessage}</Text>
+                <Text className="text-red-500 mb-4">{t(
+                    "Error.No targets have been assigned today for the selected crop.",
+                  )}</Text>
               ) : (
                 <TouchableOpacity
                   onPress={() => setOfficerModalVisible(true)}

@@ -262,11 +262,11 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
         <View
           className={`bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} `}
         >
-          <View className="flex-row items-start">
+          <View className="flex-row items-center">
             {/* Checkbox */}
             <TouchableOpacity
               onPress={() => toggleTransactionSelection(item.id)}
-              className="mr-3 mt-0.5"
+              className="mr-3"
             >
               <View
                 className={`w-6 h-6 rounded border ${isSelected ? "bg-black border-black" : "bg-white border-black"} items-center justify-center`}
@@ -279,7 +279,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
             {/* Transaction Details */}
             <View className="flex-1">
-              <Text className="text-sm font-medium text-gray-900 mb-1">
+              <Text className="text-base font-medium text-gray-900 mb-1">
                 {t("ReceivedCash.Order ID")} : {item.orderId}
               </Text>
               <View className="flex-row">
@@ -427,7 +427,7 @@ const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
 
         {/* Hand Over Button */}
         {selectedTransactions.size > 0 && transactions.length > 0 && (
-          <View className="absolute bottom-0 left-0 right-0 bg-white px-5 py-4 ">
+          <View className="absolute bottom-2 left-0 right-0 bg-white px-5 py-4 ">
             <TouchableOpacity
               onPress={handleHandOver}
               className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center h-[50px]"

@@ -132,6 +132,13 @@ const RecieveTargetBetweenOfficers: React.FC<
 
   useFocusEffect(
     useCallback(() => {
+      setAssignee("");
+      setAmount("");
+      setError("");
+      setMaxAmount(0);
+      setErrorMessage(null);
+      fetchOfficers();
+
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         () => {
@@ -230,11 +237,6 @@ const RecieveTargetBetweenOfficers: React.FC<
     }
   };
 
-  useEffect(() => {
-    fetchOfficers();
-    if (assignee === "0") setAmount("");
-  }, []);
-
   const handleAmountChange = (text: string) => {
     let sanitized = text.replace(/[^0-9.]/g, "");
 
@@ -308,22 +310,30 @@ const RecieveTargetBetweenOfficers: React.FC<
       );
 
       if (response.status === 200) {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Target received successfully."),
-        );
-        navigation.navigate("Main" as any, {
-          screen: "DailyTargetListForOfficers",
-          params: {
-            officerId,
-            collectionOfficerId,
-            officerName,
-            phoneNumber1,
-            phoneNumber2,
-            image,
-          },
-        });
-      } else {
+  Alert.alert(
+    t("Error.Success"),
+    t("Error.Target received successfully."),
+    [
+      {
+        text: t("Error.OK"),
+        onPress: () => {
+          navigation.navigate("Main" as any, {
+            screen: "DailyTargetListForOfficers",
+            params: {
+              officerId,
+              collectionOfficerId,
+              officerName,
+              phoneNumber1,
+              phoneNumber2,
+              image,
+            },
+          });
+        },
+      },
+    ],
+    { cancelable: false }
+  );
+}else {
         Alert.alert(t("Error.error"), t("Error.Failed to transfer target."));
       }
     } catch (error: any) {
@@ -440,7 +450,7 @@ const RecieveTargetBetweenOfficers: React.FC<
                 {t("PassTargetBetweenOfficers.Amount")}
               </Text>
               <TextInput
-                className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full p-3.5 text-gray-800"
+                className="border border-[#F4F4F4] bg-[#F4F4F4] px-4 rounded-full p-3.5 text-gray-800"
                 keyboardType="numeric"
                 value={amount}
                 onChangeText={handleAmountChange}

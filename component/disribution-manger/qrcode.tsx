@@ -21,6 +21,7 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import CameraAccess from "../permission/CameraAccess";
+import { AlertModal } from "../commons/AlertModal";
 
 type QrcodeNavigationProp = StackNavigationProp<RootStackParamList, "qrcode">;
 
@@ -29,293 +30,7 @@ interface QrcodeProps {
   route: RouteProp<RootStackParamList, "qrcode">;
 }
 
-interface FailedModalProps {
-  visible: boolean;
-  title?: string;
-  message: string | React.ReactElement;
-  onClose: () => void;
-  showRescanButton?: boolean;
-  onRescan?: () => void;
-  autoClose?: boolean;
-  duration?: number;
-}
 
-const FailedModal: React.FC<FailedModalProps> = ({
-  visible,
-  title = "Failed!",
-  message,
-  onClose,
-  showRescanButton = false,
-  onRescan,
-  autoClose = true,
-  duration = 4000,
-}) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const progressAnim = useRef(new Animated.Value(100)).current;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }).start();
-
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ]),
-      ).start();
-
-      if (autoClose) {
-        progressAnim.setValue(100);
-        Animated.timing(progressAnim, {
-          toValue: 0,
-          duration: duration,
-          useNativeDriver: false,
-        }).start();
-
-        const timer = setTimeout(() => {
-          onClose();
-        }, duration);
-
-        return () => clearTimeout(timer);
-      }
-    } else {
-      scaleAnim.setValue(0);
-      progressAnim.setValue(100);
-    }
-  }, [visible]);
-
-  return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View className="flex-1 justify-center items-center bg-black/70">
-        <Animated.View
-          style={{ transform: [{ scale: scaleAnim }] }}
-          className="bg-white rounded-3xl p-6 mx-6 w-[85%] max-w-sm relative overflow-hidden"
-        >
-          {/* Close Button */}
-          <TouchableOpacity
-            onPress={onClose}
-            className="absolute top-4 right-4 z-10"
-          >
-            <MaterialIcons name="close" size={24} color="#000" />
-          </TouchableOpacity>
-
-          {/* Title */}
-          <Text className="text-xl font-bold text-center text-gray-800 mb-6">
-            {title}
-          </Text>
-
-          {/* Icon with pulsing animation */}
-          <Animated.View
-            style={{ transform: [{ scale: pulseAnim }] }}
-            className="items-center mb-6"
-          >
-            <View className="relative">
-              <Image
-                source={require("../../assets/images/collection-common/error.webp")}
-                className="h-[100px] w-[100px] rounded-lg"
-                resizeMode="contain"
-              />
-            </View>
-          </Animated.View>
-
-          {/* Message */}
-          <View className="mb-6">
-            {typeof message === "string" ? (
-              <Text className="text-center text-gray-600 text-base">
-                {message}
-              </Text>
-            ) : (
-              message
-            )}
-          </View>
-
-          {/* Progress Bar */}
-          {autoClose && (
-            <View
-              className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"
-              style={{
-                borderBottomLeftRadius: 24,
-                borderBottomRightRadius: 24,
-              }}
-            >
-              <Animated.View
-                className="h-full"
-                style={{
-                  width: progressAnim.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ["0%", "100%"],
-                  }),
-                  backgroundColor: "#EF4444",
-                  borderBottomLeftRadius: 24,
-                  borderBottomRightRadius: 24,
-                }}
-              />
-            </View>
-          )}
-        </Animated.View>
-      </View>
-    </Modal>
-  );
-};
-
-interface SuccessModalProps {
-  visible: boolean;
-  title?: string;
-  message: string | React.ReactElement;
-  onClose: () => void;
-  autoClose?: boolean;
-  duration?: number;
-}
-
-const SuccessModal: React.FC<SuccessModalProps> = ({
-  visible,
-  title = "Success!",
-  message,
-  onClose,
-  autoClose = true,
-  duration = 4000,
-}) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const checkAnim = useRef(new Animated.Value(0)).current;
-  const progressAnim = useRef(new Animated.Value(100)).current;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }).start();
-
-      Animated.sequence([
-        Animated.delay(200),
-        Animated.spring(checkAnim, {
-          toValue: 1,
-          tension: 100,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      if (autoClose) {
-        progressAnim.setValue(100);
-        Animated.timing(progressAnim, {
-          toValue: 0,
-          duration: duration,
-          useNativeDriver: false,
-        }).start();
-
-        const timer = setTimeout(() => {
-          onClose();
-        }, duration);
-
-        return () => clearTimeout(timer);
-      }
-    } else {
-      scaleAnim.setValue(0);
-      checkAnim.setValue(0);
-      progressAnim.setValue(100);
-    }
-  }, [visible]);
-
-  return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View className="flex-1 justify-center items-center bg-black/70">
-        <Animated.View
-          style={{ transform: [{ scale: scaleAnim }] }}
-          className="bg-white rounded-3xl p-6 mx-6 w-[85%] max-w-sm relative overflow-hidden"
-        >
-          {/* Close Button */}
-          <TouchableOpacity
-            onPress={onClose}
-            className="absolute top-4 right-4 z-10"
-          >
-            <MaterialIcons name="close" size={24} color="#000" />
-          </TouchableOpacity>
-
-          {/* Title */}
-          <Text className="text-xl font-bold text-center text-gray-800 mb-6">
-            {title}
-          </Text>
-
-          {/* Icon with animation */}
-          <Animated.View
-            style={{ transform: [{ scale: checkAnim }] }}
-            className="items-center mb-6"
-          >
-            <View className="relative">
-              <Image
-                source={require("../../assets/images/collection-common/otpsuccess.webp")}
-                className="h-[100px] w-[100px] rounded-lg"
-                resizeMode="contain"
-              />
-            </View>
-          </Animated.View>
-
-          {/* Message */}
-          <View className="mb-6">
-            {typeof message === "string" ? (
-              <Text className="text-center text-gray-600 text-base">
-                {message}
-              </Text>
-            ) : (
-              message
-            )}
-          </View>
-
-          {/* Progress Bar */}
-          {autoClose && (
-            <View
-              className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200"
-              style={{
-                borderBottomLeftRadius: 24,
-                borderBottomRightRadius: 24,
-              }}
-            >
-              <Animated.View
-                className="h-full"
-                style={{
-                  width: progressAnim.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ["0%", "100%"],
-                  }),
-                  backgroundColor: "#980775",
-                  borderBottomLeftRadius: 24,
-                  borderBottomRightRadius: 24,
-                }}
-              />
-            </View>
-          )}
-        </Animated.View>
-      </View>
-    </Modal>
-  );
-};
 
 const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
   const [permission, requestPermission] = useCameraPermissions();
@@ -847,35 +562,38 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
       )}
 
       {/* Timeout Modal */}
-      <FailedModal
+      <AlertModal
         visible={showTimeoutModal}
         title="Scan Timeout"
         message="The QR code could not be detected within the time limit. Please check and try again."
         onClose={handleTimeoutModalClose}
         showRescanButton={true}
         onRescan={handleTimeoutRescan}
+        type="error"
         autoClose={true}
         duration={4000}
       />
 
       {/* Error Modal */}
-      <FailedModal
+      <AlertModal
         visible={showErrorModal}
         title={modalTitle}
         message={modalMessage}
         onClose={handleErrorModalClose}
         showRescanButton={showRescanButton}
         onRescan={resetScanning}
+        type="error"
         autoClose={true}
         duration={4000}
       />
 
       {/* Success Modal */}
-      <SuccessModal
+      <AlertModal
         visible={showSuccessModal}
         title={modalTitle}
         message={modalMessage}
         onClose={handleSuccessModalClose}
+        type="success"
         autoClose={true}
         duration={4000}
       />

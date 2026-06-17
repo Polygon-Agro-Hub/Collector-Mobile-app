@@ -17,7 +17,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "../navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
-import SuccessModal from "../commons/SuccessModal";
+import { AlertModal } from "../commons/AlertModal";
 
 interface userItem {
   firstName: string;
@@ -56,7 +56,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   const [language, setLanguage] = useState("en");
   const [isOtpValid, setIsOtpValid] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
+  //const [verificationAttempts, setVerificationAttempts] = useState<number>(0);
   const [isOtpExpired, setIsOtpExpired] = useState<boolean>(false);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
@@ -192,38 +192,44 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           await AsyncStorage.removeItem("referenceId");
 
           setModalVisible(true);
-          navigation.navigate("FarmerQr" as any, {
-            NICnumber: response1.data.NICnumber,
-            userId: response1.data.userId,
-          });
+
+          
+          setTimeout(() => {
+            setModalVisible(false);
+            navigation.navigate("FarmerQr" as any, {
+              NICnumber: response1.data.NICnumber,
+              userId: response1.data.userId,
+            });
+          }, 2000); 
+
           break;
 
-        case "1001":
-          setVerificationAttempts((prev) => prev + 1);
+        // case "1001":
+        //   setVerificationAttempts((prev) => prev + 1);
 
-          if (verificationAttempts >= 2) {
-            Alert.alert(
-              t("Error.Sorry"),
-              t("Otpverification.OTPExpiredOrInvalid"),
-              [
-                {
-                  text: t("Otpverification.ResendOTP"),
-                  onPress: handleResendOTP,
-                },
-                {
-                  text: t("Otpverification.TryAgain"),
-                  onPress: () => {
-                    setOtpDigits(["", "", "", "", ""]);
-                    setIsOtpValid(false);
-                    inputRefs.current[0]?.focus();
-                  },
-                },
-              ],
-            );
-          } else {
-            Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
-          }
-          break;
+        //   if (verificationAttempts >= 2) {
+        //     Alert.alert(
+        //       t("Error.Sorry"),
+        //       t("Otpverification.OTPExpiredOrInvalid"),
+        //       [
+        //         {
+        //           text: t("Otpverification.ResendOTP"),
+        //           onPress: handleResendOTP,
+        //         },
+        //         {
+        //           text: t("Otpverification.TryAgain"),
+        //           onPress: () => {
+        //             setOtpDigits(["", "", "", "", ""]);
+        //             setIsOtpValid(false);
+        //             inputRefs.current[0]?.focus();
+        //           },
+        //         },
+        //       ],
+        //     );
+        //   } else {
+        //     Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+        //   }
+        //   break;
 
         case "1002":
           setIsOtpExpired(true);
@@ -235,7 +241,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         default:
           Alert.alert(
             t("Error.Sorry"),
-            message || t("Error.somethingWentWrong"),
+            t("Otpverification.invalidOTP"),
           );
       }
     } catch (error: any) {
@@ -251,7 +257,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       } else if (errStatusCode === "1001") {
         Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       } else {
-        Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
+        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
       }
     }
   };
@@ -272,36 +278,15 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       if (PreferdLanguage === "Sinhala") {
         companyName =
           (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
-        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  නිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
+        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (PreferdLanguage === "Tamil") {
         companyName =
           (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
-        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  சரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
+        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
         companyName =
           (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
-        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}
-          
-  ${accHolderName}
-  ${accNumber}
-  ${bankName}
-  ${branchName}
-          
-  If correct, share OTP only with the ${companyName} representative who contacts you.`;
+        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
       const body = {
@@ -318,7 +303,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         setReferenceId(response.data.referenceId);
 
         setIsOtpExpired(false);
-        setVerificationAttempts(0);
+      //  setVerificationAttempts(0);
         setOtpDigits(["", "", "", "", ""]);
         setIsOtpValid(false);
         setTimer(240);
@@ -371,7 +356,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         setTimer(240);
         setDisabledResend(true);
         setIsOtpExpired(false);
-        setVerificationAttempts(0);
+     //   setVerificationAttempts(0);
         setTimeout(() => inputRefs.current[0]?.focus(), 100);
       }
 
@@ -516,16 +501,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         </View>
       </ScrollView>
 
-      <SuccessModal
+      <AlertModal
+        type="success"
         visible={modalVisible}
         title={t("Otpverification.Success")}
         message={t("Otpverification.Registration")}
         duration={2000}
-        onClose={() => {
-          setModalVisible(false);
-          pendingNavigation.current?.();
-          pendingNavigation.current = null;
-        }}
+        onClose={() => setModalVisible(false)}
       />
     </View>
   );

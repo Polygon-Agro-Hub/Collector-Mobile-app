@@ -20,12 +20,14 @@ import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import Timer from "@/component/distribution-common/TimerContainer";
 import NetInfo from "@react-native-community/netinfo";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "../navigations/CustomHeader";
 import GlobalSearchModal from "../commons/GlobalSearchModal";
+import { AlertModal } from "../commons/AlertModal";
 
 interface OrderItem {
   id: string;
@@ -129,6 +131,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
 }) => {
   const { item, status } = route.params;
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const [orderData, setOrderData] = useState<OrderItem>(
     item as unknown as OrderItem,
@@ -1577,49 +1580,17 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   };
 
   const SuccessModal = () => (
-    <Modal
+    <AlertModal
+      type="success"
       visible={showSuccessModal && orderCompletionState === "completed"}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={() => {
+      title={t("PendingOrderScreen.Completed Successfully")}
+      message={t("PendingOrderScreen.TheOrder")}
+      onClose={() => {
         setShowSuccessModal(false);
+        setOrderCompletionState("idle");
         navigation.goBack();
       }}
-    >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-          //   paddingHorizontal: 24,
-        }}
-      >
-        <View className="bg-white rounded-2xl px-6 py-8 w-full max-w-sm">
-          <Text className="text-xl font-bold text-center mb-2">
-            {t("PendingOrderScreen.Completed Successfully")}
-          </Text>
-          <Text className="text-gray-600 text-center mb-6">
-            {t("PendingOrderScreen.TheOrder")}
-          </Text>
-          <TouchableOpacity
-            className="bg-black py-3 rounded-full"
-            style={{ alignSelf: "center", paddingHorizontal: 80 }}
-            onPress={() => {
-              setShowSuccessModal(false);
-              setOrderCompletionState("idle");
-              setTimeout(() => {
-                navigation.goBack();
-              }, 100);
-            }}
-          >
-            <Text className="text-white text-center  font-medium">
-              {t("PendingOrderScreen.OK")}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+    />
   );
 
   useEffect(() => {
@@ -2260,7 +2231,10 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           <SuccessModal />
 
           {orderStatus !== "Completed" && (
-            <View className="absolute bottom-10 left-2 right-2 bg-white px-4 h-[50px]">
+            <View
+              className="absolute bottom-2 left-0 right-0 bg-white px-6 pt-3 shadow-lg"
+              style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            >
               <TouchableOpacity
                 className={`h-[50px] justify-center rounded-full px-3 ${showWarning ? "bg-black" : "bg-gray-400"}`}
                 onPress={handleSubmitPress}

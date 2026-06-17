@@ -199,6 +199,10 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
       const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Gallery access is required to save QR Code.",
+        );
         return;
       }
 
@@ -208,7 +212,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       const asset = await MediaLibrary.createAssetAsync(response.uri);
       await MediaLibrary.createAlbumAsync("Download", asset, false);
 
-      Alert.alert(t("QRcode.successTitle"), t("QRcode.savedToGallery"));
+      Alert.alert(t("QRcode.successTitle") || "Success", "Attachment has been saved to your selected folder");
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(t("Error.error"), t("Error.failedSaveQRCode"));
@@ -284,7 +288,19 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
       {/* Pension Status Checking Overlay */}
       {checkingPensionStatus && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center', zIndex: 50 }}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "#00000040",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 50,
+          }}
+        >
           <View className="bg-white p-6 rounded-2xl items-center">
             <ActivityIndicator size="large" color="#980775" />
             <Text className="mt-4 text-gray-700 font-medium">
@@ -335,8 +351,9 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               {/* Collect Button - Centered */}
               <View className="items-center mb-6 mx-4">
                 <TouchableOpacity
-                  className={`rounded-full items-center justify-center ${!farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
-                    }`}
+                  className={`rounded-full items-center justify-center ${
+                    !farmerQRCode ? "bg-gray-400" : "bg-[#980775]"
+                  }`}
                   onPress={() =>
                     navigation.navigate("Main", {
                       screen: "UnregisteredCropDetails",
@@ -392,7 +409,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               </View>
 
               {/* Download and Share buttons - Centered */}
-              <View className="flex-row w-full px-12 pb-8 gap-3 max-w-[500px] mx-auto">
+              <View className="flex-row w-full px-12 pb-8 gap-8 max-w-[500px] mx-auto">
                 <TouchableOpacity
                   className="bg-black rounded-lg items-center justify-center flex-1 py-4"
                   onPress={downloadQRCode}

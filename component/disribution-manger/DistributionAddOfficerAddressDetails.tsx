@@ -471,13 +471,14 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
           })
         }
       />
-      <View className="flex-1 bg-white w-full max-w-[500px] mx-auto px-6">
+      <View className="flex-1 bg-white w-full max-w-[500px] mx-auto">
         <ScrollView
           className="flex-1 bg-white"
           keyboardShouldPersistTaps="handled"
         >
-          {/* ── Address Details ── */}
-          <View className="px-0 mt-4">
+          <View className="p-2">
+            {/* ── Address Details ── */}
+            <View className="px-4 mt-4">
             {/* House Number */}
             <TextInput
               placeholder={t("AddOfficerAddressDetails.House")}
@@ -614,7 +615,7 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
           <View className="h-0.5 bg-[#ADADAD] my-4" />
 
           {/* ── Bank Details ── */}
-          <View className="px-0 mt-4">
+          <View className="px-4 mt-4">
             {/* Account Holder Name */}
             <TextInput
               placeholder={t("AddOfficerAddressDetails.AccountName")}
@@ -729,17 +730,17 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
 
           {/* ── Buttons ── */}
 
-          <View className="px-0 flex-col w-full gap-4 mt-5 mb-4">
+          <View className="px-4 flex-col w-full gap-4 mt-5 mb-4">
             <TouchableOpacity
-              className="bg-[#D9D9D9] rounded-full px-6 py-4 w-full items-center"
+              className="bg-[#D9D9D9] rounded-full px-6 h-[50px] w-full justify-center items-center"
               onPress={() =>
                 navigation.navigate("DistributionAddOfficerBasicDetails", {
                   jobRolle: "Distribution Officer",
                   preservedData: basicDetails,
                 })
               }
-              style={{
-                shadowColor: "#000000",
+               style={{
+                shadowColor: "#8f8a8a",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,
@@ -761,13 +762,13 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className={`bg-black rounded-full px-6 mb-20 py-4 w-full items-center ${
+              className={`bg-black rounded-full px-6 mb-20 h-[50px] justify-center w-full items-center ${
                 loading ? "opacity-50" : ""
               }`}
               onPress={handleSubmit}
               disabled={loading}
-              style={{
-                shadowColor: "#000000",
+             style={{
+                shadowColor: "#070707",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,
@@ -792,8 +793,9 @@ const DistributionAddOfficerAddressDetails: React.FC = () => {
               )}
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
+    </View>
 
       {/* Province Modal */}
       <GlobalSearchModal

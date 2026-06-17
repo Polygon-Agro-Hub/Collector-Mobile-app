@@ -10,6 +10,9 @@ import { Provider } from "react-redux";
 import { environment } from "../environment/environment";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { LogBox } from "react-native";
+import axios from "axios";
+import { logoutUser } from "../store/authSlice";
+import { AlertModal, setGlobalAlertListener } from "@/component/commons/AlertModal";
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -21,6 +24,7 @@ import { navigationRef } from "../navigationRef";
 import NetInfo from "@react-native-community/netinfo";
 import * as SplashScreen from "expo-splash-screen";
 import Login from "@/component/auth/Login";
+import BannedScreen from "@/component/auth/BannedScreen";
 import ChangePassword from "@/component/auth/ChangePassword";
 import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
 import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails";
@@ -289,6 +293,191 @@ function AppContent() {
   const { t } = useTranslation();
 
   const [isOfflineAlertShown, setIsOfflineAlertShown] = useState(false);
+  const [alertState, setAlertState] = useState({
+    visible: false,
+    title: "",
+    message: "" as string | React.ReactNode,
+    type: "error" as "success" | "error",
+    onClose: (() => {}) as () => void,
+    autoClose: true,
+    showOkButton: undefined as boolean | undefined,
+  });
+
+  useEffect(() => {
+    setGlobalAlertListener((title, message, type, onClose, autoClose, showOkButton) => {
+      setAlertState({
+        visible: true,
+        title,
+        message,
+        type,
+        onClose: () => {
+          setAlertState((prev) => ({ ...prev, visible: false }));
+          if (onClose) {
+            onClose();
+          }
+        },
+        autoClose,
+        showOkButton,
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    // Axios response interceptor
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const errorResponse = error.response;
+        if (
+          errorResponse &&
+          (errorResponse.status === 401 || errorResponse.status === 403) &&
+          (errorResponse.data?.accountStatus === "Not Approved" ||
+            errorResponse.data?.accountStatus === "Rejected" ||
+            errorResponse.data?.message === "This EMP ID is not approved." ||
+            errorResponse.data?.message === "This EMP ID is Rejected" ||
+            errorResponse.data?.message === "This account is not approved or has been rejected." ||
+            (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("not approved")) ||
+            (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("rejected")))
+        ) {
+          let currentRouteName = "";
+          if (navigationRef.isReady()) {
+            const route = navigationRef.getCurrentRoute() as any;
+            currentRouteName = route?.name || "";
+          }
+
+          if (
+            currentRouteName !== "Login" &&
+            currentRouteName !== "Splash" &&
+            currentRouteName !== "BannedScreen"
+          ) {
+            try {
+              // Clear stored credentials
+              await AsyncStorage.multiRemove([
+                "token",
+                "tokenStoredTime",
+                "tokenExpirationTime",
+                "jobRole",
+                "empid",
+                "companyNameEnglish",
+                "companyNameSinhala",
+                "companyNameTamil",
+              ]);
+
+              // Dispatch logout
+              store.dispatch(logoutUser());
+
+              if (navigationRef.isReady()) {
+                const statusType =
+                  errorResponse.data?.accountStatus === "Rejected" ||
+                  (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("rejected"))
+                    ? "rejected"
+                    : "not_approved";
+
+                navigationRef.reset({
+                  index: 0,
+                  routes: [
+                    {
+                      name: "BannedScreen",
+                      params: {
+                        statusType,
+                        message: errorResponse.data?.message,
+                      },
+                    },
+                  ],
+                });
+              }
+            } catch (e) {
+              console.error("Failed to perform force logout in Axios interceptor:", e);
+            }
+
+            return new Promise(() => {});
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Global fetch interceptor (monkeypatch)
+    const originalFetch = (globalThis as any).fetch;
+    (globalThis as any).fetch = async (...args: any[]) => {
+      const response = await originalFetch(...args);
+
+      if (response.status === 401 || response.status === 403) {
+        try {
+          const clonedResponse = response.clone();
+          const data = await clonedResponse.json();
+
+          if (
+            data.accountStatus === "Not Approved" ||
+            data.accountStatus === "Rejected" ||
+            data.message === "This EMP ID is not approved." ||
+            data.message === "This EMP ID is Rejected" ||
+            data.message === "This account is not approved or has been rejected." ||
+            (data.message && data.message.toLowerCase().includes("not approved")) ||
+            (data.message && data.message.toLowerCase().includes("rejected"))
+          ) {
+            let currentRouteName = "";
+            if (navigationRef.isReady()) {
+              const route = navigationRef.getCurrentRoute() as any;
+              currentRouteName = route?.name || "";
+            }
+
+            if (
+              currentRouteName !== "Login" &&
+              currentRouteName !== "Splash" &&
+              currentRouteName !== "BannedScreen"
+            ) {
+              // Clear stored credentials
+              await AsyncStorage.multiRemove([
+                "token",
+                "tokenStoredTime",
+                "tokenExpirationTime",
+                "jobRole",
+                "empid",
+                "companyNameEnglish",
+                "companyNameSinhala",
+                "companyNameTamil",
+              ]);
+
+              // Dispatch logout
+              store.dispatch(logoutUser());
+
+              if (navigationRef.isReady()) {
+                const statusType =
+                  data.accountStatus === "Rejected" ||
+                  (data.message && data.message.toLowerCase().includes("rejected"))
+                    ? "rejected"
+                    : "not_approved";
+
+                navigationRef.reset({
+                  index: 0,
+                  routes: [
+                    {
+                      name: "BannedScreen",
+                      params: {
+                        statusType,
+                        message: data.message,
+                      },
+                    },
+                  ],
+                });
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore json parsing / handling error
+        }
+      }
+
+      return response;
+    };
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+      (globalThis as any).fetch = originalFetch;
+    };
+  }, []);
+
   useEffect(() => {
     onlineStatus();
     // Hide splash screen when app is ready
@@ -382,6 +571,7 @@ function AppContent() {
           >
             <Stack.Screen name="Splash" component={Splash} />
             <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="BannedScreen" component={BannedScreen as any} />
             <Stack.Screen name="FormScreen" component={FormScreen} />
             <Stack.Screen name="Lanuage" component={Lanuage} />
 
@@ -468,6 +658,15 @@ function AppContent() {
             <Stack.Screen name="LoadingPage" component={LoadingPage as any} />
           </Stack.Navigator>
         </NavigationContainer>
+        <AlertModal
+          visible={alertState.visible}
+          title={alertState.title}
+          message={alertState.message}
+          type={alertState.type}
+          onClose={alertState.onClose}
+          autoClose={alertState.autoClose}
+          showOkButton={alertState.showOkButton}
+        />
       </SafeAreaView>
     </GestureHandlerRootView>
   );

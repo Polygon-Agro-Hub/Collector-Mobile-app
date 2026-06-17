@@ -127,13 +127,11 @@ export const handleGeneratePDF = async (
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            border: 2px solid #ddd;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
           }
           h1 {
             text-align: center;
             margin-bottom: 10px;
+            font-size: 24px;
           }
           .header {
             display: flex;
@@ -210,7 +208,7 @@ export const handleGeneratePDF = async (
       base64: false,
     });
 
-    const fileUri = `${(FileSystem as any).documentDirectory}report_${officerId}.pdf`;
+    const fileUri = `${(FileSystem as any).documentDirectory}Report_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
     await FileSystem.moveAsync({
       from: uri,
       to: fileUri,

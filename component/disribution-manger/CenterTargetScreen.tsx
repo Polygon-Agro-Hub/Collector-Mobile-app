@@ -32,6 +32,7 @@ import {
   processOrdersForDelivery,
 } from "@/component/disribution-manger/pdf";
 import i18n from "@/i18n/i18n";
+import { AlertModal } from "../commons/AlertModal";
 
 type CenterTargetScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -884,6 +885,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       }
     }
   };
+  
 
   const renderCheckboxForSelectAll = () => {
     return (
@@ -1050,71 +1052,49 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-  const SuccessModal = () => {
-    const progress = useRef(new Animated.Value(0)).current;
+const isScheduleSlotPassed = (
+  scheduleDate: string,
+  scheduleTime: string,
+): boolean => {
+  if (!scheduleDate || !scheduleTime) return false;
 
-    useEffect(() => {
-      if (showSuccessModal) {
-        Animated.timing(progress, {
-          toValue: 100,
-          duration: 3000,
-          useNativeDriver: false,
-        }).start();
-      } else {
-        progress.setValue(0);
-      }
-    }, [showSuccessModal]);
+  try {
+    if (!isScheduleDateToday(scheduleDate)) return false;
 
-    return (
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showSuccessModal}
-        onRequestClose={() => setShowSuccessModal(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "#00000040",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View className="bg-white rounded-2xl p-8 w-11/12 max-w-sm items-center">
-            <Text className="text-2xl font-bold mb-6 text-center text-gray-800">
-              {t("CenterTargetScreen.Success")}
-            </Text>
-
-            <Image
-              source={require("../../assets/images/collection-common/otpsuccess.webp")}
-              style={{ width: 100, height: 100 }}
-            />
-
-            <Text className="text-center text-gray-600 mb-6">
-              {successCount === 1
-                ? t("CenterTargetScreen.order one", { count: successCount })
-                : t("CenterTargetScreen.orders out for delivery", {
-                    count: successCount,
-                  })}
-            </Text>
-
-            <View className="absolute bottom-0 left-0 right-0 h-2 bg-gray-200 rounded-b-2xl overflow-hidden">
-              <Animated.View
-                style={{
-                  height: "100%",
-                  backgroundColor: "#980775",
-                  width: progress.interpolate({
-                    inputRange: [0, 100],
-                    outputRange: ["0%", "100%"],
-                  }),
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+    const timeRangeMatch = scheduleTime.match(
+      /within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i,
     );
-  };
+    const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
+
+    let endHourStr: string, endPeriod: string;
+
+    if (timeRangeMatch) {
+      [, , , endHourStr, endPeriod] = timeRangeMatch;
+    } else if (altMatch) {
+      [, , , endHourStr, endPeriod] = altMatch;
+    } else {
+      return false;
+    }
+
+    const convertTo24Hour = (hourStr: string, period: string): number => {
+      let hour = parseInt(hourStr);
+      if (period.toUpperCase() === "PM" && hour !== 12) hour += 12;
+      else if (period.toUpperCase() === "AM" && hour === 12) hour = 0;
+      return hour;
+    };
+
+    const endHour = convertTo24Hour(endHourStr, endPeriod);
+    const endTotalMinutes = endHour * 60;
+
+    const now = new Date();
+    const nowTotalMinutes = now.getHours() * 60 + now.getMinutes();
+
+    return nowTotalMinutes > endTotalMinutes;
+  } catch (error) {
+    console.error("Error checking if schedule slot passed:", error);
+    return false;
+  }
+};
 
   const formatOutTime = (dateString: string | null): string => {
     if (!dateString) return "N/A";
@@ -1911,27 +1891,28 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
 
                   <View className="flex-[2] items-center justify-center px-2">
                     {(() => {
-                      const status = getCompletionStatus(
-                        item.completedTime,
-                        item.sheduleTime,
-                      );
                       const scheduleDisplay = getScheduleDisplayForCompleted(
                         item.sheduleDate,
                         item.sheduleTime,
                       );
 
+                      const isToday = isScheduleDateToday(item.sheduleDate);
+                      const isPassed = isScheduleSlotPassed(
+                        item.sheduleDate,
+                        item.sheduleTime,
+                      );
+
+                      let textColorClass = "text-black";
+                      if (isToday) {
+                        textColorClass = isPassed
+                          ? "text-[#FF0000]"
+                          : "text-[#980775]";
+                      }
+
                       return (
                         <View className="items-center">
                           <Text
-                            className={`text-center font-medium text-xs ${
-                              isScheduleDateToday(item.sheduleDate)
-                                ? status === "on-time"
-                                  ? "text-[#980775]"
-                                  : status === "late"
-                                    ? "text-[#FF0700]"
-                                    : "text-[#980775]"
-                                : "text-black"
-                            }`}
+                            className={`text-center font-medium text-xs ${textColorClass}`}
                           >
                             {scheduleDisplay}
                           </Text>
@@ -1998,7 +1979,20 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
           </View>
         )}
       </ScrollView>
-      {showSuccessModal && <SuccessModal />}
+      <AlertModal
+        visible={showSuccessModal}
+        title={t("CenterTargetScreen.Success")}
+        message={
+          successCount === 1
+            ? t("CenterTargetScreen.order one", { count: successCount })
+            : t("CenterTargetScreen.orders out for delivery", {
+                count: successCount,
+              })
+        }
+        type="success"
+        duration={4000}
+        onClose={() => setShowSuccessModal(false)}
+      />
     </View>
   );
 };

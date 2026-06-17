@@ -472,39 +472,79 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 
-      let tempFilePath = uri;
-
       if (Platform.OS === "android") {
-        tempFilePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
+        let directoryUri = await AsyncStorage.getItem("download_directory_uri");
+        
+        if (!directoryUri) {
+          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          if (permissions.granted) {
+            directoryUri = permissions.directoryUri;
+            await AsyncStorage.setItem("download_directory_uri", directoryUri);
+          }
+        }
 
-        await FileSystem.copyAsync({
-          from: uri,
-          to: tempFilePath,
-        });
+        if (directoryUri) {
+          try {
+            const base64 = await FileSystem.readAsStringAsync(uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+              directoryUri,
+              fileName,
+              "application/pdf"
+            );
+            await FileSystem.writeAsStringAsync(fileUri, base64, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
 
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
-            dialogTitle: t("NewReport.Save GRN Report"),
-            mimeType: "application/pdf",
-            UTI: "com.adobe.pdf",
-          });
+            Alert.alert(
+              t("Error.Success") || "Success",
+              "Attachment has been saved to your selected folder",
+            );
+          } catch (e) {
+            // Permission might have been revoked, try to request again
+            await AsyncStorage.removeItem("download_directory_uri");
+            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            if (permissions.granted && permissions.directoryUri) {
+              const newDirectoryUri = permissions.directoryUri;
+              await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+
+              const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+                newDirectoryUri,
+                fileName,
+                "application/pdf"
+              );
+              await FileSystem.writeAsStringAsync(fileUri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+              });
+
+              Alert.alert(
+                t("Error.Success") || "Success",
+                "Attachment has been saved to your selected folder",
+              );
+            } else {
+              Alert.alert(
+                t("Error.Permission Denied") || "Permission Denied",
+                "Storage permission is required to save the PDF."
+              );
+            }
+          }
         } else {
           Alert.alert(
-            t("Error.error"),
-            t("NewReport.Sharing is not available on this device"),
+            t("Error.Permission Denied") || "Permission Denied",
+            "Storage permission is required to save the PDF."
           );
         }
       } else if (Platform.OS === "ios") {
         if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFilePath, {
+          await Sharing.shareAsync(uri, {
             dialogTitle: t("NewReport.Save GRN Report"),
             mimeType: "application/pdf",
             UTI: "com.adobe.pdf",
           });
-          Alert.alert(
-            t("NewReport.Info"),
-            t("NewReport.Use the 'Save to Files' option to save to Downloads"),
-          );
         } else {
           Alert.alert(
             t("Error.error"),
@@ -525,7 +565,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `PurchaseReport_${
+      const fileName = `GRN_${
         crops.length > 0 ? crops[0].invoiceNumber : "N/A"
       }_${date}.pdf`;
 

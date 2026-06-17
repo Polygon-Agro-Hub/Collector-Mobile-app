@@ -83,7 +83,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
 
   useFocusEffect(
     useCallback(() => {
-      setIsEditing(false); 
+      setIsEditing(false);
 
       const handleBackPress = () => {
         navigation.reset({
@@ -112,11 +112,24 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        handleBackPress
+        handleBackPress,
       );
 
-      return () => subscription.remove();
-    }, [navigation])
+      return () => {
+        subscription.remove();
+        setIsEditing(false);
+      };
+    }, [
+      navigation,
+      varietyId,
+      varietyNameEnglish,
+      grade,
+      target,
+      todo,
+      dailyTarget,
+      varietyNameSinhala,
+      varietyNameTamil,
+    ]),
   );
 
   return (
