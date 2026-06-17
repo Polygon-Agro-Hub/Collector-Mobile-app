@@ -303,7 +303,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       <View className="w-full max-w-[500px] mx-auto">
         {renderTargetStatus()}
 
-        <View className="flex items-center justify-center">
+        <View className="flex items-center justify-center mt-10">
           <View style={{ width: 100, height: 100 }}>
             <CircularProgress
               size={100}

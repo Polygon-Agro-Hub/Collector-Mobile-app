@@ -288,10 +288,6 @@ export default function DigitalSignature({
       );
 
       if (response.data.status === "success") {
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP,
-        );
-
         const message = (
           <View className="items-center">
             <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
@@ -679,13 +675,12 @@ export default function DigitalSignature({
       {/* ── SUCCESS MODAL ── */}
       <AlertModal
         visible={showSuccessModal}
-        title="Success"
+        title="Successful!"
         message={successMessage}
         type="success"
-        duration={4000}
         onClose={handleSuccessModalClose}
-        showOkButton={true}
         autoClose={true}
+        duration={3000}
       />
     </View>
   );

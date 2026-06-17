@@ -173,7 +173,7 @@ const ClaimOfficer: React.FC = () => {
       } else {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Officer successfully claimed."),
+          t("Error.Staff successfully claimed."),
         );
         setOfficerFound(false);
         setOfficerDetails(null);

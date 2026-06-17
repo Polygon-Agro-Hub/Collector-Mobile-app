@@ -161,7 +161,6 @@ export const handleGeneratePDF = async (
           }
           table th, table td {
             border: 1px solid #ddd;
-            border-bottom: none;
             padding: 10px;
             text-align: center;
           }

@@ -571,7 +571,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
                 keyboardType="decimal-pad"
               />
               {replaceData.quantity !== "" && !isQuantityValid && (
-                <Text className="text-red-600 text-sm text-center mt-1 px-2">
+                <Text className="text-red-600 text-sm text-left mt-1 px-2">
                   {t(
                     "ReplaceRequestsApprove.Please enter a value greater than 0",
                   )}
@@ -596,7 +596,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
               </View>
 
               {isPriceExceeded && (
-                <Text className="text-red-600 text-sm text-center mt-1 px-2">
+                <Text className="text-red-600 text-sm text-left mt-1 px-2">
                   {t(
                     "ReplaceRequestsApprove.Price must match defined product price",
                   )}

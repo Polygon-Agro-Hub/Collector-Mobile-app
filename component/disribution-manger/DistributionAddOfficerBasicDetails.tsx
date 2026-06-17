@@ -731,7 +731,7 @@ const DistributionAddOfficerBasicDetails: React.FC<AddOfficerProp> = ({
           </TouchableOpacity>
         </View>
 
-        <View className="p-2 px-4">
+        <View className="p-2">
           <View className="px-2 mt-6 items-center">
             <View className="flex flex-row items-center gap-2 justify-between">
               <Text className="text-base font-medium">
