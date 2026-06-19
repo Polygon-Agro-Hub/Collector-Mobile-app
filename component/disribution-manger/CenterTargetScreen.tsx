@@ -885,7 +885,6 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       }
     }
   };
-  
 
   const renderCheckboxForSelectAll = () => {
     return (
@@ -1016,6 +1015,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
       setShowSuccessModal(true);
 
       setSelectedItems([]);
+      setSelectAll(false);
 
       setTimeout(() => {
         setShowSuccessModal(false);
@@ -1052,49 +1052,49 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
     }
   };
 
-const isScheduleSlotPassed = (
-  scheduleDate: string,
-  scheduleTime: string,
-): boolean => {
-  if (!scheduleDate || !scheduleTime) return false;
+  const isScheduleSlotPassed = (
+    scheduleDate: string,
+    scheduleTime: string,
+  ): boolean => {
+    if (!scheduleDate || !scheduleTime) return false;
 
-  try {
-    if (!isScheduleDateToday(scheduleDate)) return false;
+    try {
+      if (!isScheduleDateToday(scheduleDate)) return false;
 
-    const timeRangeMatch = scheduleTime.match(
-      /within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i,
-    );
-    const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
+      const timeRangeMatch = scheduleTime.match(
+        /within\s*(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i,
+      );
+      const altMatch = scheduleTime.match(/(\d+)(AM|PM)\s*-\s*(\d+)(AM|PM)/i);
 
-    let endHourStr: string, endPeriod: string;
+      let endHourStr: string, endPeriod: string;
 
-    if (timeRangeMatch) {
-      [, , , endHourStr, endPeriod] = timeRangeMatch;
-    } else if (altMatch) {
-      [, , , endHourStr, endPeriod] = altMatch;
-    } else {
+      if (timeRangeMatch) {
+        [, , , endHourStr, endPeriod] = timeRangeMatch;
+      } else if (altMatch) {
+        [, , , endHourStr, endPeriod] = altMatch;
+      } else {
+        return false;
+      }
+
+      const convertTo24Hour = (hourStr: string, period: string): number => {
+        let hour = parseInt(hourStr);
+        if (period.toUpperCase() === "PM" && hour !== 12) hour += 12;
+        else if (period.toUpperCase() === "AM" && hour === 12) hour = 0;
+        return hour;
+      };
+
+      const endHour = convertTo24Hour(endHourStr, endPeriod);
+      const endTotalMinutes = endHour * 60;
+
+      const now = new Date();
+      const nowTotalMinutes = now.getHours() * 60 + now.getMinutes();
+
+      return nowTotalMinutes > endTotalMinutes;
+    } catch (error) {
+      console.error("Error checking if schedule slot passed:", error);
       return false;
     }
-
-    const convertTo24Hour = (hourStr: string, period: string): number => {
-      let hour = parseInt(hourStr);
-      if (period.toUpperCase() === "PM" && hour !== 12) hour += 12;
-      else if (period.toUpperCase() === "AM" && hour === 12) hour = 0;
-      return hour;
-    };
-
-    const endHour = convertTo24Hour(endHourStr, endPeriod);
-    const endTotalMinutes = endHour * 60;
-
-    const now = new Date();
-    const nowTotalMinutes = now.getHours() * 60 + now.getMinutes();
-
-    return nowTotalMinutes > endTotalMinutes;
-  } catch (error) {
-    console.error("Error checking if schedule slot passed:", error);
-    return false;
-  }
-};
+  };
 
   const formatOutTime = (dateString: string | null): string => {
     if (!dateString) return "N/A";
