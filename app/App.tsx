@@ -104,17 +104,6 @@ import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficerAddressDetails from "@/component/disribution-manger/DistributionAddOfficerAddressDetails";
 import DistributionAddOfficerBasicDetails from "@/component/disribution-manger/DistributionAddOfficerBasicDetails";
 
-// LogBox.ignoreAllLogs(true);
-// (Text as any).defaultProps = {
-//   ...(Text as any).defaultProps,
-//   allowFontScaling: false,
-// };
-
-// (TextInput as any).defaultProps = {
-//   ...(TextInput as any).defaultProps,
-//   allowFontScaling: false,
-// };
-
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
