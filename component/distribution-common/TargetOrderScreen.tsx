@@ -567,7 +567,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
     );
 
   return (
-    <View className="flex-1 bg-[#282828]">
+    <View className="flex-1 bg-[#ffffff]">
       <CustomHeader
         title={t("TargetOrderScreen.My Target")}
         showBackButton={true}
@@ -742,6 +742,10 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        style={{
+          marginBottom:20,
+          backgroundColor:'white'
+        }}
       >
         {error && (
           <View className="bg-red-100 border border-red-400 px-4 py-3 mx-4 mt-4 rounded">
