@@ -46,8 +46,7 @@ import OfficerSummary from "@/component/collection-manager/OfficerSummary";
 import ReportGenerator from "@/component/collection-manager/ReportGenerator";
 import ComplainHistory from "@/component/complain/ComplainHistory";
 import DailyTargetList from "@/component/collection-common/DailyTargetList";
-import AddOfficerBasicDetails from "@/component/collection-manager/AddOfficerBasicDetails";
-import AddOfficerAddressDetails from "@/component/collection-manager/AddOfficerAddressDetails";
+import AddOfficer from "@/component/collection-manager/AddOfficer";
 import ClaimOfficer from "@/component/collection-manager/ClaimOfficer";
 import TransactionList from "@/component/collection-manager/TransactionList";
 import FarmerReport from "@/component/collection-manager/FarmerReport";
@@ -101,8 +100,7 @@ import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
-import DistributionAddOfficerAddressDetails from "@/component/disribution-manger/DistributionAddOfficerAddressDetails";
-import DistributionAddOfficerBasicDetails from "@/component/disribution-manger/DistributionAddOfficerBasicDetails";
+import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
 
 // LogBox.ignoreAllLogs(true);
 // (Text as any).defaultProps = {
@@ -247,12 +245,8 @@ function MainTabNavigator() {
         component={ReplaceRequestsApprove as any}
       />
       <Tab.Screen
-        name="DistributionAddOfficerAddressDetails"
-        component={DistributionAddOfficerAddressDetails as any}
-      />
-      <Tab.Screen
-        name="DistributionAddOfficerBasicDetails"
-        component={DistributionAddOfficerBasicDetails as any}
+        name="DistributionAddOfficer"
+        component={DistributionAddOfficer as any}
       />
       <Tab.Screen name="EditTargetScreen" component={EditTargetScreen as any} />
       <Tab.Screen
@@ -262,12 +256,8 @@ function MainTabNavigator() {
       <Tab.Screen name="SideMenu" component={SideMenu} />
       <Tab.Screen name="OfficerQr" component={OfficerQr} />
       <Tab.Screen
-        name="AddOfficerBasicDetails"
-        component={AddOfficerBasicDetails as any}
-      />
-      <Tab.Screen
-        name="AddOfficerAddressDetails"
-        component={AddOfficerAddressDetails}
+        name="AddOfficer"
+        component={AddOfficer as any}
       />
       <Tab.Screen
         name="CenterTargetScreen"
