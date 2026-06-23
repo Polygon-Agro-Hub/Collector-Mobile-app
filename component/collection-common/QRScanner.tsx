@@ -214,6 +214,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
           message={t("QRScanner.SearchNIC")}
           type="error"
           duration={5000}
+          showRescanButton={true}
+          onRescan={() => {
+            setIsUnsuccessfulModalVisible(false);
+            setScanned(false);
+          }}
           onClose={() => {
             setIsUnsuccessfulModalVisible(false);
             navigation.navigate("SearchFarmer" as any);
