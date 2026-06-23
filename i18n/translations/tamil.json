@@ -611,7 +611,7 @@
   "DisclaimOfficer": {
     "Are you sure you want to disclaim this officer?": "இந்த அதிகாரியை நீங்கள் நிச்சயமாக மறுக்க விரும்புகிறீர்களா?",
     "Disclaim": "மறுப்பு",
-    "Staff disclaimed successfully.": "அதிகாரி வெற்றிகரமாக மறுத்துவிட்டார்.",
+    "Disclaim Staff Successful.": "அதிகாரி வெற்றிகரமாக மறுத்துவிட்டார்.",
     "Failed to disclaim officer.": "அதிகாரியை மறுக்க முடியவில்லை."
   },
   "CollectionOfficersList": {

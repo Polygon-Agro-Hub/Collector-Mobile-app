@@ -600,7 +600,7 @@
     "EMPID": "EMP ID",
     "Search": "Search",
     "Claim Officer": "Claim Staff",
-    "No Disclaimed": "- No Disclaimed officer was found -",
+    "No Disclaimed": "- No Disclaim Staff was found -",
     "Are you sure you want to claim this officer?": "Are you sure you want to claim this staff?",
     "Cancel": "Cancel",
     "Claim": "Claim Staff",
@@ -612,7 +612,7 @@
   "DisclaimOfficer": {
     "Are you sure you want to disclaim this officer?": "Are you sure you want to disclaim this staff?",
     "Disclaim": "Disclaim",
-    "Staff disclaimed successfully.": "Staff disclaimed successfully.",
+    "Disclaim Staff Successful.": "Disclaim Staff Successful.",
     "Failed to disclaim officer.": "Failed to disclaim staff."
   },
   "CollectionOfficersList": {

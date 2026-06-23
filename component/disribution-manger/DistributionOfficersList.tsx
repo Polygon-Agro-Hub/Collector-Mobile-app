@@ -481,7 +481,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
             onPress={async () => {
               try {
                 await AsyncStorage.removeItem("officerFormData");
-                navigation.navigate("DistributionAddOfficerBasicDetails", {
+                navigation.navigate("DistributionAddOfficer", {
                   jobRolle: "Distribution Officer",
                 });
               } catch (error) {

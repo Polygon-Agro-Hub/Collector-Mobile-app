@@ -15,7 +15,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
@@ -171,10 +171,7 @@ const ClaimOfficer: React.FC = () => {
           t("Error.Failed to claim the officer. Please try again later."),
         );
       } else {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Staff successfully claimed."),
-        );
+        Alert.alert(t("Error.Success"), t("Error.Staff successfully claimed."));
         setOfficerFound(false);
         setOfficerDetails(null);
         setEmpID("");
@@ -193,6 +190,18 @@ const ClaimOfficer: React.FC = () => {
   const handleCancel = () => {
     setModalVisible(false);
   };
+  useFocusEffect(
+    React.useCallback(() => {
+      setEmpID("");
+      setOfficerFound(false);
+      setOfficerDetails(null);
+      setSearchPerformed(false);
+      setSearchLoading(false);
+      setLoading(false);
+      setModalVisible(false);
+      setJobRole("Collection Officer");
+    }, []),
+  );
 
   useEffect(() => {
     const backAction = () => {
@@ -221,7 +230,14 @@ const ClaimOfficer: React.FC = () => {
         animationType="fade"
         onRequestClose={onCancel}
       >
-        <View style={{ flex: 1, backgroundColor: '#00000040', justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#00000040",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <View className="bg-white items-center rounded-lg w-80  p-6">
             <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
               <Ionicons name="warning" size={30} color="#6c7e8c" />
@@ -278,7 +294,9 @@ const ClaimOfficer: React.FC = () => {
         title={t("ClaimOfficer.ClaimOfficers")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("Main", { screen: "CollectionOfficersList" })}
+        onBackPress={() =>
+          navigation.navigate("Main", { screen: "CollectionOfficersList" })
+        }
       />
 
       <View className="px-8 mt-2">

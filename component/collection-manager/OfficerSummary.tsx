@@ -233,7 +233,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
         setModalVisible(false);
         Alert.alert(
           t("Error.Success"),
-          t("DisclaimOfficer.Officer disclaimed successfully."),
+          t("DisclaimOfficer.Disclaim Staff Successful."),
         );
         navigation.navigate("Main", { screen: "CollectionOfficersList" });
       } else {

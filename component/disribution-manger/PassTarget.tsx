@@ -29,6 +29,7 @@ interface PassTargetProps {
       selectedItems: number[];
       invoiceNumbers: string[];
       processOrderId: string[];
+      officerName:string;
     };
   };
 }
@@ -60,6 +61,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
     processOrderId = [],
     officerId,
     collectionOfficerId,
+    officerName,
   } = route.params;
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -82,6 +84,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
         navigation.navigate("DailyTargetListOfficerDistribution", {
           officerId,
           collectionOfficerId,
+          officerName
         });
         return true;
       };
@@ -348,6 +351,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
             navigation.navigate("DailyTargetListOfficerDistribution", {
               officerId,
               collectionOfficerId,
+              officerName
             })
           }
           textColor="white"
@@ -521,6 +525,7 @@ const PassTarget: React.FC<PassTargetProps> = ({ navigation, route }) => {
             navigation.navigate("DailyTargetListOfficerDistribution", {
               officerId,
               collectionOfficerId,
+              officerName
             });
           }, 0);
         }}

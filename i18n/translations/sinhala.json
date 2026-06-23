@@ -612,7 +612,7 @@
   "DisclaimOfficer": {
     "Are you sure you want to disclaim this officer?": "ඔබට මෙම නිලධාරියා ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?",
     "Disclaim": "ඉවත් කරන්න",
-    "Staff disclaimed successfully.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
+    "Disclaim Staff Successful.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
     "Failed to disclaim officer.": "නිලධාරියා හිමිකම ඉවත් කිරීම කිරීමට අපොහොසත් විය."
   },
   "CollectionOfficersList": {

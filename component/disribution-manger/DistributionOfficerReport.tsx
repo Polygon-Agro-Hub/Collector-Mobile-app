@@ -248,30 +248,38 @@ const DistributionOfficerReport: React.FC<DistributionOfficerReportProps> = ({
     }
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        navigation.navigate("Main" as any, {
-          screen: "DistributionOfficerSummary",
-          params: {
-            officerId,
-            officerName,
-            phoneNumber1,
-            phoneNumber2,
-            collectionOfficerId,
-            image,
-          },
-        });
-        return true;
-      };
+useFocusEffect(
+  React.useCallback(() => {
+    // Clear previous selections every time this screen gains focus
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setReportGenerated(false);
+    setGenerateAgain(false);
+    setShowStartPicker(false);
+    setShowEndPicker(false);
 
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress,
-      );
-      return () => subscription.remove();
-    }, [navigation]),
-  );
+    const onBackPress = () => {
+      navigation.navigate("Main" as any, {
+        screen: "DistributionOfficerSummary",
+        params: {
+          officerId,
+          officerName,
+          phoneNumber1,
+          phoneNumber2,
+          collectionOfficerId,
+          image,
+        },
+      });
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress,
+    );
+    return () => subscription.remove();
+  }, [navigation]),
+);
 
   const handleReset = () => {
     setStartDate(undefined);

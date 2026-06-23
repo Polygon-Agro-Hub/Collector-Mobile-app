@@ -323,7 +323,9 @@ const DailyTargetListOfficerDistribution: React.FC<
         selectedItems: selectedItemsArray,
         collectionOfficerId: collectionOfficerId,
         invoiceNumbers: invoiceNumbers,
+        officerName:officerName,
         processOrderId: processOrderId,
+
       },
     });
 
