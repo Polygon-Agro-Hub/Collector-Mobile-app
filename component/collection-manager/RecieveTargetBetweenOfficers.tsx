@@ -115,6 +115,7 @@ const RecieveTargetBetweenOfficers: React.FC<
             params: {
               varietyId,
               officerId,
+              officerName,
               collectionOfficerId,
               varietyNameEnglish,
               varietyNameSinhala,

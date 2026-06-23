@@ -612,7 +612,7 @@
   "DisclaimOfficer": {
     "Are you sure you want to disclaim this officer?": "Are you sure you want to disclaim this staff?",
     "Disclaim": "Disclaim",
-    "Staff disclaimed successfully.": "Staff disclaimed successfully.",
+    "Disclaim Staff Successful.": "Disclaim Staff Successful.",
     "Failed to disclaim officer.": "Failed to disclaim staff."
   },
   "CollectionOfficersList": {
