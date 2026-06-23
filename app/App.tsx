@@ -102,17 +102,6 @@ import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
 
-// LogBox.ignoreAllLogs(true);
-// (Text as any).defaultProps = {
-//   ...(Text as any).defaultProps,
-//   allowFontScaling: false,
-// };
-
-// (TextInput as any).defaultProps = {
-//   ...(TextInput as any).defaultProps,
-//   allowFontScaling: false,
-// };
-
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
