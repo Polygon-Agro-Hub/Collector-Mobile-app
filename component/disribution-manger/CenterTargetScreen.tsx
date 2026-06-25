@@ -27,10 +27,6 @@ import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { Animated } from "react-native";
-import {
-  fetchOrderDetailsByIds,
-  processOrdersForDelivery,
-} from "@/component/disribution-manger/pdf";
 import i18n from "@/i18n/i18n";
 import { AlertModal } from "../commons/AlertModal";
 
@@ -981,23 +977,18 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
         );
       }
 
-      const orderDetailsResult = await fetchOrderDetailsByIds(
-        orderIds,
-        authToken,
+      const emailResultResponse = await axios.post(
+        `${environment.API_BASE_URL}api/distribution-manager/process-delivery-invoices`,
+        { orderIds },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      if (orderDetailsResult.failed.length > 0) {
-        console.warn("Some orders failed to fetch:", orderDetailsResult.failed);
-      }
-
-      if (orderDetailsResult.successful.length === 0) {
-        throw new Error("Failed to fetch any order details for PDF generation");
-      }
-
-      const emailResult = await processOrdersForDelivery(
-        orderDetailsResult.successful,
-        authToken,
-      );
+      const emailResult = emailResultResponse.data;
 
       let successMessage = `Successfully processed ${orderIds.length} orders.`;
 
