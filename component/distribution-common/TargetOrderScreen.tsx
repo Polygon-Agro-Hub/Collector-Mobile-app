@@ -738,7 +738,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
         )}
       </View>
       <ScrollView
-        className="flex-1 bg-white"
+        className="flex-1 bg-white mb-40"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
