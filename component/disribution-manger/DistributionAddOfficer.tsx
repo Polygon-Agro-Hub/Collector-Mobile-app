@@ -156,6 +156,56 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
   const [districts, setDistricts] = useState<District[]>([]);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
 
+  // Reset form helper
+  const resetForm = () => {
+    setFormData({
+      userId: "",
+      firstNameEnglish: "",
+      lastNameEnglish: "",
+      firstNameSinhala: "",
+      lastNameSinhala: "",
+      firstNameTamil: "",
+      lastNameTamil: "",
+      nicNumber: "",
+      email: "",
+      profileImage: "",
+      jobRole: String(route.params?.jobRolle || "Distribution Officer"),
+      phoneCode1: "",
+      phoneNumber1: "",
+      phoneCode2: "",
+      phoneNumber2: "",
+    });
+    setFormDataAddress({
+      houseNumber: "",
+      streetName: "",
+      city: "",
+      country: "Sri Lanka",
+      province: "",
+      district: "",
+      accountHolderName: "",
+      accountNumber: "",
+      confirmAccountNumber: "",
+      bankName: "",
+      branchName: "",
+      profileImage: "",
+    });
+    setPhoneCode1("+94");
+    setPhoneCode2("+94");
+    setPhoneNumber1("");
+    setPhoneNumber2("");
+    setSelectedImage(null);
+    setFieldErrors({});
+    setFieldErrorsAddress({});
+    setError1("");
+    setError2("");
+    setError3("");
+    setError("");
+    setErrorEmail("");
+    setType("Permanent");
+    setPreferredLanguages({ Sinhala: false, English: false, Tamil: false });
+    setStep(1);
+  };
+
   // Helper function to save all state to storage
   const saveToStorage = async (
     currentStep: 1 | 2,
@@ -317,6 +367,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
           (async () => {
             try {
               await AsyncStorage.removeItem("officerFormData");
+              resetForm();
               navigation.navigate("Main", { screen: "DistributionOfficersList" });
             } catch (err) {
               console.error("Error clearing form data:", err);
@@ -1252,6 +1303,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
         );
         setLoading(false);
         await AsyncStorage.removeItem("officerFormData");
+        resetForm();
         if (jobRole === "Collection Officer") {
           navigation.navigate("Main", { screen: "CollectionOfficersList" });
         } else if (jobRole === "Distribution Officer") {
@@ -1362,6 +1414,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
           } else {
             try {
               await AsyncStorage.removeItem("officerFormData");
+              resetForm();
               navigation.navigate("Main", { screen: "DistributionOfficersList" });
             } catch (err) {
               console.error("Error clearing form data:", err);
