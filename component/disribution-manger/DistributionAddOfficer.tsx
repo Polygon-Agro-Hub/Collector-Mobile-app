@@ -343,6 +343,22 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
     }, [step]),
   );
 
+  // Clear form data when screen is unfocused (navigated away)
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        (async () => {
+          try {
+            await AsyncStorage.removeItem("officerFormData");
+            resetForm();
+          } catch (err) {
+            console.error("Error clearing form data on unfocus:", err);
+          }
+        })();
+      };
+    }, [])
+  );
+
   // Back Press Handler (hardware)
   useFocusEffect(
     useCallback(() => {
