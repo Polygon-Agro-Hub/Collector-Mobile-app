@@ -500,9 +500,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           onPress={async () => {
             try {
               await AsyncStorage.removeItem("officerFormData");
-              navigation.navigate("AddOfficerBasicDetails", {
+              navigation.navigate("AddOfficer", {
                 jobRolle: "Collection Officer",
-                preservedData: undefined,
               });
             } catch (error) {
               console.error("Error clearing form data:", error);

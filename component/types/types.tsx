@@ -157,39 +157,11 @@ export type RootStackParamList = {
     officerName: string;
     phoneNumber1: number;
   };
-  AddOfficerBasicDetails: {
-  jobRolle: string;
-  preservedData?: OfficerBasicDetailsFormData & {
-    phoneCode1?: string;
-    phoneNumber1?: string;
-    phoneCode2?: string;
-    phoneNumber2?: string;
-    profileImage?: string;
+  AddOfficer: {
+    jobRolle: string;
   };
-};
-  AddOfficerAddressDetails: {
-    formData: OfficerBasicDetailsFormData;
-    type: "Permanent" | "Temporary";
-    preferredLanguages: {
-      Sinhala: boolean;
-      English: boolean;
-      Tamil: boolean;
-    };
-    jobRole: string;
-  };
-  DistributionAddOfficerAddressDetails: {
-     formData: OfficerBasicDetailsFormData;
-    type: "Permanent" | "Temporary";
-    preferredLanguages: {
-      Sinhala: boolean;
-      English: boolean;
-      Tamil: boolean;
-    };
-    jobRole: string;
-  };
-  DistributionAddOfficerBasicDetails:{
-    jobRolle: String;
-    preservedData?: OfficerBasicDetailsFormData;
+  DistributionAddOfficer: {
+    jobRolle: string;
   };
   FarmerReport: {
     registeredFarmerId: number;

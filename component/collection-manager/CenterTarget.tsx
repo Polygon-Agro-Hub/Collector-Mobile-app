@@ -211,7 +211,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                 opacity: selectedToggle === "ToDo" ? 1 : 0.7,
               }}
             >
-              {t("CenterTarget.Todo")}
+              {t("DailyTarget.Todo")}
             </Animated.Text>
 
             {selectedToggle === "ToDo" && (

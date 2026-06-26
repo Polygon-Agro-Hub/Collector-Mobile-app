@@ -420,7 +420,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         )}
 
         <TouchableOpacity
-          className="rounded-[45px] py-3 h-12 mt-4 w-3/4 mx-auto h-[50px] justify-center"
+          className="rounded-[45px] py-3 mt-4 w-3/4 mx-auto h-[50px] justify-center"
           onPress={handleButtonClick}
           disabled={(isEditable && !areAllPricesValid()) || isSubmitting}
           style={{
@@ -449,7 +449,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="border border-[#606060] mt-4 py-3 h-12 rounded-full items-center w-3/4 mx-auto h-[50px] justify-center"
+          className="border border-[#606060] mt-4 py-3 rounded-full items-center w-3/4 mx-auto h-[50px] justify-center"
           onPress={() => {
             if (isEditable) {
               setIsEditable(false);
