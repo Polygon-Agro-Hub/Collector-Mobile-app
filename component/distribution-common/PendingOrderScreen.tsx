@@ -18,7 +18,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -106,6 +106,8 @@ interface RetailItem {
   tags: string;
   createdAt: string;
   maxQuantity: number;
+  isExcluded?: number | boolean;
+  isPreferred?: number | boolean;
 }
 
 type PendingOrderScreenNavigationProps = StackNavigationProp<
@@ -1125,26 +1127,28 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     </View>
   );
 
-  const fetchRetailItems = async () => {
-    try {
-      setLoadingRetailItems(true);
-      const token = await AsyncStorage.getItem("token");
+const fetchRetailItems = async () => {
+  try {
+    setLoadingRetailItems(true);
+    const token = await AsyncStorage.getItem("token");
 
-      if (!token) {
-        Alert.alert(t("Error.error"), t("Error.User not authenticated."));
-        return;
-      }
+    if (!token) {
+      Alert.alert(t("Error.error"), t("Error.User not authenticated."));
+      return;
+    }
 
-      const response = await axios.get(
-        `${environment.API_BASE_URL}api/distribution/all-retail-items/${item.orderId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+    const productTypeId = selectedItemForReplace?.productType;
+
+    const response = await axios.get(
+      `${environment.API_BASE_URL}api/distribution/all-retail-items/${item.orderId}`,
+      {
+        params: productTypeId ? { productTypeId } : {},
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
-
+      },
+    );
       if (response.data && Array.isArray(response.data)) {
         const processedItems = response.data.map((item) => ({
           ...item,
@@ -1166,11 +1170,11 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (showReplaceModal) {
-      fetchRetailItems();
-    }
-  }, [showReplaceModal]);
+useEffect(() => {
+  if (showReplaceModal && selectedItemForReplace) {
+    fetchRetailItems();
+  }
+}, [showReplaceModal, selectedItemForReplace]);
 
   const renderReplaceModal = () => {
     const isFormComplete =
@@ -1288,19 +1292,33 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   className="border border-black rounded-full p-3 flex-row justify-between items-center bg-white"
                   onPress={() => setShowProductSearchModal(true)}
                 >
-                  <Text
-                    className={
-                      replaceData.newProduct
-                        ? "text-black  "
-                        : "text-gray-400 italic"
-                    }
-                  >
-                    {replaceData.newProduct || "--Select New Product--"}
-                  </Text>
+                  <View className="flex-row items-center flex-1">
+                    {(() => {
+                      if (!replaceData.newProduct) return null;
+                      const product = retailItems.find(
+                        (item) => item.displayName === replaceData.newProduct,
+                      );
+                      if (!product) return null;
+                      if (product.isPreferred === 1 || product.isPreferred === true) {
+                        return <MaterialIcons name="favorite" size={20} color="#4CAF50" style={{ marginRight: 8 }} />;
+                      } else {
+                        return <MaterialIcons name="check" size={20} color="#2196F3" style={{ marginRight: 8 }} />;
+                      }
+                    })()}
+                    <Text
+                      className={
+                        replaceData.newProduct
+                          ? "text-black"
+                          : "text-gray-400 italic"
+                      }
+                    >
+                      {replaceData.newProduct || "--Select New Product--"}
+                    </Text>
+                  </View>
                   <AntDesign name="down" size={16} color="#666" />
                 </TouchableOpacity>
 
-                <GlobalSearchModal
+                  <GlobalSearchModal
                   visible={showProductSearchModal}
                   onClose={() => setShowProductSearchModal(false)}
                   title={t("PendingOrderScreen.Select New Product")}
@@ -1328,6 +1346,44 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   noResultsText={t("PendingOrderScreen.No products available")}
                   multiSelect={false}
                   isLoading={loadingRetailItems}
+                  renderItem={(item, isSelected) => {
+                    const isExcluded = item.isExcluded === 1 || item.isExcluded === true;
+                    return (
+                      <TouchableOpacity
+                        className={`px-4 py-3 flex-row items-center border-b border-gray-100 ${
+                          isExcluded ? "opacity-50" : ""
+                        }`}
+                        onPress={() => {
+                          if (isExcluded) return;
+                          const product = retailItems.find(
+                            (p) => p.displayName === item.value,
+                          );
+                          if (product) {
+                            handleProductSelect(product);
+                            setShowProductSearchModal(false);
+                          }
+                        }}
+                        disabled={isExcluded}
+                      >
+                        <View style={{ marginRight: 10 }}>
+                          {isExcluded ? (
+                            <MaterialIcons name="block" size={20} color="#FF0000" />
+                          ) : item.isPreferred === 1 || item.isPreferred === true ? (
+                            <MaterialIcons name="favorite" size={20} color="#0CD700" />
+                          ) : (
+                            <MaterialIcons name="check" size={20} color="#3B82F6" />
+                          )}
+                        </View>
+                        <Text
+                          className={`text-base flex-1 ${
+                            isExcluded ? "text-gray-400 font-normal" : "text-gray-800 font-medium"
+                          }`}
+                        >
+                          {item.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  }}
                 />
               </View>
 
