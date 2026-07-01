@@ -134,6 +134,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) return;
 
+    setIsLoading(true);
     try {
       const storedLanguage = await AsyncStorage.getItem("@user_language");
       const token = await AsyncStorage.getItem("token");
@@ -168,13 +169,15 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
             },
           },
         ],
-        { cancelable: false }
+        { cancelable: false },
       );
       setComplain("");
       setSelectedCategory(null);
     } catch (error) {
       console.error("Error submitting complaint:", error);
       Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -186,8 +189,15 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     value: item.value,
   }));
 
+  // Reset the form (dropdown selection + complaint text) every time this
+  // screen regains focus, and keep the hardware back-button behavior.
+  // This fixes the bug where a previously selected category stayed shown
+  // after navigating away and back without submitting.
   useFocusEffect(
     useCallback(() => {
+      setSelectedCategory(null);
+      setComplain("");
+
       const handleBackPress = () => {
         navigation.navigate("SideMenu");
         return true;
@@ -299,6 +309,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     <TouchableOpacity
                       className="w-full bg-black rounded-3xl items-center justify-center mb-10 h-[50px]"
                       onPress={handleSubmit}
+                      disabled={isLoading}
                       style={{
                         shadowColor: "#000000",
                         shadowOffset: { width: 0, height: 4 },

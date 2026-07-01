@@ -43,6 +43,7 @@ interface OrderItem {
   createdAt: string;
   updatedAt: string;
   completedTime?: string | null;
+  rateofCus?: string | null;
 }
 
 interface FamilyPackItem {
@@ -127,6 +128,10 @@ interface PendingOrderScreenProps {
 const RedIcon = require("@/assets/images/distribution-common/square-min-red.webp");
 const disable = require("@/assets/images/distribution-common/square-min-disable.webp");
 
+const VipIcon = require("@/assets/images/distribution-common/vip.webp");
+const CorIcon = require("@/assets/images/distribution-common/cor.webp");
+const VvpIcon = require("@/assets/images/distribution-common/vvp.webp");
+
 const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   navigation,
   route,
@@ -189,6 +194,13 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [quantityError, setQuantityError] = useState<string>("");
   const [showProductSearchModal, setShowProductSearchModal] = useState(false);
+  const [customerRate, setCustomerRate] = useState<string | null>(null);
+
+  const CUSTOMER_RATE_ICONS: { [key: string]: any } = {
+    VIP: VipIcon,
+    COR: CorIcon,
+    VVP: VvpIcon,
+  };
 
   useEffect(() => {
     const loadingTimer = setTimeout(() => {
@@ -284,6 +296,9 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     const orderData = await fetchOrderData(item.orderId);
 
     if (orderData) {
+      const rate = orderData.orderInfo?.rateofCus;
+      setCustomerRate(rate ? String(rate).toUpperCase().trim() : null);
+
       if (orderData.packageData && Array.isArray(orderData.packageData)) {
         orderData.packageData.forEach(
           (packageInfo: any, packageIndex: number) => {
@@ -954,6 +969,40 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     setQuantityError("");
   };
 
+ const CustomerRateBadge = () => {
+  if (!customerRate) return null;
+
+  if (customerRate === "VVIP") {
+    return (
+      <View className="flex-row items-center justify-center mt-[-10]">
+        <Image
+          source={VipIcon}
+          style={{ width: 100, height: 100 }}
+          resizeMode="contain"
+        />
+        <Image
+          source={VipIcon}
+          style={{ width: 100, height: 100, marginLeft: 2 }}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+
+  const icon = CUSTOMER_RATE_ICONS[customerRate];
+  if (!icon) return null; 
+
+  return (
+    <View className="items-center justify-center mt-[-10]">
+      <Image
+        source={icon}
+        style={{ width: 100, height: 100 }}
+        resizeMode="contain"
+      />
+    </View>
+  );
+};
+
   const handleBackPress = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedModal(true);
@@ -1127,28 +1176,28 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     </View>
   );
 
-const fetchRetailItems = async () => {
-  try {
-    setLoadingRetailItems(true);
-    const token = await AsyncStorage.getItem("token");
+  const fetchRetailItems = async () => {
+    try {
+      setLoadingRetailItems(true);
+      const token = await AsyncStorage.getItem("token");
 
-    if (!token) {
-      Alert.alert(t("Error.error"), t("Error.User not authenticated."));
-      return;
-    }
+      if (!token) {
+        Alert.alert(t("Error.error"), t("Error.User not authenticated."));
+        return;
+      }
 
-    const productTypeId = selectedItemForReplace?.productType;
+      const productTypeId = selectedItemForReplace?.productType;
 
-    const response = await axios.get(
-      `${environment.API_BASE_URL}api/distribution/all-retail-items/${item.orderId}`,
-      {
-        params: productTypeId ? { productTypeId } : {},
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/distribution/all-retail-items/${item.orderId}`,
+        {
+          params: productTypeId ? { productTypeId } : {},
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-      },
-    );
+      );
       if (response.data && Array.isArray(response.data)) {
         const processedItems = response.data.map((item) => ({
           ...item,
@@ -1170,11 +1219,11 @@ const fetchRetailItems = async () => {
     }
   };
 
-useEffect(() => {
-  if (showReplaceModal && selectedItemForReplace) {
-    fetchRetailItems();
-  }
-}, [showReplaceModal, selectedItemForReplace]);
+  useEffect(() => {
+    if (showReplaceModal && selectedItemForReplace) {
+      fetchRetailItems();
+    }
+  }, [showReplaceModal, selectedItemForReplace]);
 
   const renderReplaceModal = () => {
     const isFormComplete =
@@ -1299,10 +1348,27 @@ useEffect(() => {
                         (item) => item.displayName === replaceData.newProduct,
                       );
                       if (!product) return null;
-                      if (product.isPreferred === 1 || product.isPreferred === true) {
-                        return <MaterialIcons name="favorite" size={20} color="#4CAF50" style={{ marginRight: 8 }} />;
+                      if (
+                        product.isPreferred === 1 ||
+                        product.isPreferred === true
+                      ) {
+                        return (
+                          <MaterialIcons
+                            name="favorite"
+                            size={20}
+                            color="#4CAF50"
+                            style={{ marginRight: 8 }}
+                          />
+                        );
                       } else {
-                        return <MaterialIcons name="check" size={20} color="#2196F3" style={{ marginRight: 8 }} />;
+                        return (
+                          <MaterialIcons
+                            name="check"
+                            size={20}
+                            color="#2196F3"
+                            style={{ marginRight: 8 }}
+                          />
+                        );
                       }
                     })()}
                     <Text
@@ -1318,7 +1384,7 @@ useEffect(() => {
                   <AntDesign name="down" size={16} color="#666" />
                 </TouchableOpacity>
 
-                  <GlobalSearchModal
+                <GlobalSearchModal
                   visible={showProductSearchModal}
                   onClose={() => setShowProductSearchModal(false)}
                   title={t("PendingOrderScreen.Select New Product")}
@@ -1347,7 +1413,8 @@ useEffect(() => {
                   multiSelect={false}
                   isLoading={loadingRetailItems}
                   renderItem={(item, isSelected) => {
-                    const isExcluded = item.isExcluded === 1 || item.isExcluded === true;
+                    const isExcluded =
+                      item.isExcluded === 1 || item.isExcluded === true;
                     return (
                       <TouchableOpacity
                         className={`px-4 py-3 flex-row items-center border-b border-gray-100 ${
@@ -1367,16 +1434,31 @@ useEffect(() => {
                       >
                         <View style={{ marginRight: 10 }}>
                           {isExcluded ? (
-                            <MaterialIcons name="block" size={20} color="#FF0000" />
-                          ) : item.isPreferred === 1 || item.isPreferred === true ? (
-                            <MaterialIcons name="favorite" size={20} color="#0CD700" />
+                            <MaterialIcons
+                              name="block"
+                              size={20}
+                              color="#FF0000"
+                            />
+                          ) : item.isPreferred === 1 ||
+                            item.isPreferred === true ? (
+                            <MaterialIcons
+                              name="favorite"
+                              size={20}
+                              color="#0CD700"
+                            />
                           ) : (
-                            <MaterialIcons name="check" size={20} color="#3B82F6" />
+                            <MaterialIcons
+                              name="check"
+                              size={20}
+                              color="#3B82F6"
+                            />
                           )}
                         </View>
                         <Text
                           className={`text-base flex-1 ${
-                            isExcluded ? "text-gray-400 font-normal" : "text-gray-800 font-medium"
+                            isExcluded
+                              ? "text-gray-400 font-normal"
+                              : "text-gray-800 font-medium"
                           }`}
                         >
                           {item.label}
@@ -2024,7 +2106,9 @@ useEffect(() => {
             }
           >
             {/* Dynamic Status Badge */}
+
             <View className="mx-4 mt-4 mb-3 justify-center items-center">
+              <CustomerRateBadge />
               <DynamicStatusBadge />
             </View>
 

@@ -399,7 +399,10 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                     <Text className="text-sm text-gray-500">
                       {t("ManagerTransactions.TotalRs")}
                       {item.totalAmount
-                        ? item.totalAmount.toLocaleString()
+                        ? item.totalAmount.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
                         : "N/A"}
                     </Text>
                   </View>
