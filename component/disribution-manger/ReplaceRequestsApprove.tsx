@@ -47,6 +47,8 @@ interface RetailItem {
   normalPrice: number;
   discountedPrice?: number;
   unitType: string;
+  isPreferred?: number | boolean;
+  isExcluded?: number | boolean;
 }
 
 interface ReplaceRequestData {
@@ -116,6 +118,9 @@ interface OriginalPackageItem {
   productTypeName: string;
 }
 
+const toBool = (value: unknown): boolean =>
+  value === 1 || value === true || value === "1" || value === "true";
+
 const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   route,
   navigation,
@@ -132,7 +137,7 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
   const [loadingRetailItems, setLoadingRetailItems] = useState(false);
   const [loadingCurrentReplace, setLoadingCurrentReplace] = useState(false);
   const [retailItems, setRetailItems] = useState<RetailItem[]>([]);
-    const [currentReplaceRequests, setCurrentReplaceRequests] = useState<
+  const [currentReplaceRequests, setCurrentReplaceRequests] = useState<
     CurrentReplaceRequest[]
   >([]);
   const [submitting, setSubmitting] = useState(false);
@@ -251,7 +256,8 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
         const currentRequest = response.data.data[0];
 
         const rawQty = currentRequest.qty?.toString() || "0";
-        const qty = parseFloat(rawQty) > 0 ? parseFloat(rawQty).toString() : "0";
+        const qty =
+          parseFloat(rawQty) > 0 ? parseFloat(rawQty).toString() : "0";
         const qtyNum = parseFloat(qty) || 0;
         const totalPrice = parseFloat(currentRequest.price) || 0;
         const unitPrice = qtyNum > 0 ? totalPrice / qtyNum : totalPrice;
@@ -278,22 +284,43 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     try {
       setLoadingRetailItems(true);
       const token = await AsyncStorage.getItem("token");
+
+      const productTypeId = data?.productType;
+
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/distribution-manager/retail-items/${data.orderId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
+        `${environment.API_BASE_URL}api/distribution/all-retail-items/${data.orderId}`,
+        {
+          params: productTypeId ? { productTypeId } : {},
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
 
-      if (response.data.success) {
-        setRetailItems(response.data.data);
+      if (response.data && Array.isArray(response.data)) {
+        const processedItems: RetailItem[] = response.data.map(
+          (rawItem: any) => ({
+            ...rawItem,
+            normalPrice: parseFloat(rawItem.normalPrice) || 0,
+            discountedPrice: parseFloat(rawItem.discountedPrice) || 0,
+            isPreferred: toBool(rawItem.isPreferred),
+            isExcluded: toBool(rawItem.isExcluded),
+          }),
+        );
+        setRetailItems(processedItems);
+      } else {
+        console.error("Invalid retail items response:", response.data);
+        setRetailItems([]);
       }
     } catch (error) {
       console.error("Error loading retail items:", error);
+      setRetailItems([]);
     } finally {
       setLoadingRetailItems(false);
     }
   };
 
   const handleProductSelect = (product: RetailItem) => {
+    if (product.isExcluded) return;
+
     const unitPrice = product.discountedPrice ?? product.normalPrice ?? 0;
     const qtyNum = parseFloat(replaceData.quantity) || 0;
     const totalPrice = unitPrice * qtyNum;
@@ -415,11 +442,23 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
     }
   };
 
-  const modalItems = retailItems.map((item) => ({
-    label: item.displayName,
-    value: item.id,
-    price: formatPrice(item.discountedPrice ?? item.normalPrice ?? 0),
-  }));
+  const relevantRetailItems = retailItems.filter((item: any) => {
+    if (!replaceRequestData?.productType) return true;
+    const itemProductType =
+      item.productType !== undefined ? item.productType : item.productTypeId;
+    if (itemProductType === undefined || itemProductType === null) return true;
+    return String(itemProductType) === String(replaceRequestData.productType);
+  });
+
+  const modalItems = [...relevantRetailItems]
+    .sort((a, b) => Number(!!a.isExcluded) - Number(!!b.isExcluded))
+    .map((item) => ({
+      label: item.displayName,
+      value: item.id,
+      price: formatPrice(item.discountedPrice ?? item.normalPrice ?? 0),
+      isPreferred: item.isPreferred,
+      isExcluded: item.isExcluded,
+    }));
 
   if (loadingCurrentReplace) {
     return (
@@ -495,14 +534,38 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
                 className="border border-gray-300 rounded-full p-4 flex-row justify-between items-center bg-white"
                 onPress={() => setShowProductModal(true)}
               >
-                <Text
-                  className={
-                    replaceData.newProduct ? "text-black" : "text-gray-400"
-                  }
-                >
-                  {replaceData.newProduct ||
-                    t("PendingOrderScreen.Select Product")}
-                </Text>
+                <View className="flex-row items-center flex-1">
+                  {(() => {
+                    if (!replaceData.newProductId) return null;
+                    const product = relevantRetailItems.find(
+                      (item) => item.id === replaceData.newProductId,
+                    );
+                    if (!product) return null;
+                    return product.isPreferred ? (
+                      <MaterialIcons
+                        name="favorite"
+                        size={18}
+                        color="#4CAF50"
+                        style={{ marginRight: 8 }}
+                      />
+                    ) : (
+                      <MaterialIcons
+                        name="check"
+                        size={18}
+                        color="#2196F3"
+                        style={{ marginRight: 8 }}
+                      />
+                    );
+                  })()}
+                  <Text
+                    className={
+                      replaceData.newProduct ? "text-black" : "text-gray-400"
+                    }
+                  >
+                    {replaceData.newProduct ||
+                      t("PendingOrderScreen.Select Product")}
+                  </Text>
+                </View>
                 <MaterialIcons
                   name="keyboard-arrow-down"
                   size={20}
@@ -520,8 +583,8 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
                 }
                 onSelect={(selected) => {
                   if (selected.length > 0) {
-                    const product = retailItems.find(
-                      (item) => item.id === selected[0],
+                    const product = relevantRetailItems.find(
+                      (item) => String(item.id) === String(selected[0]),
                     );
                     if (product) handleProductSelect(product);
                   }
@@ -532,32 +595,68 @@ const ReplaceRequestsApprove: React.FC<ReplaceRequestsProps> = ({
                 )}
                 multiSelect={false}
                 isLoading={loadingRetailItems}
-                renderItem={(item, isSelected) => (
-                  <TouchableOpacity
-                    className="px-4 py-3 flex-row items-center justify-between border-b border-gray-100"
-                    onPress={() => {
-                      const product = retailItems.find(
-                        (p) => p.id === item.value,
-                      );
-                      if (product) {
-                        handleProductSelect(product);
-                        setShowProductModal(false);
-                      }
-                    }}
-                  >
-                    <View className="flex-1">
-                      <Text className="text-base text-gray-800">
-                        {item.label}
-                      </Text>
-                      <Text className="text-xs text-gray-500">
-                        Rs. {item.price}
-                      </Text>
-                    </View>
-                    {isSelected && (
-                      <MaterialIcons name="check" size={20} color="#21202B" />
-                    )}
-                  </TouchableOpacity>
-                )}
+                renderItem={(item, isSelected) => {
+                  const isExcluded = !!item.isExcluded;
+                  const isPreferred = !!item.isPreferred;
+
+                  return (
+                    <TouchableOpacity
+                      className={`px-4 py-3 flex-row items-center justify-between border-b border-gray-100 ${
+                        isExcluded ? "opacity-50" : ""
+                      }`}
+                      disabled={isExcluded}
+                      onPress={() => {
+                        if (isExcluded) return;
+                        const product = relevantRetailItems.find(
+                          (p) => String(p.id) === String(item.value),
+                        );
+                        if (product) {
+                          handleProductSelect(product);
+                          setShowProductModal(false);
+                        }
+                      }}
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <View style={{ marginRight: 10 }}>
+                          {isExcluded ? (
+                            <MaterialIcons
+                              name="block"
+                              size={20}
+                              color="#FF0000"
+                            />
+                          ) : isPreferred ? (
+                            <MaterialIcons
+                              name="favorite"
+                              size={20}
+                              color="#0CD700"
+                            />
+                          ) : (
+                            <MaterialIcons
+                              name="check"
+                              size={20}
+                              color="#3B82F6"
+                            />
+                          )}
+                        </View>
+                        <View className="flex-1">
+                          <Text
+                            className={`text-base ${
+                              isExcluded ? "text-gray-400" : "text-gray-800"
+                            }`}
+                          >
+                            {item.label}
+                          </Text>
+                          <Text className="text-xs text-gray-500">
+                            Rs. {item.price}
+                          </Text>
+                        </View>
+                      </View>
+                      {isSelected && !isExcluded && (
+                        <MaterialIcons name="check" size={20} color="#21202B" />
+                      )}
+                    </TouchableOpacity>
+                  );
+                }}
               />
             </View>
 

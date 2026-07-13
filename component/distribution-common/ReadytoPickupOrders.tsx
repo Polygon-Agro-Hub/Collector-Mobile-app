@@ -441,7 +441,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
         {/* Clear Search Button - Fixed at bottom when searching */}
         {isSearching && (
-          <View className="absolute bottom-20 left-0 right-0 bg-white px-6 pb-6 pt-2  border-gray-100">
+          <View className="absolute bottom-20 left-0 right-0 bg-white px-6 py-3  border-gray-100">
             <TouchableOpacity
               onPress={handleClearSearch}
               style={{
@@ -452,7 +452,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
                 shadowRadius: 6,
                 elevation: 8,
               }}
-              className="bg-black px-8 py-3 rounded-full w-full items-center"
+              className="bg-black px-8 py-3 rounded-full w-full items-center justify-center"
             >
               <View className="flex-row items-center">
                 <Ionicons
