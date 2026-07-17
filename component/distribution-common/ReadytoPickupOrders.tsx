@@ -51,6 +51,9 @@ interface Order {
   paymentMethod: string;
   isPaid: boolean;
   amount: number;
+  creditPaid: number | null;
+  remainingAmount: number;
+  isFullyPaid: number;
   status: string;
   cusId: string;
   title: string;
@@ -499,7 +502,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   const phoneDisplay = phone2 ? `${phone1}, ${phone2}` : phone1;
 
   const scheduledDate = formatDateYMD(order.sheduleDate);
-
   const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
 
   const readyDate = new Date(order.outDlvrDate);
@@ -511,8 +513,6 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
     hour12: true,
   })} on ${readyDate.getFullYear()}/${readyMonth}/${readyDay}`;
 
-  const shouldShowAmount = !order.isPaid;
-
   const formatCurrency = (amount: number | undefined | null): string => {
     const numericAmount = Number(amount) || 0;
 
@@ -522,7 +522,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
     });
   };
 
-  const cashAmount = formatCurrency(order.fullTotal);
+  const remaining = order.remainingAmount ?? order.fullTotal;
+  const shouldShowAmount = !order.isFullyPaid;
+  const cashAmount = formatCurrency(remaining);
 
   return (
     <TouchableOpacity
