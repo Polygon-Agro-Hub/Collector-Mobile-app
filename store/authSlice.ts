@@ -21,8 +21,7 @@ const authSlice = createSlice({
       action: PayloadAction<{ token: string; jobRole: string; empId: string }>,
     ) => {
       const { token, jobRole, empId } = action.payload;
-      console.log("Dispatching setUser action:");
-      console.log("jobRole redux:", jobRole);
+      console.log("👤 User logged:", empId);
       state.token = action.payload.token;
       state.jobRole = action.payload.jobRole;
       state.empId = action.payload.empId;

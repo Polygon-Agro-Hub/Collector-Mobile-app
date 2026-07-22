@@ -21,6 +21,7 @@ import { LanguageContext } from "@/context/LanguageContext";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/navigations/CustomHeader";
+import { ROLES } from "../../constants/user-roles";
 
 type SideMenuNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -270,13 +271,13 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
 
   const handleBackPress = () => {
     if (
-      profile?.jobRole === "Distribution Officer" ||
-      profile?.jobRole === "Distribution Centre Manager"
+      profile?.jobRole === ROLES.DISTRIBUTION_OFFICER ||
+      profile?.jobRole === ROLES.DISTRIBUTION_MANAGER
     ) {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-    } else if (profile?.jobRole === "Collection Officer") {
+    } else if (profile?.jobRole === ROLES.COLLECTION_OFFICER) {
       navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-    } else if (profile?.jobRole === "Collection Centre Manager") {
+    } else if (profile?.jobRole === ROLES.COLLECTION_MANAGER) {
       navigation.navigate("Main", { screen: "ManagerDashboard" });
     }
     return true;

@@ -101,6 +101,7 @@ import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
+import SelectRow from "@/component/packing/SelectRow";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -597,6 +598,11 @@ function AppContent() {
             <Stack.Screen
               name="TransactionReport"
               component={TransactionReport as any}
+            />
+
+            <Stack.Screen
+              name="SelectRow"
+              component={SelectRow as any}
             />
 
             <Stack.Screen

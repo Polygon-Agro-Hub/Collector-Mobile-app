@@ -56,7 +56,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
       const lang = await AsyncStorage.getItem("@user_language");
       setSelectedLanguage(lang || "en");
     } catch (error) {
-      console.error("Error fetching language preference:", error);
+      console.error("❌ Error fetching language preference:", error);
     }
   };
 
@@ -74,7 +74,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
         setProfile(response.data.data);
       }
     } catch (error) {
-      console.error("Failed to fetch user profile:", error);
+      console.error("❌ Failed to fetch user profile:", error);
     } finally {
       setIsLoadingProfile(false);
     }
@@ -106,7 +106,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
         setTargetPercentage(0);
       }
     } catch (error) {
-      console.error("Failed to fetch target percentage:", error);
+      console.error("❌ Failed to fetch target percentage:", error);
       setTargetPercentage(0);
     } finally {
       setIsLoadingTarget(false);
@@ -150,7 +150,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
         const tokenExpiry = new Date(expirationTime);
 
         if (currentTime < tokenExpiry) {
-          console.log("Token is valid");
+          // Token is valid
         } else {
           await AsyncStorage.multiRemove([
             "token",
@@ -161,7 +161,7 @@ const CollectionOfficerDashboard: React.FC<CollectionOfficerDashboardProps> = ({
         }
       }
     } catch (error) {
-      console.error("Error checking token expiration:", error);
+      console.error("❌ Error checking token expiration:", error);
       navigation.navigate("Login");
     }
   };
