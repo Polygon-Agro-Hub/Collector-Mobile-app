@@ -284,15 +284,14 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               paddingHorizontal: 16,
               paddingVertical: 7,
               borderRadius: 999,
-              backgroundColor:
-                activeTab === "Officers" ? "#980775" : "transparent",
+              backgroundColor: activeTab === "Officers" ? "#980775" : "#FFFFFF",
               borderWidth: activeTab === "Officers" ? 0 : 1,
               borderColor: "#ffffff50",
             }}
           >
             <Text
               style={{
-                color: "#fff",
+                color: activeTab === "Officers" ? "#fff" : "#21202B",
                 fontWeight: "600",
                 fontSize: 13,
                 marginRight: officersCount > 0 ? 6 : 0,
@@ -331,15 +330,14 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               paddingHorizontal: 16,
               paddingVertical: 7,
               borderRadius: 999,
-              backgroundColor:
-                activeTab === "Drivers" ? "#980775" : "transparent",
+              backgroundColor: activeTab === "Drivers" ? "#980775" : "#FFFFFF",
               borderWidth: activeTab === "Drivers" ? 0 : 1,
               borderColor: "#ffffff50",
             }}
           >
             <Text
               style={{
-                color: "#fff",
+                color: activeTab === "Drivers" ? "#fff" : "#21202B",
                 fontWeight: "600",
                 fontSize: 13,
                 marginRight: driversCount > 0 ? 6 : 0,
@@ -435,8 +433,8 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               : t("CollectionOfficersList.Drivers List") || "Drivers List"}
             {"  "}
             <Text className="text-[#21202B] font-normal">
-              ({t("ManagerTransactions.All") || "All"} {filteredOfficers.length}
-              )
+              ({t("ManagerTransactions.All") || "All"}{" "}
+              {String(filteredOfficers.length).padStart(2, "0")})
             </Text>
           </Text>
         </View>

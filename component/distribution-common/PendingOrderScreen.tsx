@@ -128,9 +128,9 @@ interface PendingOrderScreenProps {
 const RedIcon = require("@/assets/images/distribution-common/square-min-red.webp");
 const disable = require("@/assets/images/distribution-common/square-min-disable.webp");
 
-const VipIcon = require("@/assets/images/distribution-common/vip.webp");
-const CorIcon = require("@/assets/images/distribution-common/cor.webp");
-const VvpIcon = require("@/assets/images/distribution-common/vvp.webp");
+const VipIcon = require("@/assets/images/distribution-common/vip-new.webp");
+const CorIcon = require("@/assets/images/distribution-common/cor-new.webp");
+const VvpIcon = require("@/assets/images/distribution-common/vvp-new.webp");
 
 const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
   navigation,
@@ -969,39 +969,39 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     setQuantityError("");
   };
 
- const CustomerRateBadge = () => {
-  if (!customerRate) return null;
+  const CustomerRateBadge = () => {
+    if (!customerRate) return null;
 
-  if (customerRate === "VVIP") {
+    if (customerRate === "VVIP") {
+      return (
+        <View className="flex-row items-center justify-center mt-[-10]">
+          <Image
+            source={VipIcon}
+            style={{ width: 100, height: 100 }}
+            resizeMode="contain"
+          />
+          <Image
+            source={VipIcon}
+            style={{ width: 100, height: 100, marginLeft: 2 }}
+            resizeMode="contain"
+          />
+        </View>
+      );
+    }
+
+    const icon = CUSTOMER_RATE_ICONS[customerRate];
+    if (!icon) return null;
+
     return (
-      <View className="flex-row items-center justify-center mt-[-10]">
+      <View className="items-center justify-center mt-[-10]">
         <Image
-          source={VipIcon}
+          source={icon}
           style={{ width: 100, height: 100 }}
-          resizeMode="contain"
-        />
-        <Image
-          source={VipIcon}
-          style={{ width: 100, height: 100, marginLeft: 2 }}
           resizeMode="contain"
         />
       </View>
     );
-  }
-
-  const icon = CUSTOMER_RATE_ICONS[customerRate];
-  if (!icon) return null; 
-
-  return (
-    <View className="items-center justify-center mt-[-10]">
-      <Image
-        source={icon}
-        style={{ width: 100, height: 100 }}
-        resizeMode="contain"
-      />
-    </View>
-  );
-};
+  };
 
   const handleBackPress = () => {
     if (hasUnsavedChanges) {
@@ -1250,7 +1250,8 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
     };
 
     const handleQuantityChange = (text: string) => {
-      if (/^\d*\.?\d*$/.test(text)) {
+    
+      if (/^\d*\.?\d{0,2}$/.test(text)) {
         const numericQty = parseFloat(text);
 
         if (text !== "" && (isNaN(numericQty) || numericQty === 0)) {
@@ -1388,6 +1389,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                   visible={showProductSearchModal}
                   onClose={() => setShowProductSearchModal(false)}
                   title={t("PendingOrderScreen.Select New Product")}
+                  dimBackground={false}
                   data={retailItems.map((product) => ({
                     label: `${product.displayName} — Rs. ${formatPrice(
                       product.discountedPrice || product.normalPrice || 0,
@@ -1914,7 +1916,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
               navigation.goBack();
             }}
             style={{
-              shadowColor: "#000000",
+              shadowColor: "#0000001A",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.25,
               shadowRadius: 10,
@@ -1971,11 +1973,10 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="bg-gray-200 py-3 rounded-full"
+            className="bg-white py-3 rounded-full border border-gray-300"
             onPress={() => setShowSubmitModal(false)}
           >
-            <Text className="text-gray-700 text-center">
-              {" "}
+            <Text className="text-gray-800 text-center font-medium">
               {t("PendingOrderScreen.Leave without Submitting")}
             </Text>
           </TouchableOpacity>
@@ -2049,7 +2050,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
           className="bg-gray-200 py-4 rounded-full"
           onPress={handleBackToEdit}
           style={{
-            shadowColor: "#000000",
+            shadowColor: "#0000001A",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.25,
             shadowRadius: 10,
@@ -2506,7 +2507,7 @@ const PendingOrderScreen: React.FC<PendingOrderScreenProps> = ({
                         className="bg-gray-200 py-4 rounded-full"
                         onPress={handleBackToEdit}
                         style={{
-                          shadowColor: "#000000",
+                          shadowColor: "#0000001A",
                           shadowOffset: { width: 0, height: 4 },
                           shadowOpacity: 0.25,
                           shadowRadius: 10,

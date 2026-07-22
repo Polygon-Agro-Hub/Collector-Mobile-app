@@ -7,7 +7,7 @@ import {
   RefreshControl,
   BackHandler,
 } from "react-native";
-import { AntDesign, Entypo } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -87,7 +87,9 @@ const ReplaceRequestsScreen: React.FC<ReplaceRequestsProps> = ({
       if (response.data.success) {
         const mappedData = response.data.data.map((item: any) => ({
           id: item.id.toString(),
-          orderId: item.orderId ? item.orderId.toString() : "",
+          orderId: item.processOrderOrderId
+            ? item.processOrderOrderId.toString()
+            : (item.orderId ? item.orderId.toString() : ""),
           orderPackageId: item.orderPackageId.toString(),
           productDisplayName: item.productDisplayName,
           createdAt: (() => {

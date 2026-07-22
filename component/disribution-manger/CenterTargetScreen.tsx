@@ -985,7 +985,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
             Authorization: `Bearer ${authToken}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const emailResult = emailResultResponse.data;
@@ -1965,7 +1965,7 @@ const CenterTargetScreen: React.FC<CenterTargetScreenProps> = ({
                 : selectedToggle === "Completed"
                   ? t("DailyTarget.noCompletedTargets") ||
                     t("DailyTarget.noCompletedTargets")
-                  : t("CenterTargetScreen.No out for delivery orders")}
+                  : t("CenterTargetScreen.No out for handover orders")}
             </Text>
           </View>
         )}

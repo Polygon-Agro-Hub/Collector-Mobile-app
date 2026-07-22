@@ -248,7 +248,8 @@
     "Bank name is required": "බැංකුවේ නම අවශ්‍යයි",
     "Branch name is required": "ශාඛාවේ නම අවශ්‍යයි",
     "Price updated successfully": "මිල සාර්ථකව යාවත්කාලීන කරන ලදී",
-    "No targets have been assigned today for the selected crop.":"තෝරාගත් බෝගය සඳහා අද දින කිසිදු ඉලක්කයක් පවරා නොමැත."
+    "No targets have been assigned today for the selected crop.":"තෝරාගත් බෝගය සඳහා අද දින කිසිදු ඉලක්කයක් පවරා නොමැත.",
+    "Access denied. Your role is not authorized to use this application.":"ප්‍රවේශය ප්‍රතික්ෂේප කරන ලදී. මෙම යෙදුම භාවිතා කිරීමට ඔබගේ භූමිකාවට අවසර නැත."
   },
   "SideMenu": {
     "LNG": "si",
@@ -1051,7 +1052,7 @@
     "Scheduled": "සැලසුම් කළ",
     "On Time": "නියමිත වේලාවට",
     "Late": "ප්‍රමාදයි",
-    "No out for delivery orders": "පිටත් කිරීම සදහා බෙදාහැරීමේ ඇණවුම් නැත",
+    "No out for handover orders": "පිටත් කිරීම සදහා බෙදාහැරීමේ ඇණවුම් නැත",
     "Limit Reached": "උපරිම සීමාවට ළඟා විය",
     "You can only select up to 5 orders at a time for delivery": "බෙදාහැරීම සඳහා ඔබට වරකට ඇණවුම් 5ක් දක්වා පමණක් තෝරා ගත හැකිය",
     "OK": "හරි",

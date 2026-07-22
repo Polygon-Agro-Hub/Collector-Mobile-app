@@ -25,6 +25,8 @@ interface GlobalSearchModalProps {
   searchKeys?: string[];
   showSearch?: boolean;
   isLoading?: boolean;
+  dimBackground?: boolean;
+  widthClassName?: string;
 }
 
 const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
@@ -42,6 +44,8 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   searchKeys = ["label"],
   showSearch = true,
   isLoading = false,
+  dimBackground = true,
+  widthClassName = "w-11/12 max-w-[500px]",
 }) => {
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState(data);
@@ -189,12 +193,15 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: "#00000040",
+          backgroundColor: dimBackground ? "#00000040" : "transparent",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <View className="bg-white rounded-2xl w-11/12 max-w-[500px] max-h-[80%]">
+        <View
+          className={`bg-white rounded-2xl max-h-[80%] ${widthClassName}`}
+          style={{ overflow: "hidden" }}
+        >
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>

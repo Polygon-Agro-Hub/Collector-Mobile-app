@@ -24,6 +24,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import CustomHeader from "../navigations/CustomHeader";
 import { AntDesign } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface complainItem {
   id: number;
@@ -83,6 +84,8 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
   const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [jobRole, setJobRole] = useState<string | null>(null);
+
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const getUserNameAndRole = async () => {
@@ -430,10 +433,11 @@ ${signature}${replyTime}`,
                 )}
                 <View style={{ flex: 1, alignItems: "flex-end" }}>
                   <Text
-                    className={`text-s font-semibold px-4 py-2 rounded ${complain.status === "Opened"
-                      ? "bg-blue-100 text-[#0051FF]"
-                      : "bg-[#FFDFF7] text-[#980775]"
-                      }`}
+                    className={`text-s font-semibold px-4 py-2 rounded ${
+                      complain.status === "Opened"
+                        ? "bg-blue-100 text-[#0051FF]"
+                        : "bg-[#FFDFF7] text-[#980775]"
+                    }`}
                   >
                     {complain.status === "Opened"
                       ? t("ReportHistory.Opened")
@@ -456,8 +460,7 @@ ${signature}${replyTime}`,
         <View
           className="flex-1 items-center bg-white bg-opacity-50"
           style={{
-            paddingTop:
-              Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0,
+            paddingTop: insets.top,
           }}
         >
           <ScrollView
