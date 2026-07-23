@@ -102,6 +102,9 @@ import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
 import SelectRow from "@/component/packing/SelectRow";
+import QRHandling from "@/component/packing/qr-handling/QRHandling";
+import ReadyToPrint from "@/component/packing/qr-handling/ReadyToPrint";
+import PrintingConfirmation from "@/component/packing/qr-handling/PrintingConfirmation";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -603,6 +606,21 @@ function AppContent() {
             <Stack.Screen
               name="SelectRow"
               component={SelectRow as any}
+            />
+
+            <Stack.Screen
+              name="QRHandling"
+              component={QRHandling as any}
+            />
+
+            <Stack.Screen
+              name="ReadyToPrint"
+              component={ReadyToPrint as any}
+            />
+
+            <Stack.Screen
+              name="PrintingConfirmation"
+              component={PrintingConfirmation as any}
             />
 
             <Stack.Screen

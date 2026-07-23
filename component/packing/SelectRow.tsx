@@ -81,6 +81,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   const handlePositionSelect = (position: PositionData) => {
     setSelectedPosition(position);
+    if (position.type === "QR") {
+      navigation.navigate("QRHandling");
+      return;
+    }
     if (position.status === "Occupied") {
       Alert.alert(
         "Position Occupied",
@@ -118,7 +122,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
       {/* Header bar matching screenshot */}
@@ -361,6 +365,6 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
