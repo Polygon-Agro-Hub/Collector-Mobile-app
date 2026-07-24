@@ -2,10 +2,12 @@ export type RootStackParamList = {
   BottomNav: undefined;
   Splash: undefined;
   Login: undefined;
-  BannedScreen: {
-    statusType: string;
-    message?: string;
-  } | undefined;
+  BannedScreen:
+    | {
+        statusType: string;
+        message?: string;
+      }
+    | undefined;
   ChangePassword: undefined;
   Registeredfarmer: undefined;
   Ufarmercropdetails: undefined;
@@ -34,9 +36,9 @@ export type RootStackParamList = {
   DailyTargetList: undefined;
   ComplainHistory: undefined;
   ClaimOfficer: undefined;
- ClaimDistribution: { activeTab?: "Officers" | "Drivers" };
+  ClaimDistribution: { activeTab?: "Officers" | "Drivers" };
   TransactionList: {
-    empId: string
+    empId: string;
   };
   DailyTarget: undefined;
   TargetValidPeriod: undefined;
@@ -340,10 +342,10 @@ export type RootStackParamList = {
   DistributionOfficerReport: {
     officerId: string;
     collectionOfficerId: number;
-    officerName:string,
-    phoneNumber1:string,
-    phoneNumber2:string,        
-    image:string,
+    officerName: string;
+    phoneNumber1: string;
+    phoneNumber2: string;
+    image: string;
   };
   qrcode: {
     expectedOrderId?: string;
@@ -391,6 +393,8 @@ export interface Order {
   invNo: string;
   transactionId: string;
   paymentMethod: string;
+  remainingAmount: number;
+  isFullyPaid: number;
   isPaid: boolean;
   amount: number;
   status: string;

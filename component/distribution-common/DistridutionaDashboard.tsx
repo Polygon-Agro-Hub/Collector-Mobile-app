@@ -61,7 +61,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       const lang = await AsyncStorage.getItem("@user_language");
       setSelectedLanguage(lang || "en");
     } catch (error) {
-      console.error("Error fetching language preference:", error);
+      console.error("❌ Error fetching language preference:", error);
     }
   };
 
@@ -80,7 +80,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
         setCenterId(response.data.data.centerId);
       }
     } catch (error) {
-      console.error("Failed to fetch user profile:", error);
+      console.error("❌ Failed to fetch user profile:", error);
     }
   };
 
@@ -116,7 +116,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
         setTargetPercentage(0);
       }
     } catch (error) {
-      console.error("Failed to fetch target percentage:", error);
+      console.error("❌ Failed to fetch target percentage:", error);
       setTargetPercentage(0);
     } finally {
       setIsLoadingTarget(false);
@@ -160,9 +160,8 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
         const tokenExpiry = new Date(expirationTime);
 
         if (currentTime < tokenExpiry) {
-          console.log("Token is valid");
+          // Token is valid
         } else {
-          console.log("Token expired, clearing storage.");
           await AsyncStorage.multiRemove([
             "token",
             "tokenStoredTime",
@@ -172,7 +171,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
         }
       }
     } catch (error) {
-      console.error("Error checking token expiration:", error);
+      console.error("❌ Error checking token expiration:", error);
       navigation.navigate("Login");
     }
   };
@@ -455,6 +454,28 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
               className="text-[#555464] text-lg absolute bottom-2 left-4"
             >
               {t("DistridutionaDashboard.Pickup Order Scan")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative"
+            onPress={() => navigation.navigate("SelectRow" as any)}
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 4,
+            }}
+          >
+            <View className="absolute top-2 right-2">
+              <FontAwesome6 name="box-open" size={24} color="#980775" />
+            </View>
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-[#555464] text-lg absolute bottom-2 left-4"
+            >
+              Start Packing
             </Text>
           </TouchableOpacity>
         </View>

@@ -12,6 +12,7 @@ import { environment } from "@/environment/environment";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../services/reducxStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ROLES } from "../../constants/user-roles";
 
 const homeIcon = require("../../assets/images/common/nav-bar/navhome.webp");
 const searchIcon = require("../../assets/images/common/nav-bar/navsearch.webp");
@@ -42,7 +43,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   // Role-based tabs (stable)
   const tabs = useMemo(() => {
     switch (userRole) {
-      case "Collection Centre Manager":
+      case ROLES.COLLECTION_MANAGER:
         return [
           { name: "ManagerDashboard", icon: homeIcon },
           { name: "DailyTarget", icon: qrIcon },
@@ -50,14 +51,14 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
           { name: "SearchPriceScreen", icon: searchIcon },
         ];
 
-      case "Collection Officer":
+      case ROLES.COLLECTION_OFFICER:
         return [
           { name: "DailyTargetList", icon: qrIcon },
           { name: "CollectionOfficerDashboard", icon: homeIcon },
           { name: "SearchPriceScreen", icon: searchIcon },
         ];
 
-      case "Distribution Centre Manager":
+      case ROLES.DISTRIBUTION_MANAGER:
         return [
           { name: "DistridutionaDashboard", icon: homeIcon },
           { name: "TargetOrderScreen", icon: qrIcon },
@@ -116,8 +117,8 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     };
 
     if (
-      userRole === "Collection Centre Manager" ||
-      userRole === "Distribution Officer"
+      userRole === ROLES.COLLECTION_MANAGER ||
+      userRole === ROLES.DISTRIBUTION_OFFICER
     ) {
       checkClaimStatus();
     }
@@ -154,7 +155,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   );
 
   // Hide conditions
-  if (isKeyboardVisible || userRole === "Distribution Officer") return null;
+  if (isKeyboardVisible || userRole === ROLES.DISTRIBUTION_OFFICER) return null;
 
   // UI
   return (

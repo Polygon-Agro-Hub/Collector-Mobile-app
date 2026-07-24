@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Keyboard,
   BackHandler,
+  Platform,
 } from "react-native";
 import React, { useCallback, useState } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -32,6 +33,13 @@ interface LoginProps {
 const loginImage = require("@/assets/images/auth/login.webp");
 const user = require("@/assets/images/auth/user.webp");
 const passwordicon = require("@/assets/images/auth/password.webp");
+
+const ALLOWED_ROLES = [
+  "collection officer",
+  "collection centre manager",
+  "distribution officer",
+  "distribution centre manager",
+];
 
 const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [empid, setEmpid] = useState("");
@@ -98,10 +106,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       const data = await response.json();
 
       if (response.ok && data.jobRole) {
-        if (data.jobRole.toLowerCase() === "distribution centre head") {
+        if (!ALLOWED_ROLES.includes(data.jobRole.toLowerCase())) {
           setEmpIdError(
             t(
-              "Error.Distribution Centre Head are not allowed to access this application",
+              "Error.Access denied. Your role is not authorized to use this application.",
             ),
           );
           return;
@@ -204,6 +212,16 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       if (response.status === 403) {
         setLoading(false);
 
+        if (data.reason === "role_not_allowed") {
+          Alert.alert(
+            t("Error.error"),
+            t(
+              "Error.Access denied. Your role is not authorized to use this application.",
+            ),
+          );
+          return;
+        }
+
         let errorMessage = t("Error.This EMP ID is not approved.");
         let statusType = "not_approved";
 
@@ -249,16 +267,14 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         companyNameTamil,
       } = data;
 
-      const allowedRoles = [
-        "collection officer",
-        "collection centre manager",
-        "distribution officer",
-        "distribution centre manager",
-      ];
-
-      if (!allowedRoles.includes(jobRole.toLowerCase())) {
+      if (!ALLOWED_ROLES.includes(jobRole.toLowerCase())) {
         setLoading(false);
-        Alert.alert(t("Error.error"), t("Error.Access denied"));
+        Alert.alert(
+          t("Error.error"),
+          t(
+            "Error.Access denied. Your role is not authorized to use this application.",
+          ),
+        );
         return;
       }
 
@@ -348,13 +364,15 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     await AsyncStorage.removeItem("@user_language");
   };
 
-
-
   return (
     <KeyboardAwareScrollView
+      style={{ backgroundColor: "white" }}
       contentContainerStyle={{ flexGrow: 1, backgroundColor: "white" }}
       enableOnAndroid={true}
-      extraScrollHeight={20}
+      enableAutomaticScroll={true}
+      keyboardOpeningTime={0}
+      extraScrollHeight={Platform.OS === "ios" ? 0 : 20}
+      extraHeight={Platform.OS === "ios" ? 0 : 20}
       keyboardShouldPersistTaps="handled"
       bounces={false}
       showsVerticalScrollIndicator={false}
@@ -387,8 +405,9 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             {t("SignIn.Employee")}
           </Text>
           <View
-            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
-              }`}
+            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${
+              empIdError ? "border-red-500" : "border-[#F4F4F4]"
+            }`}
           >
             <Image source={user} className="w-6 h-6" resizeMode="contain" />
             <TextInput
@@ -396,6 +415,13 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               onChangeText={handleEmpIdChange}
               autoCapitalize="characters"
               value={empid}
+              style={{
+                fontSize: 16,
+                lineHeight: 22,
+                paddingVertical: 8,
+                includeFontPadding: true,
+                textAlignVertical: "center",
+              }}
             />
           </View>
 
@@ -421,6 +447,13 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               secureTextEntry={secureTextEntry}
               onChangeText={handlePasswordChange}
               value={password}
+              style={{
+                fontSize: 16,
+                lineHeight: 22,
+                paddingVertical: 8,
+                includeFontPadding: true,
+                textAlignVertical: "center",
+              }}
             />
             <TouchableOpacity
               onPress={() => setSecureTextEntry(!secureTextEntry)}

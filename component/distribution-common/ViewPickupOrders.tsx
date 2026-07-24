@@ -149,8 +149,9 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
     hour12: true,
   })} on ${readyDate.getFullYear()}/${String(readyDate.getMonth() + 1).padStart(2, "0")}/${String(readyDate.getDate()).padStart(2, "0")}`;
 
-  const isPaid = order.isPaid;
-  const cashAmount = (Number(order.fullTotal) || 0).toLocaleString("en-US", {
+  const remaining = Number(order.remainingAmount ?? order.fullTotal) || 0;
+  const isPaid = Number(order.isFullyPaid) === 1;
+  const cashAmount = remaining.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -193,12 +194,9 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
 
   return (
     <View className="flex-1 bg-white">
-    
-
       {/* Header */}
 
       <View className="bg-white py-6 flex-row items-center ">
-        
         <TouchableOpacity
           className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
           onPress={() => navigation.navigate("ReadytoPickupOrders")}

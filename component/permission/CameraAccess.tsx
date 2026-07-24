@@ -22,10 +22,7 @@ import { Camera } from "expo-camera";
 import CustomHeader from "../navigations/CustomHeader";
 import { RootStackParamList } from "../types/types";
 
-type CameraAccessNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  any
->;
+type CameraAccessNavigationProp = StackNavigationProp<RootStackParamList, any>;
 
 interface CameraAccessProps {
   navigation: CameraAccessNavigationProp;
@@ -77,7 +74,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
         Alert.alert(
           t("Permission.permissionDenied") || "Permission Denied",
           t("Permission.enableCameraManually") ||
-          "Camera access is required. Please enable it in settings.",
+            "Camera access is required. Please enable it in settings.",
           [
             { text: t("PublicForum.Cancel") || "Cancel", style: "cancel" },
             {
@@ -127,7 +124,18 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
 
           {/* Allow Button */}
           <View className="mt-20 w-full items-center">
-            <View className="w-2/3">
+            <View
+              style={{
+                width: "60%",
+                borderRadius: 30,
+                backgroundColor: "#ffffff",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 8,
+              }}
+            >
               <TouchableOpacity
                 onPress={requestCameraPermission}
                 disabled={isLoading}
@@ -139,6 +147,13 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   className="h-[50px] justify-center items-center"
+                  style={{
+                    height: 50,
+                    width: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 30,
+                  }}
                 >
                   <Text className="text-white font-semibold text-center text-lg">
                     {isLoading

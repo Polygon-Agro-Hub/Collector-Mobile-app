@@ -24,10 +24,7 @@ interface BannedScreenProps {
   route: RouteProp<RootStackParamList, "BannedScreen">;
 }
 
-const BannedScreen: React.FC<BannedScreenProps> = ({
-  route,
-  navigation,
-}) => {
+const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
   const { statusType, message } = route.params || {};
 
   useFocusEffect(
@@ -68,10 +65,12 @@ const BannedScreen: React.FC<BannedScreenProps> = ({
 
   if (statusType === "rejected" || statusType === "Rejected") {
     title = "Account Rejected";
-    description = "Your account approval has been revoked by the administrator.";
+    description =
+      "Your account approval has been revoked by the administrator.";
   } else if (statusType === "not_approved" || statusType === "Not Approved") {
     title = "Account Not Approved";
-    description = "Your account approval has been revoked by the administrator.";
+    description =
+      "Your account approval has been revoked by the administrator.";
   } else if (statusType === "pending" || statusType === "Pending") {
     title = "Pending Verification";
     description = "Your account status is pending verification.";
@@ -119,14 +118,14 @@ const BannedScreen: React.FC<BannedScreenProps> = ({
           </View>
 
           {/* Button - Centered */}
-          <View className="items-center mt-20">
-            <TouchableOpacity
-              onPress={handleBackToLogin}
-              activeOpacity={0.7}
+          {/* Button - Centered */}
+          <View style={{ alignItems: "center", marginTop: 80 }}>
+            {/* Outer view: shadow only */}
+            <View
               style={{
                 width: "60%",
                 borderRadius: 30,
-                backgroundColor: "transparent",
+                backgroundColor: "#ffffff",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 8 },
                 shadowOpacity: 0.25,
@@ -134,27 +133,40 @@ const BannedScreen: React.FC<BannedScreenProps> = ({
                 elevation: 8,
               }}
             >
-              <LinearGradient
-                colors={["#980775", "#c21798"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                className="h-[50px] items-center justify-center rounded-full"
+              {/* Inner view: rounding + clipping only */}
+              <TouchableOpacity
+                onPress={handleBackToLogin}
+                activeOpacity={0.7}
                 style={{
-                  shadowColor: "#000",
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 3.84,
+                  borderRadius: 30,
                   overflow: "hidden",
                 }}
               >
-                <Text className="text-center text-white font-bold text-lg">
-                  Back to Login
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={["#980775", "#c21798"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    height: 50,
+                    width: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 30,
+                  }}
+                >
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                      fontSize: 18,
+                    }}
+                  >
+                    Back to Login
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>

@@ -247,7 +247,8 @@
     "Bank name is required": "வங்கியின் பெயர் அவசியம்",
     "Branch name is required": "கிளையின் பெயர் அவசியம்.",
     "Price updated successfully": "விலை வெற்றிகரமாக புதுப்பிக்கப்பட்டது.",
-    "No targets have been assigned today for the selected crop.":"தேர்ந்தெடுக்கப்பட்ட பயிருக்கு இன்று எந்த இலக்குகளும் நிர்ணயிக்கப்படவில்லை."
+    "No targets have been assigned today for the selected crop.":"தேர்ந்தெடுக்கப்பட்ட பயிருக்கு இன்று எந்த இலக்குகளும் நிர்ணயிக்கப்படவில்லை.",
+    "Access denied. Your role is not authorized to use this application.":"அணுகல் மறுக்கப்பட்டது. இந்தப் பயன்பாட்டைப் பயன்படுத்த உங்கள் பாத்திரத்திற்கு அங்கீகாரம் இல்லை."
   },
   "SideMenu": {
     "LNG": "en",
@@ -1050,7 +1051,7 @@
     "Scheduled": "திட்டமிடப்பட்டது",
     "On Time": "சரியான நேரத்தில்",
     "Late": "தாமதம்",
-    "No out for delivery orders": "டெலிவரிக்க வெளிப்பட்ட ஆர்டர்கள் எதுவும் இல்லை",
+    "No out for handover orders": "டெலிவரிக்க வெளிப்பட்ட ஆர்டர்கள் எதுவும் இல்லை",
     "Limit Reached": "வரம்பு எட்டியது",
     "You can only select up to 5 orders at a time for delivery": "டெலிவரிக்கு ஒரே நேரத்தில் 5 ஆர்டர்கள் வரை மட்டுமே தேர்ந்தெடுக்க முடியும்.",
     "OK": "சரி",

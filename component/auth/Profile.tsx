@@ -34,6 +34,17 @@ interface ProfileProps {
   navigation: ProfileNavigationProps;
 }
 
+const inputWrapperStyle = {
+  height: 50,
+  justifyContent: "center" as const,
+};
+const inputTextStyle = {
+  flex: 1,
+  paddingVertical: 0,
+  textAlignVertical: "center" as const,
+  includeFontPadding: false,
+};
+
 const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const route = useRoute<RouteProp<RootStackParamList, "Profile">>();
   const { jobRole } = route.params;
@@ -169,7 +180,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const toggleUpdateButton = (phone1: string, phone2: string) => {
     setShowUpdateButton(
       (phone1 !== "" && phone1 !== profileData.phoneNumber) ||
-      (phone2 !== "" && phone2 !== profileData.phoneNumber2),
+        (phone2 !== "" && phone2 !== profileData.phoneNumber2),
     );
   };
 
@@ -443,10 +454,14 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.FirstName")}
               </Text>
-              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+              <View
+                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    className="px-4 text-black min-w-[250px] text-base"
+                    style={inputTextStyle}
                     value={getfirstName()}
                     editable={false}
                     scrollEnabled={false}
@@ -462,10 +477,14 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.LastName")}
               </Text>
-              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+              <View
+                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    className="px-4 text-black min-w-[250px] text-base"
+                    style={inputTextStyle}
                     value={getlastName()}
                     editable={false}
                     scrollEnabled={false}
@@ -481,10 +500,14 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.Company")}
               </Text>
-              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+              <View
+                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    className="px-4 text-black min-w-[250px] text-base"
+                    style={inputTextStyle}
                     value={getcompanyName()}
                     editable={false}
                     scrollEnabled={false}
@@ -500,11 +523,17 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.CenterCode")}
               </Text>
-              <TextInput
-                className="px-4 border border-[#F4F4F4] text-black bg-[#F4F4F4] rounded-3xl h-[50px] text-base"
-                value={profileData.regcode}
-                editable={false}
-              />
+              <View
+                className="px-4 border border-[#F4F4F4] bg-[#F4F4F4] rounded-3xl"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={profileData.regcode}
+                  editable={false}
+                />
+              </View>
             </View>
 
             <View>
@@ -514,10 +543,14 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.CenterName")}
               </Text>
-              <View className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]">
+              <View
+                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] h-[50px] text-base"
+                    className="px-4 text-black min-w-[250px] text-base"
+                    style={inputTextStyle}
                     value={profileData.collectionCenterName}
                     editable={false}
                     scrollEnabled={false}
@@ -533,14 +566,20 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.Job")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={getTranslatedJobRole(
-                  profileData.jobRole,
-                  selectedLanguage,
-                )}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={getTranslatedJobRole(
+                    profileData.jobRole,
+                    selectedLanguage,
+                  )}
+                  editable={false}
+                />
+              </View>
             </View>
 
             <View>
@@ -550,11 +589,17 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.NIC")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={profileData.nicNumber}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={profileData.nicNumber}
+                  editable={false}
+                />
+              </View>
             </View>
 
             <View>
@@ -564,15 +609,21 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.Phone1")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={newPhoneNumber}
-                placeholder="7XXXXXXXX"
-                keyboardType="numeric"
-                onChangeText={handlePhoneNumberChange}
-                maxLength={9}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={newPhoneNumber}
+                  placeholder="7XXXXXXXX"
+                  keyboardType="numeric"
+                  onChangeText={handlePhoneNumberChange}
+                  maxLength={9}
+                  editable={false}
+                />
+              </View>
               {errorMessage && (
                 <Text className="text-red-500 text-sm mt-1">
                   {errorMessage}
@@ -587,15 +638,21 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.Phone2")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={newPhoneNumber2}
-                placeholder="7XXXXXXXX"
-                keyboardType="numeric"
-                onChangeText={handlePhoneNumber2Change}
-                maxLength={9}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={newPhoneNumber2}
+                  placeholder="7XXXXXXXX"
+                  keyboardType="numeric"
+                  onChangeText={handlePhoneNumber2Change}
+                  maxLength={9}
+                  editable={false}
+                />
+              </View>
               {errorMessage2 && (
                 <Text className="text-red-500 text-sm mt-1">
                   {errorMessage2}
@@ -610,11 +667,17 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.House")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={profileData.houseNumber}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={profileData.houseNumber}
+                  editable={false}
+                />
+              </View>
             </View>
 
             <View>
@@ -624,11 +687,17 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.Street")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={profileData.streetName}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={profileData.streetName}
+                  editable={false}
+                />
+              </View>
             </View>
 
             <View>
@@ -638,15 +707,21 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.City")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={getTranslatedCity(
-                  profileData.city,
-                  profileData.district,
-                  selectedLanguage,
-                )}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={getTranslatedCity(
+                    profileData.city,
+                    profileData.district,
+                    selectedLanguage,
+                  )}
+                  editable={false}
+                />
+              </View>
             </View>
 
             <View>
@@ -656,14 +731,20 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.District")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={getTranslatedDistrict(
-                  profileData.district,
-                  selectedLanguage,
-                )}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={getTranslatedDistrict(
+                    profileData.district,
+                    selectedLanguage,
+                  )}
+                  editable={false}
+                />
+              </View>
             </View>
 
             <View>
@@ -673,14 +754,20 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
               >
                 {t("Profile.Province")}
               </Text>
-              <TextInput
-                className="px-4 rounded-3xl border border-[#F4F4F4] text-black bg-[#F4F4F4] h-[50px] text-base"
-                value={getTranslatedProvince(
-                  profileData.province,
-                  selectedLanguage,
-                )}
-                editable={false}
-              />
+              <View
+                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
+                style={inputWrapperStyle}
+              >
+                <TextInput
+                  className="text-black text-base"
+                  style={inputTextStyle}
+                  value={getTranslatedProvince(
+                    profileData.province,
+                    selectedLanguage,
+                  )}
+                  editable={false}
+                />
+              </View>
             </View>
 
             {showUpdateButton &&
