@@ -101,10 +101,17 @@ import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
-import SelectRow from "@/component/packing/SelectRow";
-import QRHandling from "@/component/packing/qr-handling/QRHandling";
-import ReadyToPrint from "@/component/packing/qr-handling/ReadyToPrint";
-import PrintingConfirmation from "@/component/packing/qr-handling/PrintingConfirmation";
+import SelectRow from "@/component/pack/SelectRow";
+import QRHandling from "@/component/pack/qr-handling/QRHandling";
+import ReadyToPrint from "@/component/pack/qr-handling/ReadyToPrint";
+import PrintingConfirmation from "@/component/pack/qr-handling/PrintingConfirmation";
+import WelcomeToPacking from "@/component/pack/packing/WelcomeToPacking";
+import Packing from "@/component/pack/packing/Packing";
+import WelcomeToQC from "@/component/pack/qc-position/WelcomeToQC";
+import Group from "@/component/disribution/dcm/assign-groups/Group";
+import SelectOrder from "@/component/disribution/dcm/assign-groups/SelectOrder";
+import SelectRowToAssign from "@/component/disribution/dcm/assign-groups/SelectRowToAssign";
+import ConfirmRowAssign from "@/component/disribution/dcm/assign-groups/ConfirmRowAssign";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -621,6 +628,41 @@ function AppContent() {
             <Stack.Screen
               name="PrintingConfirmation"
               component={PrintingConfirmation as any}
+            />
+
+            <Stack.Screen
+              name="WelcomeToPacking"
+              component={WelcomeToPacking as any}
+            />
+
+            <Stack.Screen
+              name="Packing"
+              component={Packing as any}
+            />
+
+            <Stack.Screen
+              name="WelcomeToQC"
+              component={WelcomeToQC as any}
+            />
+
+            <Stack.Screen
+              name="Group"
+              component={Group as any}
+            />
+
+            <Stack.Screen
+              name="SelectOrder"
+              component={SelectOrder as any}
+            />
+
+            <Stack.Screen
+              name="SelectRowToAssign"
+              component={SelectRowToAssign as any}
+            />
+
+            <Stack.Screen
+              name="ConfirmRowAssign"
+              component={ConfirmRowAssign as any}
             />
 
             <Stack.Screen

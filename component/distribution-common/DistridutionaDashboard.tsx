@@ -479,6 +479,32 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
             </Text>
           </TouchableOpacity>
         </View>
+
+        {jobRole === "Distribution Centre Manager" && (
+          <View className="flex-row px-4 pb-8 gap-4 justify-start">
+            <TouchableOpacity
+              className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative"
+              onPress={() => navigation.navigate("Group" as any)}
+              style={{
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 10,
+                elevation: 4,
+              }}
+            >
+              <View className="absolute top-2 right-2">
+                <FontAwesome6 name="users" size={24} color="#980775" />
+              </View>
+              <Text
+                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                className="text-[#555464] text-lg absolute bottom-2 left-4"
+              >
+                Assign Groups
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

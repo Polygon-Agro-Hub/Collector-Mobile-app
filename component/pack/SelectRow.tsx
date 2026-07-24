@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   Modal,
-  SafeAreaView,
-  StatusBar,
   Alert,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
@@ -85,6 +83,14 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       navigation.navigate("QRHandling");
       return;
     }
+    if (position.type === "NOR") {
+      navigation.navigate("WelcomeToPacking", { positionName: position.name });
+      return;
+    }
+    if (position.type === "QC") {
+      navigation.navigate("WelcomeToQC", { positionName: position.name });
+      return;
+    }
     if (position.status === "Occupied") {
       Alert.alert(
         "Position Occupied",
@@ -123,8 +129,6 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
       {/* Header bar matching screenshot */}
       <View className="flex-row items-center justify-between px-5 pt-4 bg-white">
         {/* Back Button matching CustomHeader */}

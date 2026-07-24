@@ -1,15 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
   Alert,
   ScrollView,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
+import CustomHeader from "@/component/navigations/CustomHeader";
 
 interface PrintStep {
   id: number;
@@ -95,37 +94,15 @@ export default function PrintingConfirmation({ route, navigation }: { route: any
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
-      {/* Header matching other screens */}
-      <View className="flex-row items-center justify-between px-5 py-4 bg-white">
-        {/* Back Button matching CustomHeader */}
-        <TouchableOpacity
-          onPress={handleBack}
-          style={{ alignItems: "flex-start" }}
-          activeOpacity={0.7}
-        >
-          <Entypo
-            name="chevron-left"
-            size={25}
-            color="black"
-            style={{
-              borderRadius: 50,
-              padding: 12,
-              backgroundColor: "#F6F6F680",
-            }}
-          />
-        </TouchableOpacity>
-
-        {/* Empty placeholder for alignment */}
-        <View className="w-10" />
-      </View>
+      {/* Standard Custom Header */}
+      <CustomHeader
+        title=""
+        navigation={navigation}
+        onBackPress={handleBack}
+      />
 
       {/* Main Scrollable Content Area */}
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 40 }}
-        className="flex-1 bg-white"
-      >
+      <ScrollView className="flex-1 bg-white px-6">
         {/* Header Title section matching ReadyToPrint design */}
         <View className="items-center mb-6">
           <Text className="text-xl font-bold text-slate-950">Printing Confirmation</Text>
