@@ -435,9 +435,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
 
-          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+          {/* <View className="h-0.5 bg-[#D2D2D2] my-4" /> */}
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => setComplaintDropdownOpen(!isComplaintDropdownOpen)}
             className="flex-row items-center py-3"
           >
@@ -479,7 +479,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                 </TouchableOpacity>
               ))}
             </View>
-          )}
+          )} */}
 
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 

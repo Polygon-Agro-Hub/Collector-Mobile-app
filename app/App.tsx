@@ -98,7 +98,7 @@ import Lanuage from "@/component/commons/Lanuage";
 import OfficerQr from "@/component/auth/OfficerQrCode";
 import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
-import BottomNav from "@/component/navigations/BottomNav";
+// import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
 import SelectRow from "@/component/pack/SelectRow";
@@ -139,9 +139,8 @@ function MainTabNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarHideOnKeyboard: false,
-        tabBarStyle: { position: "absolute", backgroundColor: "#ffffff" },
+        tabBarStyle: { display: "none" },
       })}
-      tabBar={(props) => <BottomNav {...props} />}
     >
       <Tab.Screen name="ManagerDashboard" component={ManagerDashboard as any} />
       <Tab.Screen name="SearchPriceScreen" component={SearchPriceScreen} />

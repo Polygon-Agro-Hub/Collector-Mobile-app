@@ -5,15 +5,15 @@ export const environment = {
   // API_BASE_URL: "http://192.168.8.100:3000/agro-api/collection-api/",
 
   // DEV --------------------
-  API_BASE_URL:
-    "https://collector-api.polygonagro.com/agro-api/collection-api/",
+  // API_BASE_URL:
+  //   "https://collector-api.polygonagro.com/agro-api/collection-api/",
 
   // UAT --------------------
   // API_BASE_URL:
   //   "https://collector-mobile-app-api-uat.vercel.app/agro-api/collection-api/",
 
   // PROD --------------------
-  // API_BASE_URL: "https://collector-api-prod.polygonagro.com/agro-api/collection-api/",
+  API_BASE_URL: "https://collector-api-prod.polygonagro.com/agro-api/collection-api/",
 
   // DEV --------------------
   SHOUTOUT_API_KEY:

@@ -106,7 +106,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     fetchFarmerData();
 
     const getPermissions = async () => {
-      await MediaLibrary.requestPermissionsAsync(true);
+      await MediaLibrary.requestPermissionsAsync();
     };
 
     getPermissions();
@@ -197,7 +197,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const { status } = await MediaLibrary.requestPermissionsAsync(true);
+      const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
