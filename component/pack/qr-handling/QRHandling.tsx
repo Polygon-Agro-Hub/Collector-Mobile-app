@@ -1,12 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -89,8 +86,6 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-
       {/* Header bar matching SelectRow design */}
       <View className="flex-row items-center justify-between px-5 pt-4 bg-white">
         {/* Back Button matching CustomHeader */}

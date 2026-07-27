@@ -120,7 +120,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const { status } = await MediaLibrary.requestPermissionsAsync(true);
+      const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
