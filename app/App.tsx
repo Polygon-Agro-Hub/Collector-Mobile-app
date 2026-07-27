@@ -98,7 +98,6 @@ import Lanuage from "@/component/commons/Lanuage";
 import OfficerQr from "@/component/auth/OfficerQrCode";
 import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
-// import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
 import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
 import SelectRow from "@/component/pack/SelectRow";
