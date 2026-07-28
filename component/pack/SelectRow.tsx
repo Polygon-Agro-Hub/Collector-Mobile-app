@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,12 @@ import {
   ScrollView,
   Modal,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { environment } from "@/environment/environment";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {
@@ -27,70 +31,73 @@ interface PositionData {
 export default function SelectRow({ navigation }: { navigation: any }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
-  const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(
-    null,
-  );
+  const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Sample data for Rows (Step 1)
-  const rows: RowData[] = [
-    { id: 1, name: "Row 1", positionsCount: 4 },
-    { id: 2, name: "Row 2", positionsCount: 1 },
-    { id: 3, name: "Row 3", positionsCount: 0 },
-    { id: 4, name: "Row 4", positionsCount: 10 },
-  ];
+  const [rows, setRows] = useState<RowData[]>([]);
+  const [positions, setPositions] = useState<PositionData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
-  // Sample data for Positions (Step 2)
-  const positions: PositionData[] = [
-    {
-      id: 1,
-      name: "QR Handling Position",
-      type: "QR",
-      status: "Occupied",
-      leftLabel: "QR",
-    },
-    {
-      id: 2,
-      name: "Packing Position 1",
-      type: "NOR",
-      status: "Available",
-      leftLabel: "01",
-    },
-    {
-      id: 3,
-      name: "Packing Position 2",
-      type: "NOR",
-      status: "Available",
-      leftLabel: "02",
-    },
-    {
-      id: 4,
-      name: "QC Position",
-      type: "QC",
-      status: "Available",
-      leftLabel: "QC",
-    },
-  ];
+  useEffect(() => {
+    fetchRows();
+  }, []);
 
-  const handleRowSelect = (row: RowData) => {
+  const fetchRows = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data && response.data.success) {
+        setRows(response.data.data);
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch rows.");
+      }
+    } catch (error) {
+      console.error("Error fetching rows:", error);
+      Alert.alert("Error", "An error occurred while fetching rows.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRowSelect = async (row: RowData) => {
     setSelectedRow(row);
-    setStep(2);
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows/${row.id}/positions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data && response.data.success) {
+        setPositions(response.data.data);
+        setStep(2);
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch positions.");
+      }
+    } catch (error) {
+      console.error("Error fetching positions:", error);
+      Alert.alert("Error", "An error occurred while fetching positions.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePositionSelect = (position: PositionData) => {
-    setSelectedPosition(position);
-    if (position.type === "QR") {
-      navigation.navigate("QRHandling");
-      return;
-    }
-    if (position.type === "NOR") {
-      navigation.navigate("WelcomeToPacking", { positionName: position.name });
-      return;
-    }
-    if (position.type === "QC") {
-      navigation.navigate("WelcomeToQC", { positionName: position.name });
-      return;
-    }
     if (position.status === "Occupied") {
       Alert.alert(
         "Position Occupied",
@@ -98,24 +105,59 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       );
       return;
     }
+    setSelectedPosition(position);
     setShowConfirmModal(true);
   };
 
-  const handleConfirm = () => {
-    setShowConfirmModal(false);
-    Alert.alert(
-      "Confirmation Success",
-      `You have been successfully assigned to ${selectedPosition?.name} of ${selectedRow?.name}.`,
-      [
-        {
-          text: "OK",
-          onPress: () => {
-            // Navigate back to the dashboard
-            navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-          },
-        },
-      ],
-    );
+  const handleConfirm = async () => {
+    if (!selectedPosition) return;
+    try {
+      setSubmitting(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/packing/positions/assign`,
+        { positionId: selectedPosition.id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setShowConfirmModal(false);
+
+      if (response.data && response.data.success) {
+        Alert.alert(
+          "Confirmation Success",
+          `You have been successfully assigned to ${selectedPosition.name} of ${selectedRow?.name}.`,
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                if (selectedPosition.type === "QR") {
+                  navigation.navigate("QRHandling");
+                } else if (selectedPosition.type === "NOR") {
+                  navigation.navigate("WelcomeToPacking", { 
+                    positionId: selectedPosition.id,
+                    positionName: selectedPosition.name 
+                  });
+                } else if (selectedPosition.type === "QC") {
+                  navigation.navigate("WelcomeToQC", { positionName: selectedPosition.name });
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to assign position.");
+      }
+    } catch (error) {
+      console.error("Error assigning position:", error);
+      Alert.alert("Error", "An error occurred while confirming assignment.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -170,7 +212,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       </View>
 
       <ScrollView className="flex-1 bg-white px-6">
-        {step === 1 ? (
+        {loading ? (
+          <View className="flex-1 justify-center items-center py-20">
+            <ActivityIndicator size="large" color="#000" />
+            <Text className="text-slate-500 text-sm mt-3 font-semibold">Loading...</Text>
+          </View>
+        ) : step === 1 ? (
           <>
             {/* Step 1 Title */}
             <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
@@ -349,10 +396,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
               {/* Confirm */}
               <TouchableOpacity
                 onPress={handleConfirm}
-                className="w-full bg-black py-4 rounded-full items-center justify-center"
+                disabled={submitting}
+                className="w-full bg-black py-4 rounded-full items-center justify-center flex-row gap-2"
                 activeOpacity={0.8}
               >
-                <Text className="text-white font-bold text-base">Confirm</Text>
+                {submitting ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text className="text-white font-bold text-base">Confirm</Text>
+                )}
               </TouchableOpacity>
 
               {/* Cancel */}

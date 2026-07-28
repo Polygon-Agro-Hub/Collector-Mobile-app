@@ -5,9 +5,13 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import CustomHeader from "@/component/navigations/CustomHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { environment } from "@/environment/environment";
 
 interface OrderItem {
   id: string;
@@ -27,36 +31,49 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
   const totalCount = group.ordersLeft;
 
   // Initialize mockup lists based on Retail (20 orders: 4 pickup, 16 delivery) or Wholesale (100 orders: 20 pickup, 80 delivery)
-  const pickupCount = isRetail ? 4 : 20;
-  const deliveryCount = isRetail ? 16 : 80;
-
   const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const list: OrderItem[] = [];
-    // Generate Pickup Orders
-    for (let i = 1; i <= pickupCount; i++) {
-      list.push({
-        id: `p-${i}`,
-        orderId: i <= 2 ? `2605050000${i}` : `2603010000${i - 2}`,
-        type: "pickup",
-        subtitle: "Pickup Order",
-        checked: false,
-      });
+    fetchOrders();
+  }, [group.timeSlotCode, type]);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/packing/groups/orders?timeSlotCode=${group.timeSlotCode}&type=${type}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data && response.data.success) {
+        const list = response.data.data.map((item: any) => ({
+          id: String(item.id),
+          orderId: item.orderId,
+          type: item.type,
+          subtitle: item.subtitle,
+          checked: false
+        }));
+        setOrders(list);
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch orders.");
+      }
+    } catch (error) {
+      console.error("Error fetching unassigned orders:", error);
+      Alert.alert("Error", "An error occurred while fetching orders.");
+    } finally {
+      setLoading(false);
     }
-    // Generate Delivery Orders
-    const locations = ["Bambalapitiya", "Dehiwala", "Wellawatte", "Colombo"];
-    for (let i = 1; i <= deliveryCount; i++) {
-      list.push({
-        id: `d-${i}`,
-        orderId: i <= 2 ? `2605050000${i}` : `2603010000${i - 2}`,
-        type: "delivery",
-        subtitle: locations[(i - 1) % locations.length],
-        checked: false,
-      });
-    }
-    setOrders(list);
-  }, [pickupCount, deliveryCount]);
+  };
+
+  const pickupCount = orders.filter((o) => o.type === "pickup").length;
+  const deliveryCount = orders.filter((o) => o.type === "delivery").length;
 
   const checkedCount = orders.filter((o) => o.checked).length;
   const allChecked = orders.length > 0 && orders.every((o) => o.checked);
@@ -97,11 +114,17 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
   };
 
   const handleContinue = () => {
-    if (checkedCount === 0) return;
+    const selectedOrderIds = orders.filter((o) => o.checked).map((o) => Number(o.id));
+    if (selectedOrderIds.length === 0) return;
     navigation.navigate("SelectRowToAssign", {
-      selectedOrdersCount: checkedCount,
+      selectedOrdersCount: selectedOrderIds.length,
+      selectedOrderIds: selectedOrderIds,
       group: group,
     });
+  };
+
+  const handleBack = () => {
+    navigation.goBack();
   };
 
   return (
@@ -120,16 +143,22 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
         </Text>
       </View>
 
-      <ScrollView
-        contentContainerStyle={{ paddingTop: 16, paddingBottom: 130 }}
-        className="flex-1 bg-white"
-        showsVerticalScrollIndicator={false}
-      >
+      {loading ? (
+        <View className="flex-grow justify-center items-center py-20" style={{ flex: 1 }}>
+          <ActivityIndicator size="large" color="#980775" />
+          <Text className="text-[#54617D] text-sm mt-3 font-semibold">Loading orders...</Text>
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: 130 }}
+          className="flex-1 bg-white"
+          showsVerticalScrollIndicator={false}
+        >
         {/* Master Checkbox Section */}
         <TouchableOpacity
           onPress={handleToggleAll}
           activeOpacity={0.8}
-          className="flex-row items-center px-6 py-3 border-b border-[#E1E7EE]"
+          className="flex-row items-center px-6 py-3"
         >
           <View
             className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
@@ -143,98 +172,107 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
           </Text>
         </TouchableOpacity>
 
-        {/* Full width border line before All Pickup Orders */}
-        <View style={{ height: 1, backgroundColor: allPickupChecked ? "#980775" : "#2868FE" }} />
-
         {/* Section 1: Pickup Orders */}
-        <View className="mt-4 px-6">
-          <TouchableOpacity
-            onPress={handleTogglePickupAll}
-            activeOpacity={0.8}
-            className="flex-row items-center py-2 mb-2"
-          >
-            <View
-              className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
-                allPickupChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
-              }`}
-            >
-              {allPickupChecked && <Ionicons name="checkmark" size={16} color="white" />}
-            </View>
-            <Text className="text-[#030E25] font-bold text-base">
-              All Pickup Orders ({String(pickupCount).padStart(2, "0")})
-            </Text>
-          </TouchableOpacity>
+        {pickupCount > 0 && (
+          <>
+            {/* Full width border line before All Pickup Orders */}
+            <View style={{ height: 1, backgroundColor: allPickupChecked ? "#980775" : "#2868FE" }} />
 
-          <View className="gap-3 mt-1">
-            {pickupOrders.map((item) => (
+            <View className="mt-4 px-6">
               <TouchableOpacity
-                key={item.id}
-                onPress={() => handleToggleItem(item.id)}
+                onPress={handleTogglePickupAll}
                 activeOpacity={0.8}
-                className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
+                className="flex-row items-center py-2 mb-2"
               >
                 <View
-                  className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${
-                    item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                  className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
+                    allPickupChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
                   }`}
                 >
-                  {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
+                  {allPickupChecked && <Ionicons name="checkmark" size={16} color="white" />}
                 </View>
-                <View>
-                  <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
-                  <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
-                </View>
+                <Text className="text-[#030E25] font-bold text-base">
+                  All Pickup Orders ({String(pickupCount).padStart(2, "0")})
+                </Text>
               </TouchableOpacity>
-            ))}
-          </View>
-        </View>
 
-        {/* Full width border line before All Delivery Orders */}
-        <View className="mt-6 mb-4" style={{ height: 1, backgroundColor: allDeliveryChecked ? "#980775" : "#ACB5BE" }} />
+              <View className="gap-3 mt-1">
+                {pickupOrders.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => handleToggleItem(item.id)}
+                    activeOpacity={0.8}
+                    className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
+                  >
+                    <View
+                      className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${
+                        item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                      }`}
+                    >
+                      {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
+                    </View>
+                    <View>
+                      <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
+                      <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
 
         {/* Section 2: Delivery Orders */}
-        <View className="px-6">
-          <TouchableOpacity
-            onPress={handleToggleDeliveryAll}
-            activeOpacity={0.8}
-            className="flex-row items-center py-2 mb-2"
-          >
-            <View
-              className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
-                allDeliveryChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
-              }`}
-            >
-              {allDeliveryChecked && <Ionicons name="checkmark" size={16} color="white" />}
-            </View>
-            <Text className="text-[#030E25] font-bold text-base">
-              All Delivery Orders ({String(deliveryCount).padStart(2, "0")})
-            </Text>
-          </TouchableOpacity>
+        {deliveryCount > 0 && (
+          <>
+            {/* Full width border line before All Delivery Orders */}
+            <View className="mt-6 mb-4" style={{ height: 1, backgroundColor: allDeliveryChecked ? "#980775" : "#ACB5BE" }} />
 
-          <View className="gap-3 mt-1">
-            {deliveryOrders.map((item) => (
+            <View className="px-6">
               <TouchableOpacity
-                key={item.id}
-                onPress={() => handleToggleItem(item.id)}
+                onPress={handleToggleDeliveryAll}
                 activeOpacity={0.8}
-                className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
+                className="flex-row items-center py-2 mb-2"
               >
                 <View
-                  className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${
-                    item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                  className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
+                    allDeliveryChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
                   }`}
                 >
-                  {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
+                  {allDeliveryChecked && <Ionicons name="checkmark" size={16} color="white" />}
                 </View>
-                <View>
-                  <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
-                  <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
-                </View>
+                <Text className="text-[#030E25] font-bold text-base">
+                  All Delivery Orders ({String(deliveryCount).padStart(2, "0")})
+                </Text>
               </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+
+              <View className="gap-3 mt-1">
+                {deliveryOrders.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => handleToggleItem(item.id)}
+                    activeOpacity={0.8}
+                    className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
+                  >
+                    <View
+                      className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${
+                        item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                      }`}
+                    >
+                      {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
+                    </View>
+                    <View>
+                      <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
+                      <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
       </ScrollView>
+      )}
 
       {/* Sticky Bottom Action Bar when any items are checked */}
       {checkedCount > 0 && (

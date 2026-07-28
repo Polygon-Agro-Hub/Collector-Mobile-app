@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { environment } from "@/environment/environment";
 
 interface OrderData {
   id: number;
@@ -18,71 +24,74 @@ interface OrderData {
 
 export default function QRHandling({ navigation }: { navigation: any }) {
   const [activeTab, setActiveTab] = useState<"todo" | "done">("todo");
-  const [hasData, setHasData] = useState<boolean>(true); // Mode switcher for demo
+  const [todoOrders, setTodoOrders] = useState<OrderData[]>([]);
+  const [doneOrders, setDoneOrders] = useState<OrderData[]>([]);
+  const [hasData, setHasData] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  // Sample data for "To Do" list (6 items)
-  const todoOrders: OrderData[] = [
-    {
-      id: 1,
-      orderNumber: "26050500001",
-      type: "R",
-      timeSlot: "08:00 AM - 12:00 PM",
-      category: "Pickup Order",
-    },
-    {
-      id: 2,
-      orderNumber: "26050500002",
-      type: "R",
-      timeSlot: "08:00 AM - 12:00 PM",
-      category: "Pickup Order",
-    },
-    {
-      id: 3,
-      orderNumber: "26050500003",
-      type: "R",
-      timeSlot: "08:00 AM - 12:00 PM",
-      category: "Bambalapitiya",
-    },
-    {
-      id: 4,
-      orderNumber: "26050500004",
-      type: "W",
-      timeSlot: "08:00 AM - 12:00 PM",
-      category: "Bambalapitiya",
-    },
-    {
-      id: 5,
-      orderNumber: "26050500005",
-      type: "R",
-      timeSlot: "12:00 PM - 04:00 PM",
-      category: "Dehiwala",
-    },
-    {
-      id: 6,
-      orderNumber: "26050500006",
-      type: "R",
-      timeSlot: "04:00 PM - 09:00 PM",
-      category: "Dehiwala",
-    },
-  ];
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchOrders();
+    setRefreshing(false);
+  };
 
-  // Sample data for "Done" list (2 items)
-  const doneOrders: OrderData[] = [
-    {
-      id: 1,
-      orderNumber: "26050500001",
-      type: "R",
-      timeSlot: "08:00 AM - 12:00 PM",
-      category: "Pickup Order",
-    },
-    {
-      id: 2,
-      orderNumber: "26050400001",
-      type: "R",
-      timeSlot: "08:00 AM - 12:00 PM",
-      category: "Pickup Order",
-    },
-  ];
+  // Time slot code mapping helpers
+  const timeSlotMap: { [key: string]: string } = {
+    "8-12": "08:00 AM - 12:00 PM",
+    "12-4": "12:00 PM - 04:00 PM",
+    "4-9": "04:00 PM - 09:00 PM"
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.get(`${environment.API_BASE_URL}api/packing/qr-orders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data && response.data.success) {
+        const allOrders = response.data.data.map((o: any) => ({
+          id: o.id,
+          orderNumber: o.orderNumber,
+          type: o.type,
+          timeSlot: timeSlotMap[o.timeSlot] || o.timeSlot,
+          category: o.category
+        }));
+
+        const todo = allOrders.filter((o: any) => {
+          const raw = response.data.data.find((item: any) => item.id === o.id);
+          return raw.orderStatus !== 'Completed';
+        });
+
+        const done = allOrders.filter((o: any) => {
+          const raw = response.data.data.find((item: any) => item.id === o.id);
+          return raw.orderStatus === 'Completed';
+        });
+
+        setTodoOrders(todo);
+        setDoneOrders(done);
+        setHasData(todo.length > 0 || done.length > 0);
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch orders.");
+      }
+    } catch (error) {
+      console.error("Error fetching QR orders:", error);
+      Alert.alert("Error", "An error occurred while fetching QR orders.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View className="flex-1 bg-white">
@@ -106,19 +115,14 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           />
         </TouchableOpacity>
 
-        {/* Subtle switcher to toggle empty state during manual review */}
-        <TouchableOpacity
-          onPress={() => setHasData(!hasData)}
-          className="px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100"
-          activeOpacity={0.7}
-        >
-          <Text className="text-[10px] font-bold text-slate-500">
-            {hasData ? "Preview Empty State" : "Preview List State"}
-          </Text>
-        </TouchableOpacity>
       </View>
 
-      {!hasData ? (
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#980775" />
+          <Text className="text-[#54617D] text-sm font-semibold mt-3">Loading orders...</Text>
+        </View>
+      ) : !hasData ? (
         /* SCREEN 1: No Data State */
         <View className="flex-1 bg-white">
           {/* Header Title section */}
@@ -194,8 +198,12 @@ export default function QRHandling({ navigation }: { navigation: any }) {
             </TouchableOpacity>
           </View>
 
-          {/* Orders Scrollable List */}
-          <ScrollView className="flex-1 bg-white px-6">
+          <ScrollView
+            className="flex-1 bg-white px-6"
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
             {activeTab === "todo" ? (
               <View className="gap-4">
                 {todoOrders.map((order, idx) => {

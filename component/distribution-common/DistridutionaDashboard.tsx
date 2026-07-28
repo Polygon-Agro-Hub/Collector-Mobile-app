@@ -17,7 +17,7 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../types/types";
 import { useTranslation } from "react-i18next";
-import { FontAwesome6 } from "@expo/vector-icons";
+import { Feather, FontAwesome6 } from "@expo/vector-icons";
 
 type DistridutionaDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -260,6 +260,113 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
     }
   };
 
+  const getDashboardItems = () => {
+    const items = [];
+
+    // 1. Start Packing (SelectRow)
+    items.push({
+      key: "start_packing",
+      title: "Start Packing",
+      icon: (
+        <Image
+          source={require("../../assets/images/dashboard/center-target.webp")}
+          className="w-8 h-8 absolute top-2 right-2"
+        />
+      ),
+      onPress: () => navigation.navigate("SelectRow" as any),
+    });
+
+    // 2. Assign Groups (DCM only)
+    if (jobRole === "Distribution Centre Manager") {
+      items.push({
+        key: "assign_groups",
+        title: "Assign Groups",
+        icon: (
+          <View className="absolute top-2 right-2">
+            <FontAwesome6 name="users" size={24} color="#980775" />
+          </View>
+        ),
+        onPress: () => navigation.navigate("Group" as any),
+      });
+    }
+
+    // 3. Pickup Order Scan
+    items.push({
+      key: "pickup_order_scan",
+      title: t("DistridutionaDashboard.Pickup Order Scan"),
+      icon: (
+        <View className="absolute top-2 right-2">
+          <FontAwesome6 name="qrcode" size={24} color="#980775" />
+        </View>
+      ),
+      onPress: () => navigation.navigate("ReadytoPickupOrders" as any),
+    });
+
+    // 4. Received Cash
+    items.push({
+      key: "received_cash",
+      title: t("DistridutionaDashboard.Received Cash"),
+      icon: (
+        <View className="absolute top-2 right-2">
+          <FontAwesome6 name="hand-holding-hand" size={24} color="#980775" />
+        </View>
+      ),
+      onPress: () => {
+        if (jobRole === "Distribution Centre Manager") {
+          navigation.navigate("ReceivedCash" as any);
+        } else if (jobRole === "Distribution Officer") {
+          navigation.navigate("ReceivedCashOfficer" as any);
+        } else {
+          navigation.navigate("ReceivedCash" as any);
+        }
+      },
+    });
+
+    // 5. Purchase Shortage (New)
+    items.push({
+      key: "purchase_shortage",
+      title: "Purchase Shortage",
+      icon: (
+        <View className="absolute top-2 right-2">
+          <Feather name="shopping-bag" size={24} color="#980775" />
+        </View>
+      ),
+      onPress: () => navigation.navigate("PurchaseShortage" as any),
+    });
+
+    // 6. Center Target / Target Orders
+    if (jobRole === "Distribution Centre Manager") {
+      items.push({
+        key: "center_target",
+        title: t("CenterTarget.CenterTarget"),
+        icon: (
+          <Image
+            source={require("../../assets/images/dashboard/center-target.webp")}
+            className="w-8 h-8 absolute top-2 right-2"
+          />
+        ),
+        onPress: () =>
+          navigation.navigate("CenterTargetScreen", {
+            centerId: Number(centerId),
+          } as any),
+      });
+    } else {
+      items.push({
+        key: "target_orders",
+        title: t("DistridutionaDashboard.TargetOrders"),
+        icon: (
+          <Image
+            source={require("../../assets/images/dashboard/packing.webp")}
+            className="w-8 h-8 absolute top-2 right-2"
+          />
+        ),
+        onPress: () => navigation.navigate("TargetOrderScreen" as any),
+      });
+    }
+
+    return items;
+  };
+
   return (
     <ScrollView
       className="flex-1 bg-white p-3"
@@ -346,15 +453,12 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
           </Text>
         </View>
 
-        <View className="flex-row px-4 pb-4 gap-4 justify-center mt-8">
-          {jobRole === "Distribution Centre Manager" ? (
+        <View className="flex-row flex-wrap px-2 pb-12 gap-4 justify-start mt-8">
+          {getDashboardItems().map((item) => (
             <TouchableOpacity
-              className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg relative border border-[#980775]"
-              onPress={() =>
-                navigation.navigate("CenterTargetScreen", {
-                  centerId: centerId,
-                } as any)
-              }
+              key={item.key}
+              className="bg-white p-4 rounded-3xl w-[47%] h-32 shadow-lg border border-[#980775] relative mb-2"
+              onPress={item.onPress}
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 2 },
@@ -363,148 +467,16 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
                 elevation: 4,
               }}
             >
-              <Image
-                source={require("../../assets/images/dashboard/center-target.webp")}
-                className="w-8 h-8 absolute top-2 right-2"
-              />
-              <Text
-                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-gray-700 text-lg absolute bottom-2 left-4"
-              >
-                {t("CenterTarget.CenterTarget")}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg border border-[#980775] relative"
-              onPress={() => navigation.navigate("TargetOrderScreen" as any)}
-              style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 10,
-                elevation: 4,
-              }}
-            >
-              <Image
-                source={require("../../assets/images/dashboard/packing.webp")}
-                className="w-8 h-8 absolute top-2 right-2"
-              />
+              {item.icon}
               <Text
                 style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
                 className="text-[#555464] text-lg absolute bottom-2 left-4"
               >
-                {t("DistridutionaDashboard.TargetOrders")}
+                {item.title}
               </Text>
             </TouchableOpacity>
-          )}
-
-          <TouchableOpacity
-            className="bg-white p-4 rounded-3xl flex-1 h-32 shadow-lg border border-[#980775] relative"
-            onPress={() => {
-              if (jobRole === "Distribution Centre Manager") {
-                navigation.navigate("ReceivedCash" as any);
-              } else if (jobRole === "Distribution Officer") {
-                navigation.navigate("ReceivedCashOfficer" as any);
-              } else {
-                navigation.navigate("ReceivedCash" as any);
-              }
-            }}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 10,
-              elevation: 4,
-            }}
-          >
-            <View className="absolute top-2 right-2">
-              <FontAwesome6
-                name="hand-holding-hand"
-                size={24}
-                color="#980775"
-              />
-            </View>
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-[#555464] text-lg absolute bottom-2 left-4"
-            >
-              {t("DistridutionaDashboard.Received Cash")}
-            </Text>
-          </TouchableOpacity>
+          ))}
         </View>
-
-        <View className="flex-row px-4 pb-8 gap-4 justify-start">
-          <TouchableOpacity
-            className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative"
-            onPress={() => navigation.navigate("ReadytoPickupOrders" as any)}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 10,
-              elevation: 4,
-            }}
-          >
-            <View className="absolute top-2 right-2">
-              <FontAwesome6 name="qrcode" size={24} color="#980775" />
-            </View>
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-[#555464] text-lg absolute bottom-2 left-4"
-            >
-              {t("DistridutionaDashboard.Pickup Order Scan")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative"
-            onPress={() => navigation.navigate("SelectRow" as any)}
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 10,
-              elevation: 4,
-            }}
-          >
-            <View className="absolute top-2 right-2">
-              <FontAwesome6 name="box-open" size={24} color="#980775" />
-            </View>
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-[#555464] text-lg absolute bottom-2 left-4"
-            >
-              Start Packing
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {jobRole === "Distribution Centre Manager" && (
-          <View className="flex-row px-4 pb-8 gap-4 justify-start">
-            <TouchableOpacity
-              className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative"
-              onPress={() => navigation.navigate("Group" as any)}
-              style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 10,
-                elevation: 4,
-              }}
-            >
-              <View className="absolute top-2 right-2">
-                <FontAwesome6 name="users" size={24} color="#980775" />
-              </View>
-              <Text
-                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-[#555464] text-lg absolute bottom-2 left-4"
-              >
-                Assign Groups
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
     </ScrollView>
   );

@@ -54,6 +54,7 @@ export type RootStackParamList = {
   ManagerTransactions: undefined;
   SearchFarmerScreen: undefined;
   DistridutionaDashboard: undefined;
+  PurchaseShortage: undefined;
   TargetOrderScreen: undefined;
   PassTarget: undefined;
   DistributionOfficersList: undefined;

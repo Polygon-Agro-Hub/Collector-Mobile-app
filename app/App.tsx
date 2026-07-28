@@ -69,6 +69,7 @@ import TransactionReport from "@/component/collection-manager/TransactionReport"
 import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
 import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
 import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
+import PurchaseShortage from "@/component/disribution/dcm/purchase-shortage/PurchaseShortage";
 import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
 import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
 import Timer from "@/component/distribution-common/TimerContainer";
@@ -169,6 +170,10 @@ function MainTabNavigator() {
       <Tab.Screen
         name="DistridutionaDashboard"
         component={DistridutionaDashboard as any}
+      />
+      <Tab.Screen
+        name="PurchaseShortage"
+        component={PurchaseShortage as any}
       />
       <Tab.Screen
         name="PriceChartManager"

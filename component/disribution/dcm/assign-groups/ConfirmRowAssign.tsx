@@ -5,33 +5,75 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import CustomHeader from "@/component/navigations/CustomHeader";
 import Timer from "@/component/distribution-common/TimerContainer";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { environment } from "@/environment/environment";
 
 export default function ConfirmRowAssign({ route, navigation }: { route: any; navigation: any }) {
-  const { selectedOrdersCount = 20, group = { id: 1, timeSlot: "08:00 AM - 12:00 PM" }, selectedRow = { name: "Row 1" } } = route.params || {};
+  const { 
+    selectedOrdersCount = 20, 
+    selectedOrderIds = [], 
+    group = { id: 1, timeSlotCode: "8-12", timeSlot: "08:00 AM - 12:00 PM" }, 
+    selectedRow = { id: "10", name: "Row 1" } 
+  } = route.params || {};
 
   const [timerRunning, setTimerRunning] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   // Check if type is Retail or Wholesale from group details or context
   const isRetail = selectedOrdersCount <= 20;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (submitting) return;
     setTimerRunning(false);
-    Alert.alert(
-      "Success",
-      `Successfully assigned ${selectedOrdersCount} orders to ${selectedRow.name} for the ${group.timeSlot} slot.`,
-      [
+    
+    try {
+      setSubmitting(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/packing/groups/assign`,
         {
-          text: "OK",
-          onPress: () => {
-            navigation.navigate("Group", { assignedGroupId: group.id });
-          },
+          rowId: Number(selectedRow.id),
+          timeSlotCode: group.timeSlotCode,
+          orderIds: selectedOrderIds
         },
-      ]
-    );
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data && response.data.success) {
+        Alert.alert(
+          "Success",
+          `Successfully assigned ${selectedOrdersCount} orders to ${selectedRow.name} for the ${group.timeSlot} slot.`,
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                navigation.navigate("Group", { assignedGroupId: group.id });
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to assign orders.");
+        setTimerRunning(true);
+      }
+    } catch (error) {
+      console.error("Error assigning orders to packing row:", error);
+      Alert.alert("Error", "An error occurred while assigning orders.");
+      setTimerRunning(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -114,11 +156,18 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
       >
         <TouchableOpacity
           onPress={handleConfirm}
+          disabled={submitting}
           className="w-full h-[50px] bg-black rounded-full flex-row items-center justify-center shadow gap-2"
           activeOpacity={0.8}
         >
-          <FontAwesome name="check" size={16} color="white" />
-          <Text className="text-white font-extrabold text-base">Confirm</Text>
+          {submitting ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <>
+              <FontAwesome name="check" size={16} color="white" />
+              <Text className="text-white font-extrabold text-base">Confirm</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </View>

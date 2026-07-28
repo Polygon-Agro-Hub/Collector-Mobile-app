@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import CustomHeader from "@/component/navigations/CustomHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { environment } from "@/environment/environment";
 
 interface RowItem {
   id: string;
@@ -16,17 +20,46 @@ interface RowItem {
 }
 
 export default function SelectRowToAssign({ route, navigation }: { route: any; navigation: any }) {
-  const { selectedOrdersCount = 20, group = { id: 1, timeSlot: "08:00 AM - 12:00 PM" } } = route.params || {};
+  const { selectedOrdersCount = 20, selectedOrderIds = [], group = { id: 1, timeSlot: "08:00 AM - 12:00 PM" } } = route.params || {};
 
-  // Mock list of packing rows
-  const [rows, setRows] = useState<RowItem[]>([
-    { id: "1", name: "Row 1", allocatedCount: 30 },
-    { id: "2", name: "Row 2", allocatedCount: 0 },
-    { id: "3", name: "Row 3", allocatedCount: 2 },
-    { id: "4", name: "Row 4", allocatedCount: 50 },
-  ]);
-
+  const [rows, setRows] = useState<RowItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchRows();
+  }, []);
+
+  const fetchRows = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
+
+      const response = await axios.get(`${environment.API_BASE_URL}api/packing/groups/rows`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data && response.data.success) {
+        const mappedRows = response.data.data.map((r: any) => ({
+          id: String(r.id),
+          name: r.name,
+          allocatedCount: r.allocatedCount
+        }));
+        setRows(mappedRows);
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch rows.");
+      }
+    } catch (error) {
+      console.error("Error fetching rows:", error);
+      Alert.alert("Error", "An error occurred while fetching rows.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAssign = () => {
     const selectedRow = rows.find((r) => r.id === selectedRowId);
@@ -34,6 +67,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
 
     navigation.navigate("ConfirmRowAssign", {
       selectedOrdersCount: selectedOrdersCount,
+      selectedOrderIds: selectedOrderIds,
       group: group,
       selectedRow: selectedRow,
     });
@@ -64,7 +98,12 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
           </View>
         </View>
 
-        {rows.length === 0 ? (
+        {loading ? (
+          <View className="flex-1 justify-center items-center py-20">
+            <ActivityIndicator size="large" color="#030E25" />
+            <Text className="text-[#676771] text-sm mt-3 font-semibold">Loading rows...</Text>
+          </View>
+        ) : rows.length === 0 ? (
           /* Empty state view matching the screenshot */
           <View className="flex-1 justify-center items-center pb-20">
             <View className="w-24 h-24 bg-[#FAFAFB] rounded-full items-center justify-center mb-4">

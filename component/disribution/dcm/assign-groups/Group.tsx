@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
-  StatusBar,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
-import { Entypo, Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import CustomHeader from "@/component/navigations/CustomHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { environment } from "@/environment/environment";
 
 type GroupPageState = "empty" | "active";
 
 interface TimeSlotGroup {
   id: number;
+  timeSlotCode: string;
   timeSlot: string;
   ordersLeft: number;
   status: "active" | "no_orders" | "assigned";
@@ -22,37 +26,47 @@ interface TimeSlotGroup {
 
 export default function Group({ route, navigation }: { route: any; navigation: any }) {
   const [pageState, setPageState] = useState<GroupPageState>("active");
+  const [retailGroups, setRetailGroups] = useState<TimeSlotGroup[]>([]);
+  const [wholesaleGroups, setWholesaleGroups] = useState<TimeSlotGroup[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Retail Groups slots state
-  const [retailGroups, setRetailGroups] = useState<TimeSlotGroup[]>([
-    { id: 1, timeSlot: "08:00 AM - 12:00 PM", ordersLeft: 20, status: "active" },
-    { id: 2, timeSlot: "12:00 PM - 04:00 PM", ordersLeft: 30, status: "active" },
-    { id: 3, timeSlot: "04:00 PM - 09:00 PM", ordersLeft: 1, status: "active" },
-  ]);
+  const fetchGroups = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        return;
+      }
 
-  // Wholesale Groups slots state
-  const [wholesaleGroups, setWholesaleGroups] = useState<TimeSlotGroup[]>([
-    { id: 4, timeSlot: "08:00 AM - 12:00 PM", ordersLeft: 100, status: "active" },
-    { id: 5, timeSlot: "12:00 PM - 04:00 PM", ordersLeft: 50, status: "active" },
-    { id: 6, timeSlot: "04:00 PM - 09:00 PM", ordersLeft: 0, status: "no_orders" },
-  ]);
+      const response = await axios.get(`${environment.API_BASE_URL}api/packing/groups`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-  // Listen for selection callbacks from SelectOrder
-  useEffect(() => {
-    if (route.params?.assignedGroupId) {
-      const gid = route.params.assignedGroupId;
-      setRetailGroups((prev) =>
-        prev.map((g) => (g.id === gid ? { ...g, ordersLeft: 0, status: "assigned" } : g))
-      );
-      setWholesaleGroups((prev) =>
-        prev.map((g) => (g.id === gid ? { ...g, ordersLeft: 0, status: "assigned" } : g))
-      );
+      if (response.data && response.data.success) {
+        const { retail, wholesale } = response.data.data;
+        setRetailGroups(retail);
+        setWholesaleGroups(wholesale);
+        
+        // Determine page state based on order availability
+        const totalLeft = retail.reduce((acc: number, item: any) => acc + item.ordersLeft, 0) +
+                          wholesale.reduce((acc: number, item: any) => acc + item.ordersLeft, 0);
+        
+        setPageState(totalLeft > 0 ? "active" : "empty");
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch groups.");
+      }
+    } catch (error) {
+      console.error("Error fetching timeslots groups:", error);
+      Alert.alert("Error", "An error occurred while fetching timeslots groups.");
+    } finally {
+      setLoading(false);
     }
-  }, [route.params?.assignedGroupId]);
-
-  const handleBack = () => {
-    navigation.goBack();
   };
+
+  useEffect(() => {
+    fetchGroups();
+  }, [route.params?.assignedGroupId]);
 
   const handleAssignGroup = (group: TimeSlotGroup, type: "retail" | "wholesale") => {
     if (group.status === "no_orders") return;
@@ -60,7 +74,6 @@ export default function Group({ route, navigation }: { route: any; navigation: a
       Alert.alert("Already Assigned", "This time slot group is already fully assigned.");
       return;
     }
-    // Navigate to SelectOrder passing the slot details
     navigation.navigate("SelectOrder", { group, type });
   };
 
@@ -74,21 +87,14 @@ export default function Group({ route, navigation }: { route: any; navigation: a
       <CustomHeader
         title="Groups"
         navigation={navigation}
-        rightComponent={
-          <TouchableOpacity
-            onPress={togglePageState}
-            className="px-3 py-1.5 rounded-full bg-[#E9ECF1]"
-            activeOpacity={0.7}
-          >
-            <Text className="text-[10px] font-extrabold text-[#030E25] uppercase tracking-wide">
-              {pageState === "empty" ? "Show Groups" : "Show Empty"}
-            </Text>
-          </TouchableOpacity>
-        }
       />
 
-      {/* Empty State Layout */}
-      {pageState === "empty" && (
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#030E25" />
+          <Text className="text-sm font-semibold text-[#54617D] mt-3">Loading groups...</Text>
+        </View>
+      ) : pageState === "empty" ? (
         <View className="flex-1 px-6 justify-center items-center">
           <View className="w-56 h-56 justify-center items-center mb-8">
             <LottieView
@@ -102,10 +108,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
             - No groups found. Please check again after{"\n"}12:00 AM tomorrow. -
           </Text>
         </View>
-      )}
-
-      {/* Active Groups List Layout */}
-      {pageState === "active" && (
+      ) : (
         <ScrollView className="flex-1 bg-white px-6">
           {/* Retail Groups Section */}
           <View className="mb-6">
@@ -113,27 +116,27 @@ export default function Group({ route, navigation }: { route: any; navigation: a
 
             <View className="gap-4">
               {retailGroups.map((group) => {
-                const isAssigned = group.status === "assigned";
+                const isDisabled = group.ordersLeft === 0;
                 return (
                   <TouchableOpacity
                     key={group.id}
                     onPress={() => handleAssignGroup(group, "retail")}
-                    activeOpacity={isAssigned ? 1 : 0.8}
+                    activeOpacity={isDisabled ? 1 : 0.8}
                     className={`flex-row items-center justify-between bg-white border border-[#E1E7EE] rounded-2xl p-4 ${
-                      isAssigned ? "" : "shadow-sm"
+                      isDisabled ? "" : "shadow-sm"
                     }`}
                   >
                     <View>
                       <Text
                         className={`text-base font-extrabold ${
-                          isAssigned ? "text-gray-400" : "text-[#030E25]"
+                          isDisabled ? "text-[#54617D]" : "text-[#030E25]"
                         }`}
                       >
                         {group.timeSlot}
                       </Text>
                       <Text
                         className={`text-xs font-bold mt-1 ${
-                          isAssigned ? "text-gray-400" : "text-[#2868FE]"
+                          isDisabled ? "text-[#54617D]" : "text-[#2868FE]"
                         }`}
                       >
                         {group.ordersLeft} Orders Left to Assign
@@ -142,15 +145,16 @@ export default function Group({ route, navigation }: { route: any; navigation: a
 
                     <TouchableOpacity
                       onPress={() => handleAssignGroup(group, "retail")}
+                      disabled={isDisabled}
                       className={`w-9 h-9 rounded-full items-center justify-center ${
-                        isAssigned ? "bg-[#E9ECF1]" : "bg-black"
+                        isDisabled ? "bg-[#E9ECF1]" : "bg-black"
                       }`}
-                      activeOpacity={isAssigned ? 1 : 0.8}
+                      activeOpacity={isDisabled ? 1 : 0.8}
                     >
                       <Feather
                         name="plus"
                         size={18}
-                        color={isAssigned ? "#94A3B8" : "white"}
+                        color={isDisabled ? "#54617D" : "white"}
                       />
                     </TouchableOpacity>
                   </TouchableOpacity>
@@ -168,10 +172,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
 
             <View className="gap-4">
               {wholesaleGroups.map((group) => {
-                const isAssigned = group.status === "assigned";
-                const isNoOrders = group.status === "no_orders";
-                const isDisabled = isAssigned || isNoOrders;
-
+                const isDisabled = group.ordersLeft === 0;
                 return (
                   <TouchableOpacity
                     key={group.id}
@@ -184,28 +185,23 @@ export default function Group({ route, navigation }: { route: any; navigation: a
                     <View>
                       <Text
                         className={`text-base font-extrabold ${
-                          isDisabled ? "text-gray-400" : "text-[#030E25]"
+                          isDisabled ? "text-[#54617D]" : "text-[#030E25]"
                         }`}
                       >
                         {group.timeSlot}
                       </Text>
-                      {isNoOrders ? (
-                        <Text className="text-xs font-bold text-[#FF0000] mt-1">
-                          No orders for today
-                        </Text>
-                      ) : (
-                        <Text
-                          className={`text-xs font-bold mt-1 ${
-                            isAssigned ? "text-gray-400" : "text-[#2868FE]"
-                          }`}
-                        >
-                          {group.ordersLeft} Orders Left to Assign
-                        </Text>
-                      )}
+                      <Text
+                        className={`text-xs font-bold mt-1 ${
+                          isDisabled ? "text-[#54617D]" : "text-[#2868FE]"
+                        }`}
+                      >
+                        {group.ordersLeft} Orders Left to Assign
+                      </Text>
                     </View>
 
                     <TouchableOpacity
                       onPress={() => handleAssignGroup(group, "wholesale")}
+                      disabled={isDisabled}
                       className={`w-9 h-9 rounded-full items-center justify-center ${
                         isDisabled ? "bg-[#E9ECF1]" : "bg-black"
                       }`}
@@ -214,7 +210,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
                       <Feather
                         name="plus"
                         size={18}
-                        color={isDisabled ? "#94A3B8" : "white"}
+                        color={isDisabled ? "#54617D" : "white"}
                       />
                     </TouchableOpacity>
                   </TouchableOpacity>
