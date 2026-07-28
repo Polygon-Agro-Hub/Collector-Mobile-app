@@ -63,7 +63,6 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
           { name: "DistridutionaDashboard", icon: homeIcon },
           { name: "TargetOrderScreen", icon: qrIcon },
           { name: "DistributionOfficersList", icon: adminIcon },
-          { name: "ReplaceRequestsScreen", icon: dataTransfer },
         ];
 
       default:
@@ -155,7 +154,12 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   );
 
   // Hide conditions
-  if (isKeyboardVisible || userRole === ROLES.DISTRIBUTION_OFFICER) return null;
+  if (
+    isKeyboardVisible ||
+    userRole === ROLES.DISTRIBUTION_OFFICER ||
+    ["PurchaseProduct", "PurchaseShortage"].includes(currentTabName)
+  )
+    return null;
 
   // UI
   return (

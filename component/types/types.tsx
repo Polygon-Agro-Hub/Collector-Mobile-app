@@ -55,10 +55,10 @@ export type RootStackParamList = {
   SearchFarmerScreen: undefined;
   DistridutionaDashboard: undefined;
   PurchaseShortage: undefined;
+  PurchaseProduct: { product?: any } | undefined;
   TargetOrderScreen: undefined;
   PassTarget: undefined;
   DistributionOfficersList: undefined;
-  ReplaceRequestsScreen: undefined;
   ReceivedCash: undefined;
   ReceivedCashOfficer: undefined;
   CameraAccess: undefined;
@@ -231,26 +231,7 @@ export type RootStackParamList = {
     phoneNumber2: string;
     image: string;
   };
-  ReplaceRequestsApprove: {
-    replaceRequestData: {
-      id: string;
-      orderId: string;
-      orderPackageId: string;
-      productDisplayName: string;
-      productTypeName: string;
-      originalPrice: string;
-      originalQty: string;
-      status: string;
-      createdAt: string;
-      invNo: string;
-      productType: string;
-      productId: string;
-      userId: string;
-      packageId?: string;
-      productNormalPrice?: string;
-      productDiscountedPrice?: string;
-    };
-  };
+
   RegisterFarmer: {
     NIC: string;
   };
@@ -309,12 +290,6 @@ export type RootStackParamList = {
   };
   CenterTargetScreen: {
     centerId: number;
-  };
-  PendingOrderScreen: {
-    item: any;
-    centerCode: string;
-    status?: "Pending" | "Opened" | "Completed" | "In Progress";
-    orderId: string;
   };
   CompletedOrderScreen: {
     item: string;

@@ -129,17 +129,19 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         pointerEvents="none"
       >
         <View className="px-24 w-full items-center">
-          <Text
-            className={`text-xl font-semibold text-center ${
-              textColor ? "" : dark ? "text-white" : "text-black"
-            }`}
-            style={[titleStyle, textColor ? { color: textColor } : undefined]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-          >
-            {title}
-          </Text>
+          {title ? (
+            <Text
+              className={`text-xl font-semibold text-center ${
+                textColor ? "" : dark ? "text-white" : "text-black"
+              }`}
+              style={[titleStyle, textColor ? { color: textColor } : undefined]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
+              {title}
+            </Text>
+          ) : null}
           {subtitle && (
             typeof subtitle === "string" ? (
               <Text

@@ -70,19 +70,17 @@ import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerB
 import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
 import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
 import PurchaseShortage from "@/component/disribution/dcm/purchase-shortage/PurchaseShortage";
+import PurchaseProduct from "@/component/disribution/dcm/purchase-shortage/PurchaseProduct";
 import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
-import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
 import Timer from "@/component/distribution-common/TimerContainer";
 import TimerContainer from "@/component/distribution-common/TimerContainer";
 import CenterTargetScreen from "@/component/disribution-manger/CenterTargetScreen";
 import DistributionOfficersList from "@/component/disribution-manger/DistributionOfficersList";
 import ClaimDistribution from "@/component/disribution-manger/ClaimDistribution";
 import DistributionOfficerSummary from "@/component/disribution-manger/DistributionOfficerSummary";
-import ReplaceRequestsScreen from "@/component/disribution-manger/ReplaceRequestsScreen";
 import DailyTargetListOfficerDistribution from "@/component/disribution-manger/DailyTargetListOfficerDistribution";
 import PassTarget from "@/component/disribution-manger/PassTarget";
 import store from "@/services/reducxStore";
-import ReplaceRequestsApprove from "@/component/disribution-manger/ReplaceRequestsApprove";
 import DistributionOfficerReport from "@/component/disribution-manger/DistributionOfficerReport";
 import ReadytoPickupOrders from "@/component/distribution-common/ReadytoPickupOrders";
 import ViewPickupOrders from "@/component/distribution-common/ViewPickupOrders";
@@ -176,6 +174,11 @@ function MainTabNavigator() {
         component={PurchaseShortage as any}
       />
       <Tab.Screen
+        name="PurchaseProduct"
+        component={PurchaseProduct as any}
+        options={{ tabBarStyle: { display: "none" } }}
+      />
+      <Tab.Screen
         name="PriceChartManager"
         component={PriceChartManager as any}
       />
@@ -238,16 +241,8 @@ function MainTabNavigator() {
       />
       <Tab.Screen name="OTPE" component={OTPE} />
       <Tab.Screen
-        name="ReplaceRequestsScreen"
-        component={ReplaceRequestsScreen as any}
-      />
-      <Tab.Screen
         name="DailyTargetListOfficerDistribution"
         component={DailyTargetListOfficerDistribution as any}
-      />
-      <Tab.Screen
-        name="ReplaceRequestsApprove"
-        component={ReplaceRequestsApprove as any}
       />
       <Tab.Screen
         name="DistributionAddOfficer"
@@ -675,19 +670,13 @@ function AppContent() {
               component={DigitalSignature as any}
             />
 
-            <Stack.Screen
-              name="PendingOrderScreen"
-              component={PendingOrderScreen as any}
-            />
+
             <Stack.Screen
               name="TimerContainer"
               component={TimerContainer as any}
             />
 
-            <Stack.Screen
-              name="ReplaceRequestsApprove"
-              component={ReplaceRequestsApprove as any}
-            />
+
             <Stack.Screen
               name="DailyTargetListOfficerDistribution"
               component={DailyTargetListOfficerDistribution as any}

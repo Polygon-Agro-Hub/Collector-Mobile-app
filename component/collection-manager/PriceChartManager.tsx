@@ -392,7 +392,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
                       }}
                     >
                       <Text className="text-[#000000] font-medium mr-1">
-                        {t("ReplaceRequestsApprove.Rs")}{" "}
+                        Rs.{" "}
                       </Text>
                       <TextInput
                         className="flex-1 text-[#000000] font-medium"

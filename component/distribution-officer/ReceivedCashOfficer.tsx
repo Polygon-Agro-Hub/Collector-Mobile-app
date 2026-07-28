@@ -20,17 +20,17 @@ import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import CustomHeader from "../navigations/CustomHeader";
 
-type ReplaceRequestsNavigationProp = StackNavigationProp<
+type ReceivedCashOfficerNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ReceivedCashOfficer"
 >;
 
-interface ReplaceRequestsProps {
-  navigation: ReplaceRequestsNavigationProp;
-  route: ReplaceRequestsRouteProp;
+interface ReceivedCashOfficerProps {
+  navigation: ReceivedCashOfficerNavigationProp;
+  route: ReceivedCashOfficerRouteProp;
 }
 
-type ReplaceRequestsRouteProp = RouteProp<
+type ReceivedCashOfficerRouteProp = RouteProp<
   RootStackParamList,
   "ReceivedCashOfficer"
 >;
@@ -71,7 +71,7 @@ interface ApiTransaction {
   orderCreatedAt: string;
 }
 
-const ReceivedCashOfficer: React.FC<ReplaceRequestsProps> = ({
+const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
   route,
   navigation,
 }) => {

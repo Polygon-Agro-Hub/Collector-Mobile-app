@@ -21,17 +21,17 @@ import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-type ReplaceRequestsNavigationProp = StackNavigationProp<
+type ReceivedCashNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ReceivedCash"
 >;
 
-interface ReplaceRequestsProps {
-  navigation: ReplaceRequestsNavigationProp;
-  route: ReplaceRequestsRouteProp;
+interface ReceivedCashProps {
+  navigation: ReceivedCashNavigationProp;
+  route: ReceivedCashRouteProp;
 }
 
-type ReplaceRequestsRouteProp = RouteProp<RootStackParamList, "ReceivedCash">;
+type ReceivedCashRouteProp = RouteProp<RootStackParamList, "ReceivedCash">;
 
 interface Transaction {
   id: string;
@@ -46,7 +46,7 @@ interface Transaction {
   transactionId?: string;
 }
 
-const ReceivedCash: React.FC<ReplaceRequestsProps> = ({
+const ReceivedCash: React.FC<ReceivedCashProps> = ({
   route,
   navigation,
 }) => {

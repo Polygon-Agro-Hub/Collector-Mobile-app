@@ -427,16 +427,7 @@ const TargetOrderScreen: React.FC<TargetOrderScreenProps> = ({
       allData: selectedToggle === "ToDo" ? todoData : completedData,
     };
 
-    switch (item.selectedStatus) {
-      case "Pending":
-      case "Opened":
-      case "Completed":
-        navigation.navigate("PendingOrderScreen", navigationParams);
-        break;
-      default:
-        navigation.navigate("PendingOrderScreen", navigationParams);
-        break;
-    }
+    // PendingOrderScreen navigation removed
   };
 
   const formatCompletionTime = (dateString: string | null) => {
