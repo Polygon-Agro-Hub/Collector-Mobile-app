@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import CustomHeader from "@/component/navigations/CustomHeader";
-import Timer from "@/component/distribution-common/TimerContainer";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -96,20 +96,11 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
             Tap on back button make changes.
           </Text>
 
-          {/* Countdown Timer */}
+          {/* Countdown Indicator */}
           <View className="justify-center items-center mb-6">
-            <Timer
-              size={180}
-              fontSize={28}
-              minutes={0.5}
-              fillColor="#000000"
-              bgColor="#FFFFFF"
-              backgroundColor="#E5E7EB"
-              showMs={false}
-              onComplete={handleConfirm}
-              running={timerRunning}
-              strokeWidth={6}
-            />
+            <View className="w-36 h-36 rounded-full border-4 border-[#030E25] items-center justify-center bg-white shadow-sm">
+              <Text className="text-3xl font-extrabold text-[#030E25]">00:30</Text>
+            </View>
           </View>
 
           {/* Flow Cards */}

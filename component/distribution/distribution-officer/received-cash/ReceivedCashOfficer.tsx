@@ -13,12 +13,12 @@ import { Entypo, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../navigations/CustomHeader";
+import CustomHeader from "../../../navigations/CustomHeader";
 
 type ReceivedCashOfficerNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -308,7 +308,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
     <View className="flex-1 items-center justify-center mt-[50%]">
       <View className=" items-center justify-center ">
         <LottieView
-          source={require("../../assets/lottie/no-data.json")}
+          source={require("../../../../assets/lottie/no-data.json")}
           autoPlay
           loop
           style={{ width: 150, height: 150 }}

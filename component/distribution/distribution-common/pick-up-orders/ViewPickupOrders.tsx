@@ -20,9 +20,9 @@ import {
 } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../../types/types";
 import { useTranslation } from "react-i18next";
-import CustomHeader from "../navigations/CustomHeader";
+import CustomHeader from "../../../navigations/CustomHeader";
 
 type ViewPickupOrdersNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -227,7 +227,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
             <View className="bg-white rounded-2xl p-4  shadow-sm">
               <View className="items-center mb-4">
                 <Image
-                  source={require("../../assets/images/distribution-common/profile-customer.webp")}
+                  source={require("../../../../assets/images/distribution-common/profile-customer.webp")}
                   className="h-[100px] w-[100px] rounded-lg"
                   resizeMode="contain"
                 />

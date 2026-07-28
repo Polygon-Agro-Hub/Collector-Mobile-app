@@ -14,7 +14,7 @@ import { Entypo, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../../types/types";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -263,7 +263,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
         {loading || filterLoading ? (
           <View className="flex-1 justify-center items-center">
             <LottieView
-              source={require("../../assets/lottie/loading.json")}
+              source={require("../../../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}
@@ -372,7 +372,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
             <View className="items-center justify-center mt-[-35%] ">
               <View className="flex items-center justify-center ">
                 <LottieView
-                  source={require("../../assets/lottie/no-data.json")}
+                  source={require("../../../../assets/lottie/no-data.json")}
                   autoPlay
                   loop
                   style={{ width: 150, height: 150 }}

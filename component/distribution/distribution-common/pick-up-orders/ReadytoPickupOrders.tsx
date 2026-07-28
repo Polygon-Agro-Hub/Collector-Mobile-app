@@ -17,13 +17,13 @@ import {
 } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../../types/types";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import CustomHeader from "../navigations/CustomHeader";
+import CustomHeader from "../../../navigations/CustomHeader";
 
 type CollectionOfficersListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -321,7 +321,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       <View className="flex-1 justify-center items-center mt-[-25%] px-4">
         <View className="items-center">
           <LottieView
-            source={require("../../assets/lottie/no-data.json")}
+            source={require("../../../../assets/lottie/no-data.json")}
             autoPlay
             loop
             style={{ width: 150, height: 150 }}
@@ -343,7 +343,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
     return (
       <View className="flex-1 bg-white justify-center items-center">
         <LottieView
-          source={require("../../assets/lottie/loading.json")}
+          source={require("../../../../assets/lottie/loading.json")}
           autoPlay
           loop
           style={{ width: 200, height: 200 }}
@@ -628,7 +628,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
     <View className="flex-1 justify-center items-center mt-[-15%] px-4 pb-24">
       <View className="relative">
         <Image
-          source={require("../../assets/images/collection-common/notfound.webp")}
+          source={require("../../../../assets/images/collection-common/notfound.webp")}
           className="h-[200px] w-[200px] rounded-lg"
           resizeMode="contain"
         />

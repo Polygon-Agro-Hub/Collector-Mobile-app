@@ -56,8 +56,6 @@ export type RootStackParamList = {
   DistridutionaDashboard: undefined;
   PurchaseShortage: undefined;
   PurchaseProduct: { product?: any } | undefined;
-  TargetOrderScreen: undefined;
-  PassTarget: undefined;
   DistributionOfficersList: undefined;
   ReceivedCash: undefined;
   ReceivedCashOfficer: undefined;
@@ -288,9 +286,7 @@ export type RootStackParamList = {
     farmerId: number;
     officerRole: string;
   };
-  CenterTargetScreen: {
-    centerId: number;
-  };
+
   CompletedOrderScreen: {
     item: string;
     centerCode: string;
@@ -303,14 +299,7 @@ export type RootStackParamList = {
     }>;
     fromScreen?: string;
   };
-  DailyTargetListOfficerDistribution: {
-    officerId: string;
-    collectionOfficerId: number;
-    officerName: string;
-    phoneNumber1: string;
-    phoneNumber2: string;
-    image: string;
-  };
+
   DigitalSignature: {
     orderId: Number;
     fromScreen: string;

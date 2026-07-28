@@ -12,7 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../../types/types";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -218,7 +218,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           source={
             item.image
               ? { uri: item.image }
-              : require("../../assets/images/collection-manager/avetar.webp")
+              : require("../../../../assets/images/collection-manager/avetar.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
         />
@@ -442,7 +442,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         {loading ? (
           <View className="flex-1 justify-center items-center -mt-[25%]">
             <LottieView
-              source={require("../../assets/lottie/loading.json")}
+              source={require("../../../../assets/lottie/loading.json")}
               autoPlay
               loop
               style={{ width: 150, height: 150 }}

@@ -68,27 +68,21 @@ import NewReport from "@/component/collection-common/NewReport";
 import TransactionReport from "@/component/collection-manager/TransactionReport";
 import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
 import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
-import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
-import PurchaseShortage from "@/component/disribution/dcm/purchase-shortage/PurchaseShortage";
-import PurchaseProduct from "@/component/disribution/dcm/purchase-shortage/PurchaseProduct";
-import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
-import Timer from "@/component/distribution-common/TimerContainer";
-import TimerContainer from "@/component/distribution-common/TimerContainer";
-import CenterTargetScreen from "@/component/disribution-manger/CenterTargetScreen";
-import DistributionOfficersList from "@/component/disribution-manger/DistributionOfficersList";
-import ClaimDistribution from "@/component/disribution-manger/ClaimDistribution";
-import DistributionOfficerSummary from "@/component/disribution-manger/DistributionOfficerSummary";
-import DailyTargetListOfficerDistribution from "@/component/disribution-manger/DailyTargetListOfficerDistribution";
-import PassTarget from "@/component/disribution-manger/PassTarget";
+import DistridutionaDashboard from "@/component/distribution/distribution-common/dashboard/DistridutionaDashboard";
+import PurchaseShortage from "@/component/distribution/distribution-common/purchase-shortage/PurchaseShortage";
+import PurchaseProduct from "@/component/distribution/distribution-common/purchase-shortage/PurchaseProduct";
+import DistributionOfficersList from "@/component/distribution/distribution-center-manager/manage-officers/DistributionOfficersList";
+import ClaimDistribution from "@/component/distribution/distribution-center-manager/manage-officers/ClaimDistribution";
+import DistributionOfficerSummary from "@/component/distribution/distribution-center-manager/manage-officers/DistributionOfficerSummary";
 import store from "@/services/reducxStore";
-import DistributionOfficerReport from "@/component/disribution-manger/DistributionOfficerReport";
-import ReadytoPickupOrders from "@/component/distribution-common/ReadytoPickupOrders";
-import ViewPickupOrders from "@/component/distribution-common/ViewPickupOrders";
-import Qrcode from "@/component/disribution-manger/qrcode";
-import DigitalSignature from "@/component/disribution-manger/DigitalSignature";
-import ReceivedCash from "@/component/disribution-manger/ReceivedCash";
-import ReceivedCashOfficer from "@/component/distribution-officer/ReceivedCashOfficer";
-import ReceivedCashQrCode from "@/component/distribution-officer/ReceivedCashQrCode";
+import DistributionOfficerReport from "@/component/distribution/distribution-center-manager/manage-officers/DistributionOfficerReport";
+import ReadytoPickupOrders from "@/component/distribution/distribution-common/pick-up-orders/ReadytoPickupOrders";
+import ViewPickupOrders from "@/component/distribution/distribution-common/pick-up-orders/ViewPickupOrders";
+import Qrcode from "@/component/distribution/distribution-common/pick-up-orders/qrcode";
+import DigitalSignature from "@/component/distribution/distribution-common/pick-up-orders/DigitalSignature";
+import ReceivedCash from "@/component/distribution/distribution-center-manager/received-cash/ReceivedCash";
+import ReceivedCashOfficer from "@/component/distribution/distribution-officer/received-cash/ReceivedCashOfficer";
+import ReceivedCashQrCode from "@/component/distribution/distribution-officer/received-cash/ReceivedCashQrCode";
 import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
 import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
@@ -99,7 +93,7 @@ import SideMenu from "@/component/navigations/SideMenu";
 import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
 import BottomNav from "@/component/navigations/BottomNav";
 import LoadingPage from "@/component/commons/LoadingPage";
-import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
+import DistributionAddOfficer from "@/component/distribution/distribution-center-manager/manage-officers/DistributionAddOfficer";
 import SelectRow from "@/component/pack/SelectRow";
 import QRHandling from "@/component/pack/qr-handling/QRHandling";
 import ReadyToPrint from "@/component/pack/qr-handling/ReadyToPrint";
@@ -107,10 +101,10 @@ import PrintingConfirmation from "@/component/pack/qr-handling/PrintingConfirmat
 import WelcomeToPacking from "@/component/pack/packing/WelcomeToPacking";
 import Packing from "@/component/pack/packing/Packing";
 import WelcomeToQC from "@/component/pack/qc-position/WelcomeToQC";
-import Group from "@/component/disribution/dcm/assign-groups/Group";
-import SelectOrder from "@/component/disribution/dcm/assign-groups/SelectOrder";
-import SelectRowToAssign from "@/component/disribution/dcm/assign-groups/SelectRowToAssign";
-import ConfirmRowAssign from "@/component/disribution/dcm/assign-groups/ConfirmRowAssign";
+import Group from "@/component/distribution/distribution-center-manager/assign-groups/Group";
+import SelectOrder from "@/component/distribution/distribution-center-manager/assign-groups/SelectOrder";
+import SelectRowToAssign from "@/component/distribution/distribution-center-manager/assign-groups/SelectRowToAssign";
+import ConfirmRowAssign from "@/component/distribution/distribution-center-manager/assign-groups/ConfirmRowAssign";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -156,7 +150,6 @@ function MainTabNavigator() {
       <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
       <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
       <Tab.Screen name="ReportGenerator" component={ReportGenerator as any} />
-      <Tab.Screen name="PassTarget" component={PassTarget as any} />
       <Tab.Screen
         name="CollectionOfficerDashboard"
         component={CollectionOfficerDashboard}
@@ -210,10 +203,7 @@ function MainTabNavigator() {
         name="ReceivedCashOfficer"
         component={ReceivedCashOfficer as any}
       />
-      <Tab.Screen
-        name="TargetOrderScreen"
-        component={TargetOrderScreen as any}
-      />
+
       <Tab.Screen
         name="UnregisteredFarmerDetails"
         component={UnregisteredFarmerDetails}
@@ -240,10 +230,7 @@ function MainTabNavigator() {
         component={DistributionOfficerSummary as any}
       />
       <Tab.Screen name="OTPE" component={OTPE} />
-      <Tab.Screen
-        name="DailyTargetListOfficerDistribution"
-        component={DailyTargetListOfficerDistribution as any}
-      />
+
       <Tab.Screen
         name="DistributionAddOfficer"
         component={DistributionAddOfficer as any}
@@ -259,10 +246,7 @@ function MainTabNavigator() {
         name="AddOfficer"
         component={AddOfficer as any}
       />
-      <Tab.Screen
-        name="CenterTargetScreen"
-        component={CenterTargetScreen as any}
-      />
+
       <Tab.Screen name="FarmerQr" component={FarmerQr} />
       <Tab.Screen name="CenterTarget" component={CenterTarget as any} />
       <Tab.Screen
@@ -573,7 +557,6 @@ function AppContent() {
             <Stack.Screen name="NewReport" component={NewReport as any} />
             <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-            <Stack.Screen name="Timer" component={Timer as any} />
 
             <Stack.Screen name="QRScanner" component={QRScanner} />
             <Stack.Screen
@@ -671,16 +654,7 @@ function AppContent() {
             />
 
 
-            <Stack.Screen
-              name="TimerContainer"
-              component={TimerContainer as any}
-            />
 
-
-            <Stack.Screen
-              name="DailyTargetListOfficerDistribution"
-              component={DailyTargetListOfficerDistribution as any}
-            />
 
             <Stack.Screen
               name="GoviPensionForm"

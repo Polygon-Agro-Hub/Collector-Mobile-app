@@ -892,26 +892,7 @@
     "Received Cash": "Received Cash",
     "Pickup Order Scan": "Pickup Order Scan"
   },
-  "TargetOrderScreen": {
-    "LNG": "en",
-    "CenterTarget": "Centre Target",
-    "Todo": "To do",
-    "Completed": "Completed",
-    "No": "No",
-    "Variety": "Variety",
-    "Grade": "Grade",
-    "Target": "Target (kg)",
-    "Todo()": "Todo (kg)",
-    "My Daily Target": "My Daily Target",
-    "Invoice No": "Invoice No",
-    "Status": "Status",
-    "Date": "Date & Time",
-    "Completed Time": "Completed Time",
-    "Retry": "Retry",
-    "Pending": "Pending",
-    "Opened": "Opened",
-    "My Target":"My Target"
-  },
+
   "OpenedOrderScreen": {
     "INV No": "INV No :",
     "Pending": "Pending",
@@ -932,74 +913,13 @@
     "Completed": "Completed",
     "InProgress": "In Progress"
   },
-  "TimerContainer": {
-    "Start": "Start",
-    "Pause": "Pause",
-    "Reset": "Reset"
-  },
-  "DailyTargetListOfficerDistribution": {
-    "Are you sure": "Are you sure you want to pass this target to some other officer?",
-    "Cancel": "Cancel",
-    "Pass": "Pass",
-    "Completed Time": "Completed Time",
-    "Retry": "Retry"
-  },
+
   "DistributionOfficersList": {
     "EMPID": "EMP ID :",
     "Officers":"Officers",
     "Drivers":"Drivers"
   },
-  "PassTarget": {
-    "EMP ID": "EMP ID",
-    "Select Assignee": "Select Assignee",
-    "Loading officers": "Loading officers..",
-    "Selected Targets": "Selected Targets",
-    "Success": "Success!",
-    "Target passed successfully.": "Target has been passed successfully.",
-    "Save": "Save",
-    "Dismiss": "Dismiss",
-    "Short Stock Assignee": "Short Stock Assignee",
-    "Search officers": "Search officers"
-  },
-  "CenterTargetScreen": {
-    "Success": "Success!",
-    "order": "order",
-    "Time": "Time",
-    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.": "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.",
-    "been sent out": "been sent out",
-    "for delivery": "for delivery",
-    "Centre Target": "Centre Target",
-    "Select Date": "Select Date (ToDo)",
-    "All Datese": "All Dates",
-    "Close": "Close",
-    "Select Completion Date": "Select Completion Date",
-    "All Completion Dates": "All Completion Dates",
-    "Are you sure you want to send these selected": "Are you sure you want to release this selected order for delivery or pickup?",
-    "Are you sure you want": "Are you sure you want to release these {{count}} selected orders for delivery or pickup?",
-    "orders out for delivery": "{{count}} orders have been released to the next stage.",
-    "order one": "{{count}} order has been released to the next stage.",
-    "Processing orders": "Processing orders...",
-    "Cancel": "Cancel",
-    "Out Time": "Out Time",
-    "Outing Status": "Outing Status",
-    "Today": "Today",
-    "Tomorrow": "Tomorrow",
-    "All": "All",
-    "Out": "Out",
-    "Completed": "Completed",
-    "Scheduled": "Scheduled",
-    "On Time": "On Time",
-    "Late": "Late",
-    "No out for handover orders": "No out for handover orders",
-    "Limit Reached": "Limit Reached",
-    "You can only select up to 5 orders at a time for delivery": "You can only select up to 5 orders at a time for delivery",
-    "OK": "OK",
-    "Processing": "Processing...",
-    "have": "have",
-    "has": "has",
-    "01 order has been sent out for delivery": "01 order has been released to the next stage.",
-    "orders have been sent out for delivery": "{{successCount}} orders have been released to the next stage."
-  },
+
   "ReadytoPickupOrders": {
     "No orders to be picked up": "No orders to be picked up",
     "Ready to Pickup Orders": "Ready to Pickup Orders",

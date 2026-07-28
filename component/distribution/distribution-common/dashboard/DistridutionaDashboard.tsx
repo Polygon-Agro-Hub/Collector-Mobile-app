@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../../types/types";
 import { useTranslation } from "react-i18next";
 import { Feather, FontAwesome6 } from "@expo/vector-icons";
 
@@ -245,7 +245,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
          <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
           <View className="flex-row justify-center items-center mb-2">
             <Image
-              source={require("../../assets/images/dashboard/Applause.webp")}
+              source={require("../../../../assets/images/dashboard/Applause.webp")}
               className="w-8 h-8 mr-2"
             />
             <Text className="text-center text-[#2AAD7A] font-bold">
@@ -269,7 +269,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       title: "Start Packing",
       icon: (
         <Image
-          source={require("../../assets/images/dashboard/center-target.webp")}
+          source={require("../../../../assets/images/dashboard/center-target.webp")}
           className="w-8 h-8 absolute top-2 right-2"
         />
       ),
@@ -334,36 +334,6 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       onPress: () => navigation.navigate("PurchaseShortage" as any),
     });
 
-    // 6. Center Target / Target Orders
-    if (jobRole === "Distribution Centre Manager") {
-      items.push({
-        key: "center_target",
-        title: t("CenterTarget.CenterTarget"),
-        icon: (
-          <Image
-            source={require("../../assets/images/dashboard/center-target.webp")}
-            className="w-8 h-8 absolute top-2 right-2"
-          />
-        ),
-        onPress: () =>
-          navigation.navigate("CenterTargetScreen", {
-            centerId: Number(centerId),
-          } as any),
-      });
-    } else {
-      items.push({
-        key: "target_orders",
-        title: t("DistridutionaDashboard.TargetOrders"),
-        icon: (
-          <Image
-            source={require("../../assets/images/dashboard/packing.webp")}
-            className="w-8 h-8 absolute top-2 right-2"
-          />
-        ),
-        onPress: () => navigation.navigate("TargetOrderScreen" as any),
-      });
-    }
-
     return items;
   };
 
@@ -382,7 +352,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
           source={
             profile?.image
               ? { uri: profile.image }
-              : require("../../assets/images/auth/my-profile.webp")
+              : require("../../../../assets/images/auth/my-profile.webp")
           }
           className="w-16 h-16 rounded-full mr-3"
         />

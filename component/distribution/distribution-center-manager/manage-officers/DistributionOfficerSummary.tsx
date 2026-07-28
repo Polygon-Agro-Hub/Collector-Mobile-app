@@ -15,7 +15,7 @@ import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { CircularProgress } from "react-native-circular-progress";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../types/types";
+import { RootStackParamList } from "../../../types/types";
 import { environment } from "@/environment/environment";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
@@ -321,7 +321,7 @@ const DistributionOfficerSummary: React.FC<OfficerSummaryProps> = ({
               source={
                 image
                   ? { uri: image }
-                  : require("../../assets/images/auth/my-profile.webp")
+                  : require("../../../../assets/images/auth/my-profile.webp")
               }
               className="w-24 h-24 rounded-full "
             />

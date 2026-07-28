@@ -10,8 +10,8 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../types/types";
-import { handleGeneratePDF } from "./ReportPDF";
+import { RootStackParamList } from "../../../types/types";
+import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { Platform } from "react-native";
@@ -21,7 +21,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
-import CustomHeader from "../navigations/CustomHeader";
+import CustomHeader from "../../../navigations/CustomHeader";
+
+const handleGeneratePDF = async (
+  fromDate: string,
+  toDate: string,
+  officerId: string,
+  collectionOfficerId: string
+) => {
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Distribution Officer Report</h2>
+        <p><strong>Officer ID:</strong> ${officerId}</p>
+        <p><strong>Date Range:</strong> ${fromDate} to ${toDate}</p>
+      </body>
+    </html>
+  `;
+  const { uri } = await Print.printToFileAsync({ html: htmlContent });
+  return uri;
+};
 
 type DistributionOfficerReportNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -350,7 +369,7 @@ useFocusEffect(
                 {formatDate(startDate)}
               </Text>
               <Image
-                source={require("../../assets/images/collection-manager/rescheduling.webp")}
+                source={require("../../../../assets/images/collection-manager/rescheduling.webp")}
                 className="w-6 h-6"
                 resizeMode="contain"
               />
@@ -403,7 +422,7 @@ useFocusEffect(
               {formatDate(endDate, t("ReportGenerator.End Date"))}
             </Text>
             <Image
-              source={require("../../assets/images/collection-manager/rescheduling.webp")}
+              source={require("../../../../assets/images/collection-manager/rescheduling.webp")}
               className="w-6 h-6"
               resizeMode="contain"
               style={{ opacity: startDate ? 1 : 0.25 }}
@@ -497,7 +516,7 @@ useFocusEffect(
         <View className="items-center justify-center flex-1">
           <View className="w-24 h-24 bg-[#FFE6CB66] rounded-full items-center justify-center mb-4">
             <Image
-              source={require("../../assets/images/collection-manager/document.webp")}
+              source={require("../../../../assets/images/collection-manager/document.webp")}
               className="w-14 h-14"
             />
           </View>
@@ -569,7 +588,7 @@ useFocusEffect(
       ) : generateAgain ? (
         <View className="items-center justify-center flex-1">
           <LottieView
-            source={require("../../assets/lottie/loading.json")}
+            source={require("../../../../assets/lottie/loading.json")}
             autoPlay
             loop
             style={{ width: 250, height: 250 }}
@@ -578,7 +597,7 @@ useFocusEffect(
       ) : (
         <View className="items-center justify-center flex-1">
           <Image
-            source={require("../../assets/images/collection-manager/empty.webp")}
+            source={require("../../../../assets/images/collection-manager/empty.webp")}
             className="w-20 h-20 mb-4"
             resizeMode="contain"
           />

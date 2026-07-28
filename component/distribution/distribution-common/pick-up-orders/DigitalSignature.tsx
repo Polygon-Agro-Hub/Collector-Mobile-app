@@ -22,7 +22,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import { AlertModal } from "../commons/AlertModal";
+import { AlertModal } from "../../../commons/AlertModal";
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
