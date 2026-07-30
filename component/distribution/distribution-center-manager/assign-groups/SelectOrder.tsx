@@ -34,8 +34,22 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const handleBack = () => {
+    navigation.navigate("Group", route.params);
+  };
+
   useEffect(() => {
     fetchOrders();
+
+    const onBackPress = () => {
+      handleBack();
+      return true;
+    };
+    const backHandler = require("react-native").BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
   }, [group.timeSlotCode, type]);
 
   const fetchOrders = async () => {
@@ -123,16 +137,13 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
     });
   };
 
-  const handleBack = () => {
-    navigation.goBack();
-  };
-
   return (
     <View className="flex-1 bg-white">
       {/* Custom Header with absolutely centered titles */}
       <CustomHeader
         title={group.timeSlot}
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       {/* Order count positioned after custom header */}

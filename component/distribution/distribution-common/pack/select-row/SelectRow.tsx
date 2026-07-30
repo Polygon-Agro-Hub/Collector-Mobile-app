@@ -8,10 +8,12 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons, Entypo } from "@expo/vector-icons";
+import { Ionicons, Entypo, Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {
@@ -38,10 +40,31 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [positions, setPositions] = useState<PositionData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [activeAssignment, setActiveAssignment] = useState<any | null>(null);
 
-  useEffect(() => {
-    fetchRows();
-  }, []);
+  const checkActiveAssignment = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const res = await axios.get(`${environment.API_BASE_URL}api/packing/active-assignment`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data && res.data.success && res.data.data) {
+        setActiveAssignment(res.data.data);
+      } else {
+        setActiveAssignment(null);
+      }
+    } catch (err) {
+      console.error("Error checking active assignment:", err);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchRows();
+      checkActiveAssignment();
+    }, [])
+  );
 
   const fetchRows = async () => {
     try {
@@ -207,9 +230,42 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           />
         </View>
 
-        {/* Empty placeholder for alignment */}
         <View className="w-10" />
       </View>
+
+      {/* Active Assignment Resume Banner */}
+      {step === 1 && activeAssignment && (
+        <TouchableOpacity
+          onPress={() => {
+            const type = activeAssignment.type || activeAssignment.positionType;
+            if (type === "QR") {
+              navigation.navigate("QRHandling");
+            } else if (type === "NOR") {
+              navigation.navigate("WelcomeToPacking", {
+                positionId: activeAssignment.positionId,
+                positionName: activeAssignment.name,
+              });
+            } else if (type === "QC") {
+              navigation.navigate("WelcomeToQC", {
+                positionName: activeAssignment.name,
+              });
+            }
+          }}
+          className="mx-6 mt-3 bg-[#EAF1FF] border border-[#3B82F6] rounded-2xl p-4 flex-row items-center justify-between"
+          activeOpacity={0.8}
+        >
+          <View className="flex-1 mr-2">
+            <Text className="text-xs font-bold text-[#1E40AF]">Active Position Today</Text>
+            <Text className="text-sm font-extrabold text-[#030E25] mt-0.5">
+              {activeAssignment.name} ({activeAssignment.rowName})
+            </Text>
+          </View>
+          <View className="bg-[#3B82F6] px-3 py-1.5 rounded-xl flex-row items-center gap-1">
+            <Text className="text-white font-bold text-xs">Resume</Text>
+            <Feather name="arrow-right" size={14} color="white" />
+          </View>
+        </TouchableOpacity>
+      )}
 
       <ScrollView className="flex-1 bg-white px-6">
         {loading ? (

@@ -214,7 +214,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        navigation.navigate("DistridutionaDashboard");
+        navigation.navigate("Main", { screen: "DistridutionaDashboard" });
         return true;
       };
 
@@ -232,7 +232,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
       <View className="bg-white px-4 py-4 flex-row items-center ">
         <TouchableOpacity
           className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
-          onPress={() => navigation.navigate("DistridutionaDashboard")}
+          onPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
         >
           <Entypo name="chevron-left" size={25} color="#000" />
         </TouchableOpacity>

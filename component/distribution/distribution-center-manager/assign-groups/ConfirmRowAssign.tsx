@@ -76,12 +76,29 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
     }
   };
 
+  const handleBack = () => {
+    navigation.navigate("SelectRowToAssign", route.params);
+  };
+
+  React.useEffect(() => {
+    const onBackPress = () => {
+      handleBack();
+      return true;
+    };
+    const backHandler = require("react-native").BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
+
   return (
     <View className="flex-1 bg-white">
       {/* Custom Header */}
       <CustomHeader
         title="Confirm Action"
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       <ScrollView

@@ -180,7 +180,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        navigation.navigate("DistridutionaDashboard");
+        navigation.navigate("Main", { screen: "DistridutionaDashboard" });
         return true;
       };
 
@@ -326,7 +326,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
         title={t("ReceivedCash.Received Cash")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
       <View className="flex-1 w-full max-w-[500px] mx-auto">

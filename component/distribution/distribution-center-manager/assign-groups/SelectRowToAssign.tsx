@@ -26,9 +26,23 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
+  const handleBack = () => {
+    navigation.navigate("SelectOrder", route.params);
+  };
+
   useEffect(() => {
     fetchRows();
-  }, []);
+
+    const onBackPress = () => {
+      handleBack();
+      return true;
+    };
+    const backHandler = require("react-native").BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const fetchRows = async () => {
     try {
@@ -79,6 +93,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
       <CustomHeader
         title="Select a Row to Assign"
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       <View className="flex-1 px-6">

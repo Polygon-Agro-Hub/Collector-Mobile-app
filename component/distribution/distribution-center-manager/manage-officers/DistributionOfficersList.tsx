@@ -177,7 +177,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        navigation.navigate("DistridutionaDashboard");
+        navigation.navigate("Main", { screen: "DistridutionaDashboard" });
         return true;
       };
       const subscription = BackHandler.addEventListener(

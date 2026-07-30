@@ -75,7 +75,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
       <CustomHeader
         title="Assigned Products"
         navigation={navigation}
-        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
       {loading && !refreshing ? (

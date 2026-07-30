@@ -304,7 +304,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        navigation.navigate("DistridutionaDashboard");
+        navigation.navigate("Main", { screen: "DistridutionaDashboard" });
         return true;
       };
 
@@ -361,7 +361,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         title={t("ReadytoPickupOrders.Ready to Pickup Orders")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("DistridutionaDashboard")}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
       <View className="flex-1 w-full max-w-[500px] mx-auto">

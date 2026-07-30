@@ -1,14 +1,18 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Alert,
   ScrollView,
+  BackHandler,
 } from "react-native";
-import { Ionicons, Entypo } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/navigations/CustomHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { environment } from "@/environment/environment";
+import AlertModal from "@/component/commons/AlertModal";
 
 interface PrintStep {
   id: number;
@@ -18,8 +22,30 @@ interface PrintStep {
   circleTextColor: string;
 }
 
-export default function PrintingConfirmation({ route, navigation }: { route: any; navigation: any }) {
-  const { orderNumber = "26050500001 (R)", category = "Pickup Order" } = route.params || {};
+export interface PackageItem {
+  id: number;
+  name: string;
+  count: number;
+}
+
+export default function PrintingConfirmation({
+  route,
+  navigation,
+}: {
+  route: any;
+  navigation: any;
+}) {
+  const {
+    orderNumber = "2607300005 (R)",
+    invoiceNumber = "2607300005",
+    category = "Pickup Order",
+    packagesList = [
+      { id: 1, name: "Daily Veggie Pack", count: 3 },
+      { id: 2, name: "Fruit & Veggie Family Pack", count: 4 },
+      { id: 3, name: "Smart Prep Veggie Box", count: 2 },
+    ],
+    alacarteCount = 3,
+  } = route.params || {};
 
   // Convert (R) to (Retail) and (W) to (Wholesale) for display inside the QR card
   const displayOrderNumber = orderNumber.includes("(R)")
@@ -28,59 +54,155 @@ export default function PrintingConfirmation({ route, navigation }: { route: any
     ? orderNumber.replace("(W)", "(Wholesale)")
     : orderNumber;
 
-  // State to track the current printing step (1 to 4)
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  // Build dynamic print steps based on package count
+  const steps: PrintStep[] = [];
 
-  // List of print steps as specified:
-  // 1. Main Container (Black)
-  // 2. Fruit Pack (#980775)
-  // 3. Spices Pack (#980775)
-  // 4. À la carte (#AC7F5E)
-  const steps: PrintStep[] = [
-    {
+  // 1. If packages > 1, add Main Container as Step 1
+  if (packagesList && packagesList.length > 1) {
+    steps.push({
       id: 1,
       label: "Main Container",
       textColor: "text-black",
       circleBgColor: "bg-slate-100",
       circleTextColor: "text-slate-700",
-    },
-    {
-      id: 2,
-      label: "Fruit Pack",
-      textColor: "text-[#980775]",
-      circleBgColor: "bg-[#fdf4ff]",
-      circleTextColor: "text-[#980775]",
-    },
-    {
-      id: 3,
-      label: "Spices Pack",
-      textColor: "text-[#980775]",
-      circleBgColor: "bg-[#fdf4ff]",
-      circleTextColor: "text-[#980775]",
-    },
-    {
-      id: 4,
-      label: "À la carte",
+    });
+  }
+
+  // 2. Add individual package steps with item counts
+  if (packagesList && packagesList.length > 0) {
+    packagesList.forEach((pkg: PackageItem) => {
+      const stepId = steps.length + 1;
+      const countStr = String(pkg.count).padStart(2, "0");
+      steps.push({
+        id: stepId,
+        label: `${countStr} ${pkg.name}`,
+        textColor: "text-[#980775]",
+        circleBgColor: "bg-[#fdf4ff]",
+        circleTextColor: "text-[#980775]",
+      });
+    });
+  }
+
+  // 3. Add final À la carte step
+  if (alacarteCount > 0) {
+    const stepId = steps.length + 1;
+    const countStr = String(alacarteCount).padStart(2, "0");
+    steps.push({
+      id: stepId,
+      label: `${countStr} À la carte`,
       textColor: "text-[#AC7F5E]",
       circleBgColor: "bg-[#fdf8f6]",
       circleTextColor: "text-[#AC7F5E]",
-    },
-  ];
+    });
+  }
 
-  const activeStep = steps[currentStep - 1];
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [alertVisible, setAlertVisible] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
+  const [alertTitle, setAlertTitle] = useState<string>("Success");
 
-  const handlePrintPress = () => {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      Alert.alert("Success", "All packages printed successfully!", [
-        {
-          text: "OK",
-          onPress: () => {
-            navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+  const activeStep = steps[currentStep - 1] || steps[0];
+  const qrValue = invoiceNumber || orderNumber;
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (currentStep > 1) {
+        setCurrentStep(currentStep - 1);
+        return true;
+      }
+      navigation.navigate("ReadyToPrint");
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
+  }, [currentStep, navigation]);
+
+  const handlePrintPress = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const processOrderId = route.params?.processOrderId || route.params?.orderId || 3131;
+      
+      let currentPackageId: number | null = null;
+      const hasMainContainer = packagesList && packagesList.length > 1;
+      const packageStepIndex = hasMainContainer ? currentStep - 2 : currentStep - 1;
+
+      if (packagesList && packageStepIndex >= 0 && packageStepIndex < packagesList.length) {
+        currentPackageId = packagesList[packageStepIndex].id;
+      }
+
+      const isMainContainerStep = hasMainContainer && currentStep === 1;
+
+      if (isMainContainerStep) {
+        const response = await axios.post(
+          `${environment.API_BASE_URL}api/packing/qr-opened`,
+          {
+            orderId: processOrderId,
+            isMainContainer: true,
+            rowId: route.params?.rowId,
           },
-        },
-      ]);
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data && response.data.success === false && response.data.code === "STATION_OCCUPIED") {
+          setAlertType("error");
+          setAlertTitle("Position Busy");
+          setAlertMessage(response.data.message || "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.");
+          setAlertVisible(true);
+          return;
+        }
+
+        setAlertType("success");
+        setAlertTitle("Success");
+        setAlertMessage("Main Container QR Code Printed Successfully!");
+        setAlertVisible(true);
+      } else {
+        const isPackageStep = packagesList && packageStepIndex >= 0 && packageStepIndex < packagesList.length;
+        const response = await axios.post(
+          `${environment.API_BASE_URL}api/packing/qr-opened`,
+          {
+            orderId: processOrderId,
+            orderpackageId: currentPackageId,
+            isPackage: isPackageStep ? 1 : 0,
+            packageIndex: isPackageStep ? packageStepIndex : 0,
+            rowId: route.params?.rowId,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data && response.data.success === false && response.data.code === "STATION_OCCUPIED") {
+          setAlertType("error");
+          setAlertTitle("Position Busy");
+          setAlertMessage(response.data.message || "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.");
+          setAlertVisible(true);
+          return;
+        }
+
+        setAlertType("success");
+        setAlertTitle("Success");
+        if (currentStep < steps.length) {
+          const stepName = steps[currentStep - 1]?.label || "Package";
+          setAlertMessage(`${stepName} QR Code Printed Successfully!`);
+          setAlertVisible(true);
+        } else {
+          setAlertMessage(`All packages for order ${orderNumber} printed successfully!`);
+          setAlertVisible(true);
+        }
+      }
+    } catch (err: any) {
+      console.error("Error updating order status on QR print:", err);
+      const busyMsg = err.response?.data?.message;
+      const isOccupied = err.response?.data?.code === "STATION_OCCUPIED";
+
+      setAlertType("error");
+      setAlertTitle(isOccupied ? "Position Busy" : "Error");
+      setAlertMessage(
+        busyMsg || "Failed to communicate with packing server. Please try again."
+      );
+      setAlertVisible(true);
     }
   };
 
@@ -88,13 +210,12 @@ export default function PrintingConfirmation({ route, navigation }: { route: any
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      navigation.goBack();
+      navigation.navigate("ReadyToPrint");
     }
   };
 
   return (
     <View className="flex-1 bg-white">
-      {/* Standard Custom Header */}
       <CustomHeader
         title=""
         navigation={navigation}
@@ -105,43 +226,46 @@ export default function PrintingConfirmation({ route, navigation }: { route: any
       <ScrollView className="flex-1 bg-white px-6">
         {/* Header Title section matching ReadyToPrint design */}
         <View className="items-center mb-6">
-          <Text className="text-xl font-bold text-slate-950">Printing Confirmation</Text>
+          <Text className="text-xl font-bold text-slate-950">
+            Printing Confirmation
+          </Text>
         </View>
 
-        {/* Progress step segments at top */}
+        {/* Dynamic Progress step segments at top */}
         <View className="flex-row justify-between items-center gap-2 px-2 mb-8">
-          {[1, 2, 3, 4].map((stepNum) => {
+          {steps.map((s, idx) => {
+            const stepNum = idx + 1;
             const isFilled = stepNum <= currentStep;
             return (
-              <View
-                key={stepNum}
-                className={`h-1.5 flex-1 rounded-full ${
-                  isFilled ? "bg-[#09152B]" : "bg-gray-200"
-                }`}
-              />
+              <View key={s.id} className="flex-1 items-center">
+                <View
+                  className={`w-full h-1.5 rounded-full mb-1 ${
+                    isFilled ? "bg-[#980775]" : "bg-gray-200"
+                  }`}
+                />
+              </View>
             );
           })}
         </View>
 
-        {/* Step Index Circle and Label */}
-        <View className="flex-row items-center justify-center mb-6 gap-2">
-          {/* Circular step count indicator */}
-          <View className={`w-8 h-8 rounded-full items-center justify-center bg-[#E9ECF1]`}>
-            <Text className={`font-bold text-sm text-[#030E25]`}>
-              {String(currentStep).padStart(2, "0")}
+        {/* Dynamic Step Active Pill Badge */}
+        <View className="items-center mb-6">
+          <View
+            className={`px-5 py-2 rounded-full flex-row items-center gap-2 ${activeStep?.circleBgColor}`}
+          >
+            <Text
+              className={`font-extrabold text-sm ${activeStep?.circleTextColor}`}
+            >
+              {activeStep?.label}
             </Text>
           </View>
-          {/* Label */}
-          <Text className={`font-bold text-lg ${activeStep.textColor}`}>
-            {activeStep.label}
-          </Text>
         </View>
 
-        {/* Square Black Border QR Code Box */}
+        {/* Standardized QR Code Card Frame matching ReadyToPrint */}
         <View className="items-center justify-center bg-white border border-black p-6 mb-6">
           <View className="p-4 bg-white mb-4">
             <QRCode
-              value={orderNumber}
+              value={qrValue}
               size={240}
               color="black"
               backgroundColor="white"
@@ -156,25 +280,34 @@ export default function PrintingConfirmation({ route, navigation }: { route: any
         </View>
       </ScrollView>
 
-      {/* Print Button Pinned to Bottom */}
       <View className="px-6 pt-4 pb-8 bg-white">
         <TouchableOpacity
           onPress={handlePrintPress}
           className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
           activeOpacity={0.8}
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.15,
-            shadowRadius: 4,
-            elevation: 3,
-          }}
         >
           <Text className="text-white font-extrabold text-base">
-            Print ({currentStep})
+            Print ({currentStep}/{steps.length})
           </Text>
         </TouchableOpacity>
       </View>
+
+      <AlertModal
+        visible={alertVisible}
+        type={alertType}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => {
+          setAlertVisible(false);
+          if (alertType === "success") {
+            if (currentStep >= steps.length) {
+              navigation.navigate("QRHandling");
+            } else {
+              setCurrentStep(currentStep + 1);
+            }
+          }
+        }}
+      />
     </View>
   );
 }

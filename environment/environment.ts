@@ -6,7 +6,7 @@ export const environment = {
 
   // DEV --------------------
   // API_BASE_URL:
-  //   "https://collector-api.polygonagro.com/agro-api/collection-api/",
+  // "https://collector-api.polygonagro.com/agro-api/collection-api/",
 
   // UAT --------------------
   // API_BASE_URL:

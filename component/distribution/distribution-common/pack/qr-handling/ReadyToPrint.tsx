@@ -1,11 +1,13 @@
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StatusBar,
   ScrollView,
+  BackHandler,
 } from "react-native";
-import { Feather, Entypo } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/navigations/CustomHeader";
 
@@ -16,9 +18,35 @@ export default function ReadyToPrint({
   route: any;
   navigation: any;
 }) {
-  // Get order data passed from navigation parameters, or use default sample data
-  const { orderNumber = "26050500001 (R)", category = "Pickup Order" } =
-    route.params || {};
+  // Get order data passed from navigation parameters
+  const {
+    orderNumber = "2607300005 (R)",
+    invoiceNumber = "2607300005",
+    category = "Pickup Order",
+    nextOrderNumber = "2607300006 (R)",
+    nextTimeSlot = "08:00 AM - 12:00 PM",
+    nextCategory = "Pickup Order",
+    packagesCount = 3,
+    alacarteCount = 3,
+    packagesList = [],
+  } = route.params || {};
+
+  useEffect(() => {
+    const onBackPress = () => {
+      navigation.navigate("QRHandling");
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
+
+  const actualPackagesCount = (packagesList && packagesList.length > 0) ? packagesList.length : packagesCount;
+  const formattedPackages = String(actualPackagesCount).padStart(2, "0");
+  const formattedAlacarte = String(alacarteCount).padStart(2, "0");
+  const qrValue = invoiceNumber || orderNumber;
 
   return (
     <View className="flex-1 bg-white">
@@ -28,6 +56,7 @@ export default function ReadyToPrint({
       <CustomHeader
         title=""
         navigation={navigation}
+        onBackPress={() => navigation.navigate("QRHandling")}
       />
 
       <ScrollView className="flex-1 bg-white px-6">
@@ -40,16 +69,16 @@ export default function ReadyToPrint({
 
         {/* QR Code Card Frame (Black border, Not rounded) */}
         <View className="items-center justify-center bg-white border border-black p-6 mb-6">
-          {/* Dynamically generated QR Code */}
+          {/* Dynamically generated QR Code for invoice number */}
           <View className="p-4 bg-white mb-4">
             <QRCode
-              value={orderNumber}
+              value={qrValue}
               size={240}
               color="black"
               backgroundColor="white"
             />
           </View>
-          {/* Order ID & Type Info */}
+          {/* Invoice / Order ID & Type Info */}
           <Text className="text-lg font-extrabold text-slate-950 tracking-tight text-center">
             {orderNumber}
           </Text>
@@ -59,23 +88,27 @@ export default function ReadyToPrint({
         </View>
 
         {/* Next Order Card (Highlighted in purple) */}
-        <View className="flex-row items-center bg-white border-2 border-[#980775] rounded-xl p-4 mb-6 shadow-sm">
-          {/* Left Bag Icon Circle */}
-          <View className="w-11 h-11 rounded-full bg-[#980775] items-center justify-center mr-4">
-            <Feather name="shopping-bag" size={20} color="white" />
-          </View>
+        {nextOrderNumber && (
+          <View className="flex-row items-center bg-white border-2 border-[#980775] rounded-xl p-4 mb-6 shadow-sm">
+            {/* Left Bag Icon Circle */}
+            <View className="w-11 h-11 rounded-full bg-[#980775] items-center justify-center mr-4">
+              <Feather name="shopping-bag" size={20} color="white" />
+            </View>
 
-          {/* Content */}
-          <View className="flex-1">
-            <Text className="font-extrabold text-slate-950 text-base">
-              26050500002 (R)
-            </Text>
-            <Text className="text-sm font-bold text-slate-900 mt-0.5">
-              08:00 AM - 12:00 PM
-            </Text>
-            <Text className="text-xs text-[#54617D] mt-0.5">Pickup Order</Text>
+            {/* Content */}
+            <View className="flex-1">
+              <Text className="font-extrabold text-slate-950 text-base">
+                {nextOrderNumber}
+              </Text>
+              <Text className="text-sm font-bold text-slate-900 mt-0.5">
+                {nextTimeSlot}
+              </Text>
+              <Text className="text-xs text-[#54617D] mt-0.5">
+                {nextCategory}
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Order Summary Card */}
         <View
@@ -92,20 +125,26 @@ export default function ReadyToPrint({
             Order Summary
           </Text>
 
-          {/* Packages Row */}
+          {/* Available Packages Row */}
           <View className="flex-row justify-between items-center py-2.5 border-b border-gray-50">
             <View className="px-3 py-1.5 rounded-lg bg-[#FAFAFB]">
               <Text className="text-xs font-bold text-[#030E25]">Packages</Text>
             </View>
-            <Text className="text-[#980775] font-extrabold text-base">02</Text>
+            <Text className="text-[#980775] font-extrabold text-base">
+              {formattedPackages}
+            </Text>
           </View>
 
           {/* À la carte Row */}
           <View className="flex-row justify-between items-center py-2.5">
             <View className="px-3 py-1.5 rounded-lg bg-[#FAFAFB]">
-              <Text className="text-xs font-bold text-[#030E25]">À la carte Items</Text>
+              <Text className="text-xs font-bold text-[#030E25]">
+                À la carte Items
+              </Text>
             </View>
-            <Text className="text-[#980775] font-extrabold text-base">10</Text>
+            <Text className="text-[#980775] font-extrabold text-base">
+              {formattedAlacarte}
+            </Text>
           </View>
         </View>
       </ScrollView>
@@ -116,7 +155,12 @@ export default function ReadyToPrint({
           onPress={() => {
             navigation.navigate("PrintingConfirmation", {
               orderNumber: orderNumber,
+              invoiceNumber: invoiceNumber,
               category: category,
+              processOrderId: route.params?.processOrderId,
+              packagesList: route.params?.packagesList || [],
+              alacarteCount: alacarteCount,
+              rowId: route.params?.rowId,
             });
           }}
           className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"

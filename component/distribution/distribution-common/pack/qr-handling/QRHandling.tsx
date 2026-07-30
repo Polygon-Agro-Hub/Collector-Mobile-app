@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -45,7 +46,17 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+
+    const onBackPress = () => {
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const fetchOrders = async () => {
     try {
@@ -66,7 +77,10 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           orderNumber: o.orderNumber,
           type: o.type,
           timeSlot: timeSlotMap[o.timeSlot] || o.timeSlot,
-          category: o.category
+          category: o.category,
+          packagesCount: (o.packagesList && o.packagesList.length > 0) ? o.packagesList.length : (o.packagesCount || 0),
+          alacarteCount: o.alacarteCount || 0,
+          packagesList: o.packagesList || [],
         }));
 
         const todo = allOrders.filter((o: any) => {
@@ -99,7 +113,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
       <View className="flex-row items-center justify-between px-5 pt-4 bg-white">
         {/* Back Button matching CustomHeader */}
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
           style={{ alignItems: "flex-start" }}
           activeOpacity={0.7}
         >
@@ -226,9 +240,24 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                       key={order.id}
                       onPress={() => {
                         if (isTop) {
+                          const nextOrder = todoOrders[idx + 1];
                           navigation.navigate("ReadyToPrint", {
+                            processOrderId: order.id,
                             orderNumber: `${order.orderNumber} (${order.type})`,
+                            invoiceNumber: order.orderNumber,
                             category: order.category,
+                            packagesCount: (order as any).packagesCount || 0,
+                            alacarteCount: (order as any).alacarteCount || 0,
+                            packagesList: (order as any).packagesList || [],
+                            nextOrderNumber: nextOrder
+                              ? `${nextOrder.orderNumber} (${nextOrder.type})`
+                              : null,
+                            nextTimeSlot: nextOrder
+                              ? timeSlotMap[nextOrder.timeSlot] || nextOrder.timeSlot
+                              : null,
+                            nextCategory: nextOrder
+                              ? nextOrder.category
+                              : null,
                           });
                         }
                       }}

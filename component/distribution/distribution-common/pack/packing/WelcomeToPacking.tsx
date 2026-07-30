@@ -7,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -78,7 +79,17 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
     };
 
     fetchCrops();
-  }, [positionId]);
+
+    const onBackPress = () => {
+      navigation.navigate("SelectRow");
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
+  }, [positionId, navigation]);
 
   return (
     <View className="flex-1 bg-white">
@@ -86,6 +97,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
       <CustomHeader
         title=""
         navigation={navigation}
+        onBackPress={() => navigation.navigate("SelectRow")}
       />
 
       {/* Main Content scroll area */}
@@ -171,8 +183,9 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
           <TouchableOpacity
             onPress={() => {
               navigation.navigate("Packing", {
-                orderNumber: "26050500001 (R)",
-                category: "Pickup Order",
+                positionId: positionId,
+                positionName: positionName,
+                positionCrops: products,
               });
             }}
             className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
