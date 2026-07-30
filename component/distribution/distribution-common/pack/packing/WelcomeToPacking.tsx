@@ -153,7 +153,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
               <View className="flex-grow justify-center items-center py-6">
                 <View className="w-56 h-56 justify-center items-center">
                   <LottieView
-                    source={require("../../../assets/lottie/no-data.json")}
+                    source={require("../../../../../assets/lottie/no-data.json")}
                     autoPlay
                     loop
                     style={{ width: "100%", height: "100%" }}

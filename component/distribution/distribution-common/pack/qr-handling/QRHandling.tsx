@@ -140,7 +140,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           <View className="flex-1 justify-center items-center">
             <View className="w-56 h-56 justify-center items-center">
               <LottieView
-                source={require("../../../assets/lottie/no-data.json")}
+                source={require("../../../../../assets/lottie/no-data.json")}
                 autoPlay
                 loop
                 style={{ width: "100%", height: "100%" }}

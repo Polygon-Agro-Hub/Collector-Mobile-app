@@ -149,7 +149,7 @@ export default function Packing({
             {/* Lottie sand-clock-timer animation */}
             <View className="w-56 h-56 justify-center items-center mb-10">
               <LottieView
-                source={require("../../../assets/lottie/packing/sand-clock-timer.json")}
+                source={require("../../../../../assets/lottie/packing/sand-clock-timer.json")}
                 autoPlay
                 loop
                 style={{ width: "100%", height: "100%" }}
@@ -172,7 +172,7 @@ export default function Packing({
             {/* Lottie down-arrow animation rotated to the right */}
             <View style={{ transform: [{ rotate: "-90deg" }] }} className="w-40 h-40 justify-center items-center mb-10">
               <LottieView
-                source={require("../../../assets/lottie/packing/down-arrow.json")}
+                source={require("../../../../../assets/lottie/packing/down-arrow.json")}
                 autoPlay
                 loop
                 style={{ width: "100%", height: "100%" }}
