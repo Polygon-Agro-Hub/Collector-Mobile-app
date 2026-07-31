@@ -38,12 +38,15 @@ export default function ReadyToPrint({
     };
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      onBackPress
+      onBackPress,
     );
     return () => backHandler.remove();
   }, [navigation]);
 
-  const actualPackagesCount = (packagesList && packagesList.length > 0) ? packagesList.length : packagesCount;
+  const actualPackagesCount =
+    packagesList && packagesList.length > 0
+      ? packagesList.length
+      : packagesCount;
   const formattedPackages = String(actualPackagesCount).padStart(2, "0");
   const formattedAlacarte = String(alacarteCount).padStart(2, "0");
   const qrValue = invoiceNumber || orderNumber;
@@ -126,22 +129,18 @@ export default function ReadyToPrint({
           </Text>
 
           {/* Available Packages Row */}
-          <View className="flex-row justify-between items-center py-2.5 border-b border-gray-50">
-            <View className="px-3 py-1.5 rounded-lg bg-[#FAFAFB]">
-              <Text className="text-xs font-bold text-[#030E25]">Packages</Text>
-            </View>
+          <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
+            <Text className="text-xs font-bold text-[#030E25]">Packages</Text>
             <Text className="text-[#980775] font-extrabold text-base">
               {formattedPackages}
             </Text>
           </View>
 
           {/* À la carte Row */}
-          <View className="flex-row justify-between items-center py-2.5">
-            <View className="px-3 py-1.5 rounded-lg bg-[#FAFAFB]">
-              <Text className="text-xs font-bold text-[#030E25]">
-                À la carte Items
-              </Text>
-            </View>
+          <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
+            <Text className="text-xs font-bold text-[#030E25]">
+              À la carte Items
+            </Text>
             <Text className="text-[#980775] font-extrabold text-base">
               {formattedAlacarte}
             </Text>
@@ -161,6 +160,8 @@ export default function ReadyToPrint({
               packagesList: route.params?.packagesList || [],
               alacarteCount: alacarteCount,
               rowId: route.params?.rowId,
+              isReprint: route.params?.isReprint || false,
+              buttonLabel: route.params?.buttonLabel || "Start",
             });
           }}
           className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
@@ -173,7 +174,9 @@ export default function ReadyToPrint({
             elevation: 3,
           }}
         >
-          <Text className="text-white font-extrabold text-base">Start</Text>
+          <Text className="text-white font-extrabold text-base">
+            {route.params?.buttonLabel || "Start"}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

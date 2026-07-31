@@ -14,6 +14,7 @@ import LottieView from "lottie-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import { getSocket } from "@/services/socket";
 
 interface OrderData {
   id: number;
@@ -47,6 +48,15 @@ export default function QRHandling({ navigation }: { navigation: any }) {
   useEffect(() => {
     fetchOrders();
 
+    const socket = getSocket();
+    const handleRealTimeUpdate = () => {
+      fetchOrders();
+    };
+
+    socket.on("order_opened", handleRealTimeUpdate);
+    socket.on("position_index_updated", handleRealTimeUpdate);
+    socket.on("target_updated", handleRealTimeUpdate);
+
     const onBackPress = () => {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
       return true;
@@ -55,7 +65,12 @@ export default function QRHandling({ navigation }: { navigation: any }) {
       "hardwareBackPress",
       onBackPress
     );
-    return () => backHandler.remove();
+    return () => {
+      socket.off("order_opened", handleRealTimeUpdate);
+      socket.off("position_index_updated", handleRealTimeUpdate);
+      socket.off("target_updated", handleRealTimeUpdate);
+      backHandler.remove();
+    };
   }, [navigation]);
 
   const fetchOrders = async () => {
@@ -85,13 +100,15 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
         const todo = allOrders.filter((o: any) => {
           const raw = response.data.data.find((item: any) => item.id === o.id);
-          return raw.orderStatus !== 'Completed';
+          const minPIndex = raw ? Number(raw.minPIndex || 0) : 0;
+          return minPIndex === 0 && raw.orderStatus !== 'Completed';
         });
 
         const done = allOrders.filter((o: any) => {
           const raw = response.data.data.find((item: any) => item.id === o.id);
-          return raw.orderStatus === 'Completed';
-        });
+          const minPIndex = raw ? Number(raw.minPIndex || 0) : 0;
+          return minPIndex > 0 || raw.orderStatus === 'Completed';
+        }).reverse();
 
         setTodoOrders(todo);
         setDoneOrders(done);
@@ -214,33 +231,149 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
           <ScrollView
             className="flex-1 bg-white px-6"
+            contentContainerStyle={{ flexGrow: 1 }}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
           >
             {activeTab === "todo" ? (
-              <View className="gap-4">
-                {todoOrders.map((order, idx) => {
-                  const isTop = idx === 0;
-                  const formattedIndex = String(idx + 1).padStart(2, "0");
+              todoOrders.length === 0 ? (
+                <View
+                  className="flex-1 justify-center items-center my-auto py-10"
+                  style={{ flex: 1, justifyContent: "center", alignItems: "center", minHeight: 320 }}
+                >
+                  <View className="w-48 h-48 justify-center items-center">
+                    <LottieView
+                      source={require("../../../../../assets/lottie/no-data.json")}
+                      autoPlay
+                      loop
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </View>
+                  <Text className="text-[#54617D] text-sm font-medium text-center mt-4">
+                    No orders to print in To Do list.
+                  </Text>
+                </View>
+              ) : (
+                <View className="gap-4 pb-8">
+                  {todoOrders.map((order, idx) => {
+                    const isTop = idx === 0;
+                    const formattedIndex = String(idx + 1).padStart(2, "0");
 
-                  // Focused styling for top card, default styling for others
-                  const cardBorderColor = isTop
-                    ? "border-[#980775] border-2"
-                    : "border-gray-100 border";
-                  const indexBgColor = isTop
-                    ? "bg-[#980775]"
-                    : "bg-slate-50 border-gray-100 border";
-                  const indexTextColor = isTop
-                    ? "text-white"
-                    : "text-slate-800";
+                    // Focused styling for top card, default styling for others
+                    const cardBorderColor = isTop
+                      ? "border-[#980775] border-2"
+                      : "border-gray-100 border";
+                    const indexBgColor = isTop
+                      ? "bg-[#980775]"
+                      : "bg-slate-50 border-gray-100 border";
+                    const indexTextColor = isTop
+                      ? "text-white"
+                      : "text-slate-800";
 
-                  return (
-                    <TouchableOpacity
-                      key={order.id}
-                      onPress={() => {
-                        if (isTop) {
-                          const nextOrder = todoOrders[idx + 1];
+                    return (
+                      <TouchableOpacity
+                        key={order.id}
+                        onPress={() => {
+                          if (isTop) {
+                            const nextOrder = todoOrders[idx + 1];
+                            navigation.navigate("ReadyToPrint", {
+                              processOrderId: order.id,
+                              orderNumber: `${order.orderNumber} (${order.type})`,
+                              invoiceNumber: order.orderNumber,
+                              category: order.category,
+                              packagesCount: (order as any).packagesCount || 0,
+                              alacarteCount: (order as any).alacarteCount || 0,
+                              packagesList: (order as any).packagesList || [],
+                              nextOrderNumber: nextOrder
+                                ? `${nextOrder.orderNumber} (${nextOrder.type})`
+                                : null,
+                              nextTimeSlot: nextOrder
+                                ? timeSlotMap[nextOrder.timeSlot] || nextOrder.timeSlot
+                                : null,
+                              nextCategory: nextOrder
+                                ? nextOrder.category
+                                : null,
+                            });
+                          }
+                        }}
+                        className={`flex-row items-center bg-white rounded-2xl p-4 shadow-sm ${cardBorderColor}`}
+                        style={{
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.05,
+                          shadowRadius: 2,
+                          elevation: 1,
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        {/* Circle Indicator */}
+                        <View
+                          className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${indexBgColor}`}
+                        >
+                          <Text
+                            className={`font-bold text-base ${indexTextColor}`}
+                          >
+                            {formattedIndex}
+                          </Text>
+                        </View>
+
+                        {/* Content */}
+                        <View className="flex-1">
+                          <Text className="font-bold text-slate-950 text-base">
+                            {order.orderNumber} ({order.type})
+                          </Text>
+                          <Text className="text-sm font-bold text-slate-900 mt-0.5">
+                            {order.timeSlot}
+                          </Text>
+                          <Text className="text-xs text-[#54617D] mt-0.5">
+                            {order.category}
+                          </Text>
+                        </View>
+
+                        {/* Chevron Right */}
+                        <Ionicons
+                          name="chevron-forward"
+                          size={20}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )
+            ) : (
+              doneOrders.length === 0 ? (
+                <View
+                  className="flex-1 justify-center items-center my-auto py-10"
+                  style={{ flex: 1, justifyContent: "center", alignItems: "center", minHeight: 320 }}
+                >
+                  <View className="w-48 h-48 justify-center items-center">
+                    <LottieView
+                      source={require("../../../../../assets/lottie/no-data.json")}
+                      autoPlay
+                      loop
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </View>
+                  <Text className="text-[#54617D] text-sm font-medium text-center mt-4">
+                    No completed orders in Done list yet.
+                  </Text>
+                </View>
+              ) : (
+                <View className="gap-4 pb-8">
+                  {doneOrders.map((order, idx) => {
+                    const formattedIndex = String(idx + 1).padStart(2, "0");
+
+                    // Done list: all cards are highlighted with purple/magenta border and index circle
+                    const cardBorderColor = "border-[#980775] border-2";
+                    const indexBgColor = "bg-[#980775]";
+                    const indexTextColor = "text-white";
+
+                    return (
+                      <TouchableOpacity
+                        key={order.id}
+                        onPress={() => {
                           navigation.navigate("ReadyToPrint", {
                             processOrderId: order.id,
                             orderNumber: `${order.orderNumber} (${order.type})`,
@@ -249,119 +382,55 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                             packagesCount: (order as any).packagesCount || 0,
                             alacarteCount: (order as any).alacarteCount || 0,
                             packagesList: (order as any).packagesList || [],
-                            nextOrderNumber: nextOrder
-                              ? `${nextOrder.orderNumber} (${nextOrder.type})`
-                              : null,
-                            nextTimeSlot: nextOrder
-                              ? timeSlotMap[nextOrder.timeSlot] || nextOrder.timeSlot
-                              : null,
-                            nextCategory: nextOrder
-                              ? nextOrder.category
-                              : null,
+                            isReprint: true,
+                            buttonLabel: "Start Again",
                           });
-                        }
-                      }}
-                      className={`flex-row items-center bg-white rounded-2xl p-4 shadow-sm ${cardBorderColor}`}
-                      style={{
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.05,
-                        shadowRadius: 2,
-                        elevation: 1,
-                      }}
-                      activeOpacity={0.8}
-                    >
-                      {/* Circle Indicator */}
-                      <View
-                        className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${indexBgColor}`}
+                        }}
+                        className={`flex-row items-center bg-white rounded-2xl p-4 shadow-sm ${cardBorderColor}`}
+                        style={{
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.05,
+                          shadowRadius: 2,
+                          elevation: 1,
+                        }}
+                        activeOpacity={0.8}
                       >
-                        <Text
-                          className={`font-bold text-base ${indexTextColor}`}
+                        {/* Circle Indicator */}
+                        <View
+                          className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${indexBgColor}`}
                         >
-                          {formattedIndex}
-                        </Text>
-                      </View>
+                          <Text
+                            className={`font-bold text-base ${indexTextColor}`}
+                          >
+                            {formattedIndex}
+                          </Text>
+                        </View>
 
-                      {/* Content */}
-                      <View className="flex-1">
-                        <Text className="font-bold text-slate-950 text-base">
-                          {order.orderNumber} ({order.type})
-                        </Text>
-                        <Text className="text-sm font-bold text-slate-900 mt-0.5">
-                          {order.timeSlot}
-                        </Text>
-                        <Text className="text-xs text-[#54617D] mt-0.5">
-                          {order.category}
-                        </Text>
-                      </View>
+                        {/* Content */}
+                        <View className="flex-1">
+                          <Text className="font-bold text-slate-950 text-base">
+                            {order.orderNumber} ({order.type})
+                          </Text>
+                          <Text className="text-sm font-bold text-slate-900 mt-0.5">
+                            {order.timeSlot}
+                          </Text>
+                          <Text className="text-xs text-[#54617D] mt-0.5">
+                            {order.category}
+                          </Text>
+                        </View>
 
-                      {/* Chevron Right */}
-                      <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color="black"
-                      />
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            ) : (
-              <View className="gap-4">
-                {doneOrders.map((order, idx) => {
-                  const formattedIndex = String(idx + 1).padStart(2, "0");
-
-                  // Done list: all cards are highlighted with purple/magenta border and index circle
-                  const cardBorderColor = "border-[#980775] border-2";
-                  const indexBgColor = "bg-[#980775]";
-                  const indexTextColor = "text-white";
-
-                  return (
-                    <TouchableOpacity
-                      key={order.id}
-                      className={`flex-row items-center bg-white rounded-2xl p-4 shadow-sm ${cardBorderColor}`}
-                      style={{
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.05,
-                        shadowRadius: 2,
-                        elevation: 1,
-                      }}
-                      activeOpacity={0.8}
-                    >
-                      {/* Circle Indicator */}
-                      <View
-                        className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${indexBgColor}`}
-                      >
-                        <Text
-                          className={`font-bold text-base ${indexTextColor}`}
-                        >
-                          {formattedIndex}
-                        </Text>
-                      </View>
-
-                      {/* Content */}
-                      <View className="flex-1">
-                        <Text className="font-bold text-slate-950 text-base">
-                          {order.orderNumber} ({order.type})
-                        </Text>
-                        <Text className="text-sm font-bold text-slate-900 mt-0.5">
-                          {order.timeSlot}
-                        </Text>
-                        <Text className="text-xs text-[#54617D] mt-0.5">
-                          {order.category}
-                        </Text>
-                      </View>
-
-                      {/* Chevron Right */}
-                      <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color="black"
-                      />
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                        {/* Chevron Right */}
+                        <Ionicons
+                          name="chevron-forward"
+                          size={20}
+                          color="black"
+                        />
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )
             )}
           </ScrollView>
         </View>

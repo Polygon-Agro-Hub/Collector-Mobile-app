@@ -48,10 +48,11 @@ const Lanuage: React.FC<LanuageProps> = ({ navigation }) => {
       contentContainerStyle={{ flexGrow: 1, padding: 4 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="flex-1 bg-white justify-center">
+      <View className="flex-1 bg-white justify-center max-w-[500px] w-full mx-auto">
         <View className="items-center">
           <Image
             className="w-52 h-52 rounded-full"
+            style={{ width: 208, height: 208, maxWidth: "100%", alignSelf: "center" }}
             source={lg}
             resizeMode="contain"
           />

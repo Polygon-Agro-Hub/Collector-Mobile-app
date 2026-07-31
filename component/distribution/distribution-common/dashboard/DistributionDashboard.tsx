@@ -18,14 +18,15 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../../../types/types";
 import { useTranslation } from "react-i18next";
 import { Feather, FontAwesome6 } from "@expo/vector-icons";
+import DashboardSkeleton from "./DashboardSkeleton";
 
-type DistridutionaDashboardNavigationProps = StackNavigationProp<
+type DistributionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
   "DistridutionaDashboard"
 >;
 
-interface DistridutionaDashboardProps {
-  navigation: DistridutionaDashboardNavigationProps;
+interface DistributionDashboardProps {
+  navigation: DistributionDashboardNavigationProps;
 }
 
 interface ProfileData {
@@ -44,13 +45,14 @@ interface ProfileData {
   centerId: number;
 }
 
-const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
+const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   navigation,
 }) => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [jobRole, setJobeRole] = useState<string | null>(null);
   const [centerId, setCenterId] = useState<string | null>(null);
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
@@ -66,6 +68,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
   };
 
   const fetchUserProfile = async () => {
+    setIsLoadingProfile(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (token) {
@@ -81,6 +84,8 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       }
     } catch (error) {
       console.error("❌ Failed to fetch user profile:", error);
+    } finally {
+      setIsLoadingProfile(false);
     }
   };
 
@@ -213,7 +218,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
     if (isLoadingTarget) {
       return (
         <View
-          className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-4 mb-8 p-4"
+          className="bg-white mx-auto w-[90%] max-w-[500px] rounded-[35px] mt-4 mb-8 p-4"
           style={{
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 2 },
@@ -231,7 +236,7 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 mb-5 p-4 border-[1px] border-[#DF9301]">
+        <View className="bg-white mx-auto w-[90%] max-w-[500px] rounded-[35px] mt-3 mb-5 p-4 border-[1px] border-[#DF9301]">
           <Text className="text-center text-yellow-600 font-bold">
             🚀{t("DistridutionaDashboard.Keep")}
           </Text>
@@ -242,11 +247,13 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       );
     } else {
       return (
-         <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
+        <View className="bg-white mx-auto w-[90%] max-w-[500px] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
           <View className="flex-row justify-center items-center mb-2">
             <Image
               source={require("../../../../assets/images/dashboard/Applause.webp")}
+              style={{ width: 32, height: 32 }}
               className="w-8 h-8 mr-2"
+              resizeMode="contain"
             />
             <Text className="text-center text-[#2AAD7A] font-bold">
               {t("DistridutionaDashboard.Completed")}
@@ -270,7 +277,9 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
       icon: (
         <Image
           source={require("../../../../assets/images/dashboard/center-target.webp")}
+          style={{ width: 32, height: 32 }}
           className="w-8 h-8 absolute top-2 right-2"
+          resizeMode="contain"
         />
       ),
       onPress: () => navigation.navigate("SelectRow" as any),
@@ -337,46 +346,53 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
     return items;
   };
 
+  if ((isLoadingProfile || isLoadingTarget) && !refreshing) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <ScrollView
       className="flex-1 bg-white p-3"
+      contentContainerStyle={{ flexGrow: 1 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <TouchableOpacity
-        className="flex-row items-center p-4"
-        onPress={() => navigation.navigate("SideMenu")}
-      >
-        <Image
-          source={
-            profile?.image
-              ? { uri: profile.image }
-              : require("../../../../assets/images/auth/my-profile.webp")
-          }
-          className="w-16 h-16 rounded-full mr-3"
-        />
+      <View className="w-full max-w-[600px] mx-auto flex-1">
+        <TouchableOpacity
+          className="flex-row items-center p-4"
+          onPress={() => navigation.navigate("SideMenu")}
+        >
+          <Image
+            source={
+              profile?.image
+                ? { uri: profile.image }
+                : require("../../../../assets/images/auth/my-profile.webp")
+            }
+            style={{ width: 64, height: 64, borderRadius: 32 }}
+            className="w-16 h-16 rounded-full mr-3"
+            resizeMode="cover"
+          />
 
-        <View style={{ flex: 1 }}>
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-lg font-bold"
-          >
-            {getFullName()}
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-lg font-bold"
+            >
+              {getFullName()}
+            </Text>
 
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-500"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {getcompanyName()}
-          </Text>
-        </View>
-      </TouchableOpacity>
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-gray-500"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {getcompanyName()}
+            </Text>
+          </View>
+        </TouchableOpacity>
 
-      <View className="w-full max-w-[500px] mx-auto">
         {renderTargetStatus()}
 
         <View className="flex items-center justify-center mt-10">
@@ -452,4 +468,4 @@ const DistridutionaDashboard: React.FC<DistridutionaDashboardProps> = ({
   );
 };
 
-export default DistridutionaDashboard;
+export default DistributionDashboard;

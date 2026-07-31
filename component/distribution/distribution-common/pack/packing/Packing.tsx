@@ -8,7 +8,7 @@ import {
   Alert,
   BackHandler,
 } from "react-native";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import CustomHeader from "@/component/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -33,12 +33,13 @@ interface PackingItem {
   id: number;
   name: string;
   weight: string;
-  packType?: string;
+  packName?: string;
+  categoryType?: "package" | "alacarte";
   image: string;
   checked: boolean;
 }
 
-type PackingStatus = "waiting" | "no_items" | "has_items";
+type PackingStatus = "no_qr_yet" | "waiting" | "no_items" | "has_items";
 
 export default function Packing({
   route,
@@ -51,20 +52,26 @@ export default function Packing({
     orderNumber: initialOrderNumber,
     processOrderId: initialProcessOrderId,
     positionId,
+    positionName = "Packing Position 1",
     rowId,
     positionCrops = [],
   } = route.params || {};
 
-  const [activeProcessOrderId, setActiveProcessOrderId] = useState<number | null>(
-    initialProcessOrderId || null
-  );
+  const [activeProcessOrderId, setActiveProcessOrderId] = useState<
+    number | null
+  >(initialProcessOrderId || null);
   const [displayOrderTitle, setDisplayOrderTitle] = useState<string>(
-    initialOrderNumber || ""
+    initialOrderNumber || "",
   );
-  const [scheduledTime, setScheduledTime] = useState<string>("08:00 AM - 12:00 PM");
+  const [scheduledTime, setScheduledTime] = useState<string>(
+    "08:00 AM - 12:00 PM",
+  );
 
-  // Status state tracking: "waiting", "no_items", or "has_items"
-  const [status, setStatus] = useState<PackingStatus>("waiting");
+  const [activeOrderPackageId, setActiveOrderPackageId] = useState<number | null>(null);
+  const [currentPIndex, setCurrentPIndex] = useState<number | null>(null);
+
+  // Status state tracking: "no_qr_yet", "waiting", "no_items", or "has_items"
+  const [status, setStatus] = useState<PackingStatus>("no_qr_yet");
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
 
@@ -75,6 +82,8 @@ export default function Packing({
         id: c.id,
         name: c.name,
         weight: c.weight || "1.0 kg",
+        packName: c.packName || "Fruity Pack",
+        categoryType: c.categoryType || "package",
         checked: false,
         image:
           c.image ||
@@ -99,7 +108,7 @@ export default function Packing({
     };
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      onBackPress
+      onBackPress,
     );
 
     // Socket.IO real-time event listener & room joining
@@ -129,7 +138,7 @@ export default function Packing({
 
       const response = await axios.get(
         `${environment.API_BASE_URL}api/packing/positions/${positionId}/crops`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data && response.data.success && response.data.data) {
@@ -137,6 +146,8 @@ export default function Packing({
           id: c.id,
           name: c.name,
           weight: c.weight || "1.0 kg",
+          packName: c.packName || "Fruity Pack",
+          categoryType: c.categoryType || "package",
           checked: false,
           image:
             c.image ||
@@ -157,7 +168,7 @@ export default function Packing({
       // 1. Fetch active order details for officer
       const activeRes = await axios.get(
         `${environment.API_BASE_URL}api/packing/active-order`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (activeRes.data && activeRes.data.success && activeRes.data.data) {
@@ -168,20 +179,57 @@ export default function Packing({
         if (activeData.processOrderId) {
           setActiveProcessOrderId(activeData.processOrderId);
         }
+        setActiveOrderPackageId(activeData.activeOrderPackageId || null);
         if (activeData.timeSlot) {
-          setScheduledTime(timeSlotMap[activeData.timeSlot] || activeData.timeSlot);
+          setScheduledTime(
+            timeSlotMap[activeData.timeSlot] || activeData.timeSlot,
+          );
         }
 
         const orderStatus = activeData.orderStatus;
-        const pIndex = activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
-        const officerPosIndex = activeData.officerPosIndex !== undefined ? Number(activeData.officerPosIndex) : 1;
+        const pIndex =
+          activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
+        setCurrentPIndex(pIndex);
 
-        if (orderStatus === "Pending" || pIndex < officerPosIndex) {
+        const officerPosIndex =
+          activeData.officerPosIndex !== undefined
+            ? Number(activeData.officerPosIndex)
+            : 1;
+
+        if (orderStatus === "Pending") {
+          // No QR code printed yet!
+          setStatus("no_qr_yet");
+        } else if (pIndex > 0 && pIndex !== officerPosIndex) {
+          // Package is currently at a different position step (waiting for box to arrive or already passed)
           setStatus("waiting");
         } else if (orderStatus === "Opened" || orderStatus === "Completed") {
-          if (items.length > 0) {
+          const orderItems = activeData.orderItems || [];
+          if (orderItems.length > 0) {
+            setItems(
+              orderItems.map((item: any) => {
+                const resolvedPackName =
+                  item.packName && item.packName !== "À la carte"
+                    ? item.packName
+                    : item.categoryType === "alacarte"
+                      ? "À la carte"
+                      : "Daily Veggie Pack";
+                const isAlacarte = resolvedPackName === "À la carte";
+                return {
+                  id: item.id,
+                  name: item.name,
+                  weight: item.weight || "1.0 kg",
+                  packName: resolvedPackName,
+                  categoryType: isAlacarte ? "alacarte" : "package",
+                  checked: false,
+                  image:
+                    item.image ||
+                    "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+                };
+              }),
+            );
             setStatus("has_items");
           } else {
+            setItems([]);
             setStatus("no_items");
           }
         }
@@ -189,12 +237,19 @@ export default function Packing({
         // Fallback to checking specific orderStatus if active-order endpoint returns null
         const res = await axios.get(
           `${environment.API_BASE_URL}api/packing/order-status/${activeProcessOrderId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (res.data && res.data.success && res.data.data) {
           const orderStatus = res.data.data.orderStatus;
-          const pIndex = res.data.data.pIndex !== undefined ? Number(res.data.data.pIndex) : 0;
-          if (orderStatus === "Pending" || pIndex < 1) {
+          const pIndex =
+            res.data.data.pIndex !== undefined
+              ? Number(res.data.data.pIndex)
+              : 0;
+          setCurrentPIndex(pIndex);
+
+          if (orderStatus === "Pending") {
+            setStatus("no_qr_yet");
+          } else if (pIndex > 0 && pIndex < 1) {
             setStatus("waiting");
           } else if (orderStatus === "Opened" || orderStatus === "Completed") {
             if (items.length > 0) {
@@ -203,37 +258,58 @@ export default function Packing({
               setStatus("no_items");
             }
           }
+        } else {
+          setStatus("no_qr_yet");
         }
+      } else {
+        setStatus("no_qr_yet");
       }
     } catch (err) {
       console.error("Error fetching active order tracking status:", err);
+      setStatus("no_qr_yet");
     }
   };
 
   const handleToggleCheck = (id: number) => {
     setItems(
       items.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+        item.id === id ? { ...item, checked: !item.checked } : item,
+      ),
     );
   };
 
-  const allItemsChecked = items.length > 0 && items.every((item) => item.checked);
+  const allItemsChecked =
+    items.length > 0 && items.every((item) => item.checked);
 
   const handleAdvancePosition = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      const targetOrderId = activeProcessOrderId || initialProcessOrderId || 3221;
+      const targetOrderId =
+        activeProcessOrderId || initialProcessOrderId || 3221;
+      const payload = {
+        orderId: targetOrderId,
+        orderpackageId: activeOrderPackageId || null,
+        currentPIndex: currentPIndex || 1,
+        rowId: rowId,
+      };
+      console.log("=== PACKING ADVANCE POSITION REQ PAYLOAD ===", payload);
+
       const res = await axios.post(
         `${environment.API_BASE_URL}api/packing/advance-position`,
-        { orderId: targetOrderId, rowId: rowId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } },
       );
+
+      console.log("=== PACKING ADVANCE POSITION RESPONSE ===", res.data);
+
       if (res.data && res.data.success) {
         setAlertMessage(
-          res.data.message || "Position advanced to next packer successfully."
+          res.data.message || "Position advanced to next packer successfully.",
         );
         setAlertVisible(true);
+        fetchActiveOrderAndStatus();
+      } else if (res.data && !res.data.success) {
+        Alert.alert("Station Busy", res.data.message || "The next station is currently busy.");
       }
     } catch (err) {
       console.error("Error advancing position index:", err);
@@ -241,74 +317,75 @@ export default function Packing({
     }
   };
 
-  // Helper toggle for manual testing
-  const handleHeaderBadgePress = () => {
-    if (status === "waiting") {
-      setStatus("no_items");
-    } else if (status === "no_items") {
-      setStatus(items.length > 0 ? "has_items" : "waiting");
-    } else {
-      setStatus("waiting");
-    }
-  };
-
   return (
     <View className="flex-1 bg-white">
       {/* Standard Custom Header displaying REAL invoice number */}
       <CustomHeader
-        title={displayOrderTitle}
+        title={status === "no_qr_yet" ? "" : displayOrderTitle}
         navigation={navigation}
         onBackPress={() => navigation.navigate("SelectRow")}
-        rightComponent={
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={handleHeaderBadgePress}
-              className="px-2 py-1 rounded bg-slate-100"
-              activeOpacity={0.7}
-            >
-              <Text className="text-[9px] font-bold text-slate-500 uppercase">
-                {status === "waiting"
-                  ? "Prev Pos"
-                  : status === "no_items"
-                  ? "No Items"
-                  : "Has Items"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        }
       />
 
       <ScrollView
         className="flex-1 bg-white px-6"
         contentContainerStyle={{
           flexGrow: 1,
-          justifyContent: status === "has_items" ? "flex-start" : "center",
-          paddingBottom: 100,
+          justifyContent:
+            status === "has_items" || status === "no_qr_yet"
+              ? "flex-start"
+              : "center",
+          paddingBottom: 40,
         }}
       >
-        {/* Scheduled Time Section matching previous UI design */}
-        <View className="mb-4 pt-2">
-          <Text className="text-[#54617D] text-xs font-semibold uppercase tracking-wider mb-1">
-            Scheduled Time
-          </Text>
-          <View className="flex-row items-center bg-[#FAFAFB] border border-[#E1E7EE] rounded-2xl px-4 py-3">
-            <Feather name="clock" size={18} color="#030E25" style={{ marginRight: 10 }} />
-            <Text className="text-[#030E25] font-extrabold text-sm">
-              {scheduledTime}
-            </Text>
+        {/* Scheduled Time Section matching user screenshot design */}
+        {status !== "no_qr_yet" && (
+          <View className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
+            <View className="w-11 h-11 rounded-full bg-[#E9ECF1] items-center justify-center mr-4">
+              <FontAwesome6 name="bag-shopping" size={24} color="black" />
+            </View>
+            <View>
+              <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
+                Scheduled Time :
+              </Text>
+              <Text className="text-[#030E25] font-extrabold text-base">
+                {scheduledTime}
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
+
+        {/* STATE 0: No QR printed yet for this target / row */}
+        {status === "no_qr_yet" && (
+          <View className="flex-1">
+            {/* Text Section at Top */}
+            <View className="items-center mt-4 mb-2">
+              <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
+                Welcome to {positionName}
+              </Text>
+              <Text className="text-[#54617D] text-sm text-center px-4 font-medium leading-5">
+                Please wait and check again.{"\n"}This row doesn't have a daily
+                target yet.
+              </Text>
+            </View>
+
+            {/* No Data Icon Centered */}
+            <View className="flex-1 justify-center items-center py-6">
+              <View className="w-56 h-56 justify-center items-center">
+                <LottieView
+                  source={require("../../../../../assets/lottie/no-data.json")}
+                  autoPlay
+                  loop
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* STATE 1: Waiting for previous position */}
         {status === "waiting" && (
-          <View className="items-center justify-center py-10">
-            <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
-              Please Wait
-            </Text>
-            <Text className="text-[#54617D] text-sm text-center mb-8 px-6 font-medium leading-5">
-              This order is still with the{"\n"}previous position
-            </Text>
-            <View className="w-56 h-56 justify-center items-center">
+          <View className="flex-1 items-center py-6">
+            <View className="w-56 h-56 justify-center items-center mb-6">
               <LottieView
                 source={require("../../../../../assets/lottie/packing/sand-clock-timer.json")}
                 autoPlay
@@ -316,75 +393,99 @@ export default function Packing({
                 style={{ width: "100%", height: "100%" }}
               />
             </View>
+            <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
+              This order is still with the{"\n"}previous position
+            </Text>
+            <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
+              Please try reloading the page in a few seconds.
+            </Text>
           </View>
         )}
 
         {/* STATE 2: Opened, but No items at this position -> SHOW SKIP SCREEN */}
         {status === "no_items" && (
-          <View className="items-center justify-center py-10">
-            <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
-              No Items to Pack
-            </Text>
-            <Text className="text-[#54617D] text-sm text-center mb-8 px-6 font-medium leading-5">
-              No items to pack for this order{"\n"}at your position
-            </Text>
-            <View className="w-56 h-56 justify-center items-center">
-              <LottieView
-                source={require("../../../../../assets/lottie/packing/sand-clock-timer.json")}
-                autoPlay
-                loop
-                style={{ width: "100%", height: "100%" }}
-              />
+          <View className="flex-1">
+            {/* Lottie Animation Centered in middle (arrow-forward.json) */}
+            <View className="flex justify-center items-center py-6">
+              <View className="w-56 h-56 justify-center items-center">
+                <LottieView
+                  source={require("../../../../../assets/lottie/packing/arrow-forward.json")}
+                  autoPlay
+                  loop
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </View>
+            </View>
+            <View className="items-center mt-4 mb-2">
+              <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
+                No items to pack for this order{"\n"}at your position
+              </Text>
+              <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
+                There are no items assigned to the position{"\n"}in the current
+                packing sequence.
+              </Text>
             </View>
           </View>
         )}
 
         {/* STATE 3: Has items assigned to this position */}
         {status === "has_items" && (
-          <View className="pt-4">
-            <Text className="text-[#54617D] text-xs font-semibold mb-4 uppercase tracking-wider">
-              Items to pack
-            </Text>
-            {items.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => handleToggleCheck(item.id)}
-                className="flex-row items-center bg-white border border-gray-150 rounded-2xl p-4 shadow-sm mb-4"
-                activeOpacity={0.8}
-              >
-                {/* Product Image */}
-                <View className="w-14 h-14 rounded-full overflow-hidden items-center justify-center bg-slate-50 mr-4">
-                  <Image
-                    source={{ uri: item.image }}
-                    className="w-full h-full"
-                    resizeMode="cover"
-                  />
-                </View>
+          <View className="pt-1">
+            {items.map((item, index) => {
+              const isAlacarte =
+                item.categoryType === "alacarte" ||
+                item.packName === "À la carte";
+              const packColor = isAlacarte
+                ? "text-[#AC7F5E]"
+                : "text-[#980775]";
 
-                {/* Details */}
-                <View className="flex-1">
-                  <Text className="text-[#030E25] font-extrabold text-sm leading-4">
-                    {item.name}
-                  </Text>
-                  <Text className="text-gray-900 font-bold text-sm mt-0.5">
-                    {item.weight}
-                  </Text>
-                </View>
-
-                {/* Checkbox */}
-                <View
-                  className={`w-6 h-6 rounded-md items-center justify-center border-2 ${
-                    item.checked
-                      ? "bg-[#980775] border-[#980775]"
-                      : "border-gray-300 bg-white"
-                  }`}
+              return (
+                <TouchableOpacity
+                  key={`${item.id}_${index}`}
+                  onPress={() => handleToggleCheck(item.id)}
+                  className="flex-row items-center justify-between bg-white border border-[#E1E7EE] rounded-2xl p-4 mb-4 shadow-sm"
+                  activeOpacity={0.8}
                 >
-                  {item.checked && (
-                    <Ionicons name="checkmark" size={16} color="white" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
+                  <View className="flex-row items-center flex-1 mr-3">
+                    {/* Product Image */}
+                    <View className="w-16 h-16 rounded-full overflow-hidden items-center justify-center bg-slate-50 mr-4">
+                      <Image
+                        source={{ uri: item.image }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                      />
+                    </View>
+
+                    {/* Details */}
+                    <View className="flex-1">
+                      <Text className="text-[#030E25] font-bold text-base leading-5 mb-0.5">
+                        {item.name}
+                      </Text>
+                      <Text className="text-[#030E25] font-extrabold text-base mb-1">
+                        {item.weight}
+                      </Text>
+                      <Text className={`font-semibold text-xs ${packColor}`}>
+                        {item.packName ||
+                          (isAlacarte ? "À la carte" : "Fruity Pack")}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Checkbox */}
+                  <View
+                    className={`w-6 h-6 rounded-md items-center justify-center border-2 ${
+                      item.checked
+                        ? "bg-[#980775] border-[#980775]"
+                        : "border-[#030E25] bg-white"
+                    }`}
+                  >
+                    {item.checked && (
+                      <Ionicons name="checkmark" size={16} color="white" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </ScrollView>
@@ -425,7 +526,7 @@ export default function Packing({
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);
-          navigation.navigate("SelectRow");
+          fetchActiveOrderAndStatus();
         }}
       />
     </View>

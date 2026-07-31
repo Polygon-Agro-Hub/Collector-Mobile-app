@@ -68,7 +68,7 @@ import NewReport from "@/component/collection-common/NewReport";
 import TransactionReport from "@/component/collection-manager/TransactionReport";
 import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
 import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
-import DistridutionaDashboard from "@/component/distribution/distribution-common/dashboard/DistridutionaDashboard";
+import DistributionDashboard from "@/component/distribution/distribution-common/dashboard/DistributionDashboard";
 import PurchaseShortage from "@/component/distribution/distribution-common/purchase-shortage/PurchaseShortage";
 import PurchaseProduct from "@/component/distribution/distribution-common/purchase-shortage/PurchaseProduct";
 import DistributionOfficersList from "@/component/distribution/distribution-center-manager/manage-officers/DistributionOfficersList";
@@ -160,7 +160,7 @@ function MainTabNavigator() {
       />
       <Tab.Screen
         name="DistridutionaDashboard"
-        component={DistridutionaDashboard as any}
+        component={DistributionDashboard as any}
       />
       <Tab.Screen
         name="PurchaseShortage"

@@ -16,7 +16,9 @@ import AlertModal from "@/component/commons/AlertModal";
 
 interface PrintStep {
   id: number;
+  type: "main" | "package" | "alacarte";
   label: string;
+  formattedIndex: string;
   textColor: string;
   circleBgColor: string;
   circleTextColor: string;
@@ -57,14 +59,19 @@ export default function PrintingConfirmation({
   // Build dynamic print steps based on package count
   const steps: PrintStep[] = [];
 
-  // 1. If packages > 1, add Main Container as Step 1
-  if (packagesList && packagesList.length > 1) {
+  // Calculate total physical boxes (Package boxes + 1 Alacarte box if present)
+  const totalBoxes = (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
+
+  // 1. If total physical boxes > 1, add Main Container as Step 1
+  if (totalBoxes > 1) {
     steps.push({
       id: 1,
+      type: "main",
       label: "Main Container",
-      textColor: "text-black",
+      formattedIndex: "01",
+      textColor: "#000000",
       circleBgColor: "bg-slate-100",
-      circleTextColor: "text-slate-700",
+      circleTextColor: "text-black",
     });
   }
 
@@ -72,11 +79,13 @@ export default function PrintingConfirmation({
   if (packagesList && packagesList.length > 0) {
     packagesList.forEach((pkg: PackageItem) => {
       const stepId = steps.length + 1;
-      const countStr = String(pkg.count).padStart(2, "0");
+      const formattedIndex = String(stepId).padStart(2, "0");
       steps.push({
         id: stepId,
-        label: `${countStr} ${pkg.name}`,
-        textColor: "text-[#980775]",
+        type: "package",
+        label: pkg.name,
+        formattedIndex,
+        textColor: "#980775",
         circleBgColor: "bg-[#fdf4ff]",
         circleTextColor: "text-[#980775]",
       });
@@ -86,11 +95,13 @@ export default function PrintingConfirmation({
   // 3. Add final À la carte step
   if (alacarteCount > 0) {
     const stepId = steps.length + 1;
-    const countStr = String(alacarteCount).padStart(2, "0");
+    const formattedIndex = String(stepId).padStart(2, "0");
     steps.push({
       id: stepId,
-      label: `${countStr} À la carte`,
-      textColor: "text-[#AC7F5E]",
+      type: "alacarte",
+      label: "À la carte",
+      formattedIndex,
+      textColor: "#AC7F5E",
       circleBgColor: "bg-[#fdf8f6]",
       circleTextColor: "text-[#AC7F5E]",
     });
@@ -123,11 +134,26 @@ export default function PrintingConfirmation({
 
   const handlePrintPress = async () => {
     try {
+      const isReprint = route.params?.isReprint;
+      if (isReprint) {
+        setAlertType("success");
+        setAlertTitle("Success");
+        if (currentStep < steps.length) {
+          const stepName = steps[currentStep - 1]?.label || "Package";
+          setAlertMessage(`${stepName} QR Code Re-printed Successfully!`);
+        } else {
+          setAlertMessage(`All packages for order ${orderNumber} re-printed successfully!`);
+        }
+        setAlertVisible(true);
+        return;
+      }
+
       const token = await AsyncStorage.getItem("token");
       const processOrderId = route.params?.processOrderId || route.params?.orderId || 3131;
       
       let currentPackageId: number | null = null;
-      const hasMainContainer = packagesList && packagesList.length > 1;
+      const totalPhysicalBoxes = (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
+      const hasMainContainer = totalPhysicalBoxes > 1;
       const packageStepIndex = hasMainContainer ? currentStep - 2 : currentStep - 1;
 
       if (packagesList && packageStepIndex >= 0 && packageStepIndex < packagesList.length) {
@@ -240,7 +266,7 @@ export default function PrintingConfirmation({
               <View key={s.id} className="flex-1 items-center">
                 <View
                   className={`w-full h-1.5 rounded-full mb-1 ${
-                    isFilled ? "bg-[#980775]" : "bg-gray-200"
+                    isFilled ? "bg-[#030E25]" : "bg-gray-200"
                   }`}
                 />
               </View>
@@ -250,11 +276,18 @@ export default function PrintingConfirmation({
 
         {/* Dynamic Step Active Pill Badge */}
         <View className="items-center mb-6">
-          <View
-            className={`px-5 py-2 rounded-full flex-row items-center gap-2 ${activeStep?.circleBgColor}`}
-          >
+          <View className="px-4 py-2 rounded-full flex-row items-center gap-2">
+            {/* Index Badge */}
+            <View className="bg-[#E9ECF1] px-2.5 py-2 rounded-full items-center justify-center">
+              <Text className="font-extrabold text-xs text-[#030E25]">
+                {activeStep?.formattedIndex}
+              </Text>
+            </View>
+
+            {/* Label Text */}
             <Text
-              className={`font-extrabold text-sm ${activeStep?.circleTextColor}`}
+              className="font-extrabold text-sm"
+              style={{ color: activeStep?.textColor || "#000000" }}
             >
               {activeStep?.label}
             </Text>
@@ -287,7 +320,7 @@ export default function PrintingConfirmation({
           activeOpacity={0.8}
         >
           <Text className="text-white font-extrabold text-base">
-            Print ({currentStep}/{steps.length})
+            {route.params?.isReprint ? "Start Again" : `Print (${currentStep})`}
           </Text>
         </TouchableOpacity>
       </View>

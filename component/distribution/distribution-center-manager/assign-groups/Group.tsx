@@ -87,6 +87,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
       <CustomHeader
         title="Groups"
         navigation={navigation}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
       {loading ? (

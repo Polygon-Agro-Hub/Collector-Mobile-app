@@ -388,6 +388,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         <View className="items-center">
           <Image
             source={loginImage}
+            style={{ width: 270, height: 270, maxWidth: "100%", alignSelf: "center" }}
             className="w-[270px] h-[270px]"
             resizeMode="contain"
           />
@@ -409,7 +410,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               empIdError ? "border-red-500" : "border-[#F4F4F4]"
             }`}
           >
-            <Image source={user} className="w-6 h-6" resizeMode="contain" />
+            <Image
+              source={user}
+              style={{ width: 24, height: 24 }}
+              className="w-6 h-6"
+              resizeMode="contain"
+            />
             <TextInput
               className="flex-1 text-base pl-2"
               onChangeText={handleEmpIdChange}
@@ -439,6 +445,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
             <Image
               source={passwordicon}
+              style={{ width: 24, height: 24 }}
               className="w-6 h-6"
               resizeMode="contain"
             />

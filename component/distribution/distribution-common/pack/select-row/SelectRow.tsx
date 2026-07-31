@@ -14,6 +14,8 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import { useDispatch } from "react-redux";
+import { setActiveAssignment } from "@/store/authSlice";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {
@@ -31,6 +33,7 @@ interface PositionData {
 }
 
 export default function SelectRow({ navigation }: { navigation: any }) {
+  const dispatch = useDispatch();
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(null);
@@ -151,6 +154,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       setShowConfirmModal(false);
 
       if (response.data && response.data.success) {
+        const assignmentData = {
+          rowId: selectedRow?.id || 0,
+          positionId: selectedPosition.id,
+          positionName: selectedPosition.name,
+          pType: selectedPosition.type,
+        };
+        dispatch(setActiveAssignment(assignmentData));
+        await AsyncStorage.setItem("activeAssignment", JSON.stringify(assignmentData));
+
         Alert.alert(
           "Confirmation Success",
           `You have been successfully assigned to ${selectedPosition.name} of ${selectedRow?.name}.`,
@@ -188,7 +200,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       setStep(1);
       setSelectedRow(null);
     } else {
-      navigation.goBack();
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
     }
   };
 

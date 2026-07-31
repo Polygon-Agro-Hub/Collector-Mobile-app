@@ -1,15 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export interface ActiveAssignmentState {
+  rowId: number;
+  positionId: number;
+  positionName: string;
+  pType: string;
+  targetId?: number;
+  timeSlot?: string;
+}
+
 interface AuthState {
   token: string | null;
   jobRole: string | null;
   empId: string | null;
+  activeAssignment: ActiveAssignmentState | null;
 }
 
 const initialState: AuthState = {
   token: null,
   jobRole: null,
   empId: null,
+  activeAssignment: null,
 };
 
 const authSlice = createSlice({
@@ -20,19 +31,29 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{ token: string; jobRole: string; empId: string }>,
     ) => {
-      const { token, jobRole, empId } = action.payload;
-      console.log("👤 User logged:", empId);
+      console.log("👤 User logged:", action.payload.empId);
       state.token = action.payload.token;
       state.jobRole = action.payload.jobRole;
       state.empId = action.payload.empId;
+    },
+    setActiveAssignment: (
+      state,
+      action: PayloadAction<ActiveAssignmentState>,
+    ) => {
+      console.log("📌 Active assignment saved in Redux:", action.payload);
+      state.activeAssignment = action.payload;
+    },
+    clearActiveAssignment: (state) => {
+      state.activeAssignment = null;
     },
     logoutUser: (state) => {
       state.token = null;
       state.jobRole = null;
       state.empId = null;
+      state.activeAssignment = null;
     },
   },
 });
 
-export const { setUser, logoutUser } = authSlice.actions;
+export const { setUser, setActiveAssignment, clearActiveAssignment, logoutUser } = authSlice.actions;
 export default authSlice.reducer;
