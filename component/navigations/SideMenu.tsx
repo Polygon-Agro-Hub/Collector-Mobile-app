@@ -145,10 +145,16 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
               headers: { Authorization: `Bearer ${token}` },
             },
           );
-          setProfile(response.data.data);
+          if (response.data && response.data.data) {
+            setProfile(response.data.data);
+          }
         }
-      } catch (error) {
-        console.error("Failed to fetch user profile:", error);
+      } catch (error: any) {
+        if (error.response?.status === 403 || error.response?.status === 401) {
+          console.log("User profile access restricted or unauthorized (403/401).");
+        } else {
+          console.warn("User profile fetch warning:", error.message || error);
+        }
       }
     };
 

@@ -229,3 +229,6 @@ Alert.alert = (title, message, buttons, options) => {
     }
   }
 };
+
+export default AlertModal;
+

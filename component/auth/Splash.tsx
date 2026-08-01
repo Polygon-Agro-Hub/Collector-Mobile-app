@@ -5,7 +5,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types/types";
 import { environment } from "@/environment/environment";
 import { useDispatch } from "react-redux";
-import { setUser } from "../../store/authSlice";
+import { setUser, logoutUser } from "../../store/authSlice";
 import * as Progress from "react-native-progress";
 
 type SplashNavigationProp = StackNavigationProp<RootStackParamList, "Splash">;
@@ -25,17 +25,17 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       handleTokenCheck();
-    }, 5000);
+    }, 1200);
 
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev < 1) {
-          return prev + 0.1;
+          return prev + 0.2;
         }
         clearInterval(progressInterval);
         return prev;
       });
-    }, 500);
+    }, 200);
 
     return () => {
       clearTimeout(timer);
@@ -66,21 +66,20 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
           message: data.message,
         };
       } else {
-        throw new Error("Failed to fetch password status");
+        return { passwordUpdated: 1 };
       }
     } catch (error) {
-      console.error("Error checking password status:", error);
-      throw error;
+      console.warn("Network check error in splash, using local session:", error);
+      return { passwordUpdated: 1 };
     }
   };
 
   const handleTokenCheck = async () => {
     try {
-    
       const hasLaunched = await AsyncStorage.getItem("hasLaunched");
       if (!hasLaunched) {
         await AsyncStorage.setItem("hasLaunched", "true");
-        navigation.navigate("Lanuage"); 
+        navigation.navigate("Lanuage");
         return;
       }
 
@@ -89,88 +88,89 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
       const role = await AsyncStorage.getItem("jobRole");
       const emp = await AsyncStorage.getItem("empid");
 
-      dispatch(
-        setUser({
-          token: userToken ?? "",
-          jobRole: role ?? "",
-          empId: emp ?? "",
-        }),
-      );
+      if (userToken) {
+        dispatch(
+          setUser({
+            token: userToken,
+            jobRole: role ?? "",
+            empId: emp ?? "",
+          }),
+        );
 
-      if (expirationTime && userToken) {
-        const currentTime = new Date();
-        const tokenExpiry = new Date(expirationTime);
-
-        if (currentTime < tokenExpiry) {
-          const result = await checkPasswordStatus(userToken);
-
-          if (result.isBanned) {
-            await AsyncStorage.multiRemove([
-              "token",
-              "tokenStoredTime",
-              "tokenExpirationTime",
-              "jobRole",
-              "empid",
-              "companyNameEnglish",
-              "companyNameSinhala",
-              "companyNameTamil",
-            ]);
-            navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: "BannedScreen",
-                  params: {
-                    statusType: result.accountStatus === "Rejected" ? "rejected" : "not_approved",
-                    message: result.message,
-                  },
-                },
-              ],
-            });
-            return;
+        let isExpired = false;
+        if (expirationTime) {
+          const currentTime = new Date();
+          const tokenExpiry = new Date(expirationTime);
+          if (currentTime >= tokenExpiry) {
+            isExpired = true;
           }
+        }
 
-          const passwordUpdated = result.passwordUpdated;
-
-          if (passwordUpdated === 0) {
-            navigation.navigate("Login");
-            return;
-          }
-
-          const jobRole = await AsyncStorage.getItem("jobRole");
-
-          if (jobRole === "Collection Officer") {
-            navigation.reset({
-              index: 0,
-              routes: [
-                { name: "Main", params: { screen: "CollectionOfficerDashboard" } },
-              ],
-            });
-          } else if (jobRole === "Collection Centre Manager") {
-            navigation.reset({
-              index: 0,
-              routes: [
-                { name: "Main", params: { screen: "ManagerDashboard" } },
-              ],
-            });
-          } else if (
-            jobRole === "Distribution Officer" ||
-            jobRole === "Distribution Centre Manager"
-          ) {
-            navigation.reset({
-              index: 0,
-              routes: [
-                { name: "Main", params: { screen: "DistridutionaDashboard" } },
-              ],
-            });
-          }
-        } else {
+        if (isExpired) {
           await AsyncStorage.multiRemove([
             "token",
             "tokenStoredTime",
             "tokenExpirationTime",
+            "jobRole",
+            "empid",
           ]);
+          dispatch(logoutUser());
           navigation.navigate("Login");
+          return;
+        }
+
+        const result = await checkPasswordStatus(userToken);
+
+        if (result.isBanned) {
+          await AsyncStorage.multiRemove([
+            "token",
+            "tokenStoredTime",
+            "tokenExpirationTime",
+            "jobRole",
+            "empid",
+            "companyNameEnglish",
+            "companyNameSinhala",
+            "companyNameTamil",
+          ]);
+          dispatch(logoutUser());
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "BannedScreen",
+                params: {
+                  statusType: result.accountStatus === "Rejected" ? "rejected" : "not_approved",
+                  message: result.message,
+                },
+              },
+            ],
+          });
+          return;
+        }
+
+        const jobRole = role || (await AsyncStorage.getItem("jobRole"));
+
+        if (jobRole === "Collection Officer") {
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: "Main", params: { screen: "CollectionOfficerDashboard" } },
+            ],
+          });
+        } else if (jobRole === "Collection Centre Manager") {
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: "Main", params: { screen: "ManagerDashboard" } },
+            ],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: "Main", params: { screen: "DistridutionaDashboard" } },
+            ],
+          });
         }
       } else {
         navigation.navigate("Login");
@@ -185,32 +185,37 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
   };
 
   return (
-    <View className="flex-1 bg-white relative justify-center">
-      <Image
-        source={top}
-        className="w-[50%] h-[18%] absolute left-0 top-0 -mt-2"
-        resizeMode="contain"
-      />
-      <Image
-        source={center}
-        className="w-full h-32 justify-center items-center"
-        resizeMode="contain"
-      />
-      <Text className="text-center text-[10px] mt-2">POWERED BY POLYGON</Text>
-      <View style={{ width: "80%", marginTop: 20, marginLeft: "10%" }}>
-        <Progress.Bar
-          progress={progress}
-          width={null}
-          color="#8C0876"
-          borderWidth={0}
-          style={{ height: 10, marginTop: 20 }}
+    <View className="flex-1 bg-white justify-center items-center">
+      <View className="w-full max-w-[500px] flex-1 justify-center relative items-center">
+        <Image
+          source={top}
+          style={{ width: "50%", height: "18%", maxWidth: 260, maxHeight: 130 }}
+          className="w-[50%] h-[18%] absolute left-0 top-0 -mt-2"
+          resizeMode="contain"
+        />
+        <Image
+          source={center}
+          style={{ width: "100%", height: 128, maxWidth: 380, alignSelf: "center" }}
+          className="w-full h-32 justify-center items-center"
+          resizeMode="contain"
+        />
+        <Text className="text-center text-[10px] mt-2">POWERED BY POLYGON</Text>
+        <View style={{ width: "80%", maxWidth: 360, marginTop: 20, alignSelf: "center" }}>
+          <Progress.Bar
+            progress={progress}
+            width={null}
+            color="#8C0876"
+            borderWidth={0}
+            style={{ height: 10, marginTop: 20 }}
+          />
+        </View>
+        <Image
+          source={bottom}
+          style={{ width: "50%", height: "18%", maxWidth: 260, maxHeight: 130 }}
+          className="w-[50%] h-[18%] absolute bottom-0 right-0"
+          resizeMode="contain"
         />
       </View>
-      <Image
-        source={bottom}
-        className="w-[50%] h-[18%] absolute bottom-0 right-0"
-        resizeMode="contain"
-      />
     </View>
   );
 };

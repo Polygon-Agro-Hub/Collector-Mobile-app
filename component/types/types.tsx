@@ -54,10 +54,9 @@ export type RootStackParamList = {
   ManagerTransactions: undefined;
   SearchFarmerScreen: undefined;
   DistridutionaDashboard: undefined;
-  TargetOrderScreen: undefined;
-  PassTarget: undefined;
+  PurchaseShortage: undefined;
+  PurchaseProduct: { product?: any } | undefined;
   DistributionOfficersList: undefined;
-  ReplaceRequestsScreen: undefined;
   ReceivedCash: undefined;
   ReceivedCashOfficer: undefined;
   CameraAccess: undefined;
@@ -230,26 +229,7 @@ export type RootStackParamList = {
     phoneNumber2: string;
     image: string;
   };
-  ReplaceRequestsApprove: {
-    replaceRequestData: {
-      id: string;
-      orderId: string;
-      orderPackageId: string;
-      productDisplayName: string;
-      productTypeName: string;
-      originalPrice: string;
-      originalQty: string;
-      status: string;
-      createdAt: string;
-      invNo: string;
-      productType: string;
-      productId: string;
-      userId: string;
-      packageId?: string;
-      productNormalPrice?: string;
-      productDiscountedPrice?: string;
-    };
-  };
+
   RegisterFarmer: {
     NIC: string;
   };
@@ -306,15 +286,7 @@ export type RootStackParamList = {
     farmerId: number;
     officerRole: string;
   };
-  CenterTargetScreen: {
-    centerId: number;
-  };
-  PendingOrderScreen: {
-    item: any;
-    centerCode: string;
-    status?: "Pending" | "Opened" | "Completed" | "In Progress";
-    orderId: string;
-  };
+
   CompletedOrderScreen: {
     item: string;
     centerCode: string;
@@ -327,14 +299,7 @@ export type RootStackParamList = {
     }>;
     fromScreen?: string;
   };
-  DailyTargetListOfficerDistribution: {
-    officerId: string;
-    collectionOfficerId: number;
-    officerName: string;
-    phoneNumber1: string;
-    phoneNumber2: string;
-    image: string;
-  };
+
   DigitalSignature: {
     orderId: Number;
     fromScreen: string;
