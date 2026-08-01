@@ -15,7 +15,7 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { setActiveAssignment } from "@/store/authSlice";
+import { setActiveAssignment } from "../../../../../store/authSlice";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {
@@ -160,7 +160,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           positionName: selectedPosition.name,
           pType: selectedPosition.type,
         };
-        dispatch(setActiveAssignment(assignmentData));
+        if (typeof setActiveAssignment === "function") {
+          const actionObj = setActiveAssignment(assignmentData);
+          if (actionObj) {
+            dispatch(actionObj);
+          }
+        }
         await AsyncStorage.setItem("activeAssignment", JSON.stringify(assignmentData));
 
         Alert.alert(

@@ -105,6 +105,8 @@ import Group from "@/component/distribution/distribution-center-manager/assign-g
 import SelectOrder from "@/component/distribution/distribution-center-manager/assign-groups/SelectOrder";
 import SelectRowToAssign from "@/component/distribution/distribution-center-manager/assign-groups/SelectRowToAssign";
 import ConfirmRowAssign from "@/component/distribution/distribution-center-manager/assign-groups/ConfirmRowAssign";
+import DistributionCenterTarget from "@/component/distribution/distribution-common/center-target/DistributionCenterTarget";
+import OrderDetails from "@/component/distribution/distribution-common/center-target/OrderDetails";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -249,6 +251,7 @@ function MainTabNavigator() {
 
       <Tab.Screen name="FarmerQr" component={FarmerQr} />
       <Tab.Screen name="CenterTarget" component={CenterTarget as any} />
+      <Tab.Screen name="DistributionCenterTarget" component={DistributionCenterTarget as any} />
       <Tab.Screen
         name="DistributionOfficerReport"
         component={DistributionOfficerReport as any}
@@ -646,6 +649,16 @@ function AppContent() {
             <Stack.Screen
               name="ConfirmRowAssign"
               component={ConfirmRowAssign as any}
+            />
+
+            <Stack.Screen
+              name="DistributionCenterTarget"
+              component={DistributionCenterTarget as any}
+            />
+
+            <Stack.Screen
+              name="OrderDetails"
+              component={OrderDetails as any}
             />
 
             <Stack.Screen

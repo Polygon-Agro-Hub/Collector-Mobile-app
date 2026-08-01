@@ -59,9 +59,10 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
         ];
 
       case ROLES.DISTRIBUTION_MANAGER:
+      case ROLES.DISTRIBUTION_OFFICER:
         return [
           { name: "DistridutionaDashboard", icon: homeIcon },
-          { name: "TargetOrderScreen", icon: qrIcon },
+          { name: "DistributionCenterTarget", icon: qrIcon },
           { name: "DistributionOfficersList", icon: adminIcon },
         ];
 
@@ -156,7 +157,6 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   // Hide conditions
   if (
     isKeyboardVisible ||
-    userRole === ROLES.DISTRIBUTION_OFFICER ||
     ["PurchaseProduct", "PurchaseShortage"].includes(currentTabName)
   )
     return null;
