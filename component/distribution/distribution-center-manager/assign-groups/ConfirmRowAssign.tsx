@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,24 +6,102 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  BackHandler,
+  StyleSheet,
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import Svg, { Circle } from "react-native-svg";
 import CustomHeader from "@/component/navigations/CustomHeader";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 
-export default function ConfirmRowAssign({ route, navigation }: { route: any; navigation: any }) {
-  const { 
-    selectedOrdersCount = 20, 
-    selectedOrderIds = [], 
-    group = { id: 1, timeSlotCode: "8-12", timeSlot: "08:00 AM - 12:00 PM" }, 
-    selectedRow = { id: "10", name: "Row 1" } 
+const CircularClockTimer = ({
+  seconds,
+  totalSeconds = 30,
+}: {
+  seconds: number;
+  totalSeconds?: number;
+}) => {
+  const size = 180;
+  const strokeWidth = 3.5;
+  const center = size / 2;
+  const radius = 72;
+  const circumference = 2 * Math.PI * radius;
+
+  const progress = Math.max(0, Math.min(1, seconds / totalSeconds));
+  const strokeDashoffset = circumference * (1 - progress);
+
+  // 12 o'clock start position (-90 deg)
+  const angleDeg = -90 + 360 * progress;
+  const angleRad = (angleDeg * Math.PI) / 180;
+  const dotX = center + radius * Math.cos(angleRad);
+  const dotY = center + radius * Math.sin(angleRad);
+
+  const formattedTime = `00:${String(seconds).padStart(2, "0")}`;
+
+  return (
+    <View style={styles.clockOuterWrapper}>
+      {/* Outer concentric shadow ring */}
+      <View style={styles.clockOuterRing}>
+        {/* Inner concentric ring */}
+        <View style={styles.clockInnerRing}>
+          <Svg width={size} height={size} style={styles.svg}>
+            {/* Background track circle */}
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke="#EDEDED"
+              strokeWidth={strokeWidth}
+              fill="none"
+            />
+            {/* Active black progress arc */}
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke="#000000"
+              strokeWidth={strokeWidth}
+              fill="none"
+              strokeDasharray={`${circumference} ${circumference}`}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${center} ${center})`}
+            />
+            {/* Solid black bullet tip dot */}
+            {progress > 0 && (
+              <Circle cx={dotX} cy={dotY} r={4.5} fill="#000000" />
+            )}
+          </Svg>
+          {/* Centered time display */}
+          <View style={styles.timeTextContainer}>
+            <Text style={styles.timeText}>{formattedTime}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default function ConfirmRowAssign({
+  route,
+  navigation,
+}: {
+  route: any;
+  navigation: any;
+}) {
+  const {
+    selectedOrdersCount = 20,
+    selectedOrderIds = [],
+    group = { id: 1, timeSlotCode: "8-12", timeSlot: "08:00 AM - 12:00 PM" },
+    selectedRow = { id: "10", name: "Row 1" },
   } = route.params || {};
 
   const [timerRunning, setTimerRunning] = useState(true);
+  const [seconds, setSeconds] = useState(30);
   const [submitting, setSubmitting] = useState(false);
+  const timerRef = useRef<any>(null);
 
   // Check if type is Retail or Wholesale from group details or context
   const isRetail = selectedOrdersCount <= 20;
@@ -31,12 +109,16 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
   const handleConfirm = async () => {
     if (submitting) return;
     setTimerRunning(false);
-    
+    if (timerRef.current) clearInterval(timerRef.current);
+
     try {
       setSubmitting(true);
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(
+          "Error",
+          "Authentication token not found. Please log in again.",
+        );
         return;
       }
 
@@ -45,9 +127,9 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
         {
           rowId: Number(selectedRow.id),
           timeSlotCode: group.timeSlotCode,
-          orderIds: selectedOrderIds
+          orderIds: selectedOrderIds,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data && response.data.success) {
@@ -61,10 +143,13 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
                 navigation.navigate("Group", { assignedGroupId: group.id });
               },
             },
-          ]
+          ],
         );
       } else {
-        Alert.alert("Error", response.data.message || "Failed to assign orders.");
+        Alert.alert(
+          "Error",
+          response.data.message || "Failed to assign orders.",
+        );
         setTimerRunning(true);
       }
     } catch (error) {
@@ -77,17 +162,37 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
   };
 
   const handleBack = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
     navigation.navigate("SelectRowToAssign", route.params);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (timerRunning) {
+      timerRef.current = setInterval(() => {
+        setSeconds((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            handleConfirm();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [timerRunning]);
+
+  useEffect(() => {
     const onBackPress = () => {
       handleBack();
       return true;
     };
-    const backHandler = require("react-native").BackHandler.addEventListener(
+    const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      onBackPress
+      onBackPress,
     );
     return () => backHandler.remove();
   }, [navigation]);
@@ -108,17 +213,13 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
       >
         <View className="items-center mt-4">
           {/* Top description text */}
-          <Text className="text-sm text-center px-12 text-[#676771] mb-6 leading-relaxed">
+          <Text className="text-sm text-center px-12 text-[#676771] mb-4 leading-relaxed">
             Marking as completed in 30 seconds.{"\n"}
             Tap on back button make changes.
           </Text>
 
-          {/* Countdown Indicator */}
-          <View className="justify-center items-center mb-6">
-            <View className="w-36 h-36 rounded-full border-4 border-[#030E25] items-center justify-center bg-white shadow-sm">
-              <Text className="text-3xl font-extrabold text-[#030E25]">00:30</Text>
-            </View>
-          </View>
+          {/* 30s Countdown Circular Clock Design */}
+          <CircularClockTimer seconds={seconds} totalSeconds={30} />
 
           {/* Flow Cards */}
           <View className="w-full items-center mt-4">
@@ -128,11 +229,15 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
                 <FontAwesome name="archive" size={18} color="#030E25" />
               </View>
               <View className="flex-1">
-                <Text className="text-xs text-[#676771] font-medium">Selected Section</Text>
+                <Text className="text-xs text-[#676771] font-medium">
+                  Selected Section
+                </Text>
                 <Text className="text-sm font-extrabold text-[#030E25] mt-1">
                   {group.timeSlot} ({isRetail ? "Retail" : "Wholesale"})
                 </Text>
-                <Text className="text-xl font-extrabold text-[#030E25] mt-1">{selectedOrdersCount}</Text>
+                <Text className="text-xl font-extrabold text-[#030E25] mt-1">
+                  {selectedOrdersCount}
+                </Text>
               </View>
             </View>
 
@@ -147,7 +252,9 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
                 <Ionicons name="git-commit-outline" size={20} color="#030E25" />
               </View>
               <View className="flex-1">
-                <Text className="text-xs text-[#676771] font-medium">Assigning to Row</Text>
+                <Text className="text-xs text-[#676771] font-medium">
+                  Assigning to Row
+                </Text>
                 <Text className="text-base font-extrabold text-[#030E25] mt-1">
                   {selectedRow.name}
                 </Text>
@@ -173,7 +280,9 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
           ) : (
             <>
               <FontAwesome name="check" size={16} color="white" />
-              <Text className="text-white font-extrabold text-base">Confirm</Text>
+              <Text className="text-white font-extrabold text-base">
+                Confirm
+              </Text>
             </>
           )}
         </TouchableOpacity>
@@ -181,3 +290,55 @@ export default function ConfirmRowAssign({ route, navigation }: { route: any; na
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  clockOuterWrapper: {
+    marginVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clockOuterRing: {
+    width: 196,
+    height: 196,
+    borderRadius: 98,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#EFEFEF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  clockInnerRing: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+    position: "relative",
+  },
+  svg: {
+    position: "absolute",
+  },
+  timeTextContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timeText: {
+    fontSize: 30,
+    fontWeight: "300",
+    color: "#09090B",
+    letterSpacing: 1,
+  },
+});
