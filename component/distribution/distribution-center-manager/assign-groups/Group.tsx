@@ -77,10 +77,6 @@ export default function Group({ route, navigation }: { route: any; navigation: a
     navigation.navigate("SelectOrder", { group, type });
   };
 
-  const togglePageState = () => {
-    setPageState(pageState === "empty" ? "active" : "empty");
-  };
-
   return (
     <View className="flex-1 bg-white">
       {/* Standard Custom Header */}

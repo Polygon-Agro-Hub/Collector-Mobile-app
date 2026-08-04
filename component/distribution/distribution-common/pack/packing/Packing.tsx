@@ -292,15 +292,12 @@ export default function Packing({
         currentPIndex: currentPIndex || 1,
         rowId: rowId,
       };
-      console.log("=== PACKING ADVANCE POSITION REQ PAYLOAD ===", payload);
 
       const res = await axios.post(
         `${environment.API_BASE_URL}api/packing/advance-position`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } },
       );
-
-      console.log("=== PACKING ADVANCE POSITION RESPONSE ===", res.data);
 
       if (res.data && res.data.success) {
         setAlertMessage(

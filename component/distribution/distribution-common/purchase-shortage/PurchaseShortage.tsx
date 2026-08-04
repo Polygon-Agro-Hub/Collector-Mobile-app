@@ -21,11 +21,13 @@ export interface ShortageProductItem {
   mpItemId: number;
   name: string;
   kg: number;
+  assignedQty: number;
   shortageQty: number;
   ceilingPrice: number;
   gradeAPrice?: number;
   image: string;
   reqStatus: "Pending" | "Completed" | null;
+  assignStatus?: "Pending" | "Finalize";
 }
 
 export default function PurchaseShortage({ navigation }: { navigation: any }) {
@@ -156,7 +158,9 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
                       style={{ color: subTextColor }}
                       className="text-xs font-semibold mt-0.5"
                     >
-                      {item.kg} kg
+                      {isDisabled
+                        ? `0 kg`
+                        : `${item.kg} kg`}
                     </Text>
                   </View>
 

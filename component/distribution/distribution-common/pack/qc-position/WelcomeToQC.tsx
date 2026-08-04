@@ -73,6 +73,7 @@ export default function WelcomeToQC({
 
   const [qcItems, setQcItems] = useState<QCItem[]>([]);
   const [currentPackName, setCurrentPackName] = useState<string>("Daily Veggie Pack");
+  const [officerPosIndex, setOfficerPosIndex] = useState<number>(3);
 
   useEffect(() => {
     fetchActiveOrderAndStatus();
@@ -135,15 +136,16 @@ export default function WelcomeToQC({
         const orderStatus = activeData.orderStatus;
         const pIndex =
           activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
-        const officerPosIndex =
+        const resolvedOfficerPosIndex =
           activeData.officerPosIndex !== undefined
             ? Number(activeData.officerPosIndex)
             : 3;
+        setOfficerPosIndex(resolvedOfficerPosIndex);
 
-        if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < officerPosIndex || pIndex >= 4) {
-          // Box has not reached QC station yet (pIndex < 3) or box/order is already completed (pIndex >= 4)
+        if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < resolvedOfficerPosIndex || pIndex > resolvedOfficerPosIndex) {
+          // Box has not reached QC station yet (pIndex < officerPosIndex) or box/order is already completed (pIndex > officerPosIndex)
           setStatus("waiting");
-        } else if (orderStatus === "Opened" && pIndex === officerPosIndex) {
+        } else if (orderStatus === "Opened" && pIndex === resolvedOfficerPosIndex) {
           const orderItems = activeData.orderItems || [];
 
           if (orderItems.length > 0) {
@@ -203,13 +205,13 @@ export default function WelcomeToQC({
       const targetOrderId =
         activeProcessOrderId || initialProcessOrderId || 3221;
 
-      // 1. Advance position index for this package box at QC (pIndex = 3 -> 4)
+      // 1. Advance position index for this package box at QC (pIndex = officerPosIndex → officerPosIndex + 1)
       const advanceRes = await axios.post(
         `${environment.API_BASE_URL}api/packing/advance-position`,
         {
           orderId: targetOrderId,
           orderpackageId: activeOrderPackageId || null,
-          currentPIndex: 3,
+          currentPIndex: officerPosIndex,
           rowId: rowId,
         },
         { headers: { Authorization: `Bearer ${token}` } }

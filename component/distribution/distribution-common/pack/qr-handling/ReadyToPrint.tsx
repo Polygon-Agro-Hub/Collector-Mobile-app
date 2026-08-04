@@ -128,23 +128,35 @@ export default function ReadyToPrint({
             Order Summary
           </Text>
 
-          {/* Available Packages Row */}
-          <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
-            <Text className="text-xs font-bold text-[#030E25]">Packages</Text>
-            <Text className="text-[#980775] font-extrabold text-base">
-              {formattedPackages}
-            </Text>
-          </View>
+          {/* Main Container Row — only shown when order has more than 1 physical box */}
+          {/* {(actualPackagesCount + (alacarteCount > 0 ? 1 : 0)) > 1 && (
+            <View className="flex-row justify-between items-center py-2.5 bg-[#F0F4FF] px-3 rounded-lg mb-2">
+              <Text className="text-xs font-bold text-[#030E25]">Main Container</Text>
+              <Text className="text-[#030E25] font-extrabold text-base">01</Text>
+            </View>
+          )} */}
 
-          {/* À la carte Row */}
-          <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
-            <Text className="text-xs font-bold text-[#030E25]">
-              À la carte Items
-            </Text>
-            <Text className="text-[#980775] font-extrabold text-base">
-              {formattedAlacarte}
-            </Text>
-          </View>
+          {/* Packages Row */}
+          {actualPackagesCount > 0 && (
+            <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
+              <Text className="text-xs font-bold text-[#030E25]">Packages</Text>
+              <Text className="text-[#980775] font-extrabold text-base">
+                {formattedPackages}
+              </Text>
+            </View>
+          )}
+
+          {/* À la carte Row — shows distinct product count */}
+          {alacarteCount > 0 && (
+            <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
+              <Text className="text-xs font-bold text-[#030E25]">
+                À la carte Items
+              </Text>
+              <Text className="text-[#980775] font-extrabold text-base">
+                {formattedAlacarte}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 

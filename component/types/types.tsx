@@ -59,6 +59,10 @@ export type RootStackParamList = {
   DistributionOfficersList: undefined;
   ReceivedCash: undefined;
   ReceivedCashOfficer: undefined;
+  ReceivedCashTransfer: {
+    totalCash: number;
+    selectedDate: string;
+  };
   CameraAccess: undefined;
   QRScanner: {
     userId: any;

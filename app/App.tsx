@@ -81,6 +81,7 @@ import ViewPickupOrders from "@/component/distribution/distribution-common/pick-
 import Qrcode from "@/component/distribution/distribution-common/pick-up-orders/qrcode";
 import DigitalSignature from "@/component/distribution/distribution-common/pick-up-orders/DigitalSignature";
 import ReceivedCash from "@/component/distribution/distribution-center-manager/received-cash/ReceivedCash";
+import ReceivedCashTransfer from "@/component/distribution/distribution-center-manager/received-cash/ReceivedCashTransfer";
 import ReceivedCashOfficer from "@/component/distribution/distribution-officer/received-cash/ReceivedCashOfficer";
 import ReceivedCashQrCode from "@/component/distribution/distribution-officer/received-cash/ReceivedCashQrCode";
 import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
@@ -150,7 +151,7 @@ function MainTabNavigator() {
       <Tab.Screen name="TransactionList" component={TransactionList as any} />
       <Tab.Screen name="OfficerSummary" component={OfficerSummary as any} />
       <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
-      <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
+
       <Tab.Screen name="ReportGenerator" component={ReportGenerator as any} />
       <Tab.Screen
         name="CollectionOfficerDashboard"
@@ -664,6 +665,16 @@ function AppContent() {
             <Stack.Screen
               name="DigitalSignature"
               component={DigitalSignature as any}
+            />
+
+            <Stack.Screen
+              name="ReceivedCash"
+              component={ReceivedCash as any}
+            />
+
+            <Stack.Screen
+              name="ReceivedCashTransfer"
+              component={ReceivedCashTransfer as any}
             />
 
 

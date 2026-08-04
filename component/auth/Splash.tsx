@@ -148,6 +148,27 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
           return;
         }
 
+        // User never completed the mandatory first-time password update.
+        // Clear session and force them to ChangePassword via Login.
+        if (result.passwordUpdated === 0) {
+          await AsyncStorage.multiRemove([
+            "token",
+            "tokenStoredTime",
+            "tokenExpirationTime",
+            "jobRole",
+            "empid",
+            "companyNameEnglish",
+            "companyNameSinhala",
+            "companyNameTamil",
+          ]);
+          dispatch(logoutUser());
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Login" }],
+          });
+          return;
+        }
+
         const jobRole = role || (await AsyncStorage.getItem("jobRole"));
 
         if (jobRole === "Collection Officer") {
