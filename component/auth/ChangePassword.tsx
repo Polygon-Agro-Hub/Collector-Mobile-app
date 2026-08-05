@@ -4,6 +4,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
   Image,
   BackHandler,
   Keyboard,
@@ -39,6 +40,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
   const [secureNew, setSecureNew] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
   const [passwordUpdate, setPasswordUpdate] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
 
   const validatePassword = () => {
@@ -95,6 +97,8 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
   const handleChangePassword = async () => {
     Keyboard.dismiss();
 
+    if (isLoading) return;
+
     if (!validatePassword()) {
       return;
     }
@@ -105,8 +109,9 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     }
 
     try {
+      setIsLoading(true);
       const token = await AsyncStorage.getItem("token");
-      const response = await axios.post(
+      await axios.post(
         `${environment.API_BASE_URL}api/collection-officer/change-password`,
         {
           currentPassword,
@@ -119,8 +124,33 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
         },
       );
 
-      Alert.alert(t("Error.Success"), t("Error.Password updated successfully"));
-      navigation.navigate("Login");
+      Alert.alert(
+        t("Error.Success"),
+        t("Error.Password updated successfully"),
+        [
+          {
+            text: "OK",
+            onPress: async () => {
+              // Clear session — user must log in again with new password
+              await AsyncStorage.multiRemove([
+                "token",
+                "tokenStoredTime",
+                "tokenExpirationTime",
+                "jobRole",
+                "empid",
+                "companyNameEnglish",
+                "companyNameSinhala",
+                "companyNameTamil",
+              ]);
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Login" }],
+              });
+            },
+          },
+        ],
+        { cancelable: false },
+      );
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 401) {
@@ -129,8 +159,10 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
           Alert.alert(t("Error.error"), t("Error.Failed to update password"));
         }
       } else {
-        Alert.alert(t("Error.error"), "Error.somethingWentWrong");
+        Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -312,17 +344,23 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             <TouchableOpacity
               className="bg-black w-full rounded-3xl items-center justify-center h-[50px]"
               onPress={handleChangePassword}
+              disabled={isLoading}
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.25,
                 shadowRadius: 10,
                 elevation: 6,
+                opacity: isLoading ? 0.6 : 1,
               }}
             >
-              <Text className="font-light text-white text-lg">
-                {t("ChangePassword.Next")}
-              </Text>
+              {isLoading ? (
+                <ActivityIndicator color="white" size="small" />
+              ) : (
+                <Text className="font-light text-white text-lg">
+                  {t("ChangePassword.Next")}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>

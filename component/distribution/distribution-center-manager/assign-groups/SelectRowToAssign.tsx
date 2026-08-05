@@ -24,11 +24,19 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
 
   const [rows, setRows] = useState<RowItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(
+    route.params?.selectedRowId || route.params?.selectedRow?.id || null
+  );
 
   const handleBack = () => {
     navigation.navigate("SelectOrder", route.params);
   };
+
+  useEffect(() => {
+    if (route.params?.selectedRowId || route.params?.selectedRow?.id) {
+      setSelectedRowId(String(route.params.selectedRowId || route.params.selectedRow.id));
+    }
+  }, [route.params?.selectedRowId, route.params?.selectedRow?.id]);
 
   useEffect(() => {
     fetchRows();
@@ -84,6 +92,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
       selectedOrderIds: selectedOrderIds,
       group: group,
       selectedRow: selectedRow,
+      selectedRowId: selectedRow.id,
     });
   };
 
@@ -130,7 +139,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
           /* Scrollable list of packing rows */
           <ScrollView
             className="flex-1"
-            contentContainerStyle={{ paddingBottom: 130 }}
+            contentContainerStyle={{ paddingBottom: selectedRowId ? 160 : 50 }}
             showsVerticalScrollIndicator={false}
           >
             <View className="gap-4">
@@ -141,9 +150,17 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                     key={row.id}
                     onPress={() => setSelectedRowId(row.id)}
                     activeOpacity={0.8}
-                    className={`flex-row items-center bg-white border rounded-2xl p-5 shadow-sm ${
+                    className={`flex-row items-center bg-white border rounded-2xl p-5 my-1 ${
                       isSelected ? "border-[#980775]" : "border-[#E1E7EE]"
                     }`}
+                    style={{
+                      backgroundColor: "#ffffff",
+                      shadowColor: "#000000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 5,
+                      elevation: 2,
+                    }}
                   >
                     {/* Custom Radio Button Indicator */}
                     <View
@@ -162,7 +179,8 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                         {row.name}
                       </Text>
                       <Text className="text-xs text-[#676771] mt-1 font-medium">
-                        {row.allocatedCount} Orders Allocated
+                        {row.allocatedCount}{" "}
+                        {row.allocatedCount === 1 ? "Order" : "Orders"} Allocated
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -176,12 +194,20 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
       {/* Sticky Bottom Assign Action Button when a row is selected */}
       {selectedRowId && (
         <View 
-          style={{ borderTopColor: "#79747E33", borderTopWidth: 1 }}
-          className="px-6 pt-4 pb-8 bg-white absolute bottom-0 left-0 right-0"
+          style={{ borderTopColor: "#79747E33", borderTopWidth: 1, paddingBottom: 10 }}
+          className="px-6 pt-4 bg-white absolute bottom-0 left-0 right-0"
         >
           <TouchableOpacity
             onPress={handleAssign}
-            className="w-full h-[50px] bg-black rounded-full flex-row items-center justify-center shadow gap-2"
+            className="w-full h-[50px] rounded-full flex-row items-center justify-center gap-2"
+            style={{
+              backgroundColor: "#000000",
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 6,
+              elevation: 5,
+            }}
             activeOpacity={0.8}
           >
             <FontAwesome name="check" size={16} color="white" />

@@ -227,7 +227,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
   );
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" style={{ paddingBottom: 0 }}>
       {/* Header */}
       <View className="bg-white px-4 py-4 flex-row items-center ">
         <TouchableOpacity
@@ -349,8 +349,39 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
                 </View>
               ))}
 
-              <View className="h-20" />
+              <View className="h-4" />
             </ScrollView>
+          
+          {/* Deposit to Company Button */}
+          <View className="px-4 pb-4 pt-2 bg-white">
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("ReceivedCashTransfer", {
+                  totalCash,
+                  selectedDate: formatDate(selectedDate),
+                })
+              }
+              activeOpacity={0.85}
+              style={{
+                backgroundColor: "#980775",
+                borderRadius: 50,
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  fontSize: 16,
+                  fontWeight: "700",
+                  letterSpacing: 0.3,
+                }}
+              >
+                {t("ReceivedCash.Deposit to Company")}
+              </Text>
+            </TouchableOpacity>
+          </View>
           </>
         ) : (
           <ScrollView

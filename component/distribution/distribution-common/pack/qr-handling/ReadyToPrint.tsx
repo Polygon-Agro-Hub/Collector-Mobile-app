@@ -22,10 +22,8 @@ export default function ReadyToPrint({
   const {
     orderNumber = "2607300005 (R)",
     invoiceNumber = "2607300005",
+    timeSlot = "08:00 AM - 12:00 PM",
     category = "Pickup Order",
-    nextOrderNumber = "2607300006 (R)",
-    nextTimeSlot = "08:00 AM - 12:00 PM",
-    nextCategory = "Pickup Order",
     packagesCount = 3,
     alacarteCount = 3,
     packagesList = [],
@@ -47,9 +45,15 @@ export default function ReadyToPrint({
     packagesList && packagesList.length > 0
       ? packagesList.length
       : packagesCount;
-  const formattedPackages = String(actualPackagesCount).padStart(2, "0");
-  const formattedAlacarte = String(alacarteCount).padStart(2, "0");
-  const qrValue = invoiceNumber || orderNumber;
+  const formattedPackages =
+    actualPackagesCount === 0
+      ? "0"
+      : String(actualPackagesCount).padStart(2, "0");
+  const formattedAlacarte =
+    alacarteCount === 0 ? "0" : String(alacarteCount).padStart(2, "0");
+
+  const cleanInvoiceNumber = invoiceNumber || (orderNumber ? orderNumber.split(" ")[0] : "");
+  const qrValue = cleanInvoiceNumber;
 
   return (
     <View className="flex-1 bg-white">
@@ -62,7 +66,7 @@ export default function ReadyToPrint({
         onBackPress={() => navigation.navigate("QRHandling")}
       />
 
-      <ScrollView className="flex-1 bg-white px-6">
+      <ScrollView className="flex-1 bg-white px-6" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {/* Header Title section matching QRHandling design */}
         <View className="items-center mb-6">
           <Text className="text-xl font-bold text-slate-950">
@@ -90,8 +94,8 @@ export default function ReadyToPrint({
           </Text>
         </View>
 
-        {/* Next Order Card (Highlighted in purple) */}
-        {nextOrderNumber && (
+        {/* Current Order Card (Highlighted in purple) */}
+        {orderNumber && (
           <View className="flex-row items-center bg-white border-2 border-[#980775] rounded-xl p-4 mb-6 shadow-sm">
             {/* Left Bag Icon Circle */}
             <View className="w-11 h-11 rounded-full bg-[#980775] items-center justify-center mr-4">
@@ -101,13 +105,13 @@ export default function ReadyToPrint({
             {/* Content */}
             <View className="flex-1">
               <Text className="font-extrabold text-slate-950 text-base">
-                {nextOrderNumber}
+                {orderNumber}
               </Text>
               <Text className="text-sm font-bold text-slate-900 mt-0.5">
-                {nextTimeSlot}
+                {timeSlot}
               </Text>
               <Text className="text-xs text-[#54617D] mt-0.5">
-                {nextCategory}
+                {category}
               </Text>
             </View>
           </View>
@@ -128,7 +132,7 @@ export default function ReadyToPrint({
             Order Summary
           </Text>
 
-          {/* Available Packages Row */}
+          {/* Packages Row */}
           <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
             <Text className="text-xs font-bold text-[#030E25]">Packages</Text>
             <Text className="text-[#980775] font-extrabold text-base">
@@ -136,7 +140,7 @@ export default function ReadyToPrint({
             </Text>
           </View>
 
-          {/* À la carte Row */}
+          {/* À la carte Row — shows distinct product count */}
           <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
             <Text className="text-xs font-bold text-[#030E25]">
               À la carte Items
@@ -149,12 +153,12 @@ export default function ReadyToPrint({
       </ScrollView>
 
       {/* Start Button Pinned to Bottom */}
-      <View className="px-6 pt-4 pb-8 bg-white">
+      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: 10 }}>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("PrintingConfirmation", {
               orderNumber: orderNumber,
-              invoiceNumber: invoiceNumber,
+              invoiceNumber: cleanInvoiceNumber,
               category: category,
               processOrderId: route.params?.processOrderId,
               packagesList: route.params?.packagesList || [],
@@ -172,6 +176,7 @@ export default function ReadyToPrint({
             shadowOpacity: 0.15,
             shadowRadius: 4,
             elevation: 3,
+            marginBottom: 10,
           }}
         >
           <Text className="text-white font-extrabold text-base">

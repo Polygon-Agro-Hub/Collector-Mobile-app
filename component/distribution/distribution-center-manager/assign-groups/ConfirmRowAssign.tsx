@@ -15,6 +15,7 @@ import CustomHeader from "@/component/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import { useIsFocused } from "@react-navigation/native";
 
 const CircularClockTimer = ({
   seconds,
@@ -64,17 +65,17 @@ const CircularClockTimer = ({
               stroke="#000000"
               strokeWidth={strokeWidth}
               fill="none"
-              strokeDasharray={`${circumference} ${circumference}`}
+              strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
               transform={`rotate(-90 ${center} ${center})`}
             />
-            {/* Solid black bullet tip dot */}
-            {progress > 0 && (
+            {/* Indicator Dot at the tip of progress */}
+            {seconds > 0 && (
               <Circle cx={dotX} cy={dotY} r={4.5} fill="#000000" />
             )}
           </Svg>
-          {/* Centered time display */}
+          {/* Centered Countdown Digital Text */}
           <View style={styles.timeTextContainer}>
             <Text style={styles.timeText}>{formattedTime}</Text>
           </View>
@@ -98,6 +99,7 @@ export default function ConfirmRowAssign({
     selectedRow = { id: "10", name: "Row 1" },
   } = route.params || {};
 
+  const isFocused = useIsFocused();
   const [timerRunning, setTimerRunning] = useState(true);
   const [seconds, setSeconds] = useState(30);
   const [submitting, setSubmitting] = useState(false);
@@ -162,12 +164,31 @@ export default function ConfirmRowAssign({
   };
 
   const handleBack = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    setTimerRunning(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setSeconds(30);
     navigation.navigate("SelectRowToAssign", route.params);
   };
 
   useEffect(() => {
-    if (timerRunning) {
+    if (isFocused) {
+      setSeconds(30);
+      setTimerRunning(true);
+    } else {
+      setTimerRunning(false);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setSeconds(30);
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (timerRunning && isFocused) {
       timerRef.current = setInterval(() => {
         setSeconds((prev) => {
           if (prev <= 1) {
@@ -178,12 +199,20 @@ export default function ConfirmRowAssign({
           return prev - 1;
         });
       }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     }
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [timerRunning]);
+  }, [timerRunning, isFocused]);
 
   useEffect(() => {
     const onBackPress = () => {
@@ -266,13 +295,21 @@ export default function ConfirmRowAssign({
 
       {/* Sticky bottom confirm action button */}
       <View
-        style={{ borderTopColor: "#79747E33", borderTopWidth: 1 }}
-        className="px-6 pt-4 pb-8 bg-white absolute bottom-0 left-0 right-0"
+        style={{ borderTopColor: "#79747E33", borderTopWidth: 1, paddingBottom: 10 }}
+        className="px-6 pt-4 bg-white absolute bottom-0 left-0 right-0"
       >
         <TouchableOpacity
           onPress={handleConfirm}
           disabled={submitting}
-          className="w-full h-[50px] bg-black rounded-full flex-row items-center justify-center shadow gap-2"
+          className="w-full h-[50px] rounded-full flex-row items-center justify-center gap-2"
+          style={{
+            backgroundColor: "#000000",
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 6,
+            elevation: 5,
+          }}
           activeOpacity={0.8}
         >
           {submitting ? (

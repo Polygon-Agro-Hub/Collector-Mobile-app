@@ -41,6 +41,17 @@ const timeSlotMap: { [key: string]: string } = {
   "16-21": "04:00 PM - 09:00 PM",
 };
 
+const formatWeightDisplay = (weightStr: string) => {
+  if (!weightStr) return weightStr;
+  const match = weightStr.trim().match(/^([\d.]+)\s*(.*)$/);
+  if (!match) return weightStr;
+  const numVal = parseFloat(match[1]);
+  const unit = match[2];
+  if (isNaN(numVal)) return weightStr;
+  const numStr = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(2);
+  return `${numStr} ${unit}`.trim();
+};
+
 export default function WelcomeToQC({
   route,
   navigation,
@@ -73,6 +84,7 @@ export default function WelcomeToQC({
 
   const [qcItems, setQcItems] = useState<QCItem[]>([]);
   const [currentPackName, setCurrentPackName] = useState<string>("Daily Veggie Pack");
+  const [officerPosIndex, setOfficerPosIndex] = useState<number>(3);
 
   useEffect(() => {
     fetchActiveOrderAndStatus();
@@ -117,7 +129,6 @@ export default function WelcomeToQC({
 
       if (activeRes.data && activeRes.data.success && activeRes.data.data) {
         const activeData = activeRes.data.data;
-        console.log("=== WELCOME TO QC ACTIVE ORDER DATA ===", JSON.stringify(activeData, null, 2));
 
         if (activeData.formattedOrderNumber) {
           setDisplayOrderTitle(activeData.formattedOrderNumber);
@@ -135,15 +146,16 @@ export default function WelcomeToQC({
         const orderStatus = activeData.orderStatus;
         const pIndex =
           activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
-        const officerPosIndex =
+        const resolvedOfficerPosIndex =
           activeData.officerPosIndex !== undefined
             ? Number(activeData.officerPosIndex)
             : 3;
+        setOfficerPosIndex(resolvedOfficerPosIndex);
 
-        if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < officerPosIndex || pIndex >= 4) {
-          // Box has not reached QC station yet (pIndex < 3) or box/order is already completed (pIndex >= 4)
+        if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < resolvedOfficerPosIndex || pIndex > resolvedOfficerPosIndex) {
+          // Box has not reached QC station yet (pIndex < officerPosIndex) or box/order is already completed (pIndex > officerPosIndex)
           setStatus("waiting");
-        } else if (orderStatus === "Opened" && pIndex === officerPosIndex) {
+        } else if (orderStatus === "Opened" && pIndex === resolvedOfficerPosIndex) {
           const orderItems = activeData.orderItems || [];
 
           if (orderItems.length > 0) {
@@ -158,7 +170,7 @@ export default function WelcomeToQC({
               return {
                 id: item.id,
                 name: item.name,
-                weight: item.weight || "1.0 kg",
+                weight: formatWeightDisplay(item.weight || "1.0 kg"),
                 packName: resolvedPackName,
                 categoryType: isAlacarte ? "alacarte" : "package",
                 checked: false,
@@ -203,13 +215,13 @@ export default function WelcomeToQC({
       const targetOrderId =
         activeProcessOrderId || initialProcessOrderId || 3221;
 
-      // 1. Advance position index for this package box at QC (pIndex = 3 -> 4)
+      // 1. Advance position index for this package box at QC (pIndex = officerPosIndex → officerPosIndex + 1)
       const advanceRes = await axios.post(
         `${environment.API_BASE_URL}api/packing/advance-position`,
         {
           orderId: targetOrderId,
           orderpackageId: activeOrderPackageId || null,
-          currentPIndex: 3,
+          currentPIndex: officerPosIndex,
           rowId: rowId,
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -224,10 +236,7 @@ export default function WelcomeToQC({
         ).catch(() => {});
 
         setStatus("waiting");
-        setAlertMessage(
-          advanceRes.data.message ||
-            "Package QC inspection completed and advanced to next station."
-        );
+        setAlertMessage("Packing has been completed successfully.");
         setAlertVisible(true);
       } else if (advanceRes.data && !advanceRes.data.success) {
         Alert.alert("Station Busy", advanceRes.data.message || "The next station is currently busy.");
@@ -396,7 +405,7 @@ export default function WelcomeToQC({
                   activeOpacity={0.8}
                 >
                   <View className="flex-row items-center flex-1 mr-3">
-                    <View className="w-14 h-14 rounded-full overflow-hidden items-center justify-center bg-slate-50 mr-4">
+                    <View className="w-14 h-14 rounded-full overflow-hidden items-center justify-center mr-4">
                       <Image
                         source={{ uri: item.image }}
                         className="w-full h-full"

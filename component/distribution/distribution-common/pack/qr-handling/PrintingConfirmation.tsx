@@ -53,14 +53,15 @@ export default function PrintingConfirmation({
   const displayOrderNumber = orderNumber.includes("(R)")
     ? orderNumber.replace("(R)", "(Retail)")
     : orderNumber.includes("(W)")
-    ? orderNumber.replace("(W)", "(Wholesale)")
-    : orderNumber;
+      ? orderNumber.replace("(W)", "(Wholesale)")
+      : orderNumber;
 
   // Build dynamic print steps based on package count
   const steps: PrintStep[] = [];
 
   // Calculate total physical boxes (Package boxes + 1 Alacarte box if present)
-  const totalBoxes = (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
+  const totalBoxes =
+    (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
 
   // 1. If total physical boxes > 1, add Main Container as Step 1
   if (totalBoxes > 1) {
@@ -122,15 +123,15 @@ export default function PrintingConfirmation({
         setCurrentStep(currentStep - 1);
         return true;
       }
-      navigation.navigate("ReadyToPrint");
+      navigation.navigate("ReadyToPrint", route.params);
       return true;
     };
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      onBackPress
+      onBackPress,
     );
     return () => backHandler.remove();
-  }, [currentStep, navigation]);
+  }, [currentStep, navigation, route.params]);
 
   const handlePrintPress = async () => {
     try {
@@ -142,21 +143,31 @@ export default function PrintingConfirmation({
           const stepName = steps[currentStep - 1]?.label || "Package";
           setAlertMessage(`${stepName} QR Code Re-printed Successfully!`);
         } else {
-          setAlertMessage(`All packages for order ${orderNumber} re-printed successfully!`);
+          setAlertMessage(
+            `All packages for order ${orderNumber} re-printed successfully!`,
+          );
         }
         setAlertVisible(true);
         return;
       }
 
       const token = await AsyncStorage.getItem("token");
-      const processOrderId = route.params?.processOrderId || route.params?.orderId || 3131;
-      
-      let currentPackageId: number | null = null;
-      const totalPhysicalBoxes = (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
-      const hasMainContainer = totalPhysicalBoxes > 1;
-      const packageStepIndex = hasMainContainer ? currentStep - 2 : currentStep - 1;
+      const processOrderId =
+        route.params?.processOrderId || route.params?.orderId || 3131;
 
-      if (packagesList && packageStepIndex >= 0 && packageStepIndex < packagesList.length) {
+      let currentPackageId: number | null = null;
+      const totalPhysicalBoxes =
+        (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
+      const hasMainContainer = totalPhysicalBoxes > 1;
+      const packageStepIndex = hasMainContainer
+        ? currentStep - 2
+        : currentStep - 1;
+
+      if (
+        packagesList &&
+        packageStepIndex >= 0 &&
+        packageStepIndex < packagesList.length
+      ) {
         currentPackageId = packagesList[packageStepIndex].id;
       }
 
@@ -170,13 +181,20 @@ export default function PrintingConfirmation({
             isMainContainer: true,
             rowId: route.params?.rowId,
           },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        if (response.data && response.data.success === false && response.data.code === "STATION_OCCUPIED") {
+        if (
+          response.data &&
+          response.data.success === false &&
+          response.data.code === "STATION_OCCUPIED"
+        ) {
           setAlertType("error");
           setAlertTitle("Position Busy");
-          setAlertMessage(response.data.message || "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.");
+          setAlertMessage(
+            response.data.message ||
+              "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.",
+          );
           setAlertVisible(true);
           return;
         }
@@ -186,7 +204,10 @@ export default function PrintingConfirmation({
         setAlertMessage("Main Container QR Code Printed Successfully!");
         setAlertVisible(true);
       } else {
-        const isPackageStep = packagesList && packageStepIndex >= 0 && packageStepIndex < packagesList.length;
+        const isPackageStep =
+          packagesList &&
+          packageStepIndex >= 0 &&
+          packageStepIndex < packagesList.length;
         const response = await axios.post(
           `${environment.API_BASE_URL}api/packing/qr-opened`,
           {
@@ -196,13 +217,20 @@ export default function PrintingConfirmation({
             packageIndex: isPackageStep ? packageStepIndex : 0,
             rowId: route.params?.rowId,
           },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        if (response.data && response.data.success === false && response.data.code === "STATION_OCCUPIED") {
+        if (
+          response.data &&
+          response.data.success === false &&
+          response.data.code === "STATION_OCCUPIED"
+        ) {
           setAlertType("error");
           setAlertTitle("Position Busy");
-          setAlertMessage(response.data.message || "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.");
+          setAlertMessage(
+            response.data.message ||
+              "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.",
+          );
           setAlertVisible(true);
           return;
         }
@@ -214,7 +242,9 @@ export default function PrintingConfirmation({
           setAlertMessage(`${stepName} QR Code Printed Successfully!`);
           setAlertVisible(true);
         } else {
-          setAlertMessage(`All packages for order ${orderNumber} printed successfully!`);
+          setAlertMessage(
+            `All packages for order ${orderNumber} printed successfully!`,
+          );
           setAlertVisible(true);
         }
       }
@@ -226,7 +256,8 @@ export default function PrintingConfirmation({
       setAlertType("error");
       setAlertTitle(isOccupied ? "Position Busy" : "Error");
       setAlertMessage(
-        busyMsg || "Failed to communicate with packing server. Please try again."
+        busyMsg ||
+          "Failed to communicate with packing server. Please try again.",
       );
       setAlertVisible(true);
     }
@@ -236,17 +267,13 @@ export default function PrintingConfirmation({
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      navigation.navigate("ReadyToPrint");
+      navigation.navigate("ReadyToPrint", route.params);
     }
   };
 
   return (
     <View className="flex-1 bg-white">
-      <CustomHeader
-        title=""
-        navigation={navigation}
-        onBackPress={handleBack}
-      />
+      <CustomHeader title="" navigation={navigation} onBackPress={handleBack} />
 
       {/* Main Scrollable Content Area */}
       <ScrollView className="flex-1 bg-white px-6">
@@ -313,7 +340,7 @@ export default function PrintingConfirmation({
         </View>
       </ScrollView>
 
-      <View className="px-6 pt-4 pb-8 bg-white">
+      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: 10 }}>
         <TouchableOpacity
           onPress={handlePrintPress}
           className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"

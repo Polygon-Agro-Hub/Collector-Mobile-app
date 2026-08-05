@@ -10,7 +10,6 @@ import {
   ScrollView,
   RefreshControl,
 } from "react-native";
-import { CircularProgress } from "react-native-circular-progress";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -218,7 +217,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     if (isLoadingTarget) {
       return (
         <View
-          className="bg-white mx-auto w-[90%] max-w-[500px] rounded-[35px] mt-4 mb-8 p-4"
+          className="bg-white w-full rounded-[28px] mt-3 mb-2 p-4"
           style={{
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 2 },
@@ -236,7 +235,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View className="bg-white mx-auto w-[90%] max-w-[500px] rounded-[35px] mt-3 mb-5 p-4 border-[1px] border-[#DF9301]">
+        <View className="bg-white w-full rounded-[28px] mt-3 mb-2 p-4 border-[1px] border-[#DF9301]">
           <Text className="text-center text-yellow-600 font-bold">
             🚀{t("DistridutionaDashboard.Keep")}
           </Text>
@@ -247,7 +246,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       );
     } else {
       return (
-        <View className="bg-white mx-auto w-[90%] max-w-[500px] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A]">
+        <View className="bg-white w-full rounded-[28px] mt-3 mb-2 p-4 border-[1px] border-[#2AAD7A] ">
           <View className="flex-row justify-center items-center mb-2">
             <Image
               source={require("../../../../assets/images/dashboard/Applause.webp")}
@@ -267,10 +266,42 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     }
   };
 
+  const handleStartPacking = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        const response = await axios.get(
+          `${environment.API_BASE_URL}api/packing/active-assignment`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (response.data && response.data.success && response.data.data) {
+          const assignment = response.data.data;
+          const type = assignment.type || assignment.pType || assignment.positionType;
+          if (type === "NOR") {
+            navigation.navigate("WelcomeToPacking" as any, {
+              positionId: assignment.positionId,
+              positionName: assignment.name || assignment.positionName,
+            });
+          } else if (type === "QC") {
+            navigation.navigate("WelcomeToQC" as any, {
+              positionName: assignment.name || assignment.positionName,
+            });
+          } else {
+            navigation.navigate("QRHandling" as any);
+          }
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking active position on Start Packing:", error);
+    }
+    navigation.navigate("SelectRow" as any);
+  };
+
   const getDashboardItems = () => {
     const items = [];
 
-    // 1. Start Packing (SelectRow)
+    // 1. Start Packing (SelectRow or active position)
     items.push({
       key: "start_packing",
       title: "Start Packing",
@@ -282,7 +313,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
           resizeMode="contain"
         />
       ),
-      onPress: () => navigation.navigate("SelectRow" as any),
+      onPress: handleStartPacking,
     });
 
     // 2. Assign Groups (DCM only)
@@ -352,7 +383,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
 
   return (
     <ScrollView
-      className="flex-1 bg-white p-3"
+      className="flex-1 bg-white px-6 py-3"
       contentContainerStyle={{ flexGrow: 1 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -360,7 +391,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     >
       <View className="w-full max-w-[600px] mx-auto flex-1">
         <TouchableOpacity
-          className="flex-row items-center p-4"
+          className="flex-row items-center py-4"
           onPress={() => navigation.navigate("SideMenu")}
         >
           <Image
@@ -395,55 +426,11 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
 
         {renderTargetStatus()}
 
-        <View className="flex items-center justify-center mt-10">
-          <View style={{ width: 100, height: 100 }}>
-            <CircularProgress
-              size={100}
-              width={8}
-              fill={targetPercentage !== null ? targetPercentage : 0}
-              tintColor="#000000"
-              backgroundColor="#E5E7EB"
-            />
-            <View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text className="text-2xl font-bold">
-                {isLoadingTarget
-                  ? "..."
-                  : targetPercentage !== null
-                    ? `${targetPercentage}%`
-                    : "0%"}
-              </Text>
-            </View>
-          </View>
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-700 font-bold text-lg mt-2"
-          >
-            {t("DistridutionaDashboard.Yourtarget")}{" "}
-          </Text>
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-700 font-bold text-lg "
-          >
-            {" "}
-            {t("DistridutionaDashboard.Progress")}
-          </Text>
-        </View>
-
-        <View className="flex-row flex-wrap px-2 pb-12 gap-4 justify-start mt-8">
+        <View className="flex-row flex-wrap justify-between pb-12 mt-4">
           {getDashboardItems().map((item) => (
             <TouchableOpacity
               key={item.key}
-              className="bg-white p-4 rounded-3xl w-[47%] h-32 shadow-lg border border-[#980775] relative mb-2"
+              className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative mb-4"
               onPress={item.onPress}
               style={{
                 shadowColor: "#000000",

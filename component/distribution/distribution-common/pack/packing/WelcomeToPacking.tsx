@@ -60,6 +60,8 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
               name: c.name,
               image: c.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80"
             }));
+            // Sort A to Z (ascending alphabetical order by product name)
+            mappedCrops.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
             setProducts(mappedCrops);
             setHasData(true);
           } else {
@@ -81,7 +83,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
     fetchCrops();
 
     const onBackPress = () => {
-      navigation.navigate("SelectRow");
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
       return true;
     };
     const backHandler = BackHandler.addEventListener(
@@ -97,11 +99,11 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
       <CustomHeader
         title=""
         navigation={navigation}
-        onBackPress={() => navigation.navigate("SelectRow")}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
       {/* Main Content scroll area */}
-      <ScrollView className="flex-1 bg-white px-6" contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
+      <ScrollView className="flex-1 bg-white px-6" contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}>
         {/* Page Title */}
         <View className="items-center mb-4 mt-4">
           <Text className="text-xl font-extrabold text-[#030E25] text-center">
@@ -179,7 +181,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
 
       {/* Start Working Button pinned to bottom (only shown in Data State) */}
       {!loading && hasData && (
-        <View className="px-6 pt-4 pb-8 bg-white absolute bottom-0 left-0 right-0">
+        <View className="px-6 pt-3 pb-10 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: 10 }}>
           <TouchableOpacity
             onPress={() => {
               navigation.navigate("Packing", {

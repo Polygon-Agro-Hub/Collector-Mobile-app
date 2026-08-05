@@ -29,6 +29,17 @@ const timeSlotMap: { [key: string]: string } = {
   "4-9": "04:00 PM - 09:00 PM",
 };
 
+const formatWeightDisplay = (weightStr: string) => {
+  if (!weightStr) return weightStr;
+  const match = weightStr.trim().match(/^([\d.]+)\s*(.*)$/);
+  if (!match) return weightStr;
+  const numVal = parseFloat(match[1]);
+  const unit = match[2];
+  if (isNaN(numVal)) return weightStr;
+  const numStr = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(2);
+  return `${numStr} ${unit}`.trim();
+};
+
 interface PackingItem {
   id: number;
   name: string;
@@ -78,10 +89,10 @@ export default function Packing({
   // Crop list items mapped ONLY from position-specific assigned crops
   const [items, setItems] = useState<PackingItem[]>(() => {
     if (positionCrops && positionCrops.length > 0) {
-      return positionCrops.map((c: any) => ({
+      const mapped = positionCrops.map((c: any) => ({
         id: c.id,
         name: c.name,
-        weight: c.weight || "1.0 kg",
+        weight: formatWeightDisplay(c.weight || "1.0 kg"),
         packName: c.packName || "Fruity Pack",
         categoryType: c.categoryType || "package",
         checked: false,
@@ -89,6 +100,8 @@ export default function Packing({
           c.image ||
           "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
       }));
+      mapped.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+      return mapped;
     }
     return [];
   });
@@ -145,7 +158,7 @@ export default function Packing({
         const fetched = response.data.data.map((c: any) => ({
           id: c.id,
           name: c.name,
-          weight: c.weight || "1.0 kg",
+          weight: formatWeightDisplay(c.weight || "1.0 kg"),
           packName: c.packName || "Fruity Pack",
           categoryType: c.categoryType || "package",
           checked: false,
@@ -153,6 +166,7 @@ export default function Packing({
             c.image ||
             "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
         }));
+        fetched.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
         setItems(fetched);
       }
     } catch (err) {
@@ -205,28 +219,28 @@ export default function Packing({
         } else if (orderStatus === "Opened" || orderStatus === "Completed") {
           const orderItems = activeData.orderItems || [];
           if (orderItems.length > 0) {
-            setItems(
-              orderItems.map((item: any) => {
-                const resolvedPackName =
-                  item.packName && item.packName !== "À la carte"
-                    ? item.packName
-                    : item.categoryType === "alacarte"
-                      ? "À la carte"
-                      : "Daily Veggie Pack";
-                const isAlacarte = resolvedPackName === "À la carte";
-                return {
-                  id: item.id,
-                  name: item.name,
-                  weight: item.weight || "1.0 kg",
-                  packName: resolvedPackName,
-                  categoryType: isAlacarte ? "alacarte" : "package",
-                  checked: false,
-                  image:
-                    item.image ||
-                    "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
-                };
-              }),
-            );
+            const mappedItems = orderItems.map((item: any) => {
+              const resolvedPackName =
+                item.packName && item.packName !== "À la carte"
+                  ? item.packName
+                  : item.categoryType === "alacarte"
+                    ? "À la carte"
+                    : "Daily Veggie Pack";
+              const isAlacarte = resolvedPackName === "À la carte";
+              return {
+                id: item.id,
+                name: item.name,
+                weight: formatWeightDisplay(item.weight || "1.0 kg"),
+                packName: resolvedPackName,
+                categoryType: isAlacarte ? "alacarte" : "package",
+                checked: false,
+                image:
+                  item.image ||
+                  "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+              };
+            });
+            mappedItems.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+            setItems(mappedItems);
             setStatus("has_items");
           } else {
             setItems([]);
@@ -292,7 +306,6 @@ export default function Packing({
         currentPIndex: currentPIndex || 1,
         rowId: rowId,
       };
-      console.log("=== PACKING ADVANCE POSITION REQ PAYLOAD ===", payload);
 
       const res = await axios.post(
         `${environment.API_BASE_URL}api/packing/advance-position`,
@@ -300,11 +313,9 @@ export default function Packing({
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      console.log("=== PACKING ADVANCE POSITION RESPONSE ===", res.data);
-
       if (res.data && res.data.success) {
         setAlertMessage(
-          res.data.message || "Position advanced to next packer successfully.",
+          "Packing has been completed successfully. Move to the next position."
         );
         setAlertVisible(true);
         fetchActiveOrderAndStatus();
@@ -334,7 +345,7 @@ export default function Packing({
             status === "has_items" || status === "no_qr_yet"
               ? "flex-start"
               : "center",
-          paddingBottom: 40,
+          paddingBottom: 130,
         }}
       >
         {/* Scheduled Time Section matching user screenshot design */}
@@ -448,7 +459,7 @@ export default function Packing({
                 >
                   <View className="flex-row items-center flex-1 mr-3">
                     {/* Product Image */}
-                    <View className="w-16 h-16 rounded-full overflow-hidden items-center justify-center bg-slate-50 mr-4">
+                    <View className="w-16 h-16 rounded-full overflow-hidden items-center justify-center mr-4">
                       <Image
                         source={{ uri: item.image }}
                         className="w-full h-full"
@@ -492,7 +503,7 @@ export default function Packing({
 
       {/* Skip Button pinned to bottom when position has no items */}
       {status === "no_items" && (
-        <View className="px-6 pt-4 pb-8 bg-white absolute bottom-0 left-0 right-0">
+        <View className="px-6 pt-3 pb-10 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: 10 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}
             className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
@@ -505,7 +516,7 @@ export default function Packing({
 
       {/* Complete Button pinned to bottom when all items checked */}
       {status === "has_items" && allItemsChecked && (
-        <View className="px-6 pt-4 pb-8 bg-white absolute bottom-0 left-0 right-0">
+        <View className="px-6 pt-3 pb-10 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: 10 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}
             className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"

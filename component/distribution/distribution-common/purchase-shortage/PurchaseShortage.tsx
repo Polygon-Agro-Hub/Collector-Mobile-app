@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,11 +6,12 @@ import {
   ScrollView,
   Image,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import LottieView from "lottie-react-native";
 import CustomHeader from "@/component/navigations/CustomHeader";
 import LoadingPage from "@/component/commons/LoadingPage";
+import NoDataScreen from "@/component/commons/NoDataScreen";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
@@ -21,17 +22,39 @@ export interface ShortageProductItem {
   mpItemId: number;
   name: string;
   kg: number;
+  assignedQty: number;
   shortageQty: number;
   ceilingPrice: number;
   gradeAPrice?: number;
   image: string;
   reqStatus: "Pending" | "Completed" | null;
+  assignStatus?: "Pending" | "Finalize";
 }
+
+const formatKg = (val: number | string | undefined | null): string => {
+  if (val === undefined || val === null || val === "") return "0";
+  const num = typeof val === "number" ? val : parseFloat(String(val));
+  if (isNaN(num) || num <= 0) return "0";
+  const rounded = Math.round(num * 1000) / 1000;
+  return String(rounded);
+};
 
 export default function PurchaseShortage({ navigation }: { navigation: any }) {
   const [products, setProducts] = useState<ShortageProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const fetchShortages = async () => {
     try {
@@ -79,22 +102,10 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
       />
 
       {loading && !refreshing ? (
-        <LoadingPage fullScreen message="Loading assign products..." />
+        <LoadingPage fullScreen message="Loading..." />
       ) : products.length === 0 ? (
         /* Empty State */
-        <View className="flex-1 px-6 justify-center items-center">
-          <View className="w-56 h-56 justify-center items-center mb-6">
-            <LottieView
-              source={require("../../../../assets/lottie/no-data.json")}
-              autoPlay
-              loop
-              style={{ width: "100%", height: "100%" }}
-            />
-          </View>
-          <Text className="text-xs font-semibold text-[#676771] text-center italic px-6 leading-5">
-            - You don't have any products assigned for purchase today. -
-          </Text>
-        </View>
+        <NoDataScreen message="- You don't have any products assigned for purchase today. -" />
       ) : (
         /* Active Product List State */
         <ScrollView
@@ -129,6 +140,11 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
                   style={{
                     borderColor: isDisabled ? "#4E52734D" : "#79747E33",
                     backgroundColor: isDisabled ? "#4E52734D" : "#FFFFFF",
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: isDisabled ? 0 : 2 },
+                    shadowOpacity: isDisabled ? 0 : 0.08,
+                    shadowRadius: isDisabled ? 0 : 4,
+                    elevation: isDisabled ? 0 : 3,
                   }}
                   className="flex-row items-center border rounded-2xl p-4"
                 >
@@ -154,9 +170,11 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
                     </Text>
                     <Text
                       style={{ color: subTextColor }}
-                      className="text-xs font-semibold mt-0.5"
+                      className="text-sm font-semibold mt-0.5"
                     >
-                      {item.kg} kg
+                      {isDisabled
+                        ? `0 kg`
+                        : `${formatKg(item.kg)} kg`}
                     </Text>
                   </View>
 
