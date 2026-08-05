@@ -313,7 +313,7 @@ export default function PrintingConfirmation({
         </View>
       </ScrollView>
 
-      <View className="px-6 pt-4 pb-8 bg-white">
+      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: 85 }}>
         <TouchableOpacity
           onPress={handlePrintPress}
           className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"

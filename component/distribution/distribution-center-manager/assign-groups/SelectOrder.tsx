@@ -50,7 +50,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
       onBackPress
     );
     return () => backHandler.remove();
-  }, [group.timeSlotCode, type]);
+  }, [group.timeSlotCode, type, route.params?.selectedOrderIds]);
 
   const fetchOrders = async () => {
     try {
@@ -67,12 +67,13 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
       );
 
       if (response.data && response.data.success) {
+        const prevSelectedIds: (number | string)[] = route.params?.selectedOrderIds || [];
         const list = response.data.data.map((item: any) => ({
           id: String(item.id),
           orderId: item.orderId,
           type: item.type,
           subtitle: item.subtitle,
-          checked: false
+          checked: prevSelectedIds.some((sId) => String(sId) === String(item.id))
         }));
         setOrders(list);
       } else {
@@ -134,6 +135,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
       selectedOrdersCount: selectedOrderIds.length,
       selectedOrderIds: selectedOrderIds,
       group: group,
+      type: type,
     });
   };
 
@@ -148,9 +150,9 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
 
       {/* Order count positioned after custom header */}
       <View className="items-center -mt-6 pb-2 bg-white">
-        <Text className="text-xs text-[#980775]">
+        <Text className="text-md text-[#980775]">
           <Text className="font-bold">{isRetail ? "Retail" : "Wholesale"} {totalCount} </Text>
-          <Text className="font-normal">Orders</Text>
+          <Text className="font-normal">{totalCount === 1 ? "Order" : "Orders"}</Text>
         </Text>
       </View>
 
@@ -161,7 +163,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={{ paddingTop: 16, paddingBottom: 130 }}
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: checkedCount > 0 ? 230 : 50 }}
           className="flex-1 bg-white"
           showsVerticalScrollIndicator={false}
         >
@@ -287,11 +289,22 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
 
       {/* Sticky Bottom Action Bar when any items are checked */}
       {checkedCount > 0 && (
-        <View className="px-6 pt-4 pb-8 bg-white border-t border-[#E1E7EE] absolute bottom-0 left-0 right-0 gap-4">
+        <View
+          style={{ paddingBottom: 10 }}
+          className="px-6 pt-4 bg-white border-t border-[#E1E7EE] absolute bottom-0 left-0 right-0 gap-4"
+        >
           {/* Deselect All Button */}
           <TouchableOpacity
             onPress={handleDeselectAll}
-            className="w-full h-[50px] bg-[#FF5A5F] rounded-full flex-row items-center justify-center shadow gap-2"
+            className="w-full h-[50px] rounded-full flex-row items-center justify-center gap-2"
+            style={{
+              backgroundColor: "#FF5A5F",
+              shadowColor: "#FF5A5F",
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.25,
+              shadowRadius: 6,
+              elevation: 4,
+            }}
             activeOpacity={0.8}
           >
             <FontAwesome name="minus" size={18} color="white" />
@@ -301,7 +314,15 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
           {/* Continue Button */}
           <TouchableOpacity
             onPress={handleContinue}
-            className="w-full h-[50px] bg-black rounded-full flex-row items-center justify-center shadow gap-2"
+            className="w-full h-[50px] rounded-full flex-row items-center justify-center gap-2"
+            style={{
+              backgroundColor: "#000000",
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 6,
+              elevation: 5,
+            }}
             activeOpacity={0.8}
           >
             <FontAwesome name="check" size={18} color="white" />

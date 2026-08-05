@@ -50,18 +50,6 @@ export default function DashboardSkeleton() {
           <View className="w-12 h-5 rounded-full bg-slate-300" />
         </Animated.View>
 
-        {/* Target Progress Circular Skeleton */}
-        <Animated.View
-          style={{ opacity: opacityAnim }}
-          className="items-center justify-center my-6"
-        >
-          <View className="w-[100px] h-[100px] rounded-full border-8 border-slate-200 items-center justify-center bg-slate-50">
-            <View className="w-10 h-5 bg-slate-200 rounded" />
-          </View>
-          <View className="w-36 h-4 bg-slate-200 rounded mt-4" />
-          <View className="w-24 h-3.5 bg-slate-200 rounded mt-1.5" />
-        </Animated.View>
-
         {/* Dashboard Grid Cards Skeleton */}
         <Animated.View
           style={{ opacity: opacityAnim }}

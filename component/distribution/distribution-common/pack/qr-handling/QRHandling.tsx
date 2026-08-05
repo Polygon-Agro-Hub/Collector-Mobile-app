@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
+import LoadingPage from "@/component/commons/LoadingPage";
 
 interface OrderData {
   id: number;
@@ -98,10 +99,30 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           packagesList: o.packagesList || [],
         }));
 
+        const getTimeSlotPriority = (rawTimeSlot: string, formattedTimeSlot: string): number => {
+          const str = (rawTimeSlot || formattedTimeSlot || "").toLowerCase();
+          if (str === "8-12" || str.includes("8:00 am") || str.includes("08:00 am")) return 1;
+          if (str === "12-4" || str === "12-16" || str.includes("12:00 pm")) return 2;
+          if (str === "16-20" || str === "16-21" || str === "4-8" || str === "4-9" || str.includes("04:00 pm") || str.includes("4:00 pm") || str.includes("09:00 pm") || str.includes("9:00 pm")) return 3;
+          return 4;
+        };
+
         const todo = allOrders.filter((o: any) => {
           const raw = response.data.data.find((item: any) => item.id === o.id);
           const minPIndex = raw ? Number(raw.minPIndex || 0) : 0;
           return minPIndex === 0 && raw.orderStatus !== 'Completed';
+        });
+
+        // Sort To Do orders by time slot priority (8-12 AM first, 12-4 PM second, 4-9 PM third)
+        todo.sort((a: any, b: any) => {
+          const rawA = response.data.data.find((item: any) => item.id === a.id);
+          const rawB = response.data.data.find((item: any) => item.id === b.id);
+          const pA = getTimeSlotPriority(rawA?.timeSlot, a.timeSlot);
+          const pB = getTimeSlotPriority(rawB?.timeSlot, b.timeSlot);
+          if (pA !== pB) {
+            return pA - pB;
+          }
+          return a.id - b.id;
         });
 
         const done = allOrders.filter((o: any) => {
@@ -149,9 +170,8 @@ export default function QRHandling({ navigation }: { navigation: any }) {
       </View>
 
       {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#980775" />
-          <Text className="text-[#54617D] text-sm font-semibold mt-3">Loading orders...</Text>
+        <View className="flex-1 justify-center items-center bg-white">
+          <LoadingPage message="Loading orders..." fullScreen />
         </View>
       ) : !hasData ? (
         /* SCREEN 1: No Data State */
@@ -207,7 +227,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                   activeTab === "todo" ? "text-white" : "text-[#54617D]"
                 }`}
               >
-                To Do ({String(todoOrders.length).padStart(2, "0")})
+                To Do ({todoOrders.length === 0 ? "0" : String(todoOrders.length).padStart(2, "0")})
               </Text>
             </TouchableOpacity>
 
@@ -224,14 +244,15 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                   activeTab === "done" ? "text-white" : "text-[#54617D]"
                 }`}
               >
-                Done ({String(doneOrders.length).padStart(2, "0")})
+                Done ({doneOrders.length === 0 ? "0" : String(doneOrders.length).padStart(2, "0")})
               </Text>
             </TouchableOpacity>
           </View>
 
           <ScrollView
             className="flex-1 bg-white px-6"
-            contentContainerStyle={{ flexGrow: 1 }}
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
+            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
@@ -255,25 +276,26 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                   </Text>
                 </View>
               ) : (
-                <View className="gap-4 pb-8">
+                <View className="gap-4 pb-12">
                   {todoOrders.map((order, idx) => {
                     const isTop = idx === 0;
                     const formattedIndex = String(idx + 1).padStart(2, "0");
 
-                    // Focused styling for top card, default styling for others
+                    // Focused styling for top card, white card with #E1E7EE border without shadow for disabled cards
                     const cardBorderColor = isTop
                       ? "border-[#980775] border-2"
-                      : "border-gray-100 border";
+                      : "border-[#E1E7EE] border";
                     const indexBgColor = isTop
                       ? "bg-[#980775]"
-                      : "bg-slate-50 border-gray-100 border";
+                      : "bg-[#E9ECF1]";
                     const indexTextColor = isTop
                       ? "text-white"
-                      : "text-slate-800";
+                      : "text-[#54617D]";
 
                     return (
                       <TouchableOpacity
                         key={order.id}
+                        disabled={!isTop}
                         onPress={() => {
                           if (isTop) {
                             const nextOrder = todoOrders[idx + 1];
@@ -281,6 +303,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                               processOrderId: order.id,
                               orderNumber: `${order.orderNumber} (${order.type})`,
                               invoiceNumber: order.orderNumber,
+                              timeSlot: order.timeSlot,
                               category: order.category,
                               packagesCount: (order as any).packagesCount || 0,
                               alacarteCount: (order as any).alacarteCount || 0,
@@ -297,13 +320,14 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                             });
                           }
                         }}
-                        className={`flex-row items-center bg-white rounded-2xl p-4 shadow-sm ${cardBorderColor}`}
+                        className={`flex-row items-center bg-white rounded-2xl p-4 ${cardBorderColor}`}
                         style={{
-                          shadowColor: "#000",
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.05,
-                          shadowRadius: 2,
-                          elevation: 1,
+                          backgroundColor: "#ffffff",
+                          shadowColor: "#000000",
+                          shadowOffset: { width: 0, height: isTop ? 4 : 0 },
+                          shadowOpacity: isTop ? 0.15 : 0,
+                          shadowRadius: isTop ? 6 : 0,
+                          elevation: isTop ? 4 : 0,
                         }}
                         activeOpacity={0.8}
                       >
@@ -320,13 +344,19 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
                         {/* Content */}
                         <View className="flex-1">
-                          <Text className="font-bold text-slate-950 text-base">
+                          <Text
+                            className={`font-bold text-base text-[#030E25]`}
+                          >
                             {order.orderNumber} ({order.type})
                           </Text>
-                          <Text className="text-sm font-bold text-slate-900 mt-0.5">
+                          <Text
+                            className={`text-sm font-bold mt-0.5 text-[#030E25]`}
+                          >
                             {order.timeSlot}
                           </Text>
-                          <Text className="text-xs text-[#54617D] mt-0.5">
+                          <Text
+                            className={`text-xs mt-0.5 "text-[#676771]`}
+                          >
                             {order.category}
                           </Text>
                         </View>

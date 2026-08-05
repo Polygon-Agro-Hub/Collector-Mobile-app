@@ -97,7 +97,7 @@ export default function UploadFile({
           </Text>
         </TouchableOpacity>
       ) : (
-        <View className="mt-6 rounded-2xl border border-dashed border-[#1861F4] bg-white p-4">
+        <View className="mt-6 mb-8 rounded-2xl border border-dashed border-[#1861F4] bg-white p-4">
           {/* File Uploaded badge */}
           <View className="flex-row items-center">
             <Ionicons name="checkmark-circle" size={16} color="#980775" />
@@ -142,7 +142,7 @@ export default function UploadFile({
               <TouchableOpacity
                 onPress={() => setPreviewVisible(true)}
                 activeOpacity={0.7}
-                className="mt-3 self-center flex-row items-center justify-center rounded-md border border-black px-10 py-2.5"
+                className="mt-3 self-center flex-row items-center justify-center rounded-md border border-black px-4 py-2"
               >
                 <Ionicons name="eye" size={16} color="#000000" />
                 <Text className="ml-2 text-sm font-semibold text-black">

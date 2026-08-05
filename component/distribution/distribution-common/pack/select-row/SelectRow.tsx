@@ -15,7 +15,8 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { setActiveAssignment } from "../../../../../store/authSlice";
+import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
+import LoadingPage from "@/component/commons/LoadingPage";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {
@@ -125,10 +126,6 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   const handlePositionSelect = (position: PositionData) => {
     if (position.status === "Occupied") {
-      Alert.alert(
-        "Position Occupied",
-        "This position is already in use. Please select an available position.",
-      );
       return;
     }
     setSelectedPosition(position);
@@ -160,17 +157,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           positionName: selectedPosition.name,
           pType: selectedPosition.type,
         };
-        if (typeof setActiveAssignment === "function") {
-          const actionObj = setActiveAssignment(assignmentData);
-          if (actionObj) {
-            dispatch(actionObj);
-          }
-        }
+        dispatch(setActiveAssignmentAction(assignmentData));
         await AsyncStorage.setItem("activeAssignment", JSON.stringify(assignmentData));
 
         Alert.alert(
           "Confirmation Success",
-          `You have been successfully assigned to ${selectedPosition.name} of ${selectedRow?.name}.`,
+          "You have been successfully assigned to this position",
           [
             {
               text: "OK",
@@ -212,7 +204,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   return (
     <View className="flex-1 bg-white">
       {/* Header bar matching screenshot */}
-      <View className="flex-row items-center justify-between px-5 pt-4 bg-white">
+      <View className="flex-row items-center justify-between px-5 pt-4 pb-2 bg-white">
         {/* Back Button matching CustomHeader */}
         <TouchableOpacity
           onPress={handleBack}
@@ -250,47 +242,17 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         <View className="w-10" />
       </View>
 
-      {/* Active Assignment Resume Banner */}
-      {step === 1 && activeAssignment && (
-        <TouchableOpacity
-          onPress={() => {
-            const type = activeAssignment.type || activeAssignment.positionType;
-            if (type === "QR") {
-              navigation.navigate("QRHandling");
-            } else if (type === "NOR") {
-              navigation.navigate("WelcomeToPacking", {
-                positionId: activeAssignment.positionId,
-                positionName: activeAssignment.name,
-              });
-            } else if (type === "QC") {
-              navigation.navigate("WelcomeToQC", {
-                positionName: activeAssignment.name,
-              });
-            }
-          }}
-          className="mx-6 mt-3 bg-[#EAF1FF] border border-[#3B82F6] rounded-2xl p-4 flex-row items-center justify-between"
-          activeOpacity={0.8}
+      {loading ? (
+        <View className="flex-1 justify-center items-center bg-white">
+          <LoadingPage message="Loading..." fullScreen />
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1 bg-white"
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10, paddingBottom: 50 }}
+          showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 mr-2">
-            <Text className="text-xs font-bold text-[#1E40AF]">Active Position Today</Text>
-            <Text className="text-sm font-extrabold text-[#030E25] mt-0.5">
-              {activeAssignment.name} ({activeAssignment.rowName})
-            </Text>
-          </View>
-          <View className="bg-[#3B82F6] px-3 py-1.5 rounded-xl flex-row items-center gap-1">
-            <Text className="text-white font-bold text-xs">Resume</Text>
-            <Feather name="arrow-right" size={14} color="white" />
-          </View>
-        </TouchableOpacity>
-      )}
-
-      <ScrollView className="flex-1 bg-white px-6">
-        {loading ? (
-          <View className="flex-1 justify-center items-center py-20">
-            <ActivityIndicator size="large" color="#000" />
-            <Text className="text-slate-500 text-sm mt-3 font-semibold">Loading...</Text>
-          </View>
-        ) : step === 1 ? (
+          {step === 1 ? (
           <>
             {/* Step 1 Title */}
             <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
@@ -305,13 +267,14 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                   <TouchableOpacity
                     key={row.id}
                     onPress={() => handleRowSelect(row)}
-                    className="flex-row items-center bg-white border border-gray-100 rounded-2xl p-4 shadow-sm"
+                    className="flex-row items-center border border-gray-100 rounded-2xl p-4 my-1"
                     style={{
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.05,
-                      shadowRadius: 2,
-                      elevation: 2,
+                      backgroundColor: "#ffffff",
+                      shadowColor: "#000000",
+                      shadowOffset: { width: 0, height: 3 },
+                      shadowOpacity: 0.12,
+                      shadowRadius: 6,
+                      elevation: 4,
                     }}
                     activeOpacity={0.8}
                   >
@@ -354,18 +317,17 @@ export default function SelectRow({ navigation }: { navigation: any }) {
             {/* Step 2 list of positions */}
             <View className="gap-4">
               {positions.map((position) => {
-                // Determine styling based on type and status
-                let leftCircleStyle = "bg-slate-50 border-gray-100";
-                let leftTextStyle = "text-slate-800";
-                let cardStyle = "bg-white border-gray-100";
+                const isOccupied = position.status === "Occupied";
 
-                if (position.type === "QR") {
-                  leftCircleStyle = "bg-yellow-100 border-yellow-200";
-                  leftTextStyle = "text-black";
-                } else if (position.type === "QC") {
+                // Determine styling based on type and status
+                let leftCircleStyle = "bg-slate-50 border-[#E1E7EE]";
+                let leftTextStyle = "text-slate-800";
+                let cardStyle = "border-[#E1E7EE] border";
+
+                if (position.type === "QR" || position.type === "QC") {
                   leftCircleStyle = "bg-yellow-50 border-yellow-300";
                   leftTextStyle = "text-black";
-                  cardStyle = "bg-white border-yellow-300 border";
+                  cardStyle = "border-yellow-300 border";
                 }
 
                 if (selectedPosition?.id === position.id) {
@@ -376,37 +338,51 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                   <TouchableOpacity
                     key={position.id}
                     onPress={() => handlePositionSelect(position)}
-                    className={`flex-row items-center border rounded-2xl p-4 shadow-sm ${cardStyle}`}
+                    disabled={isOccupied}
+                    className={`flex-row items-center rounded-2xl p-4 my-1 ${
+                      isOccupied
+                        ? "border border-transparent"
+                        : cardStyle
+                    }`}
                     style={{
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.05,
-                      shadowRadius: 2,
-                      elevation: 1,
+                      backgroundColor: isOccupied ? "#4E52734D" : "#ffffff",
+                      shadowColor: "#000000",
+                      shadowOffset: { width: 0, height: isOccupied ? 0 : 3 },
+                      shadowOpacity: isOccupied ? 0 : 0.12,
+                      shadowRadius: isOccupied ? 0 : 6,
+                      elevation: isOccupied ? 0 : 4,
                     }}
                     activeOpacity={0.8}
                   >
                     {/* Circle Indicator */}
                     <View
-                      className={`w-12 h-12 rounded-full border items-center justify-center mr-4 ${leftCircleStyle}`}
+                      className={`w-12 h-12 rounded-full border items-center justify-center mr-4 ${
+                        isOccupied ? "bg-white/40 border-gray-300/40" : leftCircleStyle
+                      }`}
                     >
-                      <Text className={`font-bold text-sm ${leftTextStyle}`}>
+                      <Text
+                        className={`font-bold text-sm ${
+                          isOccupied ? "text-[#54617D]" : leftTextStyle
+                        }`}
+                      >
                         {position.leftLabel}
                       </Text>
                     </View>
 
                     {/* Content */}
                     <View className="flex-1">
-                      <Text className="font-bold text-slate-950 text-base">
+                      <Text
+                        className={`font-bold text-base ${
+                          isOccupied ? "text-[#54617D]" : "text-slate-950"
+                        }`}
+                      >
                         {position.name}
                       </Text>
                       {/* Badge status */}
                       <View className="flex-row mt-1">
                         <View
                           className={`flex-row items-center px-2 py-0.5 rounded-full ${
-                            position.status === "Occupied"
-                              ? "bg-gray-200"
-                              : "bg-slate-50"
+                            isOccupied ? "bg-[#00000010]" : "bg-slate-50"
                           }`}
                         >
                           <View
@@ -414,12 +390,14 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                               width: 6,
                               height: 6,
                               borderRadius: 3,
-                              backgroundColor: "black",
+                              backgroundColor: isOccupied ? "#54617D" : "black",
                               marginRight: 6,
                             }}
                           />
                           <Text
-                            className={`text-[10px] font-semibold text-black`}
+                            className={`text-[10px] font-semibold ${
+                              isOccupied ? "text-[#54617D]" : "text-black"
+                            }`}
                           >
                             {position.status}
                           </Text>
@@ -431,7 +409,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#9ca3af"
+                      color={isOccupied ? "#54617D" : "#9ca3af"}
                     />
                   </TouchableOpacity>
                 );
@@ -440,6 +418,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           </>
         )}
       </ScrollView>
+    )}
 
       {/* Confirmation Modal overlay matching screenshot */}
       <Modal
@@ -470,7 +449,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
               <TouchableOpacity
                 onPress={handleConfirm}
                 disabled={submitting}
-                className="w-full bg-black py-4 rounded-full items-center justify-center flex-row gap-2"
+                className="w-full py-4 rounded-full items-center justify-center flex-row gap-2"
+                style={{
+                  backgroundColor: "#000000",
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 8,
+                  elevation: 5,
+                }}
                 activeOpacity={0.8}
               >
                 {submitting ? (
@@ -483,7 +470,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
               {/* Cancel */}
               <TouchableOpacity
                 onPress={() => setShowConfirmModal(false)}
-                className="w-full bg-[#D9D9D9] py-4 rounded-full items-center justify-center"
+                className="w-full py-4 rounded-full items-center justify-center"
+                style={{
+                  backgroundColor: "#D9D9D9",
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 6,
+                  elevation: 3,
+                }}
                 activeOpacity={0.8}
               >
                 <Text className="text-gray-700 font-bold text-base">
