@@ -41,6 +41,17 @@ const timeSlotMap: { [key: string]: string } = {
   "16-21": "04:00 PM - 09:00 PM",
 };
 
+const formatWeightDisplay = (weightStr: string) => {
+  if (!weightStr) return weightStr;
+  const match = weightStr.trim().match(/^([\d.]+)\s*(.*)$/);
+  if (!match) return weightStr;
+  const numVal = parseFloat(match[1]);
+  const unit = match[2];
+  if (isNaN(numVal)) return weightStr;
+  const numStr = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(2);
+  return `${numStr} ${unit}`.trim();
+};
+
 export default function WelcomeToQC({
   route,
   navigation,
@@ -118,7 +129,6 @@ export default function WelcomeToQC({
 
       if (activeRes.data && activeRes.data.success && activeRes.data.data) {
         const activeData = activeRes.data.data;
-        console.log("=== WELCOME TO QC ACTIVE ORDER DATA ===", JSON.stringify(activeData, null, 2));
 
         if (activeData.formattedOrderNumber) {
           setDisplayOrderTitle(activeData.formattedOrderNumber);
@@ -160,7 +170,7 @@ export default function WelcomeToQC({
               return {
                 id: item.id,
                 name: item.name,
-                weight: item.weight || "1.0 kg",
+                weight: formatWeightDisplay(item.weight || "1.0 kg"),
                 packName: resolvedPackName,
                 categoryType: isAlacarte ? "alacarte" : "package",
                 checked: false,
@@ -226,10 +236,7 @@ export default function WelcomeToQC({
         ).catch(() => {});
 
         setStatus("waiting");
-        setAlertMessage(
-          advanceRes.data.message ||
-            "Package QC inspection completed and advanced to next station."
-        );
+        setAlertMessage("Packing has been completed successfully.");
         setAlertVisible(true);
       } else if (advanceRes.data && !advanceRes.data.success) {
         Alert.alert("Station Busy", advanceRes.data.message || "The next station is currently busy.");
@@ -398,7 +405,7 @@ export default function WelcomeToQC({
                   activeOpacity={0.8}
                 >
                   <View className="flex-row items-center flex-1 mr-3">
-                    <View className="w-14 h-14 rounded-full overflow-hidden items-center justify-center bg-slate-50 mr-4">
+                    <View className="w-14 h-14 rounded-full overflow-hidden items-center justify-center mr-4">
                       <Image
                         source={{ uri: item.image }}
                         className="w-full h-full"

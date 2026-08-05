@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,15 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { Ionicons, Entypo, Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
 import { useDispatch } from "react-redux";
+import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
 import LoadingPage from "@/component/commons/LoadingPage";
 
@@ -46,6 +47,97 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [activeAssignment, setActiveAssignment] = useState<any | null>(null);
 
+  const fetchPositionsSilently = async (rowId: number) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows/${rowId}/positions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data && response.data.success) {
+        setPositions(response.data.data);
+      }
+    } catch (err) {
+      console.error("Error silently fetching positions:", err);
+    }
+  };
+
+  const fetchRowsSilently = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data && response.data.success) {
+        setRows(response.data.data);
+      }
+    } catch (err) {
+      console.error("Error silently fetching rows:", err);
+    }
+  };
+
+  // Real-time socket updates for rows & positions
+  useEffect(() => {
+    let socket: Socket | null = null;
+    try {
+      const baseUrl = environment.API_BASE_URL;
+      const socketUrl = baseUrl.includes("/agro-api")
+        ? baseUrl.split("/agro-api")[0]
+        : baseUrl;
+
+      socket = io(socketUrl, {
+        transports: ["websocket", "polling"],
+      });
+
+      socket.on("connect", () => {
+        if (selectedRow) {
+          socket?.emit("join_row", selectedRow.id);
+        }
+      });
+
+      socket.on("rows_updated", () => {
+        fetchRowsSilently();
+      });
+
+      socket.on("position_updated", () => {
+        fetchRowsSilently();
+        if (selectedRow) {
+          fetchPositionsSilently(selectedRow.id);
+        }
+      });
+
+      socket.on("positions_updated", () => {
+        fetchRowsSilently();
+        if (selectedRow) {
+          fetchPositionsSilently(selectedRow.id);
+        }
+      });
+
+      socket.on("order_opened", () => {
+        fetchRowsSilently();
+        if (selectedRow) {
+          fetchPositionsSilently(selectedRow.id);
+        }
+      });
+
+      socket.on("order_completed", () => {
+        fetchRowsSilently();
+        if (selectedRow) {
+          fetchPositionsSilently(selectedRow.id);
+        }
+      });
+    } catch (err) {
+      console.error("Socket connection error in SelectRow:", err);
+    }
+
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
+  }, [selectedRow]);
+
   const checkActiveAssignment = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -63,11 +155,29 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     }
   };
 
+  const handleBack = useCallback(() => {
+    if (step === 2) {
+      setStep(1);
+      setSelectedRow(null);
+      return true;
+    } else {
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+      return true;
+    }
+  }, [step, navigation]);
+
   useFocusEffect(
     useCallback(() => {
       fetchRows();
       checkActiveAssignment();
-    }, [])
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBack
+      );
+
+      return () => subscription.remove();
+    }, [handleBack])
   );
 
   const fetchRows = async () => {
@@ -126,6 +236,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   const handlePositionSelect = (position: PositionData) => {
     if (position.status === "Occupied") {
+      Alert.alert(
+        "Position Occupied",
+        `Position "${position.name}" is currently occupied by another officer. Please select an available position.`
+      );
       return;
     }
     setSelectedPosition(position);
@@ -189,15 +303,6 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       Alert.alert("Error", "An error occurred while confirming assignment.");
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleBack = () => {
-    if (step === 2) {
-      setStep(1);
-      setSelectedRow(null);
-    } else {
-      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
     }
   };
 
@@ -324,8 +429,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 let leftTextStyle = "text-slate-800";
                 let cardStyle = "border-[#E1E7EE] border";
 
-                if (position.type === "QR" || position.type === "QC") {
-                  leftCircleStyle = "bg-yellow-50 border-yellow-300";
+                const isQrOrQc = position.type === "QR" || position.type === "QC";
+                const circleStyle = isQrOrQc
+                  ? (isOccupied ? "bg-[#D9B700] border-[#D9B700]" : "bg-[#FAE432] border-[#FAE432]")
+                  : (isOccupied ? "bg-white/40 border-gray-300/40" : leftCircleStyle);
+
+                if (isQrOrQc) {
                   leftTextStyle = "text-black";
                   cardStyle = "border-yellow-300 border";
                 }
@@ -341,7 +450,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                     disabled={isOccupied}
                     className={`flex-row items-center rounded-2xl p-4 my-1 ${
                       isOccupied
-                        ? "border border-transparent"
+                        ? (isQrOrQc ? "border-[#D9B700] border-2" : "border border-transparent")
                         : cardStyle
                     }`}
                     style={{
@@ -356,13 +465,11 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                   >
                     {/* Circle Indicator */}
                     <View
-                      className={`w-12 h-12 rounded-full border items-center justify-center mr-4 ${
-                        isOccupied ? "bg-white/40 border-gray-300/40" : leftCircleStyle
-                      }`}
+                      className={`w-12 h-12 rounded-full border items-center justify-center mr-4 ${circleStyle}`}
                     >
                       <Text
                         className={`font-bold text-sm ${
-                          isOccupied ? "text-[#54617D]" : leftTextStyle
+                          isQrOrQc ? "text-black" : (isOccupied ? "text-[#54617D]" : leftTextStyle)
                         }`}
                       >
                         {position.leftLabel}
