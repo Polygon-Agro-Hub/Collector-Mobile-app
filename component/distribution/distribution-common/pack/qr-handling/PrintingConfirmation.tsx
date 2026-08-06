@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AlertModal from "@/component/commons/AlertModal";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface PrintStep {
   id: number;
@@ -48,6 +49,8 @@ export default function PrintingConfirmation({
     ],
     alacarteCount = 3,
   } = route.params || {};
+
+  const insets = useSafeAreaInsets();
 
   // Convert (R) to (Retail) and (W) to (Wholesale) for display inside the QR card
   const displayOrderNumber = orderNumber.includes("(R)")
@@ -340,7 +343,7 @@ export default function PrintingConfirmation({
         </View>
       </ScrollView>
 
-      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: 10 }}>
+      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
         <TouchableOpacity
           onPress={handlePrintPress}
           className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"

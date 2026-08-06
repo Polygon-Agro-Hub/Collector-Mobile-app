@@ -12,6 +12,7 @@ import CustomHeader from "@/component/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface OrderItem {
   id: string;
@@ -26,6 +27,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
     group: { id: 1, timeSlot: "08:00 AM - 12:00 PM", ordersLeft: 20 },
     type: "Retail",
   };
+  const insets = useSafeAreaInsets();
 
   const isRetail = type.toLowerCase() === "retail";
   const totalCount = group.ordersLeft;
@@ -290,7 +292,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
       {/* Sticky Bottom Action Bar when any items are checked */}
       {checkedCount > 0 && (
         <View
-          style={{ paddingBottom: 10 }}
+          style={{ paddingBottom: insets.bottom + 16 }}
           className="px-6 pt-4 bg-white border-t border-[#E1E7EE] absolute bottom-0 left-0 right-0 gap-4"
         >
           {/* Deselect All Button */}

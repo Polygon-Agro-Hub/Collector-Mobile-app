@@ -10,6 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/navigations/CustomHeader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ReadyToPrint({
   route,
@@ -28,6 +29,8 @@ export default function ReadyToPrint({
     alacarteCount = 3,
     packagesList = [],
   } = route.params || {};
+
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const onBackPress = () => {
@@ -153,7 +156,7 @@ export default function ReadyToPrint({
       </ScrollView>
 
       {/* Start Button Pinned to Bottom */}
-      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: 10 }}>
+      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("PrintingConfirmation", {

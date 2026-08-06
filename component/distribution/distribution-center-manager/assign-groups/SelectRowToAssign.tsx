@@ -12,6 +12,7 @@ import CustomHeader from "@/component/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface RowItem {
   id: string;
@@ -21,6 +22,7 @@ interface RowItem {
 
 export default function SelectRowToAssign({ route, navigation }: { route: any; navigation: any }) {
   const { selectedOrdersCount = 20, selectedOrderIds = [], group = { id: 1, timeSlot: "08:00 AM - 12:00 PM" } } = route.params || {};
+  const insets = useSafeAreaInsets();
 
   const [rows, setRows] = useState<RowItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -194,7 +196,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
       {/* Sticky Bottom Assign Action Button when a row is selected */}
       {selectedRowId && (
         <View 
-          style={{ borderTopColor: "#79747E33", borderTopWidth: 1, paddingBottom: 10 }}
+          style={{ borderTopColor: "#79747E33", borderTopWidth: 1, paddingBottom: insets.bottom + 16 }}
           className="px-6 pt-4 bg-white absolute bottom-0 left-0 right-0"
         >
           <TouchableOpacity
