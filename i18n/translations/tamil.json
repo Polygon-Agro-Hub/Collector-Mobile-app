@@ -946,6 +946,7 @@
     "Received Time": "பெறப்பட்ட நேரம்",
     "No cash was received today": "இன்று பணம் பெறப்படவில்லை",
     "Received Cash": "பெறப்பட்ட பணம்",
+    "Deposit to Company":"நிறுவனத்திற்கு வைப்புத்தொகை",
     "On": "தேதி",
     "All": "அனைத்தும்",
     "Full Total": "மொத்த தொகை",
@@ -1068,5 +1069,24 @@
     "skipMessage": "Some features may not work properly without location access. Are you sure?",
     "skip": "Skip",
     "skipForNow": "Skip for now"
+  },
+   "ReceivedCashTransfer": {
+    "Transfer to Company": "நிறுவனத்திற்கு பரிமாற்றம்",
+    "On": "தேதி",
+    "Full Total": "மொத்த தொகை",
+    "Rs": "ரூ.",
+    "Orders included": "சேர்க்கப்பட்ட ஆர்டர்கள்",
+    "Account Name": "கணக்கு பெயர்",
+    "Account Number": "கணக்கு எண்",
+    "Bank Name": "வங்கியின் பெயர்",
+    "Branch Name": "கிளையின் பெயர்",
+    "Submit Payment Slip": "பணம் செலுத்திய சீட்டை சமர்ப்பிக்கவும்",
+    "Please upload the transfer slip": "தயவுசெய்து பரிமாற்ற சீட்டை பதிவேற்றவும்",
+    "Authentication token not found": "அங்கீகார டோக்கன் கிடைக்கவில்லை",
+    "Success": "வெற்றி",
+    "Error": "பிழை",
+    "OK": "சரி",
+    "Deposit submitted for review": "வைப்புத்தொகை மறுஆய்வுக்காக சமர்ப்பிக்கப்பட்டது",
+    "Failed to submit deposit": "வைப்புத்தொகையை சமர்ப்பிக்க முடியவில்லை"
   }
 }

@@ -17,6 +17,9 @@ export type RootStackParamList = {
   SinChangePassword: undefined;
   SinLogin: undefined;
   Lanuage: undefined;
+  PdfViewer: {
+  uri: string;
+};
   SinDashboard: undefined;
   SinUfarmercropdetails: undefined;
   SinRegisteredfarmer: undefined;
@@ -60,9 +63,10 @@ export type RootStackParamList = {
   ReceivedCash: undefined;
   ReceivedCashOfficer: undefined;
   ReceivedCashTransfer: {
-    totalCash: number;
-    selectedDate: string;
-  };
+  totalCash: number;
+  selectedDate: string;
+  pickupOrderIds: (string | undefined)[];
+};
   CameraAccess: undefined;
   QRScanner: {
     userId: any;

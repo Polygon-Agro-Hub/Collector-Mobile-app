@@ -10,7 +10,7 @@ import {
   Alert,
   BackHandler,
 } from "react-native";
-import { Entypo, Ionicons } from "@expo/vector-icons";
+import { Entypo, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -124,7 +124,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
               item.pickupOrderId?.toString() || item.processOrderId?.toString(),
             orderId:
               item.processOrderOrderId || item.pickupOrderOrderId || "N/A",
-            cash: parseFloat(item.fullTotal) || 0,
+            cash: parseFloat(item.handOverPrice) || 0,
             receivedTime: item.handOverTime
               ? formatDateTime(item.handOverTime)
               : formatDateTime(item.pickupCreatedAt),
@@ -359,6 +359,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
                 navigation.navigate("ReceivedCashTransfer", {
                   totalCash,
                   selectedDate: formatDate(selectedDate),
+                  pickupOrderIds: transactions.map((t) => t.pickupOrderId),
                 })
               }
               activeOpacity={0.85}
@@ -366,16 +367,19 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
                 backgroundColor: "#980775",
                 borderRadius: 50,
                 paddingVertical: 16,
+                flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
+              <FontAwesome6 name="arrow-up-from-bracket" size={18} color="white" />
               <Text
                 style={{
                   color: "white",
                   fontSize: 16,
                   fontWeight: "700",
                   letterSpacing: 0.3,
+                  marginLeft: 8,
                 }}
               >
                 {t("ReceivedCash.Deposit to Company")}

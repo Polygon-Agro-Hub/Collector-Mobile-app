@@ -14,6 +14,8 @@ import { RootStackParamList } from "../../../types/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import UploadFile, { UploadFileItem } from "../../../commons/UploadFile";
+import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 type ReceivedCashTransferNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -41,74 +43,91 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
   navigation,
   route,
 }) => {
-  const { totalCash, selectedDate } = route.params;
+  const { t } = useTranslation();
+  const { totalCash, selectedDate, pickupOrderIds } = route.params;
+
   const [file, setFile] = useState<UploadFileItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const formattedTotal = totalCash.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const isSubmitDisabled = !file || submitting;
 
   const handleSubmit = async () => {
     if (!file) {
-      Alert.alert("Required", "Please upload the payment slip before submitting.");
+      Alert.alert(
+        t("ReceivedCashTransfer.Error"),
+        t("ReceivedCashTransfer.Please upload the transfer slip"),
+      );
       return;
     }
 
     try {
       setSubmitting(true);
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
-        Alert.alert("Error", "Authentication token not found");
+        Alert.alert(
+          t("ReceivedCashTransfer.Error"),
+          t("ReceivedCashTransfer.Authentication token not found"),
+        );
         return;
       }
 
-      const formData = new FormData();
-      formData.append("totalCash", totalCash.toString());
-      formData.append("selectedDate", selectedDate);
-      formData.append("accountName", COMPANY_BANK_DETAILS.accountName);
-      formData.append("accountNumber", COMPANY_BANK_DETAILS.accountNumber);
-      formData.append("bankName", COMPANY_BANK_DETAILS.bankName);
-      formData.append("branchName", COMPANY_BANK_DETAILS.branchName);
-
-      if (file) {
-        formData.append("paymentSlip", {
-          uri: file.uri,
-          name: file.name,
-          type: "image/jpeg",
-        } as any);
-      }
-
-      const response = await fetch(
-        `${environment.API_BASE_URL}api/pickup/deposit-to-company`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
+      const validIds = (pickupOrderIds || []).filter(
+        (id) => id !== undefined && id !== null,
       );
 
-      const data = await response.json();
+      const formData = new FormData();
+      const fileExt = file.name.split(".").pop()?.toLowerCase();
+      const fileMime =
+        file.type === "pdf"
+          ? "application/pdf"
+          : `image/${fileExt === "png" ? "png" : "jpeg"}`;
 
-      if (data.success) {
-        Alert.alert("Success", "Payment slip submitted successfully.", [
-          {
-            text: "OK",
-            onPress: () =>
-              navigation.navigate("Main", { screen: "ReceivedCash" }),
+      formData.append("slip", {
+        uri: file.uri,
+        name: file.name,
+        type: fileMime,
+      } as any);
+      formData.append("pickupOrderIds", JSON.stringify(validIds));
+
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/pickup/deposit-cash`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
-        ]);
+        },
+      );
+
+      if (response.data.status === "success") {
+        Alert.alert(
+          t("ReceivedCashTransfer.Success"),
+          t("ReceivedCashTransfer.Deposit submitted for review"),
+          [
+            {
+              text: t("ReceivedCashTransfer.OK"),
+              onPress: () =>
+                navigation.navigate("Main", {
+                  screen: "DistridutionaDashboard",
+                }),
+            },
+          ],
+        );
       } else {
-        Alert.alert("Error", data.message || "Failed to submit payment slip.");
+        Alert.alert(
+          t("ReceivedCashTransfer.Error"),
+          response.data.message ||
+            t("ReceivedCashTransfer.Failed to submit deposit"),
+        );
       }
     } catch (error: any) {
-      console.error("Submit error:", error);
+      console.error("Error submitting deposit:", error);
       Alert.alert(
-        "Error",
-        error?.message || "Failed to submit payment slip. Please try again."
+        t("ReceivedCashTransfer.Error"),
+        error.response?.data?.message ||
+          t("ReceivedCashTransfer.Failed to submit deposit"),
       );
     } finally {
       setSubmitting(false);
@@ -116,179 +135,139 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View className="flex-1 bg-white">
       {/* Header */}
-      <View
-        style={{
-          backgroundColor: "#fff",
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
+      <View className="bg-white px-4 py-4 flex-row items-center">
         <TouchableOpacity
-          style={{
-            position: "absolute",
-            left: 16,
-            backgroundColor: "#F6F6F680",
-            borderRadius: 50,
-            padding: 12,
-            zIndex: 50,
-          }}
+          className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
           onPress={() => navigation.goBack()}
         >
           <Entypo name="chevron-left" size={25} color="#000" />
         </TouchableOpacity>
-
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", marginLeft: 8 }}>
-          <Text style={{ fontSize: 18, fontWeight: "600", color: "#111827" }}>
-            Deposit to Company
+        <View className="flex-1 items-center justify-center ml-2">
+          <Text className="text-lg font-semibold text-gray-900">
+            {t("ReceivedCashTransfer.Transfer to Company")}
           </Text>
-          <Text style={{ fontSize: 13, color: "#000" }}>
-            On <Text style={{ fontWeight: "700" }}>{selectedDate}</Text>
+          <Text className="text-sm text-black">
+            {t("ReceivedCashTransfer.On")}{" "}
+            <Text className="font-bold">{selectedDate}</Text>
           </Text>
         </View>
       </View>
 
       <ScrollView
-        style={{ flex: 1 }}
+        className="flex-1 w-full max-w-[500px] mx-auto"
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
       >
-        <View style={{ paddingHorizontal: 16 }}>
-          {/* Full Total Box */}
-          <View style={{ alignItems: "center", marginBottom: 24 , marginTop: 16}}>
-            <View
-              style={{
-                borderStyle: "dashed",
-                borderWidth: 2,
-                borderColor: "#980775",
-                borderRadius: 12,
-                backgroundColor: "#fff",
-                paddingHorizontal: 24,
-                paddingVertical: 10,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={{ fontWeight: "500", color: "#000", fontSize: 14 }}>
-                  Full Total :{" "}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontWeight: "700",
-                    color: "#980775",
-                  }}
-                  adjustsFontSizeToFit
-                  numberOfLines={1}
-                >
-                  Rs.{formattedTotal}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Bank Details Card */}
+        {/* Total Cash Summary */}
+        <View className="mt-4 items-center">
           <View
             style={{
-              backgroundColor: "#F4F7FD",
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: "#F4F7FD",
-              padding: 16,
-              marginBottom: 8,
+              borderStyle: "dashed",
+              borderWidth: 2,
+              borderColor: "#980775",
+              borderRadius: 12,
+              backgroundColor: "white",
+              paddingHorizontal: 16,
+              paddingVertical: 8,
             }}
           >
-            {[
-              { label: "Account Name", value: COMPANY_BANK_DETAILS.accountName },
-              { label: "Account Number", value: COMPANY_BANK_DETAILS.accountNumber },
-              { label: "Bank Name", value: COMPANY_BANK_DETAILS.bankName },
-              { label: "Branch Name", value: COMPANY_BANK_DETAILS.branchName },
-            ].map((detail, index) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  marginBottom: index < 3 ? 10 : 0,
-                  alignItems: "flex-start",
-                }}
+            <View className="flex-row items-center justify-center flex-wrap">
+              <Text className="font-medium text-black" numberOfLines={1}>
+                {t("ReceivedCashTransfer.Full Total")} :{" "}
+              </Text>
+              <Text
+                className="text-xl font-bold text-[#980775]"
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                minimumFontScale={0.6}
               >
-                <Text
-                  style={{
-                    color: "#6B7280",
-                    fontSize: 13,
-                    width: 130,
-                    flexShrink: 0,
-                  }}
-                >
-                  {detail.label}
-                </Text>
-                <Text
-                  style={{
-                    color: "#6B7280",
-                    fontSize: 13,
-                    marginRight: 6,
-                  }}
-                >
-                  :
-                </Text>
-                <Text
-                  style={{
-                    color: "#111827",
-                    fontSize: 13,
-                    fontWeight: "500",
-                    flex: 1,
-                  }}
-                >
-                  {detail.value}
-                </Text>
-              </View>
-            ))}
+                {t("ReceivedCashTransfer.Rs")}
+                {totalCash.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Text>
+            </View>
           </View>
-
-          {/* Upload File Component */}
-          <UploadFile file={file} onFileChange={setFile} maxSizeMB={5} />
         </View>
-      </ScrollView>
 
-      {/* Submit Button */}
-      <View
-        style={{
-          paddingHorizontal: 16,
-          paddingBottom: 16,
-          paddingTop: 8,
-          backgroundColor: "#fff",
-        }}
-      >
+        {/* Order count info */}
+        <Text className="mt-3 text-center text-sm text-[#848484]">
+          {t("ReceivedCashTransfer.Orders included")}:{" "}
+          {(pickupOrderIds || []).filter((id) => id).length}
+        </Text>
+
+        {/* Company Bank Details Card */}
+        <View className="mt-5 rounded-2xl bg-[#F5F7FA] border border-[#E3E7ED] px-4 py-4">
+          <View className="flex-row justify-between py-1.5">
+            <Text className="text-sm text-[#848484]">
+              {t("ReceivedCashTransfer.Account Name")}
+            </Text>
+            <Text className="text-sm font-semibold text-gray-900">
+              {COMPANY_BANK_DETAILS.accountName}
+            </Text>
+          </View>
+          <View className="flex-row justify-between py-1.5">
+            <Text className="text-sm text-[#848484]">
+              {t("ReceivedCashTransfer.Account Number")}
+            </Text>
+            <Text className="text-sm font-semibold text-gray-900">
+              {COMPANY_BANK_DETAILS.accountNumber}
+            </Text>
+          </View>
+          <View className="flex-row justify-between py-1.5">
+            <Text className="text-sm text-[#848484]">
+              {t("ReceivedCashTransfer.Bank Name")}
+            </Text>
+            <Text className="text-sm font-semibold text-gray-900">
+              {COMPANY_BANK_DETAILS.bankName}
+            </Text>
+          </View>
+          <View className="flex-row justify-between py-1.5">
+            <Text className="text-sm text-[#848484]">
+              {t("ReceivedCashTransfer.Branch Name")}
+            </Text>
+            <Text className="text-sm font-semibold text-gray-900">
+              {COMPANY_BANK_DETAILS.branchName}
+            </Text>
+          </View>
+        </View>
+
+        {/* Slip Upload */}
+        <UploadFile file={file} onFileChange={setFile} maxSizeMB={5} />
+
+        {/* Submit Button */}
         <TouchableOpacity
           onPress={handleSubmit}
+          disabled={isSubmitDisabled}
           activeOpacity={0.85}
-          disabled={submitting}
           style={{
-            backgroundColor: submitting ? "#c4619c" : "#980775",
+            backgroundColor: isSubmitDisabled ? "#D1B8CB" : "#980775",
             borderRadius: 50,
             paddingVertical: 16,
             alignItems: "center",
             justifyContent: "center",
-            flexDirection: "row",
+            marginTop: 24,
           }}
         >
           {submitting ? (
-            <ActivityIndicator color="#fff" style={{ marginRight: 8 }} />
-          ) : null}
-          <Text
-            style={{
-              color: "#fff",
-              fontSize: 16,
-              fontWeight: "700",
-              letterSpacing: 0.3,
-            }}
-          >
-            {submitting ? "Submitting..." : "Submit Payment Slip"}
-          </Text>
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text
+              style={{
+                color: "white",
+                fontSize: 16,
+                fontWeight: "700",
+                letterSpacing: 0.3,
+              }}
+            >
+              {t("ReceivedCashTransfer.Submit Payment Slip")}
+            </Text>
+          )}
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 };

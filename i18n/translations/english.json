@@ -942,6 +942,7 @@
     "Received Time": "Received Time",
     "No cash was received today": "No cash was received today",
     "Received Cash": "Received Cash",
+    "Deposit to Company":"Deposit to Company",
     "On": "On",
     "All": "All",
     "Full Total": "Full Total",
@@ -1063,5 +1064,25 @@
     "skipMessage": "Some features may not work properly without location access. Are you sure?",
     "skip": "Skip",
     "skipForNow": "Skip for now"
+  },
+    "ReceivedCashTransfer": {
+    "Transfer to Company": "Transfer to Company",
+    "On": "On",
+    "Full Total": "Full Total",
+    "Rs": "Rs.",
+    "Orders included": "Orders included",
+    "Account Name": "Account Name",
+    "Account Number": "Account Number",
+    "Bank Name": "Bank Name",
+    "Branch Name": "Branch Name",
+    "Submit Payment Slip": "Submit Payment Slip",
+    "Please upload the transfer slip": "Please upload the transfer slip",
+    "Authentication token not found": "Authentication token not found",
+    "Success": "Success",
+    "Error": "Error",
+    "OK": "OK",
+    "Deposit submitted for review": "Deposit submitted for review",
+    "Failed to submit deposit": "Failed to submit deposit"
   }
+
 }
