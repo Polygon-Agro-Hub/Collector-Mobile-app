@@ -114,7 +114,7 @@ export default function PurchaseProduct({
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [successModalVisible, setSuccessModalVisible] = useState<boolean>(false);
 
-  const actionPaddingBottom = uploadedFile ? 50 : 10;
+  const actionPaddingBottom = uploadedFile ? 50 : insets.bottom + 16;
 
   useFocusEffect(
     useCallback(() => {

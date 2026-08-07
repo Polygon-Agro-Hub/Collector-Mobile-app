@@ -16,6 +16,7 @@ import CustomHeader from "@/component/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Product {
   id: number;
@@ -27,6 +28,7 @@ interface Product {
 
 export default function WelcomeToPacking({ route, navigation }: { route: any; navigation: any }) {
   const { positionId, positionName = "Packing Position 1" } = route.params || {};
+  const insets = useSafeAreaInsets();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [hasData, setHasData] = useState<boolean>(false);
@@ -181,7 +183,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
 
       {/* Start Working Button pinned to bottom (only shown in Data State) */}
       {!loading && hasData && (
-        <View className="px-6 pt-3 pb-10 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: 10 }}>
+        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
           <TouchableOpacity
             onPress={() => {
               navigation.navigate("Packing", {

@@ -6,9 +6,18 @@ import {
   Image,
   Modal,
   Alert,
+  SafeAreaView,
+  StatusBar,
+  Platform,
 } from "react-native";
-import { FontAwesome5, Ionicons, Feather } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Linking from "expo-linking";
+import * as Sharing from "expo-sharing";
+import PdfViewer from "./PdfViewer";
+
 
 export interface UploadFileItem {
   uri: string;
@@ -31,15 +40,23 @@ export default function UploadFile({
   maxSizeMB = 5,
 }: UploadFileProps) {
   const [previewVisible, setPreviewVisible] = useState(false);
+  const MAX_FILE_SIZE_BYTES = maxSizeMB * 1024 * 1024;
 
-  const handleUploadPress = async () => {
+  const showFileTooLargeAlert = () => {
+    Alert.alert(
+      "File Too Large",
+      `File is too large. Please upload an image or file smaller than ${maxSizeMB} MB.`,
+    );
+  };
+
+  const pickImage = async () => {
     try {
       const permissionResult =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permissionResult.granted) {
         Alert.alert(
           "Permission Required",
-          "Permission to access media library is required to upload invoice photo."
+          "Permission to access media library is required to upload invoice photo.",
         );
         return;
       }
@@ -53,13 +70,21 @@ export default function UploadFile({
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
+
+        if (asset.fileSize && asset.fileSize > MAX_FILE_SIZE_BYTES) {
+          showFileTooLargeAlert();
+          return;
+        }
+
         const fileSizeMB = asset.fileSize
           ? (asset.fileSize / (1024 * 1024)).toFixed(1) + " MB"
           : "1.2 MB";
 
         onFileChange({
           uri: asset.uri,
-          base64: asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : undefined,
+          base64: asset.base64
+            ? `data:image/jpeg;base64,${asset.base64}`
+            : undefined,
           name:
             asset.fileName ||
             "Transfer_Slip_" + Date.now().toString().slice(-6) + ".png",
@@ -68,13 +93,97 @@ export default function UploadFile({
         });
       }
     } catch (err) {
-      console.error("Error picking file:", err);
+      console.error("Error picking image:", err);
       Alert.alert("Upload Error", "Failed to select file. Please try again.");
     }
   };
 
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["image/*", "application/pdf"],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      const asset = result.assets[0];
+      const isPdf =
+        asset.mimeType === "application/pdf" || asset.name?.endsWith(".pdf");
+
+      if (asset.size && asset.size > MAX_FILE_SIZE_BYTES) {
+        showFileTooLargeAlert();
+        return;
+      }
+
+      const sizeMB = asset.size
+        ? (asset.size / (1024 * 1024)).toFixed(1) + " MB"
+        : "1.2 MB";
+
+      onFileChange({
+        uri: asset.uri,
+        name:
+          asset.name ||
+          (isPdf
+            ? "Transfer_Slip_" + Date.now().toString().slice(-6) + ".pdf"
+            : "Transfer_Slip_" + Date.now().toString().slice(-6) + ".png"),
+        sizeMB,
+        type: isPdf ? "pdf" : "image",
+      });
+    } catch (err) {
+      console.error("Error picking document:", err);
+      Alert.alert("Upload Error", "Failed to select file. Please try again.");
+    }
+  };
+
+  const handleUploadPress = () => {
+    Alert.alert(
+      "Select Upload Source",
+      "Choose how you want to upload your file",
+      [
+        { text: "Photo Library", onPress: pickImage },
+        { text: "Browse Files / PDF", onPress: pickDocument },
+        { text: "Cancel", style: "cancel" },
+      ],
+    );
+  };
+
   const removeFile = () => {
     onFileChange(null);
+  };
+
+  const openPdfExternally = async () => {
+    if (!file || file.type !== "pdf") return;
+    try {
+      let targetUri = file.uri;
+      if (targetUri.startsWith("http://") || targetUri.startsWith("https://")) {
+        const fileFilename = `pdf_share_${Date.now()}.pdf`;
+        const destination = `${FileSystem.cacheDirectory}${fileFilename}`;
+        const downloadResult = await FileSystem.downloadAsync(
+          targetUri,
+          destination,
+        );
+        targetUri = downloadResult.uri;
+      }
+
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare && targetUri.startsWith("file://")) {
+        await Sharing.shareAsync(targetUri, {
+          mimeType: "application/pdf",
+          dialogTitle: file.name,
+        });
+      } else {
+        await Linking.openURL(file.uri);
+      }
+    } catch (error) {
+      console.log("Error opening PDF externally:", error);
+      Alert.alert(
+        "Couldn't open PDF",
+        "Please make sure you have a PDF viewer app installed.",
+      );
+    }
   };
 
   return (
@@ -100,8 +209,8 @@ export default function UploadFile({
         <View className="mt-6 mb-8 rounded-2xl border border-dashed border-[#1861F4] bg-white p-4">
           {/* File Uploaded badge */}
           <View className="flex-row items-center">
-            <Ionicons name="checkmark-circle" size={16} color="#980775" />
-            <Text className="ml-1.5 text-sm font-medium text-[#980775]">
+            <Ionicons name="checkmark-circle" size={16} color="#0CB353" />
+            <Text className="ml-1.5 text-sm font-medium text-[#0CB353]">
               File Uploaded
             </Text>
           </View>
@@ -142,10 +251,10 @@ export default function UploadFile({
               <TouchableOpacity
                 onPress={() => setPreviewVisible(true)}
                 activeOpacity={0.7}
-                className="mt-3 self-center flex-row items-center justify-center rounded-md border border-black px-4 py-2"
+                className="mt-3 self-center flex-row items-center justify-center rounded-md border border-[#0850F0] px-4 py-2"
               >
-                <Ionicons name="eye" size={16} color="#000000" />
-                <Text className="ml-2 text-sm font-semibold text-black">
+                <FontAwesome6 name="eye" size={16} color="#0850F0" />
+                <Text className="ml-2 text-sm font-semibold text-[#0850F0]">
                   Preview Full Image
                 </Text>
               </TouchableOpacity>
@@ -178,10 +287,10 @@ export default function UploadFile({
               <TouchableOpacity
                 onPress={() => setPreviewVisible(true)}
                 activeOpacity={0.7}
-                className="mt-3 self-center flex-row items-center justify-center rounded-md border border-black px-10 py-2.5"
+                className="mt-3 self-center flex-row items-center justify-center rounded-md border border-[#0850F0] px-10 py-2.5"
               >
-                <Ionicons name="eye" size={16} color="#000000" />
-                <Text className="ml-2 text-sm font-semibold text-black">
+                <FontAwesome6 name="eye" size={16} color="#0850F0" />
+                <Text className="ml-2 text-sm font-semibold text-[#0850F0]">
                   Preview PDF
                 </Text>
               </TouchableOpacity>
@@ -190,29 +299,70 @@ export default function UploadFile({
         </View>
       )}
 
-      {/* Full Screen Image Preview Modal */}
+      {/* Full Screen Preview Modal */}
       <Modal
         visible={previewVisible}
-        transparent={true}
-        animationType="fade"
+        transparent={(file?.type || "image") === "image"}
+        animationType={(file?.type || "image") === "image" ? "fade" : "slide"}
         onRequestClose={() => setPreviewVisible(false)}
       >
-        <View className="flex-1 bg-black/90 justify-center items-center px-4">
-          <TouchableOpacity
-            onPress={() => setPreviewVisible(false)}
-            className="absolute top-12 right-6 p-2 rounded-full bg-white/20 z-10"
-          >
-            <Feather name="x" size={24} color="white" />
-          </TouchableOpacity>
+        {(file?.type || "image") === "image" ? (
+          <View className="flex-1 bg-black/90 justify-center items-center px-4">
+            <TouchableOpacity
+              onPress={() => setPreviewVisible(false)}
+              className="absolute top-12 right-6 p-2 rounded-full bg-white/20 z-10"
+            >
+              <Feather name="x" size={24} color="white" />
+            </TouchableOpacity>
 
-          {file && file.type === "image" && (
-            <Image
-              source={{ uri: file.uri }}
-              className="w-full h-[70%]"
-              resizeMode="contain"
-            />
-          )}
-        </View>
+            {file && file.type === "image" && (
+              <Image
+                source={{ uri: file.uri }}
+                className="w-full h-[70%]"
+                resizeMode="contain"
+              />
+            )}
+          </View>
+        ) : (
+          <SafeAreaView style={{ flex: 1, backgroundColor: "#f3f4f6" }}>
+            <StatusBar barStyle="light-content" />
+            {/* PDF Header */}
+            <View
+              className="flex-row items-center justify-between bg-black px-4 pb-3"
+              style={{
+                paddingTop:
+                  Platform.OS === "android"
+                    ? (StatusBar.currentHeight ?? 0) + 12
+                    : 12,
+              }}
+            >
+              <Text
+                className="flex-1 pr-3 text-sm font-medium text-white"
+                numberOfLines={1}
+              >
+                {file?.name}
+              </Text>
+              <View className="flex-row items-center">
+                <TouchableOpacity
+                  onPress={openPdfExternally}
+                  className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-white/10"
+                  hitSlop={8}
+                >
+                  <Ionicons name="open-outline" size={18} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setPreviewVisible(false)}
+                  className="h-8 w-8 items-center justify-center rounded-full bg-white/10"
+                  hitSlop={8}
+                >
+                  <Ionicons name="close" size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {file && file.type === "pdf" && <PdfViewer uri={file.uri} />}
+          </SafeAreaView>
+        )}
       </Modal>
     </>
   );

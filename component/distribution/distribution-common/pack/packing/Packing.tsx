@@ -16,6 +16,7 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
 import AlertModal from "@/component/commons/AlertModal";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const TIME_SLOTS = [
   { label: "08:00 AM - 12:00 PM", value: "08:00 AM - 12:00 PM" },
@@ -67,6 +68,7 @@ export default function Packing({
     rowId,
     positionCrops = [],
   } = route.params || {};
+  const insets = useSafeAreaInsets();
 
   const [activeProcessOrderId, setActiveProcessOrderId] = useState<
     number | null
@@ -503,7 +505,7 @@ export default function Packing({
 
       {/* Skip Button pinned to bottom when position has no items */}
       {status === "no_items" && (
-        <View className="px-6 pt-3 pb-10 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: 10 }}>
+        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}
             className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
@@ -516,7 +518,7 @@ export default function Packing({
 
       {/* Complete Button pinned to bottom when all items checked */}
       {status === "has_items" && allItemsChecked && (
-        <View className="px-6 pt-3 pb-10 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: 10 }}>
+        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}
             className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
