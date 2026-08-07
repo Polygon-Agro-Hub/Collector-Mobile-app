@@ -6,6 +6,7 @@ import {
   Alert,
   ScrollView,
   BackHandler,
+  ActivityIndicator,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/navigations/CustomHeader";
@@ -116,6 +117,7 @@ export default function PrintingConfirmation({
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [alertTitle, setAlertTitle] = useState<string>("Success");
+  const [isPrinting, setIsPrinting] = useState<boolean>(false);
 
   const activeStep = steps[currentStep - 1] || steps[0];
   const qrValue = invoiceNumber || orderNumber;
@@ -137,6 +139,8 @@ export default function PrintingConfirmation({
   }, [currentStep, navigation, route.params]);
 
   const handlePrintPress = async () => {
+    if (isPrinting) return;
+    setIsPrinting(true);
     try {
       const isReprint = route.params?.isReprint;
       if (isReprint) {
@@ -187,17 +191,20 @@ export default function PrintingConfirmation({
           { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        if (
-          response.data &&
-          response.data.success === false &&
-          response.data.code === "STATION_OCCUPIED"
-        ) {
+        if (response.data && response.data.success === false) {
+          const code = response.data.code;
+          const msg = response.data.message || "An error occurred.";
           setAlertType("error");
-          setAlertTitle("Position Busy");
-          setAlertMessage(
-            response.data.message ||
-              "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.",
-          );
+          if (code === "STATION_OCCUPIED") {
+            setAlertTitle("Position Busy");
+            setAlertMessage(msg);
+          } else if (code === "NO_OFFICER_ASSIGNED") {
+            setAlertTitle("Position Empty");
+            setAlertMessage(msg);
+          } else {
+            setAlertTitle("Error");
+            setAlertMessage(msg);
+          }
           setAlertVisible(true);
           return;
         }
@@ -223,17 +230,20 @@ export default function PrintingConfirmation({
           { headers: { Authorization: `Bearer ${token}` } },
         );
 
-        if (
-          response.data &&
-          response.data.success === false &&
-          response.data.code === "STATION_OCCUPIED"
-        ) {
+        if (response.data && response.data.success === false) {
+          const code = response.data.code;
+          const msg = response.data.message || "An error occurred.";
           setAlertType("error");
-          setAlertTitle("Position Busy");
-          setAlertMessage(
-            response.data.message ||
-              "Packing Position 1 is currently busy. Please wait until Position 1 completes its current box.",
-          );
+          if (code === "STATION_OCCUPIED") {
+            setAlertTitle("Position Busy");
+            setAlertMessage(msg);
+          } else if (code === "NO_OFFICER_ASSIGNED") {
+            setAlertTitle("Position Empty");
+            setAlertMessage(msg);
+          } else {
+            setAlertTitle("Error");
+            setAlertMessage(msg);
+          }
           setAlertVisible(true);
           return;
         }
@@ -253,16 +263,21 @@ export default function PrintingConfirmation({
       }
     } catch (err: any) {
       console.error("Error updating order status on QR print:", err);
-      const busyMsg = err.response?.data?.message;
-      const isOccupied = err.response?.data?.code === "STATION_OCCUPIED";
+      const msg = err.response?.data?.message || "Failed to communicate with packing server. Please try again.";
+      const code = err.response?.data?.code;
 
       setAlertType("error");
-      setAlertTitle(isOccupied ? "Position Busy" : "Error");
-      setAlertMessage(
-        busyMsg ||
-          "Failed to communicate with packing server. Please try again.",
-      );
+      if (code === "STATION_OCCUPIED") {
+        setAlertTitle("Position Busy");
+      } else if (code === "NO_OFFICER_ASSIGNED") {
+        setAlertTitle("Position Empty");
+      } else {
+        setAlertTitle("Error");
+      }
+      setAlertMessage(msg);
       setAlertVisible(true);
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -288,21 +303,23 @@ export default function PrintingConfirmation({
         </View>
 
         {/* Dynamic Progress step segments at top */}
-        <View className="flex-row justify-between items-center gap-2 px-2 mb-8">
-          {steps.map((s, idx) => {
-            const stepNum = idx + 1;
-            const isFilled = stepNum <= currentStep;
-            return (
-              <View key={s.id} className="flex-1 items-center">
-                <View
-                  className={`w-full h-1.5 rounded-full mb-1 ${
-                    isFilled ? "bg-[#030E25]" : "bg-gray-200"
-                  }`}
-                />
-              </View>
-            );
-          })}
-        </View>
+        {steps.length > 1 && (
+          <View className="flex-row justify-between items-center gap-2 px-2 mb-8">
+            {steps.map((s, idx) => {
+              const stepNum = idx + 1;
+              const isFilled = stepNum <= currentStep;
+              return (
+                <View key={s.id} className="flex-1 items-center">
+                  <View
+                    className={`w-full h-1.5 rounded-full mb-1 ${
+                      isFilled ? "bg-[#030E25]" : "bg-gray-200"
+                    }`}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        )}
 
         {/* Dynamic Step Active Pill Badge */}
         <View className="items-center mb-6">
@@ -346,12 +363,17 @@ export default function PrintingConfirmation({
       <View className="px-6 pt-4 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
         <TouchableOpacity
           onPress={handlePrintPress}
-          className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
+          disabled={isPrinting}
+          className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isPrinting ? "bg-gray-400" : "bg-black"}`}
           activeOpacity={0.8}
         >
-          <Text className="text-white font-extrabold text-base">
-            {route.params?.isReprint ? "Start Again" : `Print (${currentStep})`}
-          </Text>
+          {isPrinting ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <Text className="text-white font-extrabold text-base">
+              {route.params?.isReprint ? "Start Again" : `Print (${currentStep})`}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
 

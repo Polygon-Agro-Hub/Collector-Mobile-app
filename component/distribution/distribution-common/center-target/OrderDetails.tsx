@@ -75,69 +75,19 @@ export default function OrderDetails({
     return () => backHandler.remove();
   }, []);
 
-  const getFallbackDetails = (p: any): OrderDetailsData => {
-    const oId = Number(p.orderId) || 1;
-    const numStr = p.orderNumber || "2608010002";
-    const fmtStr = p.formattedOrderNumber || `${numStr} (R)`;
-    const slotStr = p.timeSlotLabel || "08:00 AM - 12:00 PM";
-    const catStr = p.category || "Pickup Order";
-    const statStr = p.statusLabel || "(Row 1) Out";
-
-    return {
-      orderId: oId,
-      orderNumber: numStr,
-      formattedOrderNumber: fmtStr,
-      timeSlotLabel: slotStr,
-      category: catStr,
-      statusLabel: statStr,
-      qrPrintedByEmpId: "DCM00043",
-      qrPrintedTime: "08:02 AM",
-      packageGroups: [
-        {
-          id: 1,
-          title: "Daily Veggie Pack (02)",
-          count: 2,
-          type: "package",
-          items: [
-            {
-              id: 101,
-              name: "Carrot",
-              weight: "0.5 kg",
-              packedByEmpId: "DCM00001",
-              packedTime: "08:05 AM",
-              image: "https://images.unsplash.com/photo-1598170845058-12ef4a457939?w=200&auto=format&fit=crop&q=80",
-            },
-            {
-              id: 102,
-              name: "Leeks",
-              weight: "0.5 kg",
-              packedByEmpId: "DIO00001",
-              packedTime: "08:08 AM",
-              image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=200&auto=format&fit=crop&q=80",
-            },
-          ],
-        },
-        {
-          id: 2,
-          title: "À la carte (01)",
-          count: 1,
-          type: "alacarte",
-          items: [
-            {
-              id: 103,
-              name: "Garlic",
-              weight: "0.2 kg",
-              packedByEmpId: "DIO00001",
-              packedTime: "08:10 AM",
-              image: "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=200&auto=format&fit=crop&q=80",
-            },
-          ],
-        },
-      ],
-      qcDoneByEmpId: "DCM00025",
-      qcDoneTime: "08:16 AM",
-    };
-  };
+  const buildMinimalDetails = (p: any): OrderDetailsData => ({
+    orderId: Number(p.orderId) || 0,
+    orderNumber: p.orderNumber || "",
+    formattedOrderNumber: p.formattedOrderNumber || p.orderNumber || "",
+    timeSlotLabel: p.timeSlotLabel || "",
+    category: p.category || "",
+    statusLabel: p.statusLabel || "",
+    qrPrintedByEmpId: "-",
+    qrPrintedTime: "-",
+    packageGroups: [],
+    qcDoneByEmpId: "-",
+    qcDoneTime: "-",
+  });
 
   const fetchOrderDetails = async () => {
     try {
@@ -146,7 +96,7 @@ export default function OrderDetails({
       const orderId = params.orderId;
 
       if (!token || !orderId) {
-        setDetails(getFallbackDetails(params));
+        setDetails(buildMinimalDetails(params));
         setLoading(false);
         return;
       }
@@ -160,11 +110,11 @@ export default function OrderDetails({
       if (response && response.data && response.data.success && response.data.data) {
         setDetails(response.data.data);
       } else {
-        setDetails(getFallbackDetails(params));
+        setDetails(buildMinimalDetails(params));
       }
     } catch (error) {
       console.error("Error fetching order details:", error);
-      setDetails(getFallbackDetails(params));
+      setDetails(buildMinimalDetails(params));
     } finally {
       setLoading(false);
     }
@@ -193,7 +143,7 @@ export default function OrderDetails({
           >
             <View className="w-full max-w-[600px] mx-auto">
               {/* Header Summary Card */}
-              <View className="bg-white rounded-2xl p-4 mb-5 border-2 border-[#980775] items-center shadow-sm">
+              <View className="bg-white rounded-2xl p-4 mb-5 border border-[#000000] items-center shadow-sm">
                 <Text className="font-extrabold text-slate-950 text-base text-center">
                   {details.formattedOrderNumber}
                 </Text>
@@ -209,7 +159,7 @@ export default function OrderDetails({
               </View>
 
               {/* Step 1: QR Printed By Card */}
-              <View className="bg-white rounded-2xl p-4 mb-6 border-2 border-[#F5C400] flex-row justify-between items-center shadow-sm">
+              <View className="bg-white rounded-2xl p-4 mb-6 border border-[#F5C400] flex-row justify-between items-center shadow-sm">
                 <View>
                   <Text className="text-[#54617D] text-xs font-semibold">
                     QR Printed By
@@ -245,13 +195,30 @@ export default function OrderDetails({
                           className="bg-white rounded-2xl p-3 border border-slate-200 flex-row items-center justify-between shadow-sm"
                         >
                           <View className="flex-row items-center flex-1 pr-2">
-                            <Image
-                              source={{ uri: item.image }}
-                              className="w-10 h-10 rounded-xl mr-3 bg-slate-100"
-                              resizeMode="cover"
-                            />
-                            <View>
-                              <Text className="text-slate-900 font-bold text-xs">
+                            {item.image ? (
+                              <Image
+                                source={{ uri: item.image }}
+                                className="w-14 h-14 rounded-xl mr-3"
+                                resizeMode="contain"
+                              />
+                            ) : (
+                              <View
+                                className="w-14 h-14 rounded-xl mr-3 items-center justify-center"
+                                style={{ backgroundColor: isAlacarte ? "#FDF3E7" : "#F9EEF6" }}
+                              >
+                                <Text
+                                  className="font-extrabold text-sm"
+                                  style={{ color: isAlacarte ? "#AC7F5E" : "#980775" }}
+                                >
+                                  {(item.name || "?")[0].toUpperCase()}
+                                </Text>
+                              </View>
+                            )}
+                            <View className="flex-1">
+                              <Text className="text-slate-900 font-bold text-xs" numberOfLines={1}>
+                                {item.name}
+                              </Text>
+                              <Text className="text-[#54617D] text-[11px] font-medium mt-0.5">
                                 {item.weight}
                               </Text>
                               <Text className="text-[#54617D] text-[11px] font-semibold mt-0.5">
@@ -274,7 +241,7 @@ export default function OrderDetails({
               })}
 
               {/* Step 3: QC Done By Card */}
-              <View className="bg-white rounded-2xl p-4 mb-6 border-2 border-[#F5C400] flex-row justify-between items-center shadow-sm">
+              <View className="bg-white rounded-2xl p-4 mb-6 border border-[#F5C400] flex-row justify-between items-center shadow-sm">
                 <View>
                   <Text className="text-[#54617D] text-xs font-semibold">
                     QC Done By

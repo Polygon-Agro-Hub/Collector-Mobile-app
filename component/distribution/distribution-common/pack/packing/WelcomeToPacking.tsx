@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   BackHandler,
+  RefreshControl,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
@@ -33,56 +34,63 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
   const [products, setProducts] = useState<Product[]>([]);
   const [hasData, setHasData] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchCrops = async () => {
-      if (!positionId) {
-        setLoading(false);
-        setHasData(false);
+  const fetchCrops = async (showLoader = true) => {
+    if (!positionId) {
+      if (showLoader) setLoading(false);
+      setHasData(false);
+      return;
+    }
+    try {
+      if (showLoader) setLoading(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;
       }
-      try {
-        setLoading(true);
-        const token = await AsyncStorage.getItem("token");
-        if (!token) {
-          Alert.alert("Error", "Authentication token not found. Please log in again.");
-          return;
-        }
 
-        const response = await axios.get(
-          `${environment.API_BASE_URL}api/packing/positions/${positionId}/crops`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/packing/positions/${positionId}/crops`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        if (response.data && response.data.success) {
-          const fetchedCrops = response.data.data;
-          if (fetchedCrops.length > 0) {
-            const mappedCrops = fetchedCrops.map((c: any) => ({
-              id: c.id,
-              name: c.name,
-              image: c.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80"
-            }));
-            // Sort A to Z (ascending alphabetical order by product name)
-            mappedCrops.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
-            setProducts(mappedCrops);
-            setHasData(true);
-          } else {
-            setHasData(false);
-          }
+      if (response.data && response.data.success) {
+        const fetchedCrops = response.data.data;
+        if (fetchedCrops.length > 0) {
+          const mappedCrops = fetchedCrops.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            image: c.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80"
+          }));
+          // Sort A to Z (ascending alphabetical order by product name)
+          mappedCrops.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+          setProducts(mappedCrops);
+          setHasData(true);
         } else {
-          Alert.alert("Error", response.data.message || "Failed to fetch crops.");
           setHasData(false);
         }
-      } catch (error) {
-        console.error("Error fetching crops for position:", error);
-        Alert.alert("Error", "An error occurred while fetching crops.");
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to fetch crops.");
         setHasData(false);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching crops for position:", error);
+      Alert.alert("Error", "An error occurred while fetching crops.");
+      setHasData(false);
+    } finally {
+      if (showLoader) setLoading(false);
+    }
+  };
 
-    fetchCrops();
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchCrops(false);
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    fetchCrops(true);
 
     const onBackPress = () => {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
@@ -105,7 +113,13 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
       />
 
       {/* Main Content scroll area */}
-      <ScrollView className="flex-1 bg-white px-6" contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}>
+      <ScrollView
+        className="flex-1 bg-white px-6"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Page Title */}
         <View className="items-center mb-4 mt-4">
           <Text className="text-xl font-extrabold text-[#030E25] text-center">
@@ -154,7 +168,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
                       <Image
                         source={{ uri: product.image }}
                         className="w-full h-full"
-                        resizeMode="cover"
+                        resizeMode="contain"
                       />
                     </View>
                     {/* Crop label */}

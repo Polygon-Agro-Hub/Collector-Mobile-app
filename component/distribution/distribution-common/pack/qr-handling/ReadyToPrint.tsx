@@ -160,10 +160,10 @@ export default function ReadyToPrint({
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("PrintingConfirmation", {
+              ...route.params,
               orderNumber: orderNumber,
               invoiceNumber: cleanInvoiceNumber,
               category: category,
-              processOrderId: route.params?.processOrderId,
               packagesList: route.params?.packagesList || [],
               alacarteCount: alacarteCount,
               rowId: route.params?.rowId,
