@@ -16,6 +16,8 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
 import LoadingPage from "@/component/components/loading/LoadingPage";
+import { useDispatch } from "react-redux";
+import { clearActiveAssignment } from "../../../../../store/authSlice";
 
 interface OrderData {
   id: number;
@@ -26,6 +28,7 @@ interface OrderData {
 }
 
 export default function QRHandling({ navigation }: { navigation: any }) {
+  const dispatch = useDispatch();
   const [rowId, setRowId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"todo" | "done">("todo");
   const [todoOrders, setTodoOrders] = useState<OrderData[]>([]);
@@ -77,6 +80,24 @@ export default function QRHandling({ navigation }: { navigation: any }) {
     socket.on("position_index_updated", handleRealTimeUpdate);
     socket.on("target_updated", handleRealTimeUpdate);
 
+    const handlePositionFreed = async (payload: { positionId: number }) => {
+      try {
+        const activeAssignmentStr = await AsyncStorage.getItem("activeAssignment");
+        if (activeAssignmentStr) {
+          const activeAssignment = JSON.parse(activeAssignmentStr);
+          if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
+            await AsyncStorage.removeItem("activeAssignment");
+            dispatch(clearActiveAssignment());
+            Alert.alert("Position Released", "Your position has been released by the manager.");
+            navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
+          }
+        }
+      } catch (err) {
+        console.error("Error handling position freed:", err);
+      }
+    };
+    socket.on("position_freed", handlePositionFreed);
+
     const onBackPress = () => {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
       return true;
@@ -89,6 +110,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
       socket.off("order_opened", handleRealTimeUpdate);
       socket.off("position_index_updated", handleRealTimeUpdate);
       socket.off("target_updated", handleRealTimeUpdate);
+      socket.off("position_freed", handlePositionFreed);
       backHandler.remove();
     };
   }, [navigation]);

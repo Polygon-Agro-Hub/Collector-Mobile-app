@@ -18,6 +18,8 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
 import AlertModal from "@/component/components/popup/AlertModal";
+import { useDispatch } from "react-redux";
+import { clearActiveAssignment } from "../../../../../store/authSlice";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const TIME_SLOTS = [
@@ -62,6 +64,7 @@ export default function Packing({
   route: any;
   navigation: any;
 }) {
+  const dispatch = useDispatch();
   const {
     orderNumber: initialOrderNumber,
     processOrderId: initialProcessOrderId,
@@ -153,11 +156,30 @@ export default function Packing({
     socket.on("position_index_updated", handleOrderUpdate);
     socket.on("order_completed", handleOrderUpdate);
 
+    const handlePositionFreed = async (payload: { positionId: number }) => {
+      try {
+        const activeAssignmentStr = await AsyncStorage.getItem("activeAssignment");
+        if (activeAssignmentStr) {
+          const activeAssignment = JSON.parse(activeAssignmentStr);
+          if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
+            await AsyncStorage.removeItem("activeAssignment");
+            dispatch(clearActiveAssignment());
+            Alert.alert("Position Released", "Your position has been released by the manager.");
+            navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
+          }
+        }
+      } catch (err) {
+        console.error("Error handling position freed:", err);
+      }
+    };
+    socket.on("position_freed", handlePositionFreed);
+
     return () => {
       backHandler.remove();
       socket.off("order_opened", handleOrderUpdate);
       socket.off("position_index_updated", handleOrderUpdate);
       socket.off("order_completed", handleOrderUpdate);
+      socket.off("position_freed", handlePositionFreed);
     };
   }, [positionId, rowId]);
 
