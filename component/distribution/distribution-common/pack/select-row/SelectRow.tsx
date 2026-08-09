@@ -104,6 +104,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
       socket.on("position_updated", () => {
         fetchRowsSilently();
+        checkActiveAssignment();
         if (selectedRow) {
           fetchPositionsSilently(selectedRow.id);
         }
@@ -111,6 +112,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
       socket.on("positions_updated", () => {
         fetchRowsSilently();
+        checkActiveAssignment();
+        if (selectedRow) {
+          fetchPositionsSilently(selectedRow.id);
+        }
+      });
+
+      socket.on("position_freed", () => {
+        fetchRowsSilently();
+        checkActiveAssignment();
         if (selectedRow) {
           fetchPositionsSilently(selectedRow.id);
         }
