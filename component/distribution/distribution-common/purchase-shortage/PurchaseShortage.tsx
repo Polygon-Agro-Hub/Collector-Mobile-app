@@ -9,9 +9,9 @@ import {
   BackHandler,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import CustomHeader from "@/component/navigations/CustomHeader";
-import LoadingPage from "@/component/commons/LoadingPage";
-import NoDataScreen from "@/component/commons/NoDataScreen";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
+import LoadingPage from "@/component/components/loading/LoadingPage";
+import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";

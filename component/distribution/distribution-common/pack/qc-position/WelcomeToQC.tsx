@@ -8,15 +8,17 @@ import {
   Image,
   Alert,
   BackHandler,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
-import CustomHeader from "@/component/navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LottieView from "lottie-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import AlertModal from "@/component/commons/AlertModal";
+import AlertModal from "@/component/components/popup/AlertModal";
 import { getSocket } from "@/services/socket";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type QCStatus = "no_target" | "waiting" | "no_items" | "qc_checklist";
 
@@ -64,6 +66,7 @@ export default function WelcomeToQC({
     processOrderId: initialProcessOrderId,
     rowId,
   } = route.params || {};
+  const insets = useSafeAreaInsets();
 
   const [activeProcessOrderId, setActiveProcessOrderId] = useState<
     number | null
@@ -71,6 +74,9 @@ export default function WelcomeToQC({
   const [activeOrderPackageId, setActiveOrderPackageId] = useState<
     number | null
   >(null);
+  const [packagesList, setPackagesList] = useState<any[]>([]);
+  const [alacarteCount, setAlacarteCount] = useState<number>(0);
+  const [isAlacarteActive, setIsAlacarteActive] = useState<boolean>(false);
   const [displayOrderTitle, setDisplayOrderTitle] = useState<string>(
     initialOrderNumber || ""
   );
@@ -81,6 +87,7 @@ export default function WelcomeToQC({
   const [status, setStatus] = useState<QCStatus>("no_target");
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const [isAdvancing, setIsAdvancing] = useState<boolean>(false);
 
   const [qcItems, setQcItems] = useState<QCItem[]>([]);
   const [currentPackName, setCurrentPackName] = useState<string>("Daily Veggie Pack");
@@ -90,7 +97,7 @@ export default function WelcomeToQC({
     fetchActiveOrderAndStatus();
 
     const onBackPress = () => {
-      navigation.navigate("SelectRow");
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
       return true;
     };
     const backHandler = BackHandler.addEventListener(
@@ -109,11 +116,13 @@ export default function WelcomeToQC({
 
     socket.on("order_opened", handleOrderUpdate);
     socket.on("position_index_updated", handleOrderUpdate);
+    socket.on("order_completed", handleOrderUpdate);
 
     return () => {
       backHandler.remove();
       socket.off("order_opened", handleOrderUpdate);
       socket.off("position_index_updated", handleOrderUpdate);
+      socket.off("order_completed", handleOrderUpdate);
     };
   }, [rowId]);
 
@@ -137,6 +146,9 @@ export default function WelcomeToQC({
           setActiveProcessOrderId(activeData.processOrderId);
         }
         setActiveOrderPackageId(activeData.activeOrderPackageId || null);
+        setPackagesList(activeData.packagesList || []);
+        setAlacarteCount(activeData.alacarteCount || 0);
+        setIsAlacarteActive(!!activeData.isAlacarteActive);
         if (activeData.timeSlot) {
           setScheduledTime(
             timeSlotMap[activeData.timeSlot] || activeData.timeSlot
@@ -210,6 +222,8 @@ export default function WelcomeToQC({
     qcItems.length > 0 && qcItems.every((item) => item.checked);
 
   const handleAdvanceQCBox = async () => {
+    if (isAdvancing) return;
+    setIsAdvancing(true);
     try {
       const token = await AsyncStorage.getItem("token");
       const targetOrderId =
@@ -244,8 +258,63 @@ export default function WelcomeToQC({
     } catch (err) {
       console.error("Error advancing QC box:", err);
       Alert.alert("Error", "Failed to advance QC position.");
+    } finally {
+      setIsAdvancing(false);
     }
   };
+
+  // Build dynamic QC progress steps
+  const steps: any[] = [];
+  const totalBoxes = packagesList.length + (alacarteCount > 0 ? 1 : 0);
+
+  if (totalBoxes > 1) {
+    steps.push({
+      id: 1,
+      type: "main",
+      label: "Main Container",
+    });
+  }
+
+  packagesList.forEach((pkg) => {
+    steps.push({
+      id: steps.length + 1,
+      type: "package",
+      label: pkg.name,
+      packageId: pkg.id,
+    });
+  });
+
+  if (alacarteCount > 0) {
+    steps.push({
+      id: steps.length + 1,
+      type: "alacarte",
+      label: "À la carte",
+      packageId: null,
+    });
+  }
+
+  let currentStep = 1;
+  if (activeOrderPackageId === -1) {
+    const matchedIdx = steps.findIndex((s) => s.type === "main");
+    if (matchedIdx !== -1) {
+      currentStep = matchedIdx + 1;
+    }
+  } else if (activeOrderPackageId) {
+    const matchedIdx = steps.findIndex(
+      (s) => s.type === "package" && s.packageId === activeOrderPackageId
+    );
+    if (matchedIdx !== -1) {
+      currentStep = matchedIdx + 1;
+    }
+  } else if (
+    isAlacarteActive ||
+    (qcItems.length > 0 && qcItems[0].categoryType === "alacarte")
+  ) {
+    const matchedIdx = steps.findIndex((s) => s.type === "alacarte");
+    if (matchedIdx !== -1) {
+      currentStep = matchedIdx + 1;
+    }
+  }
 
   return (
     <View className="flex-1 bg-white">
@@ -254,10 +323,46 @@ export default function WelcomeToQC({
       <CustomHeader
         title={status === "no_target" ? "" : displayOrderTitle}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("SelectRow")}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
       <View className="flex-1 px-6 pt-2">
+        {/* Scheduled Time Section */}
+        {status !== "no_target" && (
+          <View className="w-full flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
+            <View className="w-11 h-11 rounded-full bg-[#E9ECF1] items-center justify-center mr-4">
+              <FontAwesome6 name="bag-shopping" size={24} color="black" />
+            </View>
+            <View>
+              <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
+                Scheduled Time :
+              </Text>
+              <Text className="text-[#030E25] font-extrabold text-base">
+                {scheduledTime}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Dynamic Progress step segments */}
+        {status !== "no_target" && steps.length > 1 && (
+          <View className="flex-row justify-between items-center gap-2 px-2 mb-8 w-full">
+            {steps.map((s, idx) => {
+              const stepNum = idx + 1;
+              const isFilled = stepNum <= currentStep;
+              return (
+                <View key={s.id} className="flex-1 items-center">
+                  <View
+                    className={`w-full h-1.5 rounded-full mb-1 ${
+                      isFilled ? "bg-[#030E25]" : "bg-gray-200"
+                    }`}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         {/* STATE 1: No Target Available */}
         {status === "no_target" && (
           <View className="flex-1">
@@ -286,21 +391,8 @@ export default function WelcomeToQC({
 
         {/* STATE 2: Waiting Screen (Box still at previous position) */}
         {status === "waiting" && (
-          <View className="flex-1 items-center">
-            <View className="w-full flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
-              <View className="w-11 h-11 rounded-full bg-[#E9ECF1] items-center justify-center mr-4">
-                <FontAwesome6 name="bag-shopping" size={24} color="black" />
-              </View>
-              <View>
-                <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
-                  Scheduled Time :
-                </Text>
-                <Text className="text-[#030E25] font-extrabold text-base">
-                  {scheduledTime}
-                </Text>
-              </View>
-            </View>
-             <View className="w-56 h-56 justify-center items-center">
+          <View className="flex-1 items-center py-6">
+            <View className="w-56 h-56 justify-center items-center mb-6">
               <LottieView
                 source={require("../../../../../assets/lottie/packing/sand-clock-timer.json")}
                 autoPlay
@@ -311,76 +403,41 @@ export default function WelcomeToQC({
             <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
               This order is still with the{"\n"}previous position
             </Text>
-            <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5 mb-8">
+            <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
               Please try reloading the page in a few seconds.
             </Text>
           </View>
         )}
 
-        {/* STATE 3: No items to pack for this box at QC */}
+        {/* STATE 3: No items to pack for this box at QC -> SHOW SKIP SCREEN */}
         {status === "no_items" && (
-          <View className="flex-1 justify-between">
-            <View className="flex-1">
-              <View className="w-full flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
-                <View className="w-11 h-11 rounded-full bg-[#E9ECF1] items-center justify-center mr-4">
-                  <FontAwesome6 name="bag-shopping" size={24} color="black" />
-                </View>
-                <View>
-                  <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
-                    Scheduled Time :
-                  </Text>
-                  <Text className="text-[#030E25] font-extrabold text-base">
-                    {scheduledTime}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="items-center justify-center flex-1">
-                <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
-                  No Items to Pack
-                </Text>
-                <Text className="text-[#54617D] text-sm text-center px-4 font-medium leading-5 mb-6">
-                  No items to pack for this order{"\n"}at your position
-                </Text>
-                <View className="w-56 h-56 justify-center items-center">
-                  <LottieView
-                    source={require("../../../../../assets/lottie/packing/sand-clock-timer.json")}
-                    autoPlay
-                    loop
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                </View>
+          <View className="flex-1">
+            {/* Lottie Animation Centered in middle (arrow-forward.json) */}
+            <View className="flex justify-center items-center py-6">
+              <View className="w-56 h-56 justify-center items-center">
+                <LottieView
+                  source={require("../../../../../assets/lottie/packing/arrow-forward.json")}
+                  autoPlay
+                  loop
+                  style={{ width: "100%", height: "100%" }}
+                />
               </View>
             </View>
-
-            <TouchableOpacity
-              onPress={handleAdvanceQCBox}
-              className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg mb-4"
-              activeOpacity={0.8}
-            >
-              <Text className="text-white font-extrabold text-base">Skip</Text>
-            </TouchableOpacity>
+            <View className="items-center mt-4 mb-2">
+              <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
+                No items to pack for this order{"\n"}at your position
+              </Text>
+              <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
+                There are no items assigned to the position{"\n"}in the current
+                packing sequence.
+              </Text>
+            </View>
           </View>
         )}
 
         {/* STATE 4: QC Active Package Checklist View */}
         {status === "qc_checklist" && qcItems.length > 0 && (
           <View className="flex-1">
-            {/* Scheduled Time Section */}
-            <View className="w-full flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
-              <View className="w-11 h-11 rounded-full bg-[#E9ECF1] items-center justify-center mr-4">
-                <FontAwesome6 name="bag-shopping" size={24} color="black" />
-              </View>
-              <View>
-                <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
-                  Scheduled Time :
-                </Text>
-                <Text className="text-[#030E25] font-extrabold text-base">
-                  {scheduledTime}
-                </Text>
-              </View>
-            </View>
-
             {/* Package Title */}
             <Text
               className={`font-extrabold text-sm mb-4 ${
@@ -396,6 +453,7 @@ export default function WelcomeToQC({
             <ScrollView
               className="flex-1"
               showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 100 }}
             >
               {qcItems.map((item, index) => (
                 <TouchableOpacity
@@ -437,24 +495,47 @@ export default function WelcomeToQC({
                 </TouchableOpacity>
               ))}
             </ScrollView>
-
-            {/* Complete Button for current package box */}
-            {allItemsChecked && (
-              <View className="pt-2 pb-6 bg-white">
-                <TouchableOpacity
-                  onPress={handleAdvanceQCBox}
-                  className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
-                  activeOpacity={0.8}
-                >
-                  <Text className="text-white font-extrabold text-base">
-                    Complete
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </View>
         )}
       </View>
+
+      {/* Skip Button pinned to bottom when position has no items */}
+      {status === "no_items" && (
+        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
+          <TouchableOpacity
+            onPress={handleAdvanceQCBox}
+            disabled={isAdvancing}
+            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            activeOpacity={0.8}
+          >
+            {isAdvancing ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-white font-extrabold text-base">Skip</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Complete Button pinned to bottom when all items checked */}
+      {status === "qc_checklist" && allItemsChecked && (
+        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
+          <TouchableOpacity
+            onPress={handleAdvanceQCBox}
+            disabled={isAdvancing}
+            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            activeOpacity={0.8}
+          >
+            {isAdvancing ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-white font-extrabold text-base">
+                Complete
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
 
       <AlertModal
         visible={alertVisible}

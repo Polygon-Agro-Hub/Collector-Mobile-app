@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "@/component/types/types";
+import { RootStackParamList } from "@/types/types";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
@@ -21,8 +21,8 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import CameraAccess from "../../../permission/CameraAccess";
-import { AlertModal } from "../../../commons/AlertModal";
+import CameraAccess from "@/component/common/permission/CameraAccess";
+import { AlertModal } from "@/component/components/popup/AlertModal";
 
 type ReceivedCashQrCodeNavigationProp = StackNavigationProp<
   RootStackParamList,

@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   BackHandler,
+  RefreshControl,
 } from "react-native";
 import { Ionicons, Entypo, Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,7 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
-import LoadingPage from "@/component/commons/LoadingPage";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {
@@ -44,6 +45,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [rows, setRows] = useState<RowData[]>([]);
   const [positions, setPositions] = useState<PositionData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [activeAssignment, setActiveAssignment] = useState<any | null>(null);
 
@@ -138,6 +140,41 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     };
   }, [selectedRow]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await checkActiveAssignment();
+    if (step === 1) {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (token) {
+          const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.data && response.data.success) {
+            setRows(response.data.data);
+          }
+        }
+      } catch (e) {
+        console.error("Error refreshing rows:", e);
+      }
+    } else if (step === 2 && selectedRow) {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (token) {
+          const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows/${selectedRow.id}/positions`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.data && response.data.success) {
+            setPositions(response.data.data);
+          }
+        }
+      } catch (e) {
+        console.error("Error refreshing positions:", e);
+      }
+    }
+    setRefreshing(false);
+  };
+
   const checkActiveAssignment = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -198,9 +235,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       } else {
         Alert.alert("Error", response.data.message || "Failed to fetch rows.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching rows:", error);
-      Alert.alert("Error", "An error occurred while fetching rows.");
+      const errMsg = error.response?.data?.message || "An error occurred while fetching rows.";
+      Alert.alert("Error", errMsg);
     } finally {
       setLoading(false);
     }
@@ -226,9 +264,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       } else {
         Alert.alert("Error", response.data.message || "Failed to fetch positions.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching positions:", error);
-      Alert.alert("Error", "An error occurred while fetching positions.");
+      const errMsg = error.response?.data?.message || "An error occurred while fetching positions.";
+      Alert.alert("Error", errMsg);
     } finally {
       setLoading(false);
     }
@@ -298,9 +337,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       } else {
         Alert.alert("Error", response.data.message || "Failed to assign position.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error assigning position:", error);
-      Alert.alert("Error", "An error occurred while confirming assignment.");
+      const errMsg = error.response?.data?.message || "An error occurred while confirming assignment.";
+      Alert.alert("Error", errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -356,6 +396,9 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           className="flex-1 bg-white"
           contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10, paddingBottom: 50 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         >
           {step === 1 ? (
           <>

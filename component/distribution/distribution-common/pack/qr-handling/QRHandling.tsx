@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
-import LoadingPage from "@/component/commons/LoadingPage";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 
 interface OrderData {
   id: number;
@@ -26,6 +26,7 @@ interface OrderData {
 }
 
 export default function QRHandling({ navigation }: { navigation: any }) {
+  const [rowId, setRowId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"todo" | "done">("todo");
   const [todoOrders, setTodoOrders] = useState<OrderData[]>([]);
   const [doneOrders, setDoneOrders] = useState<OrderData[]>([]);
@@ -47,6 +48,24 @@ export default function QRHandling({ navigation }: { navigation: any }) {
   };
 
   useEffect(() => {
+    const loadAssignmentAndJoinRoom = async () => {
+      try {
+        const activeAssignmentStr = await AsyncStorage.getItem("activeAssignment");
+        if (activeAssignmentStr) {
+          const activeAssignment = JSON.parse(activeAssignmentStr);
+          if (activeAssignment.rowId) {
+            const parsedRowId = Number(activeAssignment.rowId);
+            setRowId(parsedRowId);
+            const socket = getSocket();
+            socket.emit("join_row", parsedRowId);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading assignment in QRHandling:", err);
+      }
+    };
+
+    loadAssignmentAndJoinRoom();
     fetchOrders();
 
     const socket = getSocket();
@@ -308,6 +327,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                               packagesCount: (order as any).packagesCount || 0,
                               alacarteCount: (order as any).alacarteCount || 0,
                               packagesList: (order as any).packagesList || [],
+                              rowId: rowId,
                               nextOrderNumber: nextOrder
                                 ? `${nextOrder.orderNumber} (${nextOrder.type})`
                                 : null,

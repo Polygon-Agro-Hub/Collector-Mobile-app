@@ -17,13 +17,13 @@ import {
 } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { RootStackParamList } from "../../../types/types";
+import { RootStackParamList } from "@/types/types";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import CustomHeader from "../../../navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 
 type CollectionOfficersListNavigationProps = StackNavigationProp<
   RootStackParamList,

@@ -7,15 +7,17 @@ import {
   Image,
   Alert,
   BackHandler,
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import CustomHeader from "@/component/navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
-import AlertModal from "@/component/commons/AlertModal";
+import AlertModal from "@/component/components/popup/AlertModal";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const TIME_SLOTS = [
@@ -87,6 +89,17 @@ export default function Packing({
   const [status, setStatus] = useState<PackingStatus>("no_qr_yet");
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const [isAdvancing, setIsAdvancing] = useState<boolean>(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (positionId) {
+      await fetchPositionCrops();
+    }
+    await fetchActiveOrderAndStatus();
+    setRefreshing(false);
+  };
 
   // Crop list items mapped ONLY from position-specific assigned crops
   const [items, setItems] = useState<PackingItem[]>(() => {
@@ -118,7 +131,7 @@ export default function Packing({
 
     // Hardware Back Press Handler to avoid navigation loop
     const onBackPress = () => {
-      navigation.navigate("SelectRow");
+      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
       return true;
     };
     const backHandler = BackHandler.addEventListener(
@@ -138,11 +151,13 @@ export default function Packing({
 
     socket.on("order_opened", handleOrderUpdate);
     socket.on("position_index_updated", handleOrderUpdate);
+    socket.on("order_completed", handleOrderUpdate);
 
     return () => {
       backHandler.remove();
       socket.off("order_opened", handleOrderUpdate);
       socket.off("position_index_updated", handleOrderUpdate);
+      socket.off("order_completed", handleOrderUpdate);
     };
   }, [positionId, rowId]);
 
@@ -215,9 +230,11 @@ export default function Packing({
         if (orderStatus === "Pending") {
           // No QR code printed yet!
           setStatus("no_qr_yet");
+          setItems([]);
         } else if (pIndex > 0 && pIndex !== officerPosIndex) {
           // Package is currently at a different position step (waiting for box to arrive or already passed)
           setStatus("waiting");
+          setItems([]);
         } else if (orderStatus === "Opened" || orderStatus === "Completed") {
           const orderItems = activeData.orderItems || [];
           if (orderItems.length > 0) {
@@ -265,9 +282,15 @@ export default function Packing({
 
           if (orderStatus === "Pending") {
             setStatus("no_qr_yet");
+            setItems([]);
           } else if (pIndex > 0 && pIndex < 1) {
             setStatus("waiting");
-          } else if (orderStatus === "Opened" || orderStatus === "Completed") {
+            setItems([]);
+          } else if (orderStatus === "Completed") {
+            setStatus("no_qr_yet");
+            setItems([]);
+            setActiveProcessOrderId(null);
+          } else if (orderStatus === "Opened") {
             if (items.length > 0) {
               setStatus("has_items");
             } else {
@@ -276,13 +299,18 @@ export default function Packing({
           }
         } else {
           setStatus("no_qr_yet");
+          setItems([]);
+          setActiveProcessOrderId(null);
         }
       } else {
         setStatus("no_qr_yet");
+        setItems([]);
+        setActiveProcessOrderId(null);
       }
     } catch (err) {
       console.error("Error fetching active order tracking status:", err);
       setStatus("no_qr_yet");
+      setItems([]);
     }
   };
 
@@ -298,6 +326,8 @@ export default function Packing({
     items.length > 0 && items.every((item) => item.checked);
 
   const handleAdvancePosition = async () => {
+    if (isAdvancing) return;
+    setIsAdvancing(true);
     try {
       const token = await AsyncStorage.getItem("token");
       const targetOrderId =
@@ -327,6 +357,8 @@ export default function Packing({
     } catch (err) {
       console.error("Error advancing position index:", err);
       Alert.alert("Error", "Failed to advance position index.");
+    } finally {
+      setIsAdvancing(false);
     }
   };
 
@@ -336,7 +368,7 @@ export default function Packing({
       <CustomHeader
         title={status === "no_qr_yet" ? "" : displayOrderTitle}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("SelectRow")}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
       <ScrollView
@@ -349,6 +381,9 @@ export default function Packing({
               : "center",
           paddingBottom: 130,
         }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {/* Scheduled Time Section matching user screenshot design */}
         {status !== "no_qr_yet" && (
@@ -508,10 +543,15 @@ export default function Packing({
         <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}
-            className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
+            disabled={isAdvancing}
+            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
             activeOpacity={0.8}
           >
-            <Text className="text-white font-extrabold text-base">Skip</Text>
+            {isAdvancing ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-white font-extrabold text-base">Skip</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -521,12 +561,17 @@ export default function Packing({
         <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}
-            className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"
+            disabled={isAdvancing}
+            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
             activeOpacity={0.8}
           >
-            <Text className="text-white font-extrabold text-base">
-              Complete
-            </Text>
+            {isAdvancing ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-white font-extrabold text-base">
+                Complete
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       )}

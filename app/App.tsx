@@ -12,7 +12,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { LogBox } from "react-native";
 import axios from "axios";
 import { logoutUser } from "../store/authSlice";
-import { AlertModal, setGlobalAlertListener } from "@/component/commons/AlertModal";
+import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -23,59 +23,55 @@ import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
 import NetInfo from "@react-native-community/netinfo";
 import * as SplashScreen from "expo-splash-screen";
-import Login from "@/component/auth/Login";
-import BannedScreen from "@/component/auth/BannedScreen";
-import ChangePassword from "@/component/auth/ChangePassword";
-import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
-import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails";
-import CollectionOfficerDashboard from "@/component/collection-officer/CollectionOfficerDashboard";
-import QRScanner from "@/component/collection-common/QRScanner";
-import FormScreen from "@/component/collection-common/FormScreen";
-import UnregisteredFarmerDetails from "@/component/farmer/UnregisteredFarmerForm";
-import UnregisteredCropDetails from "@/component/collection-common/UnregisteredCropDetails";
-import SearchFarmer from "@/component/farmer/SearchFarmer";
-import FarmerQr from "@/component/farmer/FarmerQr";
-import ComplainPage from "@/component/complain/ComplainPage";
-import Profile from "@/component/auth/Profile";
-import ReportPage from "@/component/collection-common/ReportPage";
-import SearchPriceScreen from "@/component/collection-common/SearchPriceScreen";
-import PriceChart from "@/component/collection-common/PriceChart";
-import PriceChartManager from "@/component/collection-manager/PriceChartManager";
-import CollectionOfficersList from "@/component/collection-manager/CollectionOfficersList";
-import OfficerSummary from "@/component/collection-manager/OfficerSummary";
-import ReportGenerator from "@/component/collection-manager/ReportGenerator";
-import ComplainHistory from "@/component/complain/ComplainHistory";
-import DailyTargetList from "@/component/collection-common/DailyTargetList";
-import AddOfficer from "@/component/collection-manager/AddOfficer";
-import ClaimOfficer from "@/component/collection-manager/ClaimOfficer";
-import TransactionList from "@/component/collection-manager/TransactionList";
-import FarmerReport from "@/component/collection-manager/FarmerReport";
-import DailyTarget from "@/component/collection-manager/DailyTarget";
-import NoCollectionCenterScreen from "@/component/collection-common/NoCollectionCenterScreen";
+import Login from "@/component/common/auth/Login";
+import BannedScreen from "@/component/common/auth/BannedScreen";
+import ChangePassword from "@/component/common/auth/ChangePassword";
+import Registeredfarmer from "@/component/collection/collection-common/farmer/Registeredfarmer";
+import Ufarmercropdetails from "@/component/collection/collection-common/farmer/Ufarmercropdetails";
+import CollectionOfficerDashboard from "@/component/collection/collection-officer/dashboard/CollectionOfficerDashboard";
+import QRScanner from "@/component/collection/collection-common/farmer/QRScanner";
+import UnregisteredFarmerDetails from "@/component/collection/collection-common/farmer/UnregisteredFarmerForm";
+import UnregisteredCropDetails from "@/component/collection/collection-common/farmer/UnregisteredCropDetails";
+import SearchFarmer from "@/component/collection/collection-common/farmer/SearchFarmer";
+import FarmerQr from "@/component/collection/collection-common/farmer/FarmerQr";
+import ComplainPage from "@/component/common/complain/ComplainPage";
+import Profile from "@/component/common/auth/Profile";
+import ReportPage from "@/component/collection/collection-common/goods-received-note/ReportPage";
+import SearchPriceScreen from "@/component/collection/collection-common/search-price/SearchPriceScreen";
+import PriceChart from "@/component/collection/collection-officer/price-chart/PriceChart";
+import PriceChartManager from "@/component/collection/collection-center-manager/price-chart/PriceChartManager";
+import CollectionOfficersList from "@/component/collection/collection-center-manager/manage-collection-officers/CollectionOfficersList";
+import OfficerSummary from "@/component/collection/collection-center-manager/manage-collection-officers/OfficerSummary";
+import ReportGenerator from "@/component/collection/collection-center-manager/officers-reports/ReportGenerator";
+import ComplainHistory from "@/component/common/complain/ComplainHistory";
+import DailyTargetList from "@/component/collection/collection-common/daily-target/DailyTargetList";
+import AddOfficer from "@/component/collection/collection-center-manager/manage-collection-officers/AddOfficer";
+import ClaimOfficer from "@/component/collection/collection-center-manager/manage-collection-officers/ClaimOfficer";
+import TransactionList from "@/component/collection/collection-center-manager/transaction-list/TransactionList";
+import DailyTarget from "@/component/collection/collection-center-manager/daily-target/DailyTarget";
+import NoCollectionCenterScreen from "@/component/collection/collection-common/disclaim-status/NoCollectionCenterScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import EditTargetScreen from "@/component/collection-manager/EditTargetScreen";
-import PassTargetScreen from "@/component/collection-manager/PassTargetScreen";
-import RecieveTargetScreen from "@/component/collection-manager/RecieveTargetScreen";
-import DailyTargetListForOfficers from "@/component/collection-manager/DailyTargetListForOfficers";
-import EditTargetManager from "@/component/collection-manager/EditTargetManager";
-import RecieveTargetBetweenOfficers from "@/component/collection-manager/RecieveTargetBetweenOfficers";
-import PassTargetBetweenOfficers from "@/component/collection-manager/PassTargetBetweenOfficers";
-import OTPE from "@/component/farmer/FarmerOTPVerification";
-import ManagerDashboard from "@/component/collection-manager/ManagerDashboard";
-import CenterTarget from "@/component/collection-manager/CenterTarget";
-import ManagerTransactions from "@/component/collection-manager/ManagerTransactions";
-import NewReport from "@/component/collection-common/NewReport";
-import TransactionReport from "@/component/collection-manager/TransactionReport";
-import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
-import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
+import EditTargetScreen from "@/component/collection/collection-center-manager/officers-targets/EditTargetScreen";
+import PassTargetScreen from "@/component/collection/collection-center-manager/daily-target/PassTargetScreen";
+import RecieveTargetScreen from "@/component/collection/collection-center-manager/daily-target/RecieveTargetScreen";
+import DailyTargetListForOfficers from "@/component/collection/collection-center-manager/officers-targets/DailyTargetListForOfficers";
+import EditTargetManager from "@/component/collection/collection-center-manager/daily-target/EditTargetManager";
+import RecieveTargetBetweenOfficers from "@/component/collection/collection-center-manager/officers-targets/RecieveTargetBetweenOfficers";
+import PassTargetBetweenOfficers from "@/component/collection/collection-center-manager/officers-targets/PassTargetBetweenOfficers";
+import OTPE from "@/component/collection/collection-common/farmer/FarmerOTPVerification";
+import ManagerDashboard from "@/component/collection/collection-center-manager/dashboard/ManagerDashboard";
+import CenterTarget from "@/component/collection/collection-center-manager/center-target/CenterTarget";
+import ManagerTransactions from "@/component/collection/collection-center-manager/transaction-list/ManagerTransactions";
+import NewReport from "@/component/collection/collection-common/goods-received-note/NewReport";
+import TransactionReport from "@/component/collection/collection-center-manager/transaction-list/TransactionReport";
+import UpdateFarmerBankDetails from "@/component/collection/collection-common/farmer-bank-details/UpdateFarmerBankDetails";
+import otpBankDetailsupdate from "@/component/collection/collection-common/farmer-bank-details/otpBankDetailsupdate";
 import DistributionDashboard from "@/component/distribution/distribution-common/dashboard/DistributionDashboard";
 import PurchaseShortage from "@/component/distribution/distribution-common/purchase-shortage/PurchaseShortage";
 import PurchaseProduct from "@/component/distribution/distribution-common/purchase-shortage/PurchaseProduct";
 import DistributionOfficersList from "@/component/distribution/distribution-center-manager/manage-officers/DistributionOfficersList";
 import ClaimDistribution from "@/component/distribution/distribution-center-manager/manage-officers/ClaimDistribution";
-import DistributionOfficerSummary from "@/component/distribution/distribution-center-manager/manage-officers/DistributionOfficerSummary";
 import store from "@/services/reducxStore";
-import DistributionOfficerReport from "@/component/distribution/distribution-center-manager/manage-officers/DistributionOfficerReport";
 import ReadytoPickupOrders from "@/component/distribution/distribution-common/pick-up-orders/ReadytoPickupOrders";
 import ViewPickupOrders from "@/component/distribution/distribution-common/pick-up-orders/ViewPickupOrders";
 import Qrcode from "@/component/distribution/distribution-common/pick-up-orders/qrcode";
@@ -84,16 +80,16 @@ import ReceivedCash from "@/component/distribution/distribution-center-manager/r
 import ReceivedCashTransfer from "@/component/distribution/distribution-center-manager/received-cash/ReceivedCashTransfer";
 import ReceivedCashOfficer from "@/component/distribution/distribution-officer/received-cash/ReceivedCashOfficer";
 import ReceivedCashQrCode from "@/component/distribution/distribution-officer/received-cash/ReceivedCashQrCode";
-import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
-import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
-import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
-import Splash from "@/component/auth/Splash";
-import Lanuage from "@/component/commons/Lanuage";
-import OfficerQr from "@/component/auth/OfficerQrCode";
-import SideMenu from "@/component/navigations/SideMenu";
-import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
-import BottomNav from "@/component/navigations/BottomNav";
-import LoadingPage from "@/component/commons/LoadingPage";
+import GoviPensionForm from "@/component/collection/collection-common/govi-pension/GoviPensionForm";
+import GoviPensionStatus from "@/component/collection/collection-common/govi-pension/GoviPensionStatus";
+import NotEligibleScreen from "@/component/collection/collection-common/govi-pension/NotEligibleScreen";
+import Splash from "@/component/common/auth/Splash";
+import Lanuage from "@/component/common/lanuage/Lanuage";
+import OfficerQr from "@/component/common/auth/OfficerQrCode";
+import SideMenu from "@/component/components/navigations/SideMenu";
+import PrivacyPolicy from "@/component/common/privacy-policy/PrivacyPolicy";
+import BottomNav from "@/component/components/navigations/BottomNav";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 import DistributionAddOfficer from "@/component/distribution/distribution-center-manager/manage-officers/DistributionAddOfficer";
 import SelectRow from "@/component/distribution/distribution-common/pack/select-row/SelectRow";
 import QRHandling from "@/component/distribution/distribution-common/pack/qr-handling/QRHandling";
@@ -228,10 +224,6 @@ function MainTabNavigator() {
         name="ClaimDistribution"
         component={ClaimDistribution as any}
       />
-      <Tab.Screen
-        name="DistributionOfficerSummary"
-        component={DistributionOfficerSummary as any}
-      />
       <Tab.Screen name="OTPE" component={OTPE} />
 
       <Tab.Screen
@@ -253,10 +245,6 @@ function MainTabNavigator() {
       <Tab.Screen name="FarmerQr" component={FarmerQr} />
       <Tab.Screen name="CenterTarget" component={CenterTarget as any} />
       <Tab.Screen name="DistributionCenterTarget" component={DistributionCenterTarget as any} />
-      <Tab.Screen
-        name="DistributionOfficerReport"
-        component={DistributionOfficerReport as any}
-      />
       <Tab.Screen name="ComplainPage" component={ComplainPage} />
       <Tab.Screen
         name="RecieveTargetBetweenOfficers"
@@ -550,14 +538,10 @@ function AppContent() {
             <Stack.Screen name="Splash" component={Splash} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="BannedScreen" component={BannedScreen as any} />
-            <Stack.Screen name="FormScreen" component={FormScreen} />
             <Stack.Screen name="Lanuage" component={Lanuage} />
 
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="ReportPage" component={ReportPage} />
-
-            <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
-
             <Stack.Screen name="NewReport" component={NewReport as any} />
             <Stack.Screen name="qrcode" component={Qrcode as any} />
             <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
