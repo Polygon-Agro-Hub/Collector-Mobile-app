@@ -17,9 +17,9 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { RadioButton } from "react-native-paper";
 import Checkbox from "expo-checkbox";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../../types/types";
+import { RootStackParamList } from "@/types/types";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
-import { OfficerBasicDetailsFormData } from "../../../types/types";
+import { OfficerBasicDetailsFormData } from "@/types/types";
 import { environment } from "@/environment/environment";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,8 +29,8 @@ import i18n from "@/i18n/i18n";
 import countryData from "../../../../assets/jsons/countryflag.json";
 import bankNames from "../../../../assets/jsons/banks.json";
 import provincesData from "../../../../assets/jsons/sri-lanka-provinces.json";
-import CustomHeader from "../../../navigations/CustomHeader";
-import GlobalSearchModal from "../../../commons/GlobalSearchModal";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
+import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
 import * as FileSystem from "expo-file-system/legacy";
 
 type DistributionAddOfficerNavigationProp = StackNavigationProp<

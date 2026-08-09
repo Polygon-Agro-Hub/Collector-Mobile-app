@@ -12,7 +12,7 @@ import Signature from "react-native-signature-canvas";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "@/component/types/types";
+import { RootStackParamList } from "@/types/types";
 import * as ScreenOrientation from "expo-screen-orientation";
 import {
   widthPercentageToDP as wp,
@@ -22,7 +22,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import { AlertModal } from "../../../commons/AlertModal";
+import { AlertModal } from "@/component/components/popup/AlertModal";
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,

@@ -14,7 +14,7 @@ import {
 import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../../types/types";
+import { RootStackParamList } from "@/types/types";
 import {
   RouteProp,
   useFocusEffect,
@@ -25,7 +25,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
-import CustomHeader from "../../../navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
+import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
 
 interface OfficerDetails {
   id: number;
@@ -230,76 +231,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
     }, [navigation, resetState]),
   );
 
-  const ConfirmationModal = ({
-    visible,
-    onConfirm,
-    onCancel,
-    onLoading,
-  }: any) => {
-    return (
-      <Modal
-        transparent={true}
-        visible={visible}
-        animationType="fade"
-        onRequestClose={onCancel}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "#00000040",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View className="bg-white items-center rounded-lg w-80  p-6">
-            <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
-              <Ionicons name="warning" size={30} color="#6c7e8c" />
-            </View>
-            <Text className="text-center text-base font-semibold mb-4">
-              {t("ClaimOfficer.Are you sure you want to claim this officer?")}
-            </Text>
 
-            <View className="flex-row justify-center gap-4">
-              <TouchableOpacity
-                onPress={onCancel}
-                className="p-2 py-2 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
-                style={{
-                  shadowColor: "#060606",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <Text className="text-sm text-[#6B7D8C]">
-                  {t("ClaimOfficer.Cancel")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={onConfirm}
-                disabled={onLoading}
-                className={`p-2 py-2 px-9 rounded-lg ${
-                  onLoading ? "bg-gray-400" : "bg-[#313131]"
-                }`}
-                style={{
-                  shadowColor: "#000000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <Text className="text-sm text-white">
-                  {t("ClaimOfficer.Claim")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
 
   return (
     <ScrollView
@@ -315,7 +247,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
       />
 
       {/* Form */}
-      <View className="px-8 mt-7">
+      <View className="px-6 mt-7">
         <Text className="font-semibold text-gray-800 mb-2 text-center">
           {t("ClaimOfficer.EMPID")}
         </Text>
@@ -391,7 +323,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
                 ? { uri: officerDetails.image }
                 : require("../../../../assets/images/collection-manager/pc-profile.webp")
             }
-            className="w-20 h-20 rounded-full mb-4"
+            className="w-28 h-28 rounded-full mb-4"
           />
 
           {i18n.language === "si" ? (
@@ -466,11 +398,14 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
         </View>
       )}
 
-      <ConfirmationModal
+      <WarningConfirmation
         visible={modalVisible}
+        message={t("ClaimOfficer.Are you sure you want to claim this officer?") || "Are you sure you want to claim this officer?"}
+        confirmText={t("ClaimOfficer.Claim") || "Claim"}
+        cancelText={t("ClaimOfficer.Cancel") || "Cancel"}
+        confirmButtonBgClass="bg-black active:bg-gray-800"
         onConfirm={handleClaimOfficer}
         onCancel={handleCancel}
-        onLoading={loading}
       />
     </ScrollView>
   );

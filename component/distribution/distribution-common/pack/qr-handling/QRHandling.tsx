@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
-import LoadingPage from "@/component/commons/LoadingPage";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 
 interface OrderData {
   id: number;

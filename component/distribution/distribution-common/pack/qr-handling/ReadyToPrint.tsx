@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
-import CustomHeader from "@/component/navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ReadyToPrint({

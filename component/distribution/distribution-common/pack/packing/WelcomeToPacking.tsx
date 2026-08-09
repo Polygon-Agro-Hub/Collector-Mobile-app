@@ -13,7 +13,7 @@ import {
 import { Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 
-import CustomHeader from "@/component/navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";

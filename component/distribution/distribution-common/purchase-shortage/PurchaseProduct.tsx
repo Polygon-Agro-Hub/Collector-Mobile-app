@@ -15,9 +15,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import CustomHeader from "@/component/navigations/CustomHeader";
-import UploadFile, { UploadFileItem } from "@/component/commons/UploadFile";
-import { AlertModal } from "@/component/commons/AlertModal";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
+import UploadFile, { UploadFileItem } from "@/component/components/file-management/UploadFile";
+import { AlertModal } from "@/component/components/popup/AlertModal";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";

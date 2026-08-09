@@ -18,7 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
-import LoadingPage from "@/component/commons/LoadingPage";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {

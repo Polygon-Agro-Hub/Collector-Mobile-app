@@ -9,11 +9,11 @@ import {
   BackHandler,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import CustomHeader from "@/component/navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import NoDataScreen from "@/component/commons/NoDataScreen";
+import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 
 type GroupPageState = "empty" | "active";
 

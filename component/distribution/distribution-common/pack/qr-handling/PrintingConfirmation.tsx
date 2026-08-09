@@ -9,11 +9,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import CustomHeader from "@/component/navigations/CustomHeader";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import AlertModal from "@/component/commons/AlertModal";
+import AlertModal from "@/component/components/popup/AlertModal";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface PrintStep {
