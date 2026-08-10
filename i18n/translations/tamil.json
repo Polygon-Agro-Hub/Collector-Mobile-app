@@ -76,7 +76,7 @@
     "User token not found. Please log in again.": "பயனர் குறி அடையாளம்(டோக்கன்) கிடைக்கவில்லை. மீண்டும் உள்நுழையவும்.",
     "Failed to claim the officer. Please try again later.": "அதிகாரியை உரிமை கோர முடியவில்லை. பிறகு முயற்சிக்கவும்.",
     "Success": "வெற்றி",
-    "Staff successfully claimed.": "அதிகாரியை வெற்றிகரமாக ஏற்கப்பட்டது.",
+    "Employee successfully claimed.": "அதிகாரியை வெற்றிகரமாக ஏற்கப்பட்டது.",
     "Failed to generate PDF": "PDF ஐ உருவாக்க முடியவில்லை.",
     "Sharing is not available on this device": "இந்தச் சாதனத்தில் பகிர்தல் கிடைக்கவில்லை.",
     "User not authenticated.": "பயனர் அங்கீகரிக்கப்படவில்லை.",
@@ -294,7 +294,8 @@
     "Completedkg": "முடிந்தது (kg)",
     "noCompletedTargets": "முடிக்கப்பட்ட இலக்கு எதுவும் கிடைக்கவில்லை.",
     "NoTodoItems": "செய்ய வேண்டிய இலக்கு எதுவும் கிடைக்கவில்லை.",
-    "Out": "வெளியே"
+    "Out": "வெளியே",
+    "MyDailyTarget":"எனது தினசரி இலக்கு"
   },
   "SearchPrice": {
     "LNG": "ta",
@@ -601,7 +602,7 @@
     "Search": "தேடு",
     "Claim Officer": "ஒரு அதிகாரியை கோருங்கள்",
     "No Disclaimed": "- உரிமையற்ற அதிகாரி யாரும் இல்லை -",
-    "Are you sure you want to claim this officer?": "இந்த அதிகாரியைப் பெற விரும்புகிறீர்களா?",
+    "Are you sure you want to claim this employee?": "இந்த அதிகாரியைப் பெற விரும்புகிறீர்களா?",
     "Cancel": "ரத்து செய்",
     "Claim": "உரிமைகோரவும்",
     "Select Job Role": "வேலை வகையைத் தேர்ந்தெடுக்கவும்",
@@ -610,9 +611,9 @@
     "Distribution Officer": "விநியோகிப்பதற்கான அதிகாரி"
   },
   "DisclaimOfficer": {
-    "Are you sure you want to disclaim this officer?": "இந்த அதிகாரியை நீங்கள் நிச்சயமாக மறுக்க விரும்புகிறீர்களா?",
+    "Are you sure you want to disclaim this employee?": "இந்த அதிகாரியை நீங்கள் நிச்சயமாக மறுக்க விரும்புகிறீர்களா?",
     "Disclaim": "மறுப்பு",
-    "Disclaim Staff Successful.": "அதிகாரி வெற்றிகரமாக மறுத்துவிட்டார்.",
+    "Employee successfully disclaimed.": "அதிகாரி வெற்றிகரமாக மறுத்துவிட்டார்.",
     "Failed to disclaim officer.": "அதிகாரியை மறுக்க முடியவில்லை."
   },
   "CollectionOfficersList": {
@@ -671,7 +672,8 @@
     "Save": "சேமிக்க",
     "maximum amount receive": "அதிகபட்ச பெறத்தக்க தொகை (Kg):",
     "Select an officer": "--அதிகாரியைத் தேர்ந்தெடுங்கள்--",
-    "No Officers Found":"அதிகாரிகள் யாரும் காணப்படவில்லை"
+    "No Officers Found":"அதிகாரிகள் யாரும் காணப்படவில்லை",
+    "Search an officer":"--ஒரு அதிகாரியைத் தேடுங்கள்--"
   },
   "ReportGenerator": {
     "LNG": "ta",

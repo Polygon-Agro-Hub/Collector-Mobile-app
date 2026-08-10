@@ -195,7 +195,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
       } else {
         Alert.alert(
           t("Error.Success"),
-          t("Error.Staff successfully claimed."),
+          t("Error.Employee successfully claimed."),
         );
         setModalVisible(false);
         resetState();
@@ -256,7 +256,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
             <Text className="text-gray-600 font-semibold">{empPrefix}</Text>
           </View>
           <TextInput
-            placeholder="ex: 0122"
+            placeholder="ex: 00122"
             value={empID}
             keyboardType="numeric"
             onChangeText={handleEmpIDChange}
@@ -400,7 +400,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
 
       <WarningConfirmation
         visible={modalVisible}
-        message={t("ClaimOfficer.Are you sure you want to claim this officer?") || "Are you sure you want to claim this officer?"}
+        message={t("ClaimOfficer.Are you sure you want to claim this employee?") || "Are you sure you want to claim this officer?"}
         confirmText={t("ClaimOfficer.Claim") || "Claim"}
         cancelText={t("ClaimOfficer.Cancel") || "Cancel"}
         confirmButtonBgClass="bg-black active:bg-gray-800"

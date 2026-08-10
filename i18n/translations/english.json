@@ -77,7 +77,7 @@
     "User token not found. Please log in again.": "User token not found. Please log in again.",
     "Failed to claim the officer. Please try again later.": "Failed to claim the officer. Please try again later.",
     "Success": "Success",
-    "Staff successfully claimed.": "Staff successfully claimed.",
+    "Employee successfully claimed.": "Employee successfully claimed.",
     "Failed to generate PDF": "Failed to generate PDF",
     "Sharing is not available on this device": "Sharing is not available on this device",
     "User not authenticated.": "User not authenticated.",
@@ -295,15 +295,16 @@
     "Completedkg": "Completed (kg)",
     "noCompletedTargets": "No Completed Target founds",
     "NoTodoItems": "No Todo Target founds",
-    "Out": "Out"
+    "Out": "Out",
+    "MyDailyTarget":"My Daily Target"
   },
   "SearchPrice": {
     "LNG": "en",
     "SearchPrice": "Search Price",
     "Crop": "Crop Name",
-    "SelectCrop": "--Select Crop--",
+    "SelectCrop": "--Search Crop--",
     "Variety": "Variety",
-    "SelectVariety": "--Select Variety--",
+    "SelectVariety": "--Search Variety--",
     "Search": "Search",
     "Selection Required": "Selection Required",
     "Please select both Crop and Variety to continue": "Please select both Crop and Variety to continue.",
@@ -602,7 +603,7 @@
     "Search": "Search",
     "Claim Officer": "Claim",
     "No Disclaimed": "- No Disclaim Staff was found -",
-    "Are you sure you want to claim this officer?": "Are you sure you want to claim this officer?",
+    "Are you sure you want to claim this employee?": "Are you sure you want to claim this employee?",
     "Cancel": "Cancel",
     "Claim": "Claim",
     "Select Job Role": "Select Job Role",
@@ -611,9 +612,9 @@
     "Distribution Officer": "Distribution Officer"
   },
   "DisclaimOfficer": {
-    "Are you sure you want to disclaim this officer?": "Are you sure you want to disclaim this staff?",
+    "Are you sure you want to disclaim this employee?": "Are you sure you want to disclaim this employee?",
     "Disclaim": "Disclaim",
-    "Disclaim Staff Successful.": "Disclaim Staff Successful.",
+    "Employee successfully disclaimed.": "Employee successfully disclaimed.",
     "Failed to disclaim officer.": "Failed to disclaim staff."
   },
   "CollectionOfficersList": {
@@ -642,7 +643,7 @@
     "Selected Date": "Selected Date:",
     "Transaction List": "Transaction List",
     "NIC": "NIC:",
-    "Notransactions": "No transactions found for the selected date.",
+    "Notransactions": "No Results Found",
     "Search": "Search By NIC Number, Name",
     "All": "All",
     "TotalRs": "Total: Rs. ",
@@ -670,7 +671,8 @@
     "Save": "Save",
     "maximum amount receive": "The maximum amount you can receive:",
     "Select an officer": "--Select an officer--",
-    "No Officers Found":"No Officers Found"
+    "No Officers Found":"No Officers Found",
+    "Search an officer":"--Search an officer--"
   },
   "ReportGenerator": {
     "LNG": "ta",

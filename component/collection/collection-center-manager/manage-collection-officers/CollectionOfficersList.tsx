@@ -58,6 +58,9 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
   const [selectedJobRole, setSelectedJobRole] = useState<string | null>(null);
   const [filteredOfficers, setFilteredOfficers] = useState<Officer[]>(officers);
 
+  // Zero-pads a count to at least 2 digits, e.g. 6 -> "06", 12 -> "12"
+  const formatCount = (count: number) => count.toString().padStart(2, "0");
+
   const fetchSelectedLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
@@ -419,7 +422,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             >
               {t("CollectionOfficersList.Officers List")}
               <Text style={{ color: "#21202B", fontWeight: "600" }}>
-                ({filteredOfficers.length})
+                ({formatCount(filteredOfficers.length)})
               </Text>
             </Text>
           ) : selectedJobRole === "Driver" ? (
@@ -433,7 +436,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             >
               {t("CollectionOfficersList.Drivers List")}
               <Text style={{ color: "#21202B", fontWeight: "600" }}>
-                ({filteredOfficers.length})
+                ({formatCount(filteredOfficers.length)})
               </Text>
             </Text>
           ) : (
@@ -447,7 +450,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             >
               {t("CollectionOfficersList.Officers / Drivers List")}
               <Text style={{ color: "#21202B", fontWeight: "normal" }}>
-                ({t("ManagerTransactions.All")} {officers.length})
+                ({t("ManagerTransactions.All")} {formatCount(officers.length)})
               </Text>
             </Text>
           )}

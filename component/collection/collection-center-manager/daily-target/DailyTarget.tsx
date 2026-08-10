@@ -191,7 +191,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
       {/* Header */}
       <View className="bg-[#282828] px-4 py-3 flex-row justify-between items-center">
         <Text className="text-white text-lg font-bold mx-auto">
-          {t("TargetOrderScreen.My Daily Target")}
+          {t("DailyTarget.MyDailyTarget")}
         </Text>
       </View>
 

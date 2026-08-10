@@ -502,7 +502,7 @@ const RecieveTargetBetweenOfficers: React.FC<
           setAssignee(val);
           if (val) fetchDailyTarget(val);
         }}
-        searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
+        searchPlaceholder={t("PassTargetBetweenOfficers.Search an officer")}
         multiSelect={false}
         noResultsText={t("Error.No officers available.")}
       />

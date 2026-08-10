@@ -93,7 +93,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
             </View>
             <Text className="text-center text-sm font-semibold mb-4">
               {t(
-                "DisclaimOfficer.Are you sure you want to disclaim this officer?",
+                "DisclaimOfficer.Are you sure you want to disclaim this employee?",
               )}
             </Text>
 
@@ -233,7 +233,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
         setModalVisible(false);
         Alert.alert(
           t("Error.Success"),
-          t("DisclaimOfficer.Disclaim Staff Successful."),
+          t("DisclaimOfficer.Employee successfully disclaimed."),
         );
         navigation.navigate("Main", { screen: "CollectionOfficersList" });
       } else {

@@ -441,7 +441,7 @@ const PassTargetBetweenOfficers: React.FC<
         data={officers}
         selectedItems={assignee ? [assignee] : []}
         onSelect={(items) => setAssignee(items[0] ?? "")}
-        searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
+        searchPlaceholder={t("PassTargetBetweenOfficers.Search an officer")}
         multiSelect={false}
         noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
