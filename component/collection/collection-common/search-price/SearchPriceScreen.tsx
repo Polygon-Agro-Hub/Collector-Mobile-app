@@ -244,19 +244,11 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         varietyOptions.find((option) => option.value === selectedVariety)
           ?.label || "";
 
-      if (jobRole === "Collection Centre Manager") {
-        navigation.navigate("PriceChartManager", {
-          cropName: cropName,
-          varietyId: selectedVariety,
-          varietyName: varietyName,
-        });
-      } else {
-        navigation.navigate("PriceChart", {
-          cropName: cropName,
-          varietyId: selectedVariety,
-          varietyName: varietyName,
-        });
-      }
+      navigation.navigate("PriceChart", {
+        cropName: cropName,
+        varietyId: selectedVariety,
+        varietyName: varietyName,
+      });
     } else {
       setLoading(false);
       Alert.alert(
@@ -270,10 +262,11 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("CollectionOfficerDashboard" as any);
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("ManagerDashboard" as any);
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("CollectionDashboard" as any);
         } else {
           navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
         }

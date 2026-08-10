@@ -16,7 +16,7 @@ import BannedScreen from "@/component/common/auth/BannedScreen";
 import ChangePassword from "@/component/common/auth/ChangePassword";
 import Registeredfarmer from "@/component/collection/collection-common/farmer/Registeredfarmer";
 import Ufarmercropdetails from "@/component/collection/collection-common/farmer/Ufarmercropdetails";
-import CollectionOfficerDashboard from "@/component/collection/collection-officer/dashboard/CollectionOfficerDashboard";
+import CollectionDashboard from "@/component/collection/collection-common/dashboard/CollectionDashboard";
 import QRScanner from "@/component/collection/collection-common/farmer/QRScanner";
 import UnregisteredFarmerDetails from "@/component/collection/collection-common/farmer/UnregisteredFarmerForm";
 import UnregisteredCropDetails from "@/component/collection/collection-common/farmer/UnregisteredCropDetails";
@@ -26,8 +26,7 @@ import ComplainPage from "@/component/common/complain/ComplainPage";
 import Profile from "@/component/common/auth/Profile";
 import ReportPage from "@/component/collection/collection-common/goods-received-note/ReportPage";
 import SearchPriceScreen from "@/component/collection/collection-common/search-price/SearchPriceScreen";
-import PriceChart from "@/component/collection/collection-officer/price-chart/PriceChart";
-import PriceChartManager from "@/component/collection/collection-center-manager/price-chart/PriceChartManager";
+import PriceChart from "@/component/collection/collection-common/price-chart/PriceChart";
 import CollectionOfficersList from "@/component/collection/collection-center-manager/manage-collection-officers/CollectionOfficersList";
 import OfficerSummary from "@/component/collection/collection-center-manager/manage-collection-officers/OfficerSummary";
 import ReportGenerator from "@/component/collection/collection-center-manager/officers-reports/ReportGenerator";
@@ -46,7 +45,6 @@ import EditTargetManager from "@/component/collection/collection-center-manager/
 import RecieveTargetBetweenOfficers from "@/component/collection/collection-center-manager/officers-targets/RecieveTargetBetweenOfficers";
 import PassTargetBetweenOfficers from "@/component/collection/collection-center-manager/officers-targets/PassTargetBetweenOfficers";
 import OTPE from "@/component/collection/collection-common/farmer/FarmerOTPVerification";
-import ManagerDashboard from "@/component/collection/collection-center-manager/dashboard/ManagerDashboard";
 import CenterTarget from "@/component/collection/collection-center-manager/center-target/CenterTarget";
 import ManagerTransactions from "@/component/collection/collection-center-manager/transaction-list/ManagerTransactions";
 import NewReport from "@/component/collection/collection-common/goods-received-note/NewReport";
@@ -185,9 +183,9 @@ export function withRoleGuard<P extends object>(
 // --- Bottom tab screens (inside the "Main" stack screen) ---
 const TAB_SCREENS: TabRouteConfig[] = [
   {
-    name: "ManagerDashboard",
-    component: ManagerDashboard as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER],
+    name: "CollectionDashboard",
+    component: CollectionDashboard as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
   {
     name: "SearchPriceScreen",
@@ -197,7 +195,7 @@ const TAB_SCREENS: TabRouteConfig[] = [
   {
     name: "PriceChart",
     component: PriceChart as any,
-    allowedRoles: [ROLES.COLLECTION_OFFICER],
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
   {
     name: "SearchFarmer",
@@ -245,11 +243,6 @@ const TAB_SCREENS: TabRouteConfig[] = [
     allowedRoles: [ROLES.COLLECTION_MANAGER],
   },
   {
-    name: "CollectionOfficerDashboard",
-    component: CollectionOfficerDashboard as any,
-    allowedRoles: [ROLES.COLLECTION_OFFICER],
-  },
-  {
     name: "UpdateFarmerBankDetails",
     component: UpdateFarmerBankDetails as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
@@ -264,11 +257,7 @@ const TAB_SCREENS: TabRouteConfig[] = [
     component: PurchaseShortage as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
-  {
-    name: "PriceChartManager",
-    component: PriceChartManager as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER],
-  },
+
   {
     name: "UnregisteredCropDetails",
     component: UnregisteredCropDetails as any,
@@ -430,11 +419,11 @@ export function MainTabNavigator() {
     ) {
       return "DistridutionaDashboard";
     }
-    if (jobRole === ROLES.COLLECTION_OFFICER) {
-      return "CollectionOfficerDashboard";
-    }
-    if (jobRole === ROLES.COLLECTION_MANAGER) {
-      return "ManagerDashboard";
+    if (
+      jobRole === ROLES.COLLECTION_OFFICER ||
+      jobRole === ROLES.COLLECTION_MANAGER
+    ) {
+      return "CollectionDashboard";
     }
     return undefined;
   }, [jobRole]);

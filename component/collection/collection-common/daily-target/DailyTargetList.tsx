@@ -172,10 +172,11 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("CollectionOfficerDashboard" as any);
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("ManagerDashboard" as any);
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("CollectionDashboard" as any);
         } else {
           navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
         }
@@ -196,7 +197,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
       {/* Header */}
 
       <CustomHeader
-        title={t("TargetOrderScreen.My Daily Target")}
+        title={t("DailyTarget.MyDailyTarget")}
         showBackButton={false}
         textColor="white"
         bgColor="#282828"
@@ -300,7 +301,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
         </Animated.View>
       </View>
 
-      {/* Table - Now with proper scrolling */}
+      {/* Table */}
       <View className="flex-1 bg-white">
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
           <View style={{ width: "100%" }}>

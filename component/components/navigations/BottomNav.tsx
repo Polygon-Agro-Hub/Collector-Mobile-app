@@ -46,7 +46,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     switch (userRole) {
       case ROLES.COLLECTION_MANAGER:
         return [
-          { name: "ManagerDashboard", icon: homeIcon },
+          { name: "CollectionDashboard", icon: homeIcon },
           { name: "DailyTarget", icon: qrIcon },
           { name: "CollectionOfficersList", icon: adminIcon },
           { name: "SearchPriceScreen", icon: searchIcon },
@@ -55,7 +55,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
       case ROLES.COLLECTION_OFFICER:
         return [
           { name: "DailyTargetList", icon: qrIcon },
-          { name: "CollectionOfficerDashboard", icon: homeIcon },
+          { name: "CollectionDashboard", icon: homeIcon },
           { name: "SearchPriceScreen", icon: searchIcon },
         ];
 
@@ -69,7 +69,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
 
       default:
         return [
-          { name: "CollectionOfficerDashboard", icon: homeIcon },
+          { name: "CollectionDashboard", icon: homeIcon },
           { name: "SearchPriceScreen", icon: searchIcon },
         ];
     }
@@ -78,7 +78,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   let currentTabName = state?.routes?.[state.index]?.name;
 
   if (
-    ["PriceChart", "PriceChartManager", "PriceChange"].includes(currentTabName)
+    ["PriceChart", "PriceChange"].includes(currentTabName)
   ) {
     currentTabName = "SearchPriceScreen";
   }

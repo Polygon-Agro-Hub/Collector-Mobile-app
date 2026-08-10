@@ -84,32 +84,26 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   };
 
   const handleBackPress = () => {
-    if (jobRole === "Collection Officer") {
-      navigation.navigate("Main" as any, {
-        screen: "CollectionOfficerDashboard",
-      });
-    } else if (jobRole === "Collection Centre Manager") {
-      navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
+    if (
+      jobRole === "Collection Officer" ||
+      jobRole === "Collection Centre Manager"
+    ) {
+      navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
     } else {
-      navigation.navigate("Main" as any, {
-        screen: "CollectionOfficerDashboard",
-      });
+      navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
     }
   };
 
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("Main" as any, {
-            screen: "CollectionOfficerDashboard",
-          });
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
         } else {
-          navigation.navigate("Main" as any, {
-            screen: "CollectionOfficerDashboard",
-          });
+          navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
         }
         return true;
       };

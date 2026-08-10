@@ -71,7 +71,10 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         return { passwordUpdated: 1 };
       }
     } catch (error) {
-      console.warn("Network check error in splash, using local session:", error);
+      console.warn(
+        "Network check error in splash, using local session:",
+        error,
+      );
       return { passwordUpdated: 1 };
     }
   };
@@ -110,7 +113,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
 
         if (isExpired) {
           store.dispatch(logoutUser());
-dispatch(logoutUser());
+          dispatch(logoutUser());
           navigation.navigate("Login");
           return;
         }
@@ -119,14 +122,17 @@ dispatch(logoutUser());
 
         if (result.isBanned) {
           store.dispatch(logoutUser());
-dispatch(logoutUser());
+          dispatch(logoutUser());
           navigation.reset({
             index: 0,
             routes: [
               {
                 name: "BannedScreen",
                 params: {
-                  statusType: result.accountStatus === "Rejected" ? "rejected" : "not_approved",
+                  statusType:
+                    result.accountStatus === "Rejected"
+                      ? "rejected"
+                      : "not_approved",
                   message: result.message,
                 },
               },
@@ -135,11 +141,9 @@ dispatch(logoutUser());
           return;
         }
 
-        // User never completed the mandatory first-time password update.
-        // Clear session and force them to ChangePassword via Login.
         if (result.passwordUpdated === 0) {
           store.dispatch(logoutUser());
-dispatch(logoutUser());
+          dispatch(logoutUser());
           navigation.reset({
             index: 0,
             routes: [{ name: "Login" }],
@@ -147,20 +151,16 @@ dispatch(logoutUser());
           return;
         }
 
-        const jobRole = role || (store.getState().auth.jobRole);
+        const jobRole = role || store.getState().auth.jobRole;
 
-        if (jobRole === ROLES.COLLECTION_OFFICER) {
+        if (
+          jobRole === ROLES.COLLECTION_OFFICER ||
+          jobRole === ROLES.COLLECTION_MANAGER
+        ) {
           navigation.reset({
             index: 0,
             routes: [
-              { name: "Main", params: { screen: "CollectionOfficerDashboard" } },
-            ],
-          });
-        } else if (jobRole === ROLES.COLLECTION_MANAGER) {
-          navigation.reset({
-            index: 0,
-            routes: [
-              { name: "Main", params: { screen: "ManagerDashboard" } },
+              { name: "Main", params: { screen: "CollectionDashboard" } },
             ],
           });
         } else if (
@@ -204,12 +204,24 @@ dispatch(logoutUser());
         />
         <Image
           source={center}
-          style={{ width: "100%", height: 128, maxWidth: 380, alignSelf: "center" }}
+          style={{
+            width: "100%",
+            height: 128,
+            maxWidth: 380,
+            alignSelf: "center",
+          }}
           className="w-full h-32 justify-center items-center"
           resizeMode="contain"
         />
         <Text className="text-center text-[10px] mt-2">POWERED BY POLYGON</Text>
-        <View style={{ width: "80%", maxWidth: 360, marginTop: 20, alignSelf: "center" }}>
+        <View
+          style={{
+            width: "80%",
+            maxWidth: 360,
+            marginTop: 20,
+            alignSelf: "center",
+          }}
+        >
           <Progress.Bar
             progress={progress}
             width={null}

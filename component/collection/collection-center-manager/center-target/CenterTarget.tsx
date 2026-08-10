@@ -181,6 +181,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         onBackPress={() => navigation.goBack()}
         textColor="white"
         bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
       />
       <View className="flex-row justify-center items-center pb-4 bg-[#282828]">
         {/* To Do Button */}
@@ -323,7 +324,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                     onRefresh={onRefresh}
                   />
                 }
-                contentContainerStyle={{ paddingBottom:80 }}
+                contentContainerStyle={{ paddingBottom: 80 }}
               >
                 {/* Table Content */}
                 {displayedData.length > 0 ? (

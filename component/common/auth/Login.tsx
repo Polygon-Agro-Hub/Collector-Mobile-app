@@ -307,12 +307,11 @@ const netState = await NetInfo.fetch();
             jobRole === "Distribution Centre Manager"
           ) {
             navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-          } else if (jobRole === "Collection Officer") {
-            navigation.navigate("Main", {
-              screen: "CollectionOfficerDashboard",
-            });
-          } else {
-            navigation.navigate("Main", { screen: "ManagerDashboard" });
+          } else if (
+            jobRole === "Collection Officer" ||
+            jobRole === "Collection Centre Manager"
+          ) {
+            navigation.navigate("Main", { screen: "CollectionDashboard" });
           }
         }
       }, 4000);

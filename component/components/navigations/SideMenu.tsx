@@ -277,10 +277,11 @@ setTimeout(() => {
       profile?.jobRole === ROLES.DISTRIBUTION_MANAGER
     ) {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-    } else if (profile?.jobRole === ROLES.COLLECTION_OFFICER) {
-      navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-    } else if (profile?.jobRole === ROLES.COLLECTION_MANAGER) {
-      navigation.navigate("Main", { screen: "ManagerDashboard" });
+    } else if (
+      profile?.jobRole === ROLES.COLLECTION_OFFICER ||
+      profile?.jobRole === ROLES.COLLECTION_MANAGER
+    ) {
+      navigation.navigate("Main", { screen: "CollectionDashboard" });
     }
     return true;
   };

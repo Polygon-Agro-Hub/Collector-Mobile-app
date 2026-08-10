@@ -66,10 +66,11 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   }, []);
 
   const handleBackPress = () => {
-    if (jobRole === "Collection Officer") {
-      navigation.navigate("CollectionOfficerDashboard" as any);
-    } else if (jobRole === "Collection Centre Manager") {
-      navigation.navigate("ManagerDashboard" as any);
+    if (
+      jobRole === "Collection Officer" ||
+      jobRole === "Collection Centre Manager"
+    ) {
+      navigation.navigate("CollectionDashboard" as any);
     } else {
       navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
     }
@@ -181,10 +182,11 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("CollectionOfficerDashboard" as any);
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("ManagerDashboard" as any);
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("CollectionDashboard" as any);
         } else {
           navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
         }
@@ -284,7 +286,6 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
               </Text>
             ) : null}
 
-            {/* Display search image when no NIC is entered or during search */}
             {shouldShowSearchImage && (
               <View className="mt-20 items-center">
                 <Image
