@@ -10,7 +10,6 @@ import { AlertModal, setGlobalAlertListener } from "@/component/components/popup
 import {
   SafeAreaProvider,
   SafeAreaView,
-  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
@@ -21,7 +20,6 @@ import store from "@/services/reducxStore";
 import RootStackNavigator from "../routes/Routes";
 
 function AppContent() {
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
   const [isOfflineAlertShown, setIsOfflineAlertShown] = useState(false);

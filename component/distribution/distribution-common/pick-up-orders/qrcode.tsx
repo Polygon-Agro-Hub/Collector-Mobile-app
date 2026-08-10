@@ -7,15 +7,13 @@ import {
   Animated,
   StatusBar,
   ActivityIndicator,
-  Modal,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -30,21 +28,16 @@ interface QrcodeProps {
   route: RouteProp<RootStackParamList, "qrcode">;
 }
 
-
-
 const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
   const [loading, setLoading] = useState(false);
-
   const expectedOrderId = route.params?.expectedOrderId;
   const fromScreen = route.params?.fromScreen;
   const isOrderVerification = !!expectedOrderId;
-
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
