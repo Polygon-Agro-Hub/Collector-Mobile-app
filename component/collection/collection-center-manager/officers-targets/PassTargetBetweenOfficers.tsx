@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -175,7 +176,7 @@ const PassTargetBetweenOfficers: React.FC<
       setLoading(true);
       setErrorMessage(null);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/collection-officers`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -259,7 +260,7 @@ const PassTargetBetweenOfficers: React.FC<
     try {
       setSubmitting(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.put(
         `${environment.API_BASE_URL}api/target/pass-target`,
         {

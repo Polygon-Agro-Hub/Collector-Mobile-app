@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
@@ -20,8 +21,6 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
 });
@@ -57,7 +56,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);

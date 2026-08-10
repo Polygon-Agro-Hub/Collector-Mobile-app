@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -53,7 +54,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);
@@ -113,7 +114,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   const fetchTargets = useCallback(async () => {
     setLoading(true);
     try {
-      const authToken = await AsyncStorage.getItem("token");
+      const authToken = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/officer`,
         {

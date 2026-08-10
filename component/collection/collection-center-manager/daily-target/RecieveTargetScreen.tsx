@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -109,7 +110,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
       setLoading(true);
       setErrorMessage(null);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/collection-officers-recieve/${varietyId}/${grade}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -146,7 +147,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
       setFetchingTarget(true);
       setErrorMessage(null);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/get-daily-todo-byvariety/${officerId}/${varietyId}/${grade}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -244,7 +245,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     try {
       setFetchingTarget(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.put(
         `${environment.API_BASE_URL}api/target/manager/recieve-target`,
         {

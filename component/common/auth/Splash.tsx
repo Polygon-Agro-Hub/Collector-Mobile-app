@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -6,6 +7,7 @@ import { RootStackParamList } from "@/types/types";
 import { environment } from "@/environment/environment";
 import { useDispatch } from "react-redux";
 import { setUser, logoutUser } from "@/store/authSlice";
+import { ROLES } from "@/constants/user-roles";
 import * as Progress from "react-native-progress";
 
 type SplashNavigationProp = StackNavigationProp<RootStackParamList, "Splash">;
@@ -83,10 +85,10 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         return;
       }
 
-      const expirationTime = await AsyncStorage.getItem("tokenExpirationTime");
-      const userToken = await AsyncStorage.getItem("token");
-      const role = await AsyncStorage.getItem("jobRole");
-      const emp = await AsyncStorage.getItem("empid");
+      const expirationTime = store.getState().auth.tokenExpirationTime;
+      const userToken = store.getState().auth.token;
+      const role = store.getState().auth.jobRole;
+      const emp = store.getState().auth.empId;
 
       if (userToken) {
         dispatch(
@@ -107,14 +109,8 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         }
 
         if (isExpired) {
-          await AsyncStorage.multiRemove([
-            "token",
-            "tokenStoredTime",
-            "tokenExpirationTime",
-            "jobRole",
-            "empid",
-          ]);
-          dispatch(logoutUser());
+          store.dispatch(logoutUser());
+dispatch(logoutUser());
           navigation.navigate("Login");
           return;
         }
@@ -122,17 +118,8 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         const result = await checkPasswordStatus(userToken);
 
         if (result.isBanned) {
-          await AsyncStorage.multiRemove([
-            "token",
-            "tokenStoredTime",
-            "tokenExpirationTime",
-            "jobRole",
-            "empid",
-            "companyNameEnglish",
-            "companyNameSinhala",
-            "companyNameTamil",
-          ]);
-          dispatch(logoutUser());
+          store.dispatch(logoutUser());
+dispatch(logoutUser());
           navigation.reset({
             index: 0,
             routes: [
@@ -151,17 +138,8 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         // User never completed the mandatory first-time password update.
         // Clear session and force them to ChangePassword via Login.
         if (result.passwordUpdated === 0) {
-          await AsyncStorage.multiRemove([
-            "token",
-            "tokenStoredTime",
-            "tokenExpirationTime",
-            "jobRole",
-            "empid",
-            "companyNameEnglish",
-            "companyNameSinhala",
-            "companyNameTamil",
-          ]);
-          dispatch(logoutUser());
+          store.dispatch(logoutUser());
+dispatch(logoutUser());
           navigation.reset({
             index: 0,
             routes: [{ name: "Login" }],
@@ -169,28 +147,38 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
           return;
         }
 
-        const jobRole = role || (await AsyncStorage.getItem("jobRole"));
+        const jobRole = role || (store.getState().auth.jobRole);
 
-        if (jobRole === "Collection Officer") {
+        if (jobRole === ROLES.COLLECTION_OFFICER) {
           navigation.reset({
             index: 0,
             routes: [
               { name: "Main", params: { screen: "CollectionOfficerDashboard" } },
             ],
           });
-        } else if (jobRole === "Collection Centre Manager") {
+        } else if (jobRole === ROLES.COLLECTION_MANAGER) {
           navigation.reset({
             index: 0,
             routes: [
               { name: "Main", params: { screen: "ManagerDashboard" } },
             ],
           });
-        } else {
+        } else if (
+          jobRole === ROLES.DISTRIBUTION_OFFICER ||
+          jobRole === ROLES.DISTRIBUTION_MANAGER
+        ) {
           navigation.reset({
             index: 0,
             routes: [
               { name: "Main", params: { screen: "DistridutionaDashboard" } },
             ],
+          });
+        } else {
+          store.dispatch(logoutUser());
+          dispatch(logoutUser());
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Login" }],
           });
         }
       } else {

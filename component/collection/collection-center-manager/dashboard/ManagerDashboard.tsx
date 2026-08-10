@@ -1,3 +1,5 @@
+import { logoutUser } from "@/store/authSlice";
+import store from "@/services/reducxStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -64,7 +66,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (token) {
         const response = await axios.get(
           `${environment.API_BASE_URL}api/collection-officer/user-profile`,
@@ -94,7 +96,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
   const fetchTargetPercentage = async () => {
     setIsLoadingTarget(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.User not authenticated."));
         setIsLoadingTarget(false);
@@ -179,8 +181,8 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
 
   const checkTokenExpiration = async () => {
     try {
-      const expirationTime = await AsyncStorage.getItem("tokenExpirationTime");
-      const userToken = await AsyncStorage.getItem("token");
+      const expirationTime = store.getState().auth.tokenExpirationTime;
+      const userToken = store.getState().auth.token;
 
       if (expirationTime && userToken) {
         const currentTime = new Date();
@@ -189,12 +191,8 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ navigation }) => {
         if (currentTime < tokenExpiry) {
           // Token is valid
         } else {
-          await AsyncStorage.multiRemove([
-            "token",
-            "tokenStoredTime",
-            "tokenExpirationTime",
-          ]);
-          navigation.navigate("Login");
+          store.dispatch(logoutUser());
+navigation.navigate("Login");
         }
       }
     } catch (error) {

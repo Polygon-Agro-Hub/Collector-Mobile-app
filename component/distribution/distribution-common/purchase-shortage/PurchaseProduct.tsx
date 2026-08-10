@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
@@ -19,7 +20,6 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import UploadFile, { UploadFileItem } from "@/component/components/file-management/UploadFile";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 
 const formatKg = (val: number | string | undefined | null): string => {
@@ -169,7 +169,7 @@ export default function PurchaseProduct({
 
     try {
       setSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       await axios.post(
         `${environment.API_BASE_URL}api/purchase-shortage/submit`,
         {

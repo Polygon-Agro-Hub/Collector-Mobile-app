@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -14,8 +15,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { environment } from "@/environment/environment";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -62,7 +61,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (token) {
         const response = await api.get(
@@ -195,7 +194,7 @@ const PriceChartManager: React.FC<PriceChartManagerProps> = ({
       setIsSubmitting(true);
 
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
         if (!token) {
           throw new Error("No authentication token found.");
         }

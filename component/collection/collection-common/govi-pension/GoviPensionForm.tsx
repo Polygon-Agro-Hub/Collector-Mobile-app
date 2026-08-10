@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -16,7 +17,6 @@ import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { environment } from "@/environment/environment";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { AlertModal } from "@/component/components/popup/AlertModal";
@@ -617,7 +617,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     setIsSubmitting(true);
 
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         setModalTitle("Session Expired");
         setModalMessage("Please login again to continue.");

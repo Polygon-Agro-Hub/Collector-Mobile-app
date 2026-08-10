@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -66,7 +67,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        await AsyncStorage.getItem("jobRole");
+        store.getState().auth.jobRole;
       } catch (error) {
         console.error("Error fetching user role:", error);
       }
@@ -79,7 +80,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
 
     const fetchComplainCategory = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
         console.log("TOKEN:", token);
 
         const response = await axios.get(
@@ -137,7 +138,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
     setIsLoading(true);
     try {
       const storedLanguage = await AsyncStorage.getItem("@user_language");
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (userId === 0) {
         await api.post(

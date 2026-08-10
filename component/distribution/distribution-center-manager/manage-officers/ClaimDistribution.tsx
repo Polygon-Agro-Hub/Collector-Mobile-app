@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useState } from "react";
 import {
   View,
@@ -21,7 +22,6 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
@@ -106,7 +106,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
       return;
     }
     try {
-      const userToken = await AsyncStorage.getItem("token");
+      const userToken = store.getState().auth.token;
 
       if (!userToken) {
         Alert.alert(
@@ -163,7 +163,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
 
   const handleClaimOfficer = async () => {
     try {
-      const userToken = await AsyncStorage.getItem("token");
+      const userToken = store.getState().auth.token;
 
       if (!userToken) {
         Alert.alert(

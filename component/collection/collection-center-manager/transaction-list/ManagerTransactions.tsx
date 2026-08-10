@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -18,8 +19,6 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { Entypo } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 type ManagerTransactionsNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ManagerTransactions"
@@ -94,7 +93,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
   const fetchTransactions = async (date: string) => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         console.error("No token found. Please log in again.");

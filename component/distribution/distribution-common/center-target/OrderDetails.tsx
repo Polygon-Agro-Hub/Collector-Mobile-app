@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -8,7 +9,6 @@ import {
   ActivityIndicator,
   BackHandler,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -92,7 +92,7 @@ export default function OrderDetails({
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const orderId = params.orderId;
 
       if (!token || !orderId) {

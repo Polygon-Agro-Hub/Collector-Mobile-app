@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -10,7 +11,6 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AlertModal from "@/component/components/popup/AlertModal";
@@ -158,7 +158,7 @@ export default function PrintingConfirmation({
         return;
       }
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const processOrderId =
         route.params?.processOrderId || route.params?.orderId || 3131;
 

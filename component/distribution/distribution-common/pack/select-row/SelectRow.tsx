@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -11,7 +12,6 @@ import {
   RefreshControl,
 } from "react-native";
 import { Ionicons, Entypo, Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
@@ -51,7 +51,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   const fetchPositionsSilently = async (rowId: number) => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) return;
       const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows/${rowId}/positions`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -66,7 +66,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   const fetchRowsSilently = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) return;
       const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -155,7 +155,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     await checkActiveAssignment();
     if (step === 1) {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
         if (token) {
           const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -169,7 +169,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       }
     } else if (step === 2 && selectedRow) {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
         if (token) {
           const response = await axios.get(`${environment.API_BASE_URL}api/packing/rows/${selectedRow.id}/positions`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -187,7 +187,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   const checkActiveAssignment = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) return;
       const res = await axios.get(`${environment.API_BASE_URL}api/packing/active-assignment`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -230,7 +230,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const fetchRows = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;
@@ -258,7 +258,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     setSelectedRow(row);
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;
@@ -299,7 +299,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     if (!selectedPosition) return;
     try {
       setSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;
@@ -321,7 +321,6 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           pType: selectedPosition.type,
         };
         dispatch(setActiveAssignmentAction(assignmentData));
-        await AsyncStorage.setItem("activeAssignment", JSON.stringify(assignmentData));
 
         Alert.alert(
           "Confirmation Success",

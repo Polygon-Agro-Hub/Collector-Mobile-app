@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
 import {
@@ -98,7 +99,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
     setLoading(true);
     const startTime = Date.now();
     try {
-      const authToken = await AsyncStorage.getItem("token");
+      const authToken = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/get-center-target`,
         {

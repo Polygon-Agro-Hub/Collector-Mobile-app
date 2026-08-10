@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -101,7 +102,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
       setLoading(true);
       const startTime = Date.now();
       try {
-        const authToken = await AsyncStorage.getItem("token");
+        const authToken = store.getState().auth.token;
         const response = await axios.get(
           `${environment.API_BASE_URL}api/target/officer`,
           {
@@ -138,7 +139,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
     setRefreshing(true);
     const fetchTargets = async () => {
       try {
-        const authToken = await AsyncStorage.getItem("token");
+        const authToken = store.getState().auth.token;
         const response = await axios.get(
           `${environment.API_BASE_URL}api/target/officer`,
           {

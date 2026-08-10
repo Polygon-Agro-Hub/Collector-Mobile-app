@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { useState, useEffect } from "react";
 import {
   View,
@@ -13,7 +14,6 @@ import {
 import { Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
@@ -158,11 +158,11 @@ export default function Packing({
 
     const handlePositionFreed = async (payload: { positionId: number }) => {
       try {
-        const activeAssignmentStr = await AsyncStorage.getItem("activeAssignment");
+        const activeAssignmentStr = (store.getState().auth.activeAssignment ? JSON.stringify(store.getState().auth.activeAssignment) : null);
         if (activeAssignmentStr) {
           const activeAssignment = JSON.parse(activeAssignmentStr);
           if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
-            await AsyncStorage.removeItem("activeAssignment");
+            store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
             Alert.alert("Position Released", "Your position has been released by the manager.");
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
@@ -185,7 +185,7 @@ export default function Packing({
 
   const fetchPositionCrops = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token || !positionId) return;
 
       const response = await axios.get(
@@ -215,7 +215,7 @@ export default function Packing({
 
   const fetchActiveOrderAndStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) return;
 
       // 1. Fetch active order details for officer
@@ -351,7 +351,7 @@ export default function Packing({
     if (isAdvancing) return;
     setIsAdvancing(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const targetOrderId =
         activeProcessOrderId || initialProcessOrderId || 3221;
       const payload = {

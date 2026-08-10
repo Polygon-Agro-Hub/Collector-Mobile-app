@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -167,7 +168,7 @@ const RecieveTargetBetweenOfficers: React.FC<
       setLoading(true);
       setErrorMessage(null);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/collection-officers-recieve/${varietyId}/${grade}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -205,7 +206,7 @@ const RecieveTargetBetweenOfficers: React.FC<
       setFetchingTarget(true);
       setErrorMessage(null);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/get-daily-todo-byvariety/${officerId}/${varietyId}/${grade}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -297,7 +298,7 @@ const RecieveTargetBetweenOfficers: React.FC<
     try {
       setFetchingTarget(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.put(
         `${environment.API_BASE_URL}api/target/recieve-target`,
         {

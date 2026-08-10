@@ -1,3 +1,5 @@
+import { logoutUser } from "@/store/authSlice";
+import store from "@/services/reducxStore";
 import {
   View,
   Text,
@@ -19,7 +21,6 @@ import { environment } from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import NetInfo from "@react-native-community/netinfo";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
@@ -110,7 +111,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
 
     try {
       setIsLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       await axios.post(
         `${environment.API_BASE_URL}api/collection-officer/change-password`,
         {
@@ -132,17 +133,8 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             text: "OK",
             onPress: async () => {
               // Clear session — user must log in again with new password
-              await AsyncStorage.multiRemove([
-                "token",
-                "tokenStoredTime",
-                "tokenExpirationTime",
-                "jobRole",
-                "empid",
-                "companyNameEnglish",
-                "companyNameSinhala",
-                "companyNameTamil",
-              ]);
-              navigation.reset({
+              store.dispatch(logoutUser());
+navigation.reset({
                 index: 0,
                 routes: [{ name: "Login" }],
               });
@@ -168,7 +160,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
 
   const fetchOfficer = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-officer/password-update`,

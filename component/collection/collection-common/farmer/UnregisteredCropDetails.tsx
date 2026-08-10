@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   View,
@@ -224,7 +225,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     React.useCallback(() => {
       const fetchCropNames = async () => {
         try {
-          const token = await AsyncStorage.getItem("token");
+          const token = store.getState().auth.token;
           const headers = { Authorization: `Bearer ${token}` };
 
           const response = await axios.get(
@@ -321,7 +322,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setLoadingVarieties(true);
 
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const headers = { Authorization: `Bearer ${token}` };
 
       const varietiesResponse = await api.get(
@@ -366,7 +367,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }
 
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const pricesResponse = await api.get(
         `api/unregisteredfarmercrop/unitPrices/${varietyId}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -601,7 +602,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         return;
       }
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const invoiceNumber = await generateInvoiceNumber();
 
       if (!invoiceNumber) {
@@ -703,15 +704,15 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       let companyName = "";
       if (language === "Sinhala") {
         companyName =
-          (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
+          (store.getState().auth.companyNameSinhala) || "PolygonAgro";
         Message = `ඔබේ නිෂ්පාදන ${companyName} වෙත ලබා දීම ගැන ඔබට ස්තූතියි.\nපැය 48ක් ඇතුළත රු. ${formattedPrice} ඔබේ බැංකු ගිණුමට බැර කෙරේ.\nTID: ${invoiceNumber}`;
       } else if (language === "Tamil") {
         companyName =
-          (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
+          (store.getState().auth.companyNameTamil) || "PolygonAgro";
         Message = `உங்கள் விளைபொருட்களை ${companyName} நிறுவனத்திற்கு வழங்கியதற்கு நன்றி.\nரூ. ${formattedPrice} 48 மணி நேரத்திற்குள் உங்கள் வங்கிக் கணக்கில் வரவு வைக்கப்படும்.\nTID: ${invoiceNumber}`;
       } else {
         companyName =
-          (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
+          (store.getState().auth.companyNameEnglish) || "PolygonAgro";
         Message = `Thank you for providing your produce to ${companyName}.\nRs. ${formattedPrice} will be credited to your bank account within 48 hours.\nTID: ${invoiceNumber}`;
       }
 

@@ -1,3 +1,5 @@
+import { logoutUser } from "@/store/authSlice";
+import store from "@/services/reducxStore";
 import {
   View,
   Text,
@@ -23,6 +25,7 @@ import { setUser } from "@/store/authSlice";
 import { useDispatch } from "react-redux";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { ROLES } from "@/constants/user-roles";
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -35,10 +38,10 @@ const user = require("@/assets/images/auth/user.webp");
 const passwordicon = require("@/assets/images/auth/password.webp");
 
 const ALLOWED_ROLES = [
-  "collection officer",
-  "collection centre manager",
-  "distribution officer",
-  "distribution centre manager",
+  ROLES.COLLECTION_OFFICER.toLowerCase(),
+  ROLES.COLLECTION_MANAGER.toLowerCase(),
+  ROLES.DISTRIBUTION_OFFICER.toLowerCase(),
+  ROLES.DISTRIBUTION_MANAGER.toLowerCase(),
 ];
 
 const Login: React.FC<LoginProps> = ({ navigation }) => {
@@ -176,14 +179,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     }
 
     setLoading(true);
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("jobRole");
-    await AsyncStorage.removeItem("companyNameEnglish");
-    await AsyncStorage.removeItem("companyNameSinhala");
-    await AsyncStorage.removeItem("companyNameTamil");
-    await AsyncStorage.removeItem("empid");
-
-    const netState = await NetInfo.fetch();
+    store.dispatch(logoutUser());
+const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
       setLoading(false);
       Alert.alert(t("Error.error"), "No internet connection");
@@ -328,7 +325,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
   const status = async (empId: string, status: boolean) => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         console.error("Token not found");
         return;

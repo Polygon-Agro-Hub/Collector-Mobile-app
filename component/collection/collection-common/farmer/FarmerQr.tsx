@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -24,7 +25,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const api = axios.create({
@@ -59,7 +59,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);
@@ -116,7 +116,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
     try {
       setCheckingPensionStatus(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         Alert.alert(t("Error.error"), "Authentication token not found");

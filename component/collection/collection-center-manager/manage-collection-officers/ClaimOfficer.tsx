@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -17,7 +18,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
@@ -84,7 +84,7 @@ const ClaimOfficer: React.FC = () => {
       return;
     }
     try {
-      const userToken = await AsyncStorage.getItem("token");
+      const userToken = store.getState().auth.token;
 
       if (!userToken) {
         Alert.alert(
@@ -142,7 +142,7 @@ const ClaimOfficer: React.FC = () => {
 
   const handleClaimOfficer = async () => {
     try {
-      const userToken = await AsyncStorage.getItem("token");
+      const userToken = store.getState().auth.token;
 
       if (!userToken) {
         Alert.alert(
