@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -16,7 +17,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -101,7 +101,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
   const fetchReceivedCash = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         Alert.alert("Error", "Authentication token not found");

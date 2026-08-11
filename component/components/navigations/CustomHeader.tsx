@@ -92,7 +92,9 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       className={`flex-row items-center justify-between px-4 py-3 relative ${
         transparent ? "bg-transparent" : dark ? "bg-black" : "bg-white"
       }`}
-      style={bgColor && !transparent ? { backgroundColor: bgColor } : undefined}
+      style={[
+      { minHeight: 56 },bgColor && !transparent ? { backgroundColor: bgColor } : undefined
+      ]}
     >
       <View style={{ minWidth: 50, zIndex: 20 }}>
         {showBackButton && navigation && (

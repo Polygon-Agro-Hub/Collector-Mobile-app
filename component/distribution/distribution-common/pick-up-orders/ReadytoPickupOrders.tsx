@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -20,7 +21,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -132,7 +132,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
   const fetchCustomers = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         console.error("No authentication token found");
@@ -161,7 +161,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
       setLoading(true);
       setErrorMessage("");
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         setErrorMessage(t("Error.No authentication token found"));

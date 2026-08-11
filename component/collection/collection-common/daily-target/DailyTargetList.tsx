@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -53,7 +54,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);
@@ -113,7 +114,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   const fetchTargets = useCallback(async () => {
     setLoading(true);
     try {
-      const authToken = await AsyncStorage.getItem("token");
+      const authToken = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/officer`,
         {
@@ -171,10 +172,11 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("CollectionOfficerDashboard" as any);
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("ManagerDashboard" as any);
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("CollectionDashboard" as any);
         } else {
           navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
         }
@@ -195,7 +197,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
       {/* Header */}
 
       <CustomHeader
-        title={t("TargetOrderScreen.My Daily Target")}
+        title={t("DailyTarget.MyDailyTarget")}
         showBackButton={false}
         textColor="white"
         bgColor="#282828"
@@ -299,7 +301,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
         </Animated.View>
       </View>
 
-      {/* Table - Now with proper scrolling */}
+      {/* Table */}
       <View className="flex-1 bg-white">
         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
           <View style={{ width: "100%" }}>

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -13,7 +14,6 @@ import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 
 type QRScannerNavigationProp = StackNavigationProp<
@@ -43,7 +43,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);
@@ -84,32 +84,26 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   };
 
   const handleBackPress = () => {
-    if (jobRole === "Collection Officer") {
-      navigation.navigate("Main" as any, {
-        screen: "CollectionOfficerDashboard",
-      });
-    } else if (jobRole === "Collection Centre Manager") {
-      navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
+    if (
+      jobRole === "Collection Officer" ||
+      jobRole === "Collection Centre Manager"
+    ) {
+      navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
     } else {
-      navigation.navigate("Main" as any, {
-        screen: "CollectionOfficerDashboard",
-      });
+      navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
     }
   };
 
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("Main" as any, {
-            screen: "CollectionOfficerDashboard",
-          });
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("Main" as any, { screen: "ManagerDashboard" });
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
         } else {
-          navigation.navigate("Main" as any, {
-            screen: "CollectionOfficerDashboard",
-          });
+          navigation.navigate("Main" as any, { screen: "CollectionDashboard" });
         }
         return true;
       };

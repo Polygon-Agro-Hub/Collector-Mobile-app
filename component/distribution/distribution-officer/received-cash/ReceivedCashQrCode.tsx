@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -16,7 +17,6 @@ import { RootStackParamList } from "@/types/types";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
@@ -283,7 +283,7 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
   ) => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         throw new Error("Authentication token not found");

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { useState, useEffect } from "react";
 import {
   View,
@@ -11,7 +12,6 @@ import {
 } from "react-native";
 import { Ionicons, Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
@@ -53,7 +53,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
   useEffect(() => {
     const loadAssignmentAndJoinRoom = async () => {
       try {
-        const activeAssignmentStr = await AsyncStorage.getItem("activeAssignment");
+        const activeAssignmentStr = (store.getState().auth.activeAssignment ? JSON.stringify(store.getState().auth.activeAssignment) : null);
         if (activeAssignmentStr) {
           const activeAssignment = JSON.parse(activeAssignmentStr);
           if (activeAssignment.rowId) {
@@ -82,11 +82,11 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
     const handlePositionFreed = async (payload: { positionId: number }) => {
       try {
-        const activeAssignmentStr = await AsyncStorage.getItem("activeAssignment");
+        const activeAssignmentStr = (store.getState().auth.activeAssignment ? JSON.stringify(store.getState().auth.activeAssignment) : null);
         if (activeAssignmentStr) {
           const activeAssignment = JSON.parse(activeAssignmentStr);
           if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
-            await AsyncStorage.removeItem("activeAssignment");
+            store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
             Alert.alert("Position Released", "Your position has been released by the manager.");
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
@@ -118,7 +118,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;

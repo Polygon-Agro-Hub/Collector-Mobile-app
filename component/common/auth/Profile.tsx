@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -108,7 +109,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
     phoneCode1: string,
   ) => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${newPhoneNumber}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -159,7 +160,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   ) => {
     if (newPhoneNumber2.length !== 0) {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
         const response = await axios.get(
           `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode02}${newPhoneNumber2}`,
           { headers: { Authorization: `Bearer ${token}` } },
@@ -195,7 +196,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const fetchProfileData = async () => {
     setIsLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.No token found"));
         return;
@@ -262,7 +263,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   const handleUpdatePhoneNumber = async () => {
     Keyboard.dismiss();
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.No token found"));
         return;

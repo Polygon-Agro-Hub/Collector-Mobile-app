@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -56,7 +57,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   const fetchRegistrationDetails = async () => {
     setIsLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.No token found"));
         return;

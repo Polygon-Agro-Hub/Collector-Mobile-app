@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -129,7 +130,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
       setLoading(true);
       setErrorMessage(null);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/collection-officers`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -199,7 +200,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
     try {
       setSubmitting(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.put(
         `${environment.API_BASE_URL}api/target/manager/pass-target`,
         {
@@ -444,7 +445,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
         data={officers}
         selectedItems={assignee ? [assignee] : []}
         onSelect={(items) => setAssignee(items[0] ?? "")}
-        searchPlaceholder={t("PassTargetBetweenOfficers.Select an officer")}
+        searchPlaceholder={t("PassTargetBetweenOfficers.Search an officer")}
         multiSelect={false}
         noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />

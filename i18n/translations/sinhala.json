@@ -77,7 +77,7 @@
     "User token not found. Please log in again.": "පරිශීලක ටෝකනය හමු නොවීය. කරුණාකර නැවත උතිසහ කරන්න.",
     "Failed to claim the officer. Please try again later.": "නිලධාරියාට හිමිකම් පෑමට අපොහොසත් විය. කරුණාකර පසුව උත්සාහ කරන්න.",
     "Success": "සාර්ථකයි!",
-    "Staff successfully claimed.": "නිලධාරියාට හිමිකම් පෑම සාර්ථකයි.",
+    "Employee successfully claimed.": "නිලධාරියාට හිමිකම් පෑම සාර්ථකයි.",
     "Failed to generate PDF": "PDF ජනනය කිරීමට අසමත් විය.",
     "Sharing is not available on this device": "මෙම උපාංගෙන් බෙදාගැනීම සිදු කල නොහැක.",
     "User not authenticated.": "පරිශීලකයා සත්‍යාපනය කර නොමැත.",
@@ -295,7 +295,8 @@
     "Completedkg": "සම්පූර්ණ (kg)",
     "noCompletedTargets": "සම්පූර්ණ කළ ඉලක්ක හමු නොවීය",
     "NoTodoItems": "ඉලක්ක හමු නොවීය",
-    "Out": "පිටත් කල"
+    "Out": "පිටත් කල",
+    "MyDailyTarget":"මගේ දෛනික ඉලක්කය"
   },
   "SearchPrice": {
     "LNG": "si",
@@ -602,7 +603,7 @@
     "Search": "සොයන්න",
     "Claim Officer": "නිලධාරියෙකු ලබා ගන්න",
     "No Disclaimed": "- හිමිකම් අහිමි නිලධාරියෙකු හමු නොවීය -",
-    "Are you sure you want to claim this officer?": "ඔබට මෙම නිලධාරියා ලබා ගැනීමට අවශ්‍ය බව විශ්වාසද?",
+    "Are you sure you want to claim this employee?": "ඔබට මෙම නිලධාරියා ලබා ගැනීමට අවශ්‍ය බව විශ්වාසද?",
     "Cancel": "අවලංගු කරන්න",
     "Claim": "ලබාගන්න",
     "Select Job Role": "රැකියා භූමිකාව තෝරන්න",
@@ -611,9 +612,9 @@
     "Distribution Officer": "බෙදාහැරීමේ නිලධාරි"
   },
   "DisclaimOfficer": {
-    "Are you sure you want to disclaim this officer?": "ඔබට මෙම නිලධාරියා ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?",
+    "Are you sure you want to disclaim this employee?": "ඔබට මෙම නිලධාරියා ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?",
     "Disclaim": "ඉවත් කරන්න",
-    "Disclaim Staff Successful.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
+    "Employee successfully disclaimed.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
     "Failed to disclaim officer.": "නිලධාරියා හිමිකම ඉවත් කිරීම කිරීමට අපොහොසත් විය."
   },
   "CollectionOfficersList": {
@@ -672,7 +673,8 @@
     "Save": "සුරකින්න",
     "maximum amount receive": "ලැබිය හැකි උපරිම ප්‍රමාණය (Kg):",
     "Select an officer": "--නිලධාරියෙකු තෝරන්න--",
-    "No Officers Found": "නිලධාරීන් හමු නොවීය"
+    "No Officers Found": "නිලධාරීන් හමු නොවීය",
+    "Search an officer":"--නිලධාරියෙකු සොයන්න--"
   },
   "ReportGenerator": {
     "LNG": "si",

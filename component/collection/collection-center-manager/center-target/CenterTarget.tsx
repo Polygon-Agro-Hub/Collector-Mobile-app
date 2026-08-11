@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
 import {
@@ -98,7 +99,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
     setLoading(true);
     const startTime = Date.now();
     try {
-      const authToken = await AsyncStorage.getItem("token");
+      const authToken = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/get-center-target`,
         {
@@ -180,6 +181,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         onBackPress={() => navigation.goBack()}
         textColor="white"
         bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
       />
       <View className="flex-row justify-center items-center pb-4 bg-[#282828]">
         {/* To Do Button */}
@@ -322,7 +324,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                     onRefresh={onRefresh}
                   />
                 }
-                contentContainerStyle={{ paddingBottom:80 }}
+                contentContainerStyle={{ paddingBottom: 80 }}
               >
                 {/* Table Content */}
                 {displayedData.length > 0 ? (

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
@@ -130,15 +131,15 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
       if (PreferdLanguage === "Sinhala") {
         companyName =
-          (await AsyncStorage.getItem("companyNameSinhala")) || "PolygonAgro";
+          (store.getState().auth.companyNameSinhala) || "PolygonAgro";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (PreferdLanguage === "Tamil") {
         companyName =
-          (await AsyncStorage.getItem("companyNameTamil")) || "PolygonAgro";
+          (store.getState().auth.companyNameTamil) || "PolygonAgro";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
         companyName =
-          (await AsyncStorage.getItem("companyNameEnglish")) || "PolygonAgro";
+          (store.getState().auth.companyNameEnglish) || "PolygonAgro";
         otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 

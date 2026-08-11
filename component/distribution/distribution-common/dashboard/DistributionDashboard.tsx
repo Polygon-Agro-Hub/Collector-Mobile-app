@@ -1,3 +1,5 @@
+import { logoutUser } from "@/store/authSlice";
+import store from "@/services/reducxStore";
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -69,7 +71,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   const fetchUserProfile = async () => {
     setIsLoadingProfile(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (token) {
         const response = await axios.get(
           `${environment.API_BASE_URL}api/distribution-manager/user-profile`,
@@ -91,7 +93,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   const fetchTargetPercentage = async () => {
     setIsLoadingTarget(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.User not authenticated."));
         setIsLoadingTarget(false);
@@ -156,8 +158,8 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
 
   const checkTokenExpiration = async () => {
     try {
-      const expirationTime = await AsyncStorage.getItem("tokenExpirationTime");
-      const userToken = await AsyncStorage.getItem("token");
+      const expirationTime = store.getState().auth.tokenExpirationTime;
+      const userToken = store.getState().auth.token;
 
       if (expirationTime && userToken) {
         const currentTime = new Date();
@@ -166,12 +168,8 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
         if (currentTime < tokenExpiry) {
           // Token is valid
         } else {
-          await AsyncStorage.multiRemove([
-            "token",
-            "tokenStoredTime",
-            "tokenExpirationTime",
-          ]);
-          navigation.navigate("Login");
+          store.dispatch(logoutUser());
+navigation.navigate("Login");
         }
       }
     } catch (error) {
@@ -268,7 +266,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
 
   const handleStartPacking = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (token) {
         const response = await axios.get(
           `${environment.API_BASE_URL}api/packing/active-assignment`,

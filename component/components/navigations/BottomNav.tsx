@@ -1,3 +1,5 @@
+import { logoutUser } from "@/store/authSlice";
+import store from "@/services/reducxStore";
 import { useState, useEffect, useMemo } from "react";
 import {
   View,
@@ -6,7 +8,6 @@ import {
   Keyboard,
   AppState,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useSelector } from "react-redux";
@@ -45,7 +46,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     switch (userRole) {
       case ROLES.COLLECTION_MANAGER:
         return [
-          { name: "ManagerDashboard", icon: homeIcon },
+          { name: "CollectionDashboard", icon: homeIcon },
           { name: "DailyTarget", icon: qrIcon },
           { name: "CollectionOfficersList", icon: adminIcon },
           { name: "SearchPriceScreen", icon: searchIcon },
@@ -54,7 +55,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
       case ROLES.COLLECTION_OFFICER:
         return [
           { name: "DailyTargetList", icon: qrIcon },
-          { name: "CollectionOfficerDashboard", icon: homeIcon },
+          { name: "CollectionDashboard", icon: homeIcon },
           { name: "SearchPriceScreen", icon: searchIcon },
         ];
 
@@ -68,7 +69,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
 
       default:
         return [
-          { name: "CollectionOfficerDashboard", icon: homeIcon },
+          { name: "CollectionDashboard", icon: homeIcon },
           { name: "SearchPriceScreen", icon: searchIcon },
         ];
     }
@@ -77,7 +78,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   let currentTabName = state?.routes?.[state.index]?.name;
 
   if (
-    ["PriceChart", "PriceChartManager", "PriceChange"].includes(currentTabName)
+    ["PriceChart", "PriceChange"].includes(currentTabName)
   ) {
     currentTabName = "SearchPriceScreen";
   }
@@ -99,7 +100,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   useEffect(() => {
     const checkClaimStatus = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
 
         const response = await axios.get(
           `${environment.API_BASE_URL}api/collection-officer/get-claim-status`,
@@ -138,9 +139,8 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
                   currentState === "background" ||
                   currentState === "inactive"
                 ) {
-                  await AsyncStorage.removeItem("token");
-                  await AsyncStorage.removeItem("empid");
-                  navigation?.navigate?.("Login");
+                  store.dispatch(logoutUser());
+navigation?.navigate?.("Login");
                 }
               } catch (error) {
                 console.log("AppState error:", error);

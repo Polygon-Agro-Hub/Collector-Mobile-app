@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -89,7 +90,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
 
   useEffect(() => {
     const getUserNameAndRole = async () => {
-      const role = await AsyncStorage.getItem("jobRole");
+      const role = store.getState().auth.jobRole;
       setJobRole(role);
 
       if (route?.params?.fullname) {
@@ -302,7 +303,7 @@ ${signature}${replyTime}`,
 
   const fetchComplaints = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       const res = await axios.get<complainItem[]>(
         `${environment.API_BASE_URL}api/complain/get-complains`,

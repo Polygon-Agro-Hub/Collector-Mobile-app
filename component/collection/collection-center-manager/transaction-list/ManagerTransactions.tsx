@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -18,8 +19,6 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { Entypo } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 type ManagerTransactionsNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ManagerTransactions"
@@ -94,7 +93,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
   const fetchTransactions = async (date: string) => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         console.error("No token found. Please log in again.");
@@ -209,7 +208,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("Main" as any, {
-                screen: "ManagerDashboard",
+                screen: "CollectionDashboard",
               })
             }
             // className="bg-[#FFFFFF1A] rounded-full p-2 justify-center  items-center"
@@ -255,7 +254,6 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
         </View>
       </View>
 
-      {/* ── White curved body — matches ManagerTransactions exactly ── */}
       <View className="flex-1 bg-white rounded-t-[40px] mt-[-20px]">
         {/* Floating search bar */}
         <View
@@ -321,7 +319,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           </Text>
         </View>
 
-        {/* Content — FlatList replaces the redundant ScrollView to fix nesting error */}
+        {/* Content */}
         <View className="flex-1 mb-2">
           {loading ? (
             <View className="flex-1 justify-center items-center">

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
@@ -492,7 +493,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     if (!validateNicNumber(nic) || nic.length === 0) return;
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-nic/${nic}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -564,6 +565,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     if (!formData.nicNumber.trim())
       errors.nicNumber = t("Error.NIC number is required");
     if (!formData.email.trim()) errors.email = t("Error.Email is required");
+    else if (!validateEmail(formData.email.trim())) {
+      errors.email = t("Error.Invalid email address Example");
+    }
     if (!jobRole) errors.jobRole = t("Error.Job role is required");
     if (Object.values(preferredLanguages).every((val) => !val)) {
       errors.preferredLanguages = t(
@@ -592,7 +596,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       setIsValidating(true);
 
       if (phoneNumber1.trim() && validatePhoneNumber(phoneNumber1)) {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
 
         const phone1Res = await axios.get(
           `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${phoneNumber1}`,
@@ -608,7 +612,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       }
 
       if (phoneNumber2.trim() && validatePhoneNumber(phoneNumber2)) {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
 
         const phone2Res = await axios.get(
           `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode2}${phoneNumber2}`,
@@ -798,7 +802,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     if (!validatePhoneNumber(phoneNumber)) return;
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${phoneNumber}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -860,7 +864,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     if (!validatePhoneNumber(phoneNumber)) return;
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${dialCode}${phoneNumber}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -879,12 +883,31 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     }
   };
 
+  /**
+   * Validates an email address.
+   *
+   * In addition to the general shape check, this explicitly rejects malformed
+   * domains that a loose regex would otherwise let through, e.g.:
+   *   - "amal@.gmail.com"   (domain starts with a dot)
+   *   - "amal@gmail.com."   (domain ends with a dot)
+   *   - "amal@gmail..com"   (consecutive dots)
+   *   - "amal@-gmail.com"   (label starts with a hyphen)
+   *   - "amal@gmail-.com"   (label ends with a hyphen)
+   * Without these checks, a string like "amal@.gmail.com" would pass the old
+   * regex (since "." is allowed anywhere in [a-zA-Z0-9.-]+) and then match the
+   * generic ".com" TLD branch instead of the stricter Gmail branch, letting an
+   * invalid address through with no inline error.
+   */
   const validateEmail = (email: string): boolean => {
     const generalEmailRegex =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!generalEmailRegex.test(email)) return false;
+
     const emailLower = email.toLowerCase();
     const [localPart, domain] = emailLower.split("@");
+
+    if (!domain || !isValidDomain(domain)) return false;
+
     const allowedTLDs = [".com", ".gov", ".lk"];
     if (domain === "gmail.com" || domain === "googlemail.com")
       return validateGmailLocalPart(localPart);
@@ -893,6 +916,21 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       if (domain.endsWith(tld)) return true;
     }
     return false;
+  };
+
+  // Ensures a domain has no leading/trailing dot, no consecutive dots, and
+  // that every label between dots is non-empty and doesn't start/end with a hyphen.
+  const isValidDomain = (domain: string): boolean => {
+    if (domain.startsWith(".") || domain.endsWith(".")) return false;
+    if (domain.includes("..")) return false;
+
+    const labels = domain.split(".");
+    return labels.every(
+      (label) =>
+        label.length > 0 &&
+        !label.startsWith("-") &&
+        !label.endsWith("-"),
+    );
   };
 
   const validateGmailLocalPart = (localPart: string): boolean => {
@@ -927,7 +965,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       return;
     }
     if (!validateEmail(trimmedInput)) {
-      const domain = trimmedInput.toLowerCase().split("@")[1];
+      const domain = trimmedInput.toLowerCase().split("@")[1] ?? "";
       setErrorEmail(
         domain === "gmail.com" || domain === "googlemail.com"
           ? t("Error.Invalid Gmail address")
@@ -946,7 +984,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     }
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-email/${email}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -1260,12 +1298,25 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
   const handleSubmit = async () => {
     if (!validateAddressFields()) return;
 
+    // Guard against a malformed email slipping through to the backend on
+    // step 2 — this is what previously produced a generic "Something went
+    // wrong" error instead of an inline validation message.
+    if (!formData.email?.trim() || !validateEmail(formData.email.trim())) {
+      setStep(1);
+      setFieldErrors((prev) => ({
+        ...prev,
+        email: t("Error.Invalid email address Example"),
+      }));
+      setErrorEmail(t("Error.Invalid email address Example"));
+      return;
+    }
+
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) return;
 
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       let profileImageBase64 = "";
       const imageUri = formData.profileImage;

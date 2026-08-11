@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -9,7 +10,6 @@ import {
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -57,7 +57,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
   const fetchRows = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;
