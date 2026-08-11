@@ -311,7 +311,7 @@ const TAB_SCREENS: TabRouteConfig[] = [
   {
     name: "DistributionOfficersList",
     component: DistributionOfficersList as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {
     name: "ClaimOfficer",
@@ -321,7 +321,7 @@ const TAB_SCREENS: TabRouteConfig[] = [
   {
     name: "ClaimDistribution",
     component: ClaimDistribution as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
   },
   {
     name: "OTPE",
@@ -331,12 +331,12 @@ const TAB_SCREENS: TabRouteConfig[] = [
   {
     name: "DistributionAddOfficer",
     component: DistributionAddOfficer as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {
     name: "EditTargetScreen",
     component: EditTargetScreen as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER],
+    allowedRoles: [ROLES.COLLECTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
   },
   {
     name: "PassTargetBetweenOfficers",
@@ -548,7 +548,7 @@ const STACK_SCREENS_CONFIG: StackRouteConfig[] = [
   {
     name: "SelectRow",
     component: SelectRow as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
 
   {
@@ -590,25 +590,25 @@ const STACK_SCREENS_CONFIG: StackRouteConfig[] = [
   {
     name: "Group",
     component: Group as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
   },
 
   {
     name: "SelectOrder",
     component: SelectOrder as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
   },
 
   {
     name: "SelectRowToAssign",
     component: SelectRowToAssign as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER , ROLES.DISTRIBUTION_OFFICER],
   },
 
   {
     name: "ConfirmRowAssign",
     component: ConfirmRowAssign as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER , ROLES.DISTRIBUTION_OFFICER],
   },
 
   {
@@ -632,13 +632,13 @@ const STACK_SCREENS_CONFIG: StackRouteConfig[] = [
   {
     name: "ReceivedCash",
     component: ReceivedCash as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER , ROLES.DISTRIBUTION_OFFICER],
   },
 
   {
     name: "ReceivedCashTransfer",
     component: ReceivedCashTransfer as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER ,ROLES.DISTRIBUTION_OFFICER],
   },
 
   {
