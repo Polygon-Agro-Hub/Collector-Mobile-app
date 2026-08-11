@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -130,7 +131,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     setLoading(true);
     const startTime = Date.now();
     try {
-      const authToken = await AsyncStorage.getItem("token");
+      const authToken = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/target/officer/${collectionOfficerId}`,
         {

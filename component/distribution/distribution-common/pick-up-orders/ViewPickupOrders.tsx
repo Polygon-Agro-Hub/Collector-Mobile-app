@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
-  StatusBar,
   Image,
   BackHandler,
   Animated,

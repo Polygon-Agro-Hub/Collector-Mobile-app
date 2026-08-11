@@ -1,3 +1,5 @@
+import { logoutUser } from "@/store/authSlice";
+import store from "@/services/reducxStore";
 import React, { useCallback } from "react";
 import {
   View,
@@ -12,8 +14,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 type BannedScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "BannedScreen"
@@ -40,17 +40,8 @@ const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
 
   const handleBackToLogin = async () => {
     try {
-      await AsyncStorage.multiRemove([
-        "token",
-        "tokenStoredTime",
-        "tokenExpirationTime",
-        "jobRole",
-        "empid",
-        "companyNameEnglish",
-        "companyNameSinhala",
-        "companyNameTamil",
-      ]);
-      navigation.reset({
+      store.dispatch(logoutUser());
+navigation.reset({
         index: 0,
         routes: [{ name: "Login" }],
       });

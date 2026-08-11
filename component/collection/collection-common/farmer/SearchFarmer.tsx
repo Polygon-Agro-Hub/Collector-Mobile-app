@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
@@ -20,8 +21,6 @@ import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
 });
@@ -57,7 +56,7 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);
@@ -67,10 +66,11 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   }, []);
 
   const handleBackPress = () => {
-    if (jobRole === "Collection Officer") {
-      navigation.navigate("CollectionOfficerDashboard" as any);
-    } else if (jobRole === "Collection Centre Manager") {
-      navigation.navigate("ManagerDashboard" as any);
+    if (
+      jobRole === "Collection Officer" ||
+      jobRole === "Collection Centre Manager"
+    ) {
+      navigation.navigate("CollectionDashboard" as any);
     } else {
       navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
     }
@@ -182,10 +182,11 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("CollectionOfficerDashboard" as any);
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("ManagerDashboard" as any);
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("CollectionDashboard" as any);
         } else {
           navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
         }
@@ -285,7 +286,6 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
               </Text>
             ) : null}
 
-            {/* Display search image when no NIC is entered or during search */}
             {shouldShowSearchImage && (
               <View className="mt-20 items-center">
                 <Image

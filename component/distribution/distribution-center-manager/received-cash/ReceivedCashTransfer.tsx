@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState } from "react";
 import {
   View,
@@ -11,7 +12,6 @@ import { Entypo } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import UploadFile, { UploadFileItem } from "@/component/components/file-management/UploadFile";
 import { useTranslation } from "react-i18next";
@@ -62,7 +62,7 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
 
     try {
       setSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         Alert.alert(

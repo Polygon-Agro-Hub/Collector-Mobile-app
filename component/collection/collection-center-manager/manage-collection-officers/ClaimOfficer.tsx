@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -17,7 +18,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { environment } from "@/environment/environment";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
@@ -84,7 +84,7 @@ const ClaimOfficer: React.FC = () => {
       return;
     }
     try {
-      const userToken = await AsyncStorage.getItem("token");
+      const userToken = store.getState().auth.token;
 
       if (!userToken) {
         Alert.alert(
@@ -142,7 +142,7 @@ const ClaimOfficer: React.FC = () => {
 
   const handleClaimOfficer = async () => {
     try {
-      const userToken = await AsyncStorage.getItem("token");
+      const userToken = store.getState().auth.token;
 
       if (!userToken) {
         Alert.alert(
@@ -171,7 +171,7 @@ const ClaimOfficer: React.FC = () => {
           t("Error.Failed to claim the officer. Please try again later."),
         );
       } else {
-        Alert.alert(t("Error.Success"), t("Error.Staff successfully claimed."));
+        Alert.alert(t("Error.Success"), t("Error.Employee successfully claimed."));
         setOfficerFound(false);
         setOfficerDetails(null);
         setEmpID("");
@@ -243,7 +243,7 @@ const ClaimOfficer: React.FC = () => {
               <Ionicons name="warning" size={30} color="#6c7e8c" />
             </View>
             <Text className="text-center text-sm font-semibold mb-4">
-              {t("ClaimOfficer.Are you sure you want to claim this officer?")}
+              {t("ClaimOfficer.Are you sure you want to claim this employee?")}
             </Text>
 
             <View className="flex-row  justify-center gap-4">
@@ -311,7 +311,7 @@ const ClaimOfficer: React.FC = () => {
             <Text className="text-gray-600 font-bold">{empPrefix}</Text>
           </View>
           <TextInput
-            placeholder="ex: 0122"
+            placeholder="ex: 00122"
             value={empID}
             keyboardType="numeric"
             onChangeText={handleEmpIDChange}

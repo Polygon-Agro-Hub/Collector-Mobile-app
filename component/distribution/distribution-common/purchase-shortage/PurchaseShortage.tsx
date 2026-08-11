@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
@@ -13,7 +14,6 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -59,7 +59,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
   const fetchShortages = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const res = await axios.get(
         `${environment.API_BASE_URL}api/purchase-shortage`,
         {

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -78,7 +79,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);
@@ -126,7 +127,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   const fetchCropNames = async () => {
     setLoadingCrops(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       const response = await api.get(
         "api/unregisteredfarmercrop/get-crop-names",
@@ -192,7 +193,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
 
     setLoadingVarieties(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await api.get(
         `api/unregisteredfarmercrop/crops/varieties/${selectedCrop}`,
         {
@@ -243,19 +244,11 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         varietyOptions.find((option) => option.value === selectedVariety)
           ?.label || "";
 
-      if (jobRole === "Collection Centre Manager") {
-        navigation.navigate("PriceChartManager", {
-          cropName: cropName,
-          varietyId: selectedVariety,
-          varietyName: varietyName,
-        });
-      } else {
-        navigation.navigate("PriceChart", {
-          cropName: cropName,
-          varietyId: selectedVariety,
-          varietyName: varietyName,
-        });
-      }
+      navigation.navigate("PriceChart", {
+        cropName: cropName,
+        varietyId: selectedVariety,
+        varietyName: varietyName,
+      });
     } else {
       setLoading(false);
       Alert.alert(
@@ -269,10 +262,11 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("CollectionOfficerDashboard" as any);
-        } else if (jobRole === "Collection Centre Manager") {
-          navigation.navigate("ManagerDashboard" as any);
+        if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("CollectionDashboard" as any);
         } else {
           navigation.navigate("Main" as any, { screen: "SearchPriceScreen" });
         }

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { useState, useEffect } from "react";
 import {
   View,
@@ -10,7 +11,6 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
@@ -34,7 +34,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
   const fetchGroups = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;

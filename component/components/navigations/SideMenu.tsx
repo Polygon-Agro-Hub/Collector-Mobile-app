@@ -1,3 +1,5 @@
+import { logoutUser } from "@/store/authSlice";
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import {
   View,
@@ -73,7 +75,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchJobRole = async () => {
       try {
-        const role = await AsyncStorage.getItem("jobRole");
+        const role = store.getState().auth.jobRole;
         setJobRole(role);
       } catch (error) {
         console.error("Error fetching job role:", error);
@@ -137,7 +139,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
         if (token) {
           const response = await api.get(
             "api/collection-officer/user-profile",
@@ -193,17 +195,11 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     try {
       setIsLoggingOut(true);
 
-      const empId = await AsyncStorage.getItem("empid");
+      const empId = store.getState().auth.empId;
       await status(empId!, false);
 
-      await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("jobRole");
-      await AsyncStorage.removeItem("companyNameEnglish");
-      await AsyncStorage.removeItem("companyNameSinhala");
-      await AsyncStorage.removeItem("companyNameTamil");
-      await AsyncStorage.removeItem("empid");
-
-      setTimeout(() => {
+      store.dispatch(logoutUser());
+setTimeout(() => {
         setIsLoggingOut(false);
         navigation.navigate("Login");
       }, 2000);
@@ -225,7 +221,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     }
 
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         console.error("Token not found");
         return;
@@ -281,10 +277,11 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
       profile?.jobRole === ROLES.DISTRIBUTION_MANAGER
     ) {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-    } else if (profile?.jobRole === ROLES.COLLECTION_OFFICER) {
-      navigation.navigate("Main", { screen: "CollectionOfficerDashboard" });
-    } else if (profile?.jobRole === ROLES.COLLECTION_MANAGER) {
-      navigation.navigate("Main", { screen: "ManagerDashboard" });
+    } else if (
+      profile?.jobRole === ROLES.COLLECTION_OFFICER ||
+      profile?.jobRole === ROLES.COLLECTION_MANAGER
+    ) {
+      navigation.navigate("Main", { screen: "CollectionDashboard" });
     }
     return true;
   };

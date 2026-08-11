@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
@@ -488,7 +489,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
     if (!validateNicNumber(nic) || nic.length === 0) return;
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-nic/${nic}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -588,7 +589,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
       setIsValidating(true);
 
       if (phoneNumber1.trim() && validatePhoneNumber(phoneNumber1)) {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
 
         const phone1Res = await axios.get(
           `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${phoneNumber1}`,
@@ -604,7 +605,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
       }
 
       if (phoneNumber2.trim() && validatePhoneNumber(phoneNumber2)) {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
 
         const phone2Res = await axios.get(
           `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode2}${phoneNumber2}`,
@@ -809,7 +810,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
     if (!validatePhoneNumber(phoneNumber)) return;
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${phoneCode1}${phoneNumber}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -870,7 +871,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
     if (!validatePhoneNumber(phoneNumber)) return;
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-phone/${dialCode}${phoneNumber}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -956,7 +957,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
     }
     try {
       setIsValidating(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/driver/check-email/${email}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -1275,7 +1276,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
 
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       let profileImageBase64 = "";
       const imageUri = formData.profileImage;

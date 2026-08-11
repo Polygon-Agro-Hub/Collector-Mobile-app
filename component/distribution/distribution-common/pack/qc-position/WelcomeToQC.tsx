@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -13,7 +14,6 @@ import {
 import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LottieView from "lottie-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AlertModal from "@/component/components/popup/AlertModal";
@@ -123,11 +123,11 @@ export default function WelcomeToQC({
 
     const handlePositionFreed = async (payload: { positionId: number }) => {
       try {
-        const activeAssignmentStr = await AsyncStorage.getItem("activeAssignment");
+        const activeAssignmentStr = (store.getState().auth.activeAssignment ? JSON.stringify(store.getState().auth.activeAssignment) : null);
         if (activeAssignmentStr) {
           const activeAssignment = JSON.parse(activeAssignmentStr);
           if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
-            await AsyncStorage.removeItem("activeAssignment");
+            store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
             Alert.alert("Position Released", "Your position has been released by the manager.");
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
@@ -150,7 +150,7 @@ export default function WelcomeToQC({
 
   const fetchActiveOrderAndStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) return;
 
       const activeRes = await axios.get(
@@ -247,7 +247,7 @@ export default function WelcomeToQC({
     if (isAdvancing) return;
     setIsAdvancing(true);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const targetOrderId =
         activeProcessOrderId || initialProcessOrderId || 3221;
 

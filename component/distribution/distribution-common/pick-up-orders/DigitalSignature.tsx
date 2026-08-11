@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useRef, useEffect, useState } from "react";
 import {
   View,
@@ -14,12 +15,6 @@ import { useFocusEffect, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import * as ScreenOrientation from "expo-screen-orientation";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { AlertModal } from "@/component/components/popup/AlertModal";
@@ -243,7 +238,7 @@ export default function DigitalSignature({
     try {
       setLoading(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (!token) {
         Alert.alert("Error", "Authentication token not found");

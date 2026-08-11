@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -166,7 +167,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
 
   const fetchOfficerDetails = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.No token found"));
         return;
@@ -206,7 +207,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
 
   const fetchDetails = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.No token found"));
         return;

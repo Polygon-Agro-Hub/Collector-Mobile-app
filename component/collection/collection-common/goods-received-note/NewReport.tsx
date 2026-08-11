@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -151,7 +152,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
 
   const fetchDetails = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(t("Error.error"), t("Error.No token found"));
         return;

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -69,14 +70,19 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   const [filteredOfficers, setFilteredOfficers] = useState<Officer[]>([]);
   const [tabLoading, setTabLoading] = useState<boolean>(false);
   const [selectedOfficer, setSelectedOfficer] = useState<Officer | null>(null);
-  const [detailsModalVisible, setDetailsModalVisible] = useState<boolean>(false);
+  const [detailsModalVisible, setDetailsModalVisible] =
+    useState<boolean>(false);
   const [warningVisible, setWarningVisible] = useState<boolean>(false);
 
   const handleDisclaim = (collectionOfficerId: number) => {
     if (!collectionOfficerId) {
-      Alert.alert(t("Error.error") || "Error", t("Error.Missing collectionOfficerId") || "Missing Officer ID");
+      Alert.alert(
+        t("Error.error") || "Error",
+        t("Error.Missing collectionOfficerId") || "Missing Officer ID",
+      );
       return;
     }
+    setDetailsModalVisible(false);
     setWarningVisible(true);
   };
 
@@ -86,13 +92,16 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
-      Alert.alert(t("Error.error") || "Error", t("Error.No internet connection") || "No internet connection");
+      Alert.alert(
+        t("Error.error") || "Error",
+        t("Error.No internet connection") || "No internet connection",
+      );
       return;
     }
 
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const res = await fetch(
         `${environment.API_BASE_URL}api/collection-manager/disclaim-officer`,
         {
@@ -105,13 +114,16 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
             collectionOfficerId: selectedOfficer.collectionOfficerId,
             jobRole: "Distribution Officer",
           }),
-        }
+        },
       );
 
       if (!res.ok) {
         const errorData = await res.json();
         console.error("Disclaim failed:", errorData);
-        Alert.alert(t("Error.error") || "Error", t("Error.Failed to disclaim officer.") || "Failed to disclaim staff.");
+        Alert.alert(
+          t("Error.error") || "Error",
+          t("Error.Failed to disclaim officer.") || "Failed to disclaim staff.",
+        );
         return;
       }
 
@@ -122,20 +134,23 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         setSelectedOfficer(null);
         Alert.alert(
           t("Error.Success") || "Success",
-          t("DisclaimOfficer.Disclaim Staff Successful.") || "Disclaim Staff Successful."
+          t("DisclaimOfficer.Employee successfully disclaimed.") ||
+            "Disclaim Staff Successful.",
         );
         fetchOfficers();
       } else {
         Alert.alert(
           t("Error.error") || "Error",
-          t("DisclaimOfficer.Failed to disclaim officer.") || "Failed to disclaim staff."
+          t("DisclaimOfficer.Failed to disclaim officer.") ||
+            "Failed to disclaim staff.",
         );
       }
     } catch (error) {
       console.error("Failed to disclaim:", error);
       Alert.alert(
         t("Error.error") || "Error",
-        t("DisclaimOfficer.Failed to disclaim officer.") || "Failed to disclaim staff."
+        t("DisclaimOfficer.Failed to disclaim officer.") ||
+          "Failed to disclaim staff.",
       );
     } finally {
       setLoading(false);
@@ -178,7 +193,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
       setLoading(true);
       setErrorMessage(null);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       const response = await axios.get(
         `${environment.API_BASE_URL}api/collection-manager/collection-officerslist`,
         {
@@ -366,7 +381,9 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           onClaimPress={() =>
             navigation.navigate("ClaimDistribution", { activeTab })
           }
-          claimLabel={t("CollectionOfficersList.Claim Officer") || "Claim Officer"}
+          claimLabel={
+            t("CollectionOfficersList.Claim Officer") || "Claim Officer"
+          }
         />
 
         {/* Body */}
@@ -389,8 +406,10 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                     className="font-bold text-[#21202B] mb-2"
                   >
                     {activeTab === "Officers"
-                      ? t("CollectionOfficersList.Officers List") || "Officers List"
-                      : t("CollectionOfficersList.Drivers List") || "Drivers List"}
+                      ? t("CollectionOfficersList.Officers List") ||
+                        "Officers List"
+                      : t("CollectionOfficersList.Drivers List") ||
+                        "Drivers List"}
                     {"  "}
                     <Text className="text-[#21202B] font-normal">
                       ({t("ManagerTransactions.All") || "All"}{" "}
@@ -443,7 +462,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         >
           <View className="flex-1 justify-center items-center bg-[#00000060] px-6">
             <View className="bg-white rounded-3xl w-full max-w-[340px] p-6 items-center relative overflow-hidden shadow-2xl">
-              
               {/* Close Button on Top Right */}
               <TouchableOpacity
                 className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
@@ -486,7 +504,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                       onPress={() => {
                         const phoneUrl = `tel:${selectedOfficer.phoneNumber1}`;
                         Linking.openURL(phoneUrl).catch((err) =>
-                          console.error("Failed to open dial pad:", err)
+                          console.error("Failed to open dial pad:", err),
                         );
                       }}
                       className="w-8 h-8 rounded-full bg-[#E9ECF1] items-center justify-center"
@@ -508,7 +526,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                       onPress={() => {
                         const phoneUrl = `tel:${selectedOfficer.phoneNumber2}`;
                         Linking.openURL(phoneUrl).catch((err) =>
-                          console.error("Failed to open dial pad:", err)
+                          console.error("Failed to open dial pad:", err),
                         );
                       }}
                       className="w-8 h-8 rounded-full bg-[#E9ECF1] items-center justify-center"
@@ -522,7 +540,9 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               {/* Action Buttons */}
               <View className="w-full gap-3">
                 <TouchableOpacity
-                  onPress={() => handleDisclaim(selectedOfficer.collectionOfficerId)}
+                  onPress={() =>
+                    handleDisclaim(selectedOfficer.collectionOfficerId)
+                  }
                   className="w-full h-12 bg-red-600 rounded-full items-center justify-center shadow-md active:bg-red-700"
                 >
                   <Text className="text-white font-extrabold text-sm">
@@ -530,7 +550,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                   </Text>
                 </TouchableOpacity>
               </View>
-
             </View>
           </View>
         </Modal>
@@ -539,7 +558,11 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
       {/* Warning Confirmation Modal */}
       <WarningConfirmation
         visible={warningVisible}
-        message={t("DisclaimOfficer.Are you sure you want to disclaim this officer?") || "Are you sure you want to disclaim this officer?"}
+        message={
+          t(
+            "DisclaimOfficer.Are you sure you want to disclaim this employee?",
+          ) || "Are you sure you want to disclaim this officer?"
+        }
         confirmText={t("DisclaimOfficer.Disclaim") || "Disclaim"}
         cancelText={t("ClaimOfficer.Cancel") || "Cancel"}
         onConfirm={executeDisclaim}

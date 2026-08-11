@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import { useState, useEffect } from "react";
 import {
   View,
@@ -14,7 +15,6 @@ import { Entypo } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -44,7 +44,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
     }
     try {
       if (showLoader) setLoading(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");
         return;

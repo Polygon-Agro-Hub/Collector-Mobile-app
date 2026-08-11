@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -12,7 +13,6 @@ import {
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useIsFocused } from "@react-navigation/native";
@@ -117,7 +117,7 @@ export default function ConfirmRowAssign({
 
     try {
       setSubmitting(true);
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(
           "Error",

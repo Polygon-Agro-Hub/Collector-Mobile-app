@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -14,12 +15,12 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { environment } from "@/environment/environment";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { useSelector } from "react-redux";
+import { RootState } from "@/services/reducxStore";
+import { ROLES } from "@/constants/user-roles";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -35,26 +36,57 @@ interface PriceChartProps {
   route: any;
 }
 
+interface PriceItem {
+  grade: string;
+  price: string;
+  originalPrice?: string;
+  isValid?: boolean;
+}
+
 const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
   const { varietyId, cropName, varietyName } = route.params;
+
+  const jobRole = useSelector((state: RootState) => state.auth.jobRole);
+  const isManager = jobRole === ROLES.COLLECTION_MANAGER;
 
   const [priceData, setPriceData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editedPrices, setEditedPrices] = useState<any[]>([]);
+  const [editedPrices, setEditedPrices] = useState<PriceItem[]>([]);
   const [isEditable, setIsEditable] = useState(false);
   const { t } = useTranslation();
-  const [buttonText, setButtonText] = useState(
-    t("PriceChart.Request Price Update"),
-  );
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+  const PRICE_RANGE = 15;
+
+  const getInitialButtonText = () => {
+    return isManager
+      ? t("PriceChart.Edit Price")
+      : t("PriceChart.Request Price Update");
+  };
+
+  const getEditingButtonText = () => {
+    return isManager
+      ? t("PriceChart.Update")
+      : t("PriceChart.Submit Request");
+  };
+
+  const [buttonText, setButtonText] = useState(getInitialButtonText());
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsEditable(false);
+      setButtonText(getInitialButtonText());
+      setIsSubmitting(false);
+      fetchPrices();
+    }, [varietyId, jobRole]),
+  );
 
   const fetchPrices = async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
 
       if (token) {
         const response = await api.get(
@@ -66,13 +98,22 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           },
         );
 
-        const originalData = response.data.map((item: any) => ({
-          ...item,
-          price: String(item.price).trim(),
-        }));
-
-        setPriceData(originalData);
-        setEditedPrices(JSON.parse(JSON.stringify(originalData)));
+        if (isManager) {
+          const pricesWithOriginal = response.data.map((item: any) => ({
+            ...item,
+            originalPrice: item.price,
+            isValid: true,
+          }));
+          setPriceData(pricesWithOriginal);
+          setEditedPrices(pricesWithOriginal);
+        } else {
+          const originalData = response.data.map((item: any) => ({
+            ...item,
+            price: String(item.price).trim(),
+          }));
+          setPriceData(originalData);
+          setEditedPrices(JSON.parse(JSON.stringify(originalData)));
+        }
       } else {
         setError(t("Error.Failed to fetch prices"));
       }
@@ -83,35 +124,73 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchPrices();
-    }, [varietyId]),
-  );
+  const validatePrice = (newPrice: string, originalPrice: string): boolean => {
+    const newPriceNum = parseFloat(newPrice);
+    const originalPriceNum = parseFloat(originalPrice);
+
+    if (isNaN(newPriceNum) || isNaN(originalPriceNum)) {
+      return false;
+    }
+
+    const minPrice = originalPriceNum - PRICE_RANGE;
+    const maxPrice = originalPriceNum + PRICE_RANGE;
+
+    return newPriceNum >= minPrice && newPriceNum <= maxPrice;
+  };
+
+  const getAllowedRange = (originalPrice: string): string => {
+    const originalPriceNum = parseFloat(originalPrice);
+    if (isNaN(originalPriceNum)) return "";
+
+    const minPrice = (originalPriceNum - PRICE_RANGE).toFixed(2);
+    const maxPrice = (originalPriceNum + PRICE_RANGE).toFixed(2);
+
+    return t("PriceChart.AllowedRange", { minPrice, maxPrice });
+  };
 
   const handlePriceChange = (index: number, newPrice: string) => {
     const sanitized = newPrice.replace(/[^0-9.]/g, "");
 
-    const firstDot = sanitized.indexOf(".");
+    const parts = sanitized.split(".");
     const cleanedPrice =
-      firstDot === -1
-        ? sanitized
-        : sanitized.slice(0, firstDot + 1) +
-          sanitized.slice(firstDot + 1).replace(/\./g, "");
+      parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
 
     const updatedPrices = [...editedPrices];
-    updatedPrices[index].price = cleanedPrice;
+
+    if (isManager) {
+      const originalPrice =
+        updatedPrices[index].originalPrice || updatedPrices[index].price;
+
+      const isValid =
+        cleanedPrice === "" || validatePrice(cleanedPrice, originalPrice);
+
+      updatedPrices[index] = {
+        ...updatedPrices[index],
+        price: cleanedPrice,
+        isValid: isValid,
+      };
+    } else {
+      updatedPrices[index] = {
+        ...updatedPrices[index],
+        price: cleanedPrice,
+      };
+    }
+
     setEditedPrices(updatedPrices);
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      setIsEditable(false);
-      setButtonText(t("PriceChart.Request Price Update"));
-
-      fetchPrices();
-    }, [varietyId]),
-  );
+  const areAllPricesValid = (): boolean => {
+    if (isManager) {
+      return editedPrices.every(
+        (item) =>
+          item.isValid !== false &&
+          item.price &&
+          item.price.trim() !== "" &&
+          item.price !== "0",
+      );
+    }
+    return true;
+  };
 
   const handleButtonClick = async () => {
     if (isEditable) {
@@ -123,6 +202,15 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         Alert.alert(
           t("Error.error"),
           t("Error.Please enter prices for all grades before submitting"),
+          [{ text: t("SearchPrice.OK") }],
+        );
+        return;
+      }
+
+      if (isManager && !areAllPricesValid()) {
+        Alert.alert(
+          t("Error.error"),
+          "Please ensure all prices are within the allowed range before submitting.",
         );
         return;
       }
@@ -132,8 +220,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         return;
       }
 
+      setIsSubmitting(true);
+
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = store.getState().auth.token;
         if (!token) {
           throw new Error("No authentication token found.");
         }
@@ -155,11 +245,16 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
 
         if (requestData.length === 0) {
           Alert.alert(t("Error.error"), t("Error.No prices to update"));
+          setIsSubmitting(false);
           return;
         }
 
+        const endpoint = isManager
+          ? "api/auth/marketpricerequest-manager"
+          : "api/auth/marketpricerequest";
+
         const response = await api.post(
-          "api/auth/marketpricerequest",
+          endpoint,
           { prices: requestData },
           {
             headers: {
@@ -171,11 +266,23 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         if (response.status === 201) {
           Alert.alert(
             t("Error.Success"),
-            t("Error.The price request was sent successfully"),
+            isManager
+              ? t("Error.Price updated successfully")
+              : t("Error.The price request was sent successfully"),
+            [
+              {
+                text: t("SearchPrice.OK"),
+                onPress: () => {
+                  setIsEditable(false);
+                  setButtonText(getInitialButtonText());
+                  fetchPrices();
+                },
+              },
+            ],
+            {
+              cancelable: false,
+            },
           );
-          await fetchPrices();
-          setIsEditable(false);
-          setButtonText(t("PriceChart.Request Price Update"));
         }
       } catch (error) {
         if (
@@ -197,10 +304,12 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             t("Error.Failed to submit price update."),
           );
         }
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       setIsEditable(true);
-      setButtonText(t("PriceChart.Submit Request"));
+      setButtonText(getEditingButtonText());
     }
   };
 
@@ -231,24 +340,31 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
 
   return (
     <View className="flex-1 bg-white">
-      <CustomHeader
-        title={t("PriceChart.PriceChart")}
-        showBackButton={true}
-        navigation={navigation}
-        onBackPress={() =>
-          navigation.navigate("Main" as any, { screen: "SearchPriceScreen" })
-        }
-        textColor="white"
-        bgColor="#313131"
-        iconBgColor="#FFFFFF1A"
-      />
+      {/* Full-width dark header container */}
+      <View style={{ backgroundColor: "#313131", width: "100%" }}>
+        <View className="w-full mx-auto">
+          <CustomHeader
+            title={t("PriceChart.PriceChart")}
+            showBackButton={true}
+            navigation={navigation}
+            onBackPress={() =>
+              navigation.navigate("Main" as any, {
+                screen: "SearchPriceScreen",
+              })
+            }
+            textColor="white"
+            bgColor="#313131"
+            iconBgColor="#FFFFFF1A"
+          />
+        </View>
+      </View>
 
       {/* Content */}
       <ScrollView
         className="flex-1 bg-white w-full max-w-[500px] mx-auto"
         contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16 }}
       >
-        <View className="mb-4 ">
+        <View className="mb-4">
           <View className="items-center">
             <Text className="text-[#7D7D7D] mb-1">{t("PriceChart.Crop")}</Text>
           </View>
@@ -259,7 +375,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           />
         </View>
 
-        <View className="mb-4 ">
+        <View className="mb-4">
           <View className="items-center">
             <Text className="text-[#7D7D7D] mb-1">
               {t("PriceChart.Variety")}
@@ -291,30 +407,46 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             </Text>
             <View className="border border-[#E7E7E7] rounded-xl p-4">
               {priceData.map((priceItem, index) => (
-                <View key={index} className="flex-row items-center mb-3">
-                  <Text className="w-32 font-medium text-[#7D7D7D]">
-                    {`${t("PriceChart.Grade")} ${priceItem.grade}`}
-                  </Text>
+                <View key={index} className="mb-3">
+                  <View className="flex-row items-center">
+                    <Text className="w-32 font-medium text-[#7D7D7D]">
+                      {`${t("PriceChart.Grade")} ${priceItem.grade}`}
+                    </Text>
 
-                  <View
-                    className="flex-1 flex-row items-center rounded-full px-4 h-[45px]"
-                    style={{
-                      borderWidth: 1,
-                      borderColor: isEditable ? "#980775" : "#F4F4F4",
-                      backgroundColor: "#F4F4F4",
-                    }}
-                  >
-                    <Text className="text-[#000000] font-medium mr-1">Rs.</Text>
-                    <TextInput
-                      className="flex-1 font-medium text-[#000000]"
-                      value={editedPrices[index]?.price}
-                      editable={isEditable}
-                      onChangeText={(newPrice) =>
-                        handlePriceChange(index, newPrice)
-                      }
-                      keyboardType="numeric"
-                    />
+                    <View
+                      className="flex-1 flex-row items-center rounded-full px-4 h-[45px]"
+                      style={{
+                        borderWidth: 1,
+                        borderColor: isEditable
+                          ? isManager && editedPrices[index]?.isValid === false
+                            ? "#FF0000"
+                            : "#980775"
+                          : "#F4F4F4",
+                        backgroundColor: "#F4F4F4",
+                      }}
+                    >
+                      <Text className="text-[#000000] font-medium mr-1">
+                        Rs.
+                      </Text>
+                      <TextInput
+                        className="flex-1 text-[#000000] font-medium"
+                        style={{ height: 45, padding: 0 }}
+                        value={editedPrices[index]?.price}
+                        editable={isEditable}
+                        onChangeText={(newPrice) =>
+                          handlePriceChange(index, newPrice)
+                        }
+                        keyboardType="numeric"
+                      />
+                    </View>
                   </View>
+                  {isManager && isEditable && editedPrices[index]?.isValid === false && (
+                    <Text className="text-red-500 text-xs mt-1 ml-32">
+                      {getAllowedRange(
+                        editedPrices[index]?.originalPrice || priceItem.price,
+                      )}
+                    </Text>
+                  )}
                 </View>
               ))}
             </View>
@@ -322,31 +454,40 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         )}
 
         <TouchableOpacity
-          className="bg-[#000000] rounded-[45px] py-3 h-[50px] items-center justify-center mt-4 w-3/4 mx-auto"
+          className="rounded-[45px] py-3 mt-4 w-3/4 mx-auto h-[50px] justify-center"
           onPress={handleButtonClick}
+          disabled={(isEditable && isManager && !areAllPricesValid()) || isSubmitting}
           style={{
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.25,
             shadowRadius: 10,
-            elevation: 5,
+            elevation: 6,
+            height: 50,
+            backgroundColor:
+              (isEditable && isManager && !areAllPricesValid()) || isSubmitting
+                ? "#CCCCCC"
+                : "#000000",
           }}
         >
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-center text-base text-white font-semibold"
-          >
-            {buttonText}
-          </Text>
+          {isSubmitting ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-center text-base text-white font-semibold"
+            >
+              {buttonText}
+            </Text>
+          )}
         </TouchableOpacity>
 
-        {/* Secondary Button - Changes based on state */}
         <TouchableOpacity
-          className="border border-[#606060] mt-4 py-3 h-12  rounded-full h-[50px] items-center justify-center w-3/4 mx-auto"
+          className="border border-[#606060] mt-4 py-3 rounded-full items-center w-3/4 mx-auto h-[50px] justify-center"
           onPress={() => {
             if (isEditable) {
               setIsEditable(false);
-              setButtonText(t("PriceChart.Request Price Update"));
+              setButtonText(getInitialButtonText());
               fetchPrices();
             } else {
               navigation.navigate("Main" as any, {
@@ -354,6 +495,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
               });
             }
           }}
+          disabled={isSubmitting}
           style={{
             height: 50,
             borderRadius: 999,
