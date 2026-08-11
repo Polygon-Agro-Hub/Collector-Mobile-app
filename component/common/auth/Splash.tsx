@@ -1,4 +1,4 @@
-import store from "@/services/reducxStore";
+import store, { loadPersistedAuth } from "@/services/reducxStore";
 import { View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -81,6 +81,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
 
   const handleTokenCheck = async () => {
     try {
+      await loadPersistedAuth();
       const hasLaunched = await AsyncStorage.getItem("hasLaunched");
       if (!hasLaunched) {
         await AsyncStorage.setItem("hasLaunched", "true");
@@ -94,13 +95,6 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
       const emp = store.getState().auth.empId;
 
       if (userToken) {
-        dispatch(
-          setUser({
-            token: userToken,
-            jobRole: role ?? "",
-            empId: emp ?? "",
-          }),
-        );
 
         let isExpired = false;
         if (expirationTime) {

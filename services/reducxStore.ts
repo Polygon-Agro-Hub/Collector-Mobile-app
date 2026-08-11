@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer, { setUser } from "../store/authSlice";
+import authReducer, { setUser, setActiveAssignment } from "../store/authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const store = configureStore({
@@ -15,6 +15,9 @@ export const loadPersistedAuth = async () => {
       const authState = JSON.parse(authStateStr);
       if (authState && authState.token) {
         store.dispatch(setUser(authState));
+        if (authState.activeAssignment) {
+          store.dispatch(setActiveAssignment(authState.activeAssignment));
+        }
       }
     }
   } catch (error) {
