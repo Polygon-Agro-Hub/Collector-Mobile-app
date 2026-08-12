@@ -275,24 +275,37 @@ const netState = await NetInfo.fetch();
         return;
       }
 
+      const timestamp = new Date();
+      const expirationTime = new Date(
+        timestamp.getTime() + 8 * 60 * 60 * 1000,
+      );
+
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("jobRole", jobRole);
       await AsyncStorage.setItem("companyNameEnglish", companyNameEnglish);
       await AsyncStorage.setItem("companyNameSinhala", companyNameSinhala);
       await AsyncStorage.setItem("companyNameTamil", companyNameTamil);
       await AsyncStorage.setItem("empid", empId.toString());
-      dispatch(setUser({ token, jobRole, empId: empId.toString() }));
 
       if (token) {
-        const timestamp = new Date();
-        const expirationTime = new Date(
-          timestamp.getTime() + 8 * 60 * 60 * 1000,
-        );
         await AsyncStorage.multiSet([
           ["tokenStoredTime", timestamp.toISOString()],
           ["tokenExpirationTime", expirationTime.toISOString()],
         ]);
       }
+
+      dispatch(
+        setUser({
+          token,
+          jobRole,
+          empId: empId.toString(),
+          companyNameEnglish,
+          companyNameSinhala,
+          companyNameTamil,
+          tokenStoredTime: timestamp.toISOString(),
+          tokenExpirationTime: expirationTime.toISOString(),
+        }),
+      );
 
       await status(empId, true);
 

@@ -1,4 +1,3 @@
-import { logoutUser } from "@/store/authSlice";
 import store from "@/services/reducxStore";
 import { useState, useEffect, useMemo } from "react";
 import {
@@ -124,35 +123,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
       checkClaimStatus();
     }
   }, [userRole]);
-  -(
-    // AppState handling
-    useEffect(() => {
-      const subscription = AppState.addEventListener(
-        "change",
-        async (nextAppState) => {
-          if (nextAppState === "background") {
-            setTimeout(async () => {
-              try {
-                const currentState = AppState.currentState;
 
-                if (
-                  currentState === "background" ||
-                  currentState === "inactive"
-                ) {
-                  store.dispatch(logoutUser());
-navigation?.navigate?.("Login");
-                }
-              } catch (error) {
-                console.log("AppState error:", error);
-              }
-            }, 3000);
-          }
-        },
-      );
-
-      return () => subscription.remove();
-    }, [])
-  );
 
   // Hide conditions
   if (
