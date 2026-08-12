@@ -25,27 +25,30 @@ interface GlobalSearchModalProps {
   searchKeys?: string[];
   showSearch?: boolean;
   isLoading?: boolean;
-  dimBackground?: boolean;
-  widthClassName?: string;
 }
+
+// Hoisted to module scope so it's a STABLE reference across renders.
+// If this were a default parameter (searchKeys = ["label"]), a brand new
+// array would be created on every render, which would keep retriggering
+// the filtering useEffect below forever ("Maximum update depth exceeded").
+const DEFAULT_SEARCH_KEYS = ["label"];
+const DEFAULT_SELECTED_ITEMS: string[] = [];
 
 const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   visible,
   onClose,
   title,
   data,
-  selectedItems = [],
+  selectedItems = DEFAULT_SELECTED_ITEMS,
   onSelect,
   searchPlaceholder = "Search...",
   doneButtonText = "Done",
-  noResultsText = "No Search Result Found",
+  noResultsText = "No items found",
   multiSelect = false,
   renderItem,
-  searchKeys = ["label"],
+  searchKeys = DEFAULT_SEARCH_KEYS,
   showSearch = true,
   isLoading = false,
-  dimBackground = true,
-  widthClassName = "w-11/12 max-w-[500px]",
 }) => {
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState(data);
@@ -53,10 +56,16 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   useEffect(() => {
     setSelectedValues(selectedItems);
-    if (!visible) {
+    if (visible) {
       setSearchValue("");
     }
-  }, [selectedItems, visible]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+  // NOTE: intentionally NOT depending on `selectedItems` by reference here.
+  // We only want this to run when the modal opens/closes (visible changes).
+  // If the caller passes a fresh array literal each render (e.g. `assignee ? [assignee] : []`),
+  // including it in the deps would reset searchValue/selectedValues on every render.
+  // Make sure the caller memoizes `selectedItems` (see RecieveTargetScreen fix).
 
   useEffect(() => {
     if (!showSearch || !searchValue.trim()) {
@@ -76,6 +85,25 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     });
     setFilteredData(filtered);
   }, [searchValue, data, searchKeys, showSearch]);
+
+  // Close on Android hardware back while the modal itself is open,
+  // instead of letting the event bubble to the screen underneath.
+  useEffect(() => {
+    if (!visible) return;
+
+    const { BackHandler } = require("react-native");
+    const handleBackPress = () => {
+      onClose();
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress,
+    );
+
+    return () => subscription.remove();
+  }, [visible, onClose]);
 
   const handleItemPress = (value: string) => {
     let newSelectedValues: string[];
@@ -125,16 +153,28 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
   const renderSearchInput = () => (
     <View className="px-4 py-2 border-b border-gray-200">
-      <View className="bg-gray-100 rounded-lg px-3 flex-row items-center h-[50px]">
+      <View
+        className="bg-gray-100 rounded-3xl px-3 flex-row items-center"
+        style={{ height: 50 }}
+      >
         <MaterialIcons name="search" size={20} color="#666" />
         <TextInput
           placeholder={searchPlaceholder}
           value={searchValue}
           onChangeText={setSearchValue}
-          className="flex-1 ml-2 text-base"
           placeholderTextColor="#7F7F7F"
           autoCapitalize="none"
           autoCorrect={false}
+          style={{
+            flex: 1,
+            marginLeft: 8,
+            fontSize: 16,
+            // iOS fix: explicit height + paddingVertical:0 prevents text clipping
+            // (descenders like g, j, y, f, p, q getting cut off)
+            height: 50,
+            paddingVertical: 0,
+            includeFontPadding: false,
+          }}
         />
         {searchValue ? (
           <TouchableOpacity onPress={clearSearch}>
@@ -190,18 +230,8 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: dimBackground ? "#00000040" : "transparent",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <View
-          className={`bg-white rounded-2xl max-h-[80%] ${widthClassName}`}
-          style={{ overflow: "hidden" }}
-        >
+      <View className="flex-1 bg-black/50 justify-center items-center">
+        <View className="bg-white rounded-2xl w-11/12 max-h-3/4">
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>
@@ -227,7 +257,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {multiSelect && (
             <View className="px-4 py-3 border-t border-gray-200">
               <TouchableOpacity
-                className="bg-[#21202B] rounded-xl py-3 items-center h-[50px] justify-center"
+                className="bg-[#21202B] rounded-xl py-3 items-center"
                 onPress={handleDone}
               >
                 <Text className="text-white font-semibold text-base">

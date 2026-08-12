@@ -283,23 +283,23 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
       {/* Table Header */}
 
       <View className="flex-1 bg-white">
-        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-          <View style={{ width: "100%" }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ minWidth: "100%" }}>
+          <View style={{ minWidth: "100%" }}>
             {/* Table Header */}
             <View className="flex-row bg-[#980775] h-[50px] items-center">
-              <Text className="w-16 p-2 text-center text-white">
+              <Text style={{ flex: 1, minWidth: 60 }} className="p-2 text-center text-white">
                 {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
               </Text>
-              <Text className="w-40 p-2 text-center text-white">
+              <Text style={{ flex: 3, minWidth: 140 }} className="p-2 text-center text-white">
                 {t("CenterTarget.Variety")}
               </Text>
-              <Text className="w-32 p-2 text-center text-white">
+              <Text style={{ flex: 2, minWidth: 100 }} className="p-2 text-center text-white">
                 {t("CenterTarget.Grade")}
               </Text>
-              <Text className="w-32 p-2 text-center text-white">
+              <Text style={{ flex: 2, minWidth: 100 }} className="p-2 text-center text-white">
                 {t("CenterTarget.Target")}
               </Text>
-              <Text className="w-32 p-2 text-center text-white">
+              <Text style={{ flex: 2, minWidth: 100 }} className="p-2 text-center text-white">
                 {selectedToggle === "ToDo"
                   ? t("DailyTarget.Todo()")
                   : t("DailyTarget.Completedkg")}
@@ -334,7 +334,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
                     >
                       {/* No. */}
-                      <View className="w-16 justify-center items-center border-r border-gray-300">
+                      <View style={{ flex: 1, minWidth: 60 }} className="justify-center items-center border-r border-gray-300">
                         {selectedToggle === "ToDo" ? (
                           <Text className="text-center">{index + 1}</Text>
                         ) : (
@@ -343,26 +343,26 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       </View>
 
                       {/* Variety */}
-                      <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
+                      <View style={{ flex: 3, minWidth: 140 }} className="justify-center items-center border-r border-gray-300 p-2">
                         <Text className="text-center">
                           {getvarietyName(item)}
                         </Text>
                       </View>
 
                       {/* Grade */}
-                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                      <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center border-r border-gray-300">
                         <Text className="text-center">{item.grade}</Text>
                       </View>
 
                       {/* Target */}
-                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                      <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center border-r border-gray-300">
                         <Text className="text-center">
                           {item.target.toFixed(2)}
                         </Text>
                       </View>
 
                       {/* Todo / Completed */}
-                      <View className="w-32 justify-center items-center">
+                      <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center">
                         <Text className="text-center">
                           {selectedToggle === "Completed"
                             ? item.complete.toFixed(2)

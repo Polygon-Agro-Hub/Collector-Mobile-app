@@ -20,6 +20,7 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ReceivedCashNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -46,11 +47,9 @@ interface Transaction {
   transactionId?: string;
 }
 
-const ReceivedCash: React.FC<ReceivedCashProps> = ({
-  route,
-  navigation,
-}) => {
+const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
@@ -227,12 +226,14 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
   );
 
   return (
-    <View className="flex-1 bg-white" style={{ paddingBottom: 0 }}>
+    <View className="flex-1 bg-white" style={{ paddingBottom: insets.bottom }}>
       {/* Header */}
       <View className="bg-white px-4 py-4 flex-row items-center ">
         <TouchableOpacity
           className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
-          onPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+          onPress={() =>
+            navigation.navigate("Main", { screen: "DistridutionaDashboard" })
+          }
         >
           <Entypo name="chevron-left" size={25} color="#000" />
         </TouchableOpacity>
@@ -291,7 +292,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
                   </Text>
                   <Text
                     className="text-xl font-bold text-[#980775]"
-                    adjustsFontSizeToFit 
+                    adjustsFontSizeToFit
                     numberOfLines={1}
                     minimumFontScale={0.6}
                   >
@@ -351,41 +352,56 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({
 
               <View className="h-4" />
             </ScrollView>
-          
-          {/* Deposit to Company Button */}
-          <View className="px-4 pb-4 pt-2 bg-white">
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("ReceivedCashTransfer", {
-                  totalCash,
-                  selectedDate: formatDate(selectedDate),
-                  pickupOrderIds: transactions.map((t) => t.pickupOrderId),
-                })
-              }
-              activeOpacity={0.85}
-              style={{
-                backgroundColor: "#980775",
-                borderRadius: 50,
-                paddingVertical: 16,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+
+            {/* Deposit to Company Button */}
+            <View
+              className="px-4 pt-2 bg-white"
+              style={{ paddingBottom: Math.max(insets.bottom, 16) }}
             >
-              <FontAwesome6 name="arrow-up-from-bracket" size={18} color="white" />
-              <Text
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("ReceivedCashTransfer", {
+                    totalCash,
+                    selectedDate: formatDate(selectedDate),
+                    pickupOrderIds: transactions.map((t) => t.pickupOrderId),
+                  })
+                }
+                activeOpacity={0.85}
                 style={{
-                  color: "white",
-                  fontSize: 16,
-                  fontWeight: "700",
-                  letterSpacing: 0.3,
-                  marginLeft: 8,
+                  backgroundColor: "#980775",
+                  borderRadius: 50,
+                  paddingVertical: 16,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#000000",
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }}
               >
-                {t("ReceivedCash.Deposit to Company")}
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <FontAwesome6
+                  name="arrow-up-from-bracket"
+                  size={18}
+                  color="white"
+                />
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 16,
+                    fontWeight: "700",
+                    letterSpacing: 0.3,
+                    marginLeft: 8,
+                  }}
+                >
+                  {t("ReceivedCash.Deposit to Company")}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </>
         ) : (
           <ScrollView

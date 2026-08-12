@@ -11,9 +11,12 @@ import {
 import { Entypo } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RootStackParamList } from "@/types/types";
 import { environment } from "@/environment/environment";
-import UploadFile, { UploadFileItem } from "@/component/components/file-management/UploadFile";
+import UploadFile, {
+  UploadFileItem,
+} from "@/component/components/file-management/UploadFile";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 
@@ -44,6 +47,7 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
   route,
 }) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { totalCash, selectedDate, pickupOrderIds } = route.params;
 
   const [file, setFile] = useState<UploadFileItem | null>(null);
@@ -157,7 +161,10 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
 
       <ScrollView
         className="flex-1 w-full max-w-[500px] mx-auto"
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: insets.bottom + 50,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* Total Cash Summary */}
@@ -183,7 +190,7 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
                 numberOfLines={1}
                 minimumFontScale={0.6}
               >
-                {t("ReceivedCashTransfer.Rs")}
+                {t("ReceivedCashTransfer.Rs")}{" "}
                 {totalCash.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -193,43 +200,41 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
           </View>
         </View>
 
-        {/* Order count info */}
-        <Text className="mt-3 text-center text-sm text-[#848484]">
-          {t("ReceivedCashTransfer.Orders included")}:{" "}
-          {(pickupOrderIds || []).filter((id) => id).length}
-        </Text>
-
         {/* Company Bank Details Card */}
-        <View className="mt-5 rounded-2xl bg-[#F5F7FA] border border-[#E3E7ED] px-4 py-4">
-          <View className="flex-row justify-between py-1.5">
-            <Text className="text-sm text-[#848484]">
+        <View className="mt-5 rounded-2xl bg-[#F4F7FD] border border-[#F4F7FD] px-4 py-4">
+          <View className="flex-row py-1.5">
+            <Text className="text-sm text-[#000000] w-[135px]">
               {t("ReceivedCashTransfer.Account Name")}
             </Text>
-            <Text className="text-sm font-semibold text-gray-900">
+            <Text className="text-sm text-[#000000] mr-2">:</Text>
+            <Text className="flex-1 text-sm text-[#000000]">
               {COMPANY_BANK_DETAILS.accountName}
             </Text>
           </View>
-          <View className="flex-row justify-between py-1.5">
-            <Text className="text-sm text-[#848484]">
+          <View className="flex-row py-1.5">
+            <Text className="text-sm text-[#000000] w-[135px]">
               {t("ReceivedCashTransfer.Account Number")}
             </Text>
-            <Text className="text-sm font-semibold text-gray-900">
+            <Text className="text-sm text-[#000000] mr-2">:</Text>
+            <Text className="flex-1 text-sm text-[#000000]">
               {COMPANY_BANK_DETAILS.accountNumber}
             </Text>
           </View>
-          <View className="flex-row justify-between py-1.5">
-            <Text className="text-sm text-[#848484]">
+          <View className="flex-row py-1.5">
+            <Text className="text-sm text-[#000000] w-[135px]">
               {t("ReceivedCashTransfer.Bank Name")}
             </Text>
-            <Text className="text-sm font-semibold text-gray-900">
+            <Text className="text-sm text-[#000000] mr-2">:</Text>
+            <Text className="flex-1 text-sm text-[#000000]">
               {COMPANY_BANK_DETAILS.bankName}
             </Text>
           </View>
-          <View className="flex-row justify-between py-1.5">
-            <Text className="text-sm text-[#848484]">
+          <View className="flex-row py-1.5">
+            <Text className="text-sm text-[#000000] w-[135px]">
               {t("ReceivedCashTransfer.Branch Name")}
             </Text>
-            <Text className="text-sm font-semibold text-gray-900">
+            <Text className="text-sm text-[#000000] mr-2">:</Text>
+            <Text className="flex-1 text-sm  text-[#000000]">
               {COMPANY_BANK_DETAILS.branchName}
             </Text>
           </View>
@@ -250,6 +255,14 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
             alignItems: "center",
             justifyContent: "center",
             marginTop: 24,
+            shadowColor: "#000000",
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.15,
+            shadowRadius: 4,
+            elevation: 3,
           }}
         >
           {submitting ? (

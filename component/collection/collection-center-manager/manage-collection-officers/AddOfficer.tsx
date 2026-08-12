@@ -1,5 +1,11 @@
 import store from "@/services/reducxStore";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -39,10 +45,7 @@ type AddOfficerNavigationProp = StackNavigationProp<
   "AddOfficer"
 >;
 
-type AddOfficerRouteProp = RouteProp<
-  RootStackParamList,
-  "AddOfficer"
->;
+type AddOfficerRouteProp = RouteProp<RootStackParamList, "AddOfficer">;
 
 interface AddOfficerProp {
   navigation: AddOfficerNavigationProp;
@@ -77,10 +80,7 @@ type Province = {
 
 type ModalKey = "province" | "district" | "bank" | "branch" | null;
 
-const AddOfficer: React.FC<AddOfficerProp> = ({
-  route,
-  navigation,
-}) => {
+const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
   const { t } = useTranslation();
   const scrollRef = useRef<ScrollView>(null);
 
@@ -105,7 +105,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
   const [error2, setError2] = useState("");
   const [error3, setError3] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
-  
+
   const [formData, setFormData] = useState<OfficerBasicDetailsFormData>({
     userId: "",
     firstNameEnglish: "",
@@ -153,7 +153,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  const [fieldErrorsAddress, setFieldErrorsAddress] = useState<Record<string, string>>({});
+  const [fieldErrorsAddress, setFieldErrorsAddress] = useState<
+    Record<string, string>
+  >({});
   const [districts, setDistricts] = useState<District[]>([]);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
 
@@ -219,7 +221,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     p2: string,
     pc1: string,
     pc2: string,
-    img: string | null
+    img: string | null,
   ) => {
     try {
       const dataToSave = {
@@ -267,13 +269,17 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
             }
           }
           if (parsed.type) setType(parsed.type);
-          if (parsed.preferredLanguages) setPreferredLanguages(parsed.preferredLanguages);
+          if (parsed.preferredLanguages)
+            setPreferredLanguages(parsed.preferredLanguages);
           if (parsed.jobRole) setJobRole(parsed.jobRole);
-          if (parsed.phoneNumber1 !== undefined) setPhoneNumber1(parsed.phoneNumber1);
-          if (parsed.phoneNumber2 !== undefined) setPhoneNumber2(parsed.phoneNumber2);
+          if (parsed.phoneNumber1 !== undefined)
+            setPhoneNumber1(parsed.phoneNumber1);
+          if (parsed.phoneNumber2 !== undefined)
+            setPhoneNumber2(parsed.phoneNumber2);
           if (parsed.phoneCode1) setPhoneCode1(parsed.phoneCode1);
           if (parsed.phoneCode2) setPhoneCode2(parsed.phoneCode2);
-          if (parsed.profileImage !== undefined) setSelectedImage(parsed.profileImage);
+          if (parsed.profileImage !== undefined)
+            setSelectedImage(parsed.profileImage);
           if (parsed.step) setStep(parsed.step);
         } else {
           // If no stored data, initialize jobRole from route params
@@ -308,7 +314,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
             phoneNumber2,
             phoneCode1,
             phoneCode2,
-            selectedImage
+            selectedImage,
           );
           return updated;
         });
@@ -357,7 +363,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
           }
         })();
       };
-    }, [])
+    }, []),
   );
 
   // Back Press Handler (hardware)
@@ -377,7 +383,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
             phoneNumber2,
             phoneCode1,
             phoneCode2,
-            selectedImage
+            selectedImage,
           );
           return true;
         } else {
@@ -386,9 +392,13 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
               await AsyncStorage.removeItem("officerFormData");
               resetForm();
               if (jobRole === "Collection Officer") {
-                navigation.navigate("Main", { screen: "CollectionOfficersList" });
+                navigation.navigate("Main", {
+                  screen: "CollectionOfficersList",
+                });
               } else if (jobRole === "Distribution Officer") {
-                navigation.navigate("Main", { screen: "DistributionOfficersList" });
+                navigation.navigate("Main", {
+                  screen: "DistributionOfficersList",
+                });
               }
             } catch (err) {
               console.error("Error clearing form data:", err);
@@ -403,7 +413,20 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
         onBackPress,
       );
       return () => subscription.remove();
-    }, [step, formData, formDataAddress, type, preferredLanguages, jobRole, phoneNumber1, phoneNumber2, phoneCode1, phoneCode2, selectedImage, navigation]),
+    }, [
+      step,
+      formData,
+      formDataAddress,
+      type,
+      preferredLanguages,
+      jobRole,
+      phoneNumber1,
+      phoneNumber2,
+      phoneCode1,
+      phoneCode2,
+      selectedImage,
+      navigation,
+    ]),
   );
 
   // ─────────── Step 1 Logic ───────────
@@ -423,7 +446,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
         phoneNumber2,
         phoneCode1,
         phoneCode2,
-        selectedImage
+        selectedImage,
       );
       return updated;
     });
@@ -442,7 +465,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -474,7 +497,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
 
     if (normalizedInput.length === 0) {
@@ -540,7 +563,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
         phoneNumber2,
         phoneCode1,
         phoneCode2,
-        uri
+        uri,
       );
     }
   };
@@ -658,7 +681,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
         phoneNumber2,
         phoneCode1,
         phoneCode2,
-        selectedImage
+        selectedImage,
       );
 
       setStep(2);
@@ -695,7 +718,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -707,7 +730,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       "",
     );
     if (filteredText.startsWith(" ")) filteredText = filteredText.trimStart();
-    
+
     const updatedForm = { ...formData, [fieldName]: filteredText };
     setFormData(updatedForm);
     saveToStorage(
@@ -721,7 +744,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -747,7 +770,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -768,7 +791,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
 
     if (numbersOnly.length === 0) {
@@ -835,7 +858,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       numbersOnly,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
 
     if (numbersOnly.length === 0) {
@@ -927,9 +950,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     const labels = domain.split(".");
     return labels.every(
       (label) =>
-        label.length > 0 &&
-        !label.startsWith("-") &&
-        !label.endsWith("-"),
+        label.length > 0 && !label.startsWith("-") && !label.endsWith("-"),
     );
   };
 
@@ -957,7 +978,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
 
     if (!trimmedInput) {
@@ -1021,7 +1042,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
           phoneNumber2,
           selectedCode,
           phoneCode2,
-          selectedImage
+          selectedImage,
         );
       } else {
         setPhoneCode2(selectedCode);
@@ -1037,7 +1058,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
           phoneNumber2,
           phoneCode1,
           selectedCode,
-          selectedImage
+          selectedImage,
         );
       }
     }
@@ -1087,7 +1108,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -1120,7 +1141,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -1163,7 +1184,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
         phoneNumber2,
         phoneCode1,
         phoneCode2,
-        selectedImage
+        selectedImage,
       );
     }
   };
@@ -1186,7 +1207,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -1227,7 +1248,11 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     clearFieldErrorAddress("branchName");
     setBankName(selected);
 
-    const updatedData = { ...formDataAddress, bankName: selected, branchName: "" };
+    const updatedData = {
+      ...formDataAddress,
+      bankName: selected,
+      branchName: "",
+    };
     setFormDataAddress(updatedData);
     saveToStorage(
       step,
@@ -1240,7 +1265,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -1262,7 +1287,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       phoneNumber2,
       phoneCode1,
       phoneCode2,
-      selectedImage
+      selectedImage,
     );
   };
 
@@ -1274,8 +1299,10 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
     if (!formDataAddress.streetName.trim())
       errors.streetName = t("Error.Street name is required");
     if (!formDataAddress.city.trim()) errors.city = t("Error.City is required");
-    if (!formDataAddress.province) errors.province = t("Error.Province is required");
-    if (!formDataAddress.district) errors.district = t("Error.District is required");
+    if (!formDataAddress.province)
+      errors.province = t("Error.Province is required");
+    if (!formDataAddress.district)
+      errors.district = t("Error.District is required");
     if (!formDataAddress.accountHolderName.trim())
       errors.accountHolderName = t("Error.Account holder name is required");
     if (!formDataAddress.accountNumber.trim())
@@ -1284,10 +1311,13 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       errors.confirmAccountNumber = t(
         "Error.Confirm account number is required",
       );
-    } else if (formDataAddress.accountNumber !== formDataAddress.confirmAccountNumber) {
+    } else if (
+      formDataAddress.accountNumber !== formDataAddress.confirmAccountNumber
+    ) {
       errors.confirmAccountNumber = t("Error.Account numbers do not match.");
     }
-    if (!formDataAddress.bankName) errors.bankName = t("Error.Bank name is required");
+    if (!formDataAddress.bankName)
+      errors.bankName = t("Error.Bank name is required");
     if (!formDataAddress.branchName)
       errors.branchName = t("Error.Branch name is required");
 
@@ -1466,16 +1496,20 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
               phoneNumber2,
               phoneCode1,
               phoneCode2,
-              selectedImage
+              selectedImage,
             );
           } else {
             try {
               await AsyncStorage.removeItem("officerFormData");
               resetForm();
               if (jobRole === "Collection Officer") {
-                navigation.navigate("Main", { screen: "CollectionOfficersList" });
+                navigation.navigate("Main", {
+                  screen: "CollectionOfficersList",
+                });
               } else if (jobRole === "Distribution Officer") {
-                navigation.navigate("Main", { screen: "DistributionOfficersList" });
+                navigation.navigate("Main", {
+                  screen: "DistributionOfficersList",
+                });
               }
             } catch (err) {
               console.error("Error clearing form data:", err);
@@ -1524,7 +1558,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                   className="flex-row items-center"
                   onPress={() => handleTypeChange("Permanent")}
                 >
-                  <RadioButton
+                  <RadioButton.Android
                     value="Permanent"
                     status={type === "Permanent" ? "checked" : "unchecked"}
                     onPress={() => handleTypeChange("Permanent")}
@@ -1549,7 +1583,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                   className="flex-row items-center"
                   onPress={() => handleTypeChange("Temporary")}
                 >
-                  <RadioButton
+                  <RadioButton.Android
                     value="Temporary"
                     status={type === "Temporary" ? "checked" : "unchecked"}
                     onPress={() => handleTypeChange("Temporary")}
@@ -1836,7 +1870,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                   </View>
                 </View>
                 {error2 && (
-                  <Text className="text-red-500 text-sm mt-1 ml-2">{error2}</Text>
+                  <Text className="text-red-500 text-sm mt-1 ml-2">
+                    {error2}
+                  </Text>
                 )}
                 {!error2 && fieldErrors.phoneNumber2Duplicate && (
                   <Text className="text-red-500 text-sm mt-1 ml-2">
@@ -1857,7 +1893,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                   autoCapitalize="characters"
                   autoCorrect={false}
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
-                    fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
+                    fieldErrors.nicNumber || error3
+                      ? "border border-red-500"
+                      : ""
                   }`}
                   style={{ fontSize: 14 }}
                   underlineColorAndroid="transparent"
@@ -1877,7 +1915,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                   value={formData.email}
                   onChangeText={handleEmailChange}
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
-                    fieldErrors.email || errorEmail ? "border border-red-500" : ""
+                    fieldErrors.email || errorEmail
+                      ? "border border-red-500"
+                      : ""
                   }`}
                   style={{ fontSize: 14 }}
                   keyboardType="email-address"
@@ -1908,9 +1948,13 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                     await AsyncStorage.removeItem("officerFormData");
                     resetForm();
                     if (jobRole === "Collection Officer") {
-                      navigation.navigate("Main", { screen: "CollectionOfficersList" });
+                      navigation.navigate("Main", {
+                        screen: "CollectionOfficersList",
+                      });
                     } else if (jobRole === "Distribution Officer") {
-                      navigation.navigate("Main", { screen: "DistributionOfficersList" });
+                      navigation.navigate("Main", {
+                        screen: "DistributionOfficersList",
+                      });
                     }
                   } catch (err) {
                     console.error("Error clearing form data:", err);
@@ -1987,10 +2031,15 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                 placeholder={t("AddOfficerAddressDetails.House")}
                 value={formDataAddress.houseNumber}
                 onChangeText={(text) =>
-                  handleAddressInputChange("houseNumber", text.replace(/^\s+/, ""))
+                  handleAddressInputChange(
+                    "houseNumber",
+                    text.replace(/^\s+/, ""),
+                  )
                 }
                 className={`border ${
-                  fieldErrorsAddress.houseNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+                  fieldErrorsAddress.houseNumber
+                    ? "border-red-500"
+                    : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
                 style={{ fontSize: 14 }}
               />
@@ -2010,7 +2059,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                   handleAddressInputChange("streetName", formatText(text))
                 }
                 className={`border ${
-                  fieldErrorsAddress.streetName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+                  fieldErrorsAddress.streetName
+                    ? "border-red-500"
+                    : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
                 style={{ fontSize: 14 }}
                 autoCorrect={false}
@@ -2027,9 +2078,13 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.City")}
                 value={formDataAddress.city}
-                onChangeText={(text) => handleAddressInputChange("city", formatText(text))}
+                onChangeText={(text) =>
+                  handleAddressInputChange("city", formatText(text))
+                }
                 className={`border ${
-                  fieldErrorsAddress.city ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+                  fieldErrorsAddress.city
+                    ? "border-red-500"
+                    : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
                 style={{ fontSize: 14 }}
                 autoCorrect={false}
@@ -2058,7 +2113,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                   value={
                     formDataAddress.province
                       ? (() => {
-                          const p = (provincesData.provinces as Province[]).find(
+                          const p = (
+                            provincesData.provinces as Province[]
+                          ).find(
                             (pr) => pr.name.en === formDataAddress.province,
                           );
                           return p
@@ -2085,7 +2142,9 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                 <>
                   <View className="mb-1">
                     <DropdownButton
-                      placeholder={t("AddOfficerAddressDetails.Select District")}
+                      placeholder={t(
+                        "AddOfficerAddressDetails.Select District",
+                      )}
                       value={
                         formDataAddress.district
                           ? (() => {
@@ -2129,7 +2188,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                     .toLowerCase()
                     .split(" ")
                     .map((w) =>
-                      w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w
+                      w.length > 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w,
                     )
                     .join(" ");
                   handleAddressInputChange("accountHolderName", capitalized);
@@ -2157,9 +2216,13 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                 placeholder={t("AddOfficerAddressDetails.AccountNum")}
                 keyboardType="numeric"
                 value={formDataAddress.accountNumber}
-                onChangeText={(text) => handleAddressValidation("accountNumber", text)}
+                onChangeText={(text) =>
+                  handleAddressValidation("accountNumber", text)
+                }
                 className={`border ${
-                  fieldErrorsAddress.accountNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
+                  fieldErrorsAddress.accountNumber
+                    ? "border-red-500"
+                    : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
                 style={{ fontSize: 14 }}
               />
@@ -2250,7 +2313,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
                     phoneNumber2,
                     phoneCode1,
                     phoneCode2,
-                    selectedImage
+                    selectedImage,
                   );
                 }}
                 style={{
@@ -2312,7 +2375,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       )}
 
       {/* Modals */}
-      
+
       {/* Phone Code 1 Modal */}
       <GlobalSearchModal
         visible={phoneCode1ModalVisible}
@@ -2334,7 +2397,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
             phoneNumber2,
             items[0] ?? "+94",
             phoneCode2,
-            selectedImage
+            selectedImage,
           );
         }}
         searchPlaceholder={t("AddOfficerBasicDetails.SearchCountry")}
@@ -2365,7 +2428,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
             phoneNumber2,
             phoneCode1,
             newCode,
-            selectedImage
+            selectedImage,
           );
 
           if (phoneNumber2.length > 0 && validatePhoneNumber(phoneNumber2)) {
@@ -2392,12 +2455,14 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
         onClose={() => setActiveModal(null)}
         title={t("AddOfficerAddressDetails.Select Province")}
         data={provinceModalData}
-        selectedItems={formDataAddress.province ? [formDataAddress.province] : []}
+        selectedItems={
+          formDataAddress.province ? [formDataAddress.province] : []
+        }
         onSelect={(items) => {
           handleProvinceSelect(items);
           setActiveModal(null);
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.Select Province")}
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchProvince")}
         multiSelect={false}
       />
 
@@ -2407,12 +2472,14 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
         onClose={() => setActiveModal(null)}
         title={t("AddOfficerAddressDetails.Select District")}
         data={districtModalData}
-        selectedItems={formDataAddress.district ? [formDataAddress.district] : []}
+        selectedItems={
+          formDataAddress.district ? [formDataAddress.district] : []
+        }
         onSelect={(items) => {
           handleDistrictSelect(items);
           setActiveModal(null);
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.Select District")}
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchDistrict")}
         multiSelect={false}
       />
 
@@ -2420,14 +2487,16 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       <GlobalSearchModal
         visible={activeModal === "bank"}
         onClose={() => setActiveModal(null)}
-        title={t("AddOfficerAddressDetails.BankName")}
+        title={t("AddOfficerAddressDetails.SelectBankName")}
         data={bankModalData}
-        selectedItems={formDataAddress.bankName ? [formDataAddress.bankName] : []}
+        selectedItems={
+          formDataAddress.bankName ? [formDataAddress.bankName] : []
+        }
         onSelect={(items) => {
           handleBankSelect(items);
           setActiveModal(null);
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.BankName")}
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchBankName")}
         multiSelect={false}
       />
 
@@ -2435,14 +2504,16 @@ const AddOfficer: React.FC<AddOfficerProp> = ({
       <GlobalSearchModal
         visible={activeModal === "branch"}
         onClose={() => setActiveModal(null)}
-        title={t("AddOfficerAddressDetails.BranchName")}
+        title={t("AddOfficerAddressDetails.SelectBranchName")}
         data={branchModalData}
-        selectedItems={formDataAddress.branchName ? [formDataAddress.branchName] : []}
+        selectedItems={
+          formDataAddress.branchName ? [formDataAddress.branchName] : []
+        }
         onSelect={(items) => {
           handleBranchSelect(items);
           setActiveModal(null);
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.BranchName")}
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchBranchName")}
         multiSelect={false}
       />
     </KeyboardAvoidingView>

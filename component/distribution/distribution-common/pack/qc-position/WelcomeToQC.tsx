@@ -10,6 +10,7 @@ import {
   Alert,
   BackHandler,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -52,8 +53,7 @@ const formatWeightDisplay = (weightStr: string) => {
   const numVal = parseFloat(match[1]);
   const unit = match[2];
   if (isNaN(numVal)) return weightStr;
-  const numStr = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(2);
-  return `${numStr} ${unit}`.trim();
+  return `${match[1]} ${unit}`.trim();
 };
 
 export default function WelcomeToQC({
@@ -77,7 +77,9 @@ export default function WelcomeToQC({
   const [activeOrderPackageId, setActiveOrderPackageId] = useState<
     number | null
   >(null);
+  const [activeTrackingId, setActiveTrackingId] = useState<number | null>(null);
   const [packagesList, setPackagesList] = useState<any[]>([]);
+  const [trackingRows, setTrackingRows] = useState<any[]>([]);
   const [alacarteCount, setAlacarteCount] = useState<number>(0);
   const [isAlacarteActive, setIsAlacarteActive] = useState<boolean>(false);
   const [displayOrderTitle, setDisplayOrderTitle] = useState<string>(
@@ -95,6 +97,14 @@ export default function WelcomeToQC({
   const [qcItems, setQcItems] = useState<QCItem[]>([]);
   const [currentPackName, setCurrentPackName] = useState<string>("Daily Veggie Pack");
   const [officerPosIndex, setOfficerPosIndex] = useState<number>(3);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    setQcItems([]);
+    await fetchActiveOrderAndStatus();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     fetchActiveOrderAndStatus();
@@ -154,81 +164,111 @@ export default function WelcomeToQC({
       if (!token) return;
 
       const activeRes = await axios.get(
-        `${environment.API_BASE_URL}api/packing/active-order`,
+        `${environment.API_BASE_URL}api/packing/qc/active-order`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (activeRes.data && activeRes.data.success && activeRes.data.data) {
         const activeData = activeRes.data.data;
 
-        if (activeData.formattedOrderNumber) {
-          setDisplayOrderTitle(activeData.formattedOrderNumber);
-        }
-        if (activeData.processOrderId) {
-          setActiveProcessOrderId(activeData.processOrderId);
-        }
-        setActiveOrderPackageId(activeData.activeOrderPackageId || null);
-        setPackagesList(activeData.packagesList || []);
-        setAlacarteCount(activeData.alacarteCount || 0);
-        setIsAlacarteActive(!!activeData.isAlacarteActive);
-        if (activeData.timeSlot) {
-          setScheduledTime(
-            timeSlotMap[activeData.timeSlot] || activeData.timeSlot
-          );
-        }
+        if (activeData.hasActiveBox === false) {
+          if (activeData.formattedOrderNumber) {
+            setDisplayOrderTitle(activeData.formattedOrderNumber);
+          }
+          if (activeData.processOrderId) {
+            setActiveProcessOrderId(activeData.processOrderId);
+          }
+          setPackagesList(activeData.packagesList || []);
+          setAlacarteCount(activeData.alacarteCount || 0);
+          setIsAlacarteActive(!!activeData.isAlacarteActive);
+          setTrackingRows(activeData.trackingRows || []);
 
-        const orderStatus = activeData.orderStatus;
-        const pIndex =
-          activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
-        const resolvedOfficerPosIndex =
-          activeData.officerPosIndex !== undefined
-            ? Number(activeData.officerPosIndex)
-            : 3;
-        setOfficerPosIndex(resolvedOfficerPosIndex);
-
-        if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < resolvedOfficerPosIndex || pIndex > resolvedOfficerPosIndex) {
-          // Box has not reached QC station yet (pIndex < officerPosIndex) or box/order is already completed (pIndex > officerPosIndex)
-          setStatus("waiting");
-        } else if (orderStatus === "Opened" && pIndex === resolvedOfficerPosIndex) {
-          const orderItems = activeData.orderItems || [];
-
-          if (orderItems.length > 0) {
-            const mappedItems: QCItem[] = orderItems.map((item: any) => {
-              const resolvedPackName =
-                item.packName && item.packName !== "À la carte"
-                  ? item.packName
-                  : item.categoryType === "alacarte"
-                    ? "À la carte"
-                    : "Daily Veggie Pack";
-              const isAlacarte = resolvedPackName === "À la carte";
-              return {
-                id: item.id,
-                name: item.name,
-                weight: formatWeightDisplay(item.weight || "1.0 kg"),
-                packName: resolvedPackName,
-                categoryType: isAlacarte ? "alacarte" : "package",
-                checked: false,
-                image:
-                  item.image ||
-                  "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
-              };
-            });
-
-            setQcItems(mappedItems);
-            setCurrentPackName(mappedItems[0]?.packName || "Daily Veggie Pack");
-            setStatus("qc_checklist");
-          } else {
-            // Box arrived at QC but has 0 items assigned to QC
+          if (activeData.rowStatus === "WAITING_PREVIOUS") {
+            setStatus("waiting");
             setQcItems([]);
-            setStatus("no_items");
+          } else {
+            setStatus("no_target");
+            setQcItems([]);
+            setTrackingRows([]);
+            setPackagesList([]);
+            setAlacarteCount(0);
+            setActiveProcessOrderId(null);
+          }
+        } else {
+          if (activeData.formattedOrderNumber) {
+            setDisplayOrderTitle(activeData.formattedOrderNumber);
+          }
+          if (activeData.processOrderId) {
+            setActiveProcessOrderId(activeData.processOrderId);
+          }
+          setActiveOrderPackageId(activeData.activeOrderPackageId || null);
+          setActiveTrackingId(activeData.trackingId ? Number(activeData.trackingId) : null);
+          setPackagesList(activeData.packagesList || []);
+          setAlacarteCount(activeData.alacarteCount || 0);
+          setIsAlacarteActive(!!activeData.isAlacarteActive);
+          setTrackingRows(activeData.trackingRows || []);
+          if (activeData.timeSlot) {
+            setScheduledTime(
+              timeSlotMap[activeData.timeSlot] || activeData.timeSlot
+            );
+          }
+
+          const orderStatus = activeData.orderStatus;
+          const pIndex =
+            activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
+          const resolvedOfficerPosIndex =
+            activeData.officerPosIndex !== undefined
+              ? Number(activeData.officerPosIndex)
+              : 3;
+          setOfficerPosIndex(resolvedOfficerPosIndex);
+
+          if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < resolvedOfficerPosIndex || pIndex > resolvedOfficerPosIndex) {
+            // Box has not reached QC station yet (pIndex < officerPosIndex) or box/order is already completed (pIndex > officerPosIndex)
+            setStatus("waiting");
+          } else if (orderStatus === "Opened" && pIndex === resolvedOfficerPosIndex) {
+            const orderItems = activeData.orderItems || [];
+
+            if (orderItems.length > 0) {
+              const mappedItems: QCItem[] = orderItems.map((item: any) => {
+                const resolvedPackName =
+                  item.packName && item.packName !== "À la carte"
+                    ? item.packName
+                    : item.categoryType === "alacarte"
+                      ? "À la carte"
+                      : "Daily Veggie Pack";
+                const isAlacarte = resolvedPackName === "À la carte";
+                return {
+                  id: item.id,
+                  name: item.name,
+                  weight: formatWeightDisplay(item.weight || "1.0 kg"),
+                  packName: resolvedPackName,
+                  categoryType: isAlacarte ? "alacarte" : "package",
+                  checked: false,
+                  image:
+                    item.image ||
+                    "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+                };
+              });
+
+              setQcItems(mappedItems);
+              setCurrentPackName(mappedItems[0]?.packName || "Daily Veggie Pack");
+              setStatus("qc_checklist");
+            } else {
+              // Box arrived at QC but has 0 items assigned to QC
+              setQcItems([]);
+              setStatus("no_items");
+            }
           }
         }
       } else {
         setStatus("no_target");
+        setQcItems([]);
+        setTrackingRows([]);
       }
     } catch (err) {
       console.error("Error fetching active order status in QC:", err);
       setStatus("no_target");
+      setTrackingRows([]);
     }
   };
 
@@ -259,6 +299,7 @@ export default function WelcomeToQC({
           orderpackageId: activeOrderPackageId || null,
           currentPIndex: officerPosIndex,
           rowId: rowId,
+          trackingId: activeTrackingId || null,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -271,41 +312,55 @@ export default function WelcomeToQC({
           { headers: { Authorization: `Bearer ${token}` } }
         ).catch(() => {});
 
-        setStatus("waiting");
         setAlertMessage("Packing has been completed successfully.");
         setAlertVisible(true);
       } else if (advanceRes.data && !advanceRes.data.success) {
         Alert.alert("Station Busy", advanceRes.data.message || "The next station is currently busy.");
+        setIsAdvancing(false);
+      } else {
+        setIsAdvancing(false);
       }
     } catch (err) {
       console.error("Error advancing QC box:", err);
       Alert.alert("Error", "Failed to advance QC position.");
-    } finally {
       setIsAdvancing(false);
     }
   };
 
-  // Build dynamic QC progress steps
+  // Build dynamic QC progress steps (exactly matching QR steps)
   const steps: any[] = [];
-  const totalBoxes = packagesList.length + (alacarteCount > 0 ? 1 : 0);
 
+  // Calculate total physical packages based on package quantity (pkg.qty)
+  const totalPhysicalPackages = packagesList.reduce(
+    (acc, pkg) => acc + Math.max(1, Number(pkg.qty || 1)),
+    0
+  );
+  const totalBoxes = totalPhysicalPackages + (alacarteCount > 0 ? 1 : 0);
+
+  // 1. Add Main Container as Step 1 if total physical boxes > 1
   if (totalBoxes > 1) {
     steps.push({
       id: 1,
       type: "main",
       label: "Main Container",
+      packageId: null,
     });
   }
 
+  // 2. Add package steps expanded by quantity
   packagesList.forEach((pkg) => {
-    steps.push({
-      id: steps.length + 1,
-      type: "package",
-      label: pkg.name,
-      packageId: pkg.id,
-    });
+    const qty = Math.max(1, Number(pkg.qty || 1));
+    for (let i = 0; i < qty; i++) {
+      steps.push({
+        id: steps.length + 1,
+        type: "package",
+        label: qty > 1 ? `${pkg.name} (${i + 1}/${qty})` : pkg.name,
+        packageId: pkg.id,
+      });
+    }
   });
 
+  // 3. Add À la carte step
   if (alacarteCount > 0) {
     steps.push({
       id: steps.length + 1,
@@ -315,28 +370,33 @@ export default function WelcomeToQC({
     });
   }
 
-  let currentStep = 1;
-  if (activeOrderPackageId === -1) {
-    const matchedIdx = steps.findIndex((s) => s.type === "main");
-    if (matchedIdx !== -1) {
-      currentStep = matchedIdx + 1;
+  // Match each step to its corresponding positiontracking row to get pIndex
+  let mainMatchedCount = 0;
+  const pkgMatchedCounts = new Map<number, number>();
+  let alacarteMatchedCount = 0;
+
+  const mainTrackingRows = trackingRows.filter((row) => row.isMainContainer === 1);
+  const pkgTrackingRows = trackingRows.filter((row) => !row.isMainContainer && row.orderpackageId);
+  const alacarteTrackingRows = trackingRows.filter((row) => !row.isMainContainer && !row.orderpackageId);
+
+  steps.forEach((step) => {
+    let matchedRow: any = null;
+
+    if (step.type === "main") {
+      matchedRow = mainTrackingRows[mainMatchedCount];
+      mainMatchedCount++;
+    } else if (step.type === "package") {
+      const matchedPkgRows = pkgTrackingRows.filter((row) => Number(row.orderpackageId) === Number(step.packageId));
+      const currentMatched = pkgMatchedCounts.get(step.packageId) || 0;
+      matchedRow = matchedPkgRows[currentMatched];
+      pkgMatchedCounts.set(step.packageId, currentMatched + 1);
+    } else if (step.type === "alacarte") {
+      matchedRow = alacarteTrackingRows[alacarteMatchedCount];
+      alacarteMatchedCount++;
     }
-  } else if (activeOrderPackageId) {
-    const matchedIdx = steps.findIndex(
-      (s) => s.type === "package" && s.packageId === activeOrderPackageId
-    );
-    if (matchedIdx !== -1) {
-      currentStep = matchedIdx + 1;
-    }
-  } else if (
-    isAlacarteActive ||
-    (qcItems.length > 0 && qcItems[0].categoryType === "alacarte")
-  ) {
-    const matchedIdx = steps.findIndex((s) => s.type === "alacarte");
-    if (matchedIdx !== -1) {
-      currentStep = matchedIdx + 1;
-    }
-  }
+
+    step.pIndex = matchedRow ? Number(matchedRow.pIndex || 0) : 0;
+  });
 
   return (
     <View className="flex-1 bg-white">
@@ -348,7 +408,13 @@ export default function WelcomeToQC({
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
-      <View className="flex-1 px-6 pt-2">
+      <ScrollView
+        className="flex-1 bg-white px-6 pt-2"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Scheduled Time Section */}
         {status !== "no_target" && (
           <View className="w-full flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
@@ -369,9 +435,8 @@ export default function WelcomeToQC({
         {/* Dynamic Progress step segments */}
         {status !== "no_target" && steps.length > 1 && (
           <View className="flex-row justify-between items-center gap-2 px-2 mb-8 w-full">
-            {steps.map((s, idx) => {
-              const stepNum = idx + 1;
-              const isFilled = stepNum <= currentStep;
+            {steps.map((s) => {
+              const isFilled = s.pIndex >= officerPosIndex;
               return (
                 <View key={s.id} className="flex-1 items-center">
                   <View
@@ -472,11 +537,7 @@ export default function WelcomeToQC({
             </Text>
 
             {/* Items contained in active package box */}
-            <ScrollView
-              className="flex-1"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 100 }}
-            >
+            <View className="flex-1">
               {qcItems.map((item, index) => (
                 <TouchableOpacity
                   key={`${item.id}_${index}`}
@@ -516,10 +577,10 @@ export default function WelcomeToQC({
                   </View>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
+            </View>
           </View>
         )}
-      </View>
+      </ScrollView>
 
       {/* Skip Button pinned to bottom when position has no items */}
       {status === "no_items" && (
@@ -527,7 +588,14 @@ export default function WelcomeToQC({
           <TouchableOpacity
             onPress={handleAdvanceQCBox}
             disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
             activeOpacity={0.8}
           >
             {isAdvancing ? (
@@ -545,7 +613,14 @@ export default function WelcomeToQC({
           <TouchableOpacity
             onPress={handleAdvanceQCBox}
             disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
             activeOpacity={0.8}
           >
             {isAdvancing ? (
@@ -566,6 +641,7 @@ export default function WelcomeToQC({
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);
+          setIsAdvancing(false);
           fetchActiveOrderAndStatus();
         }}
       />

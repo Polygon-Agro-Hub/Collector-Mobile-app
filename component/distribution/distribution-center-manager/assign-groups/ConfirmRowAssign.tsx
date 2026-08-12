@@ -108,7 +108,24 @@ export default function ConfirmRowAssign({
   const timerRef = useRef<any>(null);
 
   // Check if type is Retail or Wholesale from group details or context
-  const isRetail = selectedOrdersCount <= 20;
+  const rawType = String(
+    route.params?.type ||
+    group?.type ||
+    group?.buyerType ||
+    group?.orderType ||
+    ""
+  ).toUpperCase();
+
+  const isWholesale =
+    rawType === "W" ||
+    rawType === "WHOLESALE" ||
+    String(group?.title || "").toUpperCase().includes("WHOLESALE") ||
+    String(group?.title || "").includes("(W)") ||
+    !!route.params?.isWholesale;
+
+  const orderTypeTag = isWholesale ? "(W)" : "(R)";
+  const orderText = selectedOrdersCount === 1 ? "Order" : "Orders";
+  const orderTextLower = selectedOrdersCount === 1 ? "order" : "orders";
 
   const handleConfirm = async () => {
     if (submitting) return;
@@ -139,7 +156,7 @@ export default function ConfirmRowAssign({
       if (response.data && response.data.success) {
         Alert.alert(
           "Success",
-          `Successfully assigned ${selectedOrdersCount} orders to ${selectedRow.name} for the ${group.timeSlot} slot.`,
+          `Successfully assigned ${selectedOrdersCount} ${orderTextLower} to ${selectedRow.name} for the ${group.timeSlot} slot.`,
           [
             {
               text: "OK",
@@ -172,7 +189,10 @@ export default function ConfirmRowAssign({
       timerRef.current = null;
     }
     setSeconds(30);
-    navigation.navigate("SelectRowToAssign", route.params);
+    navigation.navigate("SelectRowToAssign", {
+      ...route.params,
+      selectedRowId: selectedRow?.id || route.params?.selectedRowId,
+    });
   };
 
   useEffect(() => {
@@ -264,10 +284,10 @@ export default function ConfirmRowAssign({
                   Selected Section
                 </Text>
                 <Text className="text-sm font-extrabold text-[#030E25] mt-1">
-                  {group.timeSlot} ({isRetail ? "Retail" : "Wholesale"})
+                  {group.timeSlot} {orderTypeTag}
                 </Text>
                 <Text className="text-xl font-extrabold text-[#030E25] mt-1">
-                  {selectedOrdersCount}
+                  {selectedOrdersCount} {orderText}
                 </Text>
               </View>
             </View>

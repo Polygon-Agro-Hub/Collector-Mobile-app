@@ -291,7 +291,7 @@ const ClaimOfficer: React.FC = () => {
   return (
     <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
       <CustomHeader
-        title={t("ClaimOfficer.ClaimOfficers")}
+        title={t("ClaimOfficer.Claim Staff")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() =>

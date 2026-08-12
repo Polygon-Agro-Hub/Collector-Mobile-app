@@ -539,13 +539,25 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             "Storage permission is required to save the PDF."
           );
         }
-      } else if (Platform.OS === "ios") {
+     } else if (Platform.OS === "ios") {
         if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(uri, {
-            dialogTitle: t("NewReport.Save GRN Report"),
-            mimeType: "application/pdf",
-            UTI: "com.adobe.pdf",
-          });
+          const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
+          try {
+            await FileSystem.copyAsync({ from: uri, to: newUri });
+            await Sharing.shareAsync(newUri, {
+              dialogTitle: t("NewReport.Save GRN Report"),
+              mimeType: "application/pdf",
+              UTI: "com.adobe.pdf",
+            });
+          } catch (error) {
+            console.error("Error renaming PDF before share:", error);
+            // Fallback to original uri if the copy/rename fails
+            await Sharing.shareAsync(uri, {
+              dialogTitle: t("NewReport.Save GRN Report"),
+              mimeType: "application/pdf",
+              UTI: "com.adobe.pdf",
+            });
+          }
         } else {
           Alert.alert(
             t("Error.error"),

@@ -53,64 +53,102 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
+    let alertShown = false;
+
+    const handleAuthError = (status: number, data: any) => {
+      let currentRouteName = "";
+      if (navigationRef.isReady()) {
+        const route = navigationRef.getCurrentRoute() as any;
+        currentRouteName = route?.name || "";
+      }
+
+      if (
+        currentRouteName === "Login" ||
+        currentRouteName === "Splash" ||
+        currentRouteName === "BannedScreen"
+      ) {
+        return;
+      }
+
+      const msg = (data?.message || "").toLowerCase();
+      const accStatus = (data?.accountStatus || "").toLowerCase();
+
+      const isAccountBanOrRejection =
+        accStatus === "not approved" ||
+        accStatus === "rejected" ||
+        msg.includes("not approved") ||
+        msg.includes("rejected") ||
+        msg.includes("emp id is not approved") ||
+        msg.includes("emp id is rejected");
+
+      try {
+        store.dispatch(logoutUser());
+      } catch (e) {
+        console.error("Error dispatching logout:", e);
+      }
+
+      if (isAccountBanOrRejection) {
+        if (navigationRef.isReady()) {
+          const statusType =
+            accStatus === "rejected" || msg.includes("rejected")
+              ? "rejected"
+              : "not_approved";
+
+          navigationRef.reset({
+            index: 0,
+            routes: [
+              {
+                name: "BannedScreen",
+                params: {
+                  statusType,
+                  message: data?.message,
+                },
+              },
+            ],
+          });
+        }
+      } else {
+        // Token expired / session expired
+        if (!alertShown) {
+          alertShown = true;
+          Alert.alert(
+            "Session Expired",
+            "Your token has expired. Please log in again.",
+            [
+              {
+                text: "OK",
+                onPress: () => {
+                  alertShown = false;
+                  if (navigationRef.isReady()) {
+                    navigationRef.reset({
+                      index: 0,
+                      routes: [{ name: "Login" }],
+                    });
+                  }
+                },
+              },
+            ],
+            { cancelable: false }
+          );
+        } else {
+          if (navigationRef.isReady()) {
+            navigationRef.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
+          }
+        }
+      }
+    };
+
     // Axios response interceptor
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       async (error) => {
         const errorResponse = error.response;
-        if (
-          errorResponse &&
-          (errorResponse.status === 401 || errorResponse.status === 403) &&
-          (errorResponse.data?.accountStatus === "Not Approved" ||
-            errorResponse.data?.accountStatus === "Rejected" ||
-            errorResponse.data?.message === "This EMP ID is not approved." ||
-            errorResponse.data?.message === "This EMP ID is Rejected" ||
-            errorResponse.data?.message === "This account is not approved or has been rejected." ||
-            (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("not approved")) ||
-            (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("rejected")))
-        ) {
-          let currentRouteName = "";
-          if (navigationRef.isReady()) {
-            const route = navigationRef.getCurrentRoute() as any;
-            currentRouteName = route?.name || "";
-          }
-
-          if (
-            currentRouteName !== "Login" &&
-            currentRouteName !== "Splash" &&
-            currentRouteName !== "BannedScreen"
-          ) {
-            try {
-              // Clear stored credentials
-              store.dispatch(logoutUser());
-              // Dispatch logout
-              store.dispatch(logoutUser());
-              if (navigationRef.isReady()) {
-                const statusType =
-                  errorResponse.data?.accountStatus === "Rejected" ||
-                  (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("rejected"))
-                    ? "rejected"
-                    : "not_approved";
-
-                navigationRef.reset({
-                  index: 0,
-                  routes: [
-                    {
-                      name: "BannedScreen",
-                      params: {
-                        statusType,
-                        message: errorResponse.data?.message,
-                      },
-                    },
-                  ],
-                });
-              }
-            } catch (e) {
-              console.error("Failed to perform force logout in Axios interceptor:", e);
-            }
-
-            return new Promise(() => {});
-          }
+        if (errorResponse && (errorResponse.status === 401 || errorResponse.status === 403)) {
+          handleAuthError(errorResponse.status, errorResponse.data);
+          return new Promise(() => {});
         }
         return Promise.reject(error);
       }
@@ -125,55 +163,9 @@ function AppContent() {
         try {
           const clonedResponse = response.clone();
           const data = await clonedResponse.json();
-
-          if (
-            data.accountStatus === "Not Approved" ||
-            data.accountStatus === "Rejected" ||
-            data.message === "This EMP ID is not approved." ||
-            data.message === "This EMP ID is Rejected" ||
-            data.message === "This account is not approved or has been rejected." ||
-            (data.message && data.message.toLowerCase().includes("not approved")) ||
-            (data.message && data.message.toLowerCase().includes("rejected"))
-          ) {
-            let currentRouteName = "";
-            if (navigationRef.isReady()) {
-              const route = navigationRef.getCurrentRoute() as any;
-              currentRouteName = route?.name || "";
-            }
-
-            if (
-              currentRouteName !== "Login" &&
-              currentRouteName !== "Splash" &&
-              currentRouteName !== "BannedScreen"
-            ) {
-              // Clear stored credentials
-              store.dispatch(logoutUser());
-              // Dispatch logout
-              store.dispatch(logoutUser());
-              if (navigationRef.isReady()) {
-                const statusType =
-                  data.accountStatus === "Rejected" ||
-                  (data.message && data.message.toLowerCase().includes("rejected"))
-                    ? "rejected"
-                    : "not_approved";
-
-                navigationRef.reset({
-                  index: 0,
-                  routes: [
-                    {
-                      name: "BannedScreen",
-                      params: {
-                        statusType,
-                        message: data.message,
-                      },
-                    },
-                  ],
-                });
-              }
-            }
-          }
+          handleAuthError(response.status, data);
         } catch (e) {
-          // Ignore json parsing / handling error
+          handleAuthError(response.status, {});
         }
       }
 

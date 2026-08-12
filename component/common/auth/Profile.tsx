@@ -619,6 +619,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   style={inputTextStyle}
                   value={newPhoneNumber}
                   placeholder="7XXXXXXXX"
+                  placeholderTextColor="#A3A3A3"
                   keyboardType="numeric"
                   onChangeText={handlePhoneNumberChange}
                   maxLength={9}
@@ -648,6 +649,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   style={inputTextStyle}
                   value={newPhoneNumber2}
                   placeholder="7XXXXXXXX"
+                  placeholderTextColor="#A3A3A3"
                   keyboardType="numeric"
                   onChangeText={handlePhoneNumber2Change}
                   maxLength={9}
