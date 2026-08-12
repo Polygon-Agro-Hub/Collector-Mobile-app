@@ -10,6 +10,7 @@ import {
   Alert,
   BackHandler,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -52,8 +53,7 @@ const formatWeightDisplay = (weightStr: string) => {
   const numVal = parseFloat(match[1]);
   const unit = match[2];
   if (isNaN(numVal)) return weightStr;
-  const numStr = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(2);
-  return `${numStr} ${unit}`.trim();
+  return `${match[1]} ${unit}`.trim();
 };
 
 export default function WelcomeToQC({
@@ -77,6 +77,7 @@ export default function WelcomeToQC({
   const [activeOrderPackageId, setActiveOrderPackageId] = useState<
     number | null
   >(null);
+  const [activeTrackingId, setActiveTrackingId] = useState<number | null>(null);
   const [packagesList, setPackagesList] = useState<any[]>([]);
   const [alacarteCount, setAlacarteCount] = useState<number>(0);
   const [isAlacarteActive, setIsAlacarteActive] = useState<boolean>(false);
@@ -95,6 +96,14 @@ export default function WelcomeToQC({
   const [qcItems, setQcItems] = useState<QCItem[]>([]);
   const [currentPackName, setCurrentPackName] = useState<string>("Daily Veggie Pack");
   const [officerPosIndex, setOfficerPosIndex] = useState<number>(3);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    setQcItems([]);
+    await fetchActiveOrderAndStatus();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     fetchActiveOrderAndStatus();
@@ -154,77 +163,90 @@ export default function WelcomeToQC({
       if (!token) return;
 
       const activeRes = await axios.get(
-        `${environment.API_BASE_URL}api/packing/active-order`,
+        `${environment.API_BASE_URL}api/packing/qc/active-order`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (activeRes.data && activeRes.data.success && activeRes.data.data) {
         const activeData = activeRes.data.data;
 
-        if (activeData.formattedOrderNumber) {
-          setDisplayOrderTitle(activeData.formattedOrderNumber);
-        }
-        if (activeData.processOrderId) {
-          setActiveProcessOrderId(activeData.processOrderId);
-        }
-        setActiveOrderPackageId(activeData.activeOrderPackageId || null);
-        setPackagesList(activeData.packagesList || []);
-        setAlacarteCount(activeData.alacarteCount || 0);
-        setIsAlacarteActive(!!activeData.isAlacarteActive);
-        if (activeData.timeSlot) {
-          setScheduledTime(
-            timeSlotMap[activeData.timeSlot] || activeData.timeSlot
-          );
-        }
-
-        const orderStatus = activeData.orderStatus;
-        const pIndex =
-          activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
-        const resolvedOfficerPosIndex =
-          activeData.officerPosIndex !== undefined
-            ? Number(activeData.officerPosIndex)
-            : 3;
-        setOfficerPosIndex(resolvedOfficerPosIndex);
-
-        if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < resolvedOfficerPosIndex || pIndex > resolvedOfficerPosIndex) {
-          // Box has not reached QC station yet (pIndex < officerPosIndex) or box/order is already completed (pIndex > officerPosIndex)
-          setStatus("waiting");
-        } else if (orderStatus === "Opened" && pIndex === resolvedOfficerPosIndex) {
-          const orderItems = activeData.orderItems || [];
-
-          if (orderItems.length > 0) {
-            const mappedItems: QCItem[] = orderItems.map((item: any) => {
-              const resolvedPackName =
-                item.packName && item.packName !== "À la carte"
-                  ? item.packName
-                  : item.categoryType === "alacarte"
-                    ? "À la carte"
-                    : "Daily Veggie Pack";
-              const isAlacarte = resolvedPackName === "À la carte";
-              return {
-                id: item.id,
-                name: item.name,
-                weight: formatWeightDisplay(item.weight || "1.0 kg"),
-                packName: resolvedPackName,
-                categoryType: isAlacarte ? "alacarte" : "package",
-                checked: false,
-                image:
-                  item.image ||
-                  "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
-              };
-            });
-
-            setQcItems(mappedItems);
-            setCurrentPackName(mappedItems[0]?.packName || "Daily Veggie Pack");
-            setStatus("qc_checklist");
-          } else {
-            // Box arrived at QC but has 0 items assigned to QC
+        if (activeData.hasActiveBox === false) {
+          if (activeData.rowStatus === "WAITING_PREVIOUS") {
+            setStatus("waiting");
             setQcItems([]);
-            setStatus("no_items");
+          } else {
+            setStatus("no_target");
+            setQcItems([]);
+            setActiveProcessOrderId(null);
+          }
+        } else {
+          if (activeData.formattedOrderNumber) {
+            setDisplayOrderTitle(activeData.formattedOrderNumber);
+          }
+          if (activeData.processOrderId) {
+            setActiveProcessOrderId(activeData.processOrderId);
+          }
+          setActiveOrderPackageId(activeData.activeOrderPackageId || null);
+          setActiveTrackingId(activeData.trackingId ? Number(activeData.trackingId) : null);
+          setPackagesList(activeData.packagesList || []);
+          setAlacarteCount(activeData.alacarteCount || 0);
+          setIsAlacarteActive(!!activeData.isAlacarteActive);
+          if (activeData.timeSlot) {
+            setScheduledTime(
+              timeSlotMap[activeData.timeSlot] || activeData.timeSlot
+            );
+          }
+
+          const orderStatus = activeData.orderStatus;
+          const pIndex =
+            activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
+          const resolvedOfficerPosIndex =
+            activeData.officerPosIndex !== undefined
+              ? Number(activeData.officerPosIndex)
+              : 3;
+          setOfficerPosIndex(resolvedOfficerPosIndex);
+
+          if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < resolvedOfficerPosIndex || pIndex > resolvedOfficerPosIndex) {
+            // Box has not reached QC station yet (pIndex < officerPosIndex) or box/order is already completed (pIndex > officerPosIndex)
+            setStatus("waiting");
+          } else if (orderStatus === "Opened" && pIndex === resolvedOfficerPosIndex) {
+            const orderItems = activeData.orderItems || [];
+
+            if (orderItems.length > 0) {
+              const mappedItems: QCItem[] = orderItems.map((item: any) => {
+                const resolvedPackName =
+                  item.packName && item.packName !== "À la carte"
+                    ? item.packName
+                    : item.categoryType === "alacarte"
+                      ? "À la carte"
+                      : "Daily Veggie Pack";
+                const isAlacarte = resolvedPackName === "À la carte";
+                return {
+                  id: item.id,
+                  name: item.name,
+                  weight: formatWeightDisplay(item.weight || "1.0 kg"),
+                  packName: resolvedPackName,
+                  categoryType: isAlacarte ? "alacarte" : "package",
+                  checked: false,
+                  image:
+                    item.image ||
+                    "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+                };
+              });
+
+              setQcItems(mappedItems);
+              setCurrentPackName(mappedItems[0]?.packName || "Daily Veggie Pack");
+              setStatus("qc_checklist");
+            } else {
+              // Box arrived at QC but has 0 items assigned to QC
+              setQcItems([]);
+              setStatus("no_items");
+            }
           }
         }
       } else {
         setStatus("no_target");
+        setQcItems([]);
       }
     } catch (err) {
       console.error("Error fetching active order status in QC:", err);
@@ -259,6 +281,7 @@ export default function WelcomeToQC({
           orderpackageId: activeOrderPackageId || null,
           currentPIndex: officerPosIndex,
           rowId: rowId,
+          trackingId: activeTrackingId || null,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -271,16 +294,17 @@ export default function WelcomeToQC({
           { headers: { Authorization: `Bearer ${token}` } }
         ).catch(() => {});
 
-        setStatus("waiting");
         setAlertMessage("Packing has been completed successfully.");
         setAlertVisible(true);
       } else if (advanceRes.data && !advanceRes.data.success) {
         Alert.alert("Station Busy", advanceRes.data.message || "The next station is currently busy.");
+        setIsAdvancing(false);
+      } else {
+        setIsAdvancing(false);
       }
     } catch (err) {
       console.error("Error advancing QC box:", err);
       Alert.alert("Error", "Failed to advance QC position.");
-    } finally {
       setIsAdvancing(false);
     }
   };
@@ -348,7 +372,13 @@ export default function WelcomeToQC({
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
-      <View className="flex-1 px-6 pt-2">
+      <ScrollView
+        className="flex-1 bg-white px-6 pt-2"
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Scheduled Time Section */}
         {status !== "no_target" && (
           <View className="w-full flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
@@ -472,11 +502,7 @@ export default function WelcomeToQC({
             </Text>
 
             {/* Items contained in active package box */}
-            <ScrollView
-              className="flex-1"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 100 }}
-            >
+            <View className="flex-1">
               {qcItems.map((item, index) => (
                 <TouchableOpacity
                   key={`${item.id}_${index}`}
@@ -516,10 +542,10 @@ export default function WelcomeToQC({
                   </View>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
+            </View>
           </View>
         )}
-      </View>
+      </ScrollView>
 
       {/* Skip Button pinned to bottom when position has no items */}
       {status === "no_items" && (
@@ -527,7 +553,14 @@ export default function WelcomeToQC({
           <TouchableOpacity
             onPress={handleAdvanceQCBox}
             disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
             activeOpacity={0.8}
           >
             {isAdvancing ? (
@@ -545,7 +578,14 @@ export default function WelcomeToQC({
           <TouchableOpacity
             onPress={handleAdvanceQCBox}
             disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
             activeOpacity={0.8}
           >
             {isAdvancing ? (
@@ -566,6 +606,7 @@ export default function WelcomeToQC({
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);
+          setIsAdvancing(false);
           fetchActiveOrderAndStatus();
         }}
       />

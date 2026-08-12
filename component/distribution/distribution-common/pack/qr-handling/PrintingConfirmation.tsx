@@ -24,6 +24,8 @@ interface PrintStep {
   textColor: string;
   circleBgColor: string;
   circleTextColor: string;
+  packageId?: number;
+  packageIndex?: number;
 }
 
 export interface PackageItem {
@@ -60,9 +62,9 @@ export default function PrintingConfirmation({
   // Build dynamic print steps based on package count
   const steps: PrintStep[] = [];
 
-  // Calculate total physical packages
+  // Calculate total physical packages based on package quantity (pkg.qty)
   const totalPhysicalPackages = packagesList && packagesList.length > 0
-    ? packagesList.reduce((acc: number, pkg: any) => acc + Math.max(1, Number(pkg.count || pkg.qty || 1)), 0)
+    ? packagesList.reduce((acc: number, pkg: any) => acc + Math.max(1, Number(pkg.qty || 1)), 0)
     : 0;
 
   // Calculate total physical boxes (Package boxes + 1 Alacarte box if present)
@@ -81,10 +83,10 @@ export default function PrintingConfirmation({
     });
   }
 
-  // 2. Add individual package steps based on actual package quantity
+  // 2. Add individual package steps based on actual package quantity (pkg.qty)
   if (packagesList && packagesList.length > 0) {
-    packagesList.forEach((pkg: any) => {
-      const pkgQty = Math.max(1, Number(pkg.count || pkg.qty || 1));
+    packagesList.forEach((pkg: any, pkgIdx: number) => {
+      const pkgQty = Math.max(1, Number(pkg.qty || 1));
       for (let i = 0; i < pkgQty; i++) {
         const stepId = steps.length + 1;
         const formattedIndex = String(stepId).padStart(2, "0");
@@ -97,6 +99,8 @@ export default function PrintingConfirmation({
           textColor: "#980775",
           circleBgColor: "bg-[#fdf4ff]",
           circleTextColor: "text-[#980775]",
+          packageId: pkg.id,
+          packageIndex: pkgIdx,
         });
       }
     });
@@ -167,25 +171,9 @@ export default function PrintingConfirmation({
       const processOrderId =
         route.params?.processOrderId || route.params?.orderId || 3131;
 
-      let currentPackageId: number | null = null;
-      const totalPhysicalBoxes =
-        (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
-      const hasMainContainer = totalPhysicalBoxes > 1;
-      const packageStepIndex = hasMainContainer
-        ? currentStep - 2
-        : currentStep - 1;
+      const activeStep = steps[currentStep - 1] || steps[0];
 
-      if (
-        packagesList &&
-        packageStepIndex >= 0 &&
-        packageStepIndex < packagesList.length
-      ) {
-        currentPackageId = packagesList[packageStepIndex].id;
-      }
-
-      const isMainContainerStep = hasMainContainer && currentStep === 1;
-
-      if (isMainContainerStep) {
+      if (activeStep.type === "main") {
         const response = await axios.post(
           `${environment.API_BASE_URL}api/packing/qr-opened`,
           {
@@ -219,17 +207,14 @@ export default function PrintingConfirmation({
         setAlertMessage("Main Container QR Code Printed Successfully!");
         setAlertVisible(true);
       } else {
-        const isPackageStep =
-          packagesList &&
-          packageStepIndex >= 0 &&
-          packageStepIndex < packagesList.length;
+        const isPackageStep = activeStep.type === "package";
         const response = await axios.post(
           `${environment.API_BASE_URL}api/packing/qr-opened`,
           {
             orderId: processOrderId,
-            orderpackageId: currentPackageId,
+            orderpackageId: activeStep.packageId || null,
             isPackage: isPackageStep ? 1 : 0,
-            packageIndex: isPackageStep ? packageStepIndex : 0,
+            packageIndex: isPackageStep ? (activeStep.packageIndex ?? 0) : 0,
             rowId: route.params?.rowId,
           },
           { headers: { Authorization: `Bearer ${token}` } },
@@ -266,6 +251,7 @@ export default function PrintingConfirmation({
           setAlertVisible(true);
         }
       }
+
     } catch (err: any) {
       console.error("Error updating order status on QR print:", err);
       const msg = err.response?.data?.message || "Failed to communicate with packing server. Please try again.";

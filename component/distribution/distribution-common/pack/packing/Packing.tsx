@@ -41,8 +41,7 @@ const formatWeightDisplay = (weightStr: string) => {
   const numVal = parseFloat(match[1]);
   const unit = match[2];
   if (isNaN(numVal)) return weightStr;
-  const numStr = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(2);
-  return `${numStr} ${unit}`.trim();
+  return `${match[1]} ${unit}`.trim();
 };
 
 interface PackingItem {
@@ -55,7 +54,7 @@ interface PackingItem {
   checked: boolean;
 }
 
-type PackingStatus = "no_qr_yet" | "waiting" | "no_items" | "has_items";
+type PackingStatus = "no_qr_yet" | "waiting" | "no_items" | "has_items" | "main_container";
 
 export default function Packing({
   route,
@@ -87,6 +86,7 @@ export default function Packing({
 
   const [activeOrderPackageId, setActiveOrderPackageId] = useState<number | null>(null);
   const [currentPIndex, setCurrentPIndex] = useState<number | null>(null);
+  const [activeTrackingId, setActiveTrackingId] = useState<number | null>(null);
 
   // Status state tracking: "no_qr_yet", "waiting", "no_items", or "has_items"
   const [status, setStatus] = useState<PackingStatus>("no_qr_yet");
@@ -97,39 +97,14 @@ export default function Packing({
 
   const onRefresh = async () => {
     setRefreshing(true);
-    if (positionId) {
-      await fetchPositionCrops();
-    }
+    setItems([]);
     await fetchActiveOrderAndStatus();
     setRefreshing(false);
   };
 
-  // Crop list items mapped ONLY from position-specific assigned crops
-  const [items, setItems] = useState<PackingItem[]>(() => {
-    if (positionCrops && positionCrops.length > 0) {
-      const mapped = positionCrops.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        weight: formatWeightDisplay(c.weight || "1.0 kg"),
-        packName: c.packName || "Fruity Pack",
-        categoryType: c.categoryType || "package",
-        checked: false,
-        image:
-          c.image ||
-          "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
-      }));
-      mapped.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
-      return mapped;
-    }
-    return [];
-  });
+  const [items, setItems] = useState<PackingItem[]>([]);
 
   useEffect(() => {
-    // If no crops passed, fetch assigned crops for position
-    if (positionId && items.length === 0) {
-      fetchPositionCrops();
-    }
-
     fetchActiveOrderAndStatus();
 
     // Hardware Back Press Handler to avoid navigation loop
@@ -183,152 +158,107 @@ export default function Packing({
     };
   }, [positionId, rowId]);
 
-  const fetchPositionCrops = async () => {
-    try {
-      const token = store.getState().auth.token;
-      if (!token || !positionId) return;
-
-      const response = await axios.get(
-        `${environment.API_BASE_URL}api/packing/positions/${positionId}/crops`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      if (response.data && response.data.success && response.data.data) {
-        const fetched = response.data.data.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          weight: formatWeightDisplay(c.weight || "1.0 kg"),
-          packName: c.packName || "Fruity Pack",
-          categoryType: c.categoryType || "package",
-          checked: false,
-          image:
-            c.image ||
-            "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
-        }));
-        fetched.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
-        setItems(fetched);
-      }
-    } catch (err) {
-      console.error("Error fetching position crops:", err);
-    }
-  };
-
   const fetchActiveOrderAndStatus = async () => {
     try {
       const token = store.getState().auth.token;
       if (!token) return;
 
-      // 1. Fetch active order details for officer
+      // 1. Fetch active order details for packer officer
       const activeRes = await axios.get(
-        `${environment.API_BASE_URL}api/packing/active-order`,
+        `${environment.API_BASE_URL}api/packing/packer/active-order`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (activeRes.data && activeRes.data.success && activeRes.data.data) {
         const activeData = activeRes.data.data;
-        if (activeData.formattedOrderNumber) {
-          setDisplayOrderTitle(activeData.formattedOrderNumber);
-        }
-        if (activeData.processOrderId) {
-          setActiveProcessOrderId(activeData.processOrderId);
-        }
-        setActiveOrderPackageId(activeData.activeOrderPackageId || null);
-        if (activeData.timeSlot) {
-          setScheduledTime(
-            timeSlotMap[activeData.timeSlot] || activeData.timeSlot,
-          );
-        }
 
-        const orderStatus = activeData.orderStatus;
-        const pIndex =
-          activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
-        setCurrentPIndex(pIndex);
-
-        const officerPosIndex =
-          activeData.officerPosIndex !== undefined
-            ? Number(activeData.officerPosIndex)
-            : 1;
-
-        if (orderStatus === "Pending") {
-          // No QR code printed yet!
-          setStatus("no_qr_yet");
-          setItems([]);
-        } else if (pIndex > 0 && pIndex !== officerPosIndex) {
-          // Package is currently at a different position step (waiting for box to arrive or already passed)
-          setStatus("waiting");
-          setItems([]);
-        } else if (orderStatus === "Opened" || orderStatus === "Completed") {
-          const orderItems = activeData.orderItems || [];
-          if (orderItems.length > 0) {
-            const mappedItems = orderItems.map((item: any) => {
-              const resolvedPackName =
-                item.packName && item.packName !== "À la carte"
-                  ? item.packName
-                  : item.categoryType === "alacarte"
-                    ? "À la carte"
-                    : "Daily Veggie Pack";
-              const isAlacarte = resolvedPackName === "À la carte";
-              return {
-                id: item.id,
-                name: item.name,
-                weight: formatWeightDisplay(item.weight || "1.0 kg"),
-                packName: resolvedPackName,
-                categoryType: isAlacarte ? "alacarte" : "package",
-                checked: false,
-                image:
-                  item.image ||
-                  "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
-              };
-            });
-            mappedItems.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
-            setItems(mappedItems);
-            setStatus("has_items");
-          } else {
+        if (activeData.hasActiveBox === false) {
+          if (activeData.rowStatus === "WAITING_PREVIOUS") {
+            setStatus("waiting");
             setItems([]);
-            setStatus("no_items");
+          } else {
+            setStatus("no_qr_yet");
+            setItems([]);
+            setActiveProcessOrderId(null);
           }
-        }
-      } else if (activeProcessOrderId) {
-        // Fallback to checking specific orderStatus if active-order endpoint returns null
-        const res = await axios.get(
-          `${environment.API_BASE_URL}api/packing/order-status/${activeProcessOrderId}`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        if (res.data && res.data.success && res.data.data) {
-          const orderStatus = res.data.data.orderStatus;
+        } else {
+          if (activeData.formattedOrderNumber) {
+            setDisplayOrderTitle(activeData.formattedOrderNumber);
+          }
+          if (activeData.processOrderId) {
+            setActiveProcessOrderId(activeData.processOrderId);
+          }
+          setActiveOrderPackageId(activeData.activeOrderPackageId || null);
+          setActiveTrackingId(activeData.trackingId ? Number(activeData.trackingId) : null);
+          if (activeData.timeSlot) {
+            setScheduledTime(
+              timeSlotMap[activeData.timeSlot] || activeData.timeSlot,
+            );
+          }
+
+          const orderStatus = activeData.orderStatus;
           const pIndex =
-            res.data.data.pIndex !== undefined
-              ? Number(res.data.data.pIndex)
-              : 0;
+            activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
           setCurrentPIndex(pIndex);
+
+          const officerPosIndex =
+            activeData.officerPosIndex !== undefined
+              ? Number(activeData.officerPosIndex)
+              : 1;
 
           if (orderStatus === "Pending") {
             setStatus("no_qr_yet");
             setItems([]);
-          } else if (pIndex > 0 && pIndex < 1) {
+          } else if (pIndex > 0 && pIndex !== officerPosIndex) {
             setStatus("waiting");
             setItems([]);
-          } else if (orderStatus === "Completed") {
-            setStatus("no_qr_yet");
-            setItems([]);
-            setActiveProcessOrderId(null);
-          } else if (orderStatus === "Opened") {
-            if (items.length > 0) {
-              setStatus("has_items");
+          } else if (orderStatus === "Opened" || orderStatus === "Completed") {
+            // Check Main Container first — either by explicit flag or activeOrderPackageId = -1
+            const isMainContainerBox =
+              activeData.isMainContainerBox === true ||
+              Number(activeData.activeOrderPackageId) === -1;
+            if (isMainContainerBox) {
+              setItems([]);
+              setStatus("main_container");
             } else {
-              setStatus("no_items");
+              const orderItems = activeData.orderItems || [];
+              if (orderItems.length > 0) {
+                const mappedItems = orderItems.map((item: any) => {
+                  const resolvedPackName =
+                    item.packName && item.packName !== "À la carte"
+                      ? item.packName
+                      : item.categoryType === "alacarte"
+                        ? "À la carte"
+                        : "Daily Veggie Pack";
+                  const isAlacarte = resolvedPackName === "À la carte";
+                  return {
+                    id: item.id,
+                    name: item.name,
+                    weight: formatWeightDisplay(item.weight || "1.0 kg"),
+                    packName: resolvedPackName,
+                    categoryType: isAlacarte ? "alacarte" : "package",
+                    checked: false,
+                    image:
+                      item.image ||
+                      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+                  };
+                });
+                mappedItems.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+                setItems(mappedItems);
+                setStatus("has_items");
+              } else {
+                setItems([]);
+                setStatus("no_items");
+              }
+              }
             }
           }
         } else {
+          // No box currently at this packer position
           setStatus("no_qr_yet");
           setItems([]);
           setActiveProcessOrderId(null);
         }
-      } else {
-        setStatus("no_qr_yet");
-        setItems([]);
-        setActiveProcessOrderId(null);
-      }
     } catch (err) {
       console.error("Error fetching active order tracking status:", err);
       setStatus("no_qr_yet");
@@ -359,6 +289,7 @@ export default function Packing({
         orderpackageId: activeOrderPackageId || null,
         currentPIndex: currentPIndex || 1,
         rowId: rowId,
+        trackingId: activeTrackingId || null,
       };
 
       const res = await axios.post(
@@ -372,14 +303,15 @@ export default function Packing({
           "Packing has been completed successfully. Move to the next position."
         );
         setAlertVisible(true);
-        fetchActiveOrderAndStatus();
       } else if (res.data && !res.data.success) {
         Alert.alert("Station Busy", res.data.message || "The next station is currently busy.");
+        setIsAdvancing(false);
+      } else {
+        setIsAdvancing(false);
       }
     } catch (err) {
       console.error("Error advancing position index:", err);
       Alert.alert("Error", "Failed to advance position index.");
-    } finally {
       setIsAdvancing(false);
     }
   };
@@ -398,7 +330,7 @@ export default function Packing({
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent:
-            status === "has_items" || status === "no_qr_yet"
+            status === "has_items" || status === "no_qr_yet" || status === "main_container"
               ? "flex-start"
               : "center",
           paddingBottom: 130,
@@ -472,7 +404,31 @@ export default function Packing({
           </View>
         )}
 
-        {/* STATE 2: Opened, but No items at this position -> SHOW SKIP SCREEN */}
+        {/* STATE 2: Main Container at this station — pass through */}
+        {status === "main_container" && (
+          <View className="flex-1">
+            <View className="flex justify-center items-center py-6">
+              <View className="w-56 h-56 justify-center items-center">
+                <LottieView
+                  source={require("../../../../../assets/lottie/packing/arrow-forward.json")}
+                  autoPlay
+                  loop
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </View>
+            </View>
+            <View className="items-center mt-4 mb-2">
+              <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
+                Main Container{"\n"}Pass Through
+              </Text>
+              <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
+                This is the main container box.{"\n"}Tap the button below to pass it to the next station.
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* STATE 3: Opened, but No items at this position -> SHOW SKIP SCREEN */}
         {status === "no_items" && (
           <View className="flex-1">
             {/* Lottie Animation Centered in middle (arrow-forward.json) */}
@@ -560,13 +516,45 @@ export default function Packing({
         )}
       </ScrollView>
 
+      {/* Pass Through Button for Main Container */}
+      {status === "main_container" && (
+        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
+          <TouchableOpacity
+            onPress={handleAdvancePosition}
+            disabled={isAdvancing}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
+            activeOpacity={0.8}
+          >
+            {isAdvancing ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text className="text-white font-extrabold text-base">Pass Through</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Skip Button pinned to bottom when position has no items */}
       {status === "no_items" && (
         <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}
             disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
             activeOpacity={0.8}
           >
             {isAdvancing ? (
@@ -584,7 +572,14 @@ export default function Packing({
           <TouchableOpacity
             onPress={handleAdvancePosition}
             disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
             activeOpacity={0.8}
           >
             {isAdvancing ? (
@@ -606,6 +601,7 @@ export default function Packing({
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);
+          setIsAdvancing(false);
           fetchActiveOrderAndStatus();
         }}
       />
