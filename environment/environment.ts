@@ -2,7 +2,7 @@ export const environment = {
   production: true,
 
   // LOCAL --------------------
-  API_BASE_URL: "http://192.168.8.104:3000/agro-api/collection-api/",
+  API_BASE_URL: "http://192.168.8.180:3000/agro-api/collection-api/",
 
   // DEV --------------------
   // API_BASE_URL:
