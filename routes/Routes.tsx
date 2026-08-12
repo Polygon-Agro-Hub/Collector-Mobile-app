@@ -343,7 +343,7 @@ const COLLECTION_TAB_SCREENS: TabRouteConfig[] = [
   {
     name: "EditTargetScreen",
     component: EditTargetScreen as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+    allowedRoles: [ROLES.COLLECTION_MANAGER],
   },
   {
     name: "PassTargetBetweenOfficers",
@@ -452,22 +452,22 @@ const DISTRIBUTION_TAB_SCREENS: TabRouteConfig[] = [
   {
     name: "DistributionOfficersList",
     component: DistributionOfficersList as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
   },
   {
     name: "ClaimDistribution",
     component: ClaimDistribution as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
   },
   {
     name: "DistributionAddOfficer",
     component: DistributionAddOfficer as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
   },
   {
     name: "DistributionCenterTarget",
     component: DistributionCenterTarget as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
   },
 ];
 
