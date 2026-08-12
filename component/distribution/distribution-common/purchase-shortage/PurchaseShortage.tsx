@@ -44,17 +44,23 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  useEffect(() => {
-    const onBackPress = () => {
-      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-      return true;
-    };
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
-    return () => backHandler.remove();
-  }, [navigation]);
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+        }
+        return true;
+      };
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+      return () => backHandler.remove();
+    }, [navigation])
+  );
 
   const fetchShortages = async () => {
     try {

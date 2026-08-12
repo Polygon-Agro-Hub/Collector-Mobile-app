@@ -39,10 +39,10 @@ const sanitizeDecimalInput = (text: string): string => {
   if (parts.length > 2) {
     sanitized = parts[0] + "." + parts.slice(1).join("");
   }
-  // Maximum 3 decimal places
+  // Maximum 2 decimal places
   const subParts = sanitized.split(".");
   if (subParts.length >= 2) {
-    sanitized = `${subParts[0]}.${subParts[1].slice(0, 3)}`;
+    sanitized = `${subParts[0]}.${subParts[1].slice(0, 2)}`;
   }
   return sanitized;
 };
@@ -74,7 +74,7 @@ export default function PurchaseProduct({
   // Flow State
   const [step, setStep] = useState<1 | 2>(1);
 
-  // Hide Bottom Navigation Bar on Mount & Handle Hardware Back Press
+  // Hide Bottom Navigation Bar on Mount
   useEffect(() => {
     navigation.getParent()?.setOptions({
       tabBarStyle: { display: "none" },
@@ -86,22 +86,25 @@ export default function PurchaseProduct({
     };
   }, [navigation]);
 
-  useEffect(() => {
-    const onBackPress = () => {
-      if (step === 2) {
-        setStep(1);
+  // Handle Hardware Back Press using useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (step === 2) {
+          setStep(1);
+          return true;
+        }
+        navigation.navigate("PurchaseShortage");
         return true;
-      }
-      navigation.navigate("PurchaseShortage");
-      return true;
-    };
+      };
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
-    return () => backHandler.remove();
-  }, [step, navigation]);
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+      return () => backHandler.remove();
+    }, [step, navigation])
+  );
 
   // Form State
   const [buyingQty, setBuyingQty] = useState<string>(formatKg(defaultKg));

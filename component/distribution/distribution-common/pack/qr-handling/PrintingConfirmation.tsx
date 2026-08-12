@@ -52,20 +52,21 @@ export default function PrintingConfirmation({
   } = route.params || {};
 
   const insets = useSafeAreaInsets();
-
-  // Convert (R) to (Retail) and (W) to (Wholesale) for display inside the QR card
-  const displayOrderNumber = orderNumber.includes("(R)")
-    ? orderNumber.replace("(R)", "(Retail)")
-    : orderNumber.includes("(W)")
-      ? orderNumber.replace("(W)", "(Wholesale)")
-      : orderNumber;
+  const rawType = String(route.params?.type || "").toUpperCase();
+  const isWholesale = rawType === "W" || rawType === "WHOLESALE" || String(orderNumber).includes("(W)") || String(orderNumber).includes("(Wholesale)") || String(orderNumber).includes("Wholesale");
+  const cleanInv = String(invoiceNumber || orderNumber).replace(/\s*\([^\)]*\)/g, "").trim();
+  const displayOrderNumber = isWholesale ? `${cleanInv} (Wholesale)` : `${cleanInv} (Retail)`;
 
   // Build dynamic print steps based on package count
   const steps: PrintStep[] = [];
 
+  // Calculate total physical packages
+  const totalPhysicalPackages = packagesList && packagesList.length > 0
+    ? packagesList.reduce((acc: number, pkg: any) => acc + Math.max(1, Number(pkg.count || pkg.qty || 1)), 0)
+    : 0;
+
   // Calculate total physical boxes (Package boxes + 1 Alacarte box if present)
-  const totalBoxes =
-    (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
+  const totalBoxes = totalPhysicalPackages + (alacarteCount > 0 ? 1 : 0);
 
   // 1. If total physical boxes > 1, add Main Container as Step 1
   if (totalBoxes > 1) {
@@ -80,20 +81,24 @@ export default function PrintingConfirmation({
     });
   }
 
-  // 2. Add individual package steps with item counts
+  // 2. Add individual package steps based on actual package quantity
   if (packagesList && packagesList.length > 0) {
-    packagesList.forEach((pkg: PackageItem) => {
-      const stepId = steps.length + 1;
-      const formattedIndex = String(stepId).padStart(2, "0");
-      steps.push({
-        id: stepId,
-        type: "package",
-        label: pkg.name,
-        formattedIndex,
-        textColor: "#980775",
-        circleBgColor: "bg-[#fdf4ff]",
-        circleTextColor: "text-[#980775]",
-      });
+    packagesList.forEach((pkg: any) => {
+      const pkgQty = Math.max(1, Number(pkg.count || pkg.qty || 1));
+      for (let i = 0; i < pkgQty; i++) {
+        const stepId = steps.length + 1;
+        const formattedIndex = String(stepId).padStart(2, "0");
+        const label = pkgQty > 1 ? `${pkg.name} (${i + 1}/${pkgQty})` : pkg.name;
+        steps.push({
+          id: stepId,
+          type: "package",
+          label: label,
+          formattedIndex,
+          textColor: "#980775",
+          circleBgColor: "bg-[#fdf4ff]",
+          circleTextColor: "text-[#980775]",
+        });
+      }
     });
   }
 
@@ -360,12 +365,35 @@ export default function PrintingConfirmation({
         </View>
       </ScrollView>
 
-      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="px-6 pt-4 bg-white gap-3" style={{ paddingBottom: insets.bottom + 16 }}>
+        <TouchableOpacity
+          onPress={handleBack}
+          disabled={isPrinting}
+          className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-1"
+          activeOpacity={0.8}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.12,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+        >
+          <Text className="text-[#030E25] font-extrabold text-sm">Cancel</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={handlePrintPress}
           disabled={isPrinting}
-          className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isPrinting ? "bg-gray-400" : "bg-black"}`}
+          className={`w-full h-[50px] rounded-full items-center justify-center ${isPrinting ? "bg-gray-400" : "bg-black"}`}
           activeOpacity={0.8}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.15,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
         >
           {isPrinting ? (
             <ActivityIndicator color="white" size="small" />

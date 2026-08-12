@@ -440,6 +440,11 @@ const DISTRIBUTION_TAB_SCREENS: TabRouteConfig[] = [
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {
+    name: "PurchaseProduct",
+    component: PurchaseProduct as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
     name: "ReadytoPickupOrders",
     component: ReadytoPickupOrders as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
