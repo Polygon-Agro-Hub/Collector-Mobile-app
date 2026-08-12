@@ -144,6 +144,16 @@ export function withRoleGuard<P extends object>(
 
       const navigation = (props as any)?.navigation;
 
+      if (!jobRole) {
+        if (navigationRef.isReady()) {
+          navigationRef.reset({
+            index: 0,
+            routes: [{ name: UNAUTHORIZED_FALLBACK_ROUTE }],
+          });
+        }
+        return;
+      }
+
       Alert.alert(
         "Access Denied",
         "You don't have permission to view this screen.",
@@ -167,7 +177,7 @@ export function withRoleGuard<P extends object>(
         { cancelable: false }
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAllowed]);
+    }, [isAllowed, jobRole]);
 
     if (!isAllowed) {
       // Render nothing while the alert/redirect above is in flight.

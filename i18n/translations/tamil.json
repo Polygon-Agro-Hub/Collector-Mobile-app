@@ -248,7 +248,7 @@
     "Branch name is required": "கிளையின் பெயர் அவசியம்.",
     "Price updated successfully": "விலை வெற்றிகரமாக புதுப்பிக்கப்பட்டது.",
     "No targets have been assigned today for the selected crop.":"தேர்ந்தெடுக்கப்பட்ட பயிருக்கு இன்று எந்த இலக்குகளும் நிர்ணயிக்கப்படவில்லை.",
-    "Access denied. Your role is not authorized to use this application.":"அணுகல் மறுக்கப்பட்டது. இந்தப் பயன்பாட்டைப் பயன்படுத்த உங்கள் பாத்திரத்திற்கு அங்கீகாரம் இல்லை."
+    "Access Denied": "அணுகல் மறுக்கப்பட்டது. இந்தப் பயன்பாட்டைப் பயன்படுத்த உங்கள் பாத்திரத்திற்கு அங்கீகாரம் இல்லை."
   },
   "SideMenu": {
     "LNG": "en",

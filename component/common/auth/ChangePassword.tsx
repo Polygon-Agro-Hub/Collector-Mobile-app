@@ -188,7 +188,8 @@ navigation.reset({
           return true;
         }
 
-        return false;
+        navigation.goBack();
+        return true;
       };
 
       const subscription = BackHandler.addEventListener(
@@ -248,7 +249,7 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4] text-base"
+                className="flex-1 bg-[#F4F4F4] text-black text-base"
                 secureTextEntry={secureCurrent}
                 onChangeText={setCurrentPassword}
                 value={currentPassword}
@@ -258,6 +259,7 @@ navigation.reset({
                   paddingVertical: 8,
                   includeFontPadding: true,
                   textAlignVertical: "center",
+                  color: "#000000",
                 }}
               />
               <TouchableOpacity
@@ -276,7 +278,7 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 text-base"
+                className="flex-1 text-black text-base"
                 secureTextEntry={secureNew}
                 value={newPassword}
                 onChangeText={(text) => {
@@ -289,6 +291,7 @@ navigation.reset({
                   paddingVertical: 8,
                   includeFontPadding: true,
                   textAlignVertical: "center",
+                  color: "#000000",
                 }}
               />
               <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
@@ -305,7 +308,7 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4] text-base"
+                className="flex-1 bg-[#F4F4F4] text-black text-base"
                 secureTextEntry={secureConfirm}
                 onChangeText={(text) => {
                   const cleanText = text.replace(/\s/g, "");
@@ -318,6 +321,7 @@ navigation.reset({
                   paddingVertical: 8,
                   includeFontPadding: true,
                   textAlignVertical: "center",
+                  color: "#000000",
                 }}
               />
               <TouchableOpacity

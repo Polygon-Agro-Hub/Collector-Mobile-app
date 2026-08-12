@@ -249,7 +249,7 @@
     "Branch name is required": "Branch name is required",
     "Price updated successfully": "Price updated successfully",
     "No targets have been assigned today for the selected crop.":"No targets have been assigned today for the selected crop.",
-    "Access denied. Your role is not authorized to use this application.:":"Access denied. Your role is not authorized to use this application."
+    "Access Denied": "Access denied. Your role is not authorized to use this application."
   },
   "SideMenu": {
     "LNG": "en",
