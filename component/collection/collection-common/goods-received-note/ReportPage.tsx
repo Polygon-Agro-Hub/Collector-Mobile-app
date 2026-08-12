@@ -383,11 +383,22 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
         } else {
           // iOS: Use Sharing
           if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(uri, {
-              dialogTitle: t("Save PDF"),
-              mimeType: "application/pdf",
-              UTI: "com.adobe.pdf",
-            });
+            const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
+            try {
+              await FileSystem.copyAsync({ from: uri, to: newUri });
+              await Sharing.shareAsync(newUri, {
+                dialogTitle: t("Save PDF"),
+                mimeType: "application/pdf",
+                UTI: "com.adobe.pdf",
+              });
+            } catch (error) {
+              console.error("Error renaming PDF before share:", error);
+              await Sharing.shareAsync(uri, {
+                dialogTitle: t("Save PDF"),
+                mimeType: "application/pdf",
+                UTI: "com.adobe.pdf",
+              });
+            }
           } else {
             Alert.alert(
               t("Error.error"),
@@ -407,15 +418,35 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
     }
   };
 
-  const handleSharePDF = async () => {
+const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      await Sharing.shareAsync(uri);
+      const date = new Date().toISOString().slice(0, 10);
+      const fileName = `PurchaseReport_${
+        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
+      }_${date}.pdf`;
+      const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
+
+      try {
+        await FileSystem.copyAsync({ from: uri, to: newUri });
+        await Sharing.shareAsync(newUri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Share Purchase Report",
+          UTI: "com.adobe.pdf",
+        });
+      } catch (error) {
+        console.error("Error sharing PDF with custom name:", error);
+        await Sharing.shareAsync(uri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Share Purchase Report",
+          UTI: "com.adobe.pdf",
+        });
+      }
     } else {
       Alert.alert("Error.error", t("Error.somethingWentWrong"));
     }
   };
-
+  
   return (
     <ScrollView className="flex-1 bg-white ">
       <CustomHeader

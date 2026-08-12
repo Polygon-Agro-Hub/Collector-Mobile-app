@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -297,9 +297,18 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
     }
   };
 
+  // Modal-aware hardware back handler: if the officer search modal is open,
+  // a back-press should just close the modal, not reset navigation
+  // underneath it. Fresh closure is guaranteed by including
+  // officerModalVisible in the dependency array.
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
+        if (officerModalVisible) {
+          setOfficerModalVisible(false);
+          return true;
+        }
+
         navigation.reset({
           index: 0,
           routes: [
@@ -331,7 +340,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
       );
 
       return () => subscription.remove();
-    }, [navigation]),
+    }, [navigation, officerModalVisible]),
   );
 
   const getvarietyName = () => {
@@ -347,6 +356,14 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
 
   const selectedOfficerLabel =
     officers.find((o) => o.value === assignee)?.label || null;
+
+  // Memoized so GlobalSearchModal receives a STABLE array reference
+  // instead of a new [] / [assignee] literal on every render, which
+  // would otherwise retrigger its internal effects unnecessarily.
+  const selectedItemsForModal = useMemo(
+    () => (assignee ? [assignee] : []),
+    [assignee],
+  );
 
   return (
     <>
@@ -395,9 +412,11 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
               {loading ? (
                 <ActivityIndicator size="large" color="#313131" />
               ) : errorMessage ? (
-                <Text className="text-red-500 mb-4">{t(
+                <Text className="text-red-500 mb-4">
+                  {t(
                     "Error.No targets have been assigned today for the selected crop.",
-                  )}</Text>
+                  )}
+                </Text>
               ) : (
                 <TouchableOpacity
                   onPress={() => setOfficerModalVisible(true)}
@@ -500,7 +519,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
         onClose={() => setOfficerModalVisible(false)}
         title={t("PassTargetBetweenOfficers.Short Stock Assignee")}
         data={officers}
-        selectedItems={assignee ? [assignee] : []}
+        selectedItems={selectedItemsForModal}
         onSelect={(items) => {
           const val = items[0] ?? "";
           setAssignee(val);

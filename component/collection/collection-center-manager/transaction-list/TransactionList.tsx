@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { Entypo } from "@expo/vector-icons";
+import { Modal } from "react-native";
 
 type TransactionListNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -256,7 +257,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 textAlign: "center",
               }}
             >
-              EMP {t("ManagerTransactions.ID")} : {officerId} 
+              EMP {t("ManagerTransactions.ID")} : {officerId}
             </Text>
             <Text style={{ color: "white", fontSize: 16, marginTop: 4 }}>
               {t("ManagerTransactions.Selected Date")}{" "}
@@ -302,7 +303,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
             shadowOpacity: 0.1,
             shadowRadius: 4,
             elevation: 4,
-            height: 50
+            height: 50,
           }}
           className="items-center justify-center"
         >
@@ -340,29 +341,54 @@ const TransactionList: React.FC<TransactionListProps> = ({
         )}
 
         {showDatePicker && Platform.OS === "ios" && (
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 50,
-              position: "absolute",
-              left: 24,
-              top: "52%",
-              backgroundColor: "#f3f4f6",
-              borderRadius: 12,
-            }}
+          <Modal
+            transparent
+            animationType="fade"
+            visible={showDatePicker}
+            onRequestClose={() => setShowDatePicker(false)}
           >
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="inline"
-              style={{ width: 320, height: 260 }}
-              onChange={(event, date) => {
-                setShowDatePicker(false);
-                if (date) setSelectedDate(date);
-              }}
-            />
-          </View>
+            <TouchableOpacity
+              style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)" }}
+              activeOpacity={1}
+              onPress={() => setShowDatePicker(false)}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <TouchableOpacity activeOpacity={1}>
+                  <View
+                    style={{
+                      backgroundColor: "#ffffff", // solid, not translucent
+                      borderRadius: 12,
+                      padding: 8,
+                      // force a real opaque surface behind the blur
+                      overflow: "hidden",
+                    }}
+                  >
+                    <DateTimePicker
+                      value={selectedDate}
+                      mode="date"
+                      display="inline"
+                      themeVariant="light"
+                      style={{
+                        width: 320,
+                        height: 260,
+                        backgroundColor: "#ffffff",
+                      }}
+                      onChange={(event, date) => {
+                        setShowDatePicker(false);
+                        if (date) setSelectedDate(date);
+                      }}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </Modal>
         )}
 
         <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
