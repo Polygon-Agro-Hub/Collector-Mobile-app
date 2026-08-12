@@ -30,10 +30,25 @@ const formatKg = (val: number | string | undefined | null): string => {
   return String(rounded);
 };
 
+const formatPriceWithCommas = (val: number | string | undefined | null): string => {
+  if (val === undefined || val === null || val === "") return "";
+  const rawStr = String(val).replace(/,/g, "").trim();
+  if (!rawStr) return "";
+  const parts = rawStr.split(".");
+  const intNum = parseInt(parts[0] || "0", 10);
+  if (isNaN(intNum)) return "";
+  const formattedInt = intNum.toLocaleString("en-US");
+  if (parts.length > 1) {
+    return `${formattedInt}.${parts[1].slice(0, 2)}`;
+  }
+  return formattedInt;
+};
+
 const sanitizeDecimalInput = (text: string): string => {
   if (!text) return "";
+  let raw = text.replace(/,/g, "");
   // Remove negative signs, special characters, keeping only digits and dot
-  let sanitized = text.replace(/[^0-9.]/g, "");
+  let sanitized = raw.replace(/[^0-9.]/g, "");
   // Block multiple decimal points
   const parts = sanitized.split(".");
   if (parts.length > 2) {
@@ -122,14 +137,12 @@ export default function PurchaseProduct({
   useFocusEffect(
     useCallback(() => {
       setStep(1);
+      setBuyingQty(formatKg(defaultKg));
       setPurchasingPrice("");
       setQtyError("");
       setPriceError("");
       setUploadedFile(null);
-      if (product?.kg !== undefined) {
-        setBuyingQty(formatKg(product.kg));
-      }
-    }, [product])
+    }, [product, defaultKg])
   );
 
   // Validate Step 1 Purchase
@@ -147,12 +160,12 @@ export default function PurchaseProduct({
       hasError = true;
     }
 
-    const priceNum = parseFloat(purchasingPrice);
+    const priceNum = parseFloat(purchasingPrice.replace(/,/g, ""));
     if (!purchasingPrice.trim() || isNaN(priceNum) || priceNum <= 0) {
       setPriceError("Please enter a valid price per kg.");
       hasError = true;
     } else if (priceNum > ceilingPrice) {
-      setPriceError(`Price cannot exceed Rs. ${ceilingPrice.toFixed(2)}`);
+      setPriceError(`Price cannot exceed Rs. ${formatPriceWithCommas(ceilingPrice)}`);
       hasError = true;
     }
 
@@ -165,7 +178,7 @@ export default function PurchaseProduct({
     if (!uploadedFile) {
       Alert.alert(
         "Invoice Required",
-        "Please upload the invoice photo before confirming."
+        "Please upload the invoice file before confirming."
       );
       return;
     }
@@ -178,7 +191,7 @@ export default function PurchaseProduct({
         {
           srtAssignId: srtAssignId || 1,
           prchQty: parseFloat(buyingQty),
-          prchPrice: parseFloat(purchasingPrice),
+          prchPrice: parseFloat(purchasingPrice.replace(/,/g, "")),
           slip: uploadedFile.base64 || uploadedFile.uri,
           reqStatus: "Pending",
         },
@@ -250,13 +263,13 @@ export default function PurchaseProduct({
             <Text className="text-md text-[#54617D] mt-1">
               {step === 1 ? "Collect : " : "Collected : "}
               <Text className="text-[#980775] font-extrabold">
-                {formatKg(defaultKg)} kg
+                {step === 1 ? `${formatKg(defaultKg)} kg` : `${formatKg(buyingQty)} kg`}
               </Text>
             </Text>
             <Text className="text-md text-[#54617D] mt-0.5">
               Price per kg :{" "}
               <Text style={{ color: "#AC7F5E" }} className="font-bold">
-                Rs. {gradeAPrice.toFixed(2)}
+                Rs. {step === 1 ? formatPriceWithCommas(gradeAPrice) : formatPriceWithCommas(purchasingPrice)}
               </Text>
             </Text>
           </View>
@@ -266,7 +279,7 @@ export default function PurchaseProduct({
             <View className="gap-5">
               {/* Buying Quantity in kg */}
               <View>
-                <Text className="text-xs font-bold text-[#030E25] mb-2">
+                <Text className="text-sm font-bold text-[#030E25] mb-2">
                   Buying Quantity in kg
                 </Text>
                 <TextInput
@@ -277,11 +290,13 @@ export default function PurchaseProduct({
                     if (qtyError) setQtyError("");
                   }}
                   keyboardType="decimal-pad"
+                  placeholder="--Enter Buying Quantity in kg--"
+                  placeholderTextColor="#576879"
                   style={{
                     fontStyle: buyingQty ? "normal" : "italic",
                     color: buyingQty ? "#000000" : "#576879",
                   }}
-                  className={`rounded-full px-5 h-[50px] text-base font-bold ${
+                  className={`rounded-full px-5 h-[50px] text-sm font-semibold ${
                     qtyError ? "border border-red-500 bg-[#E9ECF1]" : "bg-[#F0F3F6]"
                   }`}
                 />
@@ -297,14 +312,15 @@ export default function PurchaseProduct({
 
               {/* Purchasing Price per kg (Rs.) */}
               <View>
-                <Text className="text-xs font-bold text-[#030E25] mb-2">
+                <Text className="text-sm font-bold text-[#030E25] mb-2">
                   Purchasing Price per kg (Rs.)
                 </Text>
                 <TextInput
                   value={purchasingPrice}
                   onChangeText={(text) => {
                     const sanitized = sanitizeDecimalInput(text);
-                    setPurchasingPrice(sanitized);
+                    const formatted = formatPriceWithCommas(sanitized);
+                    setPurchasingPrice(formatted);
                     if (priceError) setPriceError("");
                   }}
                   keyboardType="decimal-pad"
@@ -329,10 +345,10 @@ export default function PurchaseProduct({
               </View>
             </View>
           ) : (
-            /* STEP 2: Upload Invoice Photo */
+            /* STEP 2: Upload Invoice File */
             <View className="mt-2">
               <Text className="text-sm font-extrabold text-[#030E25] mb-2 text-center">
-                Upload Invoice Photo
+                Upload Invoice File
               </Text>
 
               <UploadFile
@@ -427,7 +443,7 @@ export default function PurchaseProduct({
         <AlertModal
           visible={successModalVisible}
           title="Purchase Confirmed"
-          message={`Successfully recorded purchase for ${productName}!`}
+          message="The Product Has Been Purchased Successfully"
           type="success"
           autoClose={true}
           duration={3000}
