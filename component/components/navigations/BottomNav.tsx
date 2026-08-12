@@ -128,6 +128,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   // Hide conditions
   if (
     isKeyboardVisible ||
+    userRole === ROLES.DISTRIBUTION_OFFICER ||
     ["PurchaseProduct", "PurchaseShortage"].includes(currentTabName)
   )
     return null;

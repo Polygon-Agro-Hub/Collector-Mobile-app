@@ -391,7 +391,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
                 onPress={() => navigation.navigate("ClaimOfficer")}
               >
                 <Text style={{ color: "#374151", fontWeight: "600" }}>
-                  {t("CollectionOfficersList.Claim Officer")}
+                  {t("ClaimOfficer.Claim Staff")}
                 </Text>
               </TouchableOpacity>
             </View>

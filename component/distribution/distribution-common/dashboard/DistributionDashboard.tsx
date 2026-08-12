@@ -211,59 +211,6 @@ navigation.navigate("Login");
     }
   };
 
-  const renderTargetStatus = () => {
-    if (isLoadingTarget) {
-      return (
-        <View
-          className="bg-white w-full rounded-[28px] mt-3 mb-2 p-4"
-          style={{
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4,
-          }}
-        >
-          <Text className="text-center text-gray-500">
-            Loading target status...
-          </Text>
-        </View>
-      );
-    }
-
-    if (targetPercentage !== null && targetPercentage < 100) {
-      return (
-        <View className="bg-white w-full rounded-[28px] mt-3 mb-2 p-4 border-[1px] border-[#DF9301]">
-          <Text className="text-center text-yellow-600 font-bold">
-            🚀{t("DistridutionaDashboard.Keep")}
-          </Text>
-          <Text className="text-center text-gray-500">
-            {t("DistridutionaDashboard.Youhavenotachieved")}
-          </Text>
-        </View>
-      );
-    } else {
-      return (
-        <View className="bg-white w-full rounded-[28px] mt-3 mb-2 p-4 border-[1px] border-[#2AAD7A] ">
-          <View className="flex-row justify-center items-center mb-2">
-            <Image
-              source={require("../../../../assets/images/dashboard/Applause.webp")}
-              style={{ width: 32, height: 32 }}
-              className="w-8 h-8 mr-2"
-              resizeMode="contain"
-            />
-            <Text className="text-center text-[#2AAD7A] font-bold">
-              {t("DistridutionaDashboard.Completed")}
-            </Text>
-          </View>
-          <Text className="text-center text-gray-500">
-            {t("DistridutionaDashboard.Youhaveachieved")}
-          </Text>
-        </View>
-      );
-    }
-  };
-
   const handleStartPacking = async () => {
     try {
       const token = store.getState().auth.token;
@@ -422,13 +369,11 @@ navigation.navigate("Login");
           </View>
         </TouchableOpacity>
 
-        {renderTargetStatus()}
-
         <View className="flex-row flex-wrap justify-between pb-12 mt-4">
           {getDashboardItems().map((item) => (
             <TouchableOpacity
               key={item.key}
-              className="bg-white p-4 rounded-3xl w-[48%] h-32 shadow-lg border border-[#980775] relative mb-4"
+              className="bg-white p-4 rounded-3xl w-[48%] h-40 shadow-lg border border-[#980775] relative mb-4"
               onPress={item.onPress}
               style={{
                 shadowColor: "#000000",

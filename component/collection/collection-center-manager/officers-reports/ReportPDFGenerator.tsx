@@ -105,11 +105,20 @@ export const handleGeneratePDF = async (
       0,
     );
 
+    // Pad single-digit collection counts to match the "08", "05"-style
+    // formatting shown in the report design.
+    const formatCount = (count: number): string =>
+      count.toString().padStart(2, "0");
+
     const tableRows = formattedData.length
       ? formattedData
           .map(
-            (item) =>
-              `<tr><td>${item.date}</td><td>${item.total}kg</td><td>${item.TCount}</td></tr>`,
+            (item) => `
+              <tr>
+                <td>${item.date}</td>
+                <td>${item.total > 0 ? `${item.total}kg` : "<em>-No Data-</em>"}</td>
+                <td>${item.TCount > 0 ? formatCount(item.TCount) : "<em>-No Data-</em>"}</td>
+              </tr>`,
           )
           .join("")
       : `<tr><td colspan="3" style="text-align: center; font-style: italic;">No transactions occurred between ${fromDate} and ${toDate}</td></tr>`;
@@ -122,87 +131,124 @@ export const handleGeneratePDF = async (
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Collection Officer Report</title>
         <style>
+          * {
+            box-sizing: border-box;
+          }
           body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             color: #333;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           .container {
-             width: 100%;
-             max-width: 800px;
-             margin: 0 auto;
-             padding: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px;
           }
           h1 {
             text-align: center;
-            margin-bottom: 10px;
+            margin: 0 0 20px 0;
             font-size: 18px;
+            font-weight: 600;
           }
-          .header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-top: 20px;
+
+          /* ---- Header info table (From / To / EMP ID / Role / etc.) ---- */
+          .header-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            table-layout: fixed;
           }
-          .header-item {
-            width: 48%;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
+          .header-table td {
+            padding: 0 6px;
+            vertical-align: middle;
           }
-          .header-item span {
-            display: inline-block;
-            width: 48%;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+          .header-label {
+            width: 22%;
+            font-size: 13px;
+            color: #333;
+            padding-left: 0;
           }
-          table {
+          .header-value {
+            width: 28%;
+            padding: 10px 12px;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+            background-color: #f7f7f7;
+            font-size: 13px;
+            color: #333;
+          }
+
+          /* ---- Data table (Date / Total Weight / Total Collections) ---- */
+          table.data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 24px;
+            border: 1px solid #e2e2e2;
           }
-          table th, table td {
-            border: 1px solid #ddd;
+          table.data-table th,
+          table.data-table td {
+            border: 1px solid #e2e2e2;
             padding: 10px;
             text-align: center;
+            font-size: 13px;
           }
-          table th {
-            background-color: #e0dbd4;
-            font-weight: bold;
+          table.data-table th {
+            background-color: #ece7e1;
+            font-weight: 600;
           }
+
           .footer {
-            margin-top: 20px;
-            
-            font-size: 12px;
-            
-            color: #555;
+            margin-top: 16px;
+            font-size: 11px;
+            color: #777;
           }
         </style>
       </head>
       <body>
         <div class="container">
           <h1>Collection Officer Report</h1>
-          
-          <div class="header">
-            <div class="header-item"><span>From</span><span>${fromDate}</span></div>
-            <div class="header-item"><span>To</span><span>${toDate}</span></div>
-            <div class="header-item"><span>EMP ID</span><span>${officerId}</span></div>
-             <div class="header-item"><span>Role</span><span>${jobRole}</span></div>
-            <div class="header-item"><span>First Name</span><span>${firstName}</span></div>
-            <div class="header-item"><span>Last Name</span><span>${lastName}</span></div>
-            <div class="header-item"><span>Weight</span><span>${totalWeight}kg</span></div>
-            <div class="header-item"><span>Collections</span><span>${totalFarmers}</span></div>
-          </div>
 
-          <table>
-          <tr><th>Date</th><th>Total Weight</th><th>Total Collections</th></tr>
-          ${tableRows}
+          <table class="header-table">
+            <tr>
+              <td class="header-label">From</td>
+              <td class="header-value">${fromDate}</td>
+              <td class="header-label">To</td>
+              <td class="header-value">${toDate}</td>
+            </tr>
+            <tr>
+              <td class="header-label">EMP ID</td>
+              <td class="header-value">${officerId}</td>
+              <td class="header-label">Role</td>
+              <td class="header-value">${jobRole}</td>
+            </tr>
+            <tr>
+              <td class="header-label">First Name</td>
+              <td class="header-value">${firstName}</td>
+              <td class="header-label">Last Name</td>
+              <td class="header-value">${lastName}</td>
+            </tr>
+            <tr>
+              <td class="header-label">Weight</td>
+              <td class="header-value">${totalWeight}kg</td>
+              <td class="header-label">Collections</td>
+              <td class="header-value">${totalFarmers}</td>
+            </tr>
           </table>
 
-           <div class="footer">This report is generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</div>
+          <table class="data-table">
+            <tr>
+              <th>Date</th>
+              <th>Total Weight</th>
+              <th>Total Collections</th>
+            </tr>
+            ${tableRows}
+          </table>
+
+          <div class="footer">This report is generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</div>
         </div>
       </body>
       </html>

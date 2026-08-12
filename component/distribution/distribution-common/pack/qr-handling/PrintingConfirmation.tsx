@@ -24,6 +24,8 @@ interface PrintStep {
   textColor: string;
   circleBgColor: string;
   circleTextColor: string;
+  packageId?: number;
+  packageIndex?: number;
 }
 
 export interface PackageItem {
@@ -52,20 +54,21 @@ export default function PrintingConfirmation({
   } = route.params || {};
 
   const insets = useSafeAreaInsets();
-
-  // Convert (R) to (Retail) and (W) to (Wholesale) for display inside the QR card
-  const displayOrderNumber = orderNumber.includes("(R)")
-    ? orderNumber.replace("(R)", "(Retail)")
-    : orderNumber.includes("(W)")
-      ? orderNumber.replace("(W)", "(Wholesale)")
-      : orderNumber;
+  const rawType = String(route.params?.type || "").toUpperCase();
+  const isWholesale = rawType === "W" || rawType === "WHOLESALE" || String(orderNumber).includes("(W)") || String(orderNumber).includes("(Wholesale)") || String(orderNumber).includes("Wholesale");
+  const cleanInv = String(invoiceNumber || orderNumber).replace(/\s*\([^\)]*\)/g, "").trim();
+  const displayOrderNumber = isWholesale ? `${cleanInv} (Wholesale)` : `${cleanInv} (Retail)`;
 
   // Build dynamic print steps based on package count
   const steps: PrintStep[] = [];
 
+  // Calculate total physical packages based on package quantity (pkg.qty)
+  const totalPhysicalPackages = packagesList && packagesList.length > 0
+    ? packagesList.reduce((acc: number, pkg: any) => acc + Math.max(1, Number(pkg.qty || 1)), 0)
+    : 0;
+
   // Calculate total physical boxes (Package boxes + 1 Alacarte box if present)
-  const totalBoxes =
-    (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
+  const totalBoxes = totalPhysicalPackages + (alacarteCount > 0 ? 1 : 0);
 
   // 1. If total physical boxes > 1, add Main Container as Step 1
   if (totalBoxes > 1) {
@@ -80,20 +83,26 @@ export default function PrintingConfirmation({
     });
   }
 
-  // 2. Add individual package steps with item counts
+  // 2. Add individual package steps based on actual package quantity (pkg.qty)
   if (packagesList && packagesList.length > 0) {
-    packagesList.forEach((pkg: PackageItem) => {
-      const stepId = steps.length + 1;
-      const formattedIndex = String(stepId).padStart(2, "0");
-      steps.push({
-        id: stepId,
-        type: "package",
-        label: pkg.name,
-        formattedIndex,
-        textColor: "#980775",
-        circleBgColor: "bg-[#fdf4ff]",
-        circleTextColor: "text-[#980775]",
-      });
+    packagesList.forEach((pkg: any, pkgIdx: number) => {
+      const pkgQty = Math.max(1, Number(pkg.qty || 1));
+      for (let i = 0; i < pkgQty; i++) {
+        const stepId = steps.length + 1;
+        const formattedIndex = String(stepId).padStart(2, "0");
+        const label = pkgQty > 1 ? `${pkg.name} (${i + 1}/${pkgQty})` : pkg.name;
+        steps.push({
+          id: stepId,
+          type: "package",
+          label: label,
+          formattedIndex,
+          textColor: "#980775",
+          circleBgColor: "bg-[#fdf4ff]",
+          circleTextColor: "text-[#980775]",
+          packageId: pkg.id,
+          packageIndex: pkgIdx,
+        });
+      }
     });
   }
 
@@ -162,25 +171,9 @@ export default function PrintingConfirmation({
       const processOrderId =
         route.params?.processOrderId || route.params?.orderId || 3131;
 
-      let currentPackageId: number | null = null;
-      const totalPhysicalBoxes =
-        (packagesList ? packagesList.length : 0) + (alacarteCount > 0 ? 1 : 0);
-      const hasMainContainer = totalPhysicalBoxes > 1;
-      const packageStepIndex = hasMainContainer
-        ? currentStep - 2
-        : currentStep - 1;
+      const activeStep = steps[currentStep - 1] || steps[0];
 
-      if (
-        packagesList &&
-        packageStepIndex >= 0 &&
-        packageStepIndex < packagesList.length
-      ) {
-        currentPackageId = packagesList[packageStepIndex].id;
-      }
-
-      const isMainContainerStep = hasMainContainer && currentStep === 1;
-
-      if (isMainContainerStep) {
+      if (activeStep.type === "main") {
         const response = await axios.post(
           `${environment.API_BASE_URL}api/packing/qr-opened`,
           {
@@ -214,17 +207,14 @@ export default function PrintingConfirmation({
         setAlertMessage("Main Container QR Code Printed Successfully!");
         setAlertVisible(true);
       } else {
-        const isPackageStep =
-          packagesList &&
-          packageStepIndex >= 0 &&
-          packageStepIndex < packagesList.length;
+        const isPackageStep = activeStep.type === "package";
         const response = await axios.post(
           `${environment.API_BASE_URL}api/packing/qr-opened`,
           {
             orderId: processOrderId,
-            orderpackageId: currentPackageId,
+            orderpackageId: activeStep.packageId || null,
             isPackage: isPackageStep ? 1 : 0,
-            packageIndex: isPackageStep ? packageStepIndex : 0,
+            packageIndex: isPackageStep ? (activeStep.packageIndex ?? 0) : 0,
             rowId: route.params?.rowId,
           },
           { headers: { Authorization: `Bearer ${token}` } },
@@ -261,6 +251,7 @@ export default function PrintingConfirmation({
           setAlertVisible(true);
         }
       }
+
     } catch (err: any) {
       console.error("Error updating order status on QR print:", err);
       const msg = err.response?.data?.message || "Failed to communicate with packing server. Please try again.";
@@ -360,12 +351,35 @@ export default function PrintingConfirmation({
         </View>
       </ScrollView>
 
-      <View className="px-6 pt-4 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
+      <View className="px-6 pt-4 bg-white gap-3" style={{ paddingBottom: insets.bottom + 16 }}>
+        <TouchableOpacity
+          onPress={handleBack}
+          disabled={isPrinting}
+          className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-1"
+          activeOpacity={0.8}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.12,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+        >
+          <Text className="text-[#030E25] font-extrabold text-sm">Cancel</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={handlePrintPress}
           disabled={isPrinting}
-          className={`w-full h-[50px] rounded-full items-center justify-center shadow-lg ${isPrinting ? "bg-gray-400" : "bg-black"}`}
+          className={`w-full h-[50px] rounded-full items-center justify-center ${isPrinting ? "bg-gray-400" : "bg-black"}`}
           activeOpacity={0.8}
+          style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.15,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
         >
           {isPrinting ? (
             <ActivityIndicator color="white" size="small" />

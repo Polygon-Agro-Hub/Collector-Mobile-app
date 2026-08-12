@@ -16,6 +16,7 @@ import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface ShortageProductItem {
   srtAssignId: number;
@@ -43,18 +44,26 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
   const [products, setProducts] = useState<ShortageProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    const onBackPress = () => {
-      navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-      return true;
-    };
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
-    return () => backHandler.remove();
-  }, [navigation]);
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+        }
+        return true;
+      };
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+      return () => backHandler.remove();
+    }, [navigation]),
+  );
+  
 
   const fetchShortages = async () => {
     try {
@@ -64,7 +73,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
         `${environment.API_BASE_URL}api/purchase-shortage`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       if (res.data && res.data.success) {
@@ -89,7 +98,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
   useFocusEffect(
     useCallback(() => {
       fetchShortages();
-    }, [])
+    }, []),
   );
 
   return (
@@ -98,7 +107,9 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
       <CustomHeader
         title="Assigned Products"
         navigation={navigation}
-        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+        onBackPress={() =>
+          navigation.navigate("Main", { screen: "DistridutionaDashboard" })
+        }
       />
 
       {loading && !refreshing ? (
@@ -110,7 +121,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
         /* Active Product List State */
         <ScrollView
           className="flex-1 bg-white px-6 pt-4"
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: 40 + insets.bottom }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -172,9 +183,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
                       style={{ color: subTextColor }}
                       className="text-sm font-semibold mt-0.5"
                     >
-                      {isDisabled
-                        ? `0 kg`
-                        : `${formatKg(item.kg)} kg`}
+                      {isDisabled ? `0 kg` : `${formatKg(item.kg)} kg`}
                     </Text>
                   </View>
 

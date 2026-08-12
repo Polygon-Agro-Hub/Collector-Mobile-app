@@ -11,6 +11,8 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  Platform,
+  StyleSheet,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
@@ -73,7 +75,6 @@ const CustomDatePicker = ({
 
   const { t } = useTranslation();
 
-
   const startYear = minimumDate ? minimumDate.getFullYear() : 1900;
   const endYear = maximumDate.getFullYear();
   const years = Array.from(
@@ -122,7 +123,13 @@ const CustomDatePicker = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: '#00000040' }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "flex-end",
+          backgroundColor: "#00000040",
+        }}
+      >
         <View className="bg-white rounded-t-3xl pb-8">
           <View className="px-5 py-4 border-b border-gray-200">
             <TouchableOpacity onPress={onClose}>
@@ -253,7 +260,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [successorNicError, setSuccessorNicError] = useState("");
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
 
   const route = useRoute<GoviPensionFormProps["route"]>();
   const { farmerNIC, farmerName, farmerPhone, userId } = route.params || {};
@@ -531,8 +538,10 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
   const handleNavigateToFarmerQr = () => {
     setShowSuccessModal(false);
-    navigation.navigate("Main" as any, { screen: "FarmerQr", params: { userId } })
-  
+    navigation.navigate("Main" as any, {
+      screen: "FarmerQr",
+      params: { userId },
+    });
   };
 
   const handleSubmit = () => {
@@ -730,6 +739,23 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const styles = StyleSheet.create({
+    secondaryButton: {
+      backgroundColor: "#E5E5E5", // explicit, not just className
+      ...Platform.select({
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08, // lowered — was washing out the fill
+          shadowRadius: 2,
+        },
+        android: {
+          elevation: 3,
+        },
+      }),
+    },
+  });
 
   const renderSection1 = () => (
     <ScrollView
@@ -1199,23 +1225,21 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       {currentSection === 1 ? renderSection1() : renderSection2()}
 
       {/* Action Buttons */}
-     <View className="px-5 pt-3 bg-white " style={{ paddingBottom: Math.max(insets.bottom, 16) }}>
-
+      <View
+        className="px-5 pt-3 bg-white "
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      >
         {currentSection === 1 ? (
           <View className="flex-row gap-4">
+            {/* Cancel button */}
+
             <TouchableOpacity
               onPress={handleCancel}
-              className="flex-1 bg-[#ECECEC] rounded-full py-4"
+              className="flex-1 rounded-full py-4"
               disabled={isSubmitting}
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 6,
-                elevation: 4,
-              }}
+              style={styles.secondaryButton}
             >
-              <Text className="text-[#8E8E8E] text-center font-medium text-base">
+              <Text className="text-[#8E8E8E] text-center font-semibold text-base">
                 {t("GoviPensionForm.Cancel")}
               </Text>
             </TouchableOpacity>
@@ -1238,19 +1262,14 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           </View>
         ) : (
           <View className="flex-row gap-4">
+            {/* Back button */}
             <TouchableOpacity
               onPress={handlePrevious}
-              className="flex-1 bg-[#ECECEC] rounded-full py-4"
+              className="flex-1 rounded-full py-4"
               disabled={isSubmitting}
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 6,
-                elevation: 4,
-              }}
+              style={styles.secondaryButton}
             >
-              <Text className="text-[#8E8E8E] text-center font-medium text-base">
+              <Text className="text-[#8E8E8E] text-center font-semibold text-base">
                 {t("GoviPensionForm.Back")}
               </Text>
             </TouchableOpacity>

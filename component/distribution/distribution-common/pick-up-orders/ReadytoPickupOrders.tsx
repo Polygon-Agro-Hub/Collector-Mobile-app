@@ -18,6 +18,7 @@ import {
 } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RootStackParamList } from "@/types/types";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
@@ -51,6 +52,7 @@ interface Order {
   paymentMethod: string;
   isPaid: boolean;
   amount: number;
+  packTime: string; 
   creditPaid: number | null;
   remainingAmount: number;
   isFullyPaid: number;
@@ -106,6 +108,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 }) => {
   const [searchPhone, setSearchPhone] = useState("");
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -405,15 +408,12 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
         {/* Content Area */}
         <View className="flex-1">
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{ flexGrow: 1 }}
-          >
+          <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
             {searchState === "no-orders-at-all" && <NoOrdersState />}
 
             {(searchState === "initial" || searchState === "results") &&
               orders.length > 0 && (
-                <View className="p-4 pb-24">
+                <View className="p-4 pb-4">
                   {filteredOrders.map((order, index) => (
                     <OrderCard
                       key={`${order.orderId}-${index}`}
@@ -440,37 +440,40 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
               />
             )}
           </ScrollView>
-        </View>
 
-        {/* Clear Search Button - Fixed at bottom when searching */}
-        {isSearching && (
-          <View className="absolute bottom-20 left-0 right-0 bg-white px-6 py-3  border-gray-100">
-            <TouchableOpacity
-              onPress={handleClearSearch}
-              style={{
-                backgroundColor: "#000000",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 8,
-              }}
-              className="bg-black px-8 py-3 rounded-full w-full items-center justify-center"
+          {/* Clear Search Button - sits in normal flow below the list, above the tab bar. Nothing renders behind it. */}
+          {isSearching && (
+            <View
+              className="bg-white px-6 pt-3"
+              style={{ paddingBottom: 8 }}
             >
-              <View className="flex-row items-center">
-                <Ionicons
-                  name="close"
-                  size={20}
-                  color="#fff"
-                  style={{ marginRight: 8 }}
-                />
-                <Text className="text-white text-base font-semibold">
-                  {t("ReadytoPickupOrders.Clear Search")}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
+              <TouchableOpacity
+                onPress={handleClearSearch}
+                style={{
+                  backgroundColor: "#000000",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 6,
+                  elevation: 8,
+                }}
+                className="bg-black px-8 py-3 rounded-full w-full items-center justify-center"
+              >
+                <View className="flex-row items-center">
+                  <Ionicons
+                    name="close"
+                    size={20}
+                    color="#fff"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text className="text-white text-base font-semibold">
+                    {t("ReadytoPickupOrders.Clear Search")}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -504,7 +507,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   const scheduledDate = formatDateYMD(order.sheduleDate);
   const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
 
-  const readyDate = new Date(order.outDlvrDate);
+ const readyDate = new Date(order.packTime);
   const readyMonth = String(readyDate.getMonth() + 1).padStart(2, "0");
   const readyDay = String(readyDate.getDate()).padStart(2, "0");
   const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
@@ -523,7 +526,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   };
 
   const remaining = order.remainingAmount ?? order.fullTotal;
-  const shouldShowAmount = !order.isFullyPaid;
+  const shouldShowAmount = !(order.isPaid && order.paymentMethod === "Card");
   const cashAmount = formatCurrency(remaining);
 
   return (

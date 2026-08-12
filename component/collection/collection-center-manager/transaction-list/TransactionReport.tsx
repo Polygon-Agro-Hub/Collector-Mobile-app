@@ -550,7 +550,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
     }
   };
 
-  const handleDownloadPDF = async () => {
+const handleDownloadPDF = async () => {
     try {
       const uri = await generatePDF();
 
@@ -559,8 +559,9 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         return;
       }
 
-      const date = new Date().toISOString().slice(0, 10);
-      const fileName = `GRN_${crops.length > 0 ? crops[0].invoiceNumber : "N/A"}_${date}.pdf`;
+      const fileName = `PurchaseReport_${
+        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
+      }_${selectedDate}.pdf`;
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");
@@ -630,11 +631,22 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         }
       } else if (Platform.OS === "ios") {
         if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(uri, {
-            dialogTitle: "Save PDF",
-            mimeType: "application/pdf",
-            UTI: "com.adobe.pdf",
-          });
+          const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
+          try {
+            await FileSystem.copyAsync({ from: uri, to: newUri });
+            await Sharing.shareAsync(newUri, {
+              dialogTitle: "Save PDF",
+              mimeType: "application/pdf",
+              UTI: "com.adobe.pdf",
+            });
+          } catch (error) {
+            console.error("Error renaming PDF before share:", error);
+            await Sharing.shareAsync(uri, {
+              dialogTitle: "Save PDF",
+              mimeType: "application/pdf",
+              UTI: "com.adobe.pdf",
+            });
+          }
         } else {
           Alert.alert("Error", "Sharing is not available on this device");
         }

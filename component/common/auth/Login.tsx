@@ -112,7 +112,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         if (!ALLOWED_ROLES.includes(data.jobRole.toLowerCase())) {
           setEmpIdError(
             t(
-              "Error.Access denied. Your role is not authorized to use this application.",
+              "Error.Access Denied",
             ),
           );
           return;
@@ -213,7 +213,7 @@ const netState = await NetInfo.fetch();
           Alert.alert(
             t("Error.error"),
             t(
-              "Error.Access denied. Your role is not authorized to use this application.",
+              "Error.Access Denied",
             ),
           );
           return;
@@ -269,7 +269,7 @@ const netState = await NetInfo.fetch();
         Alert.alert(
           t("Error.error"),
           t(
-            "Error.Access denied. Your role is not authorized to use this application.",
+            "Error.Access Denied",
           ),
         );
         return;
@@ -426,7 +426,7 @@ const netState = await NetInfo.fetch();
               resizeMode="contain"
             />
             <TextInput
-              className="flex-1 text-base pl-2"
+              className="flex-1 text-black text-base pl-2"
               onChangeText={handleEmpIdChange}
               autoCapitalize="characters"
               value={empid}
@@ -436,6 +436,7 @@ const netState = await NetInfo.fetch();
                 paddingVertical: 8,
                 includeFontPadding: true,
                 textAlignVertical: "center",
+                color: "#000000",
               }}
             />
           </View>
@@ -459,7 +460,7 @@ const netState = await NetInfo.fetch();
               resizeMode="contain"
             />
             <TextInput
-              className="flex-1 text-base pl-2"
+              className="flex-1 text-black text-base pl-2"
               secureTextEntry={secureTextEntry}
               onChangeText={handlePasswordChange}
               value={password}
@@ -469,6 +470,7 @@ const netState = await NetInfo.fetch();
                 paddingVertical: 8,
                 includeFontPadding: true,
                 textAlignVertical: "center",
+                color: "#000000",
               }}
             />
             <TouchableOpacity

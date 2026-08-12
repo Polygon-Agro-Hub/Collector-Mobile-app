@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   BackHandler,
+  Modal,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -501,18 +502,17 @@ setTimeout(() => {
       </ScrollView>
 
       {/* Logout Lottie Animation Overlay */}
-      {isLoggingOut && (
+      <Modal
+        visible={isLoggingOut}
+        transparent={false}
+        animationType="fade"
+      >
         <View
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            flex: 1,
             backgroundColor: "white",
             justifyContent: "center",
             alignItems: "center",
-            zIndex: 9999,
           }}
         >
           <LottieView
@@ -533,7 +533,7 @@ setTimeout(() => {
             {t("SideMenu.Logging out")}
           </Text>
         </View>
-      )}
+      </Modal>
     </View>
   );
 };

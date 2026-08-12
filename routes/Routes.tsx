@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Alert } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -10,10 +10,21 @@ import store from "@/services/reducxStore";
 import { logoutUser } from "../store/authSlice";
 import BottomNav from "@/component/components/navigations/BottomNav";
 
-// --- Screens ---
+// --- Public / Common Screens ---
 import Login from "@/component/common/auth/Login";
 import BannedScreen from "@/component/common/auth/BannedScreen";
 import ChangePassword from "@/component/common/auth/ChangePassword";
+import Profile from "@/component/common/auth/Profile";
+import Splash from "@/component/common/auth/Splash";
+import Lanuage from "@/component/common/lanuage/Lanuage";
+import OfficerQr from "@/component/common/auth/OfficerQrCode";
+import SideMenu from "@/component/components/navigations/SideMenu";
+import PrivacyPolicy from "@/component/common/privacy-policy/PrivacyPolicy";
+import LoadingPage from "@/component/components/loading/LoadingPage";
+import ComplainPage from "@/component/common/complain/ComplainPage";
+import ComplainHistory from "@/component/common/complain/ComplainHistory";
+
+// --- Collection Screens ---
 import Registeredfarmer from "@/component/collection/collection-common/farmer/Registeredfarmer";
 import Ufarmercropdetails from "@/component/collection/collection-common/farmer/Ufarmercropdetails";
 import CollectionDashboard from "@/component/collection/collection-common/dashboard/CollectionDashboard";
@@ -22,15 +33,12 @@ import UnregisteredFarmerDetails from "@/component/collection/collection-common/
 import UnregisteredCropDetails from "@/component/collection/collection-common/farmer/UnregisteredCropDetails";
 import SearchFarmer from "@/component/collection/collection-common/farmer/SearchFarmer";
 import FarmerQr from "@/component/collection/collection-common/farmer/FarmerQr";
-import ComplainPage from "@/component/common/complain/ComplainPage";
-import Profile from "@/component/common/auth/Profile";
 import ReportPage from "@/component/collection/collection-common/goods-received-note/ReportPage";
 import SearchPriceScreen from "@/component/collection/collection-common/search-price/SearchPriceScreen";
 import PriceChart from "@/component/collection/collection-common/price-chart/PriceChart";
 import CollectionOfficersList from "@/component/collection/collection-center-manager/manage-collection-officers/CollectionOfficersList";
 import OfficerSummary from "@/component/collection/collection-center-manager/manage-collection-officers/OfficerSummary";
 import ReportGenerator from "@/component/collection/collection-center-manager/officers-reports/ReportGenerator";
-import ComplainHistory from "@/component/common/complain/ComplainHistory";
 import DailyTargetList from "@/component/collection/collection-common/daily-target/DailyTargetList";
 import AddOfficer from "@/component/collection/collection-center-manager/manage-collection-officers/AddOfficer";
 import ClaimOfficer from "@/component/collection/collection-center-manager/manage-collection-officers/ClaimOfficer";
@@ -51,6 +59,11 @@ import NewReport from "@/component/collection/collection-common/goods-received-n
 import TransactionReport from "@/component/collection/collection-center-manager/transaction-list/TransactionReport";
 import UpdateFarmerBankDetails from "@/component/collection/collection-common/farmer-bank-details/UpdateFarmerBankDetails";
 import otpBankDetailsupdate from "@/component/collection/collection-common/farmer-bank-details/otpBankDetailsupdate";
+import GoviPensionForm from "@/component/collection/collection-common/govi-pension/GoviPensionForm";
+import GoviPensionStatus from "@/component/collection/collection-common/govi-pension/GoviPensionStatus";
+import NotEligibleScreen from "@/component/collection/collection-common/govi-pension/NotEligibleScreen";
+
+// --- Distribution Screens ---
 import DistributionDashboard from "@/component/distribution/distribution-common/dashboard/DistributionDashboard";
 import PurchaseShortage from "@/component/distribution/distribution-common/purchase-shortage/PurchaseShortage";
 import PurchaseProduct from "@/component/distribution/distribution-common/purchase-shortage/PurchaseProduct";
@@ -64,15 +77,6 @@ import ReceivedCash from "@/component/distribution/distribution-center-manager/r
 import ReceivedCashTransfer from "@/component/distribution/distribution-center-manager/received-cash/ReceivedCashTransfer";
 import ReceivedCashOfficer from "@/component/distribution/distribution-officer/received-cash/ReceivedCashOfficer";
 import ReceivedCashQrCode from "@/component/distribution/distribution-officer/received-cash/ReceivedCashQrCode";
-import GoviPensionForm from "@/component/collection/collection-common/govi-pension/GoviPensionForm";
-import GoviPensionStatus from "@/component/collection/collection-common/govi-pension/GoviPensionStatus";
-import NotEligibleScreen from "@/component/collection/collection-common/govi-pension/NotEligibleScreen";
-import Splash from "@/component/common/auth/Splash";
-import Lanuage from "@/component/common/lanuage/Lanuage";
-import OfficerQr from "@/component/common/auth/OfficerQrCode";
-import SideMenu from "@/component/components/navigations/SideMenu";
-import PrivacyPolicy from "@/component/common/privacy-policy/PrivacyPolicy";
-import LoadingPage from "@/component/components/loading/LoadingPage";
 import DistributionAddOfficer from "@/component/distribution/distribution-center-manager/manage-officers/DistributionAddOfficer";
 import SelectRow from "@/component/distribution/distribution-common/pack/select-row/SelectRow";
 import QRHandling from "@/component/distribution/distribution-common/pack/qr-handling/QRHandling";
@@ -140,6 +144,16 @@ export function withRoleGuard<P extends object>(
 
       const navigation = (props as any)?.navigation;
 
+      if (!jobRole) {
+        if (navigationRef.isReady()) {
+          navigationRef.reset({
+            index: 0,
+            routes: [{ name: UNAUTHORIZED_FALLBACK_ROUTE }],
+          });
+        }
+        return;
+      }
+
       Alert.alert(
         "Access Denied",
         "You don't have permission to view this screen.",
@@ -163,7 +177,7 @@ export function withRoleGuard<P extends object>(
         { cancelable: false }
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isAllowed]);
+    }, [isAllowed, jobRole]);
 
     if (!isAllowed) {
       // Render nothing while the alert/redirect above is in flight.
@@ -180,8 +194,57 @@ export function withRoleGuard<P extends object>(
   return GuardedScreen;
 }
 
-// --- Bottom tab screens (inside the "Main" stack screen) ---
-const TAB_SCREENS: TabRouteConfig[] = [
+// ============================================================================
+// 1. PUBLIC ROUTES
+// ============================================================================
+const PUBLIC_TAB_SCREENS: TabRouteConfig[] = [
+  {
+    name: "ComplainHistory",
+    component: ComplainHistory as any,
+    allowedRoles: "PUBLIC",
+  },
+  {
+    name: "SideMenu",
+    component: SideMenu as any,
+    allowedRoles: "PUBLIC",
+  },
+  {
+    name: "OfficerQr",
+    component: OfficerQr as any,
+    allowedRoles: "PUBLIC",
+  },
+  {
+    name: "ComplainPage",
+    component: ComplainPage as any,
+    allowedRoles: "PUBLIC",
+  },
+];
+
+const PUBLIC_STACK_SCREENS: StackRouteConfig[] = [
+  { name: "Splash", component: Splash, allowedRoles: "PUBLIC" },
+  { name: "Login", component: Login, allowedRoles: "PUBLIC" },
+  { name: "BannedScreen", component: BannedScreen as any, allowedRoles: "PUBLIC" },
+  { name: "Lanuage", component: Lanuage, allowedRoles: "PUBLIC" },
+  { name: "Profile", component: Profile, allowedRoles: "PUBLIC" },
+  { name: "PrivacyPolicy", component: PrivacyPolicy, allowedRoles: "PUBLIC" },
+  { name: "ChangePassword", component: ChangePassword as any, allowedRoles: "PUBLIC" },
+  { name: "LoadingPage", component: LoadingPage as any, allowedRoles: "PUBLIC" },
+  {
+    name: "NoCollectionCenterScreen",
+    component: NoCollectionCenterScreen,
+    allowedRoles: "PUBLIC",
+  },
+  {
+    name: "Main",
+    component: MainTabNavigator,
+    allowedRoles: "PUBLIC",
+  },
+];
+
+// ============================================================================
+// 2. COLLECTION ROUTES
+// ============================================================================
+const COLLECTION_TAB_SCREENS: TabRouteConfig[] = [
   {
     name: "CollectionDashboard",
     component: CollectionDashboard as any,
@@ -218,11 +281,6 @@ const TAB_SCREENS: TabRouteConfig[] = [
     allowedRoles: [ROLES.COLLECTION_MANAGER],
   },
   {
-    name: "ComplainHistory",
-    component: ComplainHistory as any,
-    allowedRoles: "PUBLIC",
-  },
-  {
     name: "TransactionList",
     component: TransactionList as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER],
@@ -231,11 +289,6 @@ const TAB_SCREENS: TabRouteConfig[] = [
     name: "OfficerSummary",
     component: OfficerSummary as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER],
-  },
-  {
-    name: "ViewPickupOrders",
-    component: ViewPickupOrders as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {
     name: "ReportGenerator",
@@ -247,17 +300,6 @@ const TAB_SCREENS: TabRouteConfig[] = [
     component: UpdateFarmerBankDetails as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
-  {
-    name: "DistridutionaDashboard",
-    component: DistributionDashboard as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-  {
-    name: "PurchaseShortage",
-    component: PurchaseShortage as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
   {
     name: "UnregisteredCropDetails",
     component: UnregisteredCropDetails as any,
@@ -284,16 +326,6 @@ const TAB_SCREENS: TabRouteConfig[] = [
     allowedRoles: [ROLES.COLLECTION_MANAGER],
   },
   {
-    name: "ReadytoPickupOrders",
-    component: ReadytoPickupOrders as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-  {
-    name: "ReceivedCashOfficer",
-    component: ReceivedCashOfficer as any,
-    allowedRoles: [ROLES.DISTRIBUTION_OFFICER],
-  },
-  {
     name: "UnregisteredFarmerDetails",
     component: UnregisteredFarmerDetails as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
@@ -309,19 +341,9 @@ const TAB_SCREENS: TabRouteConfig[] = [
     allowedRoles: [ROLES.COLLECTION_MANAGER],
   },
   {
-    name: "DistributionOfficersList",
-    component: DistributionOfficersList as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-  {
     name: "ClaimOfficer",
     component: ClaimOfficer as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER],
-  },
-  {
-    name: "ClaimDistribution",
-    component: ClaimDistribution as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
   },
   {
     name: "OTPE",
@@ -329,29 +351,14 @@ const TAB_SCREENS: TabRouteConfig[] = [
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
   {
-    name: "DistributionAddOfficer",
-    component: DistributionAddOfficer as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-  {
     name: "EditTargetScreen",
     component: EditTargetScreen as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
+    allowedRoles: [ROLES.COLLECTION_MANAGER],
   },
   {
     name: "PassTargetBetweenOfficers",
     component: PassTargetBetweenOfficers as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER],
-  },
-  {
-    name: "SideMenu",
-    component: SideMenu as any,
-    allowedRoles: "PUBLIC",
-  },
-  {
-    name: "OfficerQr",
-    component: OfficerQr as any,
-    allowedRoles: "PUBLIC",
   },
   {
     name: "AddOfficer",
@@ -369,20 +376,222 @@ const TAB_SCREENS: TabRouteConfig[] = [
     allowedRoles: [ROLES.COLLECTION_MANAGER],
   },
   {
+    name: "RecieveTargetBetweenOfficers",
+    component: RecieveTargetBetweenOfficers as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER],
+  },
+];
+
+const COLLECTION_STACK_SCREENS: StackRouteConfig[] = [
+  {
+    name: "ReportPage",
+    component: ReportPage,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "NewReport",
+    component: NewReport as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "QRScanner",
+    component: QRScanner,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "Registeredfarmer",
+    component: Registeredfarmer,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "Ufarmercropdetails",
+    component: Ufarmercropdetails,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "TransactionReport",
+    component: TransactionReport as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER],
+  },
+  {
+    name: "GoviPensionForm",
+    component: GoviPensionForm as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "GoviPensionStatus",
+    component: GoviPensionStatus as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "NotEligibleScreen",
+    component: NotEligibleScreen as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+];
+
+// ============================================================================
+// 3. DISTRIBUTION ROUTES
+// ============================================================================
+const DISTRIBUTION_TAB_SCREENS: TabRouteConfig[] = [
+  {
+    name: "ViewPickupOrders",
+    component: ViewPickupOrders as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "DistridutionaDashboard",
+    component: DistributionDashboard as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "PurchaseShortage",
+    component: PurchaseShortage as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "PurchaseProduct",
+    component: PurchaseProduct as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReadytoPickupOrders",
+    component: ReadytoPickupOrders as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReceivedCashOfficer",
+    component: ReceivedCashOfficer as any,
+    allowedRoles: [ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "DistributionOfficersList",
+    component: DistributionOfficersList as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+  },
+  {
+    name: "ClaimDistribution",
+    component: ClaimDistribution as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+  },
+  {
+    name: "DistributionAddOfficer",
+    component: DistributionAddOfficer as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+  },
+  {
+    name: "DistributionCenterTarget",
+    component: DistributionCenterTarget as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
+  },
+];
+
+const DISTRIBUTION_STACK_SCREENS: StackRouteConfig[] = [
+  {
+    name: "qrcode",
+    component: Qrcode as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReceivedCashQrCode",
+    component: ReceivedCashQrCode as any,
+    allowedRoles: [ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "SelectRow",
+    component: SelectRow as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "QRHandling",
+    component: QRHandling as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReadyToPrint",
+    component: ReadyToPrint as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "PrintingConfirmation",
+    component: PrintingConfirmation as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "WelcomeToPacking",
+    component: WelcomeToPacking as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "Packing",
+    component: Packing as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "WelcomeToQC",
+    component: WelcomeToQC as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "Group",
+    component: Group as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "SelectOrder",
+    component: SelectOrder as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "SelectRowToAssign",
+    component: SelectRowToAssign as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ConfirmRowAssign",
+    component: ConfirmRowAssign as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
     name: "DistributionCenterTarget",
     component: DistributionCenterTarget as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {
-    name: "ComplainPage",
-    component: ComplainPage as any,
-    allowedRoles: "PUBLIC",
+    name: "OrderDetails",
+    component: OrderDetails as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {
-    name: "RecieveTargetBetweenOfficers",
-    component: RecieveTargetBetweenOfficers as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER],
+    name: "DigitalSignature",
+    component: DigitalSignature as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
+  {
+    name: "ReceivedCash",
+    component: ReceivedCash as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReceivedCashTransfer",
+    component: ReceivedCashTransfer as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+];
+
+// ============================================================================
+// COMBINED ROUTE CONFIGURATIONS
+// ============================================================================
+const TAB_SCREENS: TabRouteConfig[] = [
+  ...PUBLIC_TAB_SCREENS,
+  ...COLLECTION_TAB_SCREENS,
+  ...DISTRIBUTION_TAB_SCREENS,
+];
+
+const STACK_SCREENS_CONFIG: StackRouteConfig[] = [
+  ...PUBLIC_STACK_SCREENS,
+  ...COLLECTION_STACK_SCREENS,
+  ...DISTRIBUTION_STACK_SCREENS,
 ];
 
 export function MainTabNavigator() {
@@ -408,10 +617,7 @@ export function MainTabNavigator() {
     );
   }, [jobRole]);
 
-  // Preferred landing tab per role. This is only a preference — the
-  // actual initialRouteName below always falls back to whatever is
-  // really present in filteredScreens, so it can never point at a
-  // screen that hasn't been rendered yet.
+  // Preferred landing tab per role.
   const preferredInitialTab = useMemo(() => {
     if (
       jobRole === ROLES.DISTRIBUTION_OFFICER ||
@@ -428,11 +634,6 @@ export function MainTabNavigator() {
     return undefined;
   }, [jobRole]);
 
-  // Don't mount Tab.Navigator until we actually know the role (e.g.
-  // persisted auth state is still rehydrating). Rendering it earlier
-  // means filteredScreens only has the "PUBLIC" tabs, which can be a
-  // set that doesn't include the hardcoded initial route — that's what
-  // throws "Couldn't find a screen named ... to use as initialRouteName".
   if (!jobRole || filteredScreens.length === 0) {
     return <LoadingPage />;
   }
@@ -464,200 +665,6 @@ export function MainTabNavigator() {
     </Tab.Navigator>
   );
 }
-
-/**
- * Config for every screen registered on the root Stack.Navigator
- * (i.e. everything outside the bottom-tab "Main" navigator).
- *
- * "PUBLIC" is used for screens that must stay reachable regardless of
- * role — auth/onboarding screens, the tab container itself, and shared
- * utility screens (loading, privacy policy, etc). Everything else is
- * locked to the roles that should legitimately be able to open it.
- *
- * NOTE: allowedRoles for the distribution/collection-flow screens
- * (packing, assign-groups, pickup orders, GoviPension, etc.) were
- * inferred from folder location / naming. Double check these against
- * your real permission model — the guard logic itself doesn't need to
- * change, only this config.
- */
-const STACK_SCREENS_CONFIG: StackRouteConfig[] = [
-  { name: "Splash", component: Splash, allowedRoles: "PUBLIC" },
-  { name: "Login", component: Login, allowedRoles: "PUBLIC" },
-  { name: "BannedScreen", component: BannedScreen as any, allowedRoles: "PUBLIC" },
-  { name: "Lanuage", component: Lanuage, allowedRoles: "PUBLIC" },
-
-  { name: "Profile", component: Profile, allowedRoles: "PUBLIC" },
-  {
-    name: "ReportPage",
-    component: ReportPage,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-  {
-    name: "NewReport",
-    component: NewReport as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-  {
-    name: "qrcode",
-    component: Qrcode as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-  { name: "PrivacyPolicy", component: PrivacyPolicy, allowedRoles: "PUBLIC" },
-
-  {
-    name: "QRScanner",
-    component: QRScanner,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-  { name: "ChangePassword", component: ChangePassword as any, allowedRoles: "PUBLIC" },
-  {
-    name: "Registeredfarmer",
-    component: Registeredfarmer,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-  {
-    name: "Ufarmercropdetails",
-    component: Ufarmercropdetails,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-
-  {
-    name: "ReceivedCashQrCode",
-    component: ReceivedCashQrCode as any,
-    allowedRoles: [ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "NoCollectionCenterScreen",
-    component: NoCollectionCenterScreen,
-    allowedRoles: "PUBLIC",
-  },
-
-  {
-    name: "Main",
-    component: MainTabNavigator,
-    allowedRoles: "PUBLIC",
-  },
-
-  {
-    name: "TransactionReport",
-    component: TransactionReport as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER],
-  },
-
-  {
-    name: "SelectRow",
-    component: SelectRow as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "QRHandling",
-    component: QRHandling as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "ReadyToPrint",
-    component: ReadyToPrint as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "PrintingConfirmation",
-    component: PrintingConfirmation as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "WelcomeToPacking",
-    component: WelcomeToPacking as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "Packing",
-    component: Packing as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "WelcomeToQC",
-    component: WelcomeToQC as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "Group",
-    component: Group as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "SelectOrder",
-    component: SelectOrder as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER,ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "SelectRowToAssign",
-    component: SelectRowToAssign as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER , ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "ConfirmRowAssign",
-    component: ConfirmRowAssign as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER , ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "DistributionCenterTarget",
-    component: DistributionCenterTarget as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "OrderDetails",
-    component: OrderDetails as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "DigitalSignature",
-    component: DigitalSignature as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "ReceivedCash",
-    component: ReceivedCash as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER , ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "ReceivedCashTransfer",
-    component: ReceivedCashTransfer as any,
-    allowedRoles: [ROLES.DISTRIBUTION_MANAGER ,ROLES.DISTRIBUTION_OFFICER],
-  },
-
-  {
-    name: "GoviPensionForm",
-    component: GoviPensionForm as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-  {
-    name: "GoviPensionStatus",
-    component: GoviPensionStatus as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-  {
-    name: "NotEligibleScreen",
-    component: NotEligibleScreen as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
-  { name: "LoadingPage", component: LoadingPage as any, allowedRoles: "PUBLIC" },
-];
 
 /**
  * The actual list handed to Stack.Navigator — every raw screen component

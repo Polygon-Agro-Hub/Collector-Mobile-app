@@ -335,6 +335,7 @@ export interface Order {
   isFullyPaid: number;
   isPaid: boolean;
   amount: number;
+  packTime: string;
   status: string;
   cusId: string;
   title: string;

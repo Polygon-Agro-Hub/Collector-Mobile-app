@@ -44,9 +44,18 @@ export default function ReadyToPrint({
     return () => backHandler.remove();
   }, [navigation]);
 
+  const rawType = String(route.params?.type || "").toUpperCase();
+  const isWholesale = rawType === "W" || rawType === "WHOLESALE" || String(orderNumber).includes("(W)") || String(orderNumber).includes("(Wholesale)") || String(orderNumber).includes("Wholesale");
+  const cleanInvoiceNumber = invoiceNumber || (orderNumber ? orderNumber.replace(/\s*\([^\)]*\)/g, "").trim() : "");
+  const displayOrderNumber = isWholesale ? `${cleanInvoiceNumber} (W)` : `${cleanInvoiceNumber} (R)`;
+  const qrValue = cleanInvoiceNumber;
+
   const actualPackagesCount =
     packagesList && packagesList.length > 0
-      ? packagesList.length
+      ? packagesList.reduce((acc: number, pkg: any) => {
+          const qty = Number(pkg.count || pkg.qty || 1);
+          return acc + (isNaN(qty) || qty <= 0 ? 1 : qty);
+        }, 0)
       : packagesCount;
   const formattedPackages =
     actualPackagesCount === 0
@@ -54,9 +63,6 @@ export default function ReadyToPrint({
       : String(actualPackagesCount).padStart(2, "0");
   const formattedAlacarte =
     alacarteCount === 0 ? "0" : String(alacarteCount).padStart(2, "0");
-
-  const cleanInvoiceNumber = invoiceNumber || (orderNumber ? orderNumber.split(" ")[0] : "");
-  const qrValue = cleanInvoiceNumber;
 
   return (
     <View className="flex-1 bg-white">
@@ -90,7 +96,7 @@ export default function ReadyToPrint({
           </View>
           {/* Invoice / Order ID & Type Info */}
           <Text className="text-lg font-extrabold text-slate-950 tracking-tight text-center">
-            {orderNumber}
+            {displayOrderNumber}
           </Text>
           <Text className="text-gray-400 text-xs mt-1 text-center font-medium">
             {category}
@@ -108,7 +114,7 @@ export default function ReadyToPrint({
             {/* Content */}
             <View className="flex-1">
               <Text className="font-extrabold text-slate-950 text-base">
-                {orderNumber}
+                {displayOrderNumber}
               </Text>
               <Text className="text-sm font-bold text-slate-900 mt-0.5">
                 {timeSlot}
@@ -161,8 +167,9 @@ export default function ReadyToPrint({
           onPress={() => {
             navigation.navigate("PrintingConfirmation", {
               ...route.params,
-              orderNumber: orderNumber,
+              orderNumber: displayOrderNumber,
               invoiceNumber: cleanInvoiceNumber,
+              type: isWholesale ? "W" : "R",
               category: category,
               packagesList: route.params?.packagesList || [],
               alacarteCount: alacarteCount,

@@ -31,7 +31,10 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
   );
 
   const handleBack = () => {
-    navigation.navigate("SelectOrder", route.params);
+    navigation.navigate("SelectOrder", {
+      ...route.params,
+      selectedRowId: selectedRowId,
+    });
   };
 
   useEffect(() => {
@@ -90,9 +93,11 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
     if (!selectedRow) return;
 
     navigation.navigate("ConfirmRowAssign", {
+      ...route.params,
       selectedOrdersCount: selectedOrdersCount,
       selectedOrderIds: selectedOrderIds,
       group: group,
+      type: route.params?.type,
       selectedRow: selectedRow,
       selectedRowId: selectedRow.id,
     });

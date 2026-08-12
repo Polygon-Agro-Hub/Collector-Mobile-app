@@ -143,9 +143,10 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");
-        
+
         if (!directoryUri) {
-          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          const permissions =
+            await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
           if (permissions.granted) {
             directoryUri = permissions.directoryUri;
             await AsyncStorage.setItem("download_directory_uri", directoryUri);
@@ -157,11 +158,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             const base64 = await FileSystem.readAsStringAsync(uri, {
               encoding: FileSystem.EncodingType.Base64,
             });
-            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
-              directoryUri,
-              fileName,
-              "application/pdf"
-            );
+            const fileUri =
+              await FileSystem.StorageAccessFramework.createFileAsync(
+                directoryUri,
+                fileName,
+                "application/pdf",
+              );
             await FileSystem.writeAsStringAsync(fileUri, base64, {
               encoding: FileSystem.EncodingType.Base64,
             });
@@ -173,19 +175,24 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           } catch (e) {
             // Permission might have been revoked, try to request again
             await AsyncStorage.removeItem("download_directory_uri");
-            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            const permissions =
+              await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
             if (permissions.granted && permissions.directoryUri) {
               const newDirectoryUri = permissions.directoryUri;
-              await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+              await AsyncStorage.setItem(
+                "download_directory_uri",
+                newDirectoryUri,
+              );
 
               const base64 = await FileSystem.readAsStringAsync(uri, {
                 encoding: FileSystem.EncodingType.Base64,
               });
-              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
-                newDirectoryUri,
-                fileName,
-                "application/pdf"
-              );
+              const fileUri =
+                await FileSystem.StorageAccessFramework.createFileAsync(
+                  newDirectoryUri,
+                  fileName,
+                  "application/pdf",
+                );
               await FileSystem.writeAsStringAsync(fileUri, base64, {
                 encoding: FileSystem.EncodingType.Base64,
               });
@@ -197,14 +204,14 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             } else {
               Alert.alert(
                 t("Error.Permission Denied") || "Permission Denied",
-                "Storage permission is required to save the PDF."
+                "Storage permission is required to save the PDF.",
               );
             }
           }
         } else {
           Alert.alert(
             t("Error.Permission Denied") || "Permission Denied",
-            "Storage permission is required to save the PDF."
+            "Storage permission is required to save the PDF.",
           );
         }
       } else if (Platform.OS === "ios") {
@@ -510,13 +517,11 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             {t("ReportGenerator.Report has been generated")}
           </Text>
 
-          <View className="flex-row gap-4">
+          <View className="flex-row gap-4 px-10">
             <TouchableOpacity
               onPress={handleDownload}
-              className="bg-[#000000] rounded-lg items-center justify-center ml-4"
+              className="flex-1 bg-[#000000] py-4 rounded-lg justify-center items-center"
               style={{
-                width: 100,
-                height: 70,
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
@@ -541,10 +546,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
             <TouchableOpacity
               onPress={handleShare}
-              className="bg-[#000000] rounded-lg items-center justify-center"
+              className="flex-1 bg-[#000000] py-4 rounded-lg justify-center items-center"
               style={{
-                width: 100,
-                height: 70,
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
