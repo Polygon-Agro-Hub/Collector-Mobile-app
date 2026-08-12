@@ -38,18 +38,6 @@ export default function DashboardSkeleton() {
           </View>
         </Animated.View>
 
-        {/* Socket Status Banner Skeleton */}
-        <Animated.View
-          style={{ opacity: opacityAnim }}
-          className="mx-2 mb-6 flex-row items-center justify-between bg-slate-100 border border-slate-200 rounded-2xl px-4 py-3"
-        >
-          <View className="flex-row items-center gap-2">
-            <View className="w-3 h-3 rounded-full bg-slate-300" />
-            <View className="w-36 h-3 bg-slate-300 rounded" />
-          </View>
-          <View className="w-12 h-5 rounded-full bg-slate-300" />
-        </Animated.View>
-
         {/* Dashboard Grid Cards Skeleton */}
         <Animated.View
           style={{ opacity: opacityAnim }}
