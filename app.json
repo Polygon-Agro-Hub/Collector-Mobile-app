@@ -32,6 +32,7 @@
         "foregroundImage": "./assets/images/app/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.polygonagro.Collector",
@@ -90,6 +91,21 @@
         }
       ],
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/app/adaptive-icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "PORTRAIT_UP"
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "ios": {
@@ -120,7 +136,7 @@
     "experiments": {},
     "extra": {
       "eas": {
-        "projectId": "5c42bb2c-2ff1-44a4-bf37-5f0a7f422c2f"
+        "projectId": "e6ddae60-1d9d-482e-b06a-7aff0e0f6efd"
       }
     }
   }

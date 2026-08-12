@@ -77,7 +77,7 @@
     "User token not found. Please log in again.": "පරිශීලක ටෝකනය හමු නොවීය. කරුණාකර නැවත උතිසහ කරන්න.",
     "Failed to claim the officer. Please try again later.": "නිලධාරියාට හිමිකම් පෑමට අපොහොසත් විය. කරුණාකර පසුව උත්සාහ කරන්න.",
     "Success": "සාර්ථකයි!",
-    "Staff successfully claimed.": "නිලධාරියාට හිමිකම් පෑම සාර්ථකයි.",
+    "Employee successfully claimed.": "නිලධාරියාට හිමිකම් පෑම සාර්ථකයි.",
     "Failed to generate PDF": "PDF ජනනය කිරීමට අසමත් විය.",
     "Sharing is not available on this device": "මෙම උපාංගෙන් බෙදාගැනීම සිදු කල නොහැක.",
     "User not authenticated.": "පරිශීලකයා සත්‍යාපනය කර නොමැත.",
@@ -248,7 +248,8 @@
     "Bank name is required": "බැංකුවේ නම අවශ්‍යයි",
     "Branch name is required": "ශාඛාවේ නම අවශ්‍යයි",
     "Price updated successfully": "මිල සාර්ථකව යාවත්කාලීන කරන ලදී",
-    "No targets have been assigned today for the selected crop.":"තෝරාගත් බෝගය සඳහා අද දින කිසිදු ඉලක්කයක් පවරා නොමැත."
+    "No targets have been assigned today for the selected crop.":"තෝරාගත් බෝගය සඳහා අද දින කිසිදු ඉලක්කයක් පවරා නොමැත.",
+    "Access denied. Your role is not authorized to use this application.":"ප්‍රවේශය ප්‍රතික්ෂේප කරන ලදී. මෙම යෙදුම භාවිතා කිරීමට ඔබගේ භූමිකාවට අවසර නැත."
   },
   "SideMenu": {
     "LNG": "si",
@@ -294,7 +295,8 @@
     "Completedkg": "සම්පූර්ණ (kg)",
     "noCompletedTargets": "සම්පූර්ණ කළ ඉලක්ක හමු නොවීය",
     "NoTodoItems": "ඉලක්ක හමු නොවීය",
-    "Out": "පිටත් කල"
+    "Out": "පිටත් කල",
+    "MyDailyTarget":"මගේ දෛනික ඉලක්කය"
   },
   "SearchPrice": {
     "LNG": "si",
@@ -601,7 +603,7 @@
     "Search": "සොයන්න",
     "Claim Officer": "නිලධාරියෙකු ලබා ගන්න",
     "No Disclaimed": "- හිමිකම් අහිමි නිලධාරියෙකු හමු නොවීය -",
-    "Are you sure you want to claim this officer?": "ඔබට මෙම නිලධාරියා ලබා ගැනීමට අවශ්‍ය බව විශ්වාසද?",
+    "Are you sure you want to claim this employee?": "ඔබට මෙම නිලධාරියා ලබා ගැනීමට අවශ්‍ය බව විශ්වාසද?",
     "Cancel": "අවලංගු කරන්න",
     "Claim": "ලබාගන්න",
     "Select Job Role": "රැකියා භූමිකාව තෝරන්න",
@@ -610,9 +612,9 @@
     "Distribution Officer": "බෙදාහැරීමේ නිලධාරි"
   },
   "DisclaimOfficer": {
-    "Are you sure you want to disclaim this officer?": "ඔබට මෙම නිලධාරියා ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?",
+    "Are you sure you want to disclaim this employee?": "ඔබට මෙම නිලධාරියා ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?",
     "Disclaim": "ඉවත් කරන්න",
-    "Disclaim Staff Successful.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
+    "Employee successfully disclaimed.": "නිලධාරි හිමිකම සාර්ථකව ඉවත් කරන ලදී.",
     "Failed to disclaim officer.": "නිලධාරියා හිමිකම ඉවත් කිරීම කිරීමට අපොහොසත් විය."
   },
   "CollectionOfficersList": {
@@ -671,7 +673,8 @@
     "Save": "සුරකින්න",
     "maximum amount receive": "ලැබිය හැකි උපරිම ප්‍රමාණය (Kg):",
     "Select an officer": "--නිලධාරියෙකු තෝරන්න--",
-    "No Officers Found": "නිලධාරීන් හමු නොවීය"
+    "No Officers Found": "නිලධාරීන් හමු නොවීය",
+    "Search an officer":"--නිලධාරියෙකු සොයන්න--"
   },
   "ReportGenerator": {
     "LNG": "si",
@@ -893,26 +896,7 @@
     "Received Cash": "ලැබුණු මුදල්",
     "Pickup Order Scan": "පිකප් ඇණවුම් ස්කෑන් කිරීම"
   },
-  "TargetOrderScreen": {
-    "LNG": "si",
-    "CenterTarget": "මධ්‍යස්ථාන ඉලක්කය",
-    "Todo": "කළ යුතු",
-    "Completed": "සම්පූර්ණ කළ",
-    "No": "අංකය",
-    "Variety": "ප්‍රභේදය",
-    "Grade": "ශ්‍රේණිය",
-    "Target": "ඉලක්කය (kg)",
-    "Todo()": "කළ යුතු (kg)",
-    "My Daily Target": "මගේ ඉලක්කය",
-    "Invoice No": "ඉන්වොයිස් අංකය",
-    "Status": "තත්ත්වය",
-    "Date": "දිනය සහ වේලාව",
-    "Completed Time": "සම්පූර්ණ කළ වේලාව",
-    "Retry": "නැවත උත්සාහ කරන්න",
-    "Pending": "අපරිපූර්ණ",
-    "Opened": "විවෘත කළ",
-    "My Target": "මගේ ඉලක්කය"
-  },
+
   "OpenedOrderScreen": {
     "INV No ": "INV අංකය:",
     "Pending": "අපරිපූර්ණ",
@@ -929,138 +913,19 @@
     "Opened": "විවෘත කළ",
     "Completed": "සම්පූර්ණ කළ"
   },
-  "PendingOrderScreen": {
-    "Completing order": "ඇණවුම සම්පූර්ණ කරමින්...",
-    "Processing": "සකසමින්...",
-    "Select New Product": "නව නිෂ්පාදනය තෝරන්න",
-    "Select Product": "නිෂ්පාදනය තෝරන්න",
-    "Custom Selected Items": "පාරිභෝගික-තෝරාගත් අයිතම",
-    "Back to Edit": "සංස්කරණය වෙත ආපසු",
-    "Mark as Completed": "සම්පූර්ණ කළ ලෙස ලකුණු කරන්න",
-    "TapGoback": "සංස්කරණය කිරීමට 'ආපසු යන්න' ක්ලික් කරන්න.",
-    "MarkingAs": "සම්පූර්ණ කළ ලෙස ඉක්මනින් දනුම් දෙමි.",
-    "FinishUp": "අවසන් කරන්න!",
-    "Save": "සුරකින්න",
-    "All checked": "සියල්ල පරීක්ෂා කර ඇත. ඇණවුම වෙත ගෙන යනු ඇත",
-    "Completed": "සම්පූර්ණ කළ",
-    "onsave": "සුරකීම සදහා",
-    "Unchecked items": "පරික්ශා නොකළ අයිතම ඉතිරිව ඇත.දැන් සුරැකීමෙන් සම්පූර්ණ වේ.",
-    "Opened": "විවෘත කළ",
-    "Status": "තත්ත්වය",
-    "Leave without Submitting": "සුරැකීමකින් තොරව ඉවත් වන්න",
-    "OK": "හරි",
-    "TheOrder": "ඇණවුම සම්පූර්ණ කළ ලෙස සලකුණු කර ඇත.",
-    "Completed Successfully": "සාර්ථකව සම්පූර්ණ කරන ලදී!",
-    "Go Back": "ආපසු යන්න",
-    "Send Replace Request": "ප්‍රතිස්ථාපන ඉල්ලීම යවන්න",
-    "No products available": "නිෂ්පාදන නොමැත",
-    "Rs": "රු",
-    "New Product Details": "නව නිෂ්පාදන විස්තර",
-    "Product Type": "නිෂ්පාදන වර්ගය:",
-    "Selected product": "තෝරාගත් නිෂ්පාදනය:",
-    "Replace Product": "නිෂ්පාදනය ප්‍රතිස්ථාපනය කරන්න",
-    "Marking as completed in": "සම්පූර්ණ ලෙස සලකුණු කිරීම",
-    "seconds": "තත්පර.",
-    "You have unsubmitted changes": "ඔබ සම්පූර්ණ නොකළ වෙනස්කම් තිබේ!",
-    "Update": "යාවත්කාලීන කරන්න",
-    "Failed to complete order": "ඇණවුම සම්පූර්ණ කිරීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
-    "Selected product not found": "තෝරාගත් නිෂ්පාදනය හමු නොවීය. කරුණාකර නැවත උත්සාහ කරන්න.",
-    "Failed to submit replacement request": "ප්‍රතිස්ථාපන ඉල්ලීම ඉදිරිපත් කිරීමට අපොහොසත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
-    "Search products...": "නිෂ්පාදන සොයන්න..."
-  },
   "Status": {
     "Pending": "අපරිපූර්ණ",
     "Opened": "විවෘත කළ",
     "Completed": "සම්පූර්ණ කළ",
     "InProgress": "ප්‍රගතියෙන්"
   },
-  "TimerContainer": {
-    "Start": "ආරම්භ කරන්න",
-    "Pause": "විරාමය",
-    "Reset": "නැවත සකසන්න"
-  },
-  "DailyTargetListOfficerDistribution": {
-    "Are you sure": "ඔබට මෙම ඉලක්කය වෙනත් නිලධාරියෙකුට ලබා දීමට අවශ්‍ය බව විශ්වාසද?",
-    "Cancel": "අවලංගු කරන්න",
-    "Pass": "යවන්න",
-    "Completed Time": "සම්පූර්ණ කළ වේලාව",
-    "Retry": "නැවත උත්සාහ කරන්න"
-  },
+
   "DistributionOfficersList": {
     "EMPID": "සේවක අංකය :",
     "Officers":"නිලධාරීන්",
     "Drivers":"රියදුරන්"
   },
-  "PassTarget": {
-    "EMP ID": "සේවක අංකය",
-    "Select Assignee": "නිලධාරියෙකු තෝරන්න",
-    "Loading officers": "නිලධාරීන් පූරණය කිරීම..",
-    "Selected Targets": "තෝරාගත් ඉලක්කය",
-    "Save": "සුරකින්න",
-    "Dismiss": "ඉවත් කරන්න",
-    "Short Stock Assignee": "කෙටිකාලීන භාරකරු",
-    "Search officers": "පරීක්ෂක නිලධාරීන් සොයන්න"
-  },
-  "ReplaceRequestsApprove": {
-    "Loading replace request": "ප්‍රතිස්ථාපන ඉල්ලීම පූරණය වෙමින් පවතී...",
-    "Order ID": "ඇණවුම් අංකය:",
-    "Defined product": "පැහැදිලි කර අවසන් කළ නිෂ්පාදන",
-    "Relevant Product Type": "අදාළ නිෂ්පාදන වර්ගය:",
-    "Replacing Product Details": "නිෂ්පාදනයේ විස්තර වෙනස් කිරීම",
-    "ID": "අංකය:",
-    "No products available": "නිෂ්පාදන නොමැත",
-    "Approve": "අනුමත කරන්න",
-    "Rs": "රු.",
-    "Please enter a value greater than 0": "කරුණාකර 0 ට වඩා වැඩි අගයක් ඇතුළත් කරන්න.",
-    "Price must match defined product price":"මිල නිර්වචනය කරන ලද නිෂ්පාදන මිලට ගැළපිය යුතුය"
-  },
-  "ReplaceRequestsScreen": {
-    "Order ID": "ඇණවුම් අංකය:",
-    "Replacing Item": "ප්‍රතිස්ථාපනය කල අයිතමය:",
-    "Requested Time": "ඉල්ලීම කල වෙලාව:",
-    "Replace Requests": "ඉල්ලීම් ප්‍රතිස්ථාපනය කරන්න",
-    "All": "සියල්ල",
-    "No replace requests found": "ප්‍රතිස්ථාපන ඉල්ලීම් හමු නොවීය"
-  },
-  "CenterTargetScreen": {
-    "Success": "සාර්ථකයි",
-    "order": "ඇණවුම",
-    "Time": "කාලය",
-    "Only the first 5 orders have been selected. You can only select up to 5 orders at a time for delivery.": "පළමු ඇණවුම් 5 පමණක් තෝරාගෙන ඇත. ඔබට බෙදා හැරීම සඳහා වරකට ඇණවුම් 5ක් දක්වා පමණක් තෝරා ගත හැකිය.",
-    "been sent out": "යවා ඇත",
-    "for delivery": "බෙදා හැරීම සඳහා",
-    "Centre Target": "මධ්‍යස්ථාන ඉලක්කය",
-    "Select Date": "දිනය තෝරන්න (කළ යුතු)",
-    "All Datese": "සියලු දිනයන්",
-    "Close": "වසන්න",
-    "Select Completion Date": "සම්පූර්ණ කිරීමේ දිනය තෝරන්න",
-    "All Completion Dates": "සියල්ල සම්පූර්ණ කිරීමේ දිනයන්",
-    "Are you sure you want to send these selected": "මෙම තෝරාගත් අයිතම යැවීමට ඔබට විශ්වාසද?",
-    "Are you sure you want": "ඔබට මෙම තෝරාගත් ඇණවුම් {{count}} බෙදා හැරීම සඳහා යැවීමට අවශ්‍ය බව විශ්වාසද?",
-    "orders out for delivery": "ඇණවුම් {{count}}ක් බෙදා හැරීම සඳහා යවා ඇත.",
-    "order one": "ඇණවුම් {{count}}ක් බෙදා හැරීම සඳහා යවා ඇත.",
-    "Processing orders": "සැකසෙමින් පවතින ඇණවුම්.",
-    "Cancel": "අවලංගු කරන්න",
-    "Out Time": "පිටතට යන වේලාව",
-    "Outing Status": "පිටත් කිරීමේ ස්වභාවය",
-    "Today": "අද",
-    "Tomorrow": "හෙට",
-    "All": "සියල්ල",
-    "Out": "පිටතට",
-    "Completed": "සම්පූර්ණ කළ",
-    "Scheduled": "සැලසුම් කළ",
-    "On Time": "නියමිත වේලාවට",
-    "Late": "ප්‍රමාදයි",
-    "No out for delivery orders": "පිටත් කිරීම සදහා බෙදාහැරීමේ ඇණවුම් නැත",
-    "Limit Reached": "උපරිම සීමාවට ළඟා විය",
-    "You can only select up to 5 orders at a time for delivery": "බෙදාහැරීම සඳහා ඔබට වරකට ඇණවුම් 5ක් දක්වා පමණක් තෝරා ගත හැකිය",
-    "OK": "හරි",
-    "Processing": "සකසමින්...",
-    "have": "ඇත",
-    "has": "ඇත",
-    "01 order has been sent out for delivery": "ඇණවුම් 01ක් බෙදා හැරීම සඳහා යවා ඇත.",
-    "orders have been sent out for delivery": "බෙදා හැරීම සඳහා ඇණවුම් {{successCount}} යවා ඇත."
-  },
+
   "ReadytoPickupOrders": {
     "No orders to be picked up": "අත්පත් කර ගැනීමට නියමිත ඇණවුම් නැත",
     "Ready to Pickup Orders": "අත්පත් කර ගැනීමට සූදානම් ඇණවුම්",
@@ -1084,6 +949,7 @@
     "Received Time": "ලැබුනු වේලාව",
     "No cash was received today": "අද මුදල් ලැබුනේ නැත",
     "Received Cash": "ලැබුනු මුදල්",
+    "Deposit to Company":"සමාගමට තැන්පතු කිරීම",
     "On": "දිනය",
     "All": "සියල්ල",
     "Full Total": "සම්පූර්ණ එකතුව",
@@ -1205,5 +1071,24 @@
     "skipMessage": "Some features may not work properly without location access. Are you sure?",
     "skip": "Skip",
     "skipForNow": "Skip for now"
+  },
+  "ReceivedCashTransfer": {
+    "Transfer to Company": "සමාගමට මාරු කරන්න",
+    "On": "දිනය",
+    "Full Total": "සම්පූර්ණ එකතුව",
+    "Rs": "රු.",
+    "Orders included": "ඇතුළත් ඇණවුම්",
+    "Account Name": "ගිණුම් නාමය",
+    "Account Number": "ගිණුම් අංකය",
+    "Bank Name": "බැංකු නාමය",
+    "Branch Name": "ශාඛා නාමය",
+    "Submit Payment Slip": "ගෙවීම් රිසිට්පත ඉදිරිපත් කරන්න",
+    "Please upload the transfer slip": "කරුණාකර මාරු කිරීමේ රිසිට්පත උඩුගත කරන්න",
+    "Authentication token not found": "සත්‍යාපන ටෝකනය හමු නොවීය",
+    "Success": "සාර්ථකයි",
+    "Error": "දෝෂයකි",
+    "OK": "හරි",
+    "Deposit submitted for review": "තැන්පතුව සමාලෝචනය සඳහා ඉදිරිපත් කරන ලදී",
+    "Failed to submit deposit": "තැන්පතුව ඉදිරිපත් කිරීමට අසමත් විය"
   }
 }

@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { environment } from "../environment/environment";
@@ -5,7 +6,7 @@ import { environment } from "../environment/environment";
 const generateInvoiceNumber = async (): Promise<string | null> => {
   try {
     // Retrieve empId from AsyncStorage
-    const empId = await AsyncStorage.getItem("empid");
+    const empId = store.getState().auth.empId;
 
     if (!empId) {
       console.error("Error: Employee ID not found in AsyncStorage");
