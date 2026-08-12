@@ -173,6 +173,12 @@ export default function Packing({
         const activeData = activeRes.data.data;
 
         if (activeData.hasActiveBox === false) {
+          if (activeData.formattedOrderNumber) {
+            setDisplayOrderTitle(activeData.formattedOrderNumber);
+          }
+          if (activeData.processOrderId) {
+            setActiveProcessOrderId(activeData.processOrderId);
+          }
           if (activeData.rowStatus === "WAITING_PREVIOUS") {
             setStatus("waiting");
             setItems([]);
@@ -404,32 +410,8 @@ export default function Packing({
           </View>
         )}
 
-        {/* STATE 2: Main Container at this station — pass through */}
-        {status === "main_container" && (
-          <View className="flex-1">
-            <View className="flex justify-center items-center py-6">
-              <View className="w-56 h-56 justify-center items-center">
-                <LottieView
-                  source={require("../../../../../assets/lottie/packing/arrow-forward.json")}
-                  autoPlay
-                  loop
-                  style={{ width: "100%", height: "100%" }}
-                />
-              </View>
-            </View>
-            <View className="items-center mt-4 mb-2">
-              <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
-                Main Container{"\n"}Pass Through
-              </Text>
-              <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
-                This is the main container box.{"\n"}Tap the button below to pass it to the next station.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* STATE 3: Opened, but No items at this position -> SHOW SKIP SCREEN */}
-        {status === "no_items" && (
+        {/* STATE 2: Opened, but No items or Main Container at this position -> SHOW SKIP SCREEN */}
+        {(status === "no_items" || status === "main_container") && (
           <View className="flex-1">
             {/* Lottie Animation Centered in middle (arrow-forward.json) */}
             <View className="flex justify-center items-center py-6">
@@ -516,33 +498,8 @@ export default function Packing({
         )}
       </ScrollView>
 
-      {/* Pass Through Button for Main Container */}
-      {status === "main_container" && (
-        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
-          <TouchableOpacity
-            onPress={handleAdvancePosition}
-            disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 4,
-              elevation: 3,
-            }}
-            activeOpacity={0.8}
-          >
-            {isAdvancing ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Text className="text-white font-extrabold text-base">Pass Through</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Skip Button pinned to bottom when position has no items */}
-      {status === "no_items" && (
+      {/* Skip Button pinned to bottom when position has no items or is main container */}
+      {(status === "no_items" || status === "main_container") && (
         <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
           <TouchableOpacity
             onPress={handleAdvancePosition}

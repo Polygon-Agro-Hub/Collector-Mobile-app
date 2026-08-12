@@ -79,6 +79,7 @@ export default function WelcomeToQC({
   >(null);
   const [activeTrackingId, setActiveTrackingId] = useState<number | null>(null);
   const [packagesList, setPackagesList] = useState<any[]>([]);
+  const [trackingRows, setTrackingRows] = useState<any[]>([]);
   const [alacarteCount, setAlacarteCount] = useState<number>(0);
   const [isAlacarteActive, setIsAlacarteActive] = useState<boolean>(false);
   const [displayOrderTitle, setDisplayOrderTitle] = useState<string>(
@@ -171,12 +172,26 @@ export default function WelcomeToQC({
         const activeData = activeRes.data.data;
 
         if (activeData.hasActiveBox === false) {
+          if (activeData.formattedOrderNumber) {
+            setDisplayOrderTitle(activeData.formattedOrderNumber);
+          }
+          if (activeData.processOrderId) {
+            setActiveProcessOrderId(activeData.processOrderId);
+          }
+          setPackagesList(activeData.packagesList || []);
+          setAlacarteCount(activeData.alacarteCount || 0);
+          setIsAlacarteActive(!!activeData.isAlacarteActive);
+          setTrackingRows(activeData.trackingRows || []);
+
           if (activeData.rowStatus === "WAITING_PREVIOUS") {
             setStatus("waiting");
             setQcItems([]);
           } else {
             setStatus("no_target");
             setQcItems([]);
+            setTrackingRows([]);
+            setPackagesList([]);
+            setAlacarteCount(0);
             setActiveProcessOrderId(null);
           }
         } else {
@@ -191,6 +206,7 @@ export default function WelcomeToQC({
           setPackagesList(activeData.packagesList || []);
           setAlacarteCount(activeData.alacarteCount || 0);
           setIsAlacarteActive(!!activeData.isAlacarteActive);
+          setTrackingRows(activeData.trackingRows || []);
           if (activeData.timeSlot) {
             setScheduledTime(
               timeSlotMap[activeData.timeSlot] || activeData.timeSlot
@@ -247,10 +263,12 @@ export default function WelcomeToQC({
       } else {
         setStatus("no_target");
         setQcItems([]);
+        setTrackingRows([]);
       }
     } catch (err) {
       console.error("Error fetching active order status in QC:", err);
       setStatus("no_target");
+      setTrackingRows([]);
     }
   };
 
@@ -309,27 +327,40 @@ export default function WelcomeToQC({
     }
   };
 
-  // Build dynamic QC progress steps
+  // Build dynamic QC progress steps (exactly matching QR steps)
   const steps: any[] = [];
-  const totalBoxes = packagesList.length + (alacarteCount > 0 ? 1 : 0);
 
+  // Calculate total physical packages based on package quantity (pkg.qty)
+  const totalPhysicalPackages = packagesList.reduce(
+    (acc, pkg) => acc + Math.max(1, Number(pkg.qty || 1)),
+    0
+  );
+  const totalBoxes = totalPhysicalPackages + (alacarteCount > 0 ? 1 : 0);
+
+  // 1. Add Main Container as Step 1 if total physical boxes > 1
   if (totalBoxes > 1) {
     steps.push({
       id: 1,
       type: "main",
       label: "Main Container",
+      packageId: null,
     });
   }
 
+  // 2. Add package steps expanded by quantity
   packagesList.forEach((pkg) => {
-    steps.push({
-      id: steps.length + 1,
-      type: "package",
-      label: pkg.name,
-      packageId: pkg.id,
-    });
+    const qty = Math.max(1, Number(pkg.qty || 1));
+    for (let i = 0; i < qty; i++) {
+      steps.push({
+        id: steps.length + 1,
+        type: "package",
+        label: qty > 1 ? `${pkg.name} (${i + 1}/${qty})` : pkg.name,
+        packageId: pkg.id,
+      });
+    }
   });
 
+  // 3. Add À la carte step
   if (alacarteCount > 0) {
     steps.push({
       id: steps.length + 1,
@@ -339,28 +370,33 @@ export default function WelcomeToQC({
     });
   }
 
-  let currentStep = 1;
-  if (activeOrderPackageId === -1) {
-    const matchedIdx = steps.findIndex((s) => s.type === "main");
-    if (matchedIdx !== -1) {
-      currentStep = matchedIdx + 1;
+  // Match each step to its corresponding positiontracking row to get pIndex
+  let mainMatchedCount = 0;
+  const pkgMatchedCounts = new Map<number, number>();
+  let alacarteMatchedCount = 0;
+
+  const mainTrackingRows = trackingRows.filter((row) => row.isMainContainer === 1);
+  const pkgTrackingRows = trackingRows.filter((row) => !row.isMainContainer && row.orderpackageId);
+  const alacarteTrackingRows = trackingRows.filter((row) => !row.isMainContainer && !row.orderpackageId);
+
+  steps.forEach((step) => {
+    let matchedRow: any = null;
+
+    if (step.type === "main") {
+      matchedRow = mainTrackingRows[mainMatchedCount];
+      mainMatchedCount++;
+    } else if (step.type === "package") {
+      const matchedPkgRows = pkgTrackingRows.filter((row) => Number(row.orderpackageId) === Number(step.packageId));
+      const currentMatched = pkgMatchedCounts.get(step.packageId) || 0;
+      matchedRow = matchedPkgRows[currentMatched];
+      pkgMatchedCounts.set(step.packageId, currentMatched + 1);
+    } else if (step.type === "alacarte") {
+      matchedRow = alacarteTrackingRows[alacarteMatchedCount];
+      alacarteMatchedCount++;
     }
-  } else if (activeOrderPackageId) {
-    const matchedIdx = steps.findIndex(
-      (s) => s.type === "package" && s.packageId === activeOrderPackageId
-    );
-    if (matchedIdx !== -1) {
-      currentStep = matchedIdx + 1;
-    }
-  } else if (
-    isAlacarteActive ||
-    (qcItems.length > 0 && qcItems[0].categoryType === "alacarte")
-  ) {
-    const matchedIdx = steps.findIndex((s) => s.type === "alacarte");
-    if (matchedIdx !== -1) {
-      currentStep = matchedIdx + 1;
-    }
-  }
+
+    step.pIndex = matchedRow ? Number(matchedRow.pIndex || 0) : 0;
+  });
 
   return (
     <View className="flex-1 bg-white">
@@ -399,9 +435,8 @@ export default function WelcomeToQC({
         {/* Dynamic Progress step segments */}
         {status !== "no_target" && steps.length > 1 && (
           <View className="flex-row justify-between items-center gap-2 px-2 mb-8 w-full">
-            {steps.map((s, idx) => {
-              const stepNum = idx + 1;
-              const isFilled = stepNum <= currentStep;
+            {steps.map((s) => {
+              const isFilled = s.pIndex >= officerPosIndex;
               return (
                 <View key={s.id} className="flex-1 items-center">
                   <View
