@@ -62,6 +62,7 @@ interface ApiTransaction {
   paymentMethod: string;
   isPaid: number;
   amount: number;
+  moneyPaid: number; 
   processStatus: string;
   orderId: number;
   userId: number;
@@ -110,7 +111,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
       .map((item) => {
         const { date, time } = formatApiDate(item.pickupCreatedAt);
         const cashAmount =
-          item.handOverPrice ?? parseFloat(item.fullTotal.toString()) ?? 0;
+          item.handOverPrice ?? parseFloat(item.moneyPaid.toString()) ?? 0;
 
         return {
           id: item.pickupOrderId.toString(),

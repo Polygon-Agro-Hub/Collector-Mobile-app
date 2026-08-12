@@ -141,7 +141,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   const formattedTime = formatScheduleTime(order.sheduleTime);
   const timeSlot = `${scheduledDate} (${formattedTime})`;
 
-  const readyDate = new Date(order.outDlvrDate);
+ const readyDate = new Date(order.packTime);
   const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
@@ -149,7 +149,7 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   })} on ${readyDate.getFullYear()}/${String(readyDate.getMonth() + 1).padStart(2, "0")}/${String(readyDate.getDate()).padStart(2, "0")}`;
 
   const remaining = Number(order.remainingAmount ?? order.fullTotal) || 0;
-  const isPaid = Number(order.isFullyPaid) === 1;
+  const isPaid = order.isPaid && order.paymentMethod === "Card";
   const cashAmount = remaining.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
