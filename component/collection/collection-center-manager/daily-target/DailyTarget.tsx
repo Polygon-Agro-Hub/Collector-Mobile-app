@@ -373,7 +373,7 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
                       {/* Target */}
                       <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center border-r border-gray-300">
                         <Text className="text-center">
-                          {item.officerTarget.toFixed(2)}
+                          {item.officerTarget}
                         </Text>
                       </View>
 
@@ -381,8 +381,8 @@ const DailyTarget: React.FC<DailyTargetProps> = ({ navigation }) => {
                       <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center">
                         <Text className="text-center">
                           {selectedToggle === "Completed"
-                            ? item.complete.toFixed(2)
-                            : item.todo.toFixed(2)}
+                            ? item.complete
+                            : item.todo}
                         </Text>
                       </View>
                     </TouchableOpacity>

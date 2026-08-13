@@ -357,7 +357,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       {/* Target */}
                       <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center border-r border-gray-300">
                         <Text className="text-center">
-                          {item.target.toFixed(2)}
+                          {item.target}
                         </Text>
                       </View>
 
