@@ -21,6 +21,8 @@ import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
+import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 
 type OfficerSummaryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -71,70 +73,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
     }, [navigation]),
   );
 
-  const ConfirmationModal = ({ visible, onConfirm, onCancel }: any) => {
-    return (
-      <Modal
-        transparent={true}
-        visible={visible}
-        animationType="fade"
-        onRequestClose={onCancel}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "#00000040",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View className="bg-white items-center rounded-lg w-80 p-6">
-            <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
-              <Ionicons name="warning" size={30} color="#6c7e8c" />
-            </View>
-            <Text className="text-center text-sm font-semibold mb-4">
-              {t(
-                "DisclaimOfficer.Are you sure you want to disclaim this employee?",
-              )}
-            </Text>
 
-            <View className="flex-row justify-center gap-4">
-              <TouchableOpacity
-                onPress={onCancel}
-                className="p-2 py-2 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
-                style={{
-                  shadowColor: "#8f8a8a",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <Text className="text-sm text-gray-700">
-                  {t("ClaimOfficer.Cancel")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={onConfirm}
-                className="p-2 py-2 px-6 bg-[#FF0700] rounded-lg"
-                style={{
-                  shadowColor: "#8f8a8a",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <Text className="text-sm text-white">
-                  {t("DisclaimOfficer.Disclaim")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
 
   const handleDial = (phoneNumber: string) => {
     const phoneUrl = `tel:${phoneNumber}`;
@@ -232,7 +171,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
       if (data.status === "success") {
         setModalVisible(false);
         Alert.alert(
-          t("Error.Success"),
+          "Success",
           t("DisclaimOfficer.Employee successfully disclaimed."),
         );
         navigation.navigate("Main", { screen: "CollectionOfficersList" });
@@ -284,65 +223,74 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-white"
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {/* Header */}
-      <View className="relative">
-        <View className="bg-white rounded-b-[25px] px-4 pt-12 pb-6 items-center shadow-lg z-10">
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("Main", { screen: "CollectionOfficersList" })
-            }
-            className="absolute top-3 left-3 bg-[#F6F6F680] rounded-full  p-3 justify-center "
-          >
-            <Entypo name="chevron-left" size={24} color="#000502" />
-          </TouchableOpacity>
+    <View className="flex-1 bg-white">
+      <CustomHeader
+        title={""}
+        showBackButton={true}
+        navigation={navigation as any}
+        onBackPress={() =>
+          navigation.navigate("Main", { screen: "CollectionOfficersList" })
+        }
+        rightComponent={
+          <View className="relative">
+            <TouchableOpacity
+              onPress={() => setShowMenu((prev) => !prev)}
+              className="p-2 mr-1"
+            >
+              <Ionicons name="ellipsis-vertical" size={24} color="black" />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            className="absolute top-4 right-4"
-            onPress={() => setShowMenu((prev) => !prev)}
-          >
-            <Ionicons name="ellipsis-vertical" size={24} />
-          </TouchableOpacity>
-
-          {showMenu && (
-            <View className="absolute z-50 top-14 right-4 bg-white border border-[#00000040] rounded-lg">
-              <TouchableOpacity
-                className="p-2 py-2 px-4 bg-white rounded-lg  border-[#00000040] shadow-lg"
-                onPress={() => setModalVisible(true)}
+            {showMenu && (
+              <View
+                className="absolute z-50 top-10 right-0 bg-white border border-[#00000040] rounded-lg shadow-lg"
+                style={{ minWidth: 100 }}
               >
-                <Text className="text-gray-700 font-semibold">
-                  {t("OfficerSummary.Disclaim")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <View
-            className={`w-28 h-28 border-[6px] rounded-full items-center justify-center ${isOnline ? "border-[#980775]" : "border-gray-400"}`}
-          >
-            <Image
-              source={
-                image
-                  ? { uri: image }
-                  : require("../../../../assets/images/auth/my-profile.webp")
-              }
-              className="w-24 h-24 rounded-full "
-            />
+                <TouchableOpacity
+                  className="p-3 bg-white rounded-lg"
+                  onPress={() => {
+                    setModalVisible(true);
+                    setShowMenu(false);
+                  }}
+                >
+                  <Text className="text-gray-700 font-semibold text-center">
+                    {t("OfficerSummary.Disclaim") || "Disclaim"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
+        }
+      />
+      <ScrollView
+        className="flex-1 bg-white"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Header */}
+        <View className="relative">
+          <View className="bg-white rounded-b-[25px] px-4 pt-4 pb-6 items-center shadow-lg z-10">
+            <View
+              className={`w-28 h-28 border-[6px] rounded-full items-center justify-center ${isOnline ? "border-[#980775]" : "border-gray-400"}`}
+            >
+              <Image
+                source={
+                  image
+                    ? { uri: image }
+                    : require("../../../../assets/images/auth/my-profile.webp")
+                }
+                className="w-24 h-24 rounded-full "
+              />
+            </View>
 
-          {/* Name and EMP ID */}
-          <Text className="mt-4 text-lg font-bold text-black">
-            {officerName}
-          </Text>
-          <Text className="text-sm text-gray-500">
-            {t("OfficerSummary.EMPID")} {officerId}
-          </Text>
-        </View>
+            {/* Name and EMP ID */}
+            <Text className="mt-4 text-lg font-bold text-black">
+              {officerName}
+            </Text>
+            <Text className="text-sm text-gray-500">
+              {t("OfficerSummary.EMPID")} {officerId}
+            </Text>
+          </View>
 
         {/* Action Buttons Section */}
         <View className="bg-[#980775] rounded-b-[45px] px-8 py-4 -mt-6 flex-row justify-around shadow-md z-0">
@@ -495,12 +443,17 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
           </View>
         </View>
       </View>
-      <ConfirmationModal
+      <WarningConfirmation
         visible={modalVisible}
+        message={t("DisclaimOfficer.Are you sure you want to disclaim this employee?")}
         onConfirm={handleDisclaim}
         onCancel={handleCancel}
+        confirmText={t("DisclaimOfficer.Disclaim")}
+        cancelText={t("ClaimOfficer.Cancel")}
+        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
       />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

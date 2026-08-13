@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
 
 type ReportGeneratorNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -517,58 +518,13 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             {t("ReportGenerator.Report has been generated")}
           </Text>
 
-          <View className="flex-row gap-4 px-10">
-            <TouchableOpacity
-              onPress={handleDownload}
-              className="flex-1 bg-[#000000] py-4 rounded-lg justify-center items-center"
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 8,
-              }}
-            >
-              <Ionicons name="download" size={24} color="white" />
-              <Text
-                className="text-sm text-white mt-1"
-                style={[
-                  i18n.language === "si"
-                    ? { fontSize: 13 }
-                    : i18n.language === "ta"
-                      ? { fontSize: 12 }
-                      : { fontSize: 14 },
-                ]}
-              >
-                {t("ReportGenerator.Download")}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleShare}
-              className="flex-1 bg-[#000000] py-4 rounded-lg justify-center items-center"
-              style={{
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 8,
-              }}
-            >
-              <Ionicons name="share-social" size={24} color="white" />
-              <Text
-                className="text-sm text-white mt-1"
-                style={[
-                  i18n.language === "si"
-                    ? { fontSize: 13 }
-                    : i18n.language === "ta"
-                      ? { fontSize: 12 }
-                      : { fontSize: 14 },
-                ]}
-              >
-                {t("ReportGenerator.Share")}
-              </Text>
-            </TouchableOpacity>
+          <View className="w-full">
+            <DownloadShareButtons
+              onDownload={handleDownload}
+              onShare={handleShare}
+              downloadLabel={t("ReportGenerator.Download")}
+              shareLabel={t("ReportGenerator.Share")}
+            />
           </View>
         </View>
       ) : generateAgain ? (

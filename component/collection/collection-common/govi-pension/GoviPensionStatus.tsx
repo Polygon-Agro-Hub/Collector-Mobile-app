@@ -63,7 +63,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
             "GoviPensionStatus.It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
             { date: formattedDate },
           ),
-          buttonText: t("GoviPensionStatus.Go Back"),
+          buttonText: t("GoviPensionStatus.GoBack"),
           onPress: () => navigation.goBack(),
           buttonStyle: "bg-[#ECECEC]",
           buttonTextColor: "text-[#8E8E8E]",
@@ -172,7 +172,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
               }}
         >
           <Text className="text-white text-center font-bold text-lg">
-            {t("GoviPensionStatus.Go Back")}
+            {t("GoviPensionStatus.GoBack")}
           </Text>
         </TouchableOpacity>
       </View>

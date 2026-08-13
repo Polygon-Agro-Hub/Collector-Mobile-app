@@ -1,29 +1,22 @@
 import store from "@/services/reducxStore";
 import { useState, useEffect, useMemo } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Image,
-  Keyboard,
-  AppState,
-} from "react-native";
+import { View, TouchableOpacity, Keyboard, Text, useWindowDimensions } from "react-native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/services/reducxStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ROLES } from "@/constants/user-roles";
-
-const homeIcon = require("../../../assets/images/common/nav-bar/navhome.webp");
-const searchIcon = require("../../../assets/images/common/nav-bar/navsearch.webp");
-const qrIcon = require("../../../assets/images/common/nav-bar/navtarget.webp");
-const adminIcon = require("../../../assets/images/common/nav-bar/navusers.webp");
-const dataTransfer = require("../../../assets/images/common/nav-bar/transfer.webp");
+import { useTranslation } from "react-i18next";
+import { Octicons, Feather, Fontisto } from "@expo/vector-icons";
+import { Target } from "lucide-react-native";
 
 const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const userRole = useSelector((state: RootState) => state.auth.jobRole);
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { width } = useWindowDimensions();
 
   // Keyboard handling
   useEffect(() => {
@@ -45,40 +38,98 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     switch (userRole) {
       case ROLES.COLLECTION_MANAGER:
         return [
-          { name: "CollectionDashboard", icon: homeIcon },
-          { name: "DailyTarget", icon: qrIcon },
-          { name: "CollectionOfficersList", icon: adminIcon },
-          { name: "SearchPriceScreen", icon: searchIcon },
+          {
+            name: "CollectionDashboard",
+            label: t("BottomNav.Home") || "Home",
+            iconType: "Octicons",
+            iconName: "home",
+          },
+          {
+            name: "DailyTarget",
+            label: t("BottomNav.Target") || "Target",
+            iconType: "Lucide",
+            iconName: "target",
+          },
+          {
+            name: "CollectionOfficersList",
+            label: t("BottomNav.Staff") || "Staff",
+            iconType: "Feather",
+            iconName: "users",
+          },
+          {
+            name: "SearchPriceScreen",
+            label: t("BottomNav.Search") || "Search",
+            iconType: "Fontisto",
+            iconName: "search",
+          },
         ];
 
       case ROLES.COLLECTION_OFFICER:
         return [
-          { name: "DailyTargetList", icon: qrIcon },
-          { name: "CollectionDashboard", icon: homeIcon },
-          { name: "SearchPriceScreen", icon: searchIcon },
+          {
+            name: "DailyTargetList",
+            label: t("BottomNav.Target") || "Target",
+            iconType: "Lucide",
+            iconName: "target",
+          },
+          {
+            name: "CollectionDashboard",
+            label: t("BottomNav.Home") || "Home",
+            iconType: "Octicons",
+            iconName: "home",
+          },
+          {
+            name: "SearchPriceScreen",
+            label: t("BottomNav.Search") || "Search",
+            iconType: "Fontisto",
+            iconName: "search",
+          },
         ];
 
       case ROLES.DISTRIBUTION_MANAGER:
       case ROLES.DISTRIBUTION_OFFICER:
         return [
-          { name: "DistridutionaDashboard", icon: homeIcon },
-          { name: "DistributionCenterTarget", icon: qrIcon },
-          { name: "DistributionOfficersList", icon: adminIcon },
+          {
+            name: "DistridutionaDashboard",
+            label: t("BottomNav.Home") || "Home",
+            iconType: "Octicons",
+            iconName: "home",
+          },
+          {
+            name: "DistributionCenterTarget",
+            label: t("BottomNav.Target") || "Target",
+            iconType: "Lucide",
+            iconName: "target",
+          },
+          {
+            name: "DistributionOfficersList",
+            label: t("BottomNav.Staff") || "Staff",
+            iconType: "Feather",
+            iconName: "users",
+          },
         ];
 
       default:
         return [
-          { name: "CollectionDashboard", icon: homeIcon },
-          { name: "SearchPriceScreen", icon: searchIcon },
+          {
+            name: "CollectionDashboard",
+            label: t("BottomNav.Home") || "Home",
+            iconType: "Octicons",
+            iconName: "home",
+          },
+          {
+            name: "SearchPriceScreen",
+            label: t("BottomNav.Search") || "Search",
+            iconType: "Fontisto",
+            iconName: "search",
+          },
         ];
     }
-  }, [userRole]);
+  }, [userRole, t]);
 
   let currentTabName = state?.routes?.[state.index]?.name;
 
-  if (
-    ["PriceChart", "PriceChange"].includes(currentTabName)
-  ) {
+  if (["PriceChart", "PriceChange"].includes(currentTabName)) {
     currentTabName = "SearchPriceScreen";
   }
   if (
@@ -124,7 +175,6 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
     }
   }, [userRole]);
 
-
   // Hide conditions
   if (
     isKeyboardVisible ||
@@ -133,34 +183,91 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   )
     return null;
 
+  const renderTabIcon = (
+    iconType: string,
+    iconName: string,
+    color: string,
+    size: number = 22,
+  ) => {
+    switch (iconType) {
+      case "Octicons":
+        return <Octicons name={iconName as any} size={size} color={color} />;
+      case "Feather":
+        return <Feather name={iconName as any} size={size} color={color} />;
+      case "Fontisto":
+        return <Fontisto name={iconName as any} size={size} color={color} />;
+      case "Lucide":
+        if (iconName === "target") {
+          return <Target size={size} color={color} strokeWidth={2.5} />;
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
+
   // UI
   return (
     <View className="bg-white">
       <View
         className="flex-row justify-between items-center bg-white px-6 rounded-t-3xl w-full border-t border-r border-l border-[#00000040] shadow-md"
         style={{
-          paddingTop: 12,
-          paddingBottom: Math.max(insets.bottom, 12),
+          paddingTop: 16,
+          paddingBottom: Math.max(insets.bottom, 16),
         }}
       >
         {tabs.map((tab, index) => {
           const isFocused = currentTabName === tab.name;
+          const activeColor = "#000000";
+          const inactiveColor = "#8E8E93";
+          const showLabel = width > 500;
+
+          if (isFocused) {
+            if (showLabel) {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => navigation?.navigate?.(tab.name)}
+                  className="bg-[#FAE432] px-4 py-2.5 rounded-full flex-row items-center"
+                  style={{
+                    backgroundColor: "#FAE432",
+                    borderRadius: 24,
+                  }}
+                >
+                  {renderTabIcon(tab.iconType, tab.iconName, activeColor)}
+                  <Text className="text-black font-bold ml-2 text-sm">
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            } else {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => navigation?.navigate?.(tab.name)}
+                  className="bg-[#FAE432] p-3 rounded-full"
+                  style={{
+                    backgroundColor: "#FAE432",
+                    borderRadius: 50,
+                  }}
+                >
+                  {renderTabIcon(tab.iconType, tab.iconName, activeColor)}
+                </TouchableOpacity>
+              );
+            }
+          }
 
           return (
             <TouchableOpacity
               key={index}
               onPress={() => navigation?.navigate?.(tab.name)}
-              className={isFocused ? "bg-[#FAE432] p-3 rounded-full" : ""}
+              className="p-3"
               style={{
-                backgroundColor: isFocused ? "#FAE432" : "white",
-                padding: isFocused ? 8 : 6,
+                backgroundColor: "transparent",
                 borderRadius: 50,
               }}
             >
-              <Image
-                source={tab.icon}
-                style={{ width: 24, height: 24, resizeMode: "contain" }}
-              />
+              {renderTabIcon(tab.iconType, tab.iconName, inactiveColor)}
             </TouchableOpacity>
           );
         })}

@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { MaterialIcons } from "@expo/vector-icons";
+import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -406,65 +407,13 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
               </View>
 
               {/* Download and Share buttons - Centered */}
-              <View className="flex-row w-full px-12 pb-8 gap-8 max-w-[500px] mx-auto">
-                <TouchableOpacity
-                  className="bg-black rounded-lg items-center justify-center flex-1 py-4"
-                  onPress={downloadQRCode}
-                  disabled={checkingPensionStatus}
-                  style={{
-                    shadowColor: "#000000",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 10,
-                    elevation: 6,
-                  }}
-                >
-                  <View className="flex-col items-center justify-center gap-2">
-                    <MaterialIcons name="download" size={20} color="white" />
-                    <Text
-                      className="text-white text-base"
-                      style={[
-                        i18n.language === "si"
-                          ? { fontSize: 12 }
-                          : i18n.language === "ta"
-                            ? { fontSize: 11 }
-                            : { fontSize: 15 },
-                      ]}
-                    >
-                      {t("FarmerQr.Download")}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="bg-black rounded-lg items-center justify-center flex-1 py-4"
-                  onPress={shareQRCode}
-                  disabled={checkingPensionStatus}
-                  style={{
-                    shadowColor: "#000000",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 10,
-                    elevation: 6,
-                  }}
-                >
-                  <View className="flex-col items-center justify-center gap-2">
-                    <MaterialIcons name="share" size={20} color="white" />
-                    <Text
-                      className="text-white text-base"
-                      style={[
-                        i18n.language === "si"
-                          ? { fontSize: 12 }
-                          : i18n.language === "ta"
-                            ? { fontSize: 11 }
-                            : { fontSize: 15 },
-                      ]}
-                    >
-                      {t("FarmerQr.Share")}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
+              <DownloadShareButtons
+                onDownload={downloadQRCode}
+                onShare={shareQRCode}
+                disabled={checkingPensionStatus}
+                downloadLabel={t("FarmerQr.Download")}
+                shareLabel={t("FarmerQr.Share")}
+              />
             </View>
           )}
         </View>

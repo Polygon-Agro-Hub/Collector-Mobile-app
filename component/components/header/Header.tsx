@@ -107,7 +107,7 @@ export function Header<T>({
               activeTab === tab1Value ? "text-white" : "text-[#54617D]"
             }`}
           >
-            {tab1Label} ({String(tab1Count).padStart(2, "0")})
+            {tab1Label} ({tab1Count === 0 ? "0" : String(tab1Count).padStart(2, "0")})
           </Text>
         </TouchableOpacity>
 
@@ -124,7 +124,7 @@ export function Header<T>({
               activeTab === tab2Value ? "text-white" : "text-[#54617D]"
             }`}
           >
-            {tab2Label} ({String(tab2Count).padStart(2, "0")})
+            {tab2Label} ({tab2Count === 0 ? "0" : String(tab2Count).padStart(2, "0")})
           </Text>
         </TouchableOpacity>
       </View>

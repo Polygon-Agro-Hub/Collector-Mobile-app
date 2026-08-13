@@ -67,7 +67,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   );
   const [isComplaintDropdownOpen, setComplaintDropdownOpen] =
     useState<boolean>(false);
-  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const { t, i18n } = useTranslation();
   const { changeLanguage } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
@@ -192,59 +191,12 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     } catch (error) {}
   };
 
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-
-      const empId = store.getState().auth.empId;
-      await status(empId!, false);
-
-      store.dispatch(logoutUser());
-setTimeout(() => {
-        setIsLoggingOut(false);
-        navigation.navigate("Login");
-      }, 2000);
-    } catch (error) {
-      console.error("An error occurred during logout:", error);
-      setIsLoggingOut(false);
-      Alert.alert(t("Error.error"), t("Error.Failed to log out."));
-    }
+  const handleLogout = () => {
+    navigation.navigate("Logout" as any);
   };
 
   const handleEditClick = () => {
     navigation.navigate("Profile" as any, { jobRole: profile?.jobRole });
-  };
-
-  const status = async (empId: string, status: boolean) => {
-    const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
-      return;
-    }
-
-    try {
-      const token = store.getState().auth.token;
-      if (!token) {
-        console.error("Token not found");
-        return;
-      }
-
-      const response = await fetch(
-        `${environment.API_BASE_URL}api/collection-officer/online-status`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            empId: empId,
-            status: status,
-          }),
-        },
-      );
-    } catch (error) {
-      console.error("Online status error:", error);
-    }
   };
 
   const getTextStyle = (language: string) => {
@@ -491,7 +443,6 @@ setTimeout(() => {
           <TouchableOpacity
             className="flex-row items-center py-3 mb-20"
             onPress={handleLogout}
-            disabled={isLoggingOut}
           >
             <Ionicons name="log-out-outline" size={20} color="red" />
             <Text className="flex-1 text-lg ml-2 text-red-500">
@@ -500,40 +451,6 @@ setTimeout(() => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Logout Lottie Animation Overlay */}
-      <Modal
-        visible={isLoggingOut}
-        transparent={false}
-        animationType="fade"
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "white",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <LottieView
-            source={require("../../../assets/lottie/loading.json")}
-            autoPlay
-            loop
-            style={{ width: 150, height: 150 }}
-          />
-          <Text
-            style={{
-              fontSize: 18,
-              color: "#374151",
-              marginTop: 20,
-              textAlign: "center",
-              fontWeight: "500",
-            }}
-          >
-            {t("SideMenu.Logging out")}
-          </Text>
-        </View>
-      </Modal>
     </View>
   );
 };

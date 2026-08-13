@@ -1651,7 +1651,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                     fieldErrors.firstNameEnglish ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   keyboardType="default"
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -1675,7 +1675,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                     fieldErrors.lastNameEnglish ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   keyboardType="default"
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -1700,7 +1700,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                     fieldErrors.firstNameSinhala ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1723,7 +1723,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                     fieldErrors.lastNameSinhala ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1746,7 +1746,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                     fieldErrors.firstNameTamil ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1769,7 +1769,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                   className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
                     fieldErrors.lastNameTamil ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1815,7 +1815,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                           ? "border border-red-500"
                           : ""
                       }`}
-                      style={{ fontSize: 14 }}
+                      style={{ fontSize: 14, color: "#000000" }}
                       value={phoneNumber1}
                       onChangeText={handlePhoneNumber1Change}
                       keyboardType="phone-pad"
@@ -1860,7 +1860,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                           ? "border border-red-500"
                           : ""
                       }`}
-                      style={{ fontSize: 14 }}
+                      style={{ fontSize: 14, color: "#000000" }}
                       value={phoneNumber2}
                       onChangeText={handlePhoneNumber2Change}
                       keyboardType="phone-pad"
@@ -1897,7 +1897,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                       ? "border border-red-500"
                       : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   underlineColorAndroid="transparent"
                 />
                 {(error3 || fieldErrors.nicNumber) && (
@@ -1919,7 +1919,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                       ? "border border-red-500"
                       : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -2029,6 +2029,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
               {/* House Number */}
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.House")}
+                placeholderTextColor="#7D7D7D"
                 value={formDataAddress.houseNumber}
                 onChangeText={(text) =>
                   handleAddressInputChange(
@@ -2041,7 +2042,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                     ? "border-red-500"
                     : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                style={{ fontSize: 14 }}
+                style={{ fontSize: 14, color: "#000000" }}
               />
               {fieldErrorsAddress.houseNumber ? (
                 <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -2054,6 +2055,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
               {/* Street Name */}
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.Street Name")}
+                placeholderTextColor="#7D7D7D"
                 value={formDataAddress.streetName}
                 onChangeText={(text) =>
                   handleAddressInputChange("streetName", formatText(text))
@@ -2063,7 +2065,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                     ? "border-red-500"
                     : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                style={{ fontSize: 14 }}
+                style={{ fontSize: 14, color: "#000000" }}
                 autoCorrect={false}
               />
               {fieldErrorsAddress.streetName ? (
@@ -2077,6 +2079,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
               {/* City */}
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.City")}
+                placeholderTextColor="#7D7D7D"
                 value={formDataAddress.city}
                 onChangeText={(text) =>
                   handleAddressInputChange("city", formatText(text))
@@ -2086,7 +2089,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                     ? "border-red-500"
                     : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                style={{ fontSize: 14 }}
+                style={{ fontSize: 14, color: "#000000" }}
                 autoCorrect={false}
               />
               {fieldErrorsAddress.city ? (
@@ -2100,10 +2103,11 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
               {/* Country */}
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.Country")}
+                placeholderTextColor="#7D7D7D"
                 value={t("AddOfficerAddressDetails.Country")}
                 editable={false}
                 className="border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full h-[50px] mb-4 text-gray-700"
-                style={{ fontSize: 14 }}
+                style={{ fontSize: 14, color: "#000000" }}
               />
 
               {/* Province */}
@@ -2181,6 +2185,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
               {/* Account Holder Name */}
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.AccountName")}
+                placeholderTextColor="#7D7D7D"
                 value={formDataAddress.accountHolderName}
                 onChangeText={(text) => {
                   let filtered = text.replace(/[^a-zA-Z\s]/g, "").trimStart();
@@ -2201,7 +2206,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                     ? "border-red-500"
                     : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                style={{ fontSize: 14 }}
+                style={{ fontSize: 14, color: "#000000" }}
               />
               {fieldErrorsAddress.accountHolderName ? (
                 <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -2214,6 +2219,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
               {/* Account Number */}
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.AccountNum")}
+                placeholderTextColor="#7D7D7D"
                 keyboardType="numeric"
                 value={formDataAddress.accountNumber}
                 onChangeText={(text) =>
@@ -2224,7 +2230,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                     ? "border-red-500"
                     : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                style={{ fontSize: 14 }}
+                style={{ fontSize: 14, color: "#000000" }}
               />
               {fieldErrorsAddress.accountNumber ? (
                 <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -2237,6 +2243,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
               {/* Confirm Account Number */}
               <TextInput
                 placeholder={t("AddOfficerAddressDetails.Confirm AccountNum")}
+                placeholderTextColor="#7D7D7D"
                 keyboardType="numeric"
                 value={formDataAddress.confirmAccountNumber}
                 onChangeText={(text) =>
@@ -2247,7 +2254,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                     ? "border-red-500"
                     : "border-[#F4F4F4] bg-[#F4F4F4]"
                 } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                style={{ fontSize: 14 }}
+                style={{ fontSize: 14, color: "#000000" }}
               />
               {error || fieldErrorsAddress.confirmAccountNumber ? (
                 <Text className="text-red-500 text-sm mb-3 ml-3">

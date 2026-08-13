@@ -18,6 +18,7 @@ interface RowItem {
   id: string;
   name: string;
   allocatedCount: number;
+  crops?: string;
 }
 
 export default function SelectRowToAssign({ route, navigation }: { route: any; navigation: any }) {
@@ -74,7 +75,8 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
         const mappedRows = response.data.data.map((r: any) => ({
           id: String(r.id),
           name: r.name,
-          allocatedCount: r.allocatedCount
+          allocatedCount: r.allocatedCount,
+          crops: r.crops
         }));
         setRows(mappedRows);
       } else {
@@ -189,6 +191,11 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                         {row.allocatedCount}{" "}
                         {row.allocatedCount === 1 ? "Order" : "Orders"} Allocated
                       </Text>
+                      {row.crops ? (
+                        <Text className="text-xs text-[#980775] mt-1.5 font-semibold">
+                          Crops: {row.crops}
+                        </Text>
+                      ) : null}
                     </View>
                   </TouchableOpacity>
                 );

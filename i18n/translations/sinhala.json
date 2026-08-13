@@ -930,7 +930,9 @@
   "DistributionOfficersList": {
     "EMPID": "සේවක අංකය :",
     "Officers":"නිලධාරීන්",
-    "Drivers":"රියදුරන්"
+    "Drivers":"රියදුරන්",
+    "No officers found": "- නිලධාරීන් කිසිවෙකු හමු නොවීය -",
+    "No drivers found": "- රියදුරන් කිසිවෙකු හමු නොවීය -"
   },
 
   "ReadytoPickupOrders": {
@@ -1058,6 +1060,7 @@
     "Try Again!": "නැවත උත්සාහ කරන්න!",
     "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "ඔබගේ විශ්‍රාම වැටුප් ඉල්ලීම ප්‍රතික්ෂේප කර ඇති බව දැනුම් දෙමින් අපි කණගාටු වෙමු. කරුණාකර අනාගතයේ නැවත උත්සාහ කරන්න.",
     "Go Back": "ආපසු යන්න",
+    "GoBack": "ආපසු යන්න",
     "View My Pension Account": "මගේ විශ්‍රාම වැටුප් ගිණුම බලන්න",
     "Loading status...": "තත්ත්වය ලෝඩ් වෙමින් පවතී...",
     "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "ගොවියා දැනටමත් {{date}} දින විශ්‍රාම වැටුප සඳහා ඉල්ලුම් කර ඇති බව පෙනේ. අයදුම්පත දැනට සමාලෝචනයට ලක්ව ඇත. තීරණයක් ඉක්මනින් බෙදා ගනු ඇත. ගොවියාට GoViCare යෙදුම හරහා ඕනෑම වේලාවක තත්ත්වය නිරීක්ෂණය කළ හැකිය.",
@@ -1097,5 +1100,11 @@
     "OK": "හරි",
     "Deposit submitted for review": "තැන්පතුව සමාලෝචනය සඳහා ඉදිරිපත් කරන ලදී",
     "Failed to submit deposit": "තැන්පතුව ඉදිරිපත් කිරීමට අසමත් විය"
+  },
+  "BottomNav": {
+    "Home": "ප්‍රධාන",
+    "Target": "ඉලක්ක",
+    "Staff": "කාර්ය මණ්ඩලය",
+    "Search": "සෙවීම්"
   }
 }

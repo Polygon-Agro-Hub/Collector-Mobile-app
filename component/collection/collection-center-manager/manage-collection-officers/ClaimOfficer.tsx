@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
 
 interface OfficerDetails {
   id: number;
@@ -171,7 +172,7 @@ const ClaimOfficer: React.FC = () => {
           t("Error.Failed to claim the officer. Please try again later."),
         );
       } else {
-        Alert.alert(t("Error.Success"), t("Error.Employee successfully claimed."));
+        Alert.alert("Success", t("Error.Employee successfully claimed."));
         setOfficerFound(false);
         setOfficerDetails(null);
         setEmpID("");
@@ -217,76 +218,7 @@ const ClaimOfficer: React.FC = () => {
     return () => backHandler.remove();
   }, [navigation]);
 
-  const ConfirmationModal = ({
-    visible,
-    onConfirm,
-    onCancel,
-    onLoading,
-  }: any) => {
-    return (
-      <Modal
-        transparent={true}
-        visible={visible}
-        animationType="fade"
-        onRequestClose={onCancel}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "#00000040",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View className="bg-white items-center rounded-lg w-80  p-6">
-            <View className="flex items-center justify-center mb-4 rounded-lg bg-[#f7f8fa] p-2 w-12 h-12 ">
-              <Ionicons name="warning" size={30} color="#6c7e8c" />
-            </View>
-            <Text className="text-center text-sm font-semibold mb-4">
-              {t("ClaimOfficer.Are you sure you want to claim this employee?")}
-            </Text>
 
-            <View className="flex-row  justify-center gap-4">
-              <TouchableOpacity
-                onPress={onCancel}
-                className="p-2 py-2 px-7 bg-[#F6F7F9] border border-[#95A1AC] rounded-lg"
-                style={{
-                  shadowColor: "#8f8a8a",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <Text className="text-sm text-gray-700">
-                  {t("ClaimOfficer.Cancel")}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={onConfirm}
-                disabled={onLoading}
-                className={`p-2 py-2 px-9 rounded-lg ${
-                  onLoading ? "bg-gray-400" : "bg-[#313131]"
-                }`}
-                style={{
-                  shadowColor: "#000000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <Text className="text-sm text-white">
-                  {t("ClaimOfficer.Claim")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
 
   return (
     <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
@@ -455,11 +387,14 @@ const ClaimOfficer: React.FC = () => {
           </TouchableOpacity>
         </View>
       )}
-      <ConfirmationModal
+      <WarningConfirmation
         visible={modalVisible}
+        message={t("ClaimOfficer.Are you sure you want to claim this employee?")}
         onConfirm={handleClaimOfficer}
         onCancel={handleCancel}
-        onLoading={loading}
+        confirmText={t("ClaimOfficer.Claim")}
+        cancelText={t("ClaimOfficer.Cancel")}
+        confirmButtonBgClass="bg-[#313131] active:bg-gray-800"
       />
     </ScrollView>
   );

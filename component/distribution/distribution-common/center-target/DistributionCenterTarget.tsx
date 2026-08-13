@@ -322,14 +322,20 @@ export default function DistributionCenterTarget({
                               }
                             }}
                             activeOpacity={isOut ? 0.8 : 1}
-                            className={`relative bg-white rounded-2xl p-4 shadow-sm flex-row items-center ${cardBorderStyle}`}
-                            style={{
-                              shadowColor: "#000",
-                              shadowOffset: { width: 0, height: 1 },
-                              shadowOpacity: 0.05,
-                              shadowRadius: 2,
-                              elevation: 1,
-                            }}
+                            className={`relative bg-white rounded-2xl p-4 flex-row items-center ${cardBorderStyle} ${
+                              activeTab === "todo" ? "" : "shadow-sm"
+                            }`}
+                            style={
+                              activeTab === "todo"
+                                ? {}
+                                : {
+                                    shadowColor: "#000",
+                                    shadowOffset: { width: 0, height: 1 },
+                                    shadowOpacity: 0.05,
+                                    shadowRadius: 2,
+                                    elevation: 1,
+                                  }
+                            }
                           >
 
                             {/* Left Circle Index Indicator */}

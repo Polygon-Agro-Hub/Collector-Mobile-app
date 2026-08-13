@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import { useFocusEffect } from "@react-navigation/native";
+import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -236,45 +237,10 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
               </View>
             </View>
 
-            <View className="flex-row w-full px-8 pb-8 gap-4 max-w-[500px] mx-auto">
-              <TouchableOpacity
-                className="bg-black rounded-lg items-center justify-center flex-1 py-3 h-[70px]"
-                onPress={downloadQRCode}
-                style={{
-                  shadowColor: "#000000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <View className="flex-col items-center justify-center gap-2">
-                  <MaterialIcons name="download" size={24} color="white" />
-                  <Text className="text-white text-base">
-                    {t("OfficerQr.Download")}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                className="bg-black rounded-lg items-center justify-center flex-1 py-4 h-[70px]"
-                onPress={shareQRCode}
-                style={{
-                  shadowColor: "#000000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 10,
-                  elevation: 6,
-                }}
-              >
-                <View className="flex-col items-center justify-center gap-2">
-                  <MaterialIcons name="share" size={24} color="white" />
-                  <Text className="text-white text-base">
-                    {t("OfficerQr.Share")}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
+            <DownloadShareButtons
+              onDownload={downloadQRCode}
+              onShare={shareQRCode}
+            />
           </View>
         </ScrollView>
       )}

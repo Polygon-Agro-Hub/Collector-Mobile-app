@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   Platform,
+  useWindowDimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -21,6 +22,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -70,6 +72,8 @@ interface officerDetails {
 }
 
 const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
+  const { width: screenWidth } = useWindowDimensions();
+  const isTablet = screenWidth >= 600;
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
   const [officerDetails, setofficerDetails] = useState<officerDetails | null>(
     null,
@@ -455,10 +459,10 @@ const handleSharePDF = async () => {
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main" as any)}
       />
-      <View className="p-4">
+      <View className="p-4 w-full">
         {/* Personal Details Section */}
         {details && (
-          <View className="mb-4">
+          <View className="mb-4 max-w-[750px] w-full mx-auto">
             <View className="mb-2">
               <Text className="text-sm font-bold">
                 {t("ReportPage.INV")}
@@ -468,159 +472,177 @@ const handleSharePDF = async () => {
             <Text className="font-bold text-sm mb-2">
               {t("ReportPage.PersonalDetails")}
             </Text>
-            <ScrollView
-              horizontal
-              className="border border-gray-300 rounded-lg"
-            >
-              <View>
-                {/* Table Header */}
-                <View className="flex-row bg-gray-200">
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                    {t("ReportPage.FirstName")}
-                  </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                    {t("ReportPage.LastName")}
-                  </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                    {t("ReportPage.NIC")}
-                  </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                    {t("ReportPage.Phone")}
-                  </Text>
-                  <Text className="w-32 p-2 font-bold">
-                    {t("ReportPage.Address")}
-                  </Text>
+            {(() => {
+              const tableContent = (
+                <View style={isTablet ? undefined : { width: 590 }}>
+                  {/* Table Header */}
+                  <View className="flex-row bg-gray-200">
+                    <Text className="p-2 font-bold border-r border-gray-300" style={{ flex: 1 }}>
+                      {t("ReportPage.FirstName")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300" style={{ flex: 1 }}>
+                      {t("ReportPage.LastName")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300" style={{ flex: 1 }}>
+                      {t("ReportPage.NIC")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300" style={{ flex: 1 }}>
+                      {t("ReportPage.Phone")}
+                    </Text>
+                    <Text className="p-2 font-bold" style={{ flex: 1.2 }}>
+                      {t("ReportPage.Address")}
+                    </Text>
+                  </View>
+                  {/* Table Rows */}
+                  <View className="flex-row">
+                    <Text className="p-2 border-r border-gray-300" style={{ flex: 1, flexWrap: "wrap" }}>
+                      {details.firstName}
+                    </Text>
+                    <Text className="p-2 border-r border-gray-300" style={{ flex: 1, flexWrap: "wrap" }}>
+                      {details.lastName}
+                    </Text>
+                    <Text className="p-2 border-r border-gray-300" style={{ flex: 1, flexWrap: "wrap" }}>
+                      {details.NICnumber}
+                    </Text>
+                    <Text className="p-2 border-r border-gray-300" style={{ flex: 1, flexWrap: "wrap" }}>
+                      {details.phoneNumber}
+                    </Text>
+                    <Text className="p-2" style={{ flex: 1.2, flexWrap: "wrap" }}>{details.address}</Text>
+                  </View>
                 </View>
-                {/* Table Rows */}
-                <View className="flex-row">
-                  <Text className="w-32 p-2 border-r border-gray-300">
-                    {details.firstName}
-                  </Text>
-                  <Text className="w-32 p-2 border-r border-gray-300">
-                    {details.lastName}
-                  </Text>
-                  <Text className="w-32 p-2 border-r border-gray-300">
-                    {details.NICnumber}
-                  </Text>
-                  <Text className="w-32 p-2 border-r border-gray-300">
-                    {details.phoneNumber}
-                  </Text>
-                  <Text className="w-32 p-2">{details.address}</Text>
+              );
+
+              return isTablet ? (
+                <View className="w-full border border-gray-300 rounded-lg">
+                  {tableContent}
                 </View>
-              </View>
-            </ScrollView>
+              ) : (
+                <ScrollView horizontal className="border border-gray-300 rounded-lg">
+                  {tableContent}
+                </ScrollView>
+              );
+            })()}
           </View>
         )}
 
         {/* Bank Details Section */}
         {details && (
-          <View className="mb-4">
+          <View className="mb-4 max-w-[750px] w-full mx-auto">
             <Text className="font-bold text-sm mb-2">
               {t("ReportPage.Bank")}
             </Text>
-            <ScrollView
-              horizontal
-              className="border border-gray-300 rounded-lg"
-            >
-              <View>
-                {/* Table Header */}
-                <View className="flex-row bg-gray-200">
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                    {t("ReportPage.AccountNum")}
-                  </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                    {t("ReportPage.AccountName")}
-                  </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
-                    {t("ReportPage.BankName")}
-                  </Text>
-                  <Text className="w-32 p-2">{t("ReportPage.BranchName")}</Text>
+            {(() => {
+              const bankTableContent = (
+                <View style={isTablet ? undefined : { width: 480 }}>
+                  {/* Table Header */}
+                  <View className="flex-row bg-gray-200">
+                    <Text className="p-2 font-bold border-r border-gray-300" style={{ flex: 1 }}>
+                      {t("ReportPage.AccountNum")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300" style={{ flex: 1 }}>
+                      {t("ReportPage.AccountName")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300" style={{ flex: 1 }}>
+                      {t("ReportPage.BankName")}
+                    </Text>
+                    <Text className="p-2" style={{ flex: 1 }}>{t("ReportPage.BranchName")}</Text>
+                  </View>
+                  {/* Table Rows */}
+                  <View className="flex-row">
+                    <Text className="p-2 border-r border-gray-300" style={{ flex: 1, flexWrap: "wrap" }}>
+                      {details.accNumber}
+                    </Text>
+                    <Text className="p-2 border-r border-gray-300" style={{ flex: 1, flexWrap: "wrap" }}>
+                      {details.accHolderName}
+                    </Text>
+                    <Text className="p-2 border-r border-gray-300" style={{ flex: 1, flexWrap: "wrap" }}>
+                      {details.bankName}
+                    </Text>
+                    <Text className="p-2" style={{ flex: 1, flexWrap: "wrap" }}>{details.branchName}</Text>
+                  </View>
                 </View>
-                {/* Table Rows */}
-                <View className="flex-row">
-                  <Text className="w-32 p-2 border-r border-gray-300">
-                    {details.accNumber}
-                  </Text>
-                  <Text className="w-32 p-2 border-r border-gray-300">
-                    {details.accHolderName}
-                  </Text>
-                  <Text className="w-32 p-2 border-r border-gray-300">
-                    {details.bankName}
-                  </Text>
-                  <Text className="w-32 p-2">{details.branchName}</Text>
+              );
+
+              return isTablet ? (
+                <View className="w-full border border-gray-300 rounded-lg">
+                  {bankTableContent}
                 </View>
-              </View>
-            </ScrollView>
+              ) : (
+                <ScrollView horizontal className="border border-gray-300 rounded-lg">
+                  {bankTableContent}
+                </ScrollView>
+              );
+            })()}
           </View>
         )}
 
         {/* Crop Details Section */}
         {crops.length > 0 && (
-          <View className="mb-4">
+          <View className="mb-4 max-w-[750px] w-full mx-auto">
             <Text className="font-bold text-sm mb-2">
               {t("ReportPage.CropDetails")}
             </Text>
             <ScrollView
               horizontal
-              className="border border-gray-300 rounded-lg"
+              className="w-full border border-gray-300 rounded-lg"
             >
               <View>
                 {/* Table Header */}
                 <View className="flex-row bg-gray-200">
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 110 }}>
                     {t("ReportPage.CropName")}
                   </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 110 }}>
                     {t("ReportPage.Variety")}
                   </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 100 }}>
                     {t("ReportPage.Unit Price A")}
                   </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 90 }}>
                     {t("ReportPage.Weight A")}
                   </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 100 }}>
                     {t("ReportPage.Unit Price B")}
                   </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 90 }}>
                     {t("ReportPage.Weight B")}
                   </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 100 }}>
                     {t("ReportPage.Unit Price C")}
                   </Text>
-                  <Text className="w-32 p-2 font-bold border-r border-gray-300">
+                  <Text className="p-2 font-bold border-r border-gray-300" style={{ width: 90 }}>
                     {t("ReportPage.Weight C")}
                   </Text>
-                  <Text className="w-32 p-2">{t("ReportPage.Total")}</Text>
+                  <Text className="p-2" style={{ width: 110 }}>{t("ReportPage.Total")}</Text>
                 </View>
                 {/* Table Rows */}
                 {crops.map((crop) => (
                   <View key={crop.id} className="flex-row">
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 110, flexWrap: "wrap" }}>
                       {crop.cropName}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 110, flexWrap: "wrap" }}>
                       {crop.variety}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 100, flexWrap: "wrap" }}>
                       {crop.unitPriceA}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 90, flexWrap: "wrap" }}>
                       {crop.weightA}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 100, flexWrap: "wrap" }}>
                       {crop.unitPriceB}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 90, flexWrap: "wrap" }}>
                       {crop.weightB}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 100, flexWrap: "wrap" }}>
                       {crop.unitPriceC}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 90, flexWrap: "wrap" }}>
                       {crop.weightC}
                     </Text>
-                    <Text className="w-32 p-2 border-b border-gray-300">
+                    <Text className="p-2 border-b border-gray-300" style={{ width: 110, flexWrap: "wrap" }}>
                       {crop.total}
                     </Text>
                   </View>
@@ -675,32 +697,13 @@ const handleSharePDF = async () => {
             </View>
           )}
 
-        <View className="flex-row justify-around w-full mb-7">
-          <TouchableOpacity
-            className="bg-[#2AAD7A] p-4 h-[80px] w-[120px] rounded-lg items-center"
-            onPress={handleDownloadPDF}
-          >
-            <Image
-              source={require("../../../../assets/images/collection-common/download.webp")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text className="text-sm text-cyan-50">
-              {t("ReportPage.Download")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-[#2AAD7A] p-4 h-[80px] w-[120px] rounded-lg items-center"
-            onPress={handleSharePDF}
-          >
-            <Image
-              source={require("../../../../assets/images/collection-common/share.webp")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text className="text-sm text-cyan-50">
-              {t("ReportPage.Share")}
-            </Text>
-          </TouchableOpacity>
+        <View className="w-full mb-7">
+          <DownloadShareButtons
+            onDownload={handleDownloadPDF}
+            onShare={handleSharePDF}
+            downloadLabel={t("ReportPage.Download")}
+            shareLabel={t("ReportPage.Share")}
+          />
         </View>
       </View>
     </ScrollView>

@@ -16,6 +16,7 @@ import BannedScreen from "@/component/common/auth/BannedScreen";
 import ChangePassword from "@/component/common/auth/ChangePassword";
 import Profile from "@/component/common/auth/Profile";
 import Splash from "@/component/common/auth/Splash";
+import Logout from "@/component/common/auth/Logout";
 import Lanuage from "@/component/common/lanuage/Lanuage";
 import OfficerQr from "@/component/common/auth/OfficerQrCode";
 import SideMenu from "@/component/components/navigations/SideMenu";
@@ -223,6 +224,7 @@ const PUBLIC_TAB_SCREENS: TabRouteConfig[] = [
 const PUBLIC_STACK_SCREENS: StackRouteConfig[] = [
   { name: "Splash", component: Splash, allowedRoles: "PUBLIC" },
   { name: "Login", component: Login, allowedRoles: "PUBLIC" },
+  { name: "Logout", component: Logout, allowedRoles: "PUBLIC" },
   { name: "BannedScreen", component: BannedScreen as any, allowedRoles: "PUBLIC" },
   { name: "Lanuage", component: Lanuage, allowedRoles: "PUBLIC" },
   { name: "Profile", component: Profile, allowedRoles: "PUBLIC" },
