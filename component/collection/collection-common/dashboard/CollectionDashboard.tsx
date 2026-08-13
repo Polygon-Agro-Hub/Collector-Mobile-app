@@ -227,7 +227,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     const prefix = getTranslationPrefix();
     if (isLoadingTarget) {
       return (
-        <View className="bg-white rounded-3xl mt-3 p-4 mx-4 shadow-lg">
+        <View className="bg-white rounded-3xl mt-3 p-4 shadow-lg">
           <Text className="text-center text-gray-500">
             Loading target status...
           </Text>
@@ -237,7 +237,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#DF9301] shadow-lg">
+        <View className="bg-white w-full rounded-[35px] mt-3 p-4 border-[1px] border-[#DF9301] shadow-lg">
           <Text className="text-center text-yellow-600 font-bold">
             🚀 {t(`${prefix}.Keep`)}
           </Text>
@@ -248,7 +248,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       );
     } else {
       return (
-        <View className="bg-white ml-[20px] w-[90%] rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A] shadow-lg">
+        <View className="bg-white w-full rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A] shadow-lg">
           <View className="flex-row justify-center items-center mb-2">
             <Image
               source={require("../../../../assets/images/dashboard/hand.webp")}
@@ -334,51 +334,51 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
 
   return (
     <ScrollView
-      className="flex-1 bg-white"
+      className="flex-1 bg-white px-6 py-3"
       contentContainerStyle={{ flexGrow: 1 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Profile Section */}
-      <TouchableOpacity
-        className="flex-row items-center p-4"
-        onPress={() => navigation.navigate("SideMenu")}
-      >
-        <Image
-          source={
-            profile?.image
-              ? { uri: profile.image }
-              : require("../../../../assets/images/auth/my-profile.webp")
-          }
-          className="w-16 h-16 rounded-full mr-3"
-        />
+      <View className="w-full max-w-[600px] mx-auto flex-1">
+        {/* Profile Section */}
+        <TouchableOpacity
+          className="flex-row items-center py-4"
+          onPress={() => navigation.navigate("SideMenu")}
+        >
+          <Image
+            source={
+              profile?.image
+                ? { uri: profile.image }
+                : require("../../../../assets/images/auth/my-profile.webp")
+            }
+            className="w-16 h-16 rounded-full mr-3"
+          />
 
-        <View>
-          <Text
-            style={[
-              { fontSize: 18, fontWeight: "bold" },
-              getTextStyle(selectedLanguage),
-            ]}
-            className="text-black"
-          >
-            {getFullName()}
-          </Text>
-          <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-gray-500"
-          >
-            {getcompanyName()}
-          </Text>
-        </View>
-      </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                { fontSize: 18, fontWeight: "bold" },
+                getTextStyle(selectedLanguage),
+              ]}
+              className="text-black"
+            >
+              {getFullName()}
+            </Text>
+            <Text
+              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+              className="text-gray-500"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {getcompanyName()}
+            </Text>
+          </View>
+        </TouchableOpacity>
 
-      <View className="w-full max-w-[500px] mx-auto">
         {renderTargetStatus()}
-      </View>
 
-      <View className="flex-1 w-full max-w-[500px] mx-auto">
         {/* Target Progress Section */}
         {jobRole === ROLES.COLLECTION_MANAGER ? (
           <View className="flex-row items-center justify-center gap-4 mt-10 mb-10">
@@ -455,11 +455,11 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
         )}
 
         {/* Action Buttons - dynamic layout */}
-        <View className="flex-row flex-wrap justify-between px-6 pb-12 mt-4">
+        <View className="flex-row flex-wrap justify-between pb-12 mt-4">
           {getDashboardItems().map((item) => (
             <TouchableOpacity
               key={item.key}
-              className="bg-white p-4 rounded-3xl w-[46%] h-32 shadow-lg relative mb-4"
+              className="bg-white p-4 rounded-3xl w-[48%] h-40 shadow-lg relative mb-4"
               onPress={item.onPress}
               style={{
                 borderColor: item.borderColor,
@@ -467,8 +467,8 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.1,
-                shadowRadius: 5,
-                elevation: 3,
+                shadowRadius: 10,
+                elevation: 4,
               }}
             >
               {item.icon}

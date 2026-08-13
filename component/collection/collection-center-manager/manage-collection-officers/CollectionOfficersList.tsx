@@ -18,6 +18,7 @@ import { environment } from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
+import AddButton from "@/component/components/buttons/AddButton";
 
 const { width } = Dimensions.get("window");
 const scale = (size: number) => (width / 375) * size;
@@ -185,92 +186,90 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
     }
   }, [selectedJobRole, officers]);
 
-  const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => (
-    <TouchableOpacity
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 16,
-        marginBottom: 16,
-        borderRadius: 24,
-        marginHorizontal: 16,
-        backgroundColor: "#fff",
-        borderWidth: item.status === "Not Approved" ? 1 : 0,
-        borderColor: item.status === "Not Approved" ? "#FF9797" : "transparent",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 4,
-      }}
-      onPress={() => {
-        if (item.status !== "Not Approved") {
-          navigation.navigate("OfficerSummary" as any, {
-            officerId: item.empId,
-            officerName: getOfficerName(item),
-            phoneNumber1: item.phoneNumber1,
-            phoneNumber2: item.phoneNumber2,
-            collectionOfficerId: item.collectionOfficerId,
-            image: item.image,
-          });
-        }
-      }}
-      disabled={item.status === "Not Approved"}
-    >
-      <View
+  const renderOfficer = ({ item }: { item: Officer & { status?: string } }) => {
+    const isNotApproved = item.status === "Not Approved";
+    return (
+      <TouchableOpacity
+        className="flex-row items-center p-4 mb-4 rounded-2xl mx-6 bg-gray-100"
+        onPress={() => {
+          if (!isNotApproved) {
+            navigation.navigate("OfficerSummary" as any, {
+              officerId: item.empId,
+              officerName: getOfficerName(item),
+              phoneNumber1: item.phoneNumber1,
+              phoneNumber2: item.phoneNumber2,
+              collectionOfficerId: item.collectionOfficerId,
+              image: item.image,
+            });
+          }
+        }}
+        disabled={isNotApproved}
         style={{
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-          overflow: "hidden",
-          justifyContent: "center",
-          alignItems: "center",
-          marginRight: 16,
+          borderWidth: 1,
+          borderColor: isNotApproved ? "#FF3434" : "#E1E7EE",
+          shadowColor: "#000000",
+          shadowOffset: { width: 0, height: isNotApproved ? 0 : 3 },
+          shadowOpacity: isNotApproved ? 0 : 0.1,
+          shadowRadius: isNotApproved ? 0 : 6,
+          elevation: isNotApproved ? 0 : 3,
+          opacity: 1,
         }}
       >
-        <Image
-          source={
-            item.image
-              ? { uri: item.image }
-              : require("../../../../assets/images/collection-manager/avetar.webp")
-          }
-          style={{
-            width: 64,
-            height: 64,
-            borderRadius: 32,
-          }}
-        />
-      </View>
+        <View className="w-14 h-14 rounded-full overflow-hidden justify-center items-center mr-4 shadow-md">
+          <Image
+            source={
+              item.image
+                ? { uri: item.image }
+                : require("../../../../assets/images/collection-manager/avetar.webp")
+            }
+            className="w-16 h-16 rounded-full mr-3"
+          />
+        </View>
 
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 18, fontWeight: "600", color: "#111827" }}>
-          {getOfficerName(item)}
-        </Text>
-        <Text style={{ fontSize: 14, color: "#6B7280" }}>
-          EMP ID : {item.empId}
-        </Text>
-      </View>
+        <View className="flex-1">
+          <Text
+            className="font-semibold text-gray-900"
+            style={[
+              selectedLanguage === "si"
+                ? { fontSize: 16 }
+                : selectedLanguage === "ta"
+                  ? { fontSize: 14 }
+                  : { fontSize: 17 },
+            ]}
+          >
+            {getOfficerName(item)}
+          </Text>
+          <Text className="text-sm text-gray-500">
+            EMP ID : {item.empId}
+          </Text>
+        </View>
 
-      {item.status === "Not Approved" && (
-        <Text
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 14,
-            color: "#EF4444",
-            fontSize: 12,
-            fontWeight: "600",
-          }}
-        >
-          {t("CollectionOfficersList.Not Approved")}
-        </Text>
-      )}
+        {isNotApproved && (
+          <Text
+            className="text-[#FF3434] font-semibold"
+            style={[
+              {
+                position: "absolute",
+                top: 10,
+                right: 14,
+              },
+              selectedLanguage === "si"
+                ? { fontSize: 12 }
+                : selectedLanguage === "ta"
+                  ? { fontSize: 9 }
+                  : { fontSize: 12 },
+            ]}
+          >
+            {t("CollectionOfficersList.Not Approved")}
+          </Text>
+        )}
 
-      {item.status !== "Not Approved" && (
-        <Ionicons name="chevron-forward" size={scale(20)} color="#9CA3AF" />
-      )}
-    </TouchableOpacity>
-  );
+        {!isNotApproved && (
+          <Ionicons name="chevron-forward" size={scale(20)} color="#9CA3AF" />
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -407,7 +406,6 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           borderTopRightRadius: 16,
           backgroundColor: "white",
           width: "100%",
-          maxWidth: 500,
           alignSelf: "center",
         }}
       >
@@ -500,7 +498,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           />
         )}
 
-        <TouchableOpacity
+        <AddButton
           onPress={async () => {
             try {
               await AsyncStorage.removeItem("officerFormData");
@@ -511,25 +509,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
               console.error("Error clearing form data:", error);
             }
           }}
-          style={{
-            position: "absolute",
-            bottom: 80,
-            right: 16,
-            backgroundColor: "black",
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            justifyContent: "center",
-            alignItems: "center",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 4,
-            elevation: 5,
-          }}
-        >
-          <Ionicons name="add" size={scale(24)} color="#fff" />
-        </TouchableOpacity>
+        />
       </View>
     </View>
   );
