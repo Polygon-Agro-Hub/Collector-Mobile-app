@@ -41,7 +41,7 @@ const formatWeightDisplay = (weightStr: string) => {
   const numVal = parseFloat(match[1]);
   const unit = match[2];
   if (isNaN(numVal)) return weightStr;
-  return `${match[1]} ${unit}`.trim();
+  return `${numVal} ${unit}`.trim();
 };
 
 interface PackingItem {

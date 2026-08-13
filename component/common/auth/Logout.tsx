@@ -51,6 +51,30 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
     }
   };
 
+  const releasePosition = async () => {
+    const netState = await NetInfo.fetch();
+    if (!netState.isConnected) {
+      return;
+    }
+    try {
+      const token = store.getState().auth.token;
+      if (!token) return;
+
+      await fetch(
+        `${environment.API_BASE_URL}api/packing/positions/release`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error releasing position during logout:", error);
+    }
+  };
+
   useEffect(() => {
     const performLogout = async () => {
       try {
@@ -58,8 +82,9 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
         if (empId) {
           await status(empId, false);
         }
+        await releasePosition();
       } catch (err) {
-        console.error("Error in logout screen online status update:", err);
+        console.error("Error in logout screen updates:", err);
       }
 
       // Dispatch logout user to clear redux state

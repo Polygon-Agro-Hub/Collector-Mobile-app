@@ -56,13 +56,15 @@ export default function ReadyToPrint({
           const qty = Number(pkg.count || pkg.qty || 1);
           return acc + (isNaN(qty) || qty <= 0 ? 1 : qty);
         }, 0)
-      : packagesCount;
+      : Number(packagesCount || 0);
+
+  const numPackages = Number(actualPackagesCount);
+  const numAlacarte = Number(alacarteCount || 0);
+
   const formattedPackages =
-    actualPackagesCount === 0
-      ? "0"
-      : String(actualPackagesCount).padStart(2, "0");
+    numPackages === 0 ? "0" : String(numPackages).padStart(2, "0");
   const formattedAlacarte =
-    alacarteCount === 0 ? "0" : String(alacarteCount).padStart(2, "0");
+    numAlacarte === 0 ? "0" : String(numAlacarte).padStart(2, "0");
 
   return (
     <View className="flex-1 bg-white">

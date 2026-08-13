@@ -929,7 +929,9 @@
   "DistributionOfficersList": {
     "EMPID": "பணியாளர் எண் :",
     "Officers":"அதிகாரிகள்",
-    "Drivers":"ஓட்டுநர்கள்"
+    "Drivers":"ஓட்டுநர்கள்",
+    "No officers found": "- அதிகாரிகள் யாரும் காணப்படவில்லை -",
+    "No drivers found": "- ஓட்டுநர்கள் யாரும் காணப்படவில்லை -"
   },
 
   "ReadytoPickupOrders": {
@@ -1098,5 +1100,11 @@
     "OK": "சரி",
     "Deposit submitted for review": "வைப்புத்தொகை மறுஆய்வுக்காக சமர்ப்பிக்கப்பட்டது",
     "Failed to submit deposit": "வைப்புத்தொகையை சமர்ப்பிக்க முடியவில்லை"
+  },
+  "BottomNav": {
+    "Home": "முதன்மை",
+    "Target": "இலக்கு",
+    "Staff": "ஊழியர்கள்",
+    "Search": "தேடல்"
   }
 }

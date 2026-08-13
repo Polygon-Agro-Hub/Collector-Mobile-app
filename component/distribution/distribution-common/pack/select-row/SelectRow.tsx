@@ -188,17 +188,42 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const checkActiveAssignment = async () => {
     try {
       const token = store.getState().auth.token;
-      if (!token) return;
+      if (!token) return false;
       const res = await axios.get(`${environment.API_BASE_URL}api/packing/active-assignment`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data && res.data.success && res.data.data) {
-        setActiveAssignment(res.data.data);
+        const assignment = res.data.data;
+        setActiveAssignment(assignment);
+
+        const assignmentData = {
+          rowId: assignment.rowId,
+          positionId: assignment.positionId,
+          positionName: assignment.name,
+          pType: assignment.type,
+        };
+        dispatch(setActiveAssignmentAction(assignmentData));
+
+        if (assignment.type === "QR") {
+          navigation.replace("QRHandling");
+        } else if (assignment.type === "NOR") {
+          navigation.replace("WelcomeToPacking", {
+            positionId: assignment.positionId,
+            positionName: assignment.name,
+          });
+        } else if (assignment.type === "QC") {
+          navigation.replace("WelcomeToQC", {
+            positionName: assignment.name,
+          });
+        }
+        return true;
       } else {
         setActiveAssignment(null);
+        return false;
       }
     } catch (err) {
       console.error("Error checking active assignment:", err);
+      return false;
     }
   };
 
@@ -215,8 +240,14 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   useFocusEffect(
     useCallback(() => {
-      fetchRows();
-      checkActiveAssignment();
+      const initScreen = async () => {
+        setLoading(true);
+        const hasAssignment = await checkActiveAssignment();
+        if (!hasAssignment) {
+          await fetchRows();
+        }
+      };
+      initScreen();
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
@@ -229,7 +260,6 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
   const fetchRows = async () => {
     try {
-      setLoading(true);
       const token = store.getState().auth.token;
       if (!token) {
         Alert.alert("Error", "Authentication token not found. Please log in again.");

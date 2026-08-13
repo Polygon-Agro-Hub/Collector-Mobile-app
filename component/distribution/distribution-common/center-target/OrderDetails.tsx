@@ -12,6 +12,7 @@ import {
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface PackagedItem {
   id: number;
@@ -46,6 +47,18 @@ interface OrderDetailsData {
   qcBadgeType?: "P" | "N";
 }
 
+const formatWeight = (weightStr: string | number) => {
+  if (!weightStr) return "";
+  const str = String(weightStr).trim();
+  const match = str.match(/^([\d\.]+)(\s*\w*)$/);
+  if (match) {
+    const num = parseFloat(match[1]);
+    const unit = match[2];
+    return `${num}${unit}`;
+  }
+  return str;
+};
+
 export default function OrderDetails({
   route,
   navigation,
@@ -54,6 +67,7 @@ export default function OrderDetails({
   navigation: any;
 }) {
   const params = route.params || {};
+  const insets = useSafeAreaInsets();
   const [details, setDetails] = useState<OrderDetailsData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -219,7 +233,7 @@ export default function OrderDetails({
                                 {item.name}
                               </Text>
                               <Text className="text-[#54617D] text-[11px] font-medium mt-0.5">
-                                {item.weight}
+                                {formatWeight(item.weight)}
                               </Text>
                               <Text className="text-[#54617D] text-[11px] font-semibold mt-0.5">
                                 Packed By
@@ -258,7 +272,7 @@ export default function OrderDetails({
           </ScrollView>
 
           {/* Bottom Fixed Close Button */}
-          <View className="px-6 pt-3 pb-8 bg-white">
+          <View className="px-6 pt-3 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
             <View className="w-full max-w-[600px] mx-auto">
               <TouchableOpacity
                 onPress={handleBack}

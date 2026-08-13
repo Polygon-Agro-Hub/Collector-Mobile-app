@@ -930,7 +930,9 @@
   "DistributionOfficersList": {
     "EMPID": "සේවක අංකය :",
     "Officers":"නිලධාරීන්",
-    "Drivers":"රියදුරන්"
+    "Drivers":"රියදුරන්",
+    "No officers found": "- නිලධාරීන් කිසිවෙකු හමු නොවීය -",
+    "No drivers found": "- රියදුරන් කිසිවෙකු හමු නොවීය -"
   },
 
   "ReadytoPickupOrders": {
@@ -1098,5 +1100,11 @@
     "OK": "හරි",
     "Deposit submitted for review": "තැන්පතුව සමාලෝචනය සඳහා ඉදිරිපත් කරන ලදී",
     "Failed to submit deposit": "තැන්පතුව ඉදිරිපත් කිරීමට අසමත් විය"
+  },
+  "BottomNav": {
+    "Home": "ප්‍රධාන",
+    "Target": "ඉලක්ක",
+    "Staff": "කාර්ය මණ්ඩලය",
+    "Search": "සෙවීම්"
   }
 }

@@ -28,6 +28,7 @@ import LoadingPage from "@/component/components/loading/LoadingPage";
 import AddButton from "@/component/components/buttons/AddButton";
 import NetInfo from "@react-native-community/netinfo";
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
+import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 
 const { width } = Dimensions.get("window");
 const scale = (size: number) => (width / 375) * size;
@@ -399,6 +400,17 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               data={filteredOfficers}
               keyExtractor={(item) => item.empId}
               renderItem={renderOfficer}
+              ListEmptyComponent={
+                <View style={{ flex: 1, height: scale(300), justifyContent: "center" }}>
+                  <NoDataScreen
+                    message={
+                      activeTab === "Officers"
+                        ? t("DistributionOfficersList.No officers found") || "- No Officers Found -"
+                        : t("DistributionOfficersList.No drivers found") || "- No Drivers Found -"
+                    }
+                  />
+                </View>
+              }
               ListHeaderComponent={
                 <View className="mt-4 px-6">
                   <Text
@@ -413,7 +425,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                     {"  "}
                     <Text className="text-[#21202B] font-normal">
                       ({t("ManagerTransactions.All") || "All"}{" "}
-                      {String(filteredOfficers.length).padStart(2, "0")})
+                      {filteredOfficers.length === 0 ? "0" : String(filteredOfficers.length).padStart(2, "0")})
                     </Text>
                   </Text>
                 </View>
@@ -421,6 +433,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               contentContainerStyle={{
                 paddingBottom: scale(80),
                 paddingTop: scale(10),
+                flexGrow: 1,
               }}
               refreshControl={
                 <RefreshControl

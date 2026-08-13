@@ -1,6 +1,6 @@
 import store from "@/services/reducxStore";
 import { useState, useEffect, useMemo } from "react";
-import { View, TouchableOpacity, Keyboard } from "react-native";
+import { View, TouchableOpacity, Keyboard, Text, useWindowDimensions } from "react-native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useSelector } from "react-redux";
@@ -16,6 +16,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
   const userRole = useSelector((state: RootState) => state.auth.jobRole);
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
 
   // Keyboard handling
   useEffect(() => {
@@ -219,18 +220,54 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
           const isFocused = currentTabName === tab.name;
           const activeColor = "#000000";
           const inactiveColor = "#8E8E93";
+          const showLabel = width > 500;
+
+          if (isFocused) {
+            if (showLabel) {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => navigation?.navigate?.(tab.name)}
+                  className="bg-[#FAE432] px-4 py-2.5 rounded-full flex-row items-center"
+                  style={{
+                    backgroundColor: "#FAE432",
+                    borderRadius: 24,
+                  }}
+                >
+                  {renderTabIcon(tab.iconType, tab.iconName, activeColor)}
+                  <Text className="text-black font-bold ml-2 text-sm">
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            } else {
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => navigation?.navigate?.(tab.name)}
+                  className="bg-[#FAE432] p-3 rounded-full"
+                  style={{
+                    backgroundColor: "#FAE432",
+                    borderRadius: 50,
+                  }}
+                >
+                  {renderTabIcon(tab.iconType, tab.iconName, activeColor)}
+                </TouchableOpacity>
+              );
+            }
+          }
 
           return (
             <TouchableOpacity
               key={index}
               onPress={() => navigation?.navigate?.(tab.name)}
-              className={isFocused ? "bg-[#FAE432] p-3 rounded-full" : "p-3"}
+              className="p-3"
               style={{
-                backgroundColor: isFocused ? "#FAE432" : "transparent",
+                backgroundColor: "transparent",
                 borderRadius: 50,
               }}
             >
-              {renderTabIcon(tab.iconType, tab.iconName, "#000000")}
+              {renderTabIcon(tab.iconType, tab.iconName, inactiveColor)}
             </TouchableOpacity>
           );
         })}

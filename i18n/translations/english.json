@@ -926,7 +926,9 @@
   "DistributionOfficersList": {
     "EMPID": "EMP ID :",
     "Officers":"Officers",
-    "Drivers":"Drivers"
+    "Drivers":"Drivers",
+    "No officers found": "- No Officers Found -",
+    "No drivers found": "- No Drivers Found -"
   },
 
   "ReadytoPickupOrders": {
@@ -1093,6 +1095,11 @@
     "OK": "OK",
     "Deposit submitted for review": "Deposit submitted for review",
     "Failed to submit deposit": "Failed to submit deposit"
+  },
+  "BottomNav": {
+    "Home": "Home",
+    "Target": "Target",
+    "Staff": "Staff",
+    "Search": "Search"
   }
-
 }
