@@ -9,6 +9,7 @@ export type RootStackParamList = {
       }
     | undefined;
   ChangePassword: undefined;
+  Logout: undefined;
   Registeredfarmer: undefined;
   Ufarmercropdetails: undefined;
   CollectionOfficerDashboard: undefined;

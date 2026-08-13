@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -21,6 +22,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -82,6 +84,8 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
   navigation,
 }) => {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const isTablet = screenWidth >= 600;
   const [details, setDetails] = useState<PersonalAndBankDetails | null>(null);
   const [officerDetails, setOfficerDetails] = useState<officerDetails | null>(
     null,
@@ -705,7 +709,7 @@ const handleDownloadPDF = async () => {
         navigation={navigation}
         onBackPress={() => navigation.goBack()}
       />
-      <View className="p-4">
+      <View className="p-4 w-full">
         {/* GRN Header */}
         <View className="mb-4">
           <Text className="text-sm font-bold">
@@ -755,62 +759,74 @@ const handleDownloadPDF = async () => {
         <View className="border-t border-gray-400 my-2" />
 
         {/* Received Items */}
-        <View className="mb-4">
+        <View className="mb-4 w-full mx-auto">
           <Text className="font-bold text-sm mb-2">
             {t("NewReport.Received Items")} :
           </Text>
-          <ScrollView horizontal className="border border-gray-300 rounded-lg">
-            <View>
-              {/* Table Header */}
-              <View className="flex-row bg-gray-200">
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Crop Name")}
-                </Text>
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Variety")}
-                </Text>
-                <Text className="w-20 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Grade")}
-                </Text>
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Unit Price(Rs.)")}
-                </Text>
-                <Text className="w-24 p-2 font-bold border-r border-gray-300">
-                  {t("NewReport.Quantity(kg)")}
-                </Text>
-                <Text className="w-24 p-2 font-bold">
-                  {t("NewReport.Sub Total(Rs.)")}
-                </Text>
-              </View>
+          {(() => {
+              const tableContent = (
+                <View style={isTablet ? undefined : { width: 600 }}>
+                  {/* Table Header */}
+                  <View className="flex-row bg-gray-200">
+                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 2 }}>
+                      {t("NewReport.Crop Name")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 2 }}>
+                      {t("NewReport.Variety")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1 }}>
+                      {t("NewReport.Grade")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1.5 }}>
+                      {t("NewReport.Unit Price(Rs.)")}
+                    </Text>
+                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1.5 }}>
+                      {t("NewReport.Quantity(kg)")}
+                    </Text>
+                    <Text className="p-2 font-bold text-center" style={{ flex: 2 }}>
+                      {t("NewReport.Sub Total(Rs.)")}
+                    </Text>
+                  </View>
 
-              {/* Table Rows */}
-              {crops.map((crop, index) => (
-                <View key={`${crop.id}-${index}`} className="flex-row">
-                  <Text
-                    className="w-24 p-2 border-b border-gray-300 text-left"
-                    style={{ flexWrap: "wrap" }}
-                  >
-                    {getCropName(crop)}
-                  </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300">
-                    {getVarietyName(crop)}
-                  </Text>
-                  <Text className="w-20 p-2 border-b border-gray-300">
-                    {crop.grade || "-"}
-                  </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                    {formatNumber(crop.unitPrice)}
-                  </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                    {formatNumber(crop.quantity)}
-                  </Text>
-                  <Text className="w-24 p-2 border-b border-gray-300 text-right">
-                    {formatNumberWithCommas(crop.subTotal)}
-                  </Text>
+                  {/* Table Rows */}
+                  {crops.map((crop, index) => (
+                    <View key={`${crop.id}-${index}`} className="flex-row">
+                      <Text
+                        className="p-2 border-b border-gray-300 text-left"
+                        style={{ flex: 2, flexWrap: "wrap" }}
+                      >
+                        {getCropName(crop)}
+                      </Text>
+                      <Text className="p-2 border-b border-gray-300" style={{ flex: 2, flexWrap: "wrap" }}>
+                        {getVarietyName(crop)}
+                      </Text>
+                      <Text className="p-2 border-b border-gray-300 text-center" style={{ flex: 1 }}>
+                        {crop.grade || "-"}
+                      </Text>
+                      <Text className="p-2 border-b border-gray-300 text-right" style={{ flex: 1.5 }}>
+                        {formatNumber(crop.unitPrice)}
+                      </Text>
+                      <Text className="p-2 border-b border-gray-300 text-right" style={{ flex: 1.5 }}>
+                        {formatNumber(crop.quantity)}
+                      </Text>
+                      <Text className="p-2 border-b border-gray-300 text-right" style={{ flex: 2 }}>
+                        {formatNumberWithCommas(crop.subTotal)}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-          </ScrollView>
+              );
+
+              return isTablet ? (
+                <View className="w-full border border-gray-300 rounded-lg">
+                  {tableContent}
+                </View>
+              ) : (
+                <ScrollView horizontal className="border border-gray-300 rounded-lg">
+                  {tableContent}
+                </ScrollView>
+              );
+            })()}
         </View>
 
         {/* Divider */}
@@ -837,46 +853,15 @@ const handleDownloadPDF = async () => {
 
         {/* Action Buttons */}
         <View
-          className="flex-row justify-around w-full mt-4"
+          className="w-full mt-4"
           style={{ paddingBottom: insets.bottom || 20 }}
         >
-          <TouchableOpacity
-            className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
-            onPress={handleDownloadPDF}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,
-              shadowRadius: 6,
-              elevation: 4,
-            }}
-          >
-            <Image
-              source={require("../../../../assets/images/collection-common/download.webp")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text className="text-sm text-cyan-50">
-              {t("NewReport.Download")}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-black p-4 h-[80px] w-[120px] rounded-lg justify-center items-center"
-            onPress={handleSharePDF}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,
-              shadowRadius: 6,
-              elevation: 4,
-            }}
-          >
-            <Image
-              source={require("../../../../assets/images/collection-common/share.webp")}
-              style={{ width: 24, height: 24 }}
-            />
-            <Text className="text-sm text-cyan-50">{t("NewReport.Share")}</Text>
-          </TouchableOpacity>
+          <DownloadShareButtons
+            onDownload={handleDownloadPDF}
+            onShare={handleSharePDF}
+            downloadLabel={t("NewReport.Download")}
+            shareLabel={t("NewReport.Share")}
+          />
         </View>
       </View>
     </ScrollView>

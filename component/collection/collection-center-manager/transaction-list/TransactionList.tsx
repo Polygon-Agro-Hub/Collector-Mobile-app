@@ -308,7 +308,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
           className="items-center justify-center"
         >
           <TextInput
-            style={{ flex: 1, fontSize: 16, fontStyle: "italic" }}
+            style={{ flex: 1, fontSize: 16, fontStyle: "italic", color: "#000000" }}
             placeholder={t("ManagerTransactions.Search")}
             placeholderTextColor="grey"
             value={searchQuery}

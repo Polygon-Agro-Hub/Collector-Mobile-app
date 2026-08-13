@@ -12,6 +12,7 @@ import {
   Platform,
   ActivityIndicator,
   BackHandler,
+  useWindowDimensions,
 } from "react-native";
 import { Modal } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -128,6 +129,9 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
 const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   navigation,
 }) => {
+  const { width: screenWidth } = useWindowDimensions();
+  const cardWidth = screenWidth - 134; // screenWidth - 24*2 (padding) - 38*2 (arrows) - 10 (margins)
+  const itemWidth = cardWidth + 10;
   const [cropCount, setCropCount] = useState(1);
   const [cropNames, setCropNames] = useState<Crop[]>([]);
   const [selectedCrop, setSelectedCrop] = useState<{
@@ -276,7 +280,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const scrollToNext = () => {
     if (scrollViewRef.current) {
-      const newPosition = scrollPosition + 220 + 20;
+      const newPosition = scrollPosition + itemWidth;
       scrollViewRef.current.scrollTo({ x: newPosition, animated: true });
       setScrollPosition(newPosition);
     }
@@ -284,7 +288,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const scrollToPrevious = () => {
     if (scrollViewRef.current) {
-      const newPosition = scrollPosition - (220 + 20);
+      const newPosition = scrollPosition - itemWidth;
       scrollViewRef.current.scrollTo({ x: newPosition, animated: true });
       setScrollPosition(newPosition);
     }
@@ -295,7 +299,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   }) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     setScrollPosition(contentOffsetX);
-    const itemWidth = 220 + 20;
     const currentIndex = Math.round(contentOffsetX / itemWidth);
     const safeCurrentIndex = Math.max(
       0,
@@ -755,7 +758,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       setCrops(newCrops);
 
       if (scrollViewRef.current && newCrops.length > 0) {
-        const itemWidth = 220 + 20;
         const currentIndex = Math.round(scrollPosition / itemWidth);
 
         if (currentIndex >= newCrops.length && newCrops.length > 0) {
@@ -829,7 +831,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         setCropCount((prevCount) => prevCount - 1);
 
         if (scrollViewRef.current && newCrops.length > 0) {
-          const itemWidth = 220 + 20;
           const currentIndex = Math.round(scrollPosition / itemWidth);
 
           if (currentIndex >= newCrops.length && newCrops.length > 0) {
@@ -883,7 +884,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
       >
-        <View className="w-full max-w-[500px]">
+        <View className="w-full ">
           <CustomHeader
             title={t("UnregisteredCropDetails.FillDetails")}
             showBackButton={true}
@@ -921,7 +922,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                     contentContainerStyle={{ alignItems: "center" }}
                     onScroll={onScroll}
                     scrollEventThrottle={16}
-                    snapToInterval={220 + 10}
+                    snapToInterval={itemWidth}
                     decelerationRate="fast"
                     snapToAlignment="center"
                   >
@@ -935,7 +936,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                         <View
                           key={index}
                           style={{
-                            width: 220,
+                            width: cardWidth,
                             marginHorizontal: 5,
                             padding: 12,
                             opacity: isVarietyDeleting ? 0.6 : 1,
@@ -1188,13 +1189,16 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                     <Text className="w-8 text-gray-600">{grade}</Text>
                     <TextInput
                       placeholder="Rs."
+                      placeholderTextColor="#A3A3A3"
                       keyboardType="numeric"
                       className="flex-1 rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
                       value={unitPrices[grade]?.toString() || ""}
                       editable={false}
+                      style={{ color: "#4B5563" }}
                     />
                     <TextInput
                       placeholder="kg"
+                      placeholderTextColor="#A3A3A3"
                       keyboardType="decimal-pad"
                       className="flex-1 rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
                       value={quantities[grade]}
@@ -1204,6 +1208,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       autoComplete="off"
                       importantForAutofill="no"
                       autoCorrect={false}
+                      style={{ color: "#4B5563" }}
                     />
                   </View>
                 ))}
@@ -1238,12 +1243,14 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               <View className="bg-[#F4F4F4] h-[50px] items-center justify-center rounded-full mt-2 ">
                 <TextInput
                   placeholder="--Auto Fill--"
+                  placeholderTextColor="#A3A3A3"
                   editable={false}
                   value={` ${total.toLocaleString("en-IN", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}`}
                   className="text-gray-600 text-center"
+                  style={{ color: "#4B5563" }}
                 />
               </View>
 

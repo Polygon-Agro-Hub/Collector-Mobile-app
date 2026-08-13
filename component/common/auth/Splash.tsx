@@ -188,14 +188,15 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
   };
 
   return (
-    <View className="flex-1 bg-white justify-center items-center">
-      <View className="w-full max-w-[500px] flex-1 justify-center relative items-center">
-        <Image
-          source={top}
-          style={{ width: "50%", height: "18%", maxWidth: 260, maxHeight: 130 }}
-          className="w-[50%] h-[18%] absolute left-0 top-0 -mt-2"
-          resizeMode="contain"
-        />
+    <View className="flex-1 bg-white justify-center items-center relative">
+      <Image
+        source={top}
+        style={{ width: "40%", height: "18%", maxWidth: 260, maxHeight: 130 }}
+        className="w-[40%] h-[18%] absolute left-0 top-0 -mt-2"
+        resizeMode="contain"
+      />
+      
+      <View className="w-full max-w-[500px] justify-center items-center px-6">
         <Image
           source={center}
           style={{
@@ -224,13 +225,14 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
             style={{ height: 10, marginTop: 20 }}
           />
         </View>
-        <Image
-          source={bottom}
-          style={{ width: "50%", height: "18%", maxWidth: 260, maxHeight: 130 }}
-          className="w-[50%] h-[18%] absolute bottom-0 right-0"
-          resizeMode="contain"
-        />
       </View>
+
+      <Image
+        source={bottom}
+        style={{ width: "40%", height: "18%", maxWidth: 260, maxHeight: 130 }}
+        className="w-[40%] h-[18%] absolute bottom-0 right-0"
+        resizeMode="contain"
+      />
     </View>
   );
 };

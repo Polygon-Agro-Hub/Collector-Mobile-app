@@ -427,7 +427,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <TextInput
               className={`border ${fieldErrors.firstName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
-              style={{ fontSize: 14 }}
+              style={{ fontSize: 14, color: "#000000" }}
               value={firstName}
               onChangeText={handleFirstNameChange}
               keyboardType="default"
@@ -450,7 +450,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <TextInput
               className={`border ${fieldErrors.lastName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
-              style={{ fontSize: 14 }}
+              style={{ fontSize: 14, color: "#000000" }}
               value={lastName}
               onChangeText={handleLastNameChange}
               keyboardType="default"
@@ -494,7 +494,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <TextInput
               className={`border ${fieldErrors.nic || NICError ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
-              style={{ fontSize: 14 }}
+              style={{ fontSize: 14, color: "#000000" }}
               placeholder={t("UnregisteredFarmerDetails.NIC")}
               placeholderTextColor="#9CA3AF"
               value={NICnumber}
@@ -595,7 +595,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                   }
                 }}
                 className="flex-1 h-full"
-                style={{ fontSize: 14, height: 50, paddingVertical: 0 }}
+                style={{ fontSize: 14, height: 50, paddingVertical: 0, color: "#000000" }}
                 maxLength={9}
               />
             </View>
@@ -633,7 +633,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <TextInput
               className={`border ${fieldErrors.accNumber || accNumberError ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
-              style={{ fontSize: 14 }}
+              style={{ fontSize: 14, color: "#000000" }}
               keyboardType="numeric"
               placeholderTextColor="#9CA3AF"
               value={accNumber}
@@ -659,7 +659,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <TextInput
               className={`border ${fieldErrors.accHolderName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"} p-3 rounded-full h-[50px]`}
-              style={{ fontSize: 14 }}
+              style={{ fontSize: 14, color: "#000000" }}
               value={accHolderName}
               onChangeText={handleAccountNameChange}
               keyboardType="default"
