@@ -926,7 +926,9 @@
   "DistributionOfficersList": {
     "EMPID": "EMP ID :",
     "Officers":"Officers",
-    "Drivers":"Drivers"
+    "Drivers":"Drivers",
+    "No officers found": "- No Officers Found -",
+    "No drivers found": "- No Drivers Found -"
   },
 
   "ReadytoPickupOrders": {
@@ -1051,6 +1053,7 @@
     "Advise the farmer to log in to the GoViCare app and check the current pension status.": "Advise the farmer to log in to the GoViCare app and check the current pension status.",
     "Application Rejected!": "Application Rejected!",
     "Go Back": "Go Back",
+    "GoBack": "Go Back",
     "View My Pension Account": "View My Pension Account",
     "Loading status...": "Loading status...",
     "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.",
@@ -1092,6 +1095,11 @@
     "OK": "OK",
     "Deposit submitted for review": "Deposit submitted for review",
     "Failed to submit deposit": "Failed to submit deposit"
+  },
+  "BottomNav": {
+    "Home": "Home",
+    "Target": "Target",
+    "Staff": "Staff",
+    "Search": "Search"
   }
-
 }

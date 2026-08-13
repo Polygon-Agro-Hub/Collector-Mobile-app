@@ -404,7 +404,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                     {/* Target */}
                     <View className="w-32 justify-center items-center border-r border-gray-300">
                       <Text className="text-center">
-                        {item.officerTarget.toFixed(2)}
+                        {item.officerTarget}
                       </Text>
                     </View>
 
@@ -412,8 +412,8 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                     <View className="w-32 justify-center items-center">
                       <Text className="text-center">
                         {selectedToggle === "Completed"
-                          ? item.complete.toFixed(2)
-                          : item.todo.toFixed(2)}
+                          ? item.complete
+                          : item.todo}
                       </Text>
                     </View>
                   </View>

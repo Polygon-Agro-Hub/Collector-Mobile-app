@@ -1,87 +1,62 @@
-import { View } from "react-native";
-import ContentLoader, { Rect, Circle } from "react-content-loader/native";
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from "react-native-responsive-screen";
+import React, { useEffect, useRef } from "react";
+import { View, Animated } from "react-native";
 
-const DashboardSkeleton = () => (
-  <View style={{ flex: 1, backgroundColor: "#fff" }}>
-    <ContentLoader
-      speed={1}
-      width="100%"
-      height="100%"
-      backgroundColor="#f3f3f3"
-      foregroundColor="#ecebeb"
-    >
-      {/* Profile Section */}
-      <Circle cx={wp("15%")} cy={hp("8%")} r={hp("5%")} />
-      <Rect
-        x={wp("30%")}
-        y={hp("6.5%")}
-        rx="4"
-        ry="4"
-        width={wp("50%")}
-        height={hp("2%")}
-      />
-      <Rect
-        x={wp("30%")}
-        y={hp("10%")}
-        rx="4"
-        ry="4"
-        width={wp("30%")}
-        height={hp("1.5%")}
-      />
+export default function DashboardSkeleton() {
+  const opacityAnim = useRef(new Animated.Value(0.4)).current;
 
-      {/* "Keep Going" Card */}
-      <Rect
-        x={wp("5%")}
-        y={hp("15%")}
-        rx="10"
-        ry="10"
-        width={wp("90%")}
-        height={hp("8%")}
-      />
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 0.4,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [opacityAnim]);
 
-      {/* Total Weight Section */}
-      <Rect
-        x={wp("5%")}
-        y={hp("30%")}
-        rx="10"
-        ry="10"
-        width={wp("90%")}
-        height={hp("12%")}
-      />
+  return (
+    <View className="flex-1 bg-white p-4">
+      <View className="w-full max-w-[600px] mx-auto flex-1">
+        {/* Profile Header Skeleton */}
+        <Animated.View
+          style={{ opacity: opacityAnim }}
+          className="flex-row items-center p-3 mb-2"
+        >
+          <View className="w-16 h-16 rounded-full bg-slate-200 mr-3" />
+          <View className="flex-1">
+            <View className="w-40 h-4 bg-slate-200 rounded-md mb-2" />
+            <View className="w-28 h-3.5 bg-slate-200 rounded-md" />
+          </View>
+        </Animated.View>
 
-      {/* Total Farmers Section */}
-      <Rect
-        x={wp("5%")}
-        y={hp("50%")}
-        rx="10"
-        ry="10"
-        width={wp("90%")}
-        height={hp("12%")}
-      />
-
-      {/* Buttons Section */}
-      <Rect
-        x={wp("12%")}
-        y={hp("74%")}
-        rx="10"
-        ry="10"
-        width={wp("32%")}
-        height={hp("15%")}
-      />
-      <Rect
-        x={wp("58%")}
-        y={hp("74%")}
-        rx="10"
-        ry="10"
-        width={wp("32%")}
-        height={hp("15%")}
-      />
-    </ContentLoader>
-  </View>
-);
-
-export default DashboardSkeleton;
+        {/* Dashboard Grid Cards Skeleton */}
+        <Animated.View
+          style={{ opacity: opacityAnim }}
+          className="flex-row flex-wrap px-2 gap-4 justify-start mt-6"
+        >
+          {[1, 2, 3, 4].map((key) => (
+            <View
+              key={key}
+              className="bg-slate-100 border border-slate-200 p-4 rounded-3xl w-[47%] h-32 justify-between"
+            >
+              <View className="flex-row justify-between items-center">
+                <View className="w-10 h-10 rounded-2xl bg-slate-200" />
+                <View className="w-6 h-6 rounded-full bg-slate-200" />
+              </View>
+              <View className="w-24 h-4 bg-slate-200 rounded-md" />
+            </View>
+          ))}
+        </Animated.View>
+      </View>
+    </View>
+  );
+}

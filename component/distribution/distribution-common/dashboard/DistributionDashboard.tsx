@@ -19,7 +19,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import { Feather, FontAwesome6 } from "@expo/vector-icons";
-import DashboardSkeleton from "./DashboardSkeleton";
+import DashboardSkeleton from "@/component/components/skeletons/DashboardSkeleton";
 
 type DistributionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,

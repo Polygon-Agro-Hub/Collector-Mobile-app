@@ -108,7 +108,7 @@ const NotEligibleScreen: React.FC<NotEligibleScreenProps> = ({
               }}
         >
           <Text className="text-white text-center font-bold text-lg">
-            {t("GoviPensionStatus.Go Back")}
+            {t("GoviPensionStatus.GoBack")}
           </Text>
         </TouchableOpacity>
       </View>
