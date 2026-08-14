@@ -240,7 +240,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
       showsVerticalScrollIndicator={false}
     >
       <CustomHeader
-        title={t("ClaimOfficer.ClaimOfficers")}
+        title={t("ClaimOfficer.Claim Staff")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => navigation.navigate("DistributionOfficersList")}

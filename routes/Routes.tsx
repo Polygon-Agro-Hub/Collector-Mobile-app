@@ -44,7 +44,6 @@ import DailyTargetList from "@/component/collection/collection-common/daily-targ
 import AddOfficer from "@/component/collection/collection-center-manager/manage-collection-officers/AddOfficer";
 import ClaimOfficer from "@/component/collection/collection-center-manager/manage-collection-officers/ClaimOfficer";
 import TransactionList from "@/component/collection/collection-center-manager/transaction-list/TransactionList";
-import DailyTarget from "@/component/collection/collection-center-manager/daily-target/DailyTarget";
 import NoCollectionCenterScreen from "@/component/collection/collection-common/disclaim-status/NoCollectionCenterScreen";
 import EditTargetScreen from "@/component/collection/collection-center-manager/officers-targets/EditTargetScreen";
 import PassTargetScreen from "@/component/collection/collection-center-manager/daily-target/PassTargetScreen";
@@ -272,11 +271,7 @@ const COLLECTION_TAB_SCREENS: TabRouteConfig[] = [
     component: DailyTargetList as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
-  {
-    name: "DailyTarget",
-    component: DailyTarget as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER],
-  },
+
   {
     name: "PassTargetScreen",
     component: PassTargetScreen as any,

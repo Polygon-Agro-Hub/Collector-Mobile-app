@@ -268,7 +268,7 @@ const RecieveTargetScreen: React.FC<RecieveTargetScreenProps> = ({
             {
               name: "Main",
               params: {
-                screen: "DailyTarget",
+                screen: "DailyTargetList",
                 params: {
                   varietyId,
                   varietyNameEnglish,

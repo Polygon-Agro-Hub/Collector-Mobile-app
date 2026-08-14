@@ -33,6 +33,7 @@ interface EditTargetManagerProps {
       target: number;
       todo: string;
       dailyTarget: number;
+      fromScreen?: string;
     };
   };
 }
@@ -68,7 +69,36 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
     varietyId,
     varietyNameSinhala,
     varietyNameTamil,
+    fromScreen,
   } = route.params;
+
+  // Back navigation target: return to DailyTargetList
+  const backScreenName = "DailyTargetList";
+  const backNavParams = {
+    varietyId,
+    varietyNameEnglish,
+    grade,
+    target,
+    todo,
+    dailyTarget,
+    varietyNameSinhala,
+    varietyNameTamil,
+  };
+
+  const navigateBack = () => {
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "Main",
+          params: {
+            screen: backScreenName,
+            params: backNavParams,
+          },
+        },
+      ],
+    });
+  };
 
   const getvarietyName = () => {
     switch (selectedLanguage) {
@@ -86,27 +116,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
       setIsEditing(false);
 
       const handleBackPress = () => {
-        navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: "Main",
-              params: {
-                screen: "DailyTarget",
-                params: {
-                  varietyId,
-                  varietyNameEnglish,
-                  grade,
-                  target,
-                  todo,
-                  dailyTarget,
-                  varietyNameSinhala,
-                  varietyNameTamil,
-                },
-              },
-            },
-          ],
-        });
+        navigateBack();
         return true;
       };
 
@@ -129,6 +139,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
       dailyTarget,
       varietyNameSinhala,
       varietyNameTamil,
+      fromScreen,
     ]),
   );
 
@@ -141,29 +152,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
           subtitle={grade ? `Grade : ${grade}` : ""}
           showBackButton={true}
           navigation={navigation}
-          onBackPress={() =>
-            navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: "Main",
-                  params: {
-                    screen: "DailyTarget",
-                    params: {
-                      varietyId,
-                      varietyNameEnglish,
-                      grade,
-                      target,
-                      todo,
-                      dailyTarget,
-                      varietyNameSinhala,
-                      varietyNameTamil,
-                    },
-                  },
-                },
-              ],
-            })
-          }
+          onBackPress={() => navigateBack()}
           textColor="white"
           bgColor="#282828"
           iconBgColor="#FFFFFF1A"

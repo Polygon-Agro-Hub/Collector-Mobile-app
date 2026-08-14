@@ -223,7 +223,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
             {
               name: "Main",
               params: {
-                screen: "DailyTarget",
+                screen: "DailyTargetList",
                 params: {
                   varietyId,
                   varietyNameEnglish,

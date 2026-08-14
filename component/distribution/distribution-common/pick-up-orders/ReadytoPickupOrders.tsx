@@ -25,6 +25,10 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import authState, { RootState } from "@/services/reducxStore";
+import { useSelector } from "react-redux";
+import { ROLES } from "@/constants/user-roles";
+import useUserStore from "@/store/userStore";
 
 type CollectionOfficersListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -52,7 +56,7 @@ interface Order {
   paymentMethod: string;
   isPaid: boolean;
   amount: number;
-  packTime: string; 
+  packTime: string;
   creditPaid: number | null;
   remainingAmount: number;
   isFullyPaid: number;
@@ -117,6 +121,20 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
   >("initial");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const reduxRole = useSelector((state: RootState) => state.auth.jobRole);
+  const storeUserRole = useUserStore((state) => state.userRole);
+  const userRole = storeUserRole || reduxRole;
+
+  const isDistributionOfficer =
+    userRole === ROLES.DISTRIBUTION_OFFICER ||
+    userRole === "Distribution Officer";
+  const clearSearchPaddingBottom = isDistributionOfficer
+    ? Math.max(insets.bottom + 16, 50)
+    : Math.max(5);
+
+  const paddingBottom = isDistributionOfficer
+    ? (insets.bottom + 16, 50)
+    : Math.max(0);
 
   const isSearching = searchPhone.trim().length > 0;
 
@@ -364,15 +382,18 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
         title={t("ReadytoPickupOrders.Ready to Pickup Orders")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+        onBackPress={() =>
+          navigation.navigate("Main", { screen: "DistridutionaDashboard" })
+        }
       />
 
-      <View className="flex-1 w-full max-w-[500px] mx-auto">
+      <View className="flex-1 w-full mx-auto">
         {/* Search Bar */}
         <View className="flex-row items-center h-[50px]  mx-8 mt-2 pl-3 border border-[#C0C0C0] rounded-full">
           <TextInput
             className="flex-1 text-base text-black py-2"
             placeholder={t("ReadytoPickupOrders.Search by phone number")}
+            placeholderTextColor="#9CA3AF"
             value={searchPhone}
             onChangeText={handleSearchChange}
             keyboardType="phone-pad"
@@ -400,6 +421,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
             </Text>
           </View>
         )}
+
         {isSearching && (
           <View className="px-4 py-3 flex-row items-center">
             <Text className="text-sm font-medium text-gray-900"></Text>
@@ -408,12 +430,25 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
         {/* Content Area */}
         <View className="flex-1">
-          <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+            style={{ paddingBottom: paddingBottom }}
+          >
             {searchState === "no-orders-at-all" && <NoOrdersState />}
 
             {(searchState === "initial" || searchState === "results") &&
               orders.length > 0 && (
-                <View className="p-4 pb-4">
+                <View
+                  style={{
+                    padding: 16,
+                    paddingBottom: isSearching
+                      ? 16
+                      : isDistributionOfficer
+                        ? Math.max(insets.bottom + 24, 60)
+                        : Math.max(insets.bottom + 16, 24),
+                  }}
+                >
                   {filteredOrders.map((order, index) => (
                     <OrderCard
                       key={`${order.orderId}-${index}`}
@@ -445,7 +480,7 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
           {isSearching && (
             <View
               className="bg-white px-6 pt-3"
-              style={{ paddingBottom: 8 }}
+              style={{ paddingBottom: clearSearchPaddingBottom }}
             >
               <TouchableOpacity
                 onPress={handleClearSearch}
@@ -507,7 +542,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   const scheduledDate = formatDateYMD(order.sheduleDate);
   const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
 
- const readyDate = new Date(order.packTime);
+  const readyDate = new Date(order.packTime);
   const readyMonth = String(readyDate.getMonth() + 1).padStart(2, "0");
   const readyDay = String(readyDate.getDate()).padStart(2, "0");
   const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {

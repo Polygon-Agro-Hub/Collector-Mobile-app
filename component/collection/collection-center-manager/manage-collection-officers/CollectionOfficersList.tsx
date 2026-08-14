@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -77,6 +78,22 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
       setShowMenu(false);
     }, []),
   );
+
+  useFocusEffect(
+      useCallback(() => {
+        const handleBackPress = () => {
+          navigation.navigate("Main", { screen: "CollectionDashboard" });
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          handleBackPress,
+        );
+  
+        return () => subscription.remove();
+      }, [navigation]),
+    );
 
   const getTextStyle = (language: string) => {
     if (language === "si") {
@@ -471,12 +488,8 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             />
           </View>
         ) : errorMessage ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <Text style={{ color: "#6B7280", fontSize: 18 }}>
-              {errorMessage}
-            </Text>
+          <View style={{ flex: 1, height: scale(300), justifyContent: "center" }}>
+            <NoDataScreen message={t("DistributionOfficersList.No officers found")} />
           </View>
         ) : (
           <FlatList

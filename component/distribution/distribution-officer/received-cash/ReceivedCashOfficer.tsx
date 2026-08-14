@@ -428,7 +428,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
 
         {/* Hand Over Button */}
         {selectedTransactions.size > 0 && transactions.length > 0 && (
-          <View className="absolute bottom-2 left-0 right-0 bg-white px-5 py-4 ">
+          <View className="absolute bottom-8 left-0 right-0 bg-white px-5 py-4 ">
             <TouchableOpacity
               onPress={handleHandOver}
               className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center h-[50px]"

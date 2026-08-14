@@ -45,7 +45,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
             iconName: "home",
           },
           {
-            name: "DailyTarget",
+            name: "DailyTargetList",
             label: t("BottomNav.Target") || "Target",
             iconType: "Lucide",
             iconName: "target",
@@ -137,7 +137,7 @@ const BottomNav = ({ navigation, state }: { navigation: any; state: any }) => {
       currentTabName,
     )
   ) {
-    currentTabName = "DailyTarget";
+    currentTabName = "DailyTargetList";
   }
   if (["TransactionList", "OfficerSummary"].includes(currentTabName)) {
     currentTabName = "CollectionOfficersList";
