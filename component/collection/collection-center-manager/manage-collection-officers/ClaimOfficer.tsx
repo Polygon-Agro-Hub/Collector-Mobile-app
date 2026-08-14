@@ -244,6 +244,7 @@ const ClaimOfficer: React.FC = () => {
           </View>
           <TextInput
             placeholder="ex: 00122"
+            placeholderTextColor="#ADADAD"
             value={empID}
             keyboardType="numeric"
             onChangeText={handleEmpIDChange}

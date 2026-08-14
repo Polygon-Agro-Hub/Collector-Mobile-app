@@ -633,7 +633,9 @@
     "Drivers List": "රියදුරු ලැයිස්තුව",
     "Officers / Drivers List": "නිලධාරීන්ගේ ලැයිස්තුව",
     "Drivers": "රියදුරන්",
-    "Not Approved": "තවම අනුමත කර නැත"
+    "Not Approved": "තවම අනුමත කර නැත",
+    "No officers found": "- නිලධාරීන් කිසිවෙකු හමු නොවීය -",
+    "No drivers found": "- රියදුරන් කිසිවෙකු හමු නොවීය -"
   },
   "EditTargetManager": {
     "LNG": "si",

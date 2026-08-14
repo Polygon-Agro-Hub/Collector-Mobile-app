@@ -19,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import AddButton from "@/component/components/buttons/AddButton";
+import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 
 const { width } = Dimensions.get("window");
 const scale = (size: number) => (width / 375) * size;
@@ -479,9 +480,22 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
           </View>
         ) : (
           <FlatList
-            data={filteredOfficers.length > 0 ? filteredOfficers : officers}
+            data={filteredOfficers}
             keyExtractor={(item) => item.empId}
             renderItem={renderOfficer}
+            ListEmptyComponent={
+              <View style={{ flex: 1, height: scale(300), justifyContent: "center" }}>
+                <NoDataScreen
+                  message={
+                    selectedJobRole === "Collection Officer"
+                      ? t("CollectionOfficersList.No officers found") || "- No Officers Found -"
+                      : selectedJobRole === "Driver"
+                      ? t("CollectionOfficersList.No drivers found") || "- No Drivers Found -"
+                      : t("CollectionOfficersList.No officers found") || "- No Officers Found -"
+                  }
+                />
+              </View>
+            }
             contentContainerStyle={{
               paddingBottom: scale(80),
               paddingTop: scale(10),

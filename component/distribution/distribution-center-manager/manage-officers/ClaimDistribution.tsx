@@ -257,6 +257,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
           </View>
           <TextInput
             placeholder="ex: 00122"
+            placeholderTextColor="#ADADAD"
             value={empID}
             keyboardType="numeric"
             onChangeText={handleEmpIDChange}

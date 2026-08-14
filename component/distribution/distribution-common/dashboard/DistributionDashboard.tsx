@@ -132,7 +132,6 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   useEffect(() => {
     fetchUserProfile();
     fetchTargetPercentage();
-    checkTokenExpiration();
     fetchSelectedLanguage();
   }, []);
 
@@ -140,7 +139,6 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     setRefreshing(true);
     await fetchUserProfile();
     await fetchTargetPercentage();
-    await checkTokenExpiration();
     setRefreshing(false);
   };
 
@@ -155,28 +153,6 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       return () => subscription.remove();
     }, []),
   );
-
-  const checkTokenExpiration = async () => {
-    try {
-      const expirationTime = store.getState().auth.tokenExpirationTime;
-      const userToken = store.getState().auth.token;
-
-      if (expirationTime && userToken) {
-        const currentTime = new Date();
-        const tokenExpiry = new Date(expirationTime);
-
-        if (currentTime < tokenExpiry) {
-          // Token is valid
-        } else {
-          store.dispatch(logoutUser());
-navigation.navigate("Login");
-        }
-      }
-    } catch (error) {
-      console.error("❌ Error checking token expiration:", error);
-      navigation.navigate("Login");
-    }
-  };
 
   const getFullName = () => {
     if (!profile) return "Loading...";

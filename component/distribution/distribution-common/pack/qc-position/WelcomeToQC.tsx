@@ -375,9 +375,10 @@ export default function WelcomeToQC({
   const pkgMatchedCounts = new Map<number, number>();
   let alacarteMatchedCount = 0;
 
-  const mainTrackingRows = trackingRows.filter((row) => row.isMainContainer === 1);
-  const pkgTrackingRows = trackingRows.filter((row) => !row.isMainContainer && row.orderpackageId);
-  const alacarteTrackingRows = trackingRows.filter((row) => !row.isMainContainer && !row.orderpackageId);
+  const isMain = (row: any) => Number(row.isMainContainer) === 1 || row.isMainContainer === true;
+  const mainTrackingRows = trackingRows.filter((row) => isMain(row));
+  const pkgTrackingRows = trackingRows.filter((row) => !isMain(row) && row.orderpackageId);
+  const alacarteTrackingRows = trackingRows.filter((row) => !isMain(row) && !row.orderpackageId);
 
   steps.forEach((step) => {
     let matchedRow: any = null;
@@ -435,8 +436,10 @@ export default function WelcomeToQC({
         {/* Dynamic Progress step segments */}
         {status !== "no_target" && steps.length > 1 && (
           <View className="flex-row justify-between items-center gap-2 px-2 mb-8 w-full">
-            {steps.map((s) => {
-              const isFilled = s.pIndex >= officerPosIndex;
+            {steps.map((s, idx) => {
+              const hasReachedQC = s.pIndex > 0 && s.pIndex >= officerPosIndex;
+              const hasLaterReachedQC = steps.slice(idx + 1).some((later) => later.pIndex > 0 && later.pIndex >= officerPosIndex);
+              const isFilled = hasReachedQC || hasLaterReachedQC;
               return (
                 <View key={s.id} className="flex-1 items-center">
                   <View
