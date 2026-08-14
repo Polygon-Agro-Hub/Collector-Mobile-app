@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { ROLES } from "@/constants/user-roles";
 
 type DailyTargetListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -38,6 +39,10 @@ interface TargetData {
   varietyNameSinhala: string;
   varietyNameTamil: string;
   complete: number;
+  // fields used by manager edit flow
+  dailyTarget?: any;
+  varietyId?: any;
+  centerTarget?: any;
 }
 
 const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
@@ -373,51 +378,91 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                   </Text>
                 </View>
               ) : (
-                displayedData.map((item, index) => (
-                  <View
-                    key={index}
-                    className={`flex-row border-b border-gray-300 ${
-                      index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                    }`}
-                  >
-                    {/* No. */}
-                    <View className="w-16 justify-center items-center border-r border-gray-300 py-3">
-                      {selectedToggle === "ToDo" ? (
-                        <Text className="text-center">{index + 1}</Text>
-                      ) : (
-                        <Ionicons name="flag" size={20} color="#980775" />
-                      )}
-                    </View>
+                displayedData.map((item, index) => {
+                  const isManager = jobRole === ROLES.COLLECTION_MANAGER;
+                  const isTappable = isManager && selectedToggle === "ToDo";
 
-                    {/* Variety */}
-                    <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
-                      <Text className="text-center">
-                        {getvarietyName(item)}
-                      </Text>
-                    </View>
+                  const rowContent = (
+                    <>
+                      {/* No. */}
+                      <View className="w-16 justify-center items-center border-r border-gray-300 py-3">
+                        {selectedToggle === "ToDo" ? (
+                          <Text className="text-center">{index + 1}</Text>
+                        ) : (
+                          <Ionicons name="flag" size={20} color="#980775" />
+                        )}
+                      </View>
 
-                    {/* Grade */}
-                    <View className="w-32 justify-center items-center border-r border-gray-300">
-                      <Text className="text-center">{item.grade}</Text>
-                    </View>
+                      {/* Variety */}
+                      <View className="w-40 justify-center items-center border-r border-gray-300 p-2">
+                        <Text className="text-center">
+                          {getvarietyName(item)}
+                        </Text>
+                      </View>
 
-                    {/* Target */}
-                    <View className="w-32 justify-center items-center border-r border-gray-300">
-                      <Text className="text-center">
-                        {item.officerTarget}
-                      </Text>
-                    </View>
+                      {/* Grade */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">{item.grade}</Text>
+                      </View>
 
-                    {/* Todo / Completed */}
-                    <View className="w-32 justify-center items-center">
-                      <Text className="text-center">
-                        {selectedToggle === "Completed"
-                          ? item.complete
-                          : item.todo}
-                      </Text>
+                      {/* Target */}
+                      <View className="w-32 justify-center items-center border-r border-gray-300">
+                        <Text className="text-center">
+                          {item.officerTarget}
+                        </Text>
+                      </View>
+
+                      {/* Todo / Completed */}
+                      <View className="w-32 justify-center items-center">
+                        <Text className="text-center">
+                          {selectedToggle === "Completed"
+                            ? item.complete
+                            : item.todo}
+                        </Text>
+                      </View>
+
+                    
+                    </>
+                  );
+
+                  if (isTappable) {
+                    return (
+                      <TouchableOpacity
+                        key={index}
+                        className={`flex-row border-b border-gray-300 ${
+                          index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                        }`}
+                        activeOpacity={0.7}
+                        onPress={() =>
+                          navigation.navigate("EditTargetManager" as any, {
+                            varietyId: item.varietyId,
+                            varietyNameEnglish: item.varietyNameEnglish,
+                            varietyNameSinhala: item.varietyNameSinhala,
+                            varietyNameTamil: item.varietyNameTamil,
+                            grade: item.grade,
+                            target: item.officerTarget,
+                            todo: item.todo,
+                            dailyTarget: item.dailyTarget ?? item.officerTarget,
+                            fromScreen: "DailyTargetList",
+                          })
+                        }
+                      >
+                        {rowContent}
+                      </TouchableOpacity>
+                    );
+                  }
+
+                  return (
+                    <View
+                      key={index}
+                      className={`flex-row border-b border-gray-300 ${
+                        index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      }`}
+                    >
+                      {rowContent}
                     </View>
-                  </View>
-                ))
+                  );
+                })
               )}
             </ScrollView>
           </View>
