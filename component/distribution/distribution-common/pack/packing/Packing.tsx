@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,16 +8,17 @@ import {
   Image,
   Alert,
   BackHandler,
-  RefreshControl,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
-import { Feather, FontAwesome6, Ionicons } from "@expo/vector-icons";
-import LottieView from "lottie-react-native";
+import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import LottieView from "lottie-react-native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
 import AlertModal from "@/component/components/popup/AlertModal";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -54,7 +55,7 @@ interface PackingItem {
   checked: boolean;
 }
 
-type PackingStatus = "no_qr_yet" | "waiting" | "no_items" | "has_items" | "main_container";
+type PackingStatus = "no_target" | "waiting" | "no_items" | "has_items" | "main_container";
 
 export default function Packing({
   route,
@@ -70,7 +71,6 @@ export default function Packing({
     positionId,
     positionName = "Packing Position 1",
     rowId,
-    positionCrops = [],
   } = route.params || {};
   const insets = useSafeAreaInsets();
 
@@ -88,26 +88,25 @@ export default function Packing({
   const [currentPIndex, setCurrentPIndex] = useState<number | null>(null);
   const [activeTrackingId, setActiveTrackingId] = useState<number | null>(null);
 
-  // Status state tracking: "no_qr_yet", "waiting", "no_items", or "has_items"
-  const [status, setStatus] = useState<PackingStatus>("no_qr_yet");
+  const [status, setStatus] = useState<PackingStatus>("no_target");
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [isAdvancing, setIsAdvancing] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  const [items, setItems] = useState<PackingItem[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
     setItems([]);
-    await fetchActiveOrderAndStatus();
+    await fetchActiveOrderAndStatus(false);
     setRefreshing(false);
   };
 
-  const [items, setItems] = useState<PackingItem[]>([]);
-
   useEffect(() => {
-    fetchActiveOrderAndStatus();
+    fetchActiveOrderAndStatus(true);
 
-    // Hardware Back Press Handler to avoid navigation loop
     const onBackPress = () => {
       navigation.navigate("Main", { screen: "DistridutionaDashboard" });
       return true;
@@ -117,14 +116,13 @@ export default function Packing({
       onBackPress,
     );
 
-    // Socket.IO real-time event listener & room joining
     const socket = getSocket();
     if (rowId) {
       socket.emit("join_row", rowId);
     }
 
     const handleOrderUpdate = () => {
-      fetchActiveOrderAndStatus();
+      fetchActiveOrderAndStatus(false);
     };
 
     socket.on("order_opened", handleOrderUpdate);
@@ -158,12 +156,12 @@ export default function Packing({
     };
   }, [positionId, rowId]);
 
-  const fetchActiveOrderAndStatus = async () => {
+  const fetchActiveOrderAndStatus = async (showLoading: boolean = true) => {
+    if (showLoading) setLoading(true);
     try {
       const token = store.getState().auth.token;
       if (!token) return;
 
-      // 1. Fetch active order details for packer officer
       const activeRes = await axios.get(
         `${environment.API_BASE_URL}api/packing/packer/active-order`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -173,19 +171,20 @@ export default function Packing({
         const activeData = activeRes.data.data;
 
         if (activeData.hasActiveBox === false) {
-          if (activeData.formattedOrderNumber) {
-            setDisplayOrderTitle(activeData.formattedOrderNumber);
-          }
-          if (activeData.processOrderId) {
-            setActiveProcessOrderId(activeData.processOrderId);
-          }
-          if (activeData.rowStatus === "WAITING_PREVIOUS") {
+          if (activeData.rowStatus === "WAITING_PREVIOUS" || activeData.processOrderId) {
+            if (activeData.formattedOrderNumber) {
+              setDisplayOrderTitle(activeData.formattedOrderNumber);
+            }
+            if (activeData.processOrderId) {
+              setActiveProcessOrderId(activeData.processOrderId);
+            }
             setStatus("waiting");
             setItems([]);
           } else {
-            setStatus("no_qr_yet");
+            setStatus("no_target");
             setItems([]);
             setActiveProcessOrderId(null);
+            setDisplayOrderTitle("");
           }
         } else {
           if (activeData.formattedOrderNumber) {
@@ -203,26 +202,19 @@ export default function Packing({
           }
 
           const orderStatus = activeData.orderStatus;
-          const pIndex =
-            activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
+          const pIndex = activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
           setCurrentPIndex(pIndex);
 
-          const officerPosIndex =
-            activeData.officerPosIndex !== undefined
-              ? Number(activeData.officerPosIndex)
-              : 1;
+          const officerPosIndex = activeData.officerPosIndex !== undefined ? Number(activeData.officerPosIndex) : 1;
 
           if (orderStatus === "Pending") {
-            setStatus("no_qr_yet");
+            setStatus("waiting");
             setItems([]);
           } else if (pIndex > 0 && pIndex !== officerPosIndex) {
             setStatus("waiting");
             setItems([]);
           } else if (orderStatus === "Opened" || orderStatus === "Completed") {
-            // Check Main Container first — either by explicit flag or activeOrderPackageId = -1
-            const isMainContainerBox =
-              activeData.isMainContainerBox === true ||
-              Number(activeData.activeOrderPackageId) === -1;
+            const isMainContainerBox = activeData.isMainContainerBox === true || Number(activeData.activeOrderPackageId) === -1;
             if (isMainContainerBox) {
               setItems([]);
               setStatus("main_container");
@@ -230,12 +222,7 @@ export default function Packing({
               const orderItems = activeData.orderItems || [];
               if (orderItems.length > 0) {
                 const mappedItems = orderItems.map((item: any) => {
-                  const resolvedPackName =
-                    item.packName && item.packName !== "À la carte"
-                      ? item.packName
-                      : item.categoryType === "alacarte"
-                        ? "À la carte"
-                        : "Daily Veggie Pack";
+                  const resolvedPackName = item.packName && item.packName !== "À la carte" ? item.packName : (item.categoryType === "alacarte" ? "À la carte" : "Daily Veggie Pack");
                   const isAlacarte = resolvedPackName === "À la carte";
                   return {
                     id: item.id,
@@ -244,9 +231,7 @@ export default function Packing({
                     packName: resolvedPackName,
                     categoryType: isAlacarte ? "alacarte" : "package",
                     checked: false,
-                    image:
-                      item.image ||
-                      "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+                    image: item.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
                   };
                 });
                 mappedItems.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
@@ -256,19 +241,22 @@ export default function Packing({
                 setItems([]);
                 setStatus("no_items");
               }
-              }
             }
           }
-        } else {
-          // No box currently at this packer position
-          setStatus("no_qr_yet");
-          setItems([]);
-          setActiveProcessOrderId(null);
         }
+      } else {
+        setStatus("no_target");
+        setItems([]);
+        setActiveProcessOrderId(null);
+        setDisplayOrderTitle("");
+      }
     } catch (err) {
       console.error("Error fetching active order tracking status:", err);
-      setStatus("no_qr_yet");
+      setStatus("no_target");
       setItems([]);
+      setDisplayOrderTitle("");
+    } finally {
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -288,8 +276,7 @@ export default function Packing({
     setIsAdvancing(true);
     try {
       const token = store.getState().auth.token;
-      const targetOrderId =
-        activeProcessOrderId || initialProcessOrderId || 3221;
+      const targetOrderId = activeProcessOrderId || initialProcessOrderId || 3221;
       const payload = {
         orderId: targetOrderId,
         orderpackageId: activeOrderPackageId || null,
@@ -305,9 +292,7 @@ export default function Packing({
       );
 
       if (res.data && res.data.success) {
-        setAlertMessage(
-          "Packing has been completed successfully. Move to the next position."
-        );
+        setAlertMessage("Packing has been completed successfully. Move to the next position.");
         setAlertVisible(true);
       } else if (res.data && !res.data.success) {
         Alert.alert("Station Busy", res.data.message || "The next station is currently busy.");
@@ -324,233 +309,226 @@ export default function Packing({
 
   return (
     <View className="flex-1 bg-white">
-      {/* Standard Custom Header displaying REAL invoice number */}
       <CustomHeader
-        title={status === "no_qr_yet" ? "" : displayOrderTitle}
+        title={status === "no_target" || loading ? "" : displayOrderTitle}
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
-      <ScrollView
-        className="flex-1 bg-white px-6"
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent:
-            status === "has_items" || status === "no_qr_yet" || status === "main_container"
-              ? "flex-start"
-              : "center",
-          paddingBottom: 130,
-        }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {/* Scheduled Time Section matching user screenshot design */}
-        {status !== "no_qr_yet" && (
-          <View className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
-            <View className="w-11 h-11 rounded-full bg-[#E9ECF1] items-center justify-center mr-4">
-              <FontAwesome6 name="bag-shopping" size={24} color="black" />
-            </View>
-            <View>
-              <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
-                Scheduled Time :
-              </Text>
-              <Text className="text-[#030E25] font-extrabold text-base">
-                {scheduledTime}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* STATE 0: No QR printed yet for this target / row */}
-        {status === "no_qr_yet" && (
-          <View className="flex-1">
-            {/* Text Section at Top */}
-            <View className="items-center mt-4 mb-2">
-              <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
-                Welcome to {positionName}
-              </Text>
-              <Text className="text-[#54617D] text-sm text-center px-4 font-medium leading-5">
-                Please wait and check again.{"\n"}This row doesn't have a daily
-                target yet.
-              </Text>
-            </View>
-
-            {/* No Data Icon Centered */}
-            <View className="flex-1 justify-center items-center py-6">
-              <View className="w-56 h-56 justify-center items-center">
-                <LottieView
-                  source={require("../../../../../assets/lottie/no-data.json")}
-                  autoPlay
-                  loop
-                  style={{ width: "100%", height: "100%" }}
-                />
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* STATE 1: Waiting for previous position */}
-        {status === "waiting" && (
-          <View className="flex-1 items-center py-6">
-            <View className="w-56 h-56 justify-center items-center mb-6">
-              <LottieView
-                source={require("../../../../../assets/lottie/packing/sand-clock-timer.json")}
-                autoPlay
-                loop
-                style={{ width: "100%", height: "100%" }}
-              />
-            </View>
-            <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
-              This order is still with the{"\n"}previous position
-            </Text>
-            <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
-              Please try reloading the page in a few seconds.
-            </Text>
-          </View>
-        )}
-
-        {/* STATE 2: Opened, but No items or Main Container at this position -> SHOW SKIP SCREEN */}
-        {(status === "no_items" || status === "main_container") && (
-          <View className="flex-1">
-            {/* Lottie Animation Centered in middle (arrow-forward.json) */}
-            <View className="flex justify-center items-center py-6">
-              <View className="w-56 h-56 justify-center items-center">
-                <LottieView
-                  source={require("../../../../../assets/lottie/packing/arrow-forward.json")}
-                  autoPlay
-                  loop
-                  style={{ width: "100%", height: "100%" }}
-                />
-              </View>
-            </View>
-            <View className="items-center mt-4 mb-2">
-              <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
-                No items to pack for this order{"\n"}at your position
-              </Text>
-              <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
-                There are no items assigned to the position{"\n"}in the current
-                packing sequence.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* STATE 3: Has items assigned to this position */}
-        {status === "has_items" && (
-          <View className="pt-1">
-            {items.map((item, index) => {
-              const isAlacarte =
-                item.categoryType === "alacarte" ||
-                item.packName === "À la carte";
-              const packColor = isAlacarte
-                ? "text-[#AC7F5E]"
-                : "text-[#980775]";
-
-              return (
-                <TouchableOpacity
-                  key={`${item.id}_${index}`}
-                  onPress={() => handleToggleCheck(item.id)}
-                  className="flex-row items-center justify-between bg-white border border-[#E1E7EE] rounded-2xl p-4 mb-4 shadow-sm"
-                  activeOpacity={0.8}
-                >
-                  <View className="flex-row items-center flex-1 mr-3">
-                    {/* Product Image */}
-                    <View className="w-16 h-16 rounded-full overflow-hidden items-center justify-center mr-4">
-                      <Image
-                        source={{ uri: item.image }}
-                        className="w-full h-full"
-                        resizeMode="cover"
-                      />
-                    </View>
-
-                    {/* Details */}
-                    <View className="flex-1">
-                      <Text className="text-[#030E25] font-bold text-base leading-5 mb-0.5">
-                        {item.name}
-                      </Text>
-                      <Text className="text-[#030E25] font-extrabold text-base mb-1">
-                        {item.weight}
-                      </Text>
-                      <Text className={`font-semibold text-xs ${packColor}`}>
-                        {item.packName ||
-                          (isAlacarte ? "À la carte" : "Fruity Pack")}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Checkbox */}
-                  <View
-                    className={`w-6 h-6 rounded-md items-center justify-center border-2 ${
-                      item.checked
-                        ? "bg-[#980775] border-[#980775]"
-                        : "border-[#030E25] bg-white"
-                    }`}
-                  >
-                    {item.checked && (
-                      <Ionicons name="checkmark" size={16} color="white" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-      </ScrollView>
-
-      {/* Skip Button pinned to bottom when position has no items or is main container */}
-      {(status === "no_items" || status === "main_container") && (
-        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
-          <TouchableOpacity
-            onPress={handleAdvancePosition}
-            disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 4,
-              elevation: 3,
-            }}
-            activeOpacity={0.8}
-          >
-            {isAdvancing ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Text className="text-white font-extrabold text-base">Skip</Text>
-            )}
-          </TouchableOpacity>
+      {loading ? (
+        <View className="flex-1 bg-white">
+          <LoadingPage />
         </View>
+      ) : (
+        <>
+          <ScrollView
+            className="flex-1 bg-white px-6"
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent:
+                status === "has_items" || status === "main_container"
+                  ? "flex-start"
+                  : "center",
+              paddingBottom: 130,
+            }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
+            {status !== "no_target" && (
+              <View className="w-full flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl px-5 py-4 mb-6 shadow-sm">
+                <View className="w-11 h-11 rounded-full bg-[#E9ECF1] items-center justify-center mr-4">
+                  <FontAwesome6 name="bag-shopping" size={24} color="black" />
+                </View>
+                <View>
+                  <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
+                    Scheduled Time :
+                  </Text>
+                  <Text className="text-[#030E25] font-extrabold text-base">
+                    {scheduledTime}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* STATE 1: No Target Available */}
+            {status === "no_target" && (
+              <View className="flex-1">
+                <View className="items-center mt-4 mb-2">
+                  <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
+                    Welcome to {positionName || "Packing Position 1"}
+                  </Text>
+                  <Text className="text-[#54617D] text-sm text-center px-4 font-medium leading-5">
+                    Please wait and check again.{"\n"}This row doesn't have a daily
+                    target yet.
+                  </Text>
+                </View>
+
+                <View className="flex-1 justify-center items-center py-6">
+                  <View className="w-56 h-56 justify-center items-center">
+                    <LottieView
+                      source={require("../../../../../assets/lottie/no-data.json")}
+                      autoPlay
+                      loop
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* STATE 2: Waiting for previous position / QR scan */}
+            {status === "waiting" && (
+              <View className="flex-1 items-center py-6">
+                <View className="w-56 h-56 justify-center items-center mb-6">
+                  <LottieView
+                    source={require("../../../../../assets/lottie/packing/sand-clock-timer.json")}
+                    autoPlay
+                    loop
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                </View>
+                <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
+                  This order is still with the{"\n"}previous position
+                </Text>
+                <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
+                  Please try reloading the page in a few seconds.
+                </Text>
+              </View>
+            )}
+
+            {(status === "no_items" || status === "main_container") && (
+              <View className="flex-1">
+                <View className="flex justify-center items-center py-6">
+                  <View className="w-56 h-56 justify-center items-center">
+                    <LottieView
+                      source={require("../../../../../assets/lottie/packing/arrow-forward.json")}
+                      autoPlay
+                      loop
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </View>
+                </View>
+                <View className="items-center mt-4 mb-2">
+                  <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
+                    No items to pack for this order{"\n"}at your position
+                  </Text>
+                  <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
+                    There are no items assigned to the position{"\n"}in the current
+                    packing sequence.
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {status === "has_items" && (
+              <View className="pt-1">
+                {items.map((item, index) => {
+                  const isAlacarte = item.categoryType === "alacarte" || item.packName === "À la carte";
+                  const packColor = isAlacarte ? "text-[#AC7F5E]" : "text-[#980775]";
+
+                  return (
+                    <TouchableOpacity
+                      key={`${item.id}_${index}`}
+                      onPress={() => handleToggleCheck(item.id)}
+                      activeOpacity={0.8}
+                      className="flex-row items-center justify-between bg-white border border-[#E9ECF1] rounded-2xl p-4 mb-3.5 shadow-sm"
+                      style={{
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.02,
+                        shadowRadius: 2,
+                        elevation: 1,
+                      }}
+                    >
+                      <View className="w-16 h-16 rounded-xl items-center justify-center mr-3.5 overflow-hidden">
+                        <Image
+                          source={{ uri: item.image }}
+                          className="w-full h-full"
+                          resizeMode="contain"
+                        />
+                      </View>
+                      <View className="flex-1 mr-2">
+                        <Text className="text-[#030E25] font-semibold text-base leading-5">
+                          {item.name}
+                        </Text>
+                        <Text className="text-[#030E25] font-semibold text-lg mt-0.5">
+                          {item.weight}
+                        </Text>
+                        <Text className={`text-xs font-bold ${packColor} mb-0.5`}>
+                          {item.packName || ""}
+                        </Text>
+                      </View>
+                      <View
+                        className={`w-6 h-6 rounded-md items-center justify-center border-2 ${
+                          item.checked
+                            ? "bg-[#980775] border-[#980775]"
+                            : "border-[#030E25] bg-white"
+                        }`}
+                      >
+                        {item.checked && (
+                          <Ionicons name="checkmark" size={16} color="white" />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+          </ScrollView>
+
+          {(status === "no_items" || status === "main_container") && (
+            <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
+              <TouchableOpacity
+                onPress={handleAdvancePosition}
+                disabled={isAdvancing || loading}
+                className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing || loading ? "bg-gray-400" : "bg-black"}`}
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+                activeOpacity={0.8}
+              >
+                {isAdvancing ? (
+                  <ActivityIndicator color="white" size="small" />
+                ) : (
+                  <Text className="text-white font-extrabold text-base">Skip</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {status === "has_items" && allItemsChecked && (
+            <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
+              <TouchableOpacity
+                onPress={handleAdvancePosition}
+                disabled={isAdvancing || loading}
+                className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing || loading ? "bg-gray-400" : "bg-black"}`}
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+                activeOpacity={0.8}
+              >
+                {isAdvancing ? (
+                  <ActivityIndicator color="white" size="small" />
+                ) : (
+                  <Text className="text-white font-extrabold text-base">
+                    Complete
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+        </>
       )}
 
-      {/* Complete Button pinned to bottom when all items checked */}
-      {status === "has_items" && allItemsChecked && (
-        <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
-          <TouchableOpacity
-            onPress={handleAdvancePosition}
-            disabled={isAdvancing}
-            className={`w-full h-[50px] rounded-full items-center justify-center ${isAdvancing ? "bg-gray-400" : "bg-black"}`}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 4,
-              elevation: 3,
-            }}
-            activeOpacity={0.8}
-          >
-            {isAdvancing ? (
-              <ActivityIndicator color="white" size="small" />
-            ) : (
-              <Text className="text-white font-extrabold text-base">
-                Complete
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* AlertModal Success Popup */}
       <AlertModal
         visible={alertVisible}
         type="success"
@@ -559,7 +537,8 @@ export default function Packing({
         onClose={() => {
           setAlertVisible(false);
           setIsAdvancing(false);
-          fetchActiveOrderAndStatus();
+          setItems([]);
+          fetchActiveOrderAndStatus(true);
         }}
       />
     </View>
