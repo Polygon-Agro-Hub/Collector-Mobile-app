@@ -141,18 +141,18 @@ const ReceivedCashTransfer: React.FC<ReceivedCashTransferProps> = ({
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="bg-white px-4 py-4 flex-row items-center">
+      <View className="bg-white px-4 py-4 flex-row items-center justify-center relative">
         <TouchableOpacity
           className="absolute left-4 bg-[#F6F6F680] rounded-full p-3 z-50"
           onPress={() => navigation.goBack()}
         >
           <Entypo name="chevron-left" size={25} color="#000" />
         </TouchableOpacity>
-        <View className="flex-1 items-center justify-center ml-2">
-          <Text className="text-lg font-semibold text-gray-900">
+        <View className="items-center justify-center px-12">
+          <Text className="text-lg font-bold text-gray-900 text-center" numberOfLines={1}>
             {t("ReceivedCashTransfer.Transfer to Company")}
           </Text>
-          <Text className="text-sm text-black">
+          <Text className="text-sm text-black text-center">
             {t("ReceivedCashTransfer.On")}{" "}
             <Text className="font-bold">{selectedDate}</Text>
           </Text>

@@ -389,26 +389,27 @@ const ReadytoPickupOrders: React.FC<CollectionOfficersListProps> = ({
 
       <View className="flex-1 w-full mx-auto">
         {/* Search Bar */}
-        <View className="flex-row items-center h-[50px]  mx-8 mt-2 pl-3 border border-[#C0C0C0] rounded-full">
+        <View className="flex-row items-center h-[50px] mx-6 mt-2 pl-4 border border-[#C0C0C0] rounded-full overflow-hidden">
           <TextInput
             className="flex-1 text-base text-black py-2"
             placeholder={t("ReadytoPickupOrders.Search by phone number")}
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#ADADAD"
             value={searchPhone}
             onChangeText={handleSearchChange}
             keyboardType="phone-pad"
             maxLength={9}
             returnKeyType="search"
+            style={{ color: "#000000" }}
           />
           {searchPhone ? (
             <TouchableOpacity
-              className="w-[50px] h-[50px] bg-[#C0C0C0] rounded-full items-center justify-center"
+              className="w-[50px] h-full bg-[#C0C0C0] items-center justify-center border-[#C0C0C0] rounded-full"
               onPress={handleClearSearch}
             >
               <MaterialIcons name="close" size={24} color="black" />
             </TouchableOpacity>
           ) : (
-            <View className="w-[50px] h-[50px] bg-[#C0C0C0] rounded-full items-center justify-center">
+            <View className="w-[50px] h-full bg-[#C0C0C0] items-center justify-center rounded-full border-[#C0C0C0]">
               <Ionicons name="search" size={20} color="black" />
             </View>
           )}

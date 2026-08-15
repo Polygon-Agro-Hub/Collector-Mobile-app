@@ -401,13 +401,13 @@ export default function PurchaseProduct({
         {/* Bottom Sticky Action Buttons */}
         <View
           style={{ paddingBottom: actionPaddingBottom }}
-          className="px-6 pt-4 bg-white absolute bottom-0 left-0 right-0 gap-4"
+          className="px-6 pt-4 bg-white absolute bottom-0 left-0 right-0"
         >
           {step === 1 ? (
             <>
               <TouchableOpacity
                 onPress={handleBack}
-                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center"
+                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-3"
                 activeOpacity={0.8}
                 style={{
                   shadowColor: "#000000",
@@ -417,7 +417,10 @@ export default function PurchaseProduct({
                   elevation: 3,
                 }}
               >
-                <Text className="text-[#030E25] font-extrabold text-sm">
+                <Text
+                  className="text-[#030E25] font-extrabold text-sm"
+                  style={{ color: "#030E25", fontSize: 14, fontWeight: "800" }}
+                >
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -434,7 +437,10 @@ export default function PurchaseProduct({
                   elevation: 3,
                 }}
               >
-                <Text className="text-white font-extrabold text-sm">
+                <Text
+                  className="text-white font-extrabold text-sm"
+                  style={{ color: "#ffffff", fontSize: 14, fontWeight: "800" }}
+                >
                   Purchase
                 </Text>
               </TouchableOpacity>
@@ -444,7 +450,7 @@ export default function PurchaseProduct({
               <TouchableOpacity
                 onPress={() => setStep(1)}
                 disabled={submitting}
-                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center"
+                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-3"
                 activeOpacity={0.8}
                 style={{
                   shadowColor: "#000000",
@@ -454,7 +460,10 @@ export default function PurchaseProduct({
                   elevation: 3,
                 }}
               >
-                <Text className="text-[#030E25] font-extrabold text-sm">
+                <Text
+                  className="text-[#030E25] font-extrabold text-sm"
+                  style={{ color: "#030E25", fontSize: 14, fontWeight: "800" }}
+                >
                   Go Back
                 </Text>
               </TouchableOpacity>
@@ -479,7 +488,10 @@ export default function PurchaseProduct({
                     className="mr-2"
                   />
                 ) : null}
-                <Text className="text-white font-extrabold text-sm">
+                <Text
+                  className="text-white font-extrabold text-sm"
+                  style={{ color: "#ffffff", fontSize: 14, fontWeight: "800" }}
+                >
                   {submitting ? "Submitting..." : "Confirm"}
                 </Text>
               </TouchableOpacity>

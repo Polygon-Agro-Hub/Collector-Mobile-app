@@ -1565,15 +1565,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.FirstNameEnglish")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.firstNameEnglish}
                   onChangeText={(text) =>
                     handleEnglishNameChange(text, "firstNameEnglish")
                   }
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.firstNameEnglish ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   keyboardType="default"
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -1589,15 +1589,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.LastNameEnglish")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.lastNameEnglish}
                   onChangeText={(text) =>
                     handleEnglishNameChange(text, "lastNameEnglish")
                   }
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.lastNameEnglish ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   keyboardType="default"
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -1614,15 +1614,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.FirstNameinSinhala")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.firstNameSinhala}
                   onChangeText={(text) =>
                     handleSinhalaNameChange(text, "firstNameSinhala")
                   }
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.firstNameSinhala ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1637,15 +1637,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.LastNameSinhala")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.lastNameSinhala}
                   onChangeText={(text) =>
                     handleSinhalaNameChange(text, "lastNameSinhala")
                   }
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.lastNameSinhala ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1660,15 +1660,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.FirstNameTamil")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.firstNameTamil}
                   onChangeText={(text) =>
                     handleTamilNameChange(text, "firstNameTamil")
                   }
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.firstNameTamil ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1683,15 +1683,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.LastNameTamil")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.lastNameTamil}
                   onChangeText={(text) =>
                     handleTamilNameChange(text, "lastNameTamil")
                   }
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.lastNameTamil ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                   underlineColorAndroid="transparent"
                 />
@@ -1731,13 +1731,13 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                   <View className="flex-1">
                     <TextInput
                       placeholder="7XXXXXXXX"
-                      placeholderTextColor="#7D7D7D"
-                      className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] flex-1 ${
+                      placeholderTextColor="#ADADAD"
+                      className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] flex-1 text-black ${
                         error1 || fieldErrors.phoneNumber1
                           ? "border border-red-500"
                           : ""
                       }`}
-                      style={{ fontSize: 14 }}
+                      style={{ fontSize: 14, color: "#000000" }}
                       value={phoneNumber1}
                       onChangeText={handlePhoneNumber1Change}
                       keyboardType="phone-pad"
@@ -1776,13 +1776,13 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                   <View className="flex-1">
                     <TextInput
                       placeholder="7XXXXXXXX"
-                      placeholderTextColor="#7D7D7D"
-                      className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] flex-1 ${
+                      placeholderTextColor="#ADADAD"
+                      className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] flex-1 text-black ${
                         error2 || fieldErrors.phoneNumber2Duplicate
                           ? "border border-red-500"
                           : ""
                       }`}
-                      style={{ fontSize: 14 }}
+                      style={{ fontSize: 14, color: "#000000" }}
                       value={phoneNumber2}
                       onChangeText={handlePhoneNumber2Change}
                       keyboardType="phone-pad"
@@ -1805,17 +1805,17 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.NIC")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.nicNumber}
                   onChangeText={handleNicNumberChange}
                   maxLength={12}
                   keyboardType="default"
                   autoCapitalize="characters"
                   autoCorrect={false}
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.nicNumber || error3 ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   underlineColorAndroid="transparent"
                 />
                 {(error3 || fieldErrors.nicNumber) && (
@@ -1829,13 +1829,13 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
               <View>
                 <TextInput
                   placeholder={t("AddOfficerBasicDetails.Email")}
-                  placeholderTextColor="#7D7D7D"
+                  placeholderTextColor="#ADADAD"
                   value={formData.email}
                   onChangeText={handleEmailChange}
-                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] ${
+                  className={`bg-[#F4F4F4] rounded-full px-4 h-[50px] text-black ${
                     fieldErrors.email || errorEmail ? "border border-red-500" : ""
                   }`}
-                  style={{ fontSize: 14 }}
+                  style={{ fontSize: 14, color: "#000000" }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -1936,14 +1936,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 {/* House Number */}
                 <TextInput
                   placeholder={t("AddOfficerAddressDetails.House")}
+                  placeholderTextColor="#ADADAD"
                   value={formDataAddress.houseNumber}
                   onChangeText={(text) =>
                     handleAddressInputChange("houseNumber", text.replace(/^\s+/, ""))
                   }
                   className={`border ${
                     fieldErrorsAddress.houseNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                  style={{ fontSize: 14 }}
+                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  style={{ fontSize: 14, color: "#000000" }}
                 />
                 {fieldErrorsAddress.houseNumber ? (
                   <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -1956,14 +1957,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 {/* Street Name */}
                 <TextInput
                   placeholder={t("AddOfficerAddressDetails.Street Name")}
+                  placeholderTextColor="#ADADAD"
                   value={formDataAddress.streetName}
                   onChangeText={(text) =>
                     handleAddressInputChange("streetName", formatText(text))
                   }
                   className={`border ${
                     fieldErrorsAddress.streetName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                  style={{ fontSize: 14 }}
+                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                 />
                 {fieldErrorsAddress.streetName ? (
@@ -1977,12 +1979,13 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 {/* City */}
                 <TextInput
                   placeholder={t("AddOfficerAddressDetails.City")}
+                  placeholderTextColor="#ADADAD"
                   value={formDataAddress.city}
                   onChangeText={(text) => handleAddressInputChange("city", formatText(text))}
                   className={`border ${
                     fieldErrorsAddress.city ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                  style={{ fontSize: 14 }}
+                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                 />
                 {fieldErrorsAddress.city ? (
@@ -1996,10 +1999,11 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 {/* Country */}
                 <TextInput
                   placeholder={t("AddOfficerAddressDetails.Country")}
+                  placeholderTextColor="#ADADAD"
                   value={t("AddOfficerAddressDetails.Country")}
                   editable={false}
-                  className="border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full h-[50px] mb-4 text-gray-700"
-                  style={{ fontSize: 14 }}
+                  className="border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full h-[50px] mb-4 text-black"
+                  style={{ fontSize: 14, color: "#000000" }}
                 />
 
                 {/* Province */}
@@ -2073,6 +2077,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 {/* Account Holder Name */}
                 <TextInput
                   placeholder={t("AddOfficerAddressDetails.AccountName")}
+                  placeholderTextColor="#ADADAD"
                   value={formDataAddress.accountHolderName}
                   onChangeText={(text) => {
                     let filtered = text.replace(/[^a-zA-Z\s]/g, "").trimStart();
@@ -2092,8 +2097,8 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                     fieldErrorsAddress.accountHolderName
                       ? "border-red-500"
                       : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                  style={{ fontSize: 14 }}
+                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  style={{ fontSize: 14, color: "#000000" }}
                 />
                 {fieldErrorsAddress.accountHolderName ? (
                   <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -2106,13 +2111,14 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 {/* Account Number */}
                 <TextInput
                   placeholder={t("AddOfficerAddressDetails.AccountNum")}
+                  placeholderTextColor="#ADADAD"
                   keyboardType="numeric"
                   value={formDataAddress.accountNumber}
                   onChangeText={(text) => handleAddressValidation("accountNumber", text)}
                   className={`border ${
                     fieldErrorsAddress.accountNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                  style={{ fontSize: 14 }}
+                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  style={{ fontSize: 14, color: "#000000" }}
                 />
                 {fieldErrorsAddress.accountNumber ? (
                   <Text className="text-red-500 text-sm mb-3 ml-3">
@@ -2125,6 +2131,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 {/* Confirm Account Number */}
                 <TextInput
                   placeholder={t("AddOfficerAddressDetails.Confirm AccountNum")}
+                  placeholderTextColor="#ADADAD"
                   keyboardType="numeric"
                   value={formDataAddress.confirmAccountNumber}
                   onChangeText={(text) =>
@@ -2134,8 +2141,8 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                     error || fieldErrorsAddress.confirmAccountNumber
                       ? "border-red-500"
                       : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-gray-700`}
-                  style={{ fontSize: 14 }}
+                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  style={{ fontSize: 14, color: "#000000" }}
                 />
                 {error || fieldErrorsAddress.confirmAccountNumber ? (
                   <Text className="text-red-500 text-sm mb-3 ml-3">

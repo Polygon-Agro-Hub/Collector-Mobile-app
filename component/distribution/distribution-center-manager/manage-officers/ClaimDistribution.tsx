@@ -261,7 +261,8 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
             value={empID}
             keyboardType="numeric"
             onChangeText={handleEmpIDChange}
-            className="flex-1 px-4 py-2 text-gray-700"
+            className="flex-1 px-4 py-2 text-black"
+            style={{ color: "#000000" }}
           />
         </View>
 
