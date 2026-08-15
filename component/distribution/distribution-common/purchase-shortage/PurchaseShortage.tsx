@@ -49,11 +49,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        if (navigation.canGoBack()) {
-          navigation.goBack();
-        } else {
-          navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-        }
+        navigation.navigate("Main", { screen: "DistridutionaDashboard" });
         return true;
       };
       const backHandler = BackHandler.addEventListener(

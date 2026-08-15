@@ -402,7 +402,7 @@ ${signature}${replyTime}`,
         </View>
       ) : (
         <ScrollView
-          className=" flex-1  w-full max-w-[500px] mx-auto"
+          className=" flex-1  w-full mx-auto"
           contentContainerStyle={{
             paddingBottom: jobRole === "Distribution Officer" ? hp(4) : hp(12),
             paddingHorizontal: wp(4),
@@ -465,7 +465,7 @@ ${signature}${replyTime}`,
           }}
         >
           <ScrollView
-            className="bg-white rounded-lg shadow-lg w-full max-w-md"
+            className="bg-white rounded-lg shadow-lg w-full"
             contentContainerStyle={{ padding: 24, paddingBottom: 70 }}
             showsVerticalScrollIndicator={false}
           >
