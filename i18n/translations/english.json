@@ -633,7 +633,9 @@
     "Drivers List": "Drivers List",
     "Officers / Drivers List": "Officers List ",
     "Drivers": "Drivers",
-    "Not Approved": "Not Approved yet"
+    "Not Approved": "Not Approved yet",
+    "No officers found": "- No Officers Found -",
+    "No drivers found": "- No Drivers Found -"
   },
   "EditTargetManager": {
     "LNG": "en",

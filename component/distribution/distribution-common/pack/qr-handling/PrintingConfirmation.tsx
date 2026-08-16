@@ -121,7 +121,41 @@ export default function PrintingConfirmation({
     });
   }
 
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  // Match each step against trackingRows to determine if it is already printed
+  const trackingRows: any[] = route.params?.trackingRows || [];
+  const isMain = (row: any) => Number(row.isMainContainer) === 1 || row.isMainContainer === true;
+  const mainTrackingRows = trackingRows.filter((row) => isMain(row));
+  const pkgTrackingRows = trackingRows.filter((row) => !isMain(row) && row.orderpackageId);
+  const alacarteTrackingRows = trackingRows.filter((row) => !isMain(row) && !row.orderpackageId);
+
+  let mainMatchedCount = 0;
+  const pkgMatchedCounts = new Map<number, number>();
+  let alacarteMatchedCount = 0;
+
+  steps.forEach((step: any) => {
+    let matchedRow: any = null;
+
+    if (step.type === "main") {
+      matchedRow = mainTrackingRows[mainMatchedCount];
+      mainMatchedCount++;
+    } else if (step.type === "package") {
+      const matchedPkgRows = pkgTrackingRows.filter((row) => Number(row.orderpackageId) === Number(step.packageId));
+      const currentMatched = pkgMatchedCounts.get(step.packageId) || 0;
+      matchedRow = matchedPkgRows[currentMatched];
+      pkgMatchedCounts.set(step.packageId, currentMatched + 1);
+    } else if (step.type === "alacarte") {
+      matchedRow = alacarteTrackingRows[alacarteMatchedCount];
+      alacarteMatchedCount++;
+    }
+
+    step.isPrinted = matchedRow ? Number(matchedRow.pIndex || 0) > 0 : false;
+  });
+
+  // Start at the first unprinted box (or the last step if all are printed)
+  const firstUnprintedIndex = steps.findIndex((s: any) => !s.isPrinted);
+  const initialStep = firstUnprintedIndex !== -1 ? firstUnprintedIndex + 1 : steps.length;
+
+  const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertType, setAlertType] = useState<"success" | "error">("success");
@@ -298,7 +332,7 @@ export default function PrintingConfirmation({
           <View className="flex-row justify-between items-center gap-2 px-2 mb-8">
             {steps.map((s, idx) => {
               const stepNum = idx + 1;
-              const isFilled = stepNum <= currentStep;
+              const isFilled = stepNum <= currentStep || (s as any).isPrinted;
               return (
                 <View key={s.id} className="flex-1 items-center">
                   <View

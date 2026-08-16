@@ -365,8 +365,8 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center">
                         <Text className="text-center">
                           {selectedToggle === "Completed"
-                            ? item.complete.toFixed(2)
-                            : item.todo.toFixed(2)}
+                            ? item.complete
+                            : item.todo}
                         </Text>
                       </View>
                     </View>

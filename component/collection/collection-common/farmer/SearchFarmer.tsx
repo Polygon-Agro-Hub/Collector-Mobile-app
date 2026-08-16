@@ -260,14 +260,15 @@ const SearchFarmer: React.FC<SearchFarmerProps> = ({ navigation }) => {
                 value={NICnumber}
                 onChangeText={handleNicChange}
                 placeholder={t("SearchFarmer.EnterNIC")}
-                className="flex-1"
+                placeholderTextColor="#ADADAD"
+                className="flex-1 text-black"
                 maxLength={12}
                 keyboardType="default"
                 autoCapitalize="characters"
                 autoCorrect={false}
                 spellCheck={false}
                 style={{
-                  color: "#000",
+                  color: "#000000",
                   fontSize: 14,
                   paddingVertical: 0,
                 }}

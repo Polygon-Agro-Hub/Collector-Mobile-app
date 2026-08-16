@@ -19,13 +19,12 @@ const LoadingPage: React.FC<LoadingPageProps> = ({
   message,
   containerStyle,
   messageStyle,
-  fullScreen = false,
+  fullScreen = true,
 }) => {
   return (
     <View
-      className={`${fullScreen ? "flex-1" : ""} justify-center items-center bg-white`}
+      className="flex-1 w-full justify-center items-center bg-white"
       style={[
-        fullScreen ? { minHeight: 300 } : { paddingVertical: 40 },
         containerStyle,
       ]}
     >

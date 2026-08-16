@@ -632,7 +632,9 @@
     "Drivers List": "இயக்குனர்கள் பட்டியல்",
     "Officers / Drivers List": "அதிகாரிகளின் பட்டியல்",
     "Drivers": "இயக்குனர்கள்",
-    "Not Approved": "இன்னும் அங்கீகரிக்கப்படவில்லை"
+    "Not Approved": "இன்னும் அங்கீகரிக்கப்படவில்லை",
+    "No officers found": "- அதிகாரிகள் யாரும் காணப்படவில்லை -",
+    "No drivers found": "- ஓட்டுநர்கள் யாரும் காணப்படவில்லை -"
   },
   "EditTargetManager": {
     "LNG": "ta",

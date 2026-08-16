@@ -205,7 +205,29 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   useFocusEffect(
     useCallback(() => {
-      setResetImage(false);
+      setSelectedCrop(null);
+      setSelectedVariety(null);
+      setSelectedVarietyName(null);
+      setVarieties([]);
+      setUnitPrices({ A: null, B: null, C: null });
+      setQuantities({ A: "", B: "", C: "" });
+      setImages({ A: null, B: null, C: null });
+      setTotal(0);
+      setCrops([]);
+      setUsedVarietyIds([]);
+      setCropCount(1);
+      setdonebutton2visibale(false);
+      setdonebutton2disabale(false);
+      setaddbutton(true);
+      setShowCameraModels(false);
+      setScrollPosition(0);
+      setIsAtStart(true);
+      setIsAtEnd(false);
+
+      setResetImage(true);
+      const timer = setTimeout(() => setResetImage(false), 100);
+
+      return () => clearTimeout(timer);
     }, []),
   );
 
@@ -706,16 +728,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       let Message = "";
       let companyName = "";
       if (language === "Sinhala") {
-        companyName =
-          (store.getState().auth.companyNameSinhala) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameSinhala || "PolygonAgro";
         Message = `ඔබේ නිෂ්පාදන ${companyName} වෙත ලබා දීම ගැන ඔබට ස්තූතියි.\nපැය 48ක් ඇතුළත රු. ${formattedPrice} ඔබේ බැංකු ගිණුමට බැර කෙරේ.\nTID: ${invoiceNumber}`;
       } else if (language === "Tamil") {
-        companyName =
-          (store.getState().auth.companyNameTamil) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameTamil || "PolygonAgro";
         Message = `உங்கள் விளைபொருட்களை ${companyName} நிறுவனத்திற்கு வழங்கியதற்கு நன்றி.\nரூ. ${formattedPrice} 48 மணி நேரத்திற்குள் உங்கள் வங்கிக் கணக்கில் வரவு வைக்கப்படும்.\nTID: ${invoiceNumber}`;
       } else {
-        companyName =
-          (store.getState().auth.companyNameEnglish) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameEnglish || "PolygonAgro";
         Message = `Thank you for providing your produce to ${companyName}.\nRs. ${formattedPrice} will be credited to your bank account within 48 hours.\nTID: ${invoiceNumber}`;
       }
 
@@ -877,7 +896,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       enabled
-      style={{ flex: 1 ,backgroundColor:'white' }}
+      style={{ flex: 1, backgroundColor: "white" }}
     >
       <ScrollView
         className="flex-1 bg-white mb-8"
@@ -1031,9 +1050,15 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
                                   {/* Quantity */}
                                   {/* Quantity */}
-<Text style={{ fontWeight: "bold", flex: 1, textAlign: "center" }}>
-  {crop[`grade${grade}quan`]}kg
-</Text>
+                                  <Text
+                                    style={{
+                                      fontWeight: "bold",
+                                      flex: 1,
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    {crop[`grade${grade}quan`]}kg
+                                  </Text>
 
                                   {/* Delete-grade button / spinner */}
                                   {isGradeDeleting ? (

@@ -8,6 +8,7 @@ import {
   FlatList,
   Image,
   Platform,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -191,7 +192,21 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     React.useCallback(() => {
       fetchTransactions(getCurrentDate());
       setSearchQuery("");
-    }, []),
+
+      const handleBackPress = () => {
+        navigation.navigate("Main" as any, {
+          screen: "CollectionDashboard",
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
   );
 
   return (

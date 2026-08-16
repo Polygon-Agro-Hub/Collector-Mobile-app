@@ -19,6 +19,8 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
   "DigitalSignature"
@@ -173,6 +175,7 @@ export default function DigitalSignature({
 }: DigitalSignatureProps) {
   const signatureRef = useRef<any>(null);
   const { orderId } = route.params;
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [signatureDrawn, setSignatureDrawn] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -183,7 +186,7 @@ export default function DigitalSignature({
 
   const { width, height } = useWindowDimensions();
 
-  const signatureHeight = height - 56 - 64 - 40;
+  const signatureHeight = height - 56 - 64 - 40 - Math.max(insets.bottom, 0);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -199,7 +202,7 @@ export default function DigitalSignature({
         setShouldRenderSignature(false);
 
         await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
+          ScreenOrientation.OrientationLock.LANDSCAPE,
         );
 
         await new Promise<void>((resolve) => setTimeout(() => resolve(), 700));
@@ -574,9 +577,12 @@ export default function DigitalSignature({
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingHorizontal: 16,
-          paddingBottom: 12,
-          height: 64,
+          paddingLeft: Math.max(insets.left + 16, 16),
+          paddingRight: Math.max(insets.right + 16, 16),
+          paddingBottom: Math.max(insets.bottom + 8, 12),
+          paddingTop: 8,
+          height: 64 + Math.max(insets.bottom, 0),
+          backgroundColor: "#ffffff",
         }}
       >
         {/* Cancel */}
