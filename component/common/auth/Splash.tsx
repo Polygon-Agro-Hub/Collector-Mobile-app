@@ -60,7 +60,9 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
       if (response.ok) {
         const data = await response.json();
         return { passwordUpdated: data.data.passwordUpdated };
-      } else if (response.status === 403 || response.status === 401) {
+      } else if (response.status === 401) {
+        return { isExpiredToken: true };
+      } else if (response.status === 403) {
         const data = await response.json();
         return {
           isBanned: true,
@@ -89,30 +91,19 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
         return;
       }
 
-      const expirationTime = store.getState().auth.tokenExpirationTime;
       const userToken = store.getState().auth.token;
       const role = store.getState().auth.jobRole;
       const emp = store.getState().auth.empId;
 
       if (userToken) {
+        const result = await checkPasswordStatus(userToken);
 
-        let isExpired = false;
-        if (expirationTime) {
-          const currentTime = new Date();
-          const tokenExpiry = new Date(expirationTime);
-          if (currentTime >= tokenExpiry) {
-            isExpired = true;
-          }
-        }
-
-        if (isExpired) {
+        if (result.isExpiredToken) {
           store.dispatch(logoutUser());
           dispatch(logoutUser());
           navigation.navigate("Login");
           return;
         }
-
-        const result = await checkPasswordStatus(userToken);
 
         if (result.isBanned) {
           store.dispatch(logoutUser());

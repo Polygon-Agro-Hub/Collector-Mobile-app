@@ -137,7 +137,6 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       await fetchSelectedLanguage();
       await fetchUserProfile();
       await fetchTargetPercentage();
-      await checkTokenExpiration();
     };
     fetchData();
   }, []);
@@ -146,7 +145,6 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     setRefreshing(true);
     await fetchUserProfile();
     await fetchTargetPercentage();
-    await checkTokenExpiration();
     setRefreshing(false);
   };
 
@@ -161,28 +159,6 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       return () => subscription.remove();
     }, []),
   );
-
-  const checkTokenExpiration = async () => {
-    try {
-      const expirationTime = store.getState().auth.tokenExpirationTime;
-      const userToken = store.getState().auth.token;
-
-      if (expirationTime && userToken) {
-        const currentTime = new Date();
-        const tokenExpiry = new Date(expirationTime);
-
-        if (currentTime < tokenExpiry) {
-          // Token is valid
-        } else {
-          store.dispatch(logoutUser());
-          navigation.navigate("Login");
-        }
-      }
-    } catch (error) {
-      console.error("❌ Error checking token expiration:", error);
-      navigation.navigate("Login");
-    }
-  };
 
   const getFullName = () => {
     if (!profile) return "Loading...";

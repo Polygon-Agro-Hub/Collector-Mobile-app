@@ -240,7 +240,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
       showsVerticalScrollIndicator={false}
     >
       <CustomHeader
-        title={t("ClaimOfficer.ClaimOfficers")}
+        title={t("ClaimOfficer.Claim Staff")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() => navigation.navigate("DistributionOfficersList")}
@@ -257,10 +257,12 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
           </View>
           <TextInput
             placeholder="ex: 00122"
+            placeholderTextColor="#ADADAD"
             value={empID}
             keyboardType="numeric"
             onChangeText={handleEmpIDChange}
-            className="flex-1 px-4 py-2 text-gray-700"
+            className="flex-1 px-4 py-2 text-black"
+            style={{ color: "#000000" }}
           />
         </View>
 

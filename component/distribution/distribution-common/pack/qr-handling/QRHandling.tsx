@@ -138,6 +138,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           packagesCount: (o.packagesList && o.packagesList.length > 0) ? o.packagesList.length : (o.packagesCount || 0),
           alacarteCount: o.alacarteCount || 0,
           packagesList: o.packagesList || [],
+          trackingRows: o.trackingRows || [],
         }));
 
         const getTimeSlotPriority = (rawTimeSlot: string, formattedTimeSlot: string): number => {

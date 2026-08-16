@@ -158,21 +158,29 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
       </ScrollView>
 
       {/* Action Button - Always "Go Back" */}
-      <View className="px-4 mb-20  bg-white">
+      <View className="px-4 mb-20 bg-white">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          className="bg-[#353535] rounded-3xl h-[50px] items-center justify-center"
+          className="bg-[#353535] rounded-3xl h-[50px] items-center justify-center flex-row w-full"
           activeOpacity={0.8}
           style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
-                shadowRadius: 10,
-                elevation: 6,
-              }}
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 6,
+          }}
         >
-          <Text className="text-white text-center font-bold text-lg">
-            {t("GoviPensionStatus.GoBack")}
+          <Text
+            className="text-white text-center font-bold text-lg"
+            style={{
+              color: "#ffffff",
+              fontSize: 18,
+              fontWeight: "700",
+              textAlign: "center",
+            }}
+          >
+            {t("GoviPensionStatus.GoBack") || "Go Back"}
           </Text>
         </TouchableOpacity>
       </View>

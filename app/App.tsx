@@ -62,10 +62,13 @@ function AppContent() {
         currentRouteName = route?.name || "";
       }
 
+      const userToken = store.getState().auth.token;
       if (
+        !userToken ||
         currentRouteName === "Login" ||
         currentRouteName === "Splash" ||
-        currentRouteName === "BannedScreen"
+        currentRouteName === "BannedScreen" ||
+        currentRouteName === "Logout"
       ) {
         return;
       }

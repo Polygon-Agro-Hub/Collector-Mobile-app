@@ -17,7 +17,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import UploadFile, { UploadFileItem } from "@/component/components/file-management/UploadFile";
+import UploadFile, {
+  UploadFileItem,
+} from "@/component/components/file-management/UploadFile";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -30,7 +32,9 @@ const formatKg = (val: number | string | undefined | null): string => {
   return String(rounded);
 };
 
-const formatPriceWithCommas = (val: number | string | undefined | null): string => {
+const formatPriceWithCommas = (
+  val: number | string | undefined | null,
+): string => {
   if (val === undefined || val === null || val === "") return "";
   const rawStr = String(val).replace(/,/g, "").trim();
   if (!rawStr) return "";
@@ -75,12 +79,12 @@ export default function PurchaseProduct({
   const { product } = route.params || {};
   const productName = product?.name || "Batana";
   const defaultKg = product?.kg !== undefined ? product.kg : 20;
-  const assignedQty = product?.assignedQty !== undefined ? product.assignedQty : defaultKg;
+  const assignedQty =
+    product?.assignedQty !== undefined ? product.assignedQty : defaultKg;
   const gradeAPrice = product?.gradeAPrice || 200;
   const ceilingPercent = product?.ceilingPercent || 15;
   const ceilingPrice =
-    product?.ceilingPrice ||
-    gradeAPrice + gradeAPrice * (ceilingPercent / 100);
+    product?.ceilingPrice || gradeAPrice + gradeAPrice * (ceilingPercent / 100);
   const srtAssignId = product?.srtAssignId;
   const productImage =
     product?.image ||
@@ -115,10 +119,10 @@ export default function PurchaseProduct({
 
       const backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress
+        onBackPress,
       );
       return () => backHandler.remove();
-    }, [step, navigation])
+    }, [step, navigation]),
   );
 
   // Form State
@@ -130,7 +134,8 @@ export default function PurchaseProduct({
   // Step 2 State
   const [uploadedFile, setUploadedFile] = useState<UploadFileItem | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [successModalVisible, setSuccessModalVisible] = useState<boolean>(false);
+  const [successModalVisible, setSuccessModalVisible] =
+    useState<boolean>(false);
 
   const actionPaddingBottom = uploadedFile ? 50 : insets.bottom + 16;
 
@@ -142,7 +147,7 @@ export default function PurchaseProduct({
       setQtyError("");
       setPriceError("");
       setUploadedFile(null);
-    }, [product, defaultKg])
+    }, [product, defaultKg]),
   );
 
   // Validate Step 1 Purchase
@@ -156,7 +161,9 @@ export default function PurchaseProduct({
       setQtyError("Please enter a valid quantity in kg.");
       hasError = true;
     } else if (qtyNum > defaultKg) {
-      setQtyError(`Quantity cannot exceed remaining shortage of ${formatKg(defaultKg)} kg.`);
+      setQtyError(
+        `Quantity cannot exceed remaining shortage of ${formatKg(defaultKg)} kg.`,
+      );
       hasError = true;
     }
 
@@ -165,7 +172,9 @@ export default function PurchaseProduct({
       setPriceError("Please enter a valid price per kg.");
       hasError = true;
     } else if (priceNum > ceilingPrice) {
-      setPriceError(`Price cannot exceed Rs. ${formatPriceWithCommas(ceilingPrice)}`);
+      setPriceError(
+        `Price cannot exceed Rs. ${formatPriceDisplay(ceilingPrice)}`,
+      );
       hasError = true;
     }
 
@@ -178,7 +187,7 @@ export default function PurchaseProduct({
     if (!uploadedFile) {
       Alert.alert(
         "Invoice Required",
-        "Please upload the invoice file before confirming."
+        "Please upload the invoice file before confirming.",
       );
       return;
     }
@@ -197,7 +206,7 @@ export default function PurchaseProduct({
         },
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       setSuccessModalVisible(true);
@@ -205,7 +214,8 @@ export default function PurchaseProduct({
       console.error("Error submitting purchase:", err);
       Alert.alert(
         "Submission Error",
-        err.response?.data?.message || "Failed to submit purchase. Please try again."
+        err.response?.data?.message ||
+          "Failed to submit purchase. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -218,6 +228,20 @@ export default function PurchaseProduct({
     } else {
       navigation.navigate("PurchaseShortage");
     }
+  };
+
+  const formatPriceDisplay = (
+    val: number | string | undefined | null,
+  ): string => {
+    if (val === undefined || val === null || val === "") return "0.00";
+    const rawStr = String(val).replace(/,/g, "").trim();
+    if (!rawStr) return "0.00";
+    const num = parseFloat(rawStr);
+    if (isNaN(num)) return "0.00";
+    return num.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
 
   return (
@@ -250,7 +274,10 @@ export default function PurchaseProduct({
           className="flex-1 bg-white px-6 pt-1"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: actionPaddingBottom + 180 }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: actionPaddingBottom + 180,
+          }}
         >
           {/* Product Overview Header */}
           <View className="items-center mb-6">
@@ -259,17 +286,24 @@ export default function PurchaseProduct({
               className="w-28 h-28 rounded-2xl mb-3"
               resizeMode="cover"
             />
-            <Text className="text-xl font-black text-[#030E25]">{productName}</Text>
+            <Text className="text-xl font-black text-[#030E25]">
+              {productName}
+            </Text>
             <Text className="text-md text-[#54617D] mt-1">
               {step === 1 ? "Collect : " : "Collected : "}
               <Text className="text-[#980775] font-extrabold">
-                {step === 1 ? `${formatKg(defaultKg)} kg` : `${formatKg(buyingQty)} kg`}
+                {step === 1
+                  ? `${formatKg(defaultKg)} kg`
+                  : `${formatKg(buyingQty)} kg`}
               </Text>
             </Text>
             <Text className="text-md text-[#54617D] mt-0.5">
               Price per kg :{" "}
               <Text style={{ color: "#AC7F5E" }} className="font-bold">
-                Rs. {step === 1 ? formatPriceWithCommas(gradeAPrice) : formatPriceWithCommas(purchasingPrice)}
+                Rs.{" "}
+                {step === 1
+                  ? formatPriceDisplay(gradeAPrice)
+                  : formatPriceDisplay(purchasingPrice)}
               </Text>
             </Text>
           </View>
@@ -297,7 +331,9 @@ export default function PurchaseProduct({
                     color: buyingQty ? "#000000" : "#576879",
                   }}
                   className={`rounded-full px-5 h-[50px] text-sm font-semibold ${
-                    qtyError ? "border border-red-500 bg-[#E9ECF1]" : "bg-[#F0F3F6]"
+                    qtyError
+                      ? "border border-red-500 bg-[#E9ECF1]"
+                      : "bg-[#F0F3F6]"
                   }`}
                 />
                 {qtyError ? (
@@ -331,7 +367,9 @@ export default function PurchaseProduct({
                     color: purchasingPrice ? "#000000" : "#576879",
                   }}
                   className={`rounded-full px-5 h-[50px] text-sm font-semibold ${
-                    priceError ? "border border-red-500 bg-[#E9ECF1]" : "bg-[#F0F3F6]"
+                    priceError
+                      ? "border border-red-500 bg-[#E9ECF1]"
+                      : "bg-[#F0F3F6]"
                   }`}
                 />
                 {priceError ? (
@@ -363,13 +401,13 @@ export default function PurchaseProduct({
         {/* Bottom Sticky Action Buttons */}
         <View
           style={{ paddingBottom: actionPaddingBottom }}
-          className="px-6 pt-4 bg-white absolute bottom-0 left-0 right-0 gap-4"
+          className="px-6 pt-4 bg-white absolute bottom-0 left-0 right-0"
         >
           {step === 1 ? (
             <>
               <TouchableOpacity
                 onPress={handleBack}
-                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center"
+                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-3"
                 activeOpacity={0.8}
                 style={{
                   shadowColor: "#000000",
@@ -379,7 +417,12 @@ export default function PurchaseProduct({
                   elevation: 3,
                 }}
               >
-                <Text className="text-[#030E25] font-extrabold text-sm">Cancel</Text>
+                <Text
+                  className="text-[#030E25] font-extrabold text-sm"
+                  style={{ color: "#030E25", fontSize: 14, fontWeight: "800" }}
+                >
+                  Cancel
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -394,7 +437,12 @@ export default function PurchaseProduct({
                   elevation: 3,
                 }}
               >
-                <Text className="text-white font-extrabold text-sm">Purchase</Text>
+                <Text
+                  className="text-white font-extrabold text-sm"
+                  style={{ color: "#ffffff", fontSize: 14, fontWeight: "800" }}
+                >
+                  Purchase
+                </Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -402,7 +450,7 @@ export default function PurchaseProduct({
               <TouchableOpacity
                 onPress={() => setStep(1)}
                 disabled={submitting}
-                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center"
+                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-3"
                 activeOpacity={0.8}
                 style={{
                   shadowColor: "#000000",
@@ -412,7 +460,12 @@ export default function PurchaseProduct({
                   elevation: 3,
                 }}
               >
-                <Text className="text-[#030E25] font-extrabold text-sm">Go Back</Text>
+                <Text
+                  className="text-[#030E25] font-extrabold text-sm"
+                  style={{ color: "#030E25", fontSize: 14, fontWeight: "800" }}
+                >
+                  Go Back
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -429,9 +482,16 @@ export default function PurchaseProduct({
                 }}
               >
                 {submitting ? (
-                  <ActivityIndicator size="small" color="#ffffff" className="mr-2" />
+                  <ActivityIndicator
+                    size="small"
+                    color="#ffffff"
+                    className="mr-2"
+                  />
                 ) : null}
-                <Text className="text-white font-extrabold text-sm">
+                <Text
+                  className="text-white font-extrabold text-sm"
+                  style={{ color: "#ffffff", fontSize: 14, fontWeight: "800" }}
+                >
                   {submitting ? "Submitting..." : "Confirm"}
                 </Text>
               </TouchableOpacity>

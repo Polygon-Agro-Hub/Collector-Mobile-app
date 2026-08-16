@@ -232,23 +232,22 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
                 />
 
                 {/* Fixed Name Container with Equal Padding */}
-                <View className="mt-2 w-full px-8">
+                <View className="mt-2 w-full px-4 items-center justify-center">
                   <View
-                    className="overflow-hidden"
+                    className="overflow-hidden items-center justify-center"
                     style={{
                       width: "100%",
-                      alignItems:
-                        customerName.length > 20 ? "flex-start" : "center",
+                      alignItems: "center",
                     }}
                   >
                     <Animated.Text
-                      className="text-lg font-bold text-gray-800"
+                      className="text-lg font-bold text-gray-800 text-center"
                       style={{
+                        textAlign: "center",
                         transform:
                           customerName.length > 20
                             ? [{ translateX: scrollX }]
                             : [],
-                        minWidth: customerName.length > 20 ? "200%" : "auto",
                       }}
                     >
                       {customerName}

@@ -53,7 +53,7 @@ export default function ReadyToPrint({
   const actualPackagesCount =
     packagesList && packagesList.length > 0
       ? packagesList.reduce((acc: number, pkg: any) => {
-          const qty = Number(pkg.count || pkg.qty || 1);
+          const qty = Number(pkg.qty || 1);
           return acc + (isNaN(qty) || qty <= 0 ? 1 : qty);
         }, 0)
       : Number(packagesCount || 0);
@@ -175,6 +175,7 @@ export default function ReadyToPrint({
               category: category,
               packagesList: route.params?.packagesList || [],
               alacarteCount: alacarteCount,
+              trackingRows: route.params?.trackingRows || [],
               rowId: route.params?.rowId,
               isReprint: route.params?.isReprint || false,
               buttonLabel: route.params?.buttonLabel || "Start",

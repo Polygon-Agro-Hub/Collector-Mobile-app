@@ -191,11 +191,6 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                         {row.allocatedCount}{" "}
                         {row.allocatedCount === 1 ? "Order" : "Orders"} Allocated
                       </Text>
-                      {row.crops ? (
-                        <Text className="text-xs text-[#980775] mt-1.5 font-semibold">
-                          Crops: {row.crops}
-                        </Text>
-                      ) : null}
                     </View>
                   </TouchableOpacity>
                 );

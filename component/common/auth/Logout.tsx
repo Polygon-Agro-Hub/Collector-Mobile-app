@@ -23,15 +23,12 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
   const [progress, setProgress] = useState(0);
   const { t } = useTranslation();
 
-  const status = async (empId: string, statusVal: boolean) => {
+  const status = async (empId: string, statusVal: boolean, token?: string | null) => {
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
+    if (!netState.isConnected || !token) {
       return;
     }
     try {
-      const token = store.getState().auth.token;
-      if (!token) return;
-
       await fetch(
         `${environment.API_BASE_URL}api/collection-officer/online-status`,
         {
@@ -51,15 +48,12 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
     }
   };
 
-  const releasePosition = async () => {
+  const releasePosition = async (token?: string | null) => {
     const netState = await NetInfo.fetch();
-    if (!netState.isConnected) {
+    if (!netState.isConnected || !token) {
       return;
     }
     try {
-      const token = store.getState().auth.token;
-      if (!token) return;
-
       await fetch(
         `${environment.API_BASE_URL}api/packing/positions/release`,
         {
@@ -77,18 +71,22 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
 
   useEffect(() => {
     const performLogout = async () => {
+      const userToken = store.getState().auth.token;
+      const empId = store.getState().auth.empId;
+
+      // Dispatch logout user to clear redux state immediately so no global auth error popups trigger
+      store.dispatch(logoutUser());
+
       try {
-        const empId = store.getState().auth.empId;
-        if (empId) {
-          await status(empId, false);
+        if (empId && userToken) {
+          await status(empId, false, userToken);
         }
-        await releasePosition();
+        if (userToken) {
+          await releasePosition(userToken);
+        }
       } catch (err) {
         console.error("Error in logout screen updates:", err);
       }
-
-      // Dispatch logout user to clear redux state
-      store.dispatch(logoutUser());
 
       // Progress animation
       const interval = setInterval(() => {

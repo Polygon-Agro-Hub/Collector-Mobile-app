@@ -392,8 +392,18 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
           {loading || tabLoading ? (
             <LoadingPage fullScreen message={t("Loading...") || "Loading..."} />
           ) : errorMessage ? (
-            <View className="flex-1 justify-center items-center">
-              <Text className="text-gray-500 text-lg">{errorMessage}</Text>
+            <View
+              style={{ flex: 1, height: scale(300), justifyContent: "center" }}
+            >
+              <NoDataScreen
+                message={
+                  activeTab === "Officers"
+                    ? t("DistributionOfficersList.No officers found") ||
+                      "- No Officers Found -"
+                    : t("DistributionOfficersList.No drivers found") ||
+                      "- No Drivers Found -"
+                }
+              />
             </View>
           ) : (
             <FlatList
@@ -401,12 +411,20 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
               keyExtractor={(item) => item.empId}
               renderItem={renderOfficer}
               ListEmptyComponent={
-                <View style={{ flex: 1, height: scale(300), justifyContent: "center" }}>
+                <View
+                  style={{
+                    flex: 1,
+                    height: scale(300),
+                    justifyContent: "center",
+                  }}
+                >
                   <NoDataScreen
                     message={
                       activeTab === "Officers"
-                        ? t("DistributionOfficersList.No officers found") || "- No Officers Found -"
-                        : t("DistributionOfficersList.No drivers found") || "- No Drivers Found -"
+                        ? t("DistributionOfficersList.No officers found") ||
+                          "- No Officers Found -"
+                        : t("DistributionOfficersList.No drivers found") ||
+                          "- No Drivers Found -"
                     }
                   />
                 </View>
@@ -425,7 +443,10 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                     {"  "}
                     <Text className="text-[#21202B] font-normal">
                       ({t("ManagerTransactions.All") || "All"}{" "}
-                      {filteredOfficers.length === 0 ? "0" : String(filteredOfficers.length).padStart(2, "0")})
+                      {filteredOfficers.length === 0
+                        ? "0"
+                        : String(filteredOfficers.length).padStart(2, "0")}
+                      )
                     </Text>
                   </Text>
                 </View>
@@ -513,17 +534,24 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                         {selectedOfficer.phoneNumber1}
                       </Text>
                     </View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        const phoneUrl = `tel:${selectedOfficer.phoneNumber1}`;
-                        Linking.openURL(phoneUrl).catch((err) =>
-                          console.error("Failed to open dial pad:", err),
-                        );
-                      }}
-                      className="w-8 h-8 rounded-full bg-[#E9ECF1] items-center justify-center"
-                    >
-                      <Ionicons name="call" size={14} color="#030E25" />
-                    </TouchableOpacity>
+                  <TouchableOpacity
+  onPress={() => {
+    const phoneUrl = `tel:${selectedOfficer.phoneNumber1}`;
+    Linking.openURL(phoneUrl).catch((err) =>
+      console.error("Failed to open dial pad:", err),
+    );
+  }}
+  className="w-8 h-8 rounded-full bg-[#E9ECF1] items-center justify-center"
+  style={{
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
+  }}
+>
+  <Ionicons name="call" size={14} color="#030E25" />
+</TouchableOpacity>
                   </View>
                 )}
 
@@ -557,6 +585,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                     handleDisclaim(selectedOfficer.collectionOfficerId)
                   }
                   className="w-full h-12 bg-red-600 rounded-full items-center justify-center shadow-md active:bg-red-700"
+                     style={{
+            shadowColor: "#000000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 2,
+            shadowRadius: 3.84,
+            elevation: 5,
+          }}
                 >
                   <Text className="text-white font-extrabold text-sm">
                     {t("DisclaimOfficer.Disclaim") || "Disclaim"}
