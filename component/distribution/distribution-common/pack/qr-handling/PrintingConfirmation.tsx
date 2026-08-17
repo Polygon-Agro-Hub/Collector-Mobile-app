@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   ScrollView,
   BackHandler,
   ActivityIndicator,
@@ -16,23 +15,12 @@ import { environment } from "@/environment/environment";
 import AlertModal from "@/component/components/popup/AlertModal";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-interface PrintStep {
-  id: number;
-  type: "main" | "package" | "alacarte";
-  label: string;
-  formattedIndex: string;
-  textColor: string;
-  circleBgColor: string;
-  circleTextColor: string;
-  packageId?: number;
-  packageIndex?: number;
-}
-
-export interface PackageItem {
-  id: number;
-  name: string;
-  count: number;
-}
+import {
+  generatePrintSteps,
+  PrintStep,
+  PackageItem,
+} from "@/utils/packing/packing-helpers";
+import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
 
 export default function PrintingConfirmation({
   route,
@@ -42,15 +30,11 @@ export default function PrintingConfirmation({
   navigation: any;
 }) {
   const {
-    orderNumber = "2607300005 (R)",
-    invoiceNumber = "2607300005",
-    category = "Pickup Order",
-    packagesList = [
-      { id: 1, name: "Daily Veggie Pack", count: 3 },
-      { id: 2, name: "Fruit & Veggie Family Pack", count: 4 },
-      { id: 3, name: "Smart Prep Veggie Box", count: 2 },
-    ],
-    alacarteCount = 3,
+    orderNumber,
+    invoiceNumber,
+    category,
+    packagesList = [],
+    alacarteCount = 0,
   } = route.params || {};
 
   const insets = useSafeAreaInsets();
@@ -59,67 +43,8 @@ export default function PrintingConfirmation({
   const cleanInv = String(invoiceNumber || orderNumber).replace(/\s*\([^\)]*\)/g, "").trim();
   const displayOrderNumber = isWholesale ? `${cleanInv} (Wholesale)` : `${cleanInv} (Retail)`;
 
-  // Build dynamic print steps based on package count
-  const steps: PrintStep[] = [];
-
-  // Calculate total physical packages based on package quantity (pkg.qty)
-  const totalPhysicalPackages = packagesList && packagesList.length > 0
-    ? packagesList.reduce((acc: number, pkg: any) => acc + Math.max(1, Number(pkg.qty || 1)), 0)
-    : 0;
-
-  // Calculate total physical boxes (Package boxes + 1 Alacarte box if present)
-  const totalBoxes = totalPhysicalPackages + (alacarteCount > 0 ? 1 : 0);
-
-  // 1. If total physical boxes > 1, add Main Container as Step 1
-  if (totalBoxes > 1) {
-    steps.push({
-      id: 1,
-      type: "main",
-      label: "Main Container",
-      formattedIndex: "01",
-      textColor: "#000000",
-      circleBgColor: "bg-slate-100",
-      circleTextColor: "text-black",
-    });
-  }
-
-  // 2. Add individual package steps based on actual package quantity (pkg.qty)
-  if (packagesList && packagesList.length > 0) {
-    packagesList.forEach((pkg: any, pkgIdx: number) => {
-      const pkgQty = Math.max(1, Number(pkg.qty || 1));
-      for (let i = 0; i < pkgQty; i++) {
-        const stepId = steps.length + 1;
-        const formattedIndex = String(stepId).padStart(2, "0");
-        const label = pkgQty > 1 ? `${pkg.name} (${i + 1}/${pkgQty})` : pkg.name;
-        steps.push({
-          id: stepId,
-          type: "package",
-          label: label,
-          formattedIndex,
-          textColor: "#980775",
-          circleBgColor: "bg-[#fdf4ff]",
-          circleTextColor: "text-[#980775]",
-          packageId: pkg.id,
-          packageIndex: pkgIdx,
-        });
-      }
-    });
-  }
-
-  // 3. Add final À la carte step
-  if (alacarteCount > 0) {
-    const stepId = steps.length + 1;
-    const formattedIndex = String(stepId).padStart(2, "0");
-    steps.push({
-      id: stepId,
-      type: "alacarte",
-      label: "À la carte",
-      formattedIndex,
-      textColor: "#AC7F5E",
-      circleBgColor: "bg-[#fdf8f6]",
-      circleTextColor: "text-[#AC7F5E]",
-    });
-  }
+  // Build dynamic print steps using packing helper utility
+  const steps: PrintStep[] = generatePrintSteps(packagesList, alacarteCount);
 
   // Match each step against trackingRows to determine if it is already printed
   const trackingRows: any[] = route.params?.trackingRows || [];
@@ -222,10 +147,10 @@ export default function PrintingConfirmation({
           const code = response.data.code;
           const msg = response.data.message || "An error occurred.";
           setAlertType("error");
-          if (code === "STATION_OCCUPIED") {
+          if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
             setAlertTitle("Position Busy");
             setAlertMessage(msg);
-          } else if (code === "NO_OFFICER_ASSIGNED") {
+          } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
             setAlertTitle("Position Empty");
             setAlertMessage(msg);
           } else {
@@ -248,7 +173,8 @@ export default function PrintingConfirmation({
             orderId: processOrderId,
             orderpackageId: activeStep.packageId || null,
             isPackage: isPackageStep ? 1 : 0,
-            packageIndex: isPackageStep ? (activeStep.packageIndex ?? 0) : 0,
+            packageIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
+            packageBoxSubIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
             rowId: route.params?.rowId,
           },
           { headers: { Authorization: `Bearer ${token}` } },
@@ -258,10 +184,10 @@ export default function PrintingConfirmation({
           const code = response.data.code;
           const msg = response.data.message || "An error occurred.";
           setAlertType("error");
-          if (code === "STATION_OCCUPIED") {
+          if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
             setAlertTitle("Position Busy");
             setAlertMessage(msg);
-          } else if (code === "NO_OFFICER_ASSIGNED") {
+          } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
             setAlertTitle("Position Empty");
             setAlertMessage(msg);
           } else {
@@ -292,9 +218,9 @@ export default function PrintingConfirmation({
       const code = err.response?.data?.code;
 
       setAlertType("error");
-      if (code === "STATION_OCCUPIED") {
+      if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
         setAlertTitle("Position Busy");
-      } else if (code === "NO_OFFICER_ASSIGNED") {
+      } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
         setAlertTitle("Position Empty");
       } else {
         setAlertTitle("Error");
