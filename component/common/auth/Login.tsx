@@ -131,17 +131,13 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     if (empIdError) {
       setEmpIdError("");
     }
-
-    if (password.trim()) {
-      checkDCMAccess(text, password);
-    }
   };
 
   const handlePasswordChange = (text: string) => {
     setPassword(text);
 
-    if (empid.trim() && text.trim()) {
-      checkDCMAccess(empid, text);
+    if (empIdError) {
+      setEmpIdError("");
     }
   };
 

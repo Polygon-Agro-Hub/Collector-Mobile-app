@@ -66,6 +66,7 @@ function AppContent() {
       if (
         !userToken ||
         currentRouteName === "Login" ||
+        currentRouteName === "Lanuage" ||
         currentRouteName === "Splash" ||
         currentRouteName === "BannedScreen" ||
         currentRouteName === "Logout"
@@ -74,72 +75,84 @@ function AppContent() {
       }
 
       const msg = (data?.message || "").toLowerCase();
+      const code = (data?.code || data?.reason || "").toUpperCase();
       const accStatus = (data?.accountStatus || "").toLowerCase();
 
-      const isAccountBanOrRejection =
-        accStatus === "not approved" ||
-        accStatus === "rejected" ||
+      // Check if this HTTP 401/403 is a domain validation error (e.g. scanning officer from another center,
+      // officer pending approval / rejected, station occupied, or assignment error)
+      const isDomainValidationError =
+        code === "CENTER_MISMATCH" ||
+        code === "NO_OFFICER_ASSIGNED" ||
+        code === "STATION_OCCUPIED" ||
+        code === "MAIN_CONTAINER_PENDING" ||
+        code === "NOT_APPROVED" ||
+        code === "OFFICER_REJECTED" ||
+        code === "ROLE_NOT_ALLOWED" ||
+        msg.includes("center") ||
+        msg.includes("centre") ||
+        msg.includes("assigned") ||
+        msg.includes("occupied") ||
+        msg.includes("busy") ||
         msg.includes("not approved") ||
         msg.includes("rejected") ||
-        msg.includes("emp id is not approved") ||
-        msg.includes("emp id is rejected");
+        msg.includes("pending approval") ||
+        accStatus === "not approved" ||
+        accStatus === "rejected";
 
+      if (isDomainValidationError) {
+        // Let the screen component handle displaying its own validation modal / popup!
+        // DO NOT log out the user or show "Session Expired"!
+        return;
+      }
+
+      // Check if it's explicitly a token expiration
+      const isTokenExpired =
+        code === "TOKEN_EXPIRED" ||
+        code === "INVALID_TOKEN" ||
+        msg.includes("jwt expired") ||
+        msg.includes("token expired") ||
+        msg.includes("invalid token") ||
+        msg.includes("token not found") ||
+        status === 401;
+
+      if (!isTokenExpired) {
+        return;
+      }
+
+      // Genuine Token Expiration: Clear auth state and redirect to Login
       try {
         store.dispatch(logoutUser());
       } catch (e) {
         console.error("Error dispatching logout:", e);
       }
 
-      if (isAccountBanOrRejection) {
+      if (!alertShown) {
+        alertShown = true;
+        Alert.alert(
+          "Session Expired",
+          "Your token has expired. Please log in again.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                alertShown = false;
+                if (navigationRef.isReady()) {
+                  navigationRef.reset({
+                    index: 0,
+                    routes: [{ name: "Login" }],
+                  });
+                }
+              },
+            },
+          ],
+          { cancelable: false }
+        );
+      } else {
         if (navigationRef.isReady()) {
-          const statusType =
-            accStatus === "rejected" || msg.includes("rejected")
-              ? "rejected"
-              : "not_approved";
-
           navigationRef.reset({
             index: 0,
-            routes: [
-              {
-                name: "BannedScreen",
-                params: {
-                  statusType,
-                  message: data?.message,
-                },
-              },
-            ],
+            routes: [{ name: "Login" }],
           });
-        }
-      } else {
-        // Token expired / session expired
-        if (!alertShown) {
-          alertShown = true;
-          Alert.alert(
-            "Session Expired",
-            "Your token has expired. Please log in again.",
-            [
-              {
-                text: "OK",
-                onPress: () => {
-                  alertShown = false;
-                  if (navigationRef.isReady()) {
-                    navigationRef.reset({
-                      index: 0,
-                      routes: [{ name: "Login" }],
-                    });
-                  }
-                },
-              },
-            ],
-            { cancelable: false }
-          );
-        } else {
-          if (navigationRef.isReady()) {
-            navigationRef.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
-          }
         }
       }
     };

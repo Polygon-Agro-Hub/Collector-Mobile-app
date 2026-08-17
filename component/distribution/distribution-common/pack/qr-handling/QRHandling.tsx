@@ -5,12 +5,11 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   Alert,
   RefreshControl,
   BackHandler,
 } from "react-native";
-import { Ionicons, Entypo } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -18,6 +17,10 @@ import { getSocket } from "@/services/socket";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
+import {
+  formatTimeSlot,
+  getTimeSlotPriority,
+} from "@/constants/packing/time-slots";
 
 interface OrderData {
   id: number;
@@ -43,12 +46,6 @@ export default function QRHandling({ navigation }: { navigation: any }) {
     setRefreshing(false);
   };
 
-  // Time slot code mapping helpers
-  const timeSlotMap: { [key: string]: string } = {
-    "8-12": "08:00 AM - 12:00 PM",
-    "12-4": "12:00 PM - 04:00 PM",
-    "4-9": "04:00 PM - 09:00 PM"
-  };
 
   useEffect(() => {
     const loadAssignmentAndJoinRoom = async () => {
@@ -133,21 +130,13 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           id: o.id,
           orderNumber: o.orderNumber,
           type: o.type,
-          timeSlot: timeSlotMap[o.timeSlot] || o.timeSlot,
+          timeSlot: formatTimeSlot(o.timeSlot),
           category: o.category,
           packagesCount: (o.packagesList && o.packagesList.length > 0) ? o.packagesList.length : (o.packagesCount || 0),
           alacarteCount: o.alacarteCount || 0,
           packagesList: o.packagesList || [],
           trackingRows: o.trackingRows || [],
         }));
-
-        const getTimeSlotPriority = (rawTimeSlot: string, formattedTimeSlot: string): number => {
-          const str = (rawTimeSlot || formattedTimeSlot || "").toLowerCase();
-          if (str === "8-12" || str.includes("8:00 am") || str.includes("08:00 am")) return 1;
-          if (str === "12-4" || str === "12-16" || str.includes("12:00 pm")) return 2;
-          if (str === "16-20" || str === "16-21" || str === "4-8" || str === "4-9" || str.includes("04:00 pm") || str.includes("4:00 pm") || str.includes("09:00 pm") || str.includes("9:00 pm")) return 3;
-          return 4;
-        };
 
         const todo = allOrders.filter((o: any) => {
           const raw = response.data.data.find((item: any) => item.id === o.id);
@@ -355,7 +344,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                                 ? `${nextOrder.orderNumber} (${nextOrder.type})`
                                 : null,
                               nextTimeSlot: nextOrder
-                                ? timeSlotMap[nextOrder.timeSlot] || nextOrder.timeSlot
+                                ? formatTimeSlot(nextOrder.timeSlot)
                                 : null,
                               nextCategory: nextOrder
                                 ? nextOrder.category
