@@ -11,7 +11,7 @@ import {
   BackHandler,
   RefreshControl,
 } from "react-native";
-import { Ionicons, Entypo, Feather } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";

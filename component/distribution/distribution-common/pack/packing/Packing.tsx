@@ -23,17 +23,12 @@ import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export const TIME_SLOTS = [
-  { label: "08:00 AM - 12:00 PM", value: "08:00 AM - 12:00 PM" },
-  { label: "12:00 PM - 04:00 PM", value: "12:00 PM - 04:00 PM" },
-  { label: "04:00 PM - 09:00 PM", value: "04:00 PM - 09:00 PM" },
-];
-
-const timeSlotMap: { [key: string]: string } = {
-  "8-12": "08:00 AM - 12:00 PM",
-  "12-4": "12:00 PM - 04:00 PM",
-  "4-9": "04:00 PM - 09:00 PM",
-};
+import {
+  TIME_SLOTS,
+  formatTimeSlot,
+} from "@/constants/packing/time-slots";
+import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
+import { PackingStatus } from "@/constants/packing/status-types";
 
 const formatWeightDisplay = (weightStr: string) => {
   if (!weightStr) return weightStr;
@@ -54,8 +49,6 @@ interface PackingItem {
   image: string;
   checked: boolean;
 }
-
-type PackingStatus = "no_target" | "waiting" | "no_items" | "has_items" | "main_container";
 
 export default function Packing({
   route,
@@ -196,9 +189,7 @@ export default function Packing({
           setActiveOrderPackageId(activeData.activeOrderPackageId || null);
           setActiveTrackingId(activeData.trackingId ? Number(activeData.trackingId) : null);
           if (activeData.timeSlot) {
-            setScheduledTime(
-              timeSlotMap[activeData.timeSlot] || activeData.timeSlot,
-            );
+            setScheduledTime(formatTimeSlot(activeData.timeSlot));
           }
 
           const orderStatus = activeData.orderStatus;

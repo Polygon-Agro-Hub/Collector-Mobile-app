@@ -24,7 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
 
-type QCStatus = "no_target" | "waiting" | "no_items" | "qc_checklist";
+import { QCStatus } from "@/constants/packing/status-types";
 
 interface QCItem {
   id: number;
@@ -36,16 +36,7 @@ interface QCItem {
   image: string;
 }
 
-const timeSlotMap: { [key: string]: string } = {
-  "8-12": "08:00 AM - 12:00 PM",
-  "12-16": "12:00 PM - 04:00 PM",
-  "16-20": "04:00 PM - 08:00 PM",
-  "8-4": "08:00 AM - 04:00 PM",
-  "12-4": "12:00 PM - 04:00 PM",
-  "4-8": "04:00 PM - 08:00 PM",
-  "4-9": "04:00 PM - 09:00 PM",
-  "16-21": "04:00 PM - 09:00 PM",
-};
+import { formatTimeSlot } from "@/constants/packing/time-slots";
 
 const formatWeightDisplay = (weightStr: string) => {
   if (!weightStr) return weightStr;
@@ -211,9 +202,7 @@ export default function WelcomeToQC({
           setIsAlacarteActive(!!activeData.isAlacarteActive);
           setTrackingRows(activeData.trackingRows || []);
           if (activeData.timeSlot) {
-            setScheduledTime(
-              timeSlotMap[activeData.timeSlot] || activeData.timeSlot
-            );
+            setScheduledTime(formatTimeSlot(activeData.timeSlot));
           }
 
           const orderStatus = activeData.orderStatus;

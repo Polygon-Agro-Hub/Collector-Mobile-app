@@ -10,7 +10,9 @@ import {
 import { Feather } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { formatTimeSlot } from "@/constants/packing/time-slots";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 
 export default function ReadyToPrint({
   route,
@@ -21,16 +23,18 @@ export default function ReadyToPrint({
 }) {
   // Get order data passed from navigation parameters
   const {
-    orderNumber = "2607300005 (R)",
-    invoiceNumber = "2607300005",
-    timeSlot = "08:00 AM - 12:00 PM",
-    category = "Pickup Order",
-    packagesCount = 3,
-    alacarteCount = 3,
+    orderNumber,
+    invoiceNumber,
+    timeSlot,
+    category,
+    packagesCount = 0,
+    alacarteCount = 0,
     packagesList = [],
   } = route.params || {};
 
   const insets = useSafeAreaInsets();
+
+
 
   useEffect(() => {
     const onBackPress = () => {
@@ -119,7 +123,7 @@ export default function ReadyToPrint({
                 {displayOrderNumber}
               </Text>
               <Text className="text-sm font-bold text-slate-900 mt-0.5">
-                {timeSlot}
+                {formatTimeSlot(timeSlot)}
               </Text>
               <Text className="text-xs text-[#54617D] mt-0.5">
                 {category}

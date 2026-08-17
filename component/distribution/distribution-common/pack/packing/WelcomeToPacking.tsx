@@ -11,7 +11,7 @@ import {
   BackHandler,
   RefreshControl,
 } from "react-native";
-import { Entypo } from "@expo/vector-icons";
+
 import LottieView from "lottie-react-native";
 
 import CustomHeader from "@/component/components/navigations/CustomHeader";
