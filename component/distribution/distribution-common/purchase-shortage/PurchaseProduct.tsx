@@ -15,6 +15,7 @@ import {
   Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import UploadFile, {
@@ -73,6 +74,7 @@ export default function PurchaseProduct({
   route: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom + 10, 50);
 
@@ -418,10 +420,15 @@ export default function PurchaseProduct({
                 }}
               >
                 <Text
-                  className="text-[#030E25] font-extrabold text-sm"
-                  style={{ color: "#030E25", fontSize: 14, fontWeight: "800" }}
+                  className="text-[#030E25] text-center font-extrabold text-sm"
+                  style={{
+                    color: "#030E25",
+                    fontSize: 14,
+                    fontWeight: "800",
+                    textAlign: "center",
+                  }}
                 >
-                  Cancel
+                  {t("PurchaseProduct.Cancel") || "Cancel"}
                 </Text>
               </TouchableOpacity>
 
@@ -438,10 +445,15 @@ export default function PurchaseProduct({
                 }}
               >
                 <Text
-                  className="text-white font-extrabold text-sm"
-                  style={{ color: "#ffffff", fontSize: 14, fontWeight: "800" }}
+                  className="text-white text-center font-extrabold text-sm"
+                  style={{
+                    color: "#ffffff",
+                    fontSize: 14,
+                    fontWeight: "800",
+                    textAlign: "center",
+                  }}
                 >
-                  Purchase
+                  {t("PurchaseProduct.Purchase") || "Purchase"}
                 </Text>
               </TouchableOpacity>
             </>
@@ -461,10 +473,15 @@ export default function PurchaseProduct({
                 }}
               >
                 <Text
-                  className="text-[#030E25] font-extrabold text-sm"
-                  style={{ color: "#030E25", fontSize: 14, fontWeight: "800" }}
+                  className="text-[#030E25] text-center font-extrabold text-sm"
+                  style={{
+                    color: "#030E25",
+                    fontSize: 14,
+                    fontWeight: "800",
+                    textAlign: "center",
+                  }}
                 >
-                  Go Back
+                  {t("PurchaseProduct.GoBack") || "Go Back"}
                 </Text>
               </TouchableOpacity>
 
@@ -489,10 +506,17 @@ export default function PurchaseProduct({
                   />
                 ) : null}
                 <Text
-                  className="text-white font-extrabold text-sm"
-                  style={{ color: "#ffffff", fontSize: 14, fontWeight: "800" }}
+                  className="text-white text-center font-extrabold text-sm"
+                  style={{
+                    color: "#ffffff",
+                    fontSize: 14,
+                    fontWeight: "800",
+                    textAlign: "center",
+                  }}
                 >
-                  {submitting ? "Submitting..." : "Confirm"}
+                  {submitting
+                    ? t("PurchaseProduct.Submitting") || "Submitting..."
+                    : t("PurchaseProduct.Confirm") || "Confirm"}
                 </Text>
               </TouchableOpacity>
             </>

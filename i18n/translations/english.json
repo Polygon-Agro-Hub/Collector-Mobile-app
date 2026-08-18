@@ -248,8 +248,21 @@
     "Bank name is required": "Bank name is required",
     "Branch name is required": "Branch name is required",
     "Price updated successfully": "Price updated successfully",
-    "No targets have been assigned today for the selected crop.":"No targets have been assigned today for the selected crop.",
-    "Access Denied": "Access denied. Your role is not authorized to use this application."
+    "No targets have been assigned today for the selected crop.": "No targets have been assigned today for the selected crop.",
+    "Access Denied": "Access denied. Your role is not authorized to use this application.",
+    "Job role is required": "Job role is required.",
+    "Failed to validate user data.": "Failed to validate user data.",
+    "Failed to prepare PDF for download.": "Failed to prepare PDF for download.",
+    "OK": "OK",
+    "noInternet": "No Internet Connection",
+    "otpSendFailed": "OTP Send Failed",
+    "No internet connection": "No Internet Connection",
+    "No authentication token found": "No authentication token found.",
+    "Failed to fetch orders": "Failed to fetch orders.",
+    "No pickup orders available": "No pickup orders available.",
+    "Authentication failed": "Authentication failed.",
+    "An error occurred while fetching orders": "An error occurred while fetching orders.",
+    "Phone call is not supported on this device": "Phone call is not supported on this device."
   },
   "SideMenu": {
     "LNG": "en",
@@ -296,7 +309,7 @@
     "noCompletedTargets": "No Completed Target founds",
     "NoTodoItems": "No Todo Target founds",
     "Out": "Out",
-    "MyDailyTarget":"My Daily Target"
+    "MyDailyTarget": "My Daily Target"
   },
   "SearchPrice": {
     "LNG": "en",
@@ -563,7 +576,7 @@
     "Cancel": "Cancel",
     "Next": "Next",
     "Phone Number 01 and Phone Number 02 cannot be the same.": "Mobile Number 01 and Mobile Number 02 cannot be the same.",
-    "Submit":"Submit"
+    "Submit": "Submit"
   },
   "AddOfficerAddressDetails": {
     "LNG": "en",
@@ -576,17 +589,17 @@
     "AccountNum": "--Account Number--",
     "Confirm AccountNum": "--Confirm Account Number--",
     "BankName": "--Bank Name--",
-    "SelectBankName":"Select Bank Name",
-    "SearchBankName":"Search Bank Name",
-    "SelectBranchName":"Select Branch Name",
-    "SearchBranchName":"Search Branch Name",
+    "SelectBankName": "Select Bank Name",
+    "SearchBankName": "Search Bank Name",
+    "SelectBranchName": "Select Branch Name",
+    "SearchBranchName": "Search Branch Name",
     "BranchName": "--Branch Name--",
     "Go": "Go Back",
     "Submit": "Submit",
     "Select Province": "Select Province",
     "Select District": "Select District",
-    "SearchProvince":"Search Province",
-    "SearchDistrict":"Search District",
+    "SearchProvince": "Search Province",
+    "SearchDistrict": "Search District",
     "next": "Next"
   },
   "CenterTarget": {
@@ -603,7 +616,7 @@
   "ClaimOfficer": {
     "LNG": "en",
     "ClaimOfficers": "Claim",
-    "Driver":"Driver",
+    "Driver": "Driver",
     "JobRole": "Job Role",
     "EMPID": "EMP ID",
     "Search": "Search",
@@ -627,7 +640,7 @@
   "CollectionOfficersList": {
     "LNG": "en",
     "Collection Officers": "Officers",
-    "Manage Staff":"Manage Staff",
+    "Manage Staff": "Manage Staff",
     "Claim Officer": "Claim",
     "Officers List": "Officers List",
     "Drivers List": "Drivers List",
@@ -680,8 +693,8 @@
     "Save": "Save",
     "maximum amount receive": "The maximum amount you can receive:",
     "Select an officer": "--Select an officer--",
-    "No Officers Found":"No Officers Found",
-    "Search an officer":"--Search an officer--"
+    "No Officers Found": "No Officers Found",
+    "Search an officer": "--Search an officer--"
   },
   "ReportGenerator": {
     "LNG": "ta",
@@ -848,7 +861,7 @@
     "Info": "Info",
     "Use the 'Save to Files' option to save to Downloads": "Use the 'Save to Files' option to save to Downloads",
     "Failed to prepare PDF for download": "Failed to prepare PDF for download.",
-    "Full Total (Rs.)":"Full Total (Rs.)"
+    "Full Total (Rs.)": "Full Total (Rs.)"
   },
   "BankDetailsUpdate": {
     "Success": "Success",
@@ -863,28 +876,20 @@
     "PrivacyPlicyCompany": "Privacy Policy for CoDi-Net Mobile Application",
     "By": "Effective Date: ",
     "explain": "This Privacy Policy (“Policy”) governs the manner in which Polygon Holdings (Private) Limited (“we,“ “us,“ or “our“) collects, uses, maintains, and discloses information collected from users (“you“ or “your“) of the CoDi-Net mobile application (“App“). By accessing or using the App, you agree to the collection and use of information in accordance with this Policy. If you do not agree with this Policy, please refrain from using the App.",
-
     "InformationWeCollect": "Information We Collect",
     "RegistrationInformationTxt": "When you use the CoDi-Net App, we may collect personal information such as your full name, mobile number, National Identity Card (NIC) number, email address, profile photo, and work identification details. Additionally, we collect work-related information including QR code scans, farmer registration details, collection reports, complaint histories, daily targets, and transaction histories. Device-related information such as the type of device you use, operating system version, and the version of the App installed may also be gathered. Furthermore, we monitor usage data such as login timestamps, language preferences, and activity logs within the App to facilitate seamless operation, security, and user experience optimization.",
-
     "HowWeUseYourInformation": "How We Use Your Information",
     "ToProvideServicesTxt": "The information collected is used primarily to verify your identity and enable secure access to the App. It assists us in creating, maintaining, and managing your user profile and work reports to ensure operational accountability. We use this data to track your daily activities, monitor performance metrics, and assess target completions. Your information also supports the processing and recording of collection requests, management of farmer registrations, handling of complaints, and general supervision of field operations. Additionally, the data enables us to improve the functionality and reliability of the App, deliver better services, communicate important updates, issue service-related notifications, and comply with our legal and regulatory obligations.",
-
     "InformationSharingandDisclosure": "Sharing of Information",
     "ServiceProvidersTxt": "We do not sell, rent, or trade your personal data to third parties. Your information may be shared internally within Polygon Holdings (Private) Limited to support operational monitoring, employee management, and service improvement efforts. Authorized supervisors or administrators may access your information to facilitate work tracking, employee evaluations, and organizational reporting. In certain cases, we may be required to disclose your information in response to legal obligations, regulatory requirements, or lawful requests from government or law enforcement agencies.",
-
     "SecurityofYourInformation": "Data Storage and Security",
     "SecurityofYourInformationTxt": "We do not sell, rent, or trade your personal data to third parties. Your information may be shared internally within Polygon Holdings (Private) Limited to support operational monitoring, employee management, and service improvement efforts. Authorized supervisors or administrators may access your information to facilitate work tracking, employee evaluations, and organizational reporting. In certain cases, we may be required to disclose your information in response to legal obligations, regulatory requirements, or lawful requests from government or law enforcement agencies.",
-
     "YourPrivacyChoices": "Your Rights",
     "YourPrivacyChoicesTxt": "You have certain rights regarding your personal data. These include the right to access, correct, or update your information as necessary. You may also request the deletion of your profile once your service period with Polygon Holdings (Private) Limited ends, subject to compliance with internal company procedures and applicable legal requirements. Additionally, you have the right to inquire about how your data is processed and to seek further information regarding the handling of your personal information. To exercise any of these rights, you may contact us using the contact details provided at the end of this Policy.",
-
     "ChildrensPrivacy": "Children’s Privacy",
     "ChildrensPrivacyTxt": "The CoDi-Net App is intended solely for use by employees and authorized agents of Polygon Holdings (Private) Limited. and is not directed toward individuals under the age of 18. We do not knowingly collect or solicit personal information from minors. Should we become aware that we have inadvertently collected personal data from a person under the age of 18, we will promptly take steps to delete such information from our records.",
-
     "UpdatestothisPrivacyPolicy": "Changes to This Privacy Policy",
     "UpdatestothisPrivacyPolicyTxt": "We reserve the right to modify or update this Privacy Policy at any time to reflect changes in our operational practices, technological advancements, or legal requirements. Any updates will be effective as of the date indicated at the top of this Policy. In the event of material changes, we will provide appropriate notice within the App. We encourage you to periodically review this Policy to stay informed about how we are protecting your information and to understand your rights with respect to your personal data.",
-
     "ContactUs": "Contact Us",
     "ContactUsText": "If you have any questions, concerns, or requests regarding this Privacy Policy, or if you wish to exercise your rights related to your personal data, please contact us at info@polygon.lk . Alternatively, you may reach us by mail at No. 46/42, Nawam Mawatha, Colombo 02. Sri Lanka."
   },
@@ -903,7 +908,6 @@
     "Received Cash": "Received Cash",
     "Pickup Order Scan": "Pickup Order Scan"
   },
-
   "OpenedOrderScreen": {
     "INV No": "INV No :",
     "Pending": "Pending",
@@ -912,9 +916,9 @@
     "Leave without Submitting": "Leave without Submitting",
     "Stay on page": "Stay on page",
     "You have unsubmitted changes": "You have unsubmitted changes!",
-   "If you leave this page now,": "If you leave this page now,",
-  "your changes will be lost.": "your changes will be lost.",
-  "Do you want to continue without saving?": "Do you want to continue without saving?",
+    "If you leave this page now,": "If you leave this page now,",
+    "your changes will be lost.": "your changes will be lost.",
+    "Do you want to continue without saving?": "Do you want to continue without saving?",
     "Opened": "Opened",
     "Completed": "Completed"
   },
@@ -924,15 +928,13 @@
     "Completed": "Completed",
     "InProgress": "In Progress"
   },
-
   "DistributionOfficersList": {
     "EMPID": "EMP ID :",
-    "Officers":"Officers",
-    "Drivers":"Drivers",
+    "Officers": "Officers",
+    "Drivers": "Drivers",
     "No officers found": "- No Officers Found -",
     "No drivers found": "- No Drivers Found -"
   },
-
   "ReadytoPickupOrders": {
     "No orders to be picked up": "No orders to be picked up",
     "Ready to Pickup Orders": "Ready to Pickup Orders",
@@ -955,7 +957,7 @@
     "Received Time": "Received Time",
     "No cash was received today": "No cash was received today",
     "Received Cash": "Received Cash",
-    "Deposit to Company":"Deposit to Company",
+    "Deposit to Company": "Deposit to Company",
     "On": "On",
     "All": "All",
     "Full Total": "Full Total",
@@ -1079,7 +1081,7 @@
     "skip": "Skip",
     "skipForNow": "Skip for now"
   },
-    "ReceivedCashTransfer": {
+  "ReceivedCashTransfer": {
     "Transfer to Company": "Transfer to Company",
     "On": "On",
     "Full Total": "Full Total",
@@ -1103,5 +1105,12 @@
     "Target": "Target",
     "Staff": "Staff",
     "Search": "Search"
+  },
+  "PurchaseProduct": {
+    "Cancel": "Cancel",
+    "Purchase": "Purchase",
+    "GoBack": "Go Back",
+    "Submitting": "Submitting...",
+    "Confirm": "Confirm"
   }
 }

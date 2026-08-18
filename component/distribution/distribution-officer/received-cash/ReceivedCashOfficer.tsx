@@ -19,6 +19,7 @@ import axios from "axios";
 import { environment } from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ReceivedCashOfficerNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -77,6 +78,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
   navigation,
 }) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [selectedTransactions, setSelectedTransactions] = useState<Set<string>>(
     new Set(),
@@ -261,7 +263,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
         activeOpacity={0.7}
       >
         <View
-          className={`bg-[#ADADAD1A] mx-4 mb-3 p-4 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} `}
+          className={`bg-[#ADADAD1A] mb-3 p-6 rounded-xl border ${isSelected ? "border-[#738FAE]" : "border-[#738FAE]"} `}
         >
           <View className="flex-row items-center">
             {/* Checkbox */}
@@ -330,9 +332,9 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
 
-      <View className="flex-1 w-full max-w-[500px] mx-auto">
+      <View className="flex-1 w-full mx-auto px-6">
         {/* Filter Tabs */}
-        <View className="bg-white px-4 py-3 flex-row items-center justify-between">
+        <View className="bg-white py-3 flex-row items-center justify-between">
           <Text className="text-sm font-medium text-gray-900">
             {t("ReceivedCash.All")} (
             {transactions.length.toString().padStart(2, "0")})
@@ -341,7 +343,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
 
         {/* Total Card */}
         {transactions.length > 0 && (
-          <View className="px-4 py-4">
+          <View className="py-4">
             <View
               style={{
                 borderStyle: "dashed",
@@ -377,7 +379,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
         )}
 
         {transactions.length > 0 && (
-          <View className="p-6">
+          <View className="py-4">
             <TouchableOpacity
               onPress={allSelected ? handleDeselectAll : handleSelectAll}
               className="flex-row items-center"
@@ -411,7 +413,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
             renderItem={renderTransaction}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{
-              paddingBottom: selectedTransactions.size > 0 ? 100 : 20,
+              paddingBottom: selectedTransactions.size > 0 ? insets.bottom + 80 : 20,
             }}
             ListEmptyComponent={EmptyState}
             refreshControl={
@@ -428,21 +430,24 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
 
         {/* Hand Over Button */}
         {selectedTransactions.size > 0 && transactions.length > 0 && (
-          <View className="absolute bottom-8 left-0 right-0 bg-white px-5 py-4 ">
+          <View
+            className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0"
+            style={{ paddingBottom: insets.bottom + 16 }}
+          >
             <TouchableOpacity
               onPress={handleHandOver}
-              className="bg-[#980775] rounded-full py-3 flex-row items-center justify-center h-[50px]"
+              className="w-full h-[50px] bg-[#980775] rounded-full flex-row items-center justify-center"
               activeOpacity={0.8}
               style={{
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.25,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.15,
                 shadowRadius: 4,
-                elevation: 4,
+                elevation: 3,
               }}
             >
               <FontAwesome6 name="hand-holding-hand" size={18} color="white" />
-              <Text className="text-white text-base  ml-4">
+              <Text className="text-white font-extrabold text-base ml-4">
                 {t("ReceivedCash.Hand Over")} ({t("ReceivedCash.Rs")}
                 {selectedTotalCash.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
