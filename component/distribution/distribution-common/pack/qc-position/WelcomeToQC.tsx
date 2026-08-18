@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { Ionicons, Feather, FontAwesome6 } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -91,6 +92,7 @@ export default function WelcomeToQC({
   const [currentPackName, setCurrentPackName] = useState<string>("Daily Veggie Pack");
   const [officerPosIndex, setOfficerPosIndex] = useState<number>(3);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -391,6 +393,7 @@ export default function WelcomeToQC({
         title={status === "no_target" || loading ? "" : displayOrderTitle}
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
       />
 
       {loading ? (
@@ -617,6 +620,14 @@ export default function WelcomeToQC({
           )}
         </>
       )}
+
+      <EndShiftModal
+        visible={endShiftModalVisible}
+        onClose={() => setEndShiftModalVisible(false)}
+        navigation={navigation}
+        positionText="QC Position"
+        rowText={rowId ? `Row ${rowId}` : undefined}
+      />
 
       <AlertModal
         visible={alertVisible}

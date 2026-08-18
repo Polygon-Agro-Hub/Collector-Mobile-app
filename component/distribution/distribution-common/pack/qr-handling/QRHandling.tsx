@@ -14,6 +14,8 @@ import LottieView from "lottie-react-native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { getSocket } from "@/services/socket";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
@@ -39,6 +41,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
   const [hasData, setHasData] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -178,27 +181,12 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header bar matching SelectRow design */}
-      <View className="flex-row items-center justify-between px-5 pt-4 bg-white">
-        {/* Back Button matching CustomHeader */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
-          style={{ alignItems: "flex-start" }}
-          activeOpacity={0.7}
-        >
-          <Entypo
-            name="chevron-left"
-            size={25}
-            color="black"
-            style={{
-              borderRadius: 50,
-              padding: 12,
-              backgroundColor: "#F6F6F680",
-            }}
-          />
-        </TouchableOpacity>
-
-      </View>
+      <CustomHeader
+        title=""
+        navigation={navigation}
+        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
+      />
 
       {loading ? (
         <View className="flex-1 justify-center items-center bg-white">
@@ -497,6 +485,14 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           </ScrollView>
         </View>
       )}
+
+      <EndShiftModal
+        visible={endShiftModalVisible}
+        onClose={() => setEndShiftModalVisible(false)}
+        navigation={navigation}
+        positionText="QR Position"
+        rowText={rowId ? `Row ${rowId}` : undefined}
+      />
     </View>
   );
 }
