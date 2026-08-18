@@ -55,7 +55,7 @@ function AppContent() {
   useEffect(() => {
     let alertShown = false;
 
-    const handleAuthError = (status: number, data: any) => {
+    const handleAuthError = (status: number, data: any): boolean => {
       let currentRouteName = "";
       if (navigationRef.isReady()) {
         const route = navigationRef.getCurrentRoute() as any;
@@ -71,7 +71,7 @@ function AppContent() {
         currentRouteName === "BannedScreen" ||
         currentRouteName === "Logout"
       ) {
-        return;
+        return false;
       }
 
       const msg = (data?.message || "").toLowerCase();
@@ -102,7 +102,7 @@ function AppContent() {
       if (isDomainValidationError) {
         // Let the screen component handle displaying its own validation modal / popup!
         // DO NOT log out the user or show "Session Expired"!
-        return;
+        return false;
       }
 
       // Check if it's explicitly a token expiration
@@ -116,7 +116,7 @@ function AppContent() {
         status === 401;
 
       if (!isTokenExpired) {
-        return;
+        return false;
       }
 
       // Genuine Token Expiration: Clear auth state and redirect to Login
@@ -155,6 +155,8 @@ function AppContent() {
           });
         }
       }
+
+      return true;
     };
 
     // Axios response interceptor
@@ -163,8 +165,10 @@ function AppContent() {
       async (error) => {
         const errorResponse = error.response;
         if (errorResponse && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          handleAuthError(errorResponse.status, errorResponse.data);
-          return new Promise(() => {});
+          const isHandledByAuth = handleAuthError(errorResponse.status, errorResponse.data);
+          if (isHandledByAuth) {
+            return new Promise(() => {});
+          }
         }
         return Promise.reject(error);
       }
