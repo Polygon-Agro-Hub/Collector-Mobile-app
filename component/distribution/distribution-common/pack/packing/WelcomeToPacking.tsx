@@ -15,6 +15,7 @@ import {
 import LottieView from "lottie-react-native";
 
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,8 +26,6 @@ interface Product {
   image: string;
 }
 
-
-
 export default function WelcomeToPacking({ route, navigation }: { route: any; navigation: any }) {
   const { positionId, positionName = "Packing Position 1" } = route.params || {};
   const insets = useSafeAreaInsets();
@@ -35,6 +34,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
   const [hasData, setHasData] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
 
   const fetchCrops = async (showLoader = true) => {
     if (!positionId) {
@@ -110,6 +110,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
         title=""
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
       />
 
       {/* Main Content scroll area */}
@@ -222,6 +223,14 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
           </TouchableOpacity>
         </View>
       )}
+
+      {/* End Shift Confirmation Modal */}
+      <EndShiftModal
+        visible={endShiftModalVisible}
+        onClose={() => setEndShiftModalVisible(false)}
+        navigation={navigation}
+        positionText={positionName}
+      />
     </View>
   );
 }

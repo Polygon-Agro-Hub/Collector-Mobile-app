@@ -10,6 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import { formatTimeSlot } from "@/constants/packing/time-slots";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -33,6 +34,7 @@ export default function ReadyToPrint({
   } = route.params || {};
 
   const insets = useSafeAreaInsets();
+  const [endShiftModalVisible, setEndShiftModalVisible] = React.useState<boolean>(false);
 
 
 
@@ -79,6 +81,7 @@ export default function ReadyToPrint({
         title=""
         navigation={navigation}
         onBackPress={() => navigation.navigate("QRHandling")}
+        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
       />
 
       <ScrollView className="flex-1 bg-white px-6" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
@@ -196,11 +199,26 @@ export default function ReadyToPrint({
             marginBottom: 10,
           }}
         >
-          <Text className="text-white font-extrabold text-base">
+          <Text
+            className="text-white font-extrabold text-base"
+            style={{
+              color: "#ffffff",
+              fontSize: 16,
+              fontWeight: "800",
+              textAlign: "center",
+            }}
+          >
             {route.params?.buttonLabel || "Start"}
           </Text>
         </TouchableOpacity>
       </View>
+
+      <EndShiftModal
+        visible={endShiftModalVisible}
+        onClose={() => setEndShiftModalVisible(false)}
+        navigation={navigation}
+        positionText="QR Position"
+      />
     </View>
   );
 }

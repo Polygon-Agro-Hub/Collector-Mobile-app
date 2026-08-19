@@ -195,7 +195,7 @@ export default function OrderDetails({
                   : "text-[#980775]";
 
                 return (
-                  <View key={group.id} className="mb-6">
+                  <View key={String(group.id)} className="mb-6">
                     <Text
                       className={`font-extrabold text-sm mb-2.5 ${groupTitleColor}`}
                     >
@@ -203,9 +203,9 @@ export default function OrderDetails({
                     </Text>
 
                     <View className="gap-2.5">
-                      {group.items.map((item) => (
+                      {group.items.map((item, idx) => (
                         <View
-                          key={item.id}
+                          key={`${group.id}_${item.id}_${idx}`}
                           className="bg-white rounded-2xl p-3 border border-slate-200 flex-row items-center justify-between shadow-sm"
                         >
                           <View className="flex-row items-center flex-1 pr-2">

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import axios from "axios";
 import { environment } from "@/environment/environment";
 import AlertModal from "@/component/components/popup/AlertModal";
@@ -38,6 +39,7 @@ export default function PrintingConfirmation({
   } = route.params || {};
 
   const insets = useSafeAreaInsets();
+  const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
   const rawType = String(route.params?.type || "").toUpperCase();
   const isWholesale = rawType === "W" || rawType === "WHOLESALE" || String(orderNumber).includes("(W)") || String(orderNumber).includes("(Wholesale)") || String(orderNumber).includes("Wholesale");
   const cleanInv = String(invoiceNumber || orderNumber).replace(/\s*\([^\)]*\)/g, "").trim();
@@ -242,7 +244,12 @@ export default function PrintingConfirmation({
 
   return (
     <View className="flex-1 bg-white">
-      <CustomHeader title="" navigation={navigation} onBackPress={handleBack} />
+      <CustomHeader
+        title=""
+        navigation={navigation}
+        onBackPress={handleBack}
+        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
+      />
 
       {/* Main Scrollable Content Area */}
       <ScrollView className="flex-1 bg-white px-6">
@@ -273,19 +280,32 @@ export default function PrintingConfirmation({
         )}
 
         {/* Dynamic Step Active Pill Badge */}
-        <View className="items-center mb-6">
-          <View className="px-4 py-2 rounded-full flex-row items-center gap-2">
+        <View className="items-center mb-6 w-full px-2">
+          <View className="px-4 py-2.5 rounded-full flex-row items-center justify-center gap-2.5 bg-white border border-slate-200 max-w-full shadow-sm">
             {/* Index Badge */}
-            <View className="bg-[#E9ECF1] px-2.5 py-2 rounded-full items-center justify-center">
-              <Text className="font-extrabold text-xs text-[#030E25]">
+            <View className="bg-[#E9ECF1] px-3 py-1.5 rounded-full items-center justify-center">
+              <Text
+                className="font-extrabold text-xs text-[#030E25]"
+                style={{
+                  color: "#030E25",
+                  fontSize: 13,
+                  fontWeight: "800",
+                }}
+              >
                 {activeStep?.formattedIndex}
               </Text>
             </View>
 
-            {/* Label Text */}
+            {/* Label Text - Fully Visible */}
             <Text
-              className="font-extrabold text-sm"
-              style={{ color: activeStep?.textColor || "#000000" }}
+              className="font-extrabold text-base text-center"
+              style={{
+                color: activeStep?.textColor || "#000000",
+                fontSize: 16,
+                fontWeight: "800",
+                textAlign: "center",
+                flexShrink: 1,
+              }}
             >
               {activeStep?.label}
             </Text>
@@ -325,7 +345,17 @@ export default function PrintingConfirmation({
             elevation: 3,
           }}
         >
-          <Text className="text-[#030E25] font-extrabold text-sm">Cancel</Text>
+          <Text
+            className="text-[#030E25] font-extrabold text-sm"
+            style={{
+              color: "#030E25",
+              fontSize: 14,
+              fontWeight: "800",
+              textAlign: "center",
+            }}
+          >
+            Cancel
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -344,12 +374,27 @@ export default function PrintingConfirmation({
           {isPrinting ? (
             <ActivityIndicator color="white" size="small" />
           ) : (
-            <Text className="text-white font-extrabold text-base">
+            <Text
+              className="text-white font-extrabold text-base"
+              style={{
+                color: "#ffffff",
+                fontSize: 16,
+                fontWeight: "800",
+                textAlign: "center",
+              }}
+            >
               {route.params?.isReprint ? "Start Again" : `Print (${currentStep})`}
             </Text>
           )}
         </TouchableOpacity>
       </View>
+
+      <EndShiftModal
+        visible={endShiftModalVisible}
+        onClose={() => setEndShiftModalVisible(false)}
+        navigation={navigation}
+        positionText="QR Position"
+      />
 
       <AlertModal
         visible={alertVisible}
