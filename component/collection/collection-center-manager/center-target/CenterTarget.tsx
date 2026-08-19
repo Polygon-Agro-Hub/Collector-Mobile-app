@@ -282,28 +282,79 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
       </View>
       {/* Table Header */}
 
+      {/* Table */}
       <View className="flex-1 bg-white">
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ minWidth: "100%" }}>
-          <View style={{ minWidth: "100%" }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={true}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View style={{ minWidth: 505, flex: 1 }}>
             {/* Table Header */}
-            <View className="flex-row bg-[#980775] h-[50px] items-center">
-              <Text style={{ flex: 1, minWidth: 60 }} className="p-2 text-center text-white">
-                {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
-              </Text>
-              <Text style={{ flex: 3, minWidth: 140 }} className="p-2 text-center text-white">
-                {t("CenterTarget.Variety")}
-              </Text>
-              <Text style={{ flex: 2, minWidth: 100 }} className="p-2 text-center text-white">
-                {t("CenterTarget.Grade")}
-              </Text>
-              <Text style={{ flex: 2, minWidth: 100 }} className="p-2 text-center text-white">
-                {t("CenterTarget.Target")}
-              </Text>
-              <Text style={{ flex: 2, minWidth: 100 }} className="p-2 text-center text-white">
-                {selectedToggle === "ToDo"
-                  ? t("DailyTarget.Todo()")
-                  : t("DailyTarget.Completedkg")}
-              </Text>
+            <View className="flex-row bg-[#980775] min-h-[48px]">
+              {/* No */}
+              <View
+                style={{ width: 55 }}
+                className="justify-center items-center border-r border-white/20 px-1 py-2"
+              >
+                <Text className="text-center text-white font-bold text-xs">
+                  {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
+                </Text>
+              </View>
+
+              {/* Variety */}
+              <View
+                style={{ flex: 1, minWidth: 180 }}
+                className="justify-center items-center border-r border-white/20 px-2 py-2"
+              >
+                <Text
+                  className="text-center text-white font-bold text-xs"
+                  numberOfLines={2}
+                >
+                  {t("CenterTarget.Variety")}
+                </Text>
+              </View>
+
+              {/* Grade */}
+              <View
+                style={{ width: 70 }}
+                className="justify-center items-center border-r border-white/20 px-1 py-2"
+              >
+                <Text
+                  className="text-center text-white font-bold text-xs"
+                  numberOfLines={2}
+                >
+                  {t("CenterTarget.Grade")}
+                </Text>
+              </View>
+
+              {/* Target */}
+              <View
+                style={{ width: 100 }}
+                className="justify-center items-center border-r border-white/20 px-1 py-2"
+              >
+                <Text
+                  className="text-center text-white font-bold text-xs"
+                  numberOfLines={2}
+                >
+                  {t("CenterTarget.Target")}
+                </Text>
+              </View>
+
+              {/* Todo / Completed */}
+              <View
+                style={{ width: 100 }}
+                className="justify-center items-center px-1 py-2"
+              >
+                <Text
+                  className="text-center text-white font-bold text-xs"
+                  numberOfLines={2}
+                >
+                  {selectedToggle === "ToDo"
+                    ? t("DailyTarget.Todo()")
+                    : t("DailyTarget.Completedkg")}
+                </Text>
+              </View>
             </View>
 
             {loading ? (
@@ -317,7 +368,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
               </View>
             ) : (
               <ScrollView
-                className="flex-1 bg-white "
+                className="flex-1 bg-white"
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}
@@ -331,39 +382,77 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                   displayedData.map((item, index) => (
                     <View
                       key={index}
-                      className={`flex-row border-b border-gray-300 ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                      className={`flex-row border-b border-gray-300 ${
+                        index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      }`}
                     >
-                      {/* No. */}
-                      <View style={{ flex: 1, minWidth: 60 }} className="justify-center items-center border-r border-gray-300">
+                      {/* No */}
+                      <View
+                        style={{ width: 55 }}
+                        className="justify-center items-center border-r border-gray-300 px-1 py-3"
+                      >
                         {selectedToggle === "ToDo" ? (
-                          <Text className="text-center">{index + 1}</Text>
+                          <Text className="text-center font-medium text-gray-800 text-xs">
+                            {index + 1}
+                          </Text>
                         ) : (
-                          <Ionicons name="flag" size={20} color="purple" />
+                          <Ionicons
+                            name="flag"
+                            size={18}
+                            color="#980775"
+                          />
                         )}
                       </View>
 
                       {/* Variety */}
-                      <View style={{ flex: 3, minWidth: 140 }} className="justify-center items-center border-r border-gray-300 p-2">
-                        <Text className="text-center">
+                      <View
+                        style={{ flex: 1, minWidth: 180 }}
+                        className="justify-center items-center border-r border-gray-300 px-2 py-3"
+                      >
+                        <Text
+                          className="font-semibold text-gray-900 text-xs leading-4 text-center"
+                          numberOfLines={2}
+                          ellipsizeMode="tail"
+                        >
                           {getvarietyName(item)}
                         </Text>
                       </View>
 
                       {/* Grade */}
-                      <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center border-r border-gray-300">
-                        <Text className="text-center">{item.grade}</Text>
+                      <View
+                        style={{ width: 70 }}
+                        className="justify-center items-center border-r border-gray-300 px-1 py-3"
+                      >
+                        <Text
+                          className="text-center font-medium text-gray-800 text-xs"
+                          numberOfLines={2}
+                        >
+                          {item.grade}
+                        </Text>
                       </View>
 
                       {/* Target */}
-                      <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center border-r border-gray-300">
-                        <Text className="text-center">
+                      <View
+                        style={{ width: 100 }}
+                        className="justify-center items-center border-r border-gray-300 px-1 py-3"
+                      >
+                        <Text
+                          className="text-center font-medium text-gray-800 text-xs"
+                          numberOfLines={2}
+                        >
                           {item.target}
                         </Text>
                       </View>
 
                       {/* Todo / Completed */}
-                      <View style={{ flex: 2, minWidth: 100 }} className="justify-center items-center">
-                        <Text className="text-center">
+                      <View
+                        style={{ width: 100 }}
+                        className="justify-center items-center px-1 py-3"
+                      >
+                        <Text
+                          className="text-center font-medium text-gray-800 text-sm"
+                          numberOfLines={2}
+                        >
                           {selectedToggle === "Completed"
                             ? item.complete
                             : item.todo}
@@ -372,7 +461,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                     </View>
                   ))
                 ) : (
-                  <View className="flex-1 justify-center py-[30%] items-center ">
+                  <View className="flex-1 justify-center py-[30%] items-center">
                     <LottieView
                       source={require("../../../../assets/lottie/no-data.json")}
                       autoPlay

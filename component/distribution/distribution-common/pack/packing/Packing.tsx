@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import { environment } from "@/environment/environment";
@@ -86,9 +87,9 @@ export default function Packing({
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [isAdvancing, setIsAdvancing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  
   const [items, setItems] = useState<PackingItem[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -301,9 +302,10 @@ export default function Packing({
   return (
     <View className="flex-1 bg-white">
       <CustomHeader
-        title={status === "no_target" || loading ? "" : displayOrderTitle}
+        title={status !== "no_target" ? displayOrderTitle : ""}
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
       />
 
       {loading ? (
@@ -519,6 +521,14 @@ export default function Packing({
           )}
         </>
       )}
+
+      <EndShiftModal
+        visible={endShiftModalVisible}
+        onClose={() => setEndShiftModalVisible(false)}
+        navigation={navigation}
+        positionText={positionName}
+        rowText={rowId ? `Row ${rowId}` : undefined}
+      />
 
       <AlertModal
         visible={alertVisible}

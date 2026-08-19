@@ -1943,7 +1943,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                   }
                   className={`border ${
                     fieldErrorsAddress.houseNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  } p-3 rounded-full px-4 h-[50px] mb-1 text-black`}
                   style={{ fontSize: 14, color: "#000000" }}
                 />
                 {fieldErrorsAddress.houseNumber ? (
@@ -1964,7 +1964,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                   }
                   className={`border ${
                     fieldErrorsAddress.streetName ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  } p-3 rounded-full px-4 h-[50px] mb-1 text-black`}
                   style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                 />
@@ -1984,7 +1984,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                   onChangeText={(text) => handleAddressInputChange("city", formatText(text))}
                   className={`border ${
                     fieldErrorsAddress.city ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  } p-3 rounded-full px-4 h-[50px] mb-1 text-black`}
                   style={{ fontSize: 14, color: "#000000" }}
                   autoCorrect={false}
                 />
@@ -2002,7 +2002,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                   placeholderTextColor="#ADADAD"
                   value={t("AddOfficerAddressDetails.Country")}
                   editable={false}
-                  className="border-[#F4F4F4] bg-[#F4F4F4] p-3 rounded-full h-[50px] mb-4 text-black"
+                  className="border-[#F4F4F4] bg-[#F4F4F4] p-3 px-4 rounded-full h-[50px] mb-4 text-black"
                   style={{ fontSize: 14, color: "#000000" }}
                 />
 
@@ -2097,7 +2097,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                     fieldErrorsAddress.accountHolderName
                       ? "border-red-500"
                       : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  } p-3 rounded-full px-4 h-[50px] mb-1 text-black`}
                   style={{ fontSize: 14, color: "#000000" }}
                 />
                 {fieldErrorsAddress.accountHolderName ? (
@@ -2117,7 +2117,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                   onChangeText={(text) => handleAddressValidation("accountNumber", text)}
                   className={`border ${
                     fieldErrorsAddress.accountNumber ? "border-red-500" : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  } p-3 rounded-full px-4 h-[50px] mb-1 text-black`}
                   style={{ fontSize: 14, color: "#000000" }}
                 />
                 {fieldErrorsAddress.accountNumber ? (
@@ -2141,7 +2141,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                     error || fieldErrorsAddress.confirmAccountNumber
                       ? "border-red-500"
                       : "border-[#F4F4F4] bg-[#F4F4F4]"
-                  } p-3 rounded-full h-[50px] mb-1 text-black`}
+                  } p-3 rounded-full px-4 h-[50px] mb-1 text-black`}
                   style={{ fontSize: 14, color: "#000000" }}
                 />
                 {error || fieldErrorsAddress.confirmAccountNumber ? (

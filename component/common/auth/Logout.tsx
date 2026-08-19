@@ -74,15 +74,9 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
       const userToken = store.getState().auth.token;
       const empId = store.getState().auth.empId;
 
-      // Dispatch logout user to clear redux state immediately so no global auth error popups trigger
-      store.dispatch(logoutUser());
-
       try {
         if (empId && userToken) {
           await status(empId, false, userToken);
-        }
-        if (userToken) {
-          await releasePosition(userToken);
         }
       } catch (err) {
         console.error("Error in logout screen updates:", err);
@@ -99,8 +93,9 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
         });
       }, 100);
 
-      // Navigate to Login after 1.5 seconds
+      // Navigate to Login after 1.5 seconds and clear redux auth state
       const timeout = setTimeout(() => {
+        store.dispatch(logoutUser());
         navigation.reset({
           index: 0,
           routes: [{ name: "Login" as any }],
