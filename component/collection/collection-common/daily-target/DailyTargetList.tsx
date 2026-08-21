@@ -11,7 +11,7 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { RootStackParamList } from "@/types/types";

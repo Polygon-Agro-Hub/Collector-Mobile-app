@@ -16,7 +16,7 @@ import { CircularProgress } from "react-native-circular-progress";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";

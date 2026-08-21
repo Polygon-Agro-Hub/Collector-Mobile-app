@@ -1,7 +1,7 @@
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system/legacy";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 
 const normalizeResponseDate = (dateString: string): string => {
   const [month, day, year] = dateString.split("/");

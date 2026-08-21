@@ -16,7 +16,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import LottieView from "lottie-react-native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

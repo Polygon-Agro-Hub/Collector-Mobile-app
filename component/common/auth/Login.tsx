@@ -18,7 +18,7 @@ import { RootStackParamList } from "@/types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "@/store/authSlice";

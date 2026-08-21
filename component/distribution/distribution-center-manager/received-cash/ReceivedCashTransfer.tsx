@@ -13,7 +13,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RootStackParamList } from "@/types/types";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import UploadFile, {
   UploadFileItem,
 } from "@/component/components/file-management/UploadFile";

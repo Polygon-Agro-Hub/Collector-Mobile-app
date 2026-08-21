@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { io, Socket } from "socket.io-client";

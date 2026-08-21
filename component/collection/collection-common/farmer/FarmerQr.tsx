@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import * as FileSystem from "expo-file-system/legacy";

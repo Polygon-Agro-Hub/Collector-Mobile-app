@@ -14,7 +14,7 @@ import { RootStackParamList } from "@/types/types";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";

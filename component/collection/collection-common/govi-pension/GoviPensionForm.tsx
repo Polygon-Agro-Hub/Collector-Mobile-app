@@ -18,7 +18,7 @@ import * as ImagePicker from "expo-image-picker";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { AlertModal } from "@/component/components/popup/AlertModal";

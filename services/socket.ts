@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 
 let socket: Socket | null = null;
 

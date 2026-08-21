@@ -37,6 +37,9 @@
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.polygonagro.Collector",
       "versionCode": 10,
+      "blockedPermissions": [
+        "com.google.android.gms.permission.AD_ID"
+      ],
       "permissions": [
         "CAMERA",
         "PHOTO_LIBRARY",
@@ -117,6 +120,8 @@
             "minSdkVersion": 24,
             "ndkVersion": "28.0.12433566",
             "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "enableMinifyInReleaseBuilds": true,
             "packagingOptions": {
               "jniLibs": {
                 "useLegacyPackaging": false
@@ -126,12 +131,17 @@
               "android.useAndroidX": "true",
               "android.enableJetifier": "true",
               "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "true"
-            },
-            "enableMinifyInReleaseBuilds": true
+            }
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "Tracking is used to improve app experience."
+        }
+      ]
     ],
     "experiments": {},
     "extra": {

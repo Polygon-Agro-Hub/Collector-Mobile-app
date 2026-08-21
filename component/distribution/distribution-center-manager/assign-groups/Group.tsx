@@ -12,7 +12,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 
 type GroupPageState = "empty" | "active";
