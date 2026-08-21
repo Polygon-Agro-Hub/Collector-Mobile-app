@@ -27,7 +27,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { OfficerBasicDetailsFormData } from "@/types/types";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";

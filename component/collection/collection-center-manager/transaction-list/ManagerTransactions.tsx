@@ -15,7 +15,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { scale } from "react-native-size-matters";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { RootStackParamList } from "@/types/types";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";

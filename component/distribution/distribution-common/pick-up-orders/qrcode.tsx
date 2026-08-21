@@ -16,7 +16,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { Entypo } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import { AlertModal } from "@/component/components/popup/AlertModal";

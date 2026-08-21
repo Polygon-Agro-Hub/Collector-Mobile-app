@@ -15,7 +15,7 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import bankNames from "../../../../assets/jsons/banks.json";
 import { ActivityIndicator } from "react-native";

@@ -17,7 +17,7 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import axios from "axios";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";

@@ -16,7 +16,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";

@@ -2,7 +2,7 @@ import store from "@/services/reducxStore";
 import { useState, useEffect, useMemo } from "react";
 import { View, TouchableOpacity, Keyboard, Text, useWindowDimensions } from "react-native";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/services/reducxStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

@@ -16,7 +16,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import * as ScreenOrientation from "expo-screen-orientation";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";

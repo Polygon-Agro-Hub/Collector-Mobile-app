@@ -23,7 +23,7 @@ import MdIcons from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { environment } from "../../../../environment/environment";
+import environment from "../../../../environment/environment";
 
 import DashedLine from "react-native-dashed-line";
 import generateInvoiceNumber from "@/utils/generateInvoiceNumber";

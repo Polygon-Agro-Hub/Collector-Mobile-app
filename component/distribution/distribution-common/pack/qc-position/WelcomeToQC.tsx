@@ -17,7 +17,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import LottieView from "lottie-react-native";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import AlertModal from "@/component/components/popup/AlertModal";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import { getSocket } from "@/services/socket";

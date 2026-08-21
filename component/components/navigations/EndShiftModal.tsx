@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "@/store/authSlice";
