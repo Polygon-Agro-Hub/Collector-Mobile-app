@@ -11,7 +11,7 @@ import {
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface OrderItem {

@@ -14,7 +14,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

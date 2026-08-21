@@ -21,7 +21,7 @@ import {
   useFocusEffect,
   useNavigation,
 } from "@react-navigation/native";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";

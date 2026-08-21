@@ -23,7 +23,7 @@ import UploadFile, {
 } from "@/component/components/file-management/UploadFile";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 
 const formatKg = (val: number | string | undefined | null): string => {
   if (val === undefined || val === null || val === "") return "0";

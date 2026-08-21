@@ -10,7 +10,7 @@ import {
   BackHandler,
 } from "react-native";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

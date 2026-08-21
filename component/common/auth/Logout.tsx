@@ -7,7 +7,7 @@ import { logoutUser } from "@/store/authSlice";
 import * as Progress from "react-native-progress";
 import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 
 type LogoutNavigationProp = StackNavigationProp<RootStackParamList, "Logout">;
 

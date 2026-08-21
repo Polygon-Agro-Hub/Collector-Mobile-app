@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, AppState, StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { Provider } from "react-redux";
-import { environment } from "../environment/environment";
+import environment from "../environment/environment";
 import { LanguageProvider } from "@/context/LanguageContext";
 import axios from "axios";
 import { logoutUser } from "../store/authSlice";

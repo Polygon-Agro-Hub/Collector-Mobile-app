@@ -14,7 +14,7 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import axios from "axios";
-import { environment } from "@/environment/environment";
+import environment from "@/environment/environment";
 import { useIsFocused } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
