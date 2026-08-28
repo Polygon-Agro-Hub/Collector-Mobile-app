@@ -67,7 +67,8 @@
         "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_AUDIO",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "com.google.android.gms.permission.AD_ID"
       ]
     },
     "web": {
@@ -146,7 +147,7 @@
     "experiments": {},
     "extra": {
       "eas": {
-        "projectId": "4822b6ef-fcc5-43ea-b7f6-1f9bbf0a5e7b"
+        "projectId": "9509218e-656f-4358-9d1e-3b6784e9bd91"
       }
     }
   }
