@@ -1,8 +1,8 @@
 /**
  * Tspllabelbuilder.ts
  *
- * Builds TSPL commands strictly for 50mm width x 30mm height thermal labels
- * with 28mm x 28mm QR code specifications.
+ * Builds TSPL commands strictly for 50mm width x 30mm height thermal label stickers
+ * with exact 27mm x 27mm QR code specifications and left margin gap.
  */
 
 const DOTS_PER_MM = 8; // 203 dpi resolution (8 dots per mm)
@@ -15,6 +15,7 @@ export type LabelField =
       x: number;
       y: number;
       content: string;
+      font?: "1" | "2" | "3" | "4" | "5";
       scale?: 1 | 2 | 3 | 4;
       rotation?: 0 | 90 | 180 | 270;
     }
@@ -68,10 +69,10 @@ export function buildLabel(
   } = options;
 
   const lines: string[] = [
-    `SIZE ${widthMm}mm,${heightMm}mm`,
-    `GAP ${gapMm}mm,0mm`,
+    `SIZE ${widthMm} mm, ${heightMm} mm`,
+    `GAP ${gapMm} mm, 0 mm`,
     `REFERENCE 0,0`,
-    `DIRECTION 1,0`,
+    `DIRECTION 1`,
     `DENSITY ${darkness}`,
     `SPEED ${speedIps}`,
     `CLS`,
@@ -85,13 +86,15 @@ export function buildLabel(
 function fieldToTspl(field: LabelField): string {
   switch (field.type) {
     case "text": {
+      const font = field.font ?? "2";
       const scale = field.scale ?? 1;
       const rotation = field.rotation ?? 0;
       const escaped = escapeQuotes(field.content);
-      return `TEXT ${mm(field.x)},${mm(field.y)},"3",${rotation},${scale},${scale},"${escaped}"`;
+      return `TEXT ${mm(field.x)},${mm(field.y)},"${font}",${rotation},${scale},${scale},"${escaped}"`;
     }
     case "qrcode": {
-      const cell = field.cellSize ?? 6;
+      // Cell width 10 dots = 210 dots (26.25mm) for 27mm x 27mm QR footprint on 203 DPI
+      const cell = field.cellSize ?? 10;
       const content = field.content || "12345678";
       const escaped = escapeQuotes(content);
       return `QRCODE ${mm(field.x)},${mm(field.y)},L,${cell},A,0,"${escaped}"`;
@@ -102,7 +105,7 @@ function fieldToTspl(field: LabelField): string {
       return `BARCODE ${mm(field.x)},${mm(field.y)},"128",${height},1,0,2,2,"${escaped}"`;
     }
     case "line": {
-      const thickness = mm(field.thicknessMm ?? 0.5);
+      const thickness = mm(field.thicknessMm ?? 0.3);
       return `BAR ${mm(field.x)},${mm(field.y)},${mm(field.lengthMm)},${thickness}`;
     }
   }
@@ -114,38 +117,40 @@ function escapeQuotes(text: string): string {
 
 /**
  * THEME 1: Standard Horizontal Layout (50mm x 30mm Sticker)
- * - QR Code: 28mm x 28mm on Right (x=21mm, y=1mm)
- * - Text Area: Left 20mm
+ * - Text Area: Left Column with 2mm left gap (x=2.0mm to 21.0mm)
+ * - Invoice No: Bigger Font "3" (16x24 dots, prominent heading)
+ * - QR Code: Right Column (x=22.0mm, y=1.5mm, cellSize=10 -> 27mm x 27mm)
  */
 export function buildTheme1TSPL(data: LabelThemeData): string {
   const cleanOrderNo = data.orderNumber.replace(/\s*\([^\)]*\)/g, "").trim();
   const fields: LabelField[] = [
-    { type: "text", x: 1.0, y: 1.0, content: cleanOrderNo, scale: 2 },
-    { type: "text", x: 1.0, y: 5.5, content: data.category || "Moragahahena", scale: 1 },
-    { type: "text", x: 1.0, y: 9.5, content: data.orderType || "Wholesale", scale: 1 },
-    { type: "text", x: 1.0, y: 14.5, content: data.date, scale: 1 },
-    { type: "text", x: 1.0, y: 18.5, content: data.timeSlot, scale: 1 },
-    { type: "line", x: 1.0, y: 22.0, lengthMm: 19, thicknessMm: 0.3 },
-    { type: "text", x: 1.0, y: 23.0, content: data.stepLabel || "à la carte", scale: 1 },
-    { type: "text", x: 1.0, y: 26.5, content: data.stepIndex || "Step 1/1", scale: 1 },
-    { type: "qrcode", x: 21.0, y: 1.0, content: data.qrValue || cleanOrderNo, cellSize: 7 },
+    { type: "text", x: 2.0, y: 1.2, font: "3", content: cleanOrderNo, scale: 1 },
+    { type: "text", x: 2.0, y: 4.8, font: "2", content: data.category || "Moragahahena", scale: 1 },
+    { type: "text", x: 2.0, y: 8.0, font: "1", content: data.orderType || "Wholesale", scale: 1 },
+    { type: "text", x: 2.0, y: 11.2, font: "1", content: data.date, scale: 1 },
+    { type: "text", x: 2.0, y: 14.2, font: "1", content: data.timeSlot, scale: 1 },
+    { type: "line", x: 2.0, y: 17.5, lengthMm: 18, thicknessMm: 0.3 },
+    { type: "text", x: 2.0, y: 19.0, font: "1", content: data.stepLabel || "à la carte", scale: 1 },
+    { type: "text", x: 2.0, y: 22.5, font: "1", content: data.stepIndex || "Step 1/1", scale: 1 },
+    { type: "qrcode", x: 22.0, y: 1.5, content: data.qrValue || cleanOrderNo, cellSize: 10 },
   ];
   return buildLabel(fields, { widthMm: 50, heightMm: 30, gapMm: 2 });
 }
 
 /**
  * THEME 2: 90° Rotated Vertical Text (50mm x 30mm Sticker)
- * - QR Code: 28mm x 28mm on Right (x=21mm, y=1mm)
- * - Text Area: Left 20mm with rotated text
+ * - Text Area: Left Column with 2mm left gap (rotated 90°)
+ * - QR Code: Right Column (x=22.0mm, y=1.5mm, cellSize=10 -> 27mm x 27mm)
  */
 export function buildTheme2TSPL(data: LabelThemeData): string {
   const cleanOrderNo = data.orderNumber.replace(/\s*\([^\)]*\)/g, "").trim();
   const fields: LabelField[] = [
-    { type: "text", x: 1.0, y: 28.0, content: cleanOrderNo, scale: 2, rotation: 90 },
-    { type: "text", x: 6.0, y: 28.0, content: `${data.category || "Moragahahena"} - ${data.orderType}`, scale: 1, rotation: 90 },
-    { type: "text", x: 11.0, y: 28.0, content: `${data.date} ${data.timeSlot}`, scale: 1, rotation: 90 },
-    { type: "text", x: 16.0, y: 28.0, content: `${data.stepLabel} (${data.stepIndex})`, scale: 1, rotation: 90 },
-    { type: "qrcode", x: 21.0, y: 1.0, content: data.qrValue || cleanOrderNo, cellSize: 7 },
+    { type: "text", x: 2.0, y: 1.2, font: "3", content: cleanOrderNo, scale: 1, rotation: 90 },
+    { type: "text", x: 6.0, y: 1.2, font: "1", content: `${data.category || "Moragahahena"} • ${data.orderType}`, scale: 1, rotation: 90 },
+    { type: "text", x: 9.2, y: 1.2, font: "1", content: `${data.date} ${data.timeSlot}`, scale: 1, rotation: 90 },
+    { type: "line", x: 12.5, y: 1.2, lengthMm: 26, thicknessMm: 0.3 },
+    { type: "text", x: 14.0, y: 1.2, font: "1", content: `${data.stepLabel} (${data.stepIndex})`, scale: 1, rotation: 90 },
+    { type: "qrcode", x: 22.0, y: 1.5, content: data.qrValue || cleanOrderNo, cellSize: 10 },
   ];
   return buildLabel(fields, { widthMm: 50, heightMm: 30, gapMm: 2 });
 }
