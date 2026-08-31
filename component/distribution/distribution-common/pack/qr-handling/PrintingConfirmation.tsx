@@ -7,20 +7,27 @@ import {
   ScrollView,
   BackHandler,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
-import axios from "axios";
-import environment from "@/environment/environment";
 import AlertModal from "@/component/components/popup/AlertModal";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { usePrinter } from "@/services/printer/usePrinter";
+import {
+  LabelThemeData,
+  buildTheme1TSPL,
+} from "@/services/printer/Tspllabelbuilder";
+import { PrinterSelectModal } from "@/component/components/popup/PrinterSelectModal";
 import {
   generatePrintSteps,
   PrintStep,
-  PackageItem,
 } from "@/utils/packing/packing-helpers";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import environment from "@/environment/environment";
 import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
 
 export default function PrintingConfirmation({
@@ -36,14 +43,32 @@ export default function PrintingConfirmation({
     category,
     packagesList = [],
     alacarteCount = 0,
+    processOrderId: routeProcessOrderId,
+    orderId: routeOrderId,
   } = route.params || {};
 
+  const processOrderId = routeProcessOrderId || routeOrderId;
   const insets = useSafeAreaInsets();
   const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
+  const [isPrinterModalOpen, setIsPrinterModalOpen] = useState<boolean>(false);
+
+  // Bluetooth Printer Hook matching Expo57-QR-Printer
+  const {
+    discoveredDevices,
+    connectedDevice,
+    isScanning,
+    isConnecting,
+    isPrinting,
+    startScan,
+    stopScan,
+    connectToDevice,
+    printTSPL,
+    disconnect,
+  } = usePrinter();
+
   const rawType = String(route.params?.type || "").toUpperCase();
   const isWholesale = rawType === "W" || rawType === "WHOLESALE" || String(orderNumber).includes("(W)") || String(orderNumber).includes("(Wholesale)") || String(orderNumber).includes("Wholesale");
   const cleanInv = String(invoiceNumber || orderNumber).replace(/\s*\([^\)]*\)/g, "").trim();
-  const displayOrderNumber = isWholesale ? `${cleanInv} (Wholesale)` : `${cleanInv} (Retail)`;
 
   // Build dynamic print steps using packing helper utility
   const steps: PrintStep[] = generatePrintSteps(packagesList, alacarteCount);
@@ -80,17 +105,22 @@ export default function PrintingConfirmation({
 
   // Start at the first unprinted box (or the last step if all are printed)
   const firstUnprintedIndex = steps.findIndex((s: any) => !s.isPrinted);
-  const initialStep = firstUnprintedIndex !== -1 ? firstUnprintedIndex + 1 : steps.length;
+  const initialStep = firstUnprintedIndex !== -1 ? firstUnprintedIndex + 1 : (steps.length > 0 ? steps.length : 1);
 
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [alertTitle, setAlertTitle] = useState<string>("Success");
-  const [isPrinting, setIsPrinting] = useState<boolean>(false);
 
   const activeStep = steps[currentStep - 1] || steps[0];
-  const qrValue = invoiceNumber || orderNumber;
+  const qrValue = cleanInv || invoiceNumber || orderNumber;
+
+  const activeCategory = category || "Moragahahena";
+  const activeDate = route.params?.date || "2026/08/25";
+  const activeTimeSlot = route.params?.timeSlot || "08:00AM - 12:00PM";
+  const activeStepLabel = activeStep?.label || "à la carte";
+  const activeStepIndex = `Step ${currentStep}/${steps.length}`;
 
   useEffect(() => {
     const onBackPress = () => {
@@ -108,31 +138,39 @@ export default function PrintingConfirmation({
     return () => backHandler.remove();
   }, [currentStep, navigation, route.params]);
 
+  const handleOpenPrinterModal = () => {
+    setIsPrinterModalOpen(true);
+    startScan();
+  };
+
+  const handleSelectPrinter = async (device: any) => {
+    const success = await connectToDevice(device);
+    if (success) {
+      setIsPrinterModalOpen(false);
+      setAlertType("success");
+      setAlertTitle("Printer Connected");
+      setAlertMessage(`Connected to ${device.displayName || device.name}`);
+      setAlertVisible(true);
+    }
+  };
+
+  // Print Order Label: Validate Backend Tracking First, Then Print Physical Label
   const handlePrintPress = async () => {
+    // 1. Validate Bluetooth Printer is connected
+    if (!connectedDevice) {
+      handleOpenPrinterModal();
+      setAlertType("error");
+      setAlertTitle("Printer Required");
+      setAlertMessage("Please connect to a Bluetooth thermal printer first before printing.");
+      setAlertVisible(true);
+      return;
+    }
+
     if (isPrinting) return;
-    setIsPrinting(true);
+
     try {
-      const isReprint = route.params?.isReprint;
-      if (isReprint) {
-        setAlertType("success");
-        setAlertTitle("Success");
-        if (currentStep < steps.length) {
-          const stepName = steps[currentStep - 1]?.label || "Package";
-          setAlertMessage(`${stepName} QR Code Re-printed Successfully!`);
-        } else {
-          setAlertMessage(
-            `All packages for order ${orderNumber} re-printed successfully!`,
-          );
-        }
-        setAlertVisible(true);
-        return;
-      }
-
-      const token = store.getState().auth.token;
-      const processOrderId =
-        route.params?.processOrderId || route.params?.orderId || 3131;
-
-      const activeStep = steps[currentStep - 1] || steps[0];
+      // 2. Validate with backend first (Check next station busy / position assigned)
+      const token = (await AsyncStorage.getItem("@access_token")) || store.getState().auth.token;
 
       if (activeStep.type === "main") {
         const response = await axios.post(
@@ -151,22 +189,15 @@ export default function PrintingConfirmation({
           setAlertType("error");
           if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
             setAlertTitle("Position Busy");
-            setAlertMessage(msg);
           } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
             setAlertTitle("Position Empty");
-            setAlertMessage(msg);
           } else {
             setAlertTitle("Error");
-            setAlertMessage(msg);
           }
+          setAlertMessage(msg);
           setAlertVisible(true);
-          return;
+          return; // Stop here! Do NOT print sticker
         }
-
-        setAlertType("success");
-        setAlertTitle("Success");
-        setAlertMessage("Main Container QR Code Printed Successfully!");
-        setAlertVisible(true);
       } else {
         const isPackageStep = activeStep.type === "package";
         const response = await axios.post(
@@ -188,35 +219,47 @@ export default function PrintingConfirmation({
           setAlertType("error");
           if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
             setAlertTitle("Position Busy");
-            setAlertMessage(msg);
           } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
             setAlertTitle("Position Empty");
-            setAlertMessage(msg);
           } else {
             setAlertTitle("Error");
-            setAlertMessage(msg);
           }
+          setAlertMessage(msg);
           setAlertVisible(true);
-          return;
-        }
-
-        setAlertType("success");
-        setAlertTitle("Success");
-        if (currentStep < steps.length) {
-          const stepName = steps[currentStep - 1]?.label || "Package";
-          setAlertMessage(`${stepName} QR Code Printed Successfully!`);
-          setAlertVisible(true);
-        } else {
-          setAlertMessage(
-            `All packages for order ${orderNumber} printed successfully!`,
-          );
-          setAlertVisible(true);
+          return; // Stop here! Do NOT print sticker
         }
       }
 
+      // 3. Backend validated successfully — now print the physical TSPL sticker (27x27mm QR on 50x30mm sheet)
+      const labelData: LabelThemeData = {
+        qrValue: qrValue,
+        orderNumber: cleanInv,
+        category: activeCategory,
+        orderType: isWholesale ? "Wholesale" : "Retail",
+        date: activeDate,
+        timeSlot: activeTimeSlot,
+        stepLabel: activeStepLabel,
+        stepIndex: activeStepIndex,
+      };
+
+      const tspl = buildTheme1TSPL(labelData);
+      await printTSPL(tspl);
+
+      const printerName = connectedDevice.displayName || connectedDevice.name;
+      setAlertType("success");
+      setAlertTitle("Print Successful");
+      if (currentStep < steps.length) {
+        const stepName = steps[currentStep - 1]?.label || "Package";
+        setAlertMessage(`${stepName} QR label printed on ${printerName}!`);
+      } else {
+        setAlertMessage(
+          `All packages for order ${orderNumber} printed on ${printerName}!`,
+        );
+      }
+      setAlertVisible(true);
     } catch (err: any) {
       console.error("Error updating order status on QR print:", err);
-      const msg = err.response?.data?.message || "Failed to communicate with packing server. Please try again.";
+      const msg = err.response?.data?.message || err.message || "Failed to communicate with packing server. Please try again.";
       const code = err.response?.data?.code;
 
       setAlertType("error");
@@ -225,12 +268,10 @@ export default function PrintingConfirmation({
       } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
         setAlertTitle("Position Empty");
       } else {
-        setAlertTitle("Error");
+        setAlertTitle("Print Error");
       }
       setAlertMessage(msg);
       setAlertVisible(true);
-    } finally {
-      setIsPrinting(false);
     }
   };
 
@@ -253,7 +294,7 @@ export default function PrintingConfirmation({
 
       {/* Main Scrollable Content Area */}
       <ScrollView className="flex-1 bg-white px-6">
-        {/* Header Title section matching ReadyToPrint design */}
+        {/* Header Title */}
         <View className="items-center mb-6">
           <Text className="text-xl font-bold text-slate-950">
             Printing Confirmation
@@ -265,7 +306,7 @@ export default function PrintingConfirmation({
           <View className="flex-row justify-between items-center gap-2 px-2 mb-8">
             {steps.map((s, idx) => {
               const stepNum = idx + 1;
-              const isFilled = stepNum <= currentStep || (s as any).isPrinted;
+              const isFilled = (s as any).isPrinted || stepNum < currentStep;
               return (
                 <View key={s.id} className="flex-1 items-center">
                   <View
@@ -296,7 +337,7 @@ export default function PrintingConfirmation({
               </Text>
             </View>
 
-            {/* Label Text - Fully Visible */}
+            {/* Label Text */}
             <Text
               className="font-extrabold text-base text-center"
               style={{
@@ -312,22 +353,110 @@ export default function PrintingConfirmation({
           </View>
         </View>
 
-        {/* Standardized QR Code Card Frame matching ReadyToPrint */}
-        <View className="items-center justify-center bg-white border border-black p-6 mb-6">
-          <View className="p-4 bg-white mb-4">
+        {/* Printer Connectivity Status Banner matching Expo57-QR-Printer */}
+        <View
+          style={{
+            backgroundColor: connectedDevice ? "#f0fdf4" : "#fef2f2",
+            borderWidth: 1,
+            borderColor: connectedDevice ? "#bbf7d0" : "#fecaca",
+            borderRadius: 16,
+            padding: 14,
+            marginBottom: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1, paddingRight: 8 }}>
+            <MaterialCommunityIcons
+              name={connectedDevice ? "bluetooth-connect" : "bluetooth-off"}
+              size={24}
+              color={connectedDevice ? "#16a34a" : "#dc2626"}
+            />
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                  color: connectedDevice ? "#14532d" : "#991b1b",
+                }}
+                numberOfLines={1}
+              >
+                {connectedDevice ? connectedDevice.displayName || connectedDevice.name : "No Printer Connected"}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 11,
+                  color: connectedDevice ? "#166534" : "#b91c1c",
+                }}
+              >
+                {connectedDevice ? "Bluetooth Ready (50x30mm TSPL)" : "Tap to scan & connect printer"}
+              </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleOpenPrinterModal}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 14,
+              backgroundColor: connectedDevice ? "#16a34a" : "#030E25",
+              borderRadius: 20,
+            }}
+          >
+            <Text style={{ fontSize: 12, fontWeight: "bold", color: "#ffffff" }}>
+              {connectedDevice ? "Change" : "Connect"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 50mm x 30mm Sticker Label Preview Card */}
+        <View className="bg-white border border-slate-300 p-3.5 mb-6 rounded-lg flex-row justify-between items-center shadow-sm">
+          {/* Left Column Details with 2mm left gap */}
+          <View className="w-[46%] justify-between py-0.5 pl-1">
+            <View>
+              <Text className="text-[#000000] font-black text-xl leading-tight tracking-tight">
+                {cleanInv}
+              </Text>
+              <Text className="text-[#0B192C] font-bold text-sm leading-tight mt-1">
+                {activeCategory}
+              </Text>
+              <Text className="text-[#0B192C] font-normal text-xs leading-tight mt-0.5">
+                {isWholesale ? "Wholesale" : "Retail"}
+              </Text>
+            </View>
+
+            <View className="mt-2">
+              <Text className="text-[#0B192C] font-bold text-xs leading-tight">
+                {activeDate}
+              </Text>
+              <Text className="text-[#0B192C] font-bold text-xs leading-tight mt-0.5">
+                {activeTimeSlot}
+              </Text>
+            </View>
+
+            {/* Horizontal Divider Line */}
+            <View className="h-[1px] bg-slate-400 my-1.5 w-full" />
+
+            <View>
+              <Text className="text-[#0B192C] font-normal text-xs leading-tight">
+                {activeStepLabel}
+              </Text>
+              <Text className="text-[#0B192C] font-normal text-xs leading-tight mt-0.5">
+                {activeStepIndex}
+              </Text>
+            </View>
+          </View>
+
+          {/* Right Column: 27mm x 27mm Right-Aligned QR Code */}
+          <View className="w-[52%] aspectRatio-1 p-2 bg-white border border-slate-200 rounded items-center justify-center">
             <QRCode
               value={qrValue}
-              size={240}
+              size={135}
               color="black"
               backgroundColor="white"
             />
           </View>
-          <Text className="text-lg font-extrabold text-slate-950 tracking-tight text-center">
-            {displayOrderNumber}
-          </Text>
-          <Text className="text-gray-400 text-xs mt-1 text-center font-medium">
-            {category}
-          </Text>
         </View>
       </ScrollView>
 
@@ -411,6 +540,22 @@ export default function PrintingConfirmation({
             }
           }
         }}
+      />
+
+      {/* Bluetooth Printer Select Modal matching Expo57-QR-Printer */}
+      <PrinterSelectModal
+        visible={isPrinterModalOpen}
+        onClose={() => {
+          setIsPrinterModalOpen(false);
+          stopScan();
+        }}
+        devices={discoveredDevices}
+        isScanning={isScanning}
+        isConnecting={isConnecting}
+        connectedDevice={connectedDevice}
+        onStartScan={startScan}
+        onSelectDevice={handleSelectPrinter}
+        onDisconnect={disconnect}
       />
     </View>
   );
