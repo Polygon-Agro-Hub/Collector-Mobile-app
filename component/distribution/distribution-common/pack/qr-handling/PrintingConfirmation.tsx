@@ -105,7 +105,7 @@ export default function PrintingConfirmation({
 
   // Start at the first unprinted box (or the last step if all are printed)
   const firstUnprintedIndex = steps.findIndex((s: any) => !s.isPrinted);
-  const initialStep = firstUnprintedIndex !== -1 ? firstUnprintedIndex + 1 : steps.length;
+  const initialStep = firstUnprintedIndex !== -1 ? firstUnprintedIndex + 1 : (steps.length > 0 ? steps.length : 1);
 
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
@@ -154,7 +154,7 @@ export default function PrintingConfirmation({
     }
   };
 
-  // Print Order Label & Update Backend Tracking with Validation
+  // Print Order Label: Validate Backend Tracking First, Then Print Physical Label
   const handlePrintPress = async () => {
     // 1. Validate Bluetooth Printer is connected
     if (!connectedDevice) {
@@ -169,22 +169,7 @@ export default function PrintingConfirmation({
     if (isPrinting) return;
 
     try {
-      // 2. Build & Print Physical TSPL Label (27mm x 27mm QR on 50x30mm Sheet)
-      const labelData: LabelThemeData = {
-        qrValue: qrValue,
-        orderNumber: cleanInv,
-        category: activeCategory,
-        orderType: isWholesale ? "Wholesale" : "Retail",
-        date: activeDate,
-        timeSlot: activeTimeSlot,
-        stepLabel: activeStepLabel,
-        stepIndex: activeStepIndex,
-      };
-
-      const tspl = buildTheme1TSPL(labelData);
-      await printTSPL(tspl);
-
-      // 3. Post to backend to update packing tracking and validate next station
+      // 2. Validate with backend first (Check next station busy / position assigned)
       const token = (await AsyncStorage.getItem("@access_token")) || store.getState().auth.token;
 
       if (activeStep.type === "main") {
@@ -211,14 +196,8 @@ export default function PrintingConfirmation({
           }
           setAlertMessage(msg);
           setAlertVisible(true);
-          return;
+          return; // Stop here! Do NOT print sticker
         }
-
-        const printerName = connectedDevice.displayName || connectedDevice.name;
-        setAlertType("success");
-        setAlertTitle("Print Successful");
-        setAlertMessage(`Main Container QR Code Printed on ${printerName}!`);
-        setAlertVisible(true);
       } else {
         const isPackageStep = activeStep.type === "package";
         const response = await axios.post(
@@ -247,22 +226,37 @@ export default function PrintingConfirmation({
           }
           setAlertMessage(msg);
           setAlertVisible(true);
-          return;
+          return; // Stop here! Do NOT print sticker
         }
-
-        const printerName = connectedDevice.displayName || connectedDevice.name;
-        setAlertType("success");
-        setAlertTitle("Print Successful");
-        if (currentStep < steps.length) {
-          const stepName = steps[currentStep - 1]?.label || "Package";
-          setAlertMessage(`${stepName} QR label printed on ${printerName}!`);
-        } else {
-          setAlertMessage(
-            `All packages for order ${orderNumber} printed on ${printerName}!`,
-          );
-        }
-        setAlertVisible(true);
       }
+
+      // 3. Backend validated successfully — now print the physical TSPL sticker (27x27mm QR on 50x30mm sheet)
+      const labelData: LabelThemeData = {
+        qrValue: qrValue,
+        orderNumber: cleanInv,
+        category: activeCategory,
+        orderType: isWholesale ? "Wholesale" : "Retail",
+        date: activeDate,
+        timeSlot: activeTimeSlot,
+        stepLabel: activeStepLabel,
+        stepIndex: activeStepIndex,
+      };
+
+      const tspl = buildTheme1TSPL(labelData);
+      await printTSPL(tspl);
+
+      const printerName = connectedDevice.displayName || connectedDevice.name;
+      setAlertType("success");
+      setAlertTitle("Print Successful");
+      if (currentStep < steps.length) {
+        const stepName = steps[currentStep - 1]?.label || "Package";
+        setAlertMessage(`${stepName} QR label printed on ${printerName}!`);
+      } else {
+        setAlertMessage(
+          `All packages for order ${orderNumber} printed on ${printerName}!`,
+        );
+      }
+      setAlertVisible(true);
     } catch (err: any) {
       console.error("Error updating order status on QR print:", err);
       const msg = err.response?.data?.message || err.message || "Failed to communicate with packing server. Please try again.";
@@ -312,7 +306,7 @@ export default function PrintingConfirmation({
           <View className="flex-row justify-between items-center gap-2 px-2 mb-8">
             {steps.map((s, idx) => {
               const stepNum = idx + 1;
-              const isFilled = stepNum <= currentStep || (s as any).isPrinted;
+              const isFilled = (s as any).isPrinted || stepNum < currentStep;
               return (
                 <View key={s.id} className="flex-1 items-center">
                   <View

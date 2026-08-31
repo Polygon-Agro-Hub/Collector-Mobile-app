@@ -26,7 +26,7 @@ export default function ThermalPrinterTestScreen({
 }) {
   const insets = useSafeAreaInsets();
   const [customText, setCustomText] = useState<string>("Sample Test 50x30mm");
-  const [customQr, setCustomQr] = useState<string>("2608180003");
+  const [customQr, setCustomQr] = useState<string>("2608310002");
   const [isPrinterModalOpen, setIsPrinterModalOpen] = useState<boolean>(false);
   const [logMessage, setLogMessage] = useState<string>("");
 
