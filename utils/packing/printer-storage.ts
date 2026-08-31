@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export interface SavedPrinter {
   name: string;
   url?: string;
-  type: "bluetooth" | "wifi";
+  type: "bluetooth";
 }
 
 const PRINTER_STORAGE_KEY = "@saved_packing_printer";

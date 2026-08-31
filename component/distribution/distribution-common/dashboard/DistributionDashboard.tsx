@@ -295,6 +295,29 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       onPress: () => navigation.navigate("PurchaseShortage" as any),
     });
 
+    // 6. Thermal QR Printing (50mm x 30mm Scale)
+    items.push({
+      key: "thermal_qr_printer",
+      title: "QR Thermal Printer",
+      icon: (
+        <View className="absolute top-2 right-2">
+          <FontAwesome6 name="print" size={24} color="#980775" />
+        </View>
+      ),
+      onPress: () =>
+        navigation.navigate("PrintingConfirmation" as any, {
+          orderNumber: "2608180003",
+          invoiceNumber: "2608180003",
+          category: "Moragahahena",
+          type: "Wholesale",
+          date: "2026/08/25",
+          timeSlot: "08:00AM - 12:00PM",
+          packagesCount: 1,
+          alacarteCount: 1,
+          packagesList: [],
+        }),
+    });
+
     return items;
   };
 
