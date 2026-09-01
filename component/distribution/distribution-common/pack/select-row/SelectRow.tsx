@@ -198,6 +198,8 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
         const assignmentData = {
           rowId: assignment.rowId,
+          rowIndex: assignment.rowIndex,
+          rowName: assignment.rowName || (assignment.rowIndex ? `Row ${assignment.rowIndex}` : undefined),
           positionId: assignment.positionId,
           positionName: assignment.name,
           pType: assignment.type,
@@ -346,6 +348,8 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       if (response.data && response.data.success) {
         const assignmentData = {
           rowId: selectedRow?.id || 0,
+          rowIndex: selectedRow?.rowIndex,
+          rowName: selectedRow?.name || (selectedRow?.rowIndex ? `Row ${selectedRow.rowIndex}` : undefined),
           positionId: selectedPosition.id,
           positionName: selectedPosition.name,
           pType: selectedPosition.type,

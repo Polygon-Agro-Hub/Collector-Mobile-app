@@ -154,7 +154,9 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": false,
-          "modes": ["central"],
+          "modes": [
+            "central"
+          ],
           "bluetoothAlwaysPermission": "Allow CoDi-Net to connect to your Bluetooth label printer"
         }
       ]

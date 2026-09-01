@@ -9,7 +9,7 @@ import {
   RefreshControl,
   BackHandler,
 } from "react-native";
-import { Entypo, Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import environment from "@/environment/environment";
@@ -19,6 +19,8 @@ import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navig
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
+import { usePrinter } from "@/services/printer/usePrinter";
+import { PrinterSelectModal } from "@/component/components/popup/PrinterSelectModal";
 import {
   formatTimeSlot,
   getTimeSlotPriority,
@@ -42,6 +44,35 @@ export default function QRHandling({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
+  const [isPrinterModalOpen, setIsPrinterModalOpen] = useState<boolean>(false);
+
+  // Bluetooth Printer Hook
+  const {
+    discoveredDevices,
+    connectedDevice,
+    isScanning,
+    isConnecting,
+    startScan,
+    stopScan,
+    connectToDevice,
+    disconnect,
+  } = usePrinter();
+
+  const handleOpenPrinterModal = () => {
+    setIsPrinterModalOpen(true);
+    startScan();
+  };
+
+  const handleSelectPrinter = async (device: any) => {
+    const success = await connectToDevice(device);
+    if (success) {
+      setIsPrinterModalOpen(false);
+      Alert.alert(
+        "Printer Connected",
+        `Connected to ${device.displayName || device.name}`
+      );
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -135,6 +166,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           type: o.type,
           timeSlot: formatTimeSlot(o.timeSlot),
           category: o.category,
+          date: o.date,
           packagesCount: (o.packagesList && o.packagesList.length > 0) ? o.packagesList.length : (o.packagesCount || 0),
           alacarteCount: o.alacarteCount || 0,
           packagesList: o.packagesList || [],
@@ -187,6 +219,67 @@ export default function QRHandling({ navigation }: { navigation: any }) {
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
         rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
       />
+
+      {/* Bluetooth Thermal Printer Connect / Disconnect Status Banner */}
+      <View
+        style={{
+          backgroundColor: connectedDevice ? "#F0FDF4" : "#FEF2F2",
+          borderWidth: 1,
+          borderColor: connectedDevice ? "#BBF7D0" : "#FECACA",
+          borderRadius: 16,
+          paddingVertical: 10,
+          paddingHorizontal: 14,
+          marginHorizontal: 16,
+          marginTop: 10,
+          marginBottom: 4,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1, paddingRight: 8 }}>
+          <MaterialCommunityIcons
+            name={connectedDevice ? "printer-check" : "printer-off"}
+            size={22}
+            color={connectedDevice ? "#16A34A" : "#DC2626"}
+          />
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 13,
+                fontWeight: "700",
+                color: connectedDevice ? "#14532D" : "#991B1B",
+              }}
+              numberOfLines={1}
+            >
+              {connectedDevice ? (connectedDevice.displayName || connectedDevice.name) : "No Thermal Printer Connected"}
+            </Text>
+            <Text
+              style={{
+                fontSize: 11,
+                color: connectedDevice ? "#166534" : "#B91C1C",
+              }}
+            >
+              {connectedDevice ? "Bluetooth Ready (50x30mm TSPL)" : "Tap to connect Bluetooth printer"}
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          onPress={handleOpenPrinterModal}
+          style={{
+            paddingVertical: 6,
+            paddingHorizontal: 12,
+            backgroundColor: connectedDevice ? "#16A34A" : "#030E25",
+            borderRadius: 14,
+          }}
+          activeOpacity={0.8}
+        >
+          <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "700" }}>
+            {connectedDevice ? "Change" : "Connect"}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {loading ? (
         <View className="flex-1 justify-center items-center bg-white">
@@ -324,6 +417,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                               invoiceNumber: order.orderNumber,
                               timeSlot: order.timeSlot,
                               category: order.category,
+                              date: (order as any).date,
                               packagesCount: (order as any).packagesCount || 0,
                               alacarteCount: (order as any).alacarteCount || 0,
                               packagesList: (order as any).packagesList || [],
@@ -428,7 +522,9 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                             processOrderId: order.id,
                             orderNumber: `${order.orderNumber} (${order.type})`,
                             invoiceNumber: order.orderNumber,
+                            timeSlot: order.timeSlot,
                             category: order.category,
+                            date: (order as any).date,
                             packagesCount: (order as any).packagesCount || 0,
                             alacarteCount: (order as any).alacarteCount || 0,
                             packagesList: (order as any).packagesList || [],
@@ -491,7 +587,22 @@ export default function QRHandling({ navigation }: { navigation: any }) {
         onClose={() => setEndShiftModalVisible(false)}
         navigation={navigation}
         positionText="QR Position"
-        rowText={rowId ? `Row ${rowId}` : undefined}
+      />
+
+      {/* Bluetooth Printer Select / Connect / Disconnect Modal */}
+      <PrinterSelectModal
+        visible={isPrinterModalOpen}
+        onClose={() => {
+          setIsPrinterModalOpen(false);
+          stopScan();
+        }}
+        devices={discoveredDevices}
+        isScanning={isScanning}
+        isConnecting={isConnecting}
+        connectedDevice={connectedDevice}
+        onStartScan={startScan}
+        onSelectDevice={handleSelectPrinter}
+        onDisconnect={disconnect}
       />
     </View>
   );

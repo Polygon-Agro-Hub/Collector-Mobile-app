@@ -527,7 +527,6 @@ export default function Packing({
         onClose={() => setEndShiftModalVisible(false)}
         navigation={navigation}
         positionText={positionName}
-        rowText={rowId ? `Row ${rowId}` : undefined}
       />
 
       <AlertModal

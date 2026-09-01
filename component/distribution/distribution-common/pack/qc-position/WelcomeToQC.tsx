@@ -626,7 +626,6 @@ export default function WelcomeToQC({
         onClose={() => setEndShiftModalVisible(false)}
         navigation={navigation}
         positionText="QC Position"
-        rowText={rowId ? `Row ${rowId}` : undefined}
       />
 
       <AlertModal

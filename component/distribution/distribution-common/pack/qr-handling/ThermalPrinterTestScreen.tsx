@@ -108,7 +108,7 @@ export default function ThermalPrinterTestScreen({
         stepLabel: "à la carte",
         stepIndex: "Step 1/1",
       };
-      const tspl = buildTheme1TSPL(labelData);
+      const tspl = buildTheme2TSPL(labelData);
       await printTSPL(tspl);
       setLogMessage("Full test label printed successfully!");
       Alert.alert("Success", "50mm x 30mm test label printed!");

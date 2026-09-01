@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePrinter } from "@/services/printer/usePrinter";
 import {
   LabelThemeData,
-  buildTheme1TSPL,
+  buildTheme2TSPL,
 } from "@/services/printer/Tspllabelbuilder";
 import { PrinterSelectModal } from "@/component/components/popup/PrinterSelectModal";
 import {
@@ -51,6 +51,7 @@ export default function PrintingConfirmation({
   const insets = useSafeAreaInsets();
   const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
   const [isPrinterModalOpen, setIsPrinterModalOpen] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   // Bluetooth Printer Hook matching Expo57-QR-Printer
   const {
@@ -116,10 +117,18 @@ export default function PrintingConfirmation({
   const activeStep = steps[currentStep - 1] || steps[0];
   const qrValue = cleanInv || invoiceNumber || orderNumber;
 
+  const getFallbackDate = () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}/${m}/${d}`;
+  };
+
   const activeCategory = category || "Moragahahena";
-  const activeDate = route.params?.date || "2026/08/25";
+  const activeDate = route.params?.date || getFallbackDate();
   const activeTimeSlot = route.params?.timeSlot || "08:00AM - 12:00PM";
-  const activeStepLabel = activeStep?.label || "à la carte";
+  const activeStepLabel = activeStep?.label || "A la carte";
   const activeStepIndex = `Step ${currentStep}/${steps.length}`;
 
   useEffect(() => {
@@ -166,13 +175,18 @@ export default function PrintingConfirmation({
       return;
     }
 
-    if (isPrinting) return;
+    if (isPrinting || isProcessing) return;
+    setIsProcessing(true);
+
+    let backendOpenedSuccessfully = false;
+    let isMainContainerStep = activeStep.type === "main";
+    let targetOrderPackageId = isMainContainerStep ? null : (activeStep.packageId || null);
 
     try {
       // 2. Validate with backend first (Check next station busy / position assigned)
       const token = (await AsyncStorage.getItem("@access_token")) || store.getState().auth.token;
 
-      if (activeStep.type === "main") {
+      if (isMainContainerStep) {
         const response = await axios.post(
           `${environment.API_BASE_URL}api/packing/qr-opened`,
           {
@@ -196,6 +210,7 @@ export default function PrintingConfirmation({
           }
           setAlertMessage(msg);
           setAlertVisible(true);
+          setIsProcessing(false);
           return; // Stop here! Do NOT print sticker
         }
       } else {
@@ -204,7 +219,7 @@ export default function PrintingConfirmation({
           `${environment.API_BASE_URL}api/packing/qr-opened`,
           {
             orderId: processOrderId,
-            orderpackageId: activeStep.packageId || null,
+            orderpackageId: targetOrderPackageId,
             isPackage: isPackageStep ? 1 : 0,
             packageIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
             packageBoxSubIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
@@ -226,11 +241,14 @@ export default function PrintingConfirmation({
           }
           setAlertMessage(msg);
           setAlertVisible(true);
+          setIsProcessing(false);
           return; // Stop here! Do NOT print sticker
         }
       }
 
-      // 3. Backend validated successfully — now print the physical TSPL sticker (27x27mm QR on 50x30mm sheet)
+      backendOpenedSuccessfully = true;
+
+      // 3. Backend validated and updated successfully — now print the physical TSPL sticker
       const labelData: LabelThemeData = {
         qrValue: qrValue,
         orderNumber: cleanInv,
@@ -242,9 +260,39 @@ export default function PrintingConfirmation({
         stepIndex: activeStepIndex,
       };
 
-      const tspl = buildTheme1TSPL(labelData);
-      await printTSPL(tspl);
+      const tspl = buildTheme2TSPL(labelData);
+      
+      try {
+        await printTSPL(tspl);
+      } catch (printErr: any) {
+        console.error("Physical print failed, executing rollback:", printErr);
+        // Rollback backend tracking changes because physical print failed
+        try {
+          await axios.post(
+            `${environment.API_BASE_URL}api/packing/qr-rollback`,
+            {
+              orderId: processOrderId,
+              orderpackageId: targetOrderPackageId,
+              isMainContainer: isMainContainerStep,
+              rowId: route.params?.rowId,
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (rbErr) {
+          console.error("Failed to execute backend rollback:", rbErr);
+        }
 
+        setAlertType("error");
+        setAlertTitle("Printer Error");
+        setAlertMessage(
+          printErr?.message || "Failed to print sticker on thermal printer. Order state was reverted. Please check your printer connection and try again."
+        );
+        setAlertVisible(true);
+        setIsProcessing(false);
+        return; // Do NOT advance step
+      }
+
+      // 4. Physical printing succeeded!
       const printerName = connectedDevice.displayName || connectedDevice.name;
       setAlertType("success");
       setAlertTitle("Print Successful");
@@ -257,10 +305,30 @@ export default function PrintingConfirmation({
         );
       }
       setAlertVisible(true);
+      setIsProcessing(false);
     } catch (err: any) {
       console.error("Error updating order status on QR print:", err);
       const msg = err.response?.data?.message || err.message || "Failed to communicate with packing server. Please try again.";
       const code = err.response?.data?.code;
+
+      if (backendOpenedSuccessfully) {
+        // Rollback if needed
+        try {
+          const token = (await AsyncStorage.getItem("@access_token")) || store.getState().auth.token;
+          await axios.post(
+            `${environment.API_BASE_URL}api/packing/qr-rollback`,
+            {
+              orderId: processOrderId,
+              orderpackageId: targetOrderPackageId,
+              isMainContainer: isMainContainerStep,
+              rowId: route.params?.rowId,
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (rbErr) {
+          console.error("Failed to execute backend rollback in catch:", rbErr);
+        }
+      }
 
       setAlertType("error");
       if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
@@ -272,6 +340,7 @@ export default function PrintingConfirmation({
       }
       setAlertMessage(msg);
       setAlertVisible(true);
+      setIsProcessing(false);
     }
   };
 
@@ -295,7 +364,7 @@ export default function PrintingConfirmation({
       {/* Main Scrollable Content Area */}
       <ScrollView className="flex-1 bg-white px-6">
         {/* Header Title */}
-        <View className="items-center mb-6">
+        <View className="items-center mb-4 mt-2">
           <Text className="text-xl font-bold text-slate-950">
             Printing Confirmation
           </Text>
@@ -303,7 +372,7 @@ export default function PrintingConfirmation({
 
         {/* Dynamic Progress step segments at top */}
         {steps.length > 1 && (
-          <View className="flex-row justify-between items-center gap-2 px-2 mb-8">
+          <View className="flex-row justify-between items-center gap-2 px-2 mb-6">
             {steps.map((s, idx) => {
               const stepNum = idx + 1;
               const isFilled = (s as any).isPrinted || stepNum < currentStep;
@@ -321,7 +390,7 @@ export default function PrintingConfirmation({
         )}
 
         {/* Dynamic Step Active Pill Badge */}
-        <View className="items-center mb-6 w-full px-2">
+        <View className="items-center mb-4 w-full px-2">
           <View className="px-4 py-2.5 rounded-full flex-row items-center justify-center gap-2.5 bg-white border border-slate-200 max-w-full shadow-sm">
             {/* Index Badge */}
             <View className="bg-[#E9ECF1] px-3 py-1.5 rounded-full items-center justify-center">
@@ -353,15 +422,141 @@ export default function PrintingConfirmation({
           </View>
         </View>
 
-        {/* Printer Connectivity Status Banner matching Expo57-QR-Printer */}
+        {/* Calibrated Theme 2 Standard Thermal Sticker Preview Card */}
+        <View className="items-center justify-center my-3">
+          <View
+            className="bg-white border-2 border-black rounded-lg p-3 w-[270px] h-[162px] shadow-sm justify-between"
+            style={{
+              borderColor: "#000000",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            {/* Top Section: Left Details & Right Large QR */}
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1 pr-2">
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "900",
+                    color: "#000000",
+                    letterSpacing: -0.2,
+                  }}
+                >
+                  {cleanInv}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: "700",
+                    color: "#000000",
+                    marginTop: 2,
+                  }}
+                >
+                  {activeCategory}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: "700",
+                    color: "#000000",
+                    marginTop: 1,
+                  }}
+                >
+                  {isWholesale ? "Wholesale" : "Retail"}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: "700",
+                    color: "#000000",
+                    marginTop: 1,
+                  }}
+                >
+                  {activeDate}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: "700",
+                    color: "#000000",
+                    marginTop: 1,
+                  }}
+                >
+                  {activeTimeSlot}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: "800",
+                    color: "#000000",
+                    marginTop: 2,
+                  }}
+                >
+                  {activeStepIndex}
+                </Text>
+              </View>
+
+              {/* Exact Proportion High Contrast QR Code */}
+              <View
+                style={{
+                  width: 96,
+                  height: 96,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                <QRCode
+                  value={qrValue}
+                  size={90}
+                  color="#000000"
+                  backgroundColor="#FFFFFF"
+                  quietZone={0}
+                />
+              </View>
+            </View>
+
+            {/* Full Divider Line with Package Name Below */}
+            <View className="w-full">
+              <View
+                style={{
+                  height: 1.5,
+                  backgroundColor: "#000000",
+                  width: "100%",
+                  marginBottom: 2,
+                }}
+              />
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontSize: 9,
+                  fontWeight: "800",
+                  color: "#000000",
+                  paddingLeft: 2,
+                }}
+              >
+                {activeStepLabel}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Printer Connectivity Status Banner */}
         <View
           style={{
             backgroundColor: connectedDevice ? "#f0fdf4" : "#fef2f2",
             borderWidth: 1,
             borderColor: connectedDevice ? "#bbf7d0" : "#fecaca",
             borderRadius: 16,
-            padding: 14,
-            marginBottom: 16,
+            padding: 12,
+            marginTop: 8,
+            marginBottom: 20,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
@@ -398,10 +593,10 @@ export default function PrintingConfirmation({
           <TouchableOpacity
             onPress={handleOpenPrinterModal}
             style={{
-              paddingVertical: 8,
-              paddingHorizontal: 14,
+              paddingVertical: 6,
+              paddingHorizontal: 12,
               backgroundColor: connectedDevice ? "#16a34a" : "#030E25",
-              borderRadius: 20,
+              borderRadius: 16,
             }}
           >
             <Text style={{ fontSize: 12, fontWeight: "bold", color: "#ffffff" }}>
@@ -409,70 +604,18 @@ export default function PrintingConfirmation({
             </Text>
           </TouchableOpacity>
         </View>
-
-        {/* 50mm x 30mm Sticker Label Preview Card */}
-        <View className="bg-white border border-slate-300 p-3.5 mb-6 rounded-lg flex-row justify-between items-center shadow-sm">
-          {/* Left Column Details with 2mm left gap */}
-          <View className="w-[46%] justify-between py-0.5 pl-1">
-            <View>
-              <Text className="text-[#000000] font-black text-xl leading-tight tracking-tight">
-                {cleanInv}
-              </Text>
-              <Text className="text-[#0B192C] font-bold text-sm leading-tight mt-1">
-                {activeCategory}
-              </Text>
-              <Text className="text-[#0B192C] font-normal text-xs leading-tight mt-0.5">
-                {isWholesale ? "Wholesale" : "Retail"}
-              </Text>
-            </View>
-
-            <View className="mt-2">
-              <Text className="text-[#0B192C] font-bold text-xs leading-tight">
-                {activeDate}
-              </Text>
-              <Text className="text-[#0B192C] font-bold text-xs leading-tight mt-0.5">
-                {activeTimeSlot}
-              </Text>
-            </View>
-
-            {/* Horizontal Divider Line */}
-            <View className="h-[1px] bg-slate-400 my-1.5 w-full" />
-
-            <View>
-              <Text className="text-[#0B192C] font-normal text-xs leading-tight">
-                {activeStepLabel}
-              </Text>
-              <Text className="text-[#0B192C] font-normal text-xs leading-tight mt-0.5">
-                {activeStepIndex}
-              </Text>
-            </View>
-          </View>
-
-          {/* Right Column: 27mm x 27mm Right-Aligned QR Code */}
-          <View className="w-[52%] aspectRatio-1 p-2 bg-white border border-slate-200 rounded items-center justify-center">
-            <QRCode
-              value={qrValue}
-              size={135}
-              color="black"
-              backgroundColor="white"
-            />
-          </View>
-        </View>
       </ScrollView>
 
-      <View className="px-6 pt-4 bg-white gap-3" style={{ paddingBottom: insets.bottom + 16 }}>
+      {/* Floating Action Buttons */}
+      <View
+        className="px-6 pt-3 bg-white"
+        style={{ paddingBottom: insets.bottom + 16 }}
+      >
         <TouchableOpacity
           onPress={handleBack}
-          disabled={isPrinting}
-          className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-1"
+          disabled={isPrinting || isProcessing}
+          className="w-full h-[44px] bg-[#E9ECF1] rounded-full items-center justify-center mb-2"
           activeOpacity={0.8}
-          style={{
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.12,
-            shadowRadius: 4,
-            elevation: 3,
-          }}
         >
           <Text
             className="text-[#030E25] font-extrabold text-sm"
@@ -489,8 +632,10 @@ export default function PrintingConfirmation({
 
         <TouchableOpacity
           onPress={handlePrintPress}
-          disabled={isPrinting}
-          className={`w-full h-[50px] rounded-full items-center justify-center ${isPrinting ? "bg-gray-400" : "bg-black"}`}
+          disabled={isPrinting || isProcessing}
+          className={`w-full h-[50px] rounded-full items-center justify-center ${
+            isPrinting || isProcessing ? "bg-gray-400" : "bg-black"
+          }`}
           activeOpacity={0.8}
           style={{
             shadowColor: "#000000",
@@ -500,7 +645,7 @@ export default function PrintingConfirmation({
             elevation: 3,
           }}
         >
-          {isPrinting ? (
+          {isPrinting || isProcessing ? (
             <ActivityIndicator color="white" size="small" />
           ) : (
             <Text
@@ -542,7 +687,7 @@ export default function PrintingConfirmation({
         }}
       />
 
-      {/* Bluetooth Printer Select Modal matching Expo57-QR-Printer */}
+      {/* Bluetooth Printer Select Modal */}
       <PrinterSelectModal
         visible={isPrinterModalOpen}
         onClose={() => {
