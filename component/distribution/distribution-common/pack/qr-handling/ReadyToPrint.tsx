@@ -186,6 +186,7 @@ export default function ReadyToPrint({
               rowId: route.params?.rowId,
               isReprint: route.params?.isReprint || false,
               buttonLabel: route.params?.buttonLabel || "Start",
+              date: route.params?.date,
             });
           }}
           className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"

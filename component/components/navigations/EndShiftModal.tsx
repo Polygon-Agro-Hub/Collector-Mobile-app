@@ -53,7 +53,10 @@ export function EndShiftModal({
   const [loading, setLoading] = useState(false);
 
   const activeAssignment = store.getState().auth.activeAssignment;
-  const resolvedRow = rowText || (activeAssignment?.rowId ? `Row ${activeAssignment.rowId}` : "Row 1");
+  const resolvedRow =
+    rowText ||
+    activeAssignment?.rowName ||
+    (activeAssignment?.rowIndex ? `Row ${activeAssignment.rowIndex}` : "Row 1");
   const resolvedPos = positionText || activeAssignment?.positionName || "Packing Position 1";
 
   const message =
