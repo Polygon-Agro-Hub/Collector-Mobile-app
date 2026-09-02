@@ -173,6 +173,10 @@ export default function DistributionCenterTarget({
     return groups;
   };
 
+  const formatCount = (count: number) => {
+    return count === 0 ? "0" : String(count).padStart(2, "0");
+  };
+
   const currentList = activeTab === "todo" ? todoOrders : outOrders;
   const groupedOrders = groupOrdersByTimeSlot(currentList);
 
@@ -230,7 +234,7 @@ export default function DistributionCenterTarget({
                     activeTab === "todo" ? "text-white" : "text-[#54617D]"
                   }`}
                 >
-                  To Do ({String(todoOrders.length).padStart(2, "0")})
+                  To Do ({formatCount(todoOrders.length)})
                 </Text>
               </TouchableOpacity>
 
@@ -247,7 +251,7 @@ export default function DistributionCenterTarget({
                     activeTab === "out" ? "text-white" : "text-[#54617D]"
                   }`}
                 >
-                  Out ({String(outOrders.length).padStart(2, "0")})
+                  Out ({formatCount(outOrders.length)})
                 </Text>
               </TouchableOpacity>
             </View>
@@ -286,7 +290,7 @@ export default function DistributionCenterTarget({
 
                     {/* Time Slot Section Header */}
                     <Text className="text-base font-extrabold text-slate-950 mb-3 tracking-tight">
-                      {slotHeader} ({String(ordersGroup.length).padStart(2, "0")})
+                      {slotHeader} ({formatCount(ordersGroup.length)})
                     </Text>
 
                     {/* Order Cards */}

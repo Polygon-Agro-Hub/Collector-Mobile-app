@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface ActiveAssignmentState {
   rowId: number;
+  rowIndex?: number;
+  rowName?: string;
   positionId: number;
   positionName: string;
   pType: string;

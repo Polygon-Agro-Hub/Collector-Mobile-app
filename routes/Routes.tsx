@@ -82,6 +82,7 @@ import SelectRow from "@/component/distribution/distribution-common/pack/select-
 import QRHandling from "@/component/distribution/distribution-common/pack/qr-handling/QRHandling";
 import ReadyToPrint from "@/component/distribution/distribution-common/pack/qr-handling/ReadyToPrint";
 import PrintingConfirmation from "@/component/distribution/distribution-common/pack/qr-handling/PrintingConfirmation";
+import ThermalPrinterTestScreen from "@/component/distribution/distribution-common/pack/qr-handling/ThermalPrinterTestScreen";
 import WelcomeToPacking from "@/component/distribution/distribution-common/pack/packing/WelcomeToPacking";
 import Packing from "@/component/distribution/distribution-common/pack/packing/Packing";
 import WelcomeToQC from "@/component/distribution/distribution-common/pack/qc-position/WelcomeToQC";
@@ -512,6 +513,11 @@ const DISTRIBUTION_STACK_SCREENS: StackRouteConfig[] = [
   {
     name: "PrintingConfirmation",
     component: PrintingConfirmation as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ThermalPrinterTestScreen",
+    component: ThermalPrinterTestScreen as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {

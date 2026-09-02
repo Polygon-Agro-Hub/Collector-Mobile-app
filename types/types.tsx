@@ -304,6 +304,7 @@ export type RootStackParamList = {
     creatAt: string;
   };
   NotEligibleScreen: undefined;
+  ThermalPrinterTestScreen: undefined;
 };
 
 export interface OrderItem {
