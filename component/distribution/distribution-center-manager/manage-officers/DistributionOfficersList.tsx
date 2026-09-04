@@ -534,24 +534,24 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                         {selectedOfficer.phoneNumber1}
                       </Text>
                     </View>
-                  <TouchableOpacity
-  onPress={() => {
-    const phoneUrl = `tel:${selectedOfficer.phoneNumber1}`;
-    Linking.openURL(phoneUrl).catch((err) =>
-      console.error("Failed to open dial pad:", err),
-    );
-  }}
-  className="w-8 h-8 rounded-full bg-[#E9ECF1] items-center justify-center"
-  style={{
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 4,
-  }}
->
-  <Ionicons name="call" size={14} color="#030E25" />
-</TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const phoneUrl = `tel:${selectedOfficer.phoneNumber1}`;
+                        Linking.openURL(phoneUrl).catch((err) =>
+                          console.error("Failed to open dial pad:", err),
+                        );
+                      }}
+                      className="w-8 h-8 rounded-full bg-[#E9ECF1] items-center justify-center"
+                      style={{
+                        shadowColor: "#000000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3,
+                        elevation: 4,
+                      }}
+                    >
+                      <Ionicons name="call" size={14} color="#030E25" />
+                    </TouchableOpacity>
                   </View>
                 )}
 
@@ -571,6 +571,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                         );
                       }}
                       className="w-8 h-8 rounded-full bg-[#E9ECF1] items-center justify-center"
+                      style={{
+                        shadowColor: "#000000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3,
+                        elevation: 4,
+                      }}
                     >
                       <Ionicons name="call" size={14} color="#030E25" />
                     </TouchableOpacity>
@@ -585,13 +592,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
                     handleDisclaim(selectedOfficer.collectionOfficerId)
                   }
                   className="w-full h-12 bg-red-600 rounded-full items-center justify-center shadow-md active:bg-red-700"
-                     style={{
-            shadowColor: "#000000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 2,
-            shadowRadius: 3.84,
-            elevation: 5,
-          }}
+                  style={{
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 2,
+                    shadowRadius: 3.84,
+                    elevation: 5,
+                  }}
                 >
                   <Text className="text-white font-extrabold text-sm">
                     {t("DisclaimOfficer.Disclaim") || "Disclaim"}
