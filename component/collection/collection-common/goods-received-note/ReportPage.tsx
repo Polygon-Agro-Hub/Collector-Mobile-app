@@ -19,7 +19,6 @@ import { RootStackParamList } from "@/types/types";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
-import * as MediaLibrary from "expo-media-library";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
