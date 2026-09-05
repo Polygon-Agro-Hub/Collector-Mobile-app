@@ -258,6 +258,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "Collector-${{ github.ref_name }}-${{ github.run_number }}.ipa"
-          path: build/Collector.ipa
+          path: build/GoVi-Transport.ipa
           retention-days: 7
           if-no-files-found: warn
