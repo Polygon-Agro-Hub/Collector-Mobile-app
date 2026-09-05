@@ -25,6 +25,7 @@ interface RowData {
   id: number;
   name: string;
   positionsCount: number;
+  rowIndex?: number;
 }
 
 interface PositionData {
