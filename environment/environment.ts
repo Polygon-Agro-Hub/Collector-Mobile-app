@@ -1,6 +1,6 @@
 const environment = {
   // LOCAL --------------------
-  // API_BASE_URL: "http://192.168.1.11:3000/agro-api/collection-api/",
+  // API_BASE_URL: "http://192.168.8.180:3000/agro-api/collection-api/",
 
   // DEV --------------------
   API_BASE_URL:

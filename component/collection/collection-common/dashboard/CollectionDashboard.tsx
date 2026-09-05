@@ -23,6 +23,10 @@ import DashboardSkeleton from "@/component/components/skeletons/DashboardSkeleto
 import { useSelector } from "react-redux";
 import { RootState } from "@/services/reducxStore";
 import { ROLES } from "@/constants/user-roles";
+import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
+import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
+import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
 
 type CollectionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -59,6 +63,24 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+  // Device Connection State (Wi-Fi Scale BUDRY MFD-300)
+  const [isScaleModalVisible, setIsScaleModalVisible] = useState<boolean>(false);
+  const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
+  const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    const unsubscribe = wifiScaleService.subscribe((status) => {
+      setScaleStatus(status);
+    });
+    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+      setIsWifiEnabled(state.isWifiEnabled ?? state.type === "wifi");
+    });
+    return () => {
+      unsubscribe();
+      unsubscribeNetInfo();
+    };
+  }, []);
 
   const jobRole = useSelector((state: RootState) => state.auth.jobRole);
 
@@ -353,6 +375,79 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
           </View>
         </TouchableOpacity>
 
+        {/* Wi-Fi Scale (BUDRY MFD-300) Connection Section - Placed TOP of Keep Going Section */}
+        {!isWifiEnabled ? (
+          <View style={{ marginTop: 12, backgroundColor: "#fff1f2", borderWidth: 1, borderColor: "#fecdd3", borderRadius: 20, padding: 16, flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: "#ffe4e6", alignItems: "center", justifyContent: "center" }}>
+              <MaterialCommunityIcons name="wifi-off" size={24} color="#e11d48" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: "bold", color: "#9f1239" }}>
+                Wi-Fi is Off
+              </Text>
+              <Text style={{ fontSize: 12, color: "#be123c", marginTop: 2 }}>
+                Please turn on Wi-Fi on your phone to connect to the scale.
+              </Text>
+            </View>
+          </View>
+        ) : scaleStatus.connected && scaleStatus.scale ? (
+          <View style={{ marginTop: 12, backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#bbf7d0", borderRadius: 20, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: "#dcfce7", alignItems: "center", justifyContent: "center" }}>
+                <MaterialCommunityIcons name="wifi-check" size={24} color="#16a34a" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: "bold", color: "#14532d" }}>
+                  {scaleStatus.scale.name}
+                </Text>
+                <Text style={{ fontSize: 12, color: "#166534", marginTop: 2 }}>
+                  Connected & Ready ({scaleStatus.scale.ip}:{scaleStatus.scale.port || 8080})
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <TouchableOpacity
+                onPress={() => setIsScaleModalVisible(true)}
+                style={{ paddingVertical: 6, paddingHorizontal: 12, backgroundColor: "#ffffff", borderRadius: 16, borderWidth: 1, borderColor: "#bbf7d0" }}
+              >
+                <Text style={{ fontSize: 12, fontWeight: "600", color: "#166534" }}>Manage</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => await wifiScaleService.disconnectScale()}
+                style={{ paddingVertical: 6, paddingHorizontal: 12, backgroundColor: "#fee2e2", borderRadius: 16, borderWidth: 1, borderColor: "#fca5a5" }}
+              >
+                <Text style={{ fontSize: 12, fontWeight: "bold", color: "#dc2626" }}>Disconnect</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <View style={{ marginTop: 12, backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 20, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: "#ecfdf5", alignItems: "center", justifyContent: "center" }}>
+                <MaterialCommunityIcons name="scale-balance" size={24} color="#059669" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: "bold", color: "#0f172a" }}>
+                  BUDRY MFD-300
+                </Text>
+                <Text style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                  Wi-Fi Scale Not Connected
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setIsScaleModalVisible(true)}
+              style={{ paddingVertical: 8, paddingHorizontal: 16, backgroundColor: "#059669", borderRadius: 16, flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
+              <MaterialIcons name="wifi" size={16} color="#ffffff" />
+              <Text style={{ fontSize: 13, fontWeight: "bold", color: "#ffffff" }}>Connect</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Keep Going Section - Placed Below Devices Section */}
         {renderTargetStatus()}
 
         {/* Target Progress Section */}
@@ -458,6 +553,11 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
           ))}
         </View>
       </View>
+
+      <ScaleSelectModal
+        visible={isScaleModalVisible}
+        onClose={() => setIsScaleModalVisible(false)}
+      />
     </ScrollView>
   );
 };
