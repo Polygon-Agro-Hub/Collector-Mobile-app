@@ -149,8 +149,10 @@ jobs:
       # STEP 6: Run Expo Prebuild
       # ─────────────────────────────────────────────────────────────────
       - name: "⚙️ Generate native iOS project (expo prebuild)"
+        env:
+          CI: 1
         run: |
-          npx expo prebuild --platform ios --non-interactive --clean
+          npx expo prebuild --platform ios --clean
           echo "export NODE_BINARY=\$(which node)" > ios/.xcode.env.local
           echo "✅ Created ios/.xcode.env.local with NODE_BINARY=\$(which node)"
 
