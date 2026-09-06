@@ -7,7 +7,7 @@
 #   Push to UAT      → Upload to TestFlight (UAT testing)
 #   Push to main     → Upload to App Store Connect (production)
 #
-# PREREQUISITES:
+# PREREQUISITES (all must be set up — see SETUP_GUIDE.md):
 #   GitHub Secrets: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_CONTENT,
 #                   MATCH_GIT_URL, MATCH_GIT_BASIC_AUTHORIZATION,
 #                   MATCH_PASSWORD, DEV_API_URL, DEV_SHOUTOUT_API_KEY,
@@ -97,6 +97,7 @@ jobs:
       # ─────────────────────────────────────────────────────────────────
       # STEP 5a: Write DEV environment (dev-main branch only)
       # Overwrites environment/environment.ts with DEV API URL before building.
+      # This does NOT change the committed file — only the build-time file.
       # ─────────────────────────────────────────────────────────────────
       - name: "🔧 Write DEV environment (dev-main → TestFlight)"
         if: github.ref == 'refs/heads/dev-main'
@@ -117,6 +118,8 @@ jobs:
 
       # ─────────────────────────────────────────────────────────────────
       # STEP 5b: Write UAT environment (UAT branch only)
+      # Overwrites environment/environment.ts with UAT API URL before building.
+      # This does NOT change the committed file — only the build-time file.
       # ─────────────────────────────────────────────────────────────────
       - name: "🔧 Write UAT environment (UAT → TestFlight)"
         if: github.ref == 'refs/heads/UAT'
@@ -157,17 +160,21 @@ jobs:
 
       # ─────────────────────────────────────────────────────────────────
       # STEP 6: Run Expo Prebuild
+      # This generates the native ios/ folder from your JavaScript/TS code.
+      # --clean: removes any existing ios/ folder first (fresh generation)
+      # --non-interactive: no prompts (required for CI)
+      # --platform ios: only generate iOS (skip Android)
       # ─────────────────────────────────────────────────────────────────
       - name: "⚙️ Generate native iOS project (expo prebuild)"
-        env:
-          CI: 1
         run: |
-          npx expo prebuild --platform ios --clean
+          npx expo prebuild --platform ios --non-interactive --clean
           echo "export NODE_BINARY=\$(which node)" > ios/.xcode.env.local
           echo "✅ Created ios/.xcode.env.local with NODE_BINARY=\$(which node)"
 
       # ─────────────────────────────────────────────────────────────────
       # STEP 7: Cache CocoaPods
+      # Key uses package-lock.json (since ios/Podfile.lock doesn't exist before pod install)
+      # and is bumped to v57 to invalidate stale Expo 54 caches.
       # ─────────────────────────────────────────────────────────────────
       - name: "💾 Cache CocoaPods"
         uses: actions/cache@v4
@@ -186,40 +193,53 @@ jobs:
       - name: "🍫 Install CocoaPods dependencies"
         run: |
           cd ios
+          # Clean any stale cached pods from previous SDKs
           pod cache clean --all 2>/dev/null || true
           pod install --repo-update
           cd ..
 
       # ─────────────────────────────────────────────────────────────────
       # STEP 9a: Deploy to TestFlight (dev-main + UAT branches)
+      # Runs: fastlane beta
+      # Which: syncs certs, sets build number, builds .ipa, uploads
       # ─────────────────────────────────────────────────────────────────
       - name: "🚀 Deploy to TestFlight [dev-main & UAT]"
         if: github.ref == 'refs/heads/dev-main' || github.ref == 'refs/heads/UAT'
         run: bundle exec fastlane beta
         env:
+          # App Store Connect API Key — authenticates with Apple servers
           ASC_KEY_ID:      ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID:   ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          # Match — downloads certificates from your private certs repo
           MATCH_GIT_URL:                  ${{ secrets.MATCH_GIT_URL }}
           MATCH_GIT_BASIC_AUTHORIZATION:  ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD:                 ${{ secrets.MATCH_PASSWORD }}
+          # Used as the iOS build number — auto-increments with each CI run
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          #Apple Team ID
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       # ─────────────────────────────────────────────────────────────────
       # STEP 9b: Deploy to App Store (main branch)
+      # Runs: fastlane release
+      # Which: syncs certs, sets build number, builds .ipa, uploads to ASC
       # ─────────────────────────────────────────────────────────────────
       - name: "🏪 Deploy to App Store [main]"
         if: github.ref == 'refs/heads/main'
         run: bundle exec fastlane release
         env:
+          # App Store Connect API Key
           ASC_KEY_ID:      ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID:   ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          # Match
           MATCH_GIT_URL:                  ${{ secrets.MATCH_GIT_URL }}
           MATCH_GIT_BASIC_AUTHORIZATION:  ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD:                 ${{ secrets.MATCH_PASSWORD }}
+          # Build number
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
+          #Apple Team ID
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       # ─────────────────────────────────────────────────────────────────
@@ -254,10 +274,10 @@ jobs:
       # STEP 11: Upload build artifacts
       # ─────────────────────────────────────────────────────────────────
       - name: "📤 Upload .ipa artifact"
-        if: always()
+        if: always()   # Run even if previous steps fail
         uses: actions/upload-artifact@v4
         with:
-          name: "Collector-${{ github.ref_name }}-${{ github.run_number }}.ipa"
+          name: "GoVi-Transport-${{ github.ref_name }}-${{ github.run_number }}.ipa"
           path: build/GoVi-Transport.ipa
           retention-days: 7
           if-no-files-found: warn
