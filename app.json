@@ -141,7 +141,7 @@
         {
           "image": "./assets/images/app/adaptive-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#26D041"
+          "backgroundColor": "#FFFFFF"
         }
       ],
       [
