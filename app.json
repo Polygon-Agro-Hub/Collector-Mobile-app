@@ -124,12 +124,17 @@
       [
         "expo-media-library",
         {
-          "photosPermission": false,
+          "photosPermission": "Photo library access is required to upload related images.",
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save the QR code to your device.",
           "isAccessMediaLocationEnabled": false
         }
       ],
-      "expo-image-picker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Photo library access is required to upload related images."
+        }
+      ],
       "expo-location",
       [
         "expo-splash-screen",
