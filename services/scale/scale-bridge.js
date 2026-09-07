@@ -1,5 +1,5 @@
 /**
- * BUDRY MFD-300 Scale Bridge — for Expo Go development
+ * BUDRY MFD-300 Scale Bridge ï¿½ for Expo Go development
  * =====================================================
  * Connects to the scale via TCP on 192.168.1.23:33581
  * and serves live weight data over HTTP so Expo Go can poll it.
@@ -30,14 +30,14 @@ let scaleSocket    = null;
 function parseScaleChunk(chunk) {
   const str = chunk.toString("utf8");
   const m = str.match(/([+-]?\s*\d+(?:\.\d+)?)\s*kg/i);
-  if (m) {
+  if (m && m[1]) {
     const val = parseFloat(m[1].replace(/\s+/g, ""));
     if (!isNaN(val)) {
       if (val !== currentWeight) {
         console.log("Weight update: " + val + " kg");
       }
-      currentWeight  = val;
-      lastUpdateAt   = Date.now();
+      currentWeight = val;
+      lastUpdateAt = Date.now();
     }
   }
 }

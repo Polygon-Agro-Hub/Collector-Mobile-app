@@ -199,12 +199,25 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const [isScaleConfigModalVisible, setIsScaleConfigModalVisible] = useState(false);
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
   const [activeScaleGrade, setActiveScaleGrade] = useState<"A" | "B" | "C">("A");
+  const [isWifiOff, setIsWifiOff] = useState(false);
 
   useEffect(() => {
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
     });
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Check initial network state
+    NetInfo.fetch().then((state) => {
+      setIsWifiOff(!state.isConnected);
+    });
+    // Subscribe to network changes
+    const unsubNet = NetInfo.addEventListener((state) => {
+      setIsWifiOff(!state.isConnected);
+    });
+    return () => unsubNet();
   }, []);
 
   const [images, setImages] = useState<{
@@ -844,8 +857,63 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
             }
           />
           <View className="px-6 ">
-            {/* ── Connect Scale Blue Card (Shown Only When Not Connected) ── */}
-            {!scaleStatus.connected && (
+            {/* ── Scale Status Card ── */}
+            {/* State 1: WiFi is OFF — show red card, tapping opens device settings hint */}
+            {isWifiOff ? (
+              <View
+                style={{
+                  marginTop: 8,
+                  marginBottom: 10,
+                  backgroundColor: "#FF3B30",
+                  borderRadius: 28,
+                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: "#FFFFFF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <MaterialCommunityIcons name="wifi-off" size={24} color="#FF3B30" />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      color: "#FFFFFF",
+                      letterSpacing: -0.2,
+                    }}
+                  >
+                    {selectedLanguage === "si"
+                      ? "WiFi අක්‍රියයි"
+                      : selectedLanguage === "ta"
+                      ? "WiFi ஆஃப்"
+                      : "Wi-Fi is Off"}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: "#FFD0CC", marginTop: 2 }}>
+                    {selectedLanguage === "si"
+                      ? "තරාදිය සම්බන්ධ කිරීමට WiFi සක්‍රිය කරන්න"
+                      : selectedLanguage === "ta"
+                      ? "அளவுகோலை இணைக்க WiFi ஐ இயக்கவும்"
+                      : "Enable Wi-Fi to connect the scale"}
+                  </Text>
+                </View>
+
+                <MaterialCommunityIcons name="wifi-off" size={22} color="#FFFFFF" style={{ opacity: 0.7 }} />
+              </View>
+            ) : !scaleStatus.connected ? (
+              /* State 2: WiFi ON but scale not connected — show blue connect card */
               <TouchableOpacity
                 activeOpacity={0.88}
                 onPress={() => setIsScaleConfigModalVisible(true)}
@@ -892,7 +960,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
                 <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
               </TouchableOpacity>
-            )}
+            ) : null /* State 3: Scale connected — card hidden */}
+
             {/* ── Added-crops carousel ── */}
             {crops.length > 0 && (
               <View className="mb-2">
