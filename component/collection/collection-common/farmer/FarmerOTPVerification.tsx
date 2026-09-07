@@ -66,19 +66,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   useEffect(() => {
     const selectedLanguage = t("Otpverification.LNG");
     setLanguage(selectedLanguage);
-
-    const fetchReferenceId = async () => {
-      try {
-        const refId = await AsyncStorage.getItem("referenceId");
-        if (refId) setReferenceId(refId);
-      } catch (error) {
-        console.error("Failed to load referenceId:", error);
-      }
-    };
-
-    fetchReferenceId();
-
-    setTimeout(() => inputRefs.current[0]?.focus(), 100);
   }, []);
 
   useEffect(() => {
@@ -329,6 +316,30 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
   useFocusEffect(
     useCallback(() => {
+      // Always reset OTP inputs and state when screen is opened/focused
+      setOtpDigits(["", "", "", "", ""]);
+      setIsOtpValid(false);
+      setIsVerified(false);
+      setTimer(240);
+      setDisabledResend(true);
+      setIsOtpExpired(false);
+      setModalVisible(false);
+
+      const fetchReferenceId = async () => {
+        try {
+          const refId = await AsyncStorage.getItem("referenceId");
+          if (refId) setReferenceId(refId);
+        } catch (error) {
+          console.error("Failed to load referenceId:", error);
+        }
+      };
+
+      fetchReferenceId();
+
+      const focusTimer = setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 150);
+
       const handleBackPress = () => {
         navigation.navigate("UnregisteredFarmerDetails" as any, {
           NIC: NICnumber,
@@ -342,31 +353,10 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       );
 
       return () => {
+        clearTimeout(focusTimer);
         subscription.remove();
       };
-    }, [navigation]),
-  );
-
-  const hasLeftUnverified = useRef(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (hasLeftUnverified.current && !isVerified) {
-        setOtpDigits(["", "", "", "", ""]);
-        setIsOtpValid(false);
-        setTimer(240);
-        setDisabledResend(true);
-        setIsOtpExpired(false);
-     //   setVerificationAttempts(0);
-        setTimeout(() => inputRefs.current[0]?.focus(), 100);
-      }
-
-      return () => {
-        if (!isVerified) {
-          hasLeftUnverified.current = true;
-        }
-      };
-    }, [isVerified]),
+    }, [navigation, NICnumber]),
   );
 
   return (

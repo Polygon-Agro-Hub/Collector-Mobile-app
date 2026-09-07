@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import NetInfo from "@react-native-community/netinfo";
 import { SavedScale, saveSelectedScale, getSavedScale, clearSavedScale } from "@/utils/scale/scale-storage";
 
 export interface ScaleStatus {
@@ -55,6 +56,27 @@ class WifiScaleService {
     } catch (err) {
       console.warn("Scale auto-connect skipped:", err);
     }
+    this.initNetInfoListener();
+  }
+
+  private initNetInfoListener() {
+    NetInfo.addEventListener((state) => {
+      const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
+      if (!isWifi) {
+        if (this.isConnected || this.isConnecting) {
+          console.log("[WifiScaleService] Wi-Fi lost/disabled - disconnecting scale");
+          this.closeSocket();
+          this.stopHttpPolling();
+          this.isConnected = false;
+          this.isConnecting = false;
+          if (this.currentScale) {
+            this.currentScale.connected = false;
+          }
+          this.currentWeight = 0;
+          this.notifyListeners();
+        }
+      }
+    });
   }
 
   private async initSavedScale() {
@@ -81,38 +103,36 @@ class WifiScaleService {
   }
 
   /**
-   * Parse incoming raw scale data stream (e.g. "SDT\t1\t...\t0.0kg\t0.0kg")
+   * Parse raw TCP chunk from the BUDRY MFD-300 scale.
+   *
+   * Packet format:
+   *   XD1\tSDT
+   *   SDT\t1\t1\t0\t0\t0\t0,0\t0,0\t0,0\t0,0\t8.3kg\t0.0kg
+   *   END\tSDT
+   *
+   * The FIRST "kg" value in the packet is always the measured weight (e.g. 8.3kg).
+   * The SECOND "kg" value is the tare weight (e.g. 0.0kg) — never read it.
+   *
+   * Root cause of the old 8.3 → 0 oscillation:
+   *   When weight was stable (8.3 === currentWeight), the original code did NOT return
+   *   early, fell through to a secondary loop, and found the tare 0.0kg instead.
+   *
+   * Fix: match the FIRST kg in the raw chunk and ALWAYS return — even when the value
+   * hasn't changed — so we never accidentally read the tare column.
    */
   private parseScaleData(rawChunk: string) {
     if (!rawChunk) return;
 
-    // Pattern 1: Matches "0.0kg" or " 12.35 kg" (BUDRY / SDT scale format)
-    const matchKg = rawChunk.match(/([+-]?\s*\d+(?:\.\d+)?)\s*kg/i);
-    if (matchKg && matchKg[1]) {
-      const parsed = parseFloat(matchKg[1].replace(/\s+/g, ""));
-      if (!isNaN(parsed) && parsed !== this.currentWeight) {
-        this.currentWeight = parsed;
-        this.notifyListeners();
-        return;
-      }
-    }
-
-    // Pattern 2: Tab-delimited tokens in SDT line
-    const lines = rawChunk.split(/\r?\n/);
-    for (const line of lines) {
-      if (line.includes("SDT")) {
-        const parts = line.split("\t");
-        for (const part of parts) {
-          const trimmed = part.trim();
-          if (trimmed.toLowerCase().endsWith("kg")) {
-            const val = parseFloat(trimmed.replace(/kg/i, "").trim());
-            if (!isNaN(val) && val !== this.currentWeight) {
-              this.currentWeight = val;
-              this.notifyListeners();
-              return;
-            }
-          }
+    const match = rawChunk.match(/([+-]?\s*\d+(?:\.\d+)?)\s*kg/i);
+    if (match && match[1]) {
+      const val = parseFloat(match[1].replace(/\s+/g, ""));
+      if (!isNaN(val)) {
+        if (val !== this.currentWeight) {
+          this.currentWeight = val;
+          this.notifyListeners();
         }
+        // ← Always return here. Never fall through to secondary kg values (tare).
+        return;
       }
     }
   }

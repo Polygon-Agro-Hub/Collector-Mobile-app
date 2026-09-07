@@ -62,7 +62,6 @@ import otpBankDetailsupdate from "@/component/collection/collection-common/farme
 import GoviPensionForm from "@/component/collection/collection-common/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/collection/collection-common/govi-pension/GoviPensionStatus";
 import NotEligibleScreen from "@/component/collection/collection-common/govi-pension/NotEligibleScreen";
-import ScaleWeightScreen from "@/component/collection/collection-common/scale/ScaleWeightScreen";
 
 // --- Distribution Screens ---
 import DistributionDashboard from "@/component/distribution/distribution-common/dashboard/DistributionDashboard";
@@ -427,11 +426,6 @@ const COLLECTION_STACK_SCREENS: StackRouteConfig[] = [
     component: NotEligibleScreen as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
-  {
-    name: "ScaleWeightScreen",
-    component: ScaleWeightScreen as any,
-    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
-  },
 ];
 
 // ============================================================================
@@ -656,6 +650,7 @@ export function MainTabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName={initialRouteName}
+      backBehavior="initialRoute"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarHideOnKeyboard: false,
