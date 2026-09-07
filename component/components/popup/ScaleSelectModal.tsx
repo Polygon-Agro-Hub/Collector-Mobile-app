@@ -8,7 +8,8 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import NetInfo from "@react-native-community/netinfo";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
@@ -17,13 +18,17 @@ interface ScaleSelectModalProps {
   onClose: () => void;
 }
 
+const isExpoGo = Constants.appOwnership === "expo";
+const DEFAULT_IP = isExpoGo ? "192.168.1.13" : "192.168.1.23";
+const DEFAULT_PORT = isExpoGo ? "3001" : "33581";
+
 export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   visible,
   onClose,
 }) => {
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
-  const [ipAddress, setIpAddress] = useState<string>("192.168.1.100");
-  const [port, setPort] = useState<string>("8080");
+  const [ipAddress, setIpAddress] = useState<string>(DEFAULT_IP);
+  const [port, setPort] = useState<string>(DEFAULT_PORT);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
 
@@ -31,10 +36,15 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
     const unsubscribeScale = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
       if (status.scale?.ip) {
-        setIpAddress(status.scale.ip);
-      }
-      if (status.scale?.port) {
-        setPort(status.scale.port.toString());
+        if (isExpoGo && status.scale.ip === "192.168.1.23") {
+          setIpAddress("192.168.1.13");
+          setPort("3001");
+        } else {
+          setIpAddress(status.scale.ip);
+          if (status.scale?.port) {
+            setPort(status.scale.port.toString());
+          }
+        }
       }
     });
     const unsubscribeNet = NetInfo.addEventListener((state) => {
@@ -86,13 +96,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
           {/* Header */}
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              <MaterialCommunityIcons name="scale-balance" size={26} color="#030E25" />
+              <FontAwesome6 name="weight-scale" size={24} color="black" />
               <View>
                 <Text style={{ fontSize: 18, fontWeight: "bold", color: "#020617" }}>
                   Select Wi-Fi Scale
-                </Text>
-                <Text style={{ fontSize: 12, color: "#64748b" }}>
-                  BUDRY MFD-300 Scale Setup
                 </Text>
               </View>
             </View>
@@ -148,38 +155,34 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
 
           {/* Configuration & Preset Section */}
           <View style={{ marginTop: 20 }}>
-            <Text style={{ fontSize: 12, fontWeight: "800", color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>
-              Scale Device Configuration
-            </Text>
 
             {/* Default Device Selection Card */}
             <TouchableOpacity
               onPress={() => {
-                setIpAddress("192.168.1.100");
-                setPort("8080");
+                setIpAddress(DEFAULT_IP);
+                setPort(DEFAULT_PORT);
               }}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
-                backgroundColor: "#f8fafc",
                 padding: 14,
                 borderRadius: 16,
                 marginBottom: 16,
                 borderWidth: 1,
-                borderColor: "#e2e8f0",
+                borderColor: "#9D9D9D",
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                 <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#e2e8f0", alignItems: "center", justifyContent: "center" }}>
-                  <MaterialCommunityIcons name="scale" size={20} color="#334155" />
+                  <FontAwesome6 name="weight-scale" size={20} color="black" />
                 </View>
                 <View>
                   <Text style={{ fontSize: 14, fontWeight: "bold", color: "#0f172a" }}>
-                    BUDRY MFD-300 (Default)
+                    {isExpoGo ? "BUDRY MFD-300 (PC Bridge)" : "BUDRY MFD-300"}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#64748b" }}>
-                    IP: 192.168.1.100 | Port: 8080
+                    IP: {DEFAULT_IP} | Port: {DEFAULT_PORT}
                   </Text>
                 </View>
               </View>
@@ -197,7 +200,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                   onChangeText={setIpAddress}
                   placeholder="e.g. 192.168.1.100"
                   keyboardType="numeric"
-                  style={{ backgroundColor: "#f8fafc", borderWidth: 1, borderColor: "#cbd5e1", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
+                  style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
                 />
               </View>
 
@@ -210,7 +213,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                   onChangeText={setPort}
                   placeholder="8080"
                   keyboardType="number-pad"
-                  style={{ backgroundColor: "#f8fafc", borderWidth: 1, borderColor: "#cbd5e1", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
+                  style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
                 />
               </View>
             </View>
@@ -219,22 +222,28 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
             <TouchableOpacity
               onPress={handleConnect}
               disabled={isConnecting}
+              activeOpacity={0.85}
               style={{
-                backgroundColor: "#059669",
+                backgroundColor: "#FAE432",
                 paddingVertical: 14,
-                borderRadius: 16,
+                borderRadius: 32,
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
               }}
             >
               {isConnecting ? (
-                <ActivityIndicator size="small" color="#ffffff" />
+                <ActivityIndicator size="small" color="#000000" />
               ) : (
                 <>
-                  <MaterialIcons name="wifi" size={20} color="#ffffff" />
-                  <Text style={{ fontSize: 15, fontWeight: "bold", color: "#ffffff" }}>
+                  <MaterialIcons name="wifi" size={20} color="#000000" />
+                  <Text style={{ fontSize: 16, fontWeight: "bold", color: "#000000" }}>
                     {scaleStatus.connected ? "Reconnect Scale" : "Connect Scale"}
                   </Text>
                 </>

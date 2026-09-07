@@ -20,7 +20,7 @@ import { RouteProp, useFocusEffect, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import Entypo from "react-native-vector-icons/Entypo";
 import MdIcons from "react-native-vector-icons/MaterialIcons";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import environment from "../../../../environment/environment";
@@ -33,6 +33,9 @@ import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
+import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
+import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
+import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -191,6 +194,18 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     varietyName: "",
     grade: "A" as "A" | "B" | "C",
   });
+
+  const [scaleModalVisible, setScaleModalVisible] = useState(false);
+  const [isScaleConfigModalVisible, setIsScaleConfigModalVisible] = useState(false);
+  const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
+  const [activeScaleGrade, setActiveScaleGrade] = useState<"A" | "B" | "C">("A");
+
+  useEffect(() => {
+    const unsubscribe = wifiScaleService.subscribe((status) => {
+      setScaleStatus(status);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const [images, setImages] = useState<{
     A: string | null;
@@ -446,34 +461,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }
 
     setQuantities((prev) => ({ ...prev, [grade]: cleanedValue }));
-
-    const numericValue =
-      cleanedValue === "" ? 0 : parseFloat(cleanedValue) || 0;
-
-    if (numericValue === 0) {
-      setImages((prev) => ({ ...prev, [grade]: null }));
-    }
-
-    const gradesWithQuantityButNoImage = (["A", "B", "C"] as const).filter(
-      (g) => {
-        const otherGradeValue =
-          g === grade ? numericValue : parseFloat(quantities[g]) || 0;
-        return otherGradeValue > 0 && !images[g] && g !== grade;
-      },
-    );
-
-    if (gradesWithQuantityButNoImage.length > 0 && numericValue > 0) {
-      Alert.alert(
-        t("Error.Upload Image First"),
-        t("UnregisteredCropDetails.Please upload image for Grade", {
-          grade,
-          gradesWithQuantityButNoImage: gradesWithQuantityButNoImage[0],
-        }),
-        [{ text: t("Error.Ok") }],
-      );
-      return;
-    }
-
     calculateTotal();
   };
 
@@ -492,24 +479,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   };
 
   const incrementCropCount = async () => {
-    const missingImages = [];
-    if ((quantities.A ? parseFloat(quantities.A) : 0) > 0 && !images.A)
-      missingImages.push("Grade A");
-    if ((quantities.B ? parseFloat(quantities.B) : 0) > 0 && !images.B)
-      missingImages.push("Grade B");
-    if ((quantities.C ? parseFloat(quantities.C) : 0) > 0 && !images.C)
-      missingImages.push("Grade C");
-
-    if (missingImages.length > 0) {
-      Alert.alert(
-        t("UnregisteredCropDetails.Images Required"),
-        t("UnregisteredCropDetails.Please upload images for", {
-          missingImages: missingImages.join(", "),
-        }),
-      );
-      return;
-    }
-
     if (!selectedCrop || !selectedVariety) {
       Alert.alert(
         t("UnregisteredCropDetails.Incomplete Seletcion"),
@@ -537,9 +506,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       gradeBquan: quantities.B ? parseFloat(quantities.B) : 0,
       gradeCprice: unitPrices.C || 0,
       gradeCquan: quantities.C ? parseFloat(quantities.C) : 0,
-      imageA: images.A || null,
-      imageB: images.B || null,
-      imageC: images.C || null,
     };
 
     setCrops((prevCrops) => [...prevCrops, newCrop]);
@@ -551,25 +517,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setSelectedCrop(null);
     setSelectedVariety(null);
     setUnitPrices({ A: null, B: null, C: null });
-    setImages({ A: null, B: null, C: null });
     setQuantities({ A: "", B: "", C: "" });
     setShowCameraModels(false);
-  };
-
-  const handleImagePick = (
-    base64Image: string | null,
-    grade: "A" | "B" | "C",
-  ) => {
-    const quantityValue = quantities[grade] ? parseFloat(quantities[grade]) : 0;
-    if (quantityValue <= 0) {
-      Alert.alert(
-        t("UnregisteredCropDetails.Add Quantity First"),
-        t("UnregisteredCropDetails.Please enter quantity", { grade }),
-        [{ text: t("Error.Ok") }],
-      );
-      return;
-    }
-    setImages((prevImages) => ({ ...prevImages, [grade]: base64Image }));
   };
 
   const hasUnsavedCropDetails = () => {
@@ -585,8 +534,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setSelectedVariety(null);
     setUnitPrices({ A: null, B: null, C: null });
     setQuantities({ A: "", B: "", C: "" });
-    setImages({ A: null, B: null, C: null });
-    setResetImage(true);
     setTotal(0);
     setCrops([]);
     setdonebutton2visibale(false);
@@ -598,25 +545,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const handleSubmit = async () => {
     if (hasUnsavedCropDetails()) {
       Alert.alert(
-        t("Error.Unsaved Crop Details"),
-        t("Error.You have entered crop details but"),
-        [
-          { text: t("Error.No"), style: "cancel" },
-          {
-            text: t("Error.Yes"),
-            style: "default",
-            onPress: () => proceedWithSubmit(),
-          },
-        ],
+        t("UnregisteredCropDetails.Unsaved Changes"),
+        t(
+          "UnregisteredCropDetails.You have entered crop details that haven't been added yet. Please click 'Add' to include them, or clear the form to proceed.",
+        ),
       );
       return;
     }
-    proceedWithSubmit();
-  };
-
-  const proceedWithSubmit = async () => {
-    const netState = await NetInfo.fetch();
-    if (!netState.isConnected) return;
 
     try {
       if (crops.length === 0) {
@@ -658,9 +593,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           gradeBquan: crop.gradeBquan || 0,
           gradeCprice: crop.gradeCprice || 0,
           gradeCquan: crop.gradeCquan || 0,
-          imageA: crop.imageA || null,
-          imageB: crop.imageB || null,
-          imageC: crop.imageC || null,
         })),
       };
 
@@ -834,7 +766,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       const newCrops = [...crops];
       newCrops[cropIndex][`grade${grade}quan`] = 0;
       newCrops[cropIndex][`grade${grade}price`] = 0;
-      newCrops[cropIndex][`image${grade}`] = null;
 
       const allGradesDeleted = ["A", "B", "C"].every(
         (gradeKey) => newCrops[cropIndex][`grade${gradeKey}quan`] === 0,
@@ -913,6 +844,55 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
             }
           />
           <View className="px-6 ">
+            {/* ── Connect Scale Blue Card (Shown Only When Not Connected) ── */}
+            {!scaleStatus.connected && (
+              <TouchableOpacity
+                activeOpacity={0.88}
+                onPress={() => setIsScaleConfigModalVisible(true)}
+                style={{
+                  marginTop: 8,
+                  marginBottom: 10,
+                  backgroundColor: "#1266FD",
+                  borderRadius: 28,
+                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: "#FFFFFF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <MaterialCommunityIcons name="wifi" size={24} color="#1266FD" />
+                </View>
+
+                <Text
+                  style={{
+                    flex: 1,
+                    fontSize: 17,
+                    fontWeight: "bold",
+                    color: "#FFFFFF",
+                    letterSpacing: -0.2,
+                  }}
+                >
+                  {selectedLanguage === "si"
+                    ? "තරාදිය සම්බන්ධ කරන්න"
+                    : selectedLanguage === "ta"
+                    ? "அளவுகோலை இணைக்கவும்"
+                    : "Connect Scale"}
+                </Text>
+
+                <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
             {/* ── Added-crops carousel ── */}
             {crops.length > 0 && (
               <View className="mb-2">
@@ -1209,58 +1189,94 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 {t("UnregisteredCropDetails.UnitGrades")}
               </Text>
               <View className="border border-gray-300 rounded-lg mt-2 p-4">
-                {["A", "B", "C"].map((grade) => (
-                  <View key={grade} className="flex-row items-center mb-3">
-                    <Text className="w-8 text-gray-600">{grade}</Text>
-                    <TextInput
-                      placeholder="Rs."
-                      placeholderTextColor="#A3A3A3"
-                      keyboardType="numeric"
-                      className="flex-1 rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
-                      value={unitPrices[grade]?.toString() || ""}
-                      editable={false}
-                      style={{ color: "#4B5563" }}
-                    />
-                    <TextInput
-                      placeholder="kg"
-                      placeholderTextColor="#A3A3A3"
-                      keyboardType="decimal-pad"
-                      className="flex-1 rounded-full p-2 mx-2 text-gray-600 bg-[#F4F4F4] text-center"
-                      value={quantities[grade]}
-                      onChangeText={(value) =>
-                        handleQuantityChange(grade as "A" | "B" | "C", value)
-                      }
-                      autoComplete="off"
-                      importantForAutofill="no"
-                      autoCorrect={false}
-                      style={{ color: "#4B5563" }}
-                    />
-                  </View>
-                ))}
-              </View>
+                {(["A", "B", "C"] as const).map((grade) => {
+                  const hasValue = !!quantities[grade] && parseFloat(quantities[grade]) > 0;
+                  return (
+                    <View key={grade} className="flex-row items-center mb-3">
+                      <Text className="w-6 text-gray-600 font-semibold text-base">
+                        {grade}
+                      </Text>
+                      <TextInput
+                        placeholder="Rs."
+                        placeholderTextColor="#A3A3A3"
+                        keyboardType="numeric"
+                        value={unitPrices[grade]?.toString() || ""}
+                        editable={false}
+                        style={{
+                          height: 50,
+                          backgroundColor: "#F4F4F4",
+                          borderRadius: 25,
+                          flex: 1,
+                          marginHorizontal: 4,
+                          textAlign: "center",
+                          color: "#4B5563",
+                          fontSize: 15,
+                          fontWeight: "500",
+                        }}
+                      />
+                      <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={() => {
+                          setActiveScaleGrade(grade);
+                          setScaleModalVisible(true);
+                        }}
+                        style={{
+                          height: 50,
+                          backgroundColor: "#F4F4F4",
+                          borderRadius: 25,
+                          flex: 1,
+                          marginHorizontal: 4,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <TextInput
+                          placeholder="kg"
+                          placeholderTextColor="#A3A3A3"
+                          value={quantities[grade]}
+                          editable={false}
+                          pointerEvents="none"
+                          style={{
+                            textAlign: "center",
+                            color: "#4B5563",
+                            fontSize: 15,
+                            fontWeight: "500",
+                          }}
+                        />
+                      </TouchableOpacity>
 
-              {showCameraModels && (
-                <View className="flex-row items-center justify-between">
-                  <CameraComponent
-                    onImagePicked={(image) => handleImagePick(image, "A")}
-                    grade="A"
-                    resetImage={resetImage}
-                    disabled={isGradeACameraEnabled}
-                  />
-                  <CameraComponent
-                    onImagePicked={(image) => handleImagePick(image, "B")}
-                    grade="B"
-                    resetImage={resetImage}
-                    disabled={isGradeBCameraEnabled}
-                  />
-                  <CameraComponent
-                    onImagePicked={(image) => handleImagePick(image, "C")}
-                    grade="C"
-                    resetImage={resetImage}
-                    disabled={isGradeCCameraEnabled}
-                  />
-                </View>
-              )}
+                      {/* Scale Action Button: Arrow or Retry */}
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          setActiveScaleGrade(grade);
+                          setScaleModalVisible(true);
+                        }}
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: 25,
+                          backgroundColor: "#000000",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginLeft: 4,
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.15,
+                          shadowRadius: 4,
+                          elevation: 3,
+                        }}
+                      >
+                        {hasValue ? (
+                          <MaterialIcons name="refresh" size={24} color="#FFFFFF" />
+                        ) : (
+                          <MaterialIcons name="arrow-forward" size={24} color="#FFFFFF" />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </View>
 
               <Text className="text-gray-600 mt-4">
                 {t("UnregisteredCropDetails.Total")}
@@ -1402,6 +1418,26 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         searchPlaceholder={t("search")}
         multiSelect={false}
         isLoading={loadingVarieties}
+      />
+
+      {/* Real-time Scale Weight Modal */}
+      <ScaleWeightModal
+        visible={scaleModalVisible}
+        onClose={() => setScaleModalVisible(false)}
+        initialWeight={
+          quantities[activeScaleGrade]
+            ? parseFloat(quantities[activeScaleGrade]) || 0
+            : 0
+        }
+        onContinue={(weight) => {
+          handleQuantityChange(activeScaleGrade, weight.toFixed(2));
+        }}
+      />
+
+      {/* Scale Setup / Connect Bottom Sheet Modal */}
+      <ScaleSelectModal
+        visible={isScaleConfigModalVisible}
+        onClose={() => setIsScaleConfigModalVisible(false)}
       />
     </KeyboardAvoidingView>
   );

@@ -14,6 +14,7 @@ export type RootStackParamList = {
   Ufarmercropdetails: undefined;
   CollectionOfficerDashboard: undefined;
   CollectionDashboard: undefined;
+  ScaleWeightScreen: undefined;
   SideMenu: undefined;
   ReadytoPickupOrders: undefined;
   SinChangePassword: undefined;
