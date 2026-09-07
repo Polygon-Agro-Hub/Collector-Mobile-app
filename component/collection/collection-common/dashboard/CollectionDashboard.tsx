@@ -323,30 +323,6 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       onPress: () => navigation.navigate("SearchFarmer" as any),
     });
 
-    items.push({
-      key: "digital_scale",
-      title: "Digital Scale",
-      borderColor: "#10B981",
-      icon: (
-        <View
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: "#ECFDF5",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <MaterialCommunityIcons name="scale-balance" size={22} color="#059669" />
-        </View>
-      ),
-      onPress: () => navigation.navigate("ScaleWeightScreen" as any),
-    });
-
     return items;
   };
 

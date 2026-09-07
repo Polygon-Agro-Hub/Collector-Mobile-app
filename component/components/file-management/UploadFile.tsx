@@ -51,16 +51,6 @@ export default function UploadFile({
 
   const pickImage = async () => {
     try {
-      const permissionResult =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permissionResult.granted) {
-        Alert.alert(
-          "Permission Required",
-          "Permission to access media library is required to upload invoice photo.",
-        );
-        return;
-      }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,

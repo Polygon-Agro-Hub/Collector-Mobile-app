@@ -382,18 +382,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     );
   };
 
-  const requestPermission = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission Denied",
-        "Sorry, we need camera roll permissions to upload images!",
-      );
-      return false;
-    }
-    return true;
-  };
-
   const pickImageFromGallery = async (
     imageType:
       | "nicFront"
@@ -403,9 +391,6 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       | "successorBirthCertFront"
       | "successorBirthCertBack",
   ) => {
-    const hasPermission = await requestPermission();
-    if (!hasPermission) return;
-
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,

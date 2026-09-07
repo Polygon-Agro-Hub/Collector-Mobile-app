@@ -507,15 +507,6 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
   };
 
   const handleImagePick = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      Alert.alert(
-        t("Error.Permission required"),
-        t("Error.Permission required message"),
-      );
-      return;
-    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,

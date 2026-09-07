@@ -18,41 +18,34 @@
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.VIBRATE",
-        "android.permission.WAKE_LOCK",
-        "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.ACCESS_WIFI_STATE",
-        "android.permission.CHANGE_WIFI_STATE",
         "android.permission.ACCESS_NETWORK_STATE",
-        "android.permission.CHANGE_NETWORK_STATE",
-        "android.permission.SYSTEM_ALERT_WINDOW",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.NOTIFICATIONS",
-        "android.permission.CALL_PHONE",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
         "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_MEDIA_VIDEO",
-        "android.permission.READ_MEDIA_AUDIO",
         "android.permission.BLUETOOTH",
-        "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.BLUETOOTH_CONNECT"
       ],
       "blockedPermissions": [
         "com.google.android.gms.permission.AD_ID",
         "android.permission.ACCESS_BACKGROUND_LOCATION",
-        "android.permission.READ_MEDIA_IMAGES",
-        "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VIDEO",
         "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION"
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.CALL_PHONE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.CHANGE_WIFI_STATE",
+        "android.permission.CHANGE_NETWORK_STATE"
       ]
     },
     "ios": {
@@ -66,14 +59,11 @@
           "NSAllowsArbitraryLoads": true
         },
         "NSCameraUsageDescription": "Camera access is required to scan QR codes and capture images.",
-        "NSMicrophoneUsageDescription": "Microphone access is required for voice features.",
         "NSPhotoLibraryUsageDescription": "Photo library access is required to upload related images.",
         "NSPhotoLibraryAddUsageDescription": "Allow CoDi-Net to save the QR code to your device.",
         "NSLocationWhenInUseUsageDescription": "Location access is required to track collection activities.",
-        "NSUserTrackingUsageDescription": "Tracking is used to improve app experience.",
-        "NSUserNotificationUsageDescription": "Notifications are used to send important updates.",
-        "NSPhoneUsageDescription": "Phone access is used to call farmers directly.",
-        "NSLocalNetworkUsageDescription": "Local network access is required to communicate with the digital weighing scale on your Wi-Fi network."
+        "NSLocalNetworkUsageDescription": "Local network access is required to communicate with the digital weighing scale on your Wi-Fi network.",
+        "NSBluetoothAlwaysUsageDescription": "Bluetooth access is required to connect to your label printer."
       }
     },
     "web": {
@@ -99,15 +89,6 @@
           }
         }
       ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/app/adaptive-icon.png",
-          "color": "#ffffff",
-          "defaultChannel": "default",
-          "enableBackgroundRemoteNotifications": false
-        }
-      ],
       "expo-font",
       "expo-video",
       "expo-audio",
@@ -118,8 +99,7 @@
         "expo-camera",
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
+          "recordAudioAndroid": false
         }
       ],
       [
