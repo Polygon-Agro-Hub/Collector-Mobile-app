@@ -72,7 +72,8 @@
         "NSLocationWhenInUseUsageDescription": "Location access is required to track collection activities.",
         "NSUserTrackingUsageDescription": "Tracking is used to improve app experience.",
         "NSUserNotificationUsageDescription": "Notifications are used to send important updates.",
-        "NSPhoneUsageDescription": "Phone access is used to call farmers directly."
+        "NSPhoneUsageDescription": "Phone access is used to call farmers directly.",
+        "NSLocalNetworkUsageDescription": "Local network access is required to communicate with the digital weighing scale on your Wi-Fi network."
       }
     },
     "web": {
