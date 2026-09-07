@@ -105,6 +105,12 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
             })
             .filter((item: { value: any }) => item.value);
 
+          mappedCategories.sort((a: { label: string }, b: { label: string }) =>
+            (a.label || "").localeCompare(b.label || "", undefined, {
+              sensitivity: "base",
+            })
+          );
+
           setCategory(mappedCategories);
         }
       } catch (error) {

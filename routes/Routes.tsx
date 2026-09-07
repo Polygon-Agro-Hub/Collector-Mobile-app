@@ -656,6 +656,7 @@ export function MainTabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName={initialRouteName}
+      backBehavior="initialRoute"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarHideOnKeyboard: false,

@@ -209,14 +209,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   }, []);
 
   useEffect(() => {
-    // Check initial network state
-    NetInfo.fetch().then((state) => {
-      setIsWifiOff(!state.isConnected);
-    });
-    // Subscribe to network changes
-    const unsubNet = NetInfo.addEventListener((state) => {
-      setIsWifiOff(!state.isConnected);
-    });
+    const checkWifi = (state: any) => {
+      const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
+      setIsWifiOff(!isWifi);
+    };
+
+    NetInfo.fetch().then(checkWifi);
+    const unsubNet = NetInfo.addEventListener(checkWifi);
     return () => unsubNet();
   }, []);
 
@@ -254,6 +253,12 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
       setResetImage(true);
       const timer = setTimeout(() => setResetImage(false), 100);
+
+      NetInfo.fetch().then((state) => {
+        const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
+        setIsWifiOff(!isWifi);
+      });
+      setScaleStatus(wifiScaleService.getStatus());
 
       return () => clearTimeout(timer);
     }, []),
@@ -858,18 +863,21 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           />
           <View className="px-6 ">
             {/* ── Scale Status Card ── */}
-            {/* State 1: WiFi is OFF — show red card, tapping opens device settings hint */}
+            {/* State 1: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */}
             {isWifiOff ? (
-              <View
+              <TouchableOpacity
+                activeOpacity={0.88}
+                onPress={() => setIsScaleConfigModalVisible(true)}
                 style={{
                   marginTop: 8,
                   marginBottom: 10,
-                  backgroundColor: "#FF3B30",
+                  backgroundColor: "#FDF0F1",
                   borderRadius: 28,
                   paddingVertical: 10,
                   paddingHorizontal: 14,
                   flexDirection: "row",
                   alignItems: "center",
+                  gap: 12,
                 }}
               >
                 <View
@@ -880,38 +888,42 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                     backgroundColor: "#FFFFFF",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginRight: 12,
                   }}
                 >
-                  <MaterialCommunityIcons name="wifi-off" size={24} color="#FF3B30" />
+                  <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
                 </View>
-
                 <View style={{ flex: 1 }}>
                   <Text
                     style={{
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: "bold",
-                      color: "#FFFFFF",
+                      color: "#E91233",
                       letterSpacing: -0.2,
                     }}
                   >
                     {selectedLanguage === "si"
-                      ? "WiFi අක්‍රියයි"
+                      ? "Wi-Fi අක්‍රියයි"
                       : selectedLanguage === "ta"
-                      ? "WiFi ஆஃப்"
+                      ? "Wi-Fi முடக்கப்பட்டுள்ளது"
                       : "Wi-Fi is Off"}
                   </Text>
-                  <Text style={{ fontSize: 12, color: "#FFD0CC", marginTop: 2 }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#0F172A",
+                      fontWeight: "500",
+                      marginTop: 1,
+                      lineHeight: 16,
+                    }}
+                  >
                     {selectedLanguage === "si"
-                      ? "තරාදිය සම්බන්ධ කිරීමට WiFi සක්‍රිය කරන්න"
+                      ? "ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න."
                       : selectedLanguage === "ta"
-                      ? "அளவுகோலை இணைக்க WiFi ஐ இயக்கவும்"
-                      : "Enable Wi-Fi to connect the scale"}
+                      ? "உங்கள் தொலைபேசியில் Wi-Fi இயக்கவும்."
+                      : "Please turn on Wi-Fi on your phone to connect to the scale."}
                   </Text>
                 </View>
-
-                <MaterialCommunityIcons name="wifi-off" size={22} color="#FFFFFF" style={{ opacity: 0.7 }} />
-              </View>
+              </TouchableOpacity>
             ) : !scaleStatus.connected ? (
               /* State 2: WiFi ON but scale not connected — show blue connect card */
               <TouchableOpacity

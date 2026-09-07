@@ -301,9 +301,13 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
             value={selectedDate}
             mode="date"
             display="default"
+            maximumDate={new Date()}
             onChange={(event, date) => {
               setShowDatePicker(false);
-              if (date) setSelectedDate(date);
+              if (date) {
+                const today = new Date();
+                setSelectedDate(date > today ? today : date);
+              }
             }}
           />
         )}
@@ -315,10 +319,14 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
               value={selectedDate}
               mode="date"
               display="inline"
+              maximumDate={new Date()}
               style={{ width: 320, height: 260 }}
               onChange={(event, date) => {
                 setShowDatePicker(false);
-                if (date) setSelectedDate(date);
+                if (date) {
+                  const today = new Date();
+                  setSelectedDate(date > today ? today : date);
+                }
               }}
             />
           </View>

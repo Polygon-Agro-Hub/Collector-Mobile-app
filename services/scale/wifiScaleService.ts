@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import NetInfo from "@react-native-community/netinfo";
 import { SavedScale, saveSelectedScale, getSavedScale, clearSavedScale } from "@/utils/scale/scale-storage";
 
 export interface ScaleStatus {
@@ -55,6 +56,27 @@ class WifiScaleService {
     } catch (err) {
       console.warn("Scale auto-connect skipped:", err);
     }
+    this.initNetInfoListener();
+  }
+
+  private initNetInfoListener() {
+    NetInfo.addEventListener((state) => {
+      const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
+      if (!isWifi) {
+        if (this.isConnected || this.isConnecting) {
+          console.log("[WifiScaleService] Wi-Fi lost/disabled - disconnecting scale");
+          this.closeSocket();
+          this.stopHttpPolling();
+          this.isConnected = false;
+          this.isConnecting = false;
+          if (this.currentScale) {
+            this.currentScale.connected = false;
+          }
+          this.currentWeight = 0;
+          this.notifyListeners();
+        }
+      }
+    });
   }
 
   private async initSavedScale() {
