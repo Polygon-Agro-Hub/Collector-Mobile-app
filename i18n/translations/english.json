@@ -262,7 +262,8 @@
     "No pickup orders available": "No pickup orders available.",
     "Authentication failed": "Authentication failed.",
     "An error occurred while fetching orders": "An error occurred while fetching orders.",
-    "Phone call is not supported on this device": "Phone call is not supported on this device."
+    "Phone call is not supported on this device": "Phone call is not supported on this device.",
+    "Cancel": "Cancel"
   },
   "SideMenu": {
     "LNG": "en",
@@ -1079,7 +1080,8 @@
     "skipLocation": "Skip Location?",
     "skipMessage": "Some features may not work properly without location access. Are you sure?",
     "skip": "Skip",
-    "skipForNow": "Skip for now"
+    "skipForNow": "Skip for now",
+    "enableCameraManually":"Camera access is required. Please enable it in settings."
   },
   "ReceivedCashTransfer": {
     "Transfer to Company": "Transfer to Company",

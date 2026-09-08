@@ -481,7 +481,7 @@ export default function PurchaseProduct({
                     textAlign: "center",
                   }}
                 >
-                  {t("PurchaseProduct.GoBack") || "Go Back"}
+                  {t("PurchaseProduct.GoBack", { defaultValue: "Go Back" })}
                 </Text>
               </TouchableOpacity>
 

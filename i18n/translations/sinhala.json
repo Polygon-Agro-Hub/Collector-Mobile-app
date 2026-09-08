@@ -264,7 +264,8 @@
     "No pickup orders available": "ලබා ගැනීමට ඇණවුම් නොමැත.",
     "Authentication failed": "තහවුරු කිරීම අසාර්ථක විය.",
     "An error occurred while fetching orders": "ඇණවුම් ලබා ගැනීමේදී දෝෂයක් සිදු විය.",
-    "Phone call is not supported on this device": "මෙම උපාංගයෙන් දුරකථන ඇමතුම් ලබා ගත නොහැක."
+    "Phone call is not supported on this device": "මෙම උපාංගයෙන් දුරකථන ඇමතුම් ලබා ගත නොහැක.",
+    "Cancel": "අවලංගු කරන්න"
   },
   "SideMenu": {
     "LNG": "si",
@@ -1087,7 +1088,8 @@
     "skipLocation": "Skip Location?",
     "skipMessage": "Some features may not work properly without location access. Are you sure?",
     "skip": "Skip",
-    "skipForNow": "Skip for now"
+    "skipForNow": "Skip for now",
+    "enableCameraManually":"Camera access is required. Please enable it in settings."
   },
   "ReceivedCashTransfer": {
     "Transfer to Company": "සමාගමට මාරු කරන්න",

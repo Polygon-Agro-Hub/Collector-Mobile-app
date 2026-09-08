@@ -12,7 +12,10 @@ import {
 import QRCode from "react-native-qrcode-svg";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
+import {
+  EndShiftHeaderRight,
+  EndShiftModal,
+} from "@/component/components/navigations/EndShiftModal";
 import AlertModal from "@/component/components/popup/AlertModal";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePrinter } from "@/services/printer/usePrinter";
@@ -21,10 +24,7 @@ import {
   buildTheme2TSPL,
 } from "@/services/printer/Tspllabelbuilder";
 import { PrinterSelectModal } from "@/component/components/popup/PrinterSelectModal";
-import {
-  generatePrintSteps,
-  PrintStep,
-} from "@/utils/packing/packing-helpers";
+import { generatePrintSteps, PrintStep } from "@/utils/packing/packing-helpers";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import environment from "@/environment/environment";
@@ -49,7 +49,8 @@ export default function PrintingConfirmation({
 
   const processOrderId = routeProcessOrderId || routeOrderId;
   const insets = useSafeAreaInsets();
-  const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
+  const [endShiftModalVisible, setEndShiftModalVisible] =
+    useState<boolean>(false);
   const [isPrinterModalOpen, setIsPrinterModalOpen] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
@@ -68,18 +69,30 @@ export default function PrintingConfirmation({
   } = usePrinter();
 
   const rawType = String(route.params?.type || "").toUpperCase();
-  const isWholesale = rawType === "W" || rawType === "WHOLESALE" || String(orderNumber).includes("(W)") || String(orderNumber).includes("(Wholesale)") || String(orderNumber).includes("Wholesale");
-  const cleanInv = String(invoiceNumber || orderNumber).replace(/\s*\([^\)]*\)/g, "").trim();
+  const isWholesale =
+    rawType === "W" ||
+    rawType === "WHOLESALE" ||
+    String(orderNumber).includes("(W)") ||
+    String(orderNumber).includes("(Wholesale)") ||
+    String(orderNumber).includes("Wholesale");
+  const cleanInv = String(invoiceNumber || orderNumber)
+    .replace(/\s*\([^\)]*\)/g, "")
+    .trim();
 
   // Build dynamic print steps using packing helper utility
   const steps: PrintStep[] = generatePrintSteps(packagesList, alacarteCount);
 
   // Match each step against trackingRows to determine if it is already printed
   const trackingRows: any[] = route.params?.trackingRows || [];
-  const isMain = (row: any) => Number(row.isMainContainer) === 1 || row.isMainContainer === true;
+  const isMain = (row: any) =>
+    Number(row.isMainContainer) === 1 || row.isMainContainer === true;
   const mainTrackingRows = trackingRows.filter((row) => isMain(row));
-  const pkgTrackingRows = trackingRows.filter((row) => !isMain(row) && row.orderpackageId);
-  const alacarteTrackingRows = trackingRows.filter((row) => !isMain(row) && !row.orderpackageId);
+  const pkgTrackingRows = trackingRows.filter(
+    (row) => !isMain(row) && row.orderpackageId,
+  );
+  const alacarteTrackingRows = trackingRows.filter(
+    (row) => !isMain(row) && !row.orderpackageId,
+  );
 
   let mainMatchedCount = 0;
   const pkgMatchedCounts = new Map<number, number>();
@@ -92,7 +105,9 @@ export default function PrintingConfirmation({
       matchedRow = mainTrackingRows[mainMatchedCount];
       mainMatchedCount++;
     } else if (step.type === "package") {
-      const matchedPkgRows = pkgTrackingRows.filter((row) => Number(row.orderpackageId) === Number(step.packageId));
+      const matchedPkgRows = pkgTrackingRows.filter(
+        (row) => Number(row.orderpackageId) === Number(step.packageId),
+      );
       const currentMatched = pkgMatchedCounts.get(step.packageId) || 0;
       matchedRow = matchedPkgRows[currentMatched];
       pkgMatchedCounts.set(step.packageId, currentMatched + 1);
@@ -106,7 +121,12 @@ export default function PrintingConfirmation({
 
   // Start at the first unprinted box (or the last step if all are printed)
   const firstUnprintedIndex = steps.findIndex((s: any) => !s.isPrinted);
-  const initialStep = firstUnprintedIndex !== -1 ? firstUnprintedIndex + 1 : (steps.length > 0 ? steps.length : 1);
+  const initialStep =
+    firstUnprintedIndex !== -1
+      ? firstUnprintedIndex + 1
+      : steps.length > 0
+        ? steps.length
+        : 1;
 
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
@@ -170,7 +190,9 @@ export default function PrintingConfirmation({
       handleOpenPrinterModal();
       setAlertType("error");
       setAlertTitle("Printer Required");
-      setAlertMessage("Please connect to a Bluetooth thermal printer first before printing.");
+      setAlertMessage(
+        "Please connect to a Bluetooth thermal printer first before printing.",
+      );
       setAlertVisible(true);
       return;
     }
@@ -180,12 +202,19 @@ export default function PrintingConfirmation({
 
     let backendOpenedSuccessfully = false;
     let isMainContainerStep = activeStep.type === "main";
-    let targetOrderPackageId = isMainContainerStep ? null : (activeStep.packageId || null);
-    const effectiveRowId = route.params?.rowId ?? store.getState().auth.activeAssignment?.rowId ?? null;
+    let targetOrderPackageId = isMainContainerStep
+      ? null
+      : activeStep.packageId || null;
+    const effectiveRowId =
+      route.params?.rowId ??
+      store.getState().auth.activeAssignment?.rowId ??
+      null;
 
     try {
       // 2. Validate with backend first (Check next station busy / position assigned)
-      const token = (await AsyncStorage.getItem("@access_token")) || store.getState().auth.token;
+      const token =
+        (await AsyncStorage.getItem("@access_token")) ||
+        store.getState().auth.token;
 
       if (isMainContainerStep) {
         const response = await axios.post(
@@ -222,8 +251,12 @@ export default function PrintingConfirmation({
             orderId: processOrderId,
             orderpackageId: targetOrderPackageId,
             isPackage: isPackageStep ? 1 : 0,
-            packageIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
-            packageBoxSubIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
+            packageIndex: isPackageStep
+              ? (activeStep.packageBoxSubIndex ?? 0)
+              : 0,
+            packageBoxSubIndex: isPackageStep
+              ? (activeStep.packageBoxSubIndex ?? 0)
+              : 0,
             rowId: effectiveRowId,
           },
           { headers: { Authorization: `Bearer ${token}` } },
@@ -262,7 +295,7 @@ export default function PrintingConfirmation({
       };
 
       const tspl = buildTheme2TSPL(labelData);
-      
+
       try {
         await printTSPL(tspl);
       } catch (printErr: any) {
@@ -277,7 +310,7 @@ export default function PrintingConfirmation({
               isMainContainer: isMainContainerStep,
               rowId: effectiveRowId,
             },
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
         } catch (rbErr) {
           console.error("Failed to execute backend rollback:", rbErr);
@@ -286,7 +319,8 @@ export default function PrintingConfirmation({
         setAlertType("error");
         setAlertTitle("Printer Error");
         setAlertMessage(
-          printErr?.message || "Failed to print sticker on thermal printer. Order state was reverted. Please check your printer connection and try again."
+          printErr?.message ||
+            "Failed to print sticker on thermal printer. Order state was reverted. Please check your printer connection and try again.",
         );
         setAlertVisible(true);
         setIsProcessing(false);
@@ -309,13 +343,18 @@ export default function PrintingConfirmation({
       setIsProcessing(false);
     } catch (err: any) {
       console.error("Error updating order status on QR print:", err);
-      const msg = err.response?.data?.message || err.message || "Failed to communicate with packing server. Please try again.";
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to communicate with packing server. Please try again.";
       const code = err.response?.data?.code;
 
       if (backendOpenedSuccessfully) {
         // Rollback if needed
         try {
-          const token = (await AsyncStorage.getItem("@access_token")) || store.getState().auth.token;
+          const token =
+            (await AsyncStorage.getItem("@access_token")) ||
+            store.getState().auth.token;
           await axios.post(
             `${environment.API_BASE_URL}api/packing/qr-rollback`,
             {
@@ -324,7 +363,7 @@ export default function PrintingConfirmation({
               isMainContainer: isMainContainerStep,
               rowId: effectiveRowId,
             },
-            { headers: { Authorization: `Bearer ${token}` } }
+            { headers: { Authorization: `Bearer ${token}` } },
           );
         } catch (rbErr) {
           console.error("Failed to execute backend rollback in catch:", rbErr);
@@ -359,7 +398,9 @@ export default function PrintingConfirmation({
         title=""
         navigation={navigation}
         onBackPress={handleBack}
-        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
+        rightComponent={
+          <EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />
+        }
       />
 
       {/* Main Scrollable Content Area */}
@@ -424,16 +465,17 @@ export default function PrintingConfirmation({
         </View>
 
         {/* Calibrated Theme 2 Standard Thermal Sticker Preview Card */}
-        <View className="items-center justify-center my-3">
+        <View className="items-center justify-center my-3 w-full">
           <View
-            className="bg-white border-2 border-black rounded-lg p-3 w-[270px] h-[162px] shadow-sm justify-between"
+            className="bg-white border-2 border-black rounded-lg p-3 w-full shadow-sm justify-center items-center"
             style={{
               borderColor: "#000000",
               backgroundColor: "#ffffff",
+              alignItems:'center'
             }}
           >
             {/* Top Section: Left Details & Right Large QR */}
-            <View className="flex-row justify-between items-start">
+            <View className="flex-row justify-between items-start w-full">
               <View className="flex-1 pr-2">
                 <Text
                   numberOfLines={1}
@@ -563,7 +605,15 @@ export default function PrintingConfirmation({
             justifyContent: "space-between",
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1, paddingRight: 8 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              flex: 1,
+              paddingRight: 8,
+            }}
+          >
             <MaterialCommunityIcons
               name={connectedDevice ? "bluetooth-connect" : "bluetooth-off"}
               size={24}
@@ -578,7 +628,9 @@ export default function PrintingConfirmation({
                 }}
                 numberOfLines={1}
               >
-                {connectedDevice ? connectedDevice.displayName || connectedDevice.name : "No Printer Connected"}
+                {connectedDevice
+                  ? connectedDevice.displayName || connectedDevice.name
+                  : "No Printer Connected"}
               </Text>
               <Text
                 style={{
@@ -586,7 +638,9 @@ export default function PrintingConfirmation({
                   color: connectedDevice ? "#166534" : "#b91c1c",
                 }}
               >
-                {connectedDevice ? "Bluetooth Ready (50x30mm TSPL)" : "Tap to scan & connect printer"}
+                {connectedDevice
+                  ? "Bluetooth Ready (50x30mm TSPL)"
+                  : "Tap to scan & connect printer"}
               </Text>
             </View>
           </View>
@@ -600,7 +654,9 @@ export default function PrintingConfirmation({
               borderRadius: 16,
             }}
           >
-            <Text style={{ fontSize: 12, fontWeight: "bold", color: "#ffffff" }}>
+            <Text
+              style={{ fontSize: 12, fontWeight: "bold", color: "#ffffff" }}
+            >
               {connectedDevice ? "Change" : "Connect"}
             </Text>
           </TouchableOpacity>
@@ -658,7 +714,9 @@ export default function PrintingConfirmation({
                 textAlign: "center",
               }}
             >
-              {route.params?.isReprint ? "Start Again" : `Print (${currentStep})`}
+              {route.params?.isReprint
+                ? "Start Again"
+                : `Print (${currentStep})`}
             </Text>
           )}
         </TouchableOpacity>

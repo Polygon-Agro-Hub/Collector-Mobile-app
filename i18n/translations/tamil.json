@@ -263,7 +263,8 @@
     "No pickup orders available": "எடுக்க ஆர்டர்கள் எதுவும் இல்லை.",
     "Authentication failed": "அடையாளத்தைச் சரிபார்த்தல் தோல்வியடைந்தது.",
     "An error occurred while fetching orders": "ஆர்டர்களைப் பெறும்போது பிழை ஏற்பட்டது.",
-    "Phone call is not supported on this device": "இந்த சாதனத்தில் தொலைபேசி அழைப்பு ஆதரிக்கப்படவில்லை."
+    "Phone call is not supported on this device": "இந்த சாதனத்தில் தொலைபேசி அழைப்பு ஆதரிக்கப்படவில்லை.",
+    "Cancel": "ரத்துசெய்"
   },
   "SideMenu": {
     "LNG": "en",
@@ -1087,7 +1088,8 @@
     "skipLocation": "Skip Location?",
     "skipMessage": "Some features may not work properly without location access. Are you sure?",
     "skip": "Skip",
-    "skipForNow": "Skip for now"
+    "skipForNow": "Skip for now",
+    "enableCameraManually":"Camera access is required. Please enable it in settings."
   },
   "ReceivedCashTransfer": {
     "Transfer to Company": "நிறுவனத்திற்கு பரிமாற்றம்",

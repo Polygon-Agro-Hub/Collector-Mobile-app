@@ -7,6 +7,7 @@ import {
   Animated,
   StatusBar,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -495,6 +496,22 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
       });
     }
   };
+
+   useFocusEffect(
+      React.useCallback(() => {
+        const onBackPress = () => {
+          navigation.goBack();
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          onBackPress,
+        );
+        return () => subscription.remove();
+      }, [navigation]),
+    );
+  
 
   const handleTimeoutModalClose = () => {
     setShowTimeoutModal(false);

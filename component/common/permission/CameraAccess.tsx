@@ -76,7 +76,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
           t("Permission.enableCameraManually") ||
             "Camera access is required. Please enable it in settings.",
           [
-            { text: t("PublicForum.Cancel") || "Cancel", style: "cancel" },
+            { text: t("Error.Cancel") || "Cancel", style: "cancel" },
             {
               text: t("Permission.openSettings") || "Open Settings",
               onPress: () => Linking.openSettings(),

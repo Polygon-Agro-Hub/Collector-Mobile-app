@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Modal, Animated, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Modal,
+  Animated,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 
@@ -32,7 +39,8 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   autoClose = true,
   showOkButton,
 }) => {
-  const isOkButtonVisible = showOkButton !== undefined ? showOkButton : !autoClose;
+  const isOkButtonVisible =
+    showOkButton !== undefined ? showOkButton : !autoClose;
   const loadingBarWidth = useRef(new Animated.Value(1)).current; // 1 = 100%
 
   useEffect(() => {
@@ -94,11 +102,17 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   };
 
   return (
-    <Modal 
-      visible={visible} 
-      transparent 
+    <Modal
+      visible={visible}
+      transparent
       animationType="fade"
-      supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}
+      supportedOrientations={[
+        "portrait",
+        "portrait-upside-down",
+        "landscape",
+        "landscape-left",
+        "landscape-right",
+      ]}
     >
       <View className="flex-1 bg-black/50 justify-center items-center p-4">
         <View className="bg-white p-6 rounded-2xl items-center shadow-lg w-full max-w-md relative">
@@ -189,7 +203,7 @@ type AlertListener = (
   type: "success" | "error",
   onClose: () => void,
   autoClose: boolean,
-  showOkButton?: boolean
+  showOkButton?: boolean,
 ) => void;
 
 let globalAlertListener: AlertListener | null = null;
@@ -206,7 +220,18 @@ Alert.alert = (title, message, buttons, options) => {
   if (hasMultipleButtons) {
     originalAlert(title, message, buttons, options);
   } else {
-    const isSuccess = title && title.toLowerCase().includes("success");
+    const SUCCESS_KEYWORDS = [
+      "success",
+      "connected",
+      "completed",
+      "done",
+      "saved",
+      "updated",
+      "sent",
+    ];
+    const combinedText =
+      `${title || ""} ${typeof message === "string" ? message : ""}`.toLowerCase();
+    const isSuccess = SUCCESS_KEYWORDS.some((kw) => combinedText.includes(kw));
     const type = isSuccess ? "success" : "error";
 
     const onCloseCallback = () => {
@@ -222,7 +247,7 @@ Alert.alert = (title, message, buttons, options) => {
         type,
         onCloseCallback,
         isSuccess === true,
-        !isSuccess
+        !isSuccess,
       );
     } else {
       originalAlert(title, message, buttons, options);
@@ -231,4 +256,3 @@ Alert.alert = (title, message, buttons, options) => {
 };
 
 export default AlertModal;
-
