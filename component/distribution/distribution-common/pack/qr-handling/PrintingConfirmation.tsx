@@ -181,6 +181,7 @@ export default function PrintingConfirmation({
     let backendOpenedSuccessfully = false;
     let isMainContainerStep = activeStep.type === "main";
     let targetOrderPackageId = isMainContainerStep ? null : (activeStep.packageId || null);
+    const effectiveRowId = route.params?.rowId ?? store.getState().auth.activeAssignment?.rowId ?? null;
 
     try {
       // 2. Validate with backend first (Check next station busy / position assigned)
@@ -192,7 +193,7 @@ export default function PrintingConfirmation({
           {
             orderId: processOrderId,
             isMainContainer: true,
-            rowId: route.params?.rowId,
+            rowId: effectiveRowId,
           },
           { headers: { Authorization: `Bearer ${token}` } },
         );
@@ -223,7 +224,7 @@ export default function PrintingConfirmation({
             isPackage: isPackageStep ? 1 : 0,
             packageIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
             packageBoxSubIndex: isPackageStep ? (activeStep.packageBoxSubIndex ?? 0) : 0,
-            rowId: route.params?.rowId,
+            rowId: effectiveRowId,
           },
           { headers: { Authorization: `Bearer ${token}` } },
         );
@@ -274,7 +275,7 @@ export default function PrintingConfirmation({
               orderId: processOrderId,
               orderpackageId: targetOrderPackageId,
               isMainContainer: isMainContainerStep,
-              rowId: route.params?.rowId,
+              rowId: effectiveRowId,
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -321,7 +322,7 @@ export default function PrintingConfirmation({
               orderId: processOrderId,
               orderpackageId: targetOrderPackageId,
               isMainContainer: isMainContainerStep,
-              rowId: route.params?.rowId,
+              rowId: effectiveRowId,
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );

@@ -64,8 +64,9 @@ export default function Packing({
     processOrderId: initialProcessOrderId,
     positionId,
     positionName = "Packing Position 1",
-    rowId,
+    rowId: routeRowId,
   } = route.params || {};
+  const rowId = routeRowId ?? store.getState().auth.activeAssignment?.rowId;
   const insets = useSafeAreaInsets();
 
   const [activeProcessOrderId, setActiveProcessOrderId] = useState<

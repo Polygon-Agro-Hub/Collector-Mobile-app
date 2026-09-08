@@ -213,10 +213,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           navigation.replace("WelcomeToPacking", {
             positionId: assignment.positionId,
             positionName: assignment.name,
+            rowId: assignment.rowId,
           });
         } else if (assignment.type === "QC") {
           navigation.replace("WelcomeToQC", {
             positionName: assignment.name,
+            rowId: assignment.rowId,
           });
         }
         return true;
@@ -369,10 +371,14 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 } else if (selectedPosition.type === "NOR") {
                   navigation.navigate("WelcomeToPacking", { 
                     positionId: selectedPosition.id,
-                    positionName: selectedPosition.name 
+                    positionName: selectedPosition.name,
+                    rowId: selectedRow?.id,
                   });
                 } else if (selectedPosition.type === "QC") {
-                  navigation.navigate("WelcomeToQC", { positionName: selectedPosition.name });
+                  navigation.navigate("WelcomeToQC", { 
+                    positionName: selectedPosition.name,
+                    rowId: selectedRow?.id,
+                  });
                 }
               },
             },

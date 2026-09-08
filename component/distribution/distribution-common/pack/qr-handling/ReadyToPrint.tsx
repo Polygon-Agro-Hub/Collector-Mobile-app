@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect } from "react";
 import {
   View,
@@ -183,7 +184,7 @@ export default function ReadyToPrint({
               packagesList: route.params?.packagesList || [],
               alacarteCount: alacarteCount,
               trackingRows: route.params?.trackingRows || [],
-              rowId: route.params?.rowId,
+              rowId: route.params?.rowId ?? store.getState().auth.activeAssignment?.rowId ?? null,
               isReprint: route.params?.isReprint || false,
               buttonLabel: route.params?.buttonLabel || "Start",
               date: route.params?.date,

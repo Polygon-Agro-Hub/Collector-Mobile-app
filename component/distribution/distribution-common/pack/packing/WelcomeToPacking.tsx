@@ -205,6 +205,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
                 positionId: positionId,
                 positionName: positionName,
                 positionCrops: products,
+                rowId: route.params?.rowId ?? store.getState().auth.activeAssignment?.rowId,
               });
             }}
             className="w-full h-[50px] bg-black rounded-full items-center justify-center shadow-lg"

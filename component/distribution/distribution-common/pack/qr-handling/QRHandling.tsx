@@ -410,6 +410,9 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                         disabled={!isTop}
                         onPress={() => {
                           if (isTop) {
+                            // Fallback to Redux store rowId in case useState async hasn't resolved yet
+                            // This prevents "Position Empty" (NO_OFFICER_ASSIGNED) error on the backend
+                            const resolvedRowId = rowId ?? store.getState().auth.activeAssignment?.rowId ?? null;
                             const nextOrder = todoOrders[idx + 1];
                             navigation.navigate("ReadyToPrint", {
                               processOrderId: order.id,
@@ -421,7 +424,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                               packagesCount: (order as any).packagesCount || 0,
                               alacarteCount: (order as any).alacarteCount || 0,
                               packagesList: (order as any).packagesList || [],
-                              rowId: rowId,
+                              rowId: resolvedRowId,
                               nextOrderNumber: nextOrder
                                 ? `${nextOrder.orderNumber} (${nextOrder.type})`
                                 : null,

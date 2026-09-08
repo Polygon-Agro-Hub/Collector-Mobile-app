@@ -60,8 +60,9 @@ export default function WelcomeToQC({
   const {
     orderNumber: initialOrderNumber,
     processOrderId: initialProcessOrderId,
-    rowId,
+    rowId: routeRowId,
   } = route.params || {};
+  const rowId = routeRowId ?? store.getState().auth.activeAssignment?.rowId;
   const insets = useSafeAreaInsets();
 
   const [activeProcessOrderId, setActiveProcessOrderId] = useState<
