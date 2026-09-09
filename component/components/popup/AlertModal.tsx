@@ -116,19 +116,19 @@ export const AlertModal: React.FC<AlertModalProps> = ({
     >
       <View className="flex-1 bg-black/50 justify-center items-center p-4">
         <View className="bg-white p-6 rounded-2xl items-center shadow-lg w-full max-w-md relative">
-         <TouchableOpacity
-  className="absolute top-5 right-5 z-20 w-8 h-8 rounded-full bg-[#F7FAFF] items-center justify-center"
-  onPress={onClose}
->
-  <Ionicons name="close" size={20} color="#000000" />
-</TouchableOpacity>
+          <TouchableOpacity
+            className="absolute top-5 right-5 z-20 w-8 h-8 rounded-full bg-[#F7FAFF] items-center justify-center"
+            onPress={onClose}
+          >
+            <Ionicons name="close" size={20} color="#000000" />
+          </TouchableOpacity>
 
-<Text
-  className="font-bold text-lg mb-4 text-center text-black"
-  style={{ paddingHorizontal: 36 }} // ~button width (32) + right offset (20) - overlap margin
->
-  {getModalTitle()}
-</Text>
+          <Text
+            className="font-bold text-lg mb-4 text-center text-black"
+            style={{ paddingHorizontal: 36 }}
+          >
+            {getModalTitle()}
+          </Text>
 
           {getContent()}
 
