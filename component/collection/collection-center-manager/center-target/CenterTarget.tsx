@@ -171,11 +171,11 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress
+        onBackPress,
       );
 
       return () => subscription.remove();
-    }, [navigation])
+    }, [navigation]),
   );
 
   const getvarietyName = (TargetData: TargetData) => {
@@ -414,11 +414,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                             {index + 1}
                           </Text>
                         ) : (
-                          <Ionicons
-                            name="flag"
-                            size={18}
-                            color="#980775"
-                          />
+                          <Ionicons name="flag" size={18} color="#980775" />
                         )}
                       </View>
 
@@ -463,12 +459,13 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       </View>
 
                       {/* Todo / Completed */}
+                      {/* Todo / Completed */}
                       <View
                         style={{ width: 100 }}
                         className="justify-center items-center px-1 py-3"
                       >
                         <Text
-                          className="text-center font-medium text-gray-800 text-sm"
+                          className="text-center font-medium text-gray-800 text-xs"
                           numberOfLines={2}
                         >
                           {selectedToggle === "Completed"

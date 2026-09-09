@@ -7,6 +7,10 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
@@ -91,7 +95,15 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
       <View style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.6)", justifyContent: "flex-end" }}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />
+        </TouchableWithoutFeedback>
         <View style={{ backgroundColor: "#ffffff", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, minHeight: 440, maxHeight: "85%" }}>
           {/* Header */}
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" }}>
@@ -154,7 +166,14 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
           )}
 
           {/* Configuration & Preset Section */}
-          <View style={{ marginTop: 20 }}>
+          <ScrollView
+            style={{ marginTop: 20 }}
+            contentContainerStyle={{ paddingBottom: 24 }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
 
             {/* Default Device Selection Card */}
             <TouchableOpacity
@@ -210,9 +229,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 </Text>
                 <TextInput
                   value={port}
-                  onChangeText={setPort}
+                  onChangeText={(text) => setPort(text.replace(/[^0-9]/g, "").slice(0, 5))}
                   placeholder="8080"
                   keyboardType="number-pad"
+                  maxLength={5}
                   style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
                 />
               </View>
@@ -249,9 +269,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 </>
               )}
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         </View>
       </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
