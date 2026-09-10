@@ -17,6 +17,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 export interface ShortageProductItem {
   srtAssignId: number;
@@ -41,6 +42,7 @@ const formatKg = (val: number | string | undefined | null): string => {
 };
 
 export default function PurchaseShortage({ navigation }: { navigation: any }) {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<ShortageProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -101,7 +103,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
     <View className="flex-1 bg-white">
       {/* Custom Header with title "Assigned Products" */}
       <CustomHeader
-        title="Assigned Products"
+        title={t("PurchaseShortage.Assigned Products", "Assigned Products")}
         navigation={navigation}
         onBackPress={() =>
           navigation.navigate("Main", { screen: "DistridutionaDashboard" })
@@ -112,7 +114,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
         <LoadingPage fullScreen message="Loading..." />
       ) : products.length === 0 ? (
         /* Empty State */
-        <NoDataScreen message="- You don't have any products assigned for purchase today. -" />
+        <NoDataScreen message={t("PurchaseShortage.No assigned products message", "- You don't have any products assigned for purchase today. -")} />
       ) : (
         /* Active Product List State */
         <ScrollView

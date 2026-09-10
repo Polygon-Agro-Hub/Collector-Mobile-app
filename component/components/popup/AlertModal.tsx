@@ -1,7 +1,15 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Modal, Animated, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Modal,
+  Animated,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
+import { useTranslation } from "react-i18next";
 
 interface AlertModalProps {
   visible: boolean;
@@ -32,7 +40,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   autoClose = true,
   showOkButton,
 }) => {
-  const isOkButtonVisible = showOkButton !== undefined ? showOkButton : !autoClose;
+  const { t } = useTranslation();
+  const isOkButtonVisible =
+    showOkButton !== undefined ? showOkButton : !autoClose;
   const loadingBarWidth = useRef(new Animated.Value(1)).current; // 1 = 100%
 
   useEffect(() => {
@@ -88,29 +98,37 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
   const getModalTitle = () => {
     if (showOpenOngoingButton) {
-      return "Cannot Proceed!";
+      return t("AlertModal.Cannot Proceed!", "Cannot Proceed!");
     }
     return title;
   };
 
   return (
-    <Modal 
-      visible={visible} 
-      transparent 
+    <Modal
+      visible={visible}
+      transparent
       animationType="fade"
-      supportedOrientations={['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']}
+      supportedOrientations={[
+        "portrait",
+        "portrait-upside-down",
+        "landscape",
+        "landscape-left",
+        "landscape-right",
+      ]}
     >
       <View className="flex-1 bg-black/50 justify-center items-center p-4">
         <View className="bg-white p-6 rounded-2xl items-center shadow-lg w-full max-w-md relative">
           <TouchableOpacity
-            className="absolute top-5 right-5 z-10 w-8 h-8 rounded-full bg-[#F7FAFF] items-center justify-center"
+            className="absolute top-5 right-5 z-20 w-8 h-8 rounded-full bg-[#F7FAFF] items-center justify-center"
             onPress={onClose}
           >
             <Ionicons name="close" size={20} color="#000000" />
           </TouchableOpacity>
 
-          {/* Title */}
-          <Text className="font-bold text-lg mb-4 text-center text-black">
+          <Text
+            className="font-bold text-lg mb-4 text-center text-black"
+            style={{ paddingHorizontal: 36 }}
+          >
             {getModalTitle()}
           </Text>
 
@@ -126,7 +144,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
                 <FontAwesome5 name="undo" size={18} color="white" />
-                <Text className="text-white font-bold text-base">Re-Scan</Text>
+                <Text className="text-white font-bold text-base">
+                  {t("AlertModal.Re-Scan", "Re-Scan")}
+                </Text>
               </TouchableOpacity>
             )}
 
@@ -138,7 +158,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
                 <Text className="text-white font-bold text-base">
-                  Open Ongoing Activity
+                  {t("AlertModal.Open Ongoing Activity", "Open Ongoing Activity")}
                 </Text>
               </TouchableOpacity>
             )}
@@ -149,7 +169,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 activeOpacity={0.8}
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
-                <Text className="text-white font-bold text-base">OK</Text>
+                <Text className="text-white font-bold text-base">
+                  {t("AlertModal.OK", "OK")}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -189,7 +211,7 @@ type AlertListener = (
   type: "success" | "error",
   onClose: () => void,
   autoClose: boolean,
-  showOkButton?: boolean
+  showOkButton?: boolean,
 ) => void;
 
 let globalAlertListener: AlertListener | null = null;
@@ -206,7 +228,18 @@ Alert.alert = (title, message, buttons, options) => {
   if (hasMultipleButtons) {
     originalAlert(title, message, buttons, options);
   } else {
-    const isSuccess = title && title.toLowerCase().includes("success");
+    const SUCCESS_KEYWORDS = [
+      "success",
+      "connected",
+      "completed",
+      "done",
+      "saved",
+      "updated",
+      "sent",
+    ];
+    const combinedText =
+      `${title || ""} ${typeof message === "string" ? message : ""}`.toLowerCase();
+    const isSuccess = SUCCESS_KEYWORDS.some((kw) => combinedText.includes(kw));
     const type = isSuccess ? "success" : "error";
 
     const onCloseCallback = () => {
@@ -222,7 +255,7 @@ Alert.alert = (title, message, buttons, options) => {
         type,
         onCloseCallback,
         isSuccess === true,
-        !isSuccess
+        !isSuccess,
       );
     } else {
       originalAlert(title, message, buttons, options);
@@ -231,4 +264,3 @@ Alert.alert = (title, message, buttons, options) => {
 };
 
 export default AlertModal;
-

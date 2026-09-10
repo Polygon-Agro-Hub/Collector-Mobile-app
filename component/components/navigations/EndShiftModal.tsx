@@ -12,6 +12,7 @@ import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "@/store/authSlice";
+import { useTranslation } from "react-i18next";
 
 export function EndShiftHeaderRight({ onPress }: { onPress: () => void }) {
   return (
@@ -49,6 +50,7 @@ export function EndShiftModal({
   rowText,
   customMessage,
 }: EndShiftModalProps) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +63,11 @@ export function EndShiftModal({
 
   const message =
     customMessage ||
-    `Are you sure you want to end the shift for ${resolvedPos} in ${resolvedRow}?`;
+    t("Packing.End Shift Confirmation", {
+      pos: resolvedPos,
+      row: resolvedRow,
+      defaultValue: `Are you sure you want to end the shift for ${resolvedPos} in ${resolvedRow}?`,
+    });
 
   const handleConfirmEndShift = async () => {
     try {
@@ -122,7 +128,7 @@ export function EndShiftModal({
               activeOpacity={0.7}
             >
               <Text style={{ color: "#344054", fontSize: 14, fontWeight: "600" }}>
-                Cancel
+                {t("Packing.Cancel", "Cancel")}
               </Text>
             </TouchableOpacity>
 
@@ -143,7 +149,7 @@ export function EndShiftModal({
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "700" }}>
-                  End
+                  {t("Packing.End", "End")}
                 </Text>
               )}
             </TouchableOpacity>

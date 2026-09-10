@@ -225,7 +225,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     // 1. Start Packing (SelectRow or active position)
     items.push({
       key: "start_packing",
-      title: "Start Packing",
+      title: t("DistridutionaDashboard.Start Packing"),
       icon: (
         <Image
           source={require("../../../../assets/images/dashboard/center-target.webp")}
@@ -241,7 +241,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     if (jobRole === "Distribution Centre Manager") {
       items.push({
         key: "assign_groups",
-        title: "Assign Groups",
+        title: t("DistridutionaDashboard.Assign Groups"),
         icon: (
           <View className="absolute top-2 right-2">
             <FontAwesome6 name="users" size={24} color="#980775" />
@@ -286,7 +286,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     // 5. Purchase Shortage (New)
     items.push({
       key: "purchase_shortage",
-      title: "Purchase Shortage",
+      title: t("DistridutionaDashboard.Purchase Shortage"),
       icon: (
         <View className="absolute top-2 right-2">
           <Feather name="shopping-bag" size={24} color="#980775" />

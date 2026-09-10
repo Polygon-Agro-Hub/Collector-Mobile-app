@@ -35,7 +35,10 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
 import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
-import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
+import {
+  wifiScaleService,
+  ScaleStatus,
+} from "@/services/scale/wifiScaleService";
 
 const api = axios.create({
   baseURL: environment.API_BASE_URL,
@@ -196,9 +199,14 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   });
 
   const [scaleModalVisible, setScaleModalVisible] = useState(false);
-  const [isScaleConfigModalVisible, setIsScaleConfigModalVisible] = useState(false);
-  const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
-  const [activeScaleGrade, setActiveScaleGrade] = useState<"A" | "B" | "C">("A");
+  const [isScaleConfigModalVisible, setIsScaleConfigModalVisible] =
+    useState(false);
+  const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
+    wifiScaleService.getStatus(),
+  );
+  const [activeScaleGrade, setActiveScaleGrade] = useState<"A" | "B" | "C">(
+    "A",
+  );
   const [isWifiOff, setIsWifiOff] = useState(false);
 
   useEffect(() => {
@@ -210,7 +218,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   useEffect(() => {
     const checkWifi = (state: any) => {
-      const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
+      const isWifi =
+        state.isWifiEnabled ??
+        (state.type === "wifi" && Boolean(state.isConnected));
       setIsWifiOff(!isWifi);
     };
 
@@ -255,7 +265,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       const timer = setTimeout(() => setResetImage(false), 100);
 
       NetInfo.fetch().then((state) => {
-        const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
+        const isWifi =
+          state.isWifiEnabled ??
+          (state.type === "wifi" && Boolean(state.isConnected));
         setIsWifiOff(!isWifi);
       });
       setScaleStatus(wifiScaleService.getStatus());
@@ -493,7 +505,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       return acc + price * quantity;
     }, 0);
     setTotal(totalPrice);
-    if (totalPrice !== 0) setaddbutton(false);
+    setaddbutton(totalPrice === 0);
   };
 
   const incrementCropCount = async () => {
@@ -864,115 +876,129 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           <View className="px-6 ">
             {/* ── Scale Status Card ── */}
             {/* State 1: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */}
-            {isWifiOff ? (
-              <TouchableOpacity
-                activeOpacity={0.88}
-                onPress={() => setIsScaleConfigModalVisible(true)}
-                style={{
-                  marginTop: 8,
-                  marginBottom: 10,
-                  backgroundColor: "#FDF0F1",
-                  borderRadius: 28,
-                  paddingVertical: 10,
-                  paddingHorizontal: 14,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 12,
-                }}
-              >
-                <View
+            {
+              isWifiOff ? (
+                <TouchableOpacity
+                  activeOpacity={0.88}
+                  onPress={() => setIsScaleConfigModalVisible(true)}
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    backgroundColor: "#FFFFFF",
+                    marginTop: 8,
+                    marginBottom: 10,
+                    backgroundColor: "#FDF0F1",
+                    borderRadius: 28,
+                    paddingVertical: 10,
+                    paddingHorizontal: 14,
+                    flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "center",
+                    gap: 12,
                   }}
                 >
-                  <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
-                </View>
-                <View style={{ flex: 1 }}>
+                  <View
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      backgroundColor: "#FFFFFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="wifi"
+                      size={24}
+                      color="#E91233"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "bold",
+                        color: "#E91233",
+                        letterSpacing: -0.2,
+                      }}
+                    >
+                      {selectedLanguage === "si"
+                        ? "Wi-Fi අක්‍රියයි"
+                        : selectedLanguage === "ta"
+                          ? "Wi-Fi முடக்கப்பட்டுள்ளது"
+                          : "Wi-Fi is Off"}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: "#0F172A",
+                        fontWeight: "500",
+                        marginTop: 1,
+                        lineHeight: 16,
+                      }}
+                    >
+                      {selectedLanguage === "si"
+                        ? "ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න."
+                        : selectedLanguage === "ta"
+                          ? "உங்கள் தொலைபேசியில் Wi-Fi இயக்கவும்."
+                          : "Please turn on Wi-Fi on your phone to connect to the scale."}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ) : !scaleStatus.connected ? (
+                /* State 2: WiFi ON but scale not connected — show blue connect card */
+                <TouchableOpacity
+                  activeOpacity={0.88}
+                  onPress={() => setIsScaleConfigModalVisible(true)}
+                  style={{
+                    marginTop: 8,
+                    marginBottom: 10,
+                    backgroundColor: "#1266FD",
+                    borderRadius: 28,
+                    paddingVertical: 10,
+                    paddingHorizontal: 14,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      backgroundColor: "#FFFFFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="wifi"
+                      size={24}
+                      color="#1266FD"
+                    />
+                  </View>
+
                   <Text
                     style={{
-                      fontSize: 16,
+                      flex: 1,
+                      fontSize: 17,
                       fontWeight: "bold",
-                      color: "#E91233",
+                      color: "#FFFFFF",
                       letterSpacing: -0.2,
                     }}
                   >
                     {selectedLanguage === "si"
-                      ? "Wi-Fi අක්‍රියයි"
+                      ? "තරාදිය සම්බන්ධ කරන්න"
                       : selectedLanguage === "ta"
-                      ? "Wi-Fi முடக்கப்பட்டுள்ளது"
-                      : "Wi-Fi is Off"}
+                        ? "அளவுகோலை இணைக்கவும்"
+                        : "Connect Scale"}
                   </Text>
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: "#0F172A",
-                      fontWeight: "500",
-                      marginTop: 1,
-                      lineHeight: 16,
-                    }}
-                  >
-                    {selectedLanguage === "si"
-                      ? "ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න."
-                      : selectedLanguage === "ta"
-                      ? "உங்கள் தொலைபேசியில் Wi-Fi இயக்கவும்."
-                      : "Please turn on Wi-Fi on your phone to connect to the scale."}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ) : !scaleStatus.connected ? (
-              /* State 2: WiFi ON but scale not connected — show blue connect card */
-              <TouchableOpacity
-                activeOpacity={0.88}
-                onPress={() => setIsScaleConfigModalVisible(true)}
-                style={{
-                  marginTop: 8,
-                  marginBottom: 10,
-                  backgroundColor: "#1266FD",
-                  borderRadius: 28,
-                  paddingVertical: 10,
-                  paddingHorizontal: 14,
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <View
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    backgroundColor: "#FFFFFF",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: 12,
-                  }}
-                >
-                  <MaterialCommunityIcons name="wifi" size={24} color="#1266FD" />
-                </View>
 
-                <Text
-                  style={{
-                    flex: 1,
-                    fontSize: 17,
-                    fontWeight: "bold",
-                    color: "#FFFFFF",
-                    letterSpacing: -0.2,
-                  }}
-                >
-                  {selectedLanguage === "si"
-                    ? "තරාදිය සම්බන්ධ කරන්න"
-                    : selectedLanguage === "ta"
-                    ? "அளவுகோலை இணைக்கவும்"
-                    : "Connect Scale"}
-                </Text>
-
-                <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
-              </TouchableOpacity>
-            ) : null /* State 3: Scale connected — card hidden */}
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={26}
+                    color="#FFFFFF"
+                  />
+                </TouchableOpacity>
+              ) : null /* State 3: Scale connected — card hidden */
+            }
 
             {/* ── Added-crops carousel ── */}
             {crops.length > 0 && (
@@ -1271,7 +1297,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               </Text>
               <View className="border border-gray-300 rounded-lg mt-2 p-4">
                 {(["A", "B", "C"] as const).map((grade) => {
-                  const hasValue = !!quantities[grade] && parseFloat(quantities[grade]) > 0;
+                  const hasValue =
+                    !!quantities[grade] && parseFloat(quantities[grade]) > 0;
                   return (
                     <View key={grade} className="flex-row items-center mb-3">
                       <Text className="w-6 text-gray-600 font-semibold text-base">
@@ -1349,9 +1376,17 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                         }}
                       >
                         {hasValue ? (
-                          <MaterialIcons name="refresh" size={24} color="#FFFFFF" />
+                          <MaterialIcons
+                            name="refresh"
+                            size={24}
+                            color="#FFFFFF"
+                          />
                         ) : (
-                          <MaterialIcons name="arrow-forward" size={24} color="#FFFFFF" />
+                          <MaterialIcons
+                            name="arrow-forward"
+                            size={24}
+                            color="#FFFFFF"
+                          />
                         )}
                       </TouchableOpacity>
                     </View>

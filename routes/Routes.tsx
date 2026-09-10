@@ -24,6 +24,8 @@ import PrivacyPolicy from "@/component/common/privacy-policy/PrivacyPolicy";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import ComplainPage from "@/component/common/complain/ComplainPage";
 import ComplainHistory from "@/component/common/complain/ComplainHistory";
+import CameraAccess from "@/component/common/permission/CameraAccess";
+import LocationAccess from "@/component/common/permission/LocationAccess";
 
 // --- Collection Screens ---
 import Registeredfarmer from "@/component/collection/collection-common/farmer/Registeredfarmer";
@@ -241,6 +243,8 @@ const PUBLIC_STACK_SCREENS: StackRouteConfig[] = [
     component: MainTabNavigator,
     allowedRoles: "PUBLIC",
   },
+  { name: "CameraAccess", component: CameraAccess as any, allowedRoles: "PUBLIC" },
+  { name: "LocationAccess", component: LocationAccess as any, allowedRoles: "PUBLIC" },
 ];
 
 // ============================================================================

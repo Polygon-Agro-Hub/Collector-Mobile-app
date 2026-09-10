@@ -1,3 +1,4 @@
+import store from "@/services/reducxStore";
 import React, { useEffect } from "react";
 import {
   View,
@@ -13,7 +14,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import { formatTimeSlot } from "@/constants/packing/time-slots";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { useTranslation } from "react-i18next";
 
 export default function ReadyToPrint({
   route,
@@ -22,6 +23,7 @@ export default function ReadyToPrint({
   route: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
   // Get order data passed from navigation parameters
   const {
     orderNumber,
@@ -88,7 +90,7 @@ export default function ReadyToPrint({
         {/* Header Title section matching QRHandling design */}
         <View className="items-center mb-6">
           <Text className="text-xl font-bold text-slate-950">
-            Ready to Print
+            {t("QRHandling.Ready to Print", "Ready to Print")}
           </Text>
         </View>
 
@@ -147,12 +149,12 @@ export default function ReadyToPrint({
           }}
         >
           <Text className="text-slate-800 font-extrabold text-sm mb-4">
-            Order Summary
+            {t("QRHandling.Order Summary", "Order Summary")}
           </Text>
 
           {/* Packages Row */}
           <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
-            <Text className="text-xs font-bold text-[#030E25]">Packages</Text>
+            <Text className="text-xs font-bold text-[#030E25]">{t("QRHandling.Packages Count", "Packages")}</Text>
             <Text className="text-[#980775] font-extrabold text-base">
               {formattedPackages}
             </Text>
@@ -161,7 +163,7 @@ export default function ReadyToPrint({
           {/* À la carte Row — shows distinct product count */}
           <View className="flex-row justify-between items-center py-2.5 bg-[#FAFAFB] px-3 rounded-lg mb-2">
             <Text className="text-xs font-bold text-[#030E25]">
-              À la carte Items
+              {t("QRHandling.A la carte items", "À la carte Items")}
             </Text>
             <Text className="text-[#980775] font-extrabold text-base">
               {formattedAlacarte}
@@ -183,7 +185,7 @@ export default function ReadyToPrint({
               packagesList: route.params?.packagesList || [],
               alacarteCount: alacarteCount,
               trackingRows: route.params?.trackingRows || [],
-              rowId: route.params?.rowId,
+              rowId: route.params?.rowId ?? store.getState().auth.activeAssignment?.rowId ?? null,
               isReprint: route.params?.isReprint || false,
               buttonLabel: route.params?.buttonLabel || "Start",
               date: route.params?.date,

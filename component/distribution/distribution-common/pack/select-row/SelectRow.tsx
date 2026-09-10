@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
 import LoadingPage from "@/component/components/loading/LoadingPage";
+import { useTranslation } from "react-i18next";
 
 // Define TypeScript interfaces for our sample data
 interface RowData {
@@ -37,6 +38,7 @@ interface PositionData {
 }
 
 export default function SelectRow({ navigation }: { navigation: any }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
@@ -213,10 +215,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           navigation.replace("WelcomeToPacking", {
             positionId: assignment.positionId,
             positionName: assignment.name,
+            rowId: assignment.rowId,
           });
         } else if (assignment.type === "QC") {
           navigation.replace("WelcomeToQC", {
             positionName: assignment.name,
+            rowId: assignment.rowId,
           });
         }
         return true;
@@ -369,10 +373,14 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 } else if (selectedPosition.type === "NOR") {
                   navigation.navigate("WelcomeToPacking", { 
                     positionId: selectedPosition.id,
-                    positionName: selectedPosition.name 
+                    positionName: selectedPosition.name,
+                    rowId: selectedRow?.id,
                   });
                 } else if (selectedPosition.type === "QC") {
-                  navigation.navigate("WelcomeToQC", { positionName: selectedPosition.name });
+                  navigation.navigate("WelcomeToQC", { 
+                    positionName: selectedPosition.name,
+                    rowId: selectedRow?.id,
+                  });
                 }
               },
             },
@@ -448,7 +456,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           <>
             {/* Step 1 Title */}
             <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
-              Select the row you work with
+              {t("Packing.Choose the packing row you will be working at.", "Select the row you work with")}
             </Text>
 
             {/* Step 1 list of rows */}
@@ -484,8 +492,8 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                       </Text>
                       <Text className="text-xs text-[#54617D] mt-0.5">
                         {row.positionsCount}{" "}
-                        {row.positionsCount === 1 ? "Position" : "Positions"}{" "}
-                        Available
+                        {row.positionsCount === 1 ? t("Packing.Position", "Position") : t("Packing.Positions", "Positions")}{" "}
+                        {t("Packing.Available", "Available")}
                       </Text>
                     </View>
 
@@ -500,7 +508,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           <>
             {/* Step 2 Title */}
             <Text className="text-lg text-center text-slate-600 mb-6 mt-2">
-              Selected :{" "}
+              {t("Packing.Selected :", "Selected :")}{" "}
               <Text className="font-extrabold text-slate-950">
                 {selectedRow?.name}
               </Text>
@@ -593,7 +601,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                               isOccupied ? "text-[#54617D]" : "text-black"
                             }`}
                           >
-                            {position.status}
+                            {position.status === "Occupied" ? t("Packing.Occupied", "Occupied") : t("Packing.Available", "Available")}
                           </Text>
                         </View>
                       </View>
@@ -628,13 +636,16 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           <View className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl items-center">
             {/* Modal Title */}
             <Text className="text-lg font-bold text-slate-950 text-center mb-3">
-              Position Confirmation
+              {t("Packing.Confirm Position Selection", "Position Confirmation")}
             </Text>
 
             {/* Modal Description */}
             <Text className="text-[#54617D] text-sm text-center leading-relaxed px-2 mb-6">
-              If you confirm, from now upon you will be assigned to{" "}
-              {selectedPosition?.name.toLowerCase()} of {selectedRow?.name}.
+              {t("Packing.You are selecting position in row", {
+                posName: selectedPosition?.name,
+                rowName: selectedRow?.name,
+                defaultValue: `If you confirm, from now upon you will be assigned to ${selectedPosition?.name} of ${selectedRow?.name}.`
+              })}
             </Text>
 
             {/* Action buttons (Confirm / Cancel stacked) */}
@@ -657,7 +668,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 {submitting ? (
                   <ActivityIndicator size="small" color="white" />
                 ) : (
-                  <Text className="text-white font-bold text-base">Confirm</Text>
+                  <Text className="text-white font-bold text-base">{t("AssignGroups.Confirm", "Confirm")}</Text>
                 )}
               </TouchableOpacity>
 
@@ -676,7 +687,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 activeOpacity={0.8}
               >
                 <Text className="text-gray-700 font-bold text-base">
-                  Cancel
+                  {t("Packing.Cancel", "Cancel")}
                 </Text>
               </TouchableOpacity>
             </View>

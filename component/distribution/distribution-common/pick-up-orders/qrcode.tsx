@@ -7,6 +7,7 @@ import {
   Animated,
   StatusBar,
   ActivityIndicator,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -20,6 +21,7 @@ import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import { AlertModal } from "@/component/components/popup/AlertModal";
+import { useTranslation } from "react-i18next";
 
 type QrcodeNavigationProp = StackNavigationProp<RootStackParamList, "qrcode">;
 
@@ -29,6 +31,7 @@ interface QrcodeProps {
 }
 
 const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
+  const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
@@ -102,9 +105,9 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
 
     timerRef.current = setTimeout(() => {
       if (!scanned && !loading && isFocusedRef.current) {
-        setModalTitle("Scan Timeout");
+        setModalTitle(t("qrcode.Scan Timeout", "Scan Timeout"));
         setModalMessage(
-          "The QR code could not be detected within the time limit. Please check and try again.",
+          t("qrcode.Scan timeout message", "The QR code could not be detected within the time limit. Please check and try again."),
         );
         setShowRescanButton(true);
         setShowTimeoutModal(true);
@@ -495,6 +498,22 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
       });
     }
   };
+
+   useFocusEffect(
+      React.useCallback(() => {
+        const onBackPress = () => {
+          navigation.goBack();
+          return true;
+        };
+  
+        const subscription = BackHandler.addEventListener(
+          "hardwareBackPress",
+          onBackPress,
+        );
+        return () => subscription.remove();
+      }, [navigation]),
+    );
+  
 
   const handleTimeoutModalClose = () => {
     setShowTimeoutModal(false);

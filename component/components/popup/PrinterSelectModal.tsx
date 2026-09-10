@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { PrinterDevice } from "@/services/printer/BluetoothPrinterService";
+import { useTranslation } from "react-i18next";
 
 interface PrinterSelectModalProps {
   visible: boolean;
@@ -33,6 +34,7 @@ export const PrinterSelectModal: React.FC<PrinterSelectModalProps> = ({
   onSelectDevice,
   onDisconnect,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -47,7 +49,7 @@ export const PrinterSelectModal: React.FC<PrinterSelectModalProps> = ({
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <MaterialCommunityIcons name="printer-search" size={24} color="#030E25" />
               <Text style={{ fontSize: 18, fontWeight: "bold", color: "#020617" }}>
-                Select Bluetooth Printer
+                {t("QRHandling.Select Bluetooth Printer", "Select Bluetooth Printer")}
               </Text>
             </View>
             <TouchableOpacity
@@ -70,7 +72,7 @@ export const PrinterSelectModal: React.FC<PrinterSelectModalProps> = ({
                     {connectedDevice.displayName || connectedDevice.name}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#166534" }}>
-                    Connected & Ready (50x30mm)
+                    {t("QRHandling.Connected & Ready", "Connected & Ready (50x30mm)")}
                   </Text>
                 </View>
               </View>
@@ -78,7 +80,7 @@ export const PrinterSelectModal: React.FC<PrinterSelectModalProps> = ({
                 onPress={onDisconnect}
                 style={{ paddingVertical: 6, paddingHorizontal: 12, backgroundColor: "#fee2e2", borderRadius: 20, borderWidth: 1, borderColor: "#fca5a5" }}
               >
-                <Text style={{ fontSize: 12, fontWeight: "bold", color: "#dc2626" }}>Disconnect</Text>
+                <Text style={{ fontSize: 12, fontWeight: "bold", color: "#dc2626" }}>{t("QRHandling.Disconnect", "Disconnect")}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -86,7 +88,7 @@ export const PrinterSelectModal: React.FC<PrinterSelectModalProps> = ({
           {/* Scan Action Bar */}
           <View style={{ marginTop: 16, marginBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <Text style={{ fontSize: 12, fontWeight: "800", color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>
-              Available Printers ({devices.length})
+              {t("QRHandling.Available Printers", { count: devices.length, defaultValue: `Available Printers (${devices.length})` })}
             </Text>
             <TouchableOpacity
               onPress={onStartScan}
@@ -99,7 +101,7 @@ export const PrinterSelectModal: React.FC<PrinterSelectModalProps> = ({
                 <Ionicons name="refresh" size={16} color="#4338ca" />
               )}
               <Text style={{ fontSize: 12, fontWeight: "bold", color: "#4338ca" }}>
-                {isScanning ? "Scanning..." : "Scan Devices"}
+                {isScanning ? t("QRHandling.Scanning...", "Scanning...") : t("QRHandling.Scan Devices", "Scan Devices")}
               </Text>
             </TouchableOpacity>
           </View>

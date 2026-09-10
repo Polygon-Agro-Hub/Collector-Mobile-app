@@ -23,6 +23,7 @@ import LoadingPage from "@/component/components/loading/LoadingPage";
 import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 import {
   TIME_SLOTS,
@@ -58,14 +59,16 @@ export default function Packing({
   route: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const {
     orderNumber: initialOrderNumber,
     processOrderId: initialProcessOrderId,
     positionId,
     positionName = "Packing Position 1",
-    rowId,
+    rowId: routeRowId,
   } = route.params || {};
+  const rowId = routeRowId ?? store.getState().auth.activeAssignment?.rowId;
   const insets = useSafeAreaInsets();
 
   const [activeProcessOrderId, setActiveProcessOrderId] = useState<
@@ -349,11 +352,10 @@ export default function Packing({
               <View className="flex-1">
                 <View className="items-center mt-4 mb-2">
                   <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
-                    Welcome to {positionName || "Packing Position 1"}
+                    {t("Packing.Welcome to", { positionName: positionName || "Packing Position 1", defaultValue: `Welcome to ${positionName || "Packing Position 1"}` })}
                   </Text>
                   <Text className="text-[#54617D] text-sm text-center px-4 font-medium leading-5">
-                    Please wait and check again.{"\n"}This row doesn't have a daily
-                    target yet.
+                    {t("Packing.No daily target for row", "Please wait and check again.\nThis row doesn't have a daily target yet.")}
                   </Text>
                 </View>
 
@@ -382,10 +384,10 @@ export default function Packing({
                   />
                 </View>
                 <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
-                  This order is still with the{"\n"}previous position
+                  {t("Packing.Order with previous position", "This order is still with the\nprevious position")}
                 </Text>
                 <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
-                  Please try reloading the page in a few seconds.
+                  {t("Packing.Please try reloading the page in a few seconds.", "Please try reloading the page in a few seconds.")}
                 </Text>
               </View>
             )}
@@ -404,11 +406,10 @@ export default function Packing({
                 </View>
                 <View className="items-center mt-4 mb-2">
                   <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
-                    No items to pack for this order{"\n"}at your position
+                    {t("Packing.No items to pack for this order at your position", "No items to pack for this order\nat your position")}
                   </Text>
                   <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
-                    There are no items assigned to the position{"\n"}in the current
-                    packing sequence.
+                    {t("Packing.No items assigned sequence message", "There are no items assigned to the position\nin the current packing sequence.")}
                   </Text>
                 </View>
               </View>
@@ -488,7 +489,7 @@ export default function Packing({
                 {isAdvancing ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  <Text className="text-white font-extrabold text-base">Skip</Text>
+                  <Text className="text-white font-extrabold text-base">{t("Packing.Skip", "Skip")}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -513,7 +514,7 @@ export default function Packing({
                   <ActivityIndicator color="white" size="small" />
                 ) : (
                   <Text className="text-white font-extrabold text-base">
-                    Complete
+                    {t("Packing.Complete", "Complete")}
                   </Text>
                 )}
               </TouchableOpacity>

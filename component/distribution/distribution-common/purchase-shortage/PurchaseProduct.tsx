@@ -160,22 +160,28 @@ export default function PurchaseProduct({
 
     const qtyNum = parseFloat(buyingQty);
     if (!buyingQty.trim() || isNaN(qtyNum) || qtyNum <= 0) {
-      setQtyError("Please enter a valid quantity in kg.");
+      setQtyError(t("PurchaseShortage.Please enter a valid quantity in kg.", "Please enter a valid quantity in kg."));
       hasError = true;
     } else if (qtyNum > defaultKg) {
       setQtyError(
-        `Quantity cannot exceed remaining shortage of ${formatKg(defaultKg)} kg.`,
+        t("PurchaseShortage.Quantity cannot exceed remaining shortage", {
+          kg: formatKg(defaultKg),
+          defaultValue: `Quantity cannot exceed remaining shortage of ${formatKg(defaultKg)} kg.`,
+        }),
       );
       hasError = true;
     }
 
     const priceNum = parseFloat(purchasingPrice.replace(/,/g, ""));
     if (!purchasingPrice.trim() || isNaN(priceNum) || priceNum <= 0) {
-      setPriceError("Please enter a valid price per kg.");
+      setPriceError(t("PurchaseShortage.Please enter a valid price per kg.", "Please enter a valid price per kg."));
       hasError = true;
     } else if (priceNum > ceilingPrice) {
       setPriceError(
-        `Price cannot exceed Rs. ${formatPriceDisplay(ceilingPrice)}`,
+        t("PurchaseShortage.Price cannot exceed ceiling", {
+          price: formatPriceDisplay(ceilingPrice),
+          defaultValue: `Price cannot exceed Rs. ${formatPriceDisplay(ceilingPrice)}`,
+        }),
       );
       hasError = true;
     }
@@ -188,8 +194,8 @@ export default function PurchaseProduct({
   const handleConfirmOrder = async () => {
     if (!uploadedFile) {
       Alert.alert(
-        "Invoice Required",
-        "Please upload the invoice file before confirming.",
+        t("PurchaseShortage.Invoice Required", "Invoice Required"),
+        t("PurchaseShortage.Please upload invoice before confirming", "Please upload the invoice file before confirming."),
       );
       return;
     }
@@ -292,7 +298,7 @@ export default function PurchaseProduct({
               {productName}
             </Text>
             <Text className="text-md text-[#54617D] mt-1">
-              {step === 1 ? "Collect : " : "Collected : "}
+              {step === 1 ? t("PurchaseShortage.Collect : ", "Collect : ") : t("PurchaseShortage.Collected : ", "Collected : ")}
               <Text className="text-[#980775] font-extrabold">
                 {step === 1
                   ? `${formatKg(defaultKg)} kg`
@@ -300,7 +306,7 @@ export default function PurchaseProduct({
               </Text>
             </Text>
             <Text className="text-md text-[#54617D] mt-0.5">
-              Price per kg :{" "}
+              {t("PurchaseShortage.Price per kg : ", "Price per kg : ")}
               <Text style={{ color: "#AC7F5E" }} className="font-bold">
                 Rs.{" "}
                 {step === 1
@@ -316,7 +322,7 @@ export default function PurchaseProduct({
               {/* Buying Quantity in kg */}
               <View>
                 <Text className="text-sm font-bold text-[#030E25] mb-2">
-                  Buying Quantity in kg
+                  {t("PurchaseShortage.Buying Quantity in kg", "Buying Quantity in kg")}
                 </Text>
                 <TextInput
                   value={buyingQty}
@@ -326,7 +332,7 @@ export default function PurchaseProduct({
                     if (qtyError) setQtyError("");
                   }}
                   keyboardType="decimal-pad"
-                  placeholder="--Enter Buying Quantity in kg--"
+                  placeholder={t("PurchaseShortage.Enter Buying Quantity placeholder", "--Enter Buying Quantity in kg--")}
                   placeholderTextColor="#576879"
                   style={{
                     fontStyle: buyingQty ? "normal" : "italic",
@@ -351,7 +357,7 @@ export default function PurchaseProduct({
               {/* Purchasing Price per kg (Rs.) */}
               <View>
                 <Text className="text-sm font-bold text-[#030E25] mb-2">
-                  Purchasing Price per kg (Rs.)
+                  {t("PurchaseShortage.Purchasing Price (Rs.)", "Purchasing Price per kg (Rs.)")}
                 </Text>
                 <TextInput
                   value={purchasingPrice}
@@ -362,7 +368,7 @@ export default function PurchaseProduct({
                     if (priceError) setPriceError("");
                   }}
                   keyboardType="decimal-pad"
-                  placeholder="--Enter Purchasing Price per kg--"
+                  placeholder={t("PurchaseShortage.Enter Purchasing Price placeholder", "--Enter Purchasing Price per kg--")}
                   placeholderTextColor="#576879"
                   style={{
                     fontStyle: purchasingPrice ? "normal" : "italic",
@@ -388,7 +394,7 @@ export default function PurchaseProduct({
             /* STEP 2: Upload Invoice File */
             <View className="mt-2">
               <Text className="text-sm font-extrabold text-[#030E25] mb-2 text-center">
-                Upload Invoice File
+                {t("PurchaseShortage.Upload Invoice", "Upload Invoice File")}
               </Text>
 
               <UploadFile
@@ -428,7 +434,7 @@ export default function PurchaseProduct({
                     textAlign: "center",
                   }}
                 >
-                  {t("PurchaseProduct.Cancel") || "Cancel"}
+                  {t("Packing.Cancel", "Cancel")}
                 </Text>
               </TouchableOpacity>
 
@@ -453,7 +459,7 @@ export default function PurchaseProduct({
                     textAlign: "center",
                   }}
                 >
-                  {t("PurchaseProduct.Purchase") || "Purchase"}
+                  {t("PurchaseShortage.Purchase", "Purchase")}
                 </Text>
               </TouchableOpacity>
             </>
@@ -481,7 +487,7 @@ export default function PurchaseProduct({
                     textAlign: "center",
                   }}
                 >
-                  {t("PurchaseProduct.GoBack") || "Go Back"}
+                  {t("Common.Go Back", "Go Back")}
                 </Text>
               </TouchableOpacity>
 
@@ -515,8 +521,8 @@ export default function PurchaseProduct({
                   }}
                 >
                   {submitting
-                    ? t("PurchaseProduct.Submitting") || "Submitting..."
-                    : t("PurchaseProduct.Confirm") || "Confirm"}
+                    ? t("Common.Submitting", "Submitting...")
+                    : t("AssignGroups.Confirm", "Confirm")}
                 </Text>
               </TouchableOpacity>
             </>

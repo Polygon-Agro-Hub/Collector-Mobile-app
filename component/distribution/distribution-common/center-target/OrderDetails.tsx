@@ -13,6 +13,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 interface PackagedItem {
   id: number;
@@ -66,6 +67,7 @@ export default function OrderDetails({
   route: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
   const params = route.params || {};
   const insets = useSafeAreaInsets();
   const [details, setDetails] = useState<OrderDetailsData | null>(null);
@@ -137,7 +139,7 @@ export default function OrderDetails({
   return (
     <View className="flex-1 bg-white">
       <CustomHeader
-        title="Order Details"
+        title={t("DistributionCenterTarget.Order Details", "Order Details")}
         navigation={navigation}
         onBackPress={handleBack}
       />
@@ -146,7 +148,7 @@ export default function OrderDetails({
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#980775" />
           <Text className="text-[#54617D] text-sm font-semibold mt-3">
-            Loading order details...
+            {t("DistributionCenterTarget.Loading order details...", "Loading order details...")}
           </Text>
         </View>
       ) : details ? (
@@ -176,7 +178,7 @@ export default function OrderDetails({
               <View className="bg-white rounded-2xl p-4 mb-6 border border-[#F5C400] flex-row justify-between items-center shadow-sm">
                 <View>
                   <Text className="text-[#54617D] text-xs font-semibold">
-                    QR Printed By
+                    {t("DistributionCenterTarget.QR Printed By", "QR Printed By")}
                   </Text>
                   <Text className="text-slate-950 font-extrabold text-sm mt-0.5">
                     {details.qrPrintedByEmpId}
@@ -236,7 +238,7 @@ export default function OrderDetails({
                                 {formatWeight(item.weight)}
                               </Text>
                               <Text className="text-[#54617D] text-[11px] font-semibold mt-0.5">
-                                Packed By
+                                {t("DistributionCenterTarget.Packed By", "Packed By")}
                               </Text>
                               <Text className="text-slate-950 font-extrabold text-xs mt-0.5">
                                 {item.packedByEmpId}
@@ -258,7 +260,7 @@ export default function OrderDetails({
               <View className="bg-white rounded-2xl p-4 mb-6 border border-[#F5C400] flex-row justify-between items-center shadow-sm">
                 <View>
                   <Text className="text-[#54617D] text-xs font-semibold">
-                    QC Done By
+                    {t("DistributionCenterTarget.QC Done By", "QC Done By")}
                   </Text>
                   <Text className="text-slate-950 font-extrabold text-sm mt-0.5">
                     {details.qcDoneByEmpId}
@@ -280,7 +282,7 @@ export default function OrderDetails({
                 activeOpacity={0.8}
               >
                 <Text className="text-white font-extrabold text-base">
-                  Close
+                  {t("DistributionCenterTarget.Close", "Close")}
                 </Text>
               </TouchableOpacity>
             </View>
