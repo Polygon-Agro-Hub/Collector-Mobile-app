@@ -17,30 +17,34 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import { LinearGradient } from "expo-linear-gradient";
-import { Camera } from "expo-camera";
+import * as Location from "expo-location";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
-type CameraAccessNavigationProp = StackNavigationProp<
+type LocationAccessNavigationProp = StackNavigationProp<
   RootStackParamList,
   any
 >;
 
-interface CameraAccessProps {
-  navigation?: CameraAccessNavigationProp;
+interface LocationAccessProps {
+  navigation?: LocationAccessNavigationProp;
   onPermissionGranted?: () => void;
   onClose?: () => void;
+  onNotNow?: () => void;
   returnScreen?: keyof RootStackParamList;
   onBackPress?: () => void;
+  blockBackNavigation?: boolean;
 }
 
-const cameraImage = require("@/assets/images/permission/camera.webp");
+const locationImage = require("@/assets/images/permission/location.webp");
 
-const CameraAccess: React.FC<CameraAccessProps> = ({
+const LocationAccess: React.FC<LocationAccessProps> = ({
   navigation,
   onPermissionGranted,
   onClose,
+  onNotNow,
   returnScreen = "Main",
   onBackPress,
+  blockBackNavigation = false,
 }) => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -64,8 +68,19 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
     }
   };
 
+  const handleNotNowPress = () => {
+    if (onNotNow) {
+      onNotNow();
+    } else {
+      handleDenyOrClose();
+    }
+  };
+
   useEffect(() => {
     const handleHardwareBackPress = () => {
+      if (blockBackNavigation) {
+        return true;
+      }
       handleDenyOrClose();
       return true;
     };
@@ -74,17 +89,12 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
       handleHardwareBackPress
     );
     return () => subscription.remove();
-  }, [navigation, onClose, onBackPress, returnScreen]);
+  }, [blockBackNavigation, navigation, onClose, onBackPress, returnScreen]);
 
-  const requestCameraPermission = async () => {
+  const requestLocationPermission = async () => {
     setIsLoading(true);
     try {
-      const current = await Camera.getCameraPermissionsAsync();
-      let status = current.status;
-      if (status !== "granted") {
-        const response = await Camera.requestCameraPermissionsAsync();
-        status = response.status;
-      }
+      const { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status === "granted") {
         if (onPermissionGranted) {
@@ -94,31 +104,37 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
         } else if (navigation) {
           navigation.navigate(returnScreen as any);
         }
-      } else if (status === "denied") {
+      } else {
         Alert.alert(
-          t("CameraAccess.PermissionDenied") || "Permission Denied",
-          t("CameraAccess.CameraAccessIsRequiredPleaseEnableItInSettings") ||
-            "Camera access is required. Please enable it in settings.",
+          t("LocationAccess.PermissionDenied") || "Permission Denied",
+          t("LocationAccess.LocationAccessIsRequiredPleaseEnableItInSettings") ||
+            "Location access is required for this feature. Please enable it in settings.",
           [
             {
-              text: t("CameraAccess.NotNow") || "Not Now",
+              text: t("LocationAccess.NotNow") || "Not Now",
               style: "cancel",
-              onPress: handleDenyOrClose,
+              onPress: handleNotNowPress,
             },
             {
-              text: t("CameraAccess.OpenSettings") || "Open Settings",
+              text: t("LocationAccess.OpenSettings") || "Open Settings",
               onPress: () => Linking.openSettings(),
             },
           ]
         );
       }
     } catch (error) {
-      console.error("Error requesting camera permission:", error);
+      console.error("Error requesting location permission:", error);
       Alert.alert(
         t("Error.error") || "Error",
-        t("CameraAccess.UnableToRequestCameraPermissionPleaseTryAgain") ||
-          "Unable to request camera permission. Please try again.",
-        [{ text: t("Main.OK") || "OK" }]
+        t("LocationAccess.UnableToRequestLocationPermissionPleaseTryAgain") ||
+          "Unable to request location permission. Please try again.",
+        [
+          {
+            text: t("LocationAccess.NotNow") || "Not Now",
+            onPress: handleNotNowPress,
+          },
+          { text: t("Main.OK") || "OK" },
+        ]
       );
     } finally {
       setIsLoading(false);
@@ -128,6 +144,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#121212" }}>
       <StatusBar barStyle="light-content" backgroundColor="#121212" />
+
       <ScrollView
         className="flex-1 px-5"
         onLayout={(e: LayoutChangeEvent) =>
@@ -155,7 +172,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
           {/* Header Image */}
           <View className="items-center justify-center mt-2 mb-4">
             <Image
-              source={cameraImage}
+              source={locationImage}
               className="w-32 h-32"
               resizeMode="contain"
             />
@@ -163,54 +180,54 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
 
           {/* Title */}
           <Text className="text-white text-2xl font-bold text-center mb-2">
-            {t("CameraAccess.ProminentDisclosureTitle") ||
-              "Why CoDi-Net Uses Camera"}
+            {t("LocationAccess.ProminentDisclosureTitle") ||
+              "Why CoDi-Net Uses Location Data"}
           </Text>
 
           {/* Intro */}
           <Text className="text-gray-300 text-sm text-center mb-5 leading-5">
-            {t("CameraAccess.ProminentDisclosureIntro") ||
-              "CoDi-Net requires camera access to enable the following operational features:"}
+            {t("LocationAccess.ProminentDisclosureIntro") ||
+              "CoDi-Net collects and uses your device's location data to enable the following core features:"}
           </Text>
 
-          {/* Feature 1: QR Scanning */}
+          {/* Feature 1: Bluetooth Printer & Hardware Connection */}
           <View className="bg-[#1E1E1E] p-4 rounded-xl mb-3 border border-gray-800 flex-row items-start">
             <View className="bg-[#980775]/20 p-2.5 rounded-lg mr-3 mt-0.5 border border-[#980775]/40">
               <MaterialCommunityIcons
-                name="qrcode-scan"
+                name="printer-pos-outline"
                 size={24}
                 color="#E879F9"
               />
             </View>
             <View className="flex-1">
               <Text className="text-white font-semibold text-base mb-1">
-                {t("CameraAccess.FeatureQRTitle") ||
-                  "Instant QR Code Scanning"}
+                {t("LocationAccess.FeatureWeatherTitle") ||
+                  "Bluetooth Printer & Device Scanning"}
               </Text>
               <Text className="text-gray-400 text-xs leading-4">
-                {t("CameraAccess.FeatureQRDesc") ||
-                  "Scan farmer IDs, pickup orders, and cash handover QR codes for quick identification, verification, and secure transactions."}
+                {t("LocationAccess.FeatureWeatherDesc") ||
+                  "Android requires location access to discover and connect nearby Bluetooth thermal label printers and digital weighing scales."}
               </Text>
             </View>
           </View>
 
-          {/* Feature 2: Inspection / Document Photos */}
+          {/* Feature 2: Nearby Centers & Field Verification */}
           <View className="bg-[#1E1E1E] p-4 rounded-xl mb-4 border border-gray-800 flex-row items-start">
             <View className="bg-[#980775]/20 p-2.5 rounded-lg mr-3 mt-0.5 border border-[#980775]/40">
               <MaterialCommunityIcons
-                name="camera-outline"
+                name="map-marker-radius-outline"
                 size={24}
                 color="#E879F9"
               />
             </View>
             <View className="flex-1">
               <Text className="text-white font-semibold text-base mb-1">
-                {t("CameraAccess.FeatureInspectionTitle") ||
-                  "Crop Quality Inspection & Documents"}
+                {t("LocationAccess.FeatureCropTitle") ||
+                  "Nearby Centers & Field Verification"}
               </Text>
               <Text className="text-gray-400 text-xs leading-4">
-                {t("CameraAccess.FeatureInspectionDesc") ||
-                  "Capture real-time crop grade photos (Grade A, B, C) during collection and document verification photos for farmers and officers."}
+                {t("LocationAccess.FeatureCropDesc") ||
+                  "Locate nearby collection centers, verify farmer field locations during crop collection, and ensure accurate regional pricing."}
               </Text>
             </View>
           </View>
@@ -224,8 +241,8 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
               style={{ marginTop: 2, marginRight: 8 }}
             />
             <Text className="text-gray-300 text-xs flex-1 leading-4">
-              {t("CameraAccess.DisclosureFooter") ||
-                "Camera access is only active while scanning QR codes or capturing crop inspection photos. No photos or videos are captured without your explicit tap."}
+              {t("LocationAccess.DisclosureFooter") ||
+                "Your location data is only accessed while using collection and tracking features. We do not sell your location data or use it for background tracking."}
             </Text>
           </View>
 
@@ -236,7 +253,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
             }`}
           >
             <TouchableOpacity
-              onPress={requestCameraPermission}
+              onPress={requestLocationPermission}
               activeOpacity={0.8}
               disabled={isLoading}
               className="w-full mb-3"
@@ -256,15 +273,15 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
               >
                 <View className="flex-row items-center justify-center">
                   <Ionicons
-                    name="camera-outline"
+                    name="location-outline"
                     size={20}
                     color="#FFFFFF"
                     style={{ marginRight: 8 }}
                   />
                   <Text className="text-white font-extrabold text-base tracking-wide">
                     {isLoading
-                      ? t("CameraAccess.Requesting...") || "Requesting..."
-                      : t("CameraAccess.AgreeAndContinue") ||
+                      ? t("LocationAccess.Requesting...") || "Requesting..."
+                      : t("LocationAccess.AgreeAndContinue") ||
                         "Agree & Continue"}
                   </Text>
                 </View>
@@ -272,12 +289,12 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={handleDenyOrClose}
+              onPress={handleNotNowPress}
               activeOpacity={0.7}
               className="py-3 px-6 items-center justify-center"
             >
               <Text className="text-gray-400 font-semibold text-sm">
-                {t("CameraAccess.NotNow") || "Not Now"}
+                {t("LocationAccess.NotNow") || "Not Now"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -287,4 +304,4 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
   );
 };
 
-export default CameraAccess;
+export default LocationAccess;

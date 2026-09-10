@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
+import { useTranslation } from "react-i18next";
 
 interface AlertModalProps {
   visible: boolean;
@@ -39,6 +40,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   autoClose = true,
   showOkButton,
 }) => {
+  const { t } = useTranslation();
   const isOkButtonVisible =
     showOkButton !== undefined ? showOkButton : !autoClose;
   const loadingBarWidth = useRef(new Animated.Value(1)).current; // 1 = 100%
@@ -96,7 +98,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
   const getModalTitle = () => {
     if (showOpenOngoingButton) {
-      return "Cannot Proceed!";
+      return t("AlertModal.Cannot Proceed!", "Cannot Proceed!");
     }
     return title;
   };
@@ -142,7 +144,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
                 <FontAwesome5 name="undo" size={18} color="white" />
-                <Text className="text-white font-bold text-base">Re-Scan</Text>
+                <Text className="text-white font-bold text-base">
+                  {t("AlertModal.Re-Scan", "Re-Scan")}
+                </Text>
               </TouchableOpacity>
             )}
 
@@ -154,7 +158,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
                 <Text className="text-white font-bold text-base">
-                  Open Ongoing Activity
+                  {t("AlertModal.Open Ongoing Activity", "Open Ongoing Activity")}
                 </Text>
               </TouchableOpacity>
             )}
@@ -165,7 +169,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 activeOpacity={0.8}
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
-                <Text className="text-white font-bold text-base">OK</Text>
+                <Text className="text-white font-bold text-base">
+                  {t("AlertModal.OK", "OK")}
+                </Text>
               </TouchableOpacity>
             )}
           </View>

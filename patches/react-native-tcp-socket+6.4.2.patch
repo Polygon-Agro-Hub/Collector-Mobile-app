@@ -1,0 +1,30 @@
+diff --git a/node_modules/react-native-tcp-socket/src/Globals.js b/node_modules/react-native-tcp-socket/src/Globals.js
+index b12410b..d85031a 100644
+--- a/node_modules/react-native-tcp-socket/src/Globals.js
++++ b/node_modules/react-native-tcp-socket/src/Globals.js
+@@ -7,6 +7,24 @@ function getNextId() {
+     return instanceNumber++;
+ }
+ 
+-const nativeEventEmitter = new NativeEventEmitter(Sockets);
++// Guard: on iOS the native TcpSockets module may not yet be available at
++// module-load time (first launch, Expo Go sandbox, or slow native init).
++// Calling new NativeEventEmitter(null/undefined) triggers an invariant() crash
++// that freezes the entire app on iOS.  We defer construction until the first
++// time a listener is actually needed.
++const _noopEmitter = { addListener: () => ({ remove: () => {} }) };
++let _emitterInstance = null;
++
++const nativeEventEmitter = new Proxy(_noopEmitter, {
++    get(_, prop) {
++        if (!_emitterInstance) {
++            if (!Sockets) return _noopEmitter[prop] !== undefined ? _noopEmitter[prop] : () => {};
++            try { _emitterInstance = new NativeEventEmitter(Sockets); }
++            catch (_) { return _noopEmitter[prop] !== undefined ? _noopEmitter[prop] : () => {}; }
++        }
++        const val = _emitterInstance[prop];
++        return typeof val === 'function' ? val.bind(_emitterInstance) : val;
++    }
++});
+ 
+ export { nativeEventEmitter, getNextId };

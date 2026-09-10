@@ -19,6 +19,7 @@ import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navig
 import axios from "axios";
 import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 interface Product {
   id: number;
@@ -27,6 +28,7 @@ interface Product {
 }
 
 export default function WelcomeToPacking({ route, navigation }: { route: any; navigation: any }) {
+  const { t } = useTranslation();
   const { positionId, positionName = "Packing Position 1" } = route.params || {};
   const insets = useSafeAreaInsets();
 
@@ -124,14 +126,14 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
         {/* Page Title */}
         <View className="items-center mb-4 mt-4">
           <Text className="text-xl font-extrabold text-[#030E25] text-center">
-            Welcome to {positionName}
+            {t("Packing.Welcome to", { positionName: positionName, defaultValue: `Welcome to ${positionName}` })}
           </Text>
         </View>
 
         {loading ? (
           <View className="flex-grow justify-center items-center py-20" style={{ flex: 1 }}>
             <ActivityIndicator size="large" color="#030E25" />
-            <Text className="text-[#54617D] text-sm mt-3 font-semibold">Loading products...</Text>
+            <Text className="text-[#54617D] text-sm mt-3 font-semibold">{t("Packing.Loading products...", "Loading products...")}</Text>
           </View>
         ) : (
           <View className="flex-grow" style={{ flex: 1, justifyContent: hasData ? "flex-start" : "center" }}>
@@ -139,11 +141,11 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
             <View className="items-center mb-8 px-4">
               {hasData ? (
                 <Text className="text-sm font-medium text-[#54617D] text-center leading-5">
-                  Before you begin make sure you have{"\n"}these products with you
+                  {t("Packing.Before you begin make sure you have these products with you", "Before you begin make sure you have\nthese products with you")}
                 </Text>
               ) : (
                 <Text className="text-sm font-medium text-[#54617D] text-center leading-5">
-                  Please wait and check again.{"\n"}This position doesn't have any assigned products yet.
+                  {t("Packing.No assigned products yet", "Please wait and check again.\nThis position doesn't have any assigned products yet.")}
                 </Text>
               )}
             </View>
@@ -219,7 +221,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
             }}
           >
             <Text className="text-white font-extrabold text-base">
-              Start Working
+              {t("Packing.Start Working", "Start Working")}
             </Text>
           </TouchableOpacity>
         </View>

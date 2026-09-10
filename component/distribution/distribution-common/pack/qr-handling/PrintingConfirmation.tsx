@@ -29,6 +29,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import environment from "@/environment/environment";
 import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
+import { useTranslation } from "react-i18next";
 
 export default function PrintingConfirmation({
   route,
@@ -37,6 +38,7 @@ export default function PrintingConfirmation({
   route: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
   const {
     orderNumber,
     invoiceNumber,
@@ -408,7 +410,7 @@ export default function PrintingConfirmation({
         {/* Header Title */}
         <View className="items-center mb-4 mt-2">
           <Text className="text-xl font-bold text-slate-950">
-            Printing Confirmation
+            {t("QRHandling.Printing Confirmation", "Printing Confirmation")}
           </Text>
         </View>
 
@@ -508,7 +510,7 @@ export default function PrintingConfirmation({
                     marginTop: 1,
                   }}
                 >
-                  {isWholesale ? "Wholesale" : "Retail"}
+                  {isWholesale ? t("AssignGroups.Wholesale", "Wholesale") : t("AssignGroups.Retail", "Retail")}
                 </Text>
                 <Text
                   numberOfLines={1}
@@ -630,7 +632,7 @@ export default function PrintingConfirmation({
               >
                 {connectedDevice
                   ? connectedDevice.displayName || connectedDevice.name
-                  : "No Printer Connected"}
+                  : t("QRHandling.No Printer Connected", "No Printer Connected")}
               </Text>
               <Text
                 style={{
@@ -639,8 +641,8 @@ export default function PrintingConfirmation({
                 }}
               >
                 {connectedDevice
-                  ? "Bluetooth Ready (50x30mm TSPL)"
-                  : "Tap to scan & connect printer"}
+                  ? t("QRHandling.Bluetooth Ready", "Bluetooth Ready (50x30mm TSPL)")
+                  : t("QRHandling.Tap to scan & connect printer", "Tap to scan & connect printer")}
               </Text>
             </View>
           </View>
@@ -657,7 +659,7 @@ export default function PrintingConfirmation({
             <Text
               style={{ fontSize: 12, fontWeight: "bold", color: "#ffffff" }}
             >
-              {connectedDevice ? "Change" : "Connect"}
+              {connectedDevice ? t("QRHandling.Change", "Change") : t("QRHandling.Connect", "Connect")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -683,7 +685,7 @@ export default function PrintingConfirmation({
               textAlign: "center",
             }}
           >
-            Cancel
+            {t("Packing.Cancel", "Cancel")}
           </Text>
         </TouchableOpacity>
 
@@ -715,8 +717,8 @@ export default function PrintingConfirmation({
               }}
             >
               {route.params?.isReprint
-                ? "Start Again"
-                : `Print (${currentStep})`}
+                ? t("QRHandling.Start Again", "Start Again")
+                : t("QRHandling.Print Step", { current: currentStep, defaultValue: `Print (${currentStep})` })}
             </Text>
           )}
         </TouchableOpacity>

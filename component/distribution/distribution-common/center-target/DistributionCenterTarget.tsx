@@ -16,6 +16,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import { getSocket } from "@/services/socket";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { useTranslation } from "react-i18next";
 
 interface TargetOrder {
   id: number;
@@ -46,6 +47,7 @@ export default function DistributionCenterTarget({
 }: {
   navigation: any;
 }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"todo" | "out">("todo");
   const [todoOrders, setTodoOrders] = useState<TargetOrder[]>([]);
   const [outOrders, setOutOrders] = useState<TargetOrder[]>([]);
@@ -183,7 +185,7 @@ export default function DistributionCenterTarget({
   return (
     <View className="flex-1 bg-white">
       <CustomHeader
-        title="Centre Target"
+        title={t("DistributionCenterTarget.Centre Target", "Centre Target")}
         navigation={navigation}
         onBackPress={handleBack}
       />
@@ -192,7 +194,7 @@ export default function DistributionCenterTarget({
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#980775" />
           <Text className="text-[#54617D] text-sm font-semibold mt-3">
-            Loading targets...
+            {t("DistributionCenterTarget.Loading targets...", "Loading targets...")}
           </Text>
         </View>
       ) : !hasData ? (
@@ -200,7 +202,7 @@ export default function DistributionCenterTarget({
         <View className="flex-1 bg-white">
           <View className="items-center mt-6 mb-6 px-4">
             <Text className="text-sm font-medium text-[#54617D] text-center leading-relaxed">
-              Please wait and check again.{"\n"}Your centre doesn't have a daily target yet.
+              {t("DistributionCenterTarget.No daily target yet", "Please wait and check again.\nYour centre doesn't have a daily target yet.")}
             </Text>
           </View>
 
@@ -234,7 +236,7 @@ export default function DistributionCenterTarget({
                     activeTab === "todo" ? "text-white" : "text-[#54617D]"
                   }`}
                 >
-                  To Do ({formatCount(todoOrders.length)})
+                  {t("DistributionCenterTarget.To Do", { count: formatCount(todoOrders.length), defaultValue: `To Do (${formatCount(todoOrders.length)})` })}
                 </Text>
               </TouchableOpacity>
 
@@ -251,7 +253,7 @@ export default function DistributionCenterTarget({
                     activeTab === "out" ? "text-white" : "text-[#54617D]"
                   }`}
                 >
-                  Out ({formatCount(outOrders.length)})
+                  {t("DistributionCenterTarget.Out", { count: formatCount(outOrders.length), defaultValue: `Out (${formatCount(outOrders.length)})` })}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -278,8 +280,8 @@ export default function DistributionCenterTarget({
                   </View>
                   <Text className="text-[#54617D] text-sm font-medium text-center mt-4">
                     {activeTab === "todo"
-                      ? "No targets in To Do list."
-                      : "No targets in Out list yet."}
+                      ? t("DistributionCenterTarget.No targets in To Do list.", "No targets in To Do list.")
+                      : t("DistributionCenterTarget.No targets in Out list yet.", "No targets in Out list yet.")}
                   </Text>
                 </View>
               ) : (
@@ -309,6 +311,14 @@ export default function DistributionCenterTarget({
                           : order.status === "Opened"
                           ? "text-[#F59E0B]"
                           : "text-[#FF5B5B]";
+
+                        const displayStatus = `(${order.rowName}) ${
+                          order.status === "Out"
+                            ? t("DistributionCenterTarget.OutStatus", "Out")
+                            : order.status === "Opened"
+                            ? t("DistributionCenterTarget.Opened", "Opened")
+                            : t("DistributionCenterTarget.Pending", "Pending")
+                        }`;
 
                         return (
                           <TouchableOpacity
@@ -363,7 +373,7 @@ export default function DistributionCenterTarget({
                               <Text
                                 className={`text-xs font-extrabold mt-0.5 ${statusTextColor}`}
                               >
-                                {order.statusLabel}
+                                {displayStatus}
                               </Text>
                             </View>
 

@@ -14,6 +14,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import axios from "axios";
 import environment from "@/environment/environment";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
+import { useTranslation } from "react-i18next";
 
 type GroupPageState = "empty" | "active";
 
@@ -26,6 +27,7 @@ interface TimeSlotGroup {
 }
 
 export default function Group({ route, navigation }: { route: any; navigation: any }) {
+  const { t } = useTranslation();
   const [pageState, setPageState] = useState<GroupPageState>("active");
   const [retailGroups, setRetailGroups] = useState<TimeSlotGroup[]>([]);
   const [wholesaleGroups, setWholesaleGroups] = useState<TimeSlotGroup[]>([]);
@@ -36,7 +38,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
       setLoading(true);
       const token = store.getState().auth.token;
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(t("Error.Error") || "Error", t("Error.User token not found. Please log in again.") || "Authentication token not found. Please log in again.");
         return;
       }
 
@@ -56,11 +58,11 @@ export default function Group({ route, navigation }: { route: any; navigation: a
 
         setPageState(totalOrdersLeft > 0 ? "active" : "empty");
       } else {
-        Alert.alert("Error", response.data.message || "Failed to fetch groups.");
+        Alert.alert(t("Error.Error") || "Error", response.data.message || t("AssignGroups.Failed to assign orders.") || "Failed to fetch groups.");
       }
     } catch (error) {
       console.error("Error fetching timeslots groups:", error);
-      Alert.alert("Error", "An error occurred while fetching timeslots groups.");
+      Alert.alert(t("Error.Error") || "Error", t("Error.Failed to fetch data.") || "An error occurred while fetching timeslots groups.");
     } finally {
       setLoading(false);
     }
@@ -83,7 +85,10 @@ export default function Group({ route, navigation }: { route: any; navigation: a
   const handleAssignGroup = (group: TimeSlotGroup, type: "retail" | "wholesale") => {
     if (group.ordersLeft === 0 || group.status === "no_orders") return;
     if (group.status === "assigned") {
-      Alert.alert("Already Assigned", "This time slot group is already fully assigned.");
+      Alert.alert(
+        t("AssignGroups.Already Assigned"),
+        t("AssignGroups.This time slot group is already fully assigned.")
+      );
       return;
     }
     navigation.navigate("SelectOrder", { group, type });
@@ -93,7 +98,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
     <View className="flex-1 bg-white">
       {/* Standard Custom Header */}
       <CustomHeader
-        title="Groups"
+        title={t("AssignGroups.Groups")}
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
       />
@@ -101,10 +106,12 @@ export default function Group({ route, navigation }: { route: any; navigation: a
       {loading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#030E25" />
-          <Text className="text-sm font-semibold text-[#54617D] mt-3">Loading groups...</Text>
+          <Text className="text-sm font-semibold text-[#54617D] mt-3">
+            {t("AssignGroups.Loading groups...")}
+          </Text>
         </View>
       ) : pageState === "empty" ? (
-        <NoDataScreen message="- No groups found. Please check again after 12:00 AM tomorrow. -" />
+        <NoDataScreen message={t("AssignGroups.No groups found message")} />
       ) : (
         <ScrollView
           className="flex-1 bg-white"
@@ -113,7 +120,9 @@ export default function Group({ route, navigation }: { route: any; navigation: a
         >
           {/* Retail Groups Section */}
           <View className="mb-6">
-            <Text className="text-base font-extrabold text-[#030E25] mb-4">Retail Groups</Text>
+            <Text className="text-base font-extrabold text-[#030E25] mb-4">
+              {t("AssignGroups.Retail Groups")}
+            </Text>
 
             <View className="gap-4">
               {retailGroups.map((group) => {
@@ -143,12 +152,14 @@ export default function Group({ route, navigation }: { route: any; navigation: a
                       </Text>
                       {isDisabled ? (
                         <Text className="text-xs font-bold mt-1 text-[#FF0000]">
-                          No orders for today
+                          {t("AssignGroups.No orders for today")}
                         </Text>
                       ) : (
                         <Text className="text-xs font-bold mt-1 text-[#2868FE]">
                           {group.ordersLeft}{" "}
-                          {group.ordersLeft === 1 ? "Order" : "Orders"} Left to Assign
+                          {group.ordersLeft === 1
+                            ? t("AssignGroups.Order Left to Assign")
+                            : t("AssignGroups.Orders Left to Assign")}
                         </Text>
                       )}
                     </View>
@@ -178,7 +189,9 @@ export default function Group({ route, navigation }: { route: any; navigation: a
 
           {/* Wholesale Groups Section */}
           <View className="mt-2">
-            <Text className="text-base font-extrabold text-[#030E25] mb-4">Wholesale Groups</Text>
+            <Text className="text-base font-extrabold text-[#030E25] mb-4">
+              {t("AssignGroups.Wholesale Groups")}
+            </Text>
 
             <View className="gap-4">
               {wholesaleGroups.map((group) => {
@@ -208,12 +221,14 @@ export default function Group({ route, navigation }: { route: any; navigation: a
                       </Text>
                       {isDisabled ? (
                         <Text className="text-xs font-bold mt-1 text-[#FF0000]">
-                          No orders for today
+                          {t("AssignGroups.No orders for today")}
                         </Text>
                       ) : (
                         <Text className="text-xs font-bold mt-1 text-[#2868FE]">
                           {group.ordersLeft}{" "}
-                          {group.ordersLeft === 1 ? "Order" : "Orders"} Left to Assign
+                          {group.ordersLeft === 1
+                            ? t("AssignGroups.Order Left to Assign")
+                            : t("AssignGroups.Orders Left to Assign")}
                         </Text>
                       )}
                     </View>

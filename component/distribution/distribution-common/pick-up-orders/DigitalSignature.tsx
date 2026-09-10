@@ -18,8 +18,8 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { AlertModal } from "@/component/components/popup/AlertModal";
-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 type DigitalSignatureNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -170,11 +170,12 @@ const DashedBorder = ({
 };
 
 export default function DigitalSignature({
-  route,
   navigation,
+  route,
 }: DigitalSignatureProps) {
+  const { t } = useTranslation();
+  const { orderId } = route.params || {};
   const signatureRef = useRef<any>(null);
-  const { orderId } = route.params;
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [signatureDrawn, setSignatureDrawn] = useState(false);
@@ -289,11 +290,10 @@ export default function DigitalSignature({
         const message = (
           <View className="items-center">
             <Text className="text-center text-[#4E4E4E] mb-5 mt-2">
-              Pickup details for order:{" "}
-              <Text className="font-bold text-[#000000]">
-                {String(orderId)}
-              </Text>{" "}
-              has been saved successfully!
+              {t("DigitalSignature.Pickup details saved successfully", {
+                orderId: String(orderId),
+                defaultValue: `Pickup details for order: ${String(orderId)} has been saved successfully!`
+              })}
             </Text>
           </View>
         );
@@ -307,13 +307,13 @@ export default function DigitalSignature({
           navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
         }, 4000);
       } else {
-        throw new Error(response.data.message || "Failed to save signature");
+        throw new Error(response.data.message || t("DigitalSignature.Failed to save signature", "Failed to save signature. Please try again."));
       }
     } catch (error: any) {
       console.error("Error saving pickup signature:", error);
       setLoading(false);
 
-      let errorMessage = "Failed to save signature. Please try again.";
+      let errorMessage = t("DigitalSignature.Failed to save signature", "Failed to save signature. Please try again.");
 
       if (error.response) {
         errorMessage = error.response.data?.message || errorMessage;
@@ -334,12 +334,12 @@ export default function DigitalSignature({
 
   const handleBackPress = () => {
     Alert.alert(
-      "Cancel Signature",
-      "Are you sure you want to cancel? Your signature will not be saved.",
+      t("DigitalSignature.Cancel Signature", "Cancel Signature"),
+      t("DigitalSignature.Cancel signature confirmation", "Are you sure you want to cancel? Your signature will not be saved."),
       [
-        { text: "No, Continue", style: "cancel" },
+        { text: t("DigitalSignature.No, Continue", "No, Continue"), style: "cancel" },
         {
-          text: "Yes, Cancel",
+          text: t("DigitalSignature.Yes, Cancel", "Yes, Cancel"),
           onPress: () => {
             navigation.navigate("Main", { screen: "ReadytoPickupOrders" });
           },
@@ -422,6 +422,13 @@ export default function DigitalSignature({
     }
     .m-signature-pad--footer {
       display: none !important;
+      margin: 0px;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     canvas {
       background-color: #DFEDFC !important;
@@ -492,7 +499,7 @@ export default function DigitalSignature({
           }}
           numberOfLines={1}
         >
-          Customer's Digital Signature
+          {t("DigitalSignature.Customer Signature", "Customer's Digital Signature")}
         </Text>
       </View>
 
@@ -548,7 +555,7 @@ export default function DigitalSignature({
                 fontWeight: "600",
               }}
             >
-              Clear
+              {t("DigitalSignature.Clear", "Clear")}
             </Text>
           </TouchableOpacity>
 
@@ -607,7 +614,7 @@ export default function DigitalSignature({
         >
           <Ionicons name="close" size={20} color="black" />
           <Text style={{ color: "black", fontWeight: "700", marginLeft: 8 }}>
-            Cancel
+            {t("Packing.Cancel", "Cancel")}
           </Text>
         </TouchableOpacity>
 
@@ -625,7 +632,7 @@ export default function DigitalSignature({
           >
             <ActivityIndicator size="small" color="#000" />
             <Text style={{ fontWeight: "600", color: "black", marginLeft: 8 }}>
-              Saving...
+              {t("DigitalSignature.Saving...", "Saving...")}
             </Text>
           </View>
         ) : (
@@ -667,7 +674,7 @@ export default function DigitalSignature({
                 marginLeft: 8,
               }}
             >
-              Done
+              {t("Common.Done", "Done")}
             </Text>
           </TouchableOpacity>
         )}
