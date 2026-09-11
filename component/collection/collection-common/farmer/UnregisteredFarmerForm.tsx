@@ -201,11 +201,16 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         Alert.alert(
           t("Error.error"),
           t("Error.This Phone Number already exists."),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
         setLoading(false);
         return;
       } else if (checkResponse.data.message === "This NIC already exists.") {
-        Alert.alert(t("Error.error"), t("Error.This NIC already exists."));
+        Alert.alert(
+          t("Error.error"),
+          t("Error.This NIC already exists."),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
         setLoading(false);
         return;
       } else if (
@@ -215,6 +220,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         Alert.alert(
           t("Error.error"),
           t("Error.This Phone Number and NIC already exist."),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
         setLoading(false);
         return;
@@ -229,11 +235,22 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       let otpMessage = "";
       let companyName = "";
 
-      if (PreferdLanguage === "Sinhala") {
+      const lang = (PreferdLanguage || "").toLowerCase().trim();
+      const isSinhala =
+        lang === "sinhala" ||
+        lang === "si" ||
+        lang === "sinhalese" ||
+        lang === "සිංහල";
+      const isTamil =
+        lang === "tamil" ||
+        lang === "ta" ||
+        lang === "தமிழ்";
+
+      if (isSinhala) {
         companyName =
           (store.getState().auth.companyNameSinhala) || "PolygonAgro";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
-      } else if (PreferdLanguage === "Tamil") {
+      } else if (isTamil) {
         companyName =
           (store.getState().auth.companyNameTamil) || "PolygonAgro";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
@@ -272,7 +289,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       });
       setLoading(false);
     } catch (error) {
-      Alert.alert(t("Error.error"), t("Error.otpSendFailed"));
+      Alert.alert(t("Error.error"), t("Error.otpSendFailed"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
       setLoading(false);
     }
   };
@@ -476,7 +495,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                 languageOptions.find((l) => l.value === PreferdLanguage)
                   ?.label || ""
               }
-              placeholder="Select Language"
+              placeholder={t(
+                "UnregisteredFarmerDetails.Select Language",
+                "Select Language",
+              )}
               hasError={!!fieldErrors.preferdLanguage}
               onPress={() => setLanguageModalVisible(true)}
             />
@@ -550,11 +572,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.Phone")}
             </Text>
             <View
-              className={`flex-row items-center border ${
-                fieldErrors.phone || phoneError
+              className={`flex-row items-center border ${fieldErrors.phone || phoneError
                   ? "border-red-500"
                   : "border-[#F4F4F4] bg-[#F4F4F4]"
-              } px-4 rounded-full h-[50px]`}
+                } px-4 rounded-full h-[50px]`}
             >
               <TextInput
                 placeholder="7XXXXXXXX"
@@ -615,7 +636,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               value={
                 districtOptions.find((d) => d.value === district)?.label || ""
               }
-              placeholder="--Select District--"
+              placeholder={t(
+                "UnregisteredFarmerDetails.SelectDistrictPlaceholder",
+                "--Select District--",
+              )}
               hasError={!!fieldErrors.district}
               onPress={() => setDistrictModalVisible(true)}
             />
@@ -682,7 +706,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <SelectorButton
               value={bankName}
-              placeholder="--Select Bank--"
+              placeholder={t(
+                "UnregisteredFarmerDetails.Select Bank",
+                "--Select Bank--",
+              )}
               hasError={!!fieldErrors.bankName}
               onPress={() => setBankModalVisible(true)}
             />
@@ -700,13 +727,17 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
             </Text>
             <SelectorButton
               value={branchName}
-              placeholder="--Select Branch--"
+              placeholder={t(
+                "UnregisteredFarmerDetails.Select Branch",
+                "--Select Branch--",
+              )}
               hasError={!!fieldErrors.branchName}
               onPress={() => {
                 if (!bankName) {
                   Alert.alert(
                     t("Error.error"),
                     t("UnregisteredFarmerDetails.SelectBank"),
+                    [{ text: t("AlertModal.OK", "OK") }],
                   );
                   return;
                 }
@@ -783,7 +814,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           if (val && fieldErrors.district)
             setFieldErrors((prev) => ({ ...prev, district: "" }));
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.SearchDistrict")}
+        searchPlaceholder={t(
+          "UnregisteredFarmerDetails.SearchDistrict",
+          "Search district...",
+        )}
         multiSelect={false}
       />
 
@@ -801,7 +835,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           if (val && fieldErrors.bankName)
             setFieldErrors((prev) => ({ ...prev, bankName: "" }));
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.SearchBankName")}
+        searchPlaceholder={t(
+          "UnregisteredFarmerDetails.SearchBank",
+          "Search bank...",
+        )}
         multiSelect={false}
       />
 
@@ -818,7 +855,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           if (val && fieldErrors.branchName)
             setFieldErrors((prev) => ({ ...prev, branchName: "" }));
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.SearchBranchName")}
+        searchPlaceholder={t(
+          "UnregisteredFarmerDetails.SearchBranch",
+          "Search branch...",
+        )}
         multiSelect={false}
       />
     </KeyboardAvoidingView>

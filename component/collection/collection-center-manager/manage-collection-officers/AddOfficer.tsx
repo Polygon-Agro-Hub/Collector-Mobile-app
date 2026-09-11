@@ -332,16 +332,16 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
   }, [jobRole, formData.userId]);
 
   // Country Data Initializer
-  useMemo(() => {
+  useEffect(() => {
     const initialItems = countryData.map((country) => ({
       label: `${country.emoji}  ${country.dial_code}`,
       value: country.dial_code,
-      countryName: country.name,
+      countryName: t(`Countries.${country.name}`, country.name),
       flag: country.emoji,
       dialCode: country.dial_code,
     }));
     setCountryItems(initialItems);
-  }, []);
+  }, [t, i18n.language]);
 
   // Scroll to top when view is focused or step changes
   useFocusEffect(
@@ -1919,7 +1919,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                 />
                 {isValidating && (
                   <Text className="text-gray-500 text-xs mt-1 ml-2">
-                    {t("Validating email...")}
+                    {t("AddOfficerBasicDetails.ValidatingEmail", t("Validating email..."))}
                   </Text>
                 )}
                 {(errorEmail || fieldErrors.email) && (

@@ -15,7 +15,7 @@ interface GlobalSearchModalProps {
   visible: boolean;
   onClose: () => void;
   title: string;
-  data: Array<{ label: string; value: string; [key: string]: any }>;
+  data: Array<{ label: string; value: string;[key: string]: any }>;
   selectedItems: string[];
   onSelect: (items: string[]) => void;
   searchPlaceholder?: string;
@@ -48,14 +48,12 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   isLoading = false,
 }) => {
   const { t } = useTranslation();
-
-
-  const resolvedSearchPlaceholder =
-    searchPlaceholder ?? t("GlobalSearchModal.SearchPlaceholder");
-  const resolvedDoneButtonText =
-    doneButtonText ?? t("GlobalSearchModal.DoneButton");
-  const resolvedNoResultsText =
-    noResultsText ?? t("GlobalSearchModal.NoResultsText");
+  const effectiveSearchPlaceholder =
+    searchPlaceholder || t("GlobalSearchModal.Search", "Search...");
+  const effectiveDoneText =
+    doneButtonText || t("GlobalSearchModal.Done", "Done");
+  const effectiveNoResultsText =
+    noResultsText || t("GlobalSearchModal.No items found", "No items found");
 
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState(data);
@@ -66,7 +64,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     if (visible) {
       setSearchValue("");
     }
-   
+
   }, [visible]);
 
 
@@ -143,9 +141,8 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     isLast: boolean,
   ) => (
     <TouchableOpacity
-      className={`px-4 py-3 flex-row items-center justify-between ${
-        !isLast ? "border-b border-gray-200" : ""
-      }`}
+      className={`px-4 py-3 flex-row items-center justify-between ${!isLast ? "border-b border-gray-200" : ""
+        }`}
       onPress={() => handleItemPress(item.value)}
     >
       <Text className="text-base text-gray-800">{item.label}</Text>
@@ -161,7 +158,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       >
         <MaterialIcons name="search" size={20} color="#666" />
         <TextInput
-          placeholder={resolvedSearchPlaceholder}
+          placeholder={effectiveSearchPlaceholder}
           value={searchValue}
           onChangeText={setSearchValue}
           placeholderTextColor="#7F7F7F"
@@ -200,7 +197,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     if (filteredData.length === 0) {
       return (
         <View className="px-4 py-8 items-center">
-          <Text className="text-gray-500 text-base">{resolvedNoResultsText}</Text>
+          <Text className="text-gray-500 text-base">{effectiveNoResultsText}</Text>
         </View>
       );
     }
@@ -263,7 +260,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 onPress={handleDone}
               >
                 <Text className="text-white font-semibold text-base">
-                  {resolvedDoneButtonText}
+                  {effectiveDoneText}
                 </Text>
               </TouchableOpacity>
             </View>
