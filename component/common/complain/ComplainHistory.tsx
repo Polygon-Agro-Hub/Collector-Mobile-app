@@ -172,12 +172,10 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
 
       return `${closingWord},\n${teamName}`;
     } else if (complain.complainAssign === "CCH") {
-      const headTitle =
-        appLang === "si"
-          ? "Collection Centre Head"
-          : appLang === "ta"
-            ? "Collection Centre Head"
-            : "Collection Centre Head";
+      const headTitle = t(
+        "Roles.Collection Centre Head",
+        "Collection Centre Head",
+      );
 
       const closingWord =
         appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
@@ -192,12 +190,10 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         return `${closingWord},\n${replierName},\n${headTitle}`;
       }
     } else if (complain.complainAssign === "DCH") {
-      const headTitle =
-        appLang === "si"
-          ? "Distribution Centre Head"
-          : appLang === "ta"
-            ? "Distribution Centre Head"
-            : "Distribution Centre Head";
+      const headTitle = t(
+        "Roles.Distribution Centre Head",
+        "Distribution Centre Head",
+      );
 
       const closingWord =
         appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
@@ -212,19 +208,20 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         return `${closingWord}, ${replierName}\n${headTitle}`;
       }
     } else if (complain.complainAssign === "CCM") {
-      const managerTitle =
-        appLang === "si"
-          ? "Collection Centre Manager"
-          : appLang === "ta"
-            ? "Collection Centre Manager"
-            : "Collection Centre Manager";
+      const managerTitle = t(
+        "Roles.Collection Centre Manager",
+        "Collection Centre Manager",
+      );
+      const ofWord = t("Roles.of", "of");
 
       const closingWord =
         appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
 
       const line1 = `${closingWord}, ${replierName}`;
       const line2 = centerRegCode
-        ? `${managerTitle} of ${centerRegCode}`
+        ? appLang === "si" || appLang === "ta"
+          ? `${centerRegCode} ${ofWord} ${managerTitle}`
+          : `${managerTitle} ${ofWord} ${centerRegCode}`
         : `${managerTitle}`;
 
       if (companyName) {
@@ -233,19 +230,20 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         return `${line1}\n${line2}`;
       }
     } else {
-      const managerTitle =
-        appLang === "si"
-          ? "Distribution Centre Manager"
-          : appLang === "ta"
-            ? "Distribution Centre Manager"
-            : "Distribution Centre Manager";
+      const managerTitle = t(
+        "Roles.Distribution Centre Manager",
+        "Distribution Centre Manager",
+      );
+      const ofWord = t("Roles.of", "of");
 
       const closingWord =
         appLang === "si" ? "මෙයට" : appLang === "ta" ? "இதற்கு" : "Sincerely";
 
       const line1 = `${closingWord}, ${replierName}`;
       const line2 = centerRegCode
-        ? `${managerTitle} of ${centerRegCode}`
+        ? appLang === "si" || appLang === "ta"
+          ? `${centerRegCode} ${ofWord} ${managerTitle}`
+          : `${managerTitle} ${ofWord} ${centerRegCode}`
         : `${managerTitle}`;
 
       if (companyName) {
@@ -326,18 +324,35 @@ ${signature}${replyTime}`,
     }, []),
   );
 
+  const MONTH_KEYS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
   const formatDateTime = (isoDate: string) => {
     const date = new Date(isoDate);
 
     const hours = date.getHours();
     const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
+    const ampmKey = hours >= 12 ? "PM" : "AM";
+    const ampm = t(`Time.${ampmKey}`, ampmKey);
     const hour12 = hours % 12 || 12;
     const minuteStr = minutes.toString().padStart(2, "0");
     const timeStr = `${hour12}.${minuteStr} ${ampm}`;
 
     const day = date.getDate();
-    const month = date.toLocaleString("en-US", { month: "short" });
+    const monthKey = MONTH_KEYS[date.getMonth()];
+    const month = t(`Months.${monthKey}`, monthKey);
     const year = date.getFullYear();
 
     return `${timeStr}, ${day} ${month} ${year}`;

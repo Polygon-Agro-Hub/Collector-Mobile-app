@@ -21,7 +21,7 @@
     "Progress": "Progress",
     "Scan": "Scan QR",
     "Search": "Search By NIC",
-    "LoadingTargetStatus":"Loading target status..."
+    "LoadingTargetStatus": "Loading target status..."
   },
   "Error": {
     "error": "Sorry",
@@ -267,7 +267,7 @@
     "Cancel": "Cancel",
     "Cannot add negative values for load.": "Cannot add negative values for load.",
     "Product replacement successful": "Product replacement successful",
-    "AttachmentHasBeenSavedToYourSelectedFolder":"Attachment has been saved to your selected folder"
+    "AttachmentHasBeenSavedToYourSelectedFolder": "Attachment has been saved to your selected folder"
   },
   "SideMenu": {
     "LNG": "en",
@@ -377,7 +377,25 @@
     "EnterAccountNumber": "Please enter Account Number",
     "EnterAccountName": "Please enter Account Holder’s Name",
     "SelectBank": "Please select Bank",
-    "SelectBranch": "Please select Branch"
+    "SelectBranch": "Please select Branch",
+    "SelectDistrictPlaceholder": "--Select District--",
+    "--Select District--": "--Select District--",
+    "--Select Bank--": "--Select Bank--",
+    "--Select Branch--": "--Select Branch--",
+    "SearchDistrict": "Search district...",
+    "SearchBank": "Search bank...",
+    "SearchBranch": "Search branch...",
+    "OK": "OK"
+  },
+  "GlobalSearchModal": {
+    "Search": "Search...",
+    "Done": "Done",
+    "No items found": "No items found",
+    "SearchPlaceholder": "Search...",
+    "NoResultsText": "No items found",
+    "DoneButton": "Done",
+    "Loading": "Loading...",
+    "SelectedCount": "{{count}} selected"
   },
   "PriceChart": {
     "LNG": "en",
@@ -398,6 +416,7 @@
     "LNG": "en",
     "OTPVerification": "OTP Verification",
     "EnterCode": "Enter Verification Code",
+    "Enter Verification Code": "Enter Verification Code",
     "OTPCode": "OTP Code",
     "Didreceive": " I didn’t receive the code!",
     "Verify": "Verify",
@@ -430,15 +449,80 @@
   },
   "UnregisteredCropDetails": {
     "LNG": "en",
+    "CropDetails": "Crop Details",
+    "varietyName": "Variety Name",
+    "VarietyPlaceholder": "Enter variety name",
+    "Quantity": "Quantity (Kg)",
     "FillDetails": "Fill Details",
+    "Select": "Select Crop",
+    "SelectCrop": "--Select Crop--",
+    "SelectVariety": "--Select Variety--",
+    "SelectCropPlaceholder": "Select Crop",
+    "GradeA": "Grade A",
+    "GradeB": "Grade B",
+    "GradeC": "Grade C",
+    "Add": "Add Crop",
+    "AddedCrops": "Added Crops",
+    "Total": "Total (Kg)",
+    "Submit": "Submit",
+    "Success": "Success!",
+    "Successful": "Crop details submitted successfully",
+    "Oops": "Oops!",
+    "Unsuccessful": "Submission failed. Please try again.",
+    "Close": "Close",
+    "Delete": "Delete Variety",
+    "DeleteVariety": "Delete Variety",
+    "DeleteConfirmation": "Are you sure you want to delete this variety?",
+    "Yes": "Yes",
+    "No": "No",
+    "SelectGrade": "Select Grade",
+    "Unit": "Unit",
+    "Price": "Price",
+    "TotalAmount": "Total Amount (Rs.)",
+    "TotalKg": "Total (Kg) :",
+    "TotalPrice": "Total Price (Rs.) :",
+    "Next": "Next",
+    "Previous": "Previous",
+    "Save": "Save",
+    "Cancel": "Cancel",
+    "Take": "Take Photo",
+    "Retake": "Retake Photo",
+    "Uploading": "Uploading...",
+    "SelectUnit": "Select Unit",
+    "SelectUnitPrice": "Select Unit Price",
+    "SelectUnitPlaceholder": "--Select Unit--",
+    "SelectUnitPricePlaceholder": "--Select Unit Price--",
+    "QuantityA": "Quantity for Grade A",
+    "QuantityB": "Quantity for Grade B",
+    "QuantityC": "Quantity for Grade C",
+    "QuantityPlaceholder": "0.00",
+    "DeleteCrop": "Delete Crop",
+    "DeleteCropConfirmation": "Are you sure you want to delete this crop?",
+    "TakeAPhoto": "Take a photo of the crop",
+    "PhotoRequired": "Photo is required for this grade",
+    "MinimumOneGrade": "At least one grade quantity is required",
+    "ValidQuantity": "Please enter a valid quantity",
+    "CropAlreadyAdded": "This crop and variety has already been added",
+    "FillAllFields": "Please fill all required fields",
+    "NoPricesFound": "No prices found for selected crop and variety",
+    "FailedToSubmit": "Failed to submit crop details",
+    "UploadingPhotos": "Uploading photos...",
+    "SubmittingDetails": "Submitting details...",
+    "CropDetailsSubmitted": "Crop details submitted successfully!",
+    "KG": "KG"
+  },
+  "GoodsReceivedNote": {
+    "LNG": "en",
+    "Download": "Download",
+    "GRN": "Goods Received Note",
+    "Date": "Date",
+    "FarmerName": "Farmer Name",
+    "FarmerNIC": "Farmer NIC",
+    "OfficerName": "Officer Name",
+    "OfficerID": "Officer ID",
+    "CenterName": "Center Name",
+    "CenterID": "Center ID",
     "Crop": "Crop",
-    "CropName": "Crop Name",
-    "Variety": "Variety",
-    "UnitGrades": "Unit Prices according to Grades",
-    "Total": "Total (Rs.)",
-    "Add": "Add item",
-    "Done": "Done",
-    "Select Crop": "Select Crop",
     "Select Variety": "Select Variety",
     "Processing...": "Processing...",
     "Cancel": "Cancel",
@@ -452,8 +536,8 @@
     "Please select both a crop and a variety before adding": "Please select both a crop and a variety before adding.",
     "Are you sure you want to delete previously added": "Are you sure you want to delete previously added {{varietyName}}?",
     "Are you sure you want to delete grade": "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}}?",
-    "UnsavedChanges":"Unsaved Changes",
-    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet":"You have entered crop details that haven't been added yet. Please click 'Add' to include them, or clear the form to proceed."
+    "UnsavedChanges": "Unsaved Changes",
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "You have entered crop details that haven't been added yet. Please click 'Add' to include them, or clear the form to proceed."
   },
   "ReportPage": {
     "LNG": "en",
@@ -584,6 +668,7 @@
     "Cancel": "Cancel",
     "Next": "Next",
     "Phone Number 01 and Phone Number 02 cannot be the same.": "Mobile Number 01 and Mobile Number 02 cannot be the same.",
+    "ValidatingEmail": "Validating email...",
     "Submit": "Submit"
   },
   "AddOfficerAddressDetails": {
@@ -656,7 +741,8 @@
     "Drivers": "Drivers",
     "Not Approved": "Not Approved yet",
     "No officers found": "- No Officers Found -",
-    "No drivers found": "- No Drivers Found -"
+    "No drivers found": "- No Drivers Found -",
+    "EMPID": "EMP ID :"
   },
   "EditTargetManager": {
     "LNG": "en",
@@ -880,7 +966,8 @@
     "Success": "Success",
     "SuccessMessage": "Bank Details Update Success!",
     "Failed": "Failed",
-    "FailedMessage": "Bank Details Update Failed!"
+    "FailedMessage": "Bank Details Update Failed!",
+    "OK": "OK"
   },
   "PrivacyPlicy": {
     "LNG": "en",
@@ -1074,7 +1161,41 @@
     "October": "October",
     "November": "November",
     "December": "December",
-    "Enteravalidenic": "Please enter a valid National Identity Card (NIC) number"
+    "Enteravalidenic": "Please enter a valid National Identity Card (NIC) number",
+    "Enter a valid NIC number": "Enter a valid NIC number",
+    "Invalid NIC": "Invalid NIC",
+    "NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)": "NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)",
+    "Successor's NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)": "Successor's NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)",
+    "Confirm Submission": "Confirm Submission",
+    "Are you sure you want to submit this pension request?": "Are you sure you want to submit this pension request?",
+    "Yes": "Yes",
+    "No": "No",
+    "Validation Error": "Validation Error",
+    "Error": "Error",
+    "Please enter your full name": "Please enter your full name",
+    "Please select your date of birth": "Please select your date of birth",
+    "NIC number is required": "NIC number is required",
+    "Please upload NIC front image": "Please upload NIC front image",
+    "Please upload NIC back image": "Please upload NIC back image",
+    "Please enter successor's full name": "Please enter successor's full name",
+    "Please select relationship": "Please select relationship",
+    "Please select successor's date of birth": "Please select successor's date of birth",
+    "Please enter successor's NIC number": "Please enter successor's NIC number",
+    "Please upload successor's NIC front image": "Please upload successor's NIC front image",
+    "Please upload successor's NIC back image": "Please upload successor's NIC back image",
+    "Please upload successor's birth certificate front image": "Please upload successor's birth certificate front image",
+    "Please upload successor's birth certificate back image": "Please upload successor's birth certificate back image",
+    "Please complete all required fields": "Please complete all required fields",
+    "Failed to pick image. Please try again.": "Failed to pick image. Please try again.",
+    "Session Expired": "Session Expired",
+    "Please login again to continue.": "Please login again to continue.",
+    "Success!": "Success!",
+    "Pension Request Submitted Successfully!": "Pension Request Submitted Successfully!",
+    "Submission Failed": "Submission Failed",
+    "Failed to submit request. Please try again.": "Failed to submit request. Please try again.",
+    "Submission Error": "Submission Error",
+    "An error occurred while submitting your request. Please try again.": "An error occurred while submitting your request. Please try again.",
+    "No response from server. Please check your internet connection.": "No response from server. Please check your internet connection."
   },
   "GoviPensionStatus": {
     "Application Already Submitted!": "Application Already Submitted!",
@@ -1092,7 +1213,9 @@
     "Congratulations!": "Congratulations!",
     "You are now eligible for the pension scheme.": "You are now eligible for the pension scheme.",
     "Try Again!": "Try Again!",
-    "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future."
+    "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.",
+    "Not Eligible Yet": "Not Eligible Yet",
+    "The farmer haven’t completed any cultivation yet.": "The farmer haven’t completed any cultivation yet."
   },
   "Permission": {
     "locationAccess": "Location Access",
@@ -1404,13 +1527,6 @@
     "BridgeBadStatus": "Bridge at {{ip}}:{{port}} returned HTTP {{status}}.\nMake sure scale-bridge.js is running on your PC.",
     "BridgeInvalidResponse": "Bridge at {{ip}}:{{port}} returned an invalid response."
   },
-   "GlobalSearchModal": {
-    "SearchPlaceholder": "Search...",
-    "NoResultsText": "No items found",
-    "DoneButton": "Done",
-    "Loading": "Loading...",
-    "SelectedCount": "{{count}} selected"
-  },
   "Calendar": {
     "months": {
       "January": "January",
@@ -1437,6 +1553,52 @@
     },
     "Done": "Done",
     "Cancel": "Cancel"
+  },
+  "Countries": {
+    "Sri Lanka": "Sri Lanka",
+    "Vietnam": "Vietnam",
+    "Cambodia": "Cambodia",
+    "Bangladesh": "Bangladesh",
+    "India": "India",
+    "Netherlands": "Netherlands"
+  },
+  "Months": {
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "May": "May",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec"
+  },
+  "Time": {
+    "AM": "AM",
+    "PM": "PM"
+  },
+  "Roles": {
+    "Collection Centre Head": "Collection Centre Head",
+    "Distribution Centre Head": "Distribution Centre Head",
+    "Collection Centre Manager": "Collection Centre Manager",
+    "Distribution Centre Manager": "Distribution Centre Manager",
+    "of": "of"
+  },
+  "Validating email...": "Validating email...",
+  "Validating mail": "Validating mail",
+  "BannedScreen": {
+    "Access Denied": "Access Denied",
+    "Account Rejected": "Account Rejected",
+    "Account Not Approved": "Account Not Approved",
+    "Pending Verification": "Pending Verification",
+    "Your account has been rejected or is not approved.": "Your account has been rejected or is not approved.",
+    "Your account approval has been revoked by the administrator.": "Your account approval has been revoked by the administrator.",
+    "Your account status is pending verification.": "Your account status is pending verification.",
+    "Please contact Polygon Customer Support for further details.": "Please contact Polygon Customer Support for further details.",
+    "Back to Login": "Back to Login"
   },
   "PDFReport": {
   "title": "Collection Officer Report",

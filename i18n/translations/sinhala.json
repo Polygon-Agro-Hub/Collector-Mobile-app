@@ -21,7 +21,7 @@
     "Progress": "ප්‍රගතිය",
     "Scan": "QR ස්කෑන් කිරිම",
     "Search": "NIC මගින් සොයන්න",
-    "LoadingTargetStatus":"ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී..."
+    "LoadingTargetStatus": "ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී..."
   },
   "Error": {
     "error": "සමාවෙන්න",
@@ -267,7 +267,7 @@
     "Cancel": "අවලංගු කරන්න",
     "Cannot add negative values for load.": "භාරය සඳහා සෘණ අගයන් ඇතුල් කළ නොහැක (කි.ග්‍රෑ.).",
     "Product replacement successful": "නිෂ්පාදන ප්‍රතිස්ථාපනය සාර්ථකයි!",
-    "AttachmentHasBeenSavedToYourSelectedFolder":"ඇමුණුම ඔබ තෝරාගත් ෆෝල්ඩරයේ සුරැකී ඇත."
+    "AttachmentHasBeenSavedToYourSelectedFolder": "ඇමුණුම ඔබ තෝරාගත් ෆෝල්ඩරයේ සුරැකී ඇත."
   },
   "SideMenu": {
     "LNG": "si",
@@ -377,7 +377,25 @@
     "EnterAccountNumber": "කරුණාකර ගිණුම් අංකය ඇතුළත් කරන්න.",
     "EnterAccountName": "කරුණාකර ගිණුම් හිමියාගේ නම ඇතුළත් කරන්න.",
     "SelectBank": "කරුණාකර බැංකුව තෝරන්න",
-    "SelectBranch": "කරුණාකර ශාඛාව තෝරන්න"
+    "SelectBranch": "කරුණාකර ශාඛාව තෝරන්න",
+    "SelectDistrictPlaceholder": "--දිස්ත්‍රික්කය තෝරන්න--",
+    "--Select District--": "--දිස්ත්‍රික්කය තෝරන්න--",
+    "--Select Bank--": "--බැංකුව තෝරන්න--",
+    "--Select Branch--": "--ශාඛාව තෝරන්න--",
+    "SearchDistrict": "දිස්ත්‍රික්කය සොයන්න...",
+    "SearchBank": "බැංකුව සොයන්න...",
+    "SearchBranch": "ශාඛාව සොයන්න...",
+    "OK": "හරි"
+  },
+  "GlobalSearchModal": {
+    "Search": "සොයන්න...",
+    "Done": "හරි",
+    "No items found": "අයිතම හමු නොවීය",
+    "SearchPlaceholder": "සොයන්න...",
+    "NoResultsText": "අයිතම හමු නොවීය",
+    "DoneButton": "සම්පූර්ණයි",
+    "Loading": "පූරණය වේ...",
+    "SelectedCount": "{{count}} තෝරා ඇත"
   },
   "PriceChart": {
     "LNG": "si",
@@ -398,6 +416,7 @@
     "LNG": "si",
     "OTPVerification": "OTP සත්‍යාපනය",
     "EnterCode": "සත්‍යාපන කේතය ඇතුළත් කරන්න",
+    "Enter Verification Code": "සත්‍යාපන කේතය ඇතුළත් කරන්න",
     "OTPCode": "OTP Code",
     "Didreceive": "කේතයක් නොලැබුණි!",
     "Verify": "තහවුරු කරන්න",
@@ -452,8 +471,8 @@
     "Please select both a crop and a variety before adding": "එකතු කිරීමට පෙර කරුණාකර බෝගයක් සහ ප්‍රභේදයක් යන දෙකම තෝරන්න.",
     "Are you sure you want to delete previously added": "කලින් එකතු කළ {{varietyName}} මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
     "Are you sure you want to delete grade": "කලින් එකතු කළ {{varietyName}} - ශ්‍රේණිය {{grade}} මැකීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
-    "UnsavedChanges":"සුරැක නොමැති වෙනස්කම්",
-    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet":"ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න."
+    "UnsavedChanges": "සුරැක නොමැති වෙනස්කම්",
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න."
   },
   "ReportPage": {
     "LNG": "si",
@@ -584,6 +603,7 @@
     "Cancel": "අවලංගු කරන්න",
     "Next": "ඉදිරියට යන්න",
     "Phone Number 01 and Phone Number 02 cannot be the same.": "දුරකථන අංක 01 සහ 02 එකම විය නොහැක.",
+    "ValidatingEmail": "විද්‍යුත් තැපෑල සත්‍යාපනය කරමින් පවතී",
     "Submit": "තහවුරු කරන්න"
   },
   "AddOfficerAddressDetails": {
@@ -656,7 +676,8 @@
     "Drivers": "රියදුරන්",
     "Not Approved": "තවම අනුමත කර නැත",
     "No officers found": "- නිලධාරීන් කිසිවෙකු හමු නොවීය -",
-    "No drivers found": "- රියදුරන් කිසිවෙකු හමු නොවීය -"
+    "No drivers found": "- රියදුරන් කිසිවෙකු හමු නොවීය -",
+    "EMPID": "සේවක අංකය :"
   },
   "EditTargetManager": {
     "LNG": "si",
@@ -880,7 +901,8 @@
     "Success": "සාර්ථකයි",
     "SuccessMessage": "බැංකු විස්තර යාවත්කාලීන කිරීම සාර්ථකයි!",
     "Failed": "අසාර්ථකයි",
-    "FailedMessage": "බැංකු විස්තර යාවත්කාලීන කිරීම අසාර්ථකයි!"
+    "FailedMessage": "බැංකු විස්තර යාවත්කාලීන කිරීම අසාර්ථකයි!",
+    "OK": "හරි"
   },
   "PrivacyPlicy": {
     "LNG": "si",
@@ -1024,11 +1046,11 @@
     "Section 1 of 2: Applicant Details": "කොටස 1 of 2: අයදුම්කරුගේ විස්තර",
     "Section 2 of 2: Successor Details": "කොටස 2 of 2: අනුප්‍රාප්තිකයාගේ විස්තර",
     "Applicant Details": "අයදුම්කරුගේ විස්තර",
-    "Your Full Name": "ඔබේ සම්පූර්ණ නම",
-    "Your Date of Birth": "ඔබේ උපන් දිනය",
-    "Enter your full name": "ඔබේ සම්පූර්ණ නම ඇතුළත් කරන්න",
+    "Your Full Name": "ගොවියාගේ සම්පූර්ණ නම",
+    "Your Date of Birth": "ගොවියාගේ උපන් දිනය",
+    "Enter your full name": "ගොවියාගේ සම්පූර්ණ නම ඇතුළත් කරන්න",
     "--Select Date--": "--දිනය තෝරන්න--",
-    "Your NIC Number": "ඔබේ ජාතික හැඳුනුම්පත් අංකය",
+    "Your NIC Number": "ගොවියාගේ ජාතික හැඳුනුම්පත් අංකය",
     "Enter NIC number": "ජාතික හැඳුනුම්පත් අංකය ඇතුළත් කරන්න",
     "NIC Front Image": "ජාතික හැඳුනුම්පත් ඉදිරිපස රූපය",
     "NIC Back Image": "ජාතික හැඳුනුම්පත් පිටුපස රූපය",
@@ -1053,9 +1075,9 @@
     "Back": "ආපසු",
     "NIC not required (under 16)": "ජාතික හැඳුනුම්පත් අවශ්‍ය නැත (වයස අවුරුදු 16ට අඩු)",
     "Not required (under 16)": "අවශ්‍ය නැත (වයස අවුරුදු 16ට අඩු)",
-    "--Type here--": "--මෙහි යතුරු ලියන්න--",
-    "Successor's Birth Certificate (Front)": "අනුප්‍රාප්තිකයාගේ උපත සහතිකපත් (ඉදිරිපස)",
-    "Successor's Birth Certificate (Back)": "අනුප්‍රාප්තිකයාගේ උපත සහතිකපත් (පිටුපස)",
+    "--Type here--": "--මෙතැන සටහන් කරන්න--",
+    "Successor's Birth Certificate (Front)": "අනුප්‍රාප්තිකයාගේ උප්පැන්න සහතිකය (ඉදිරිපස)",
+    "Successor's Birth Certificate (Back)": "අනුප්‍රාප්තිකයාගේ උප්පැන්න සහතිකය (පිටුපස)",
     "Select Birthday": "උපන් දිනය තෝරන්න",
     "Save": "සුරකින්න",
     "Year": "අවුරුද්ද",
@@ -1074,7 +1096,41 @@
     "October": "ඔක්තෝබර්",
     "November": "නොවැම්බර්",
     "December": "දෙසැම්බර්",
-    "Enteravalidenic": "කරුණාකර වලංගු ජාතික හැඳුනුම්පත් අංකයක් (NIC) ඇතුළත් කරන්න."
+    "Enteravalidenic": "කරුණාකර වලංගු ජාතික හැඳුනුම්පත් අංකයක් (NIC) ඇතුළත් කරන්න.",
+    "Enter a valid NIC number": "වලංගු ජාතික හැඳුනුම්පත් අංකයක් ඇතුළත් කරන්න",
+    "Invalid NIC": "වලංගු නොවන ජාතික හැඳුනුම්පතකි",
+    "NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)": "ජාතික හැඳුනුම්පත ඉලක්කම් 9ක් සමග V/v (උදා: 123456789V) හෝ ඉලක්කම් 12ක් (උදා: 199912345678) විය යුතුය",
+    "Successor's NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)": "අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත ඉලක්කම් 9ක් සමග V/v (උදා: 123456789V) හෝ ඉලක්කම් 12ක් (උදා: 199912345678) විය යුතුය",
+    "Confirm Submission": "ඉදිරිපත් කිරීම තහවුරු කරන්න",
+    "Are you sure you want to submit this pension request?": "ඔබට මෙම විශ්‍රාම වැටුප් ඉල්ලීම ඉදිරිපත් කිරීමට අවශ්‍ය බව සහතිකද?",
+    "Yes": "ඔව්",
+    "No": "නැත",
+    "Validation Error": "වලංගුකරණ දෝෂයකි",
+    "Error": "දෝෂයකි",
+    "Please enter your full name": "කරුණාකර ඔබේ සම්පූර්ණ නම ඇතුළත් කරන්න",
+    "Please select your date of birth": "කරුණාකර ඔබේ උපන් දිනය තෝරන්න",
+    "NIC number is required": "ජාතික හැඳුනුම්පත් අංකය අවශ්‍යයි",
+    "Please upload NIC front image": "කරුණාකර ජාතික හැඳුනුම්පත් ඉදිරිපස රූපය උඩුගත කරන්න",
+    "Please upload NIC back image": "කරුණාකර ජාතික හැඳුනුම්පත් පිටුපස රූපය උඩුගත කරන්න",
+    "Please enter successor's full name": "කරුණාකර අනුප්‍රාප්තිකයාගේ සම්පූර්ණ නම ඇතුළත් කරන්න",
+    "Please select relationship": "කරුණාකර සම්බන්ධතාවය තෝරන්න",
+    "Please select successor's date of birth": "කරුණාකර අනුප්‍රාප්තිකයාගේ උපන් දිනය තෝරන්න",
+    "Please enter successor's NIC number": "කරුණාකර අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් අංකය ඇතුළත් කරන්න",
+    "Please upload successor's NIC front image": "කරුණාකර අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් ඉදිරිපස රූපය උඩුගත කරන්න",
+    "Please upload successor's NIC back image": "කරුණාකර අනුප්‍රාප්තිකයාගේ ජාතික හැඳුනුම්පත් පිටුපස රූපය උඩුගත කරන්න",
+    "Please upload successor's birth certificate front image": "කරුණාකර අනුප්‍රාප්තිකයාගේ උප්පැන්න සහතිකයේ ඉදිරිපස රූපය උඩුගත කරන්න",
+    "Please upload successor's birth certificate back image": "කරුණාකර අනුප්‍රාප්තිකයාගේ උප්පැන්න සහතිකයේ පිටුපස රූපය උඩුගත කරන්න",
+    "Please complete all required fields": "කරුණාකර අවශ්‍ය සියලුම ක්ෂේත්‍ර සම්පූර්ණ කරන්න",
+    "Failed to pick image. Please try again.": "රූපය තෝරා ගැනීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "Session Expired": "සැසිය කල් ඉකුත් වී ඇත",
+    "Please login again to continue.": "ඉදිරියට යාමට කරුණාකර නැවත ලොග් වන්න.",
+    "Success!": "සාර්ථකයි!",
+    "Pension Request Submitted Successfully!": "විශ්‍රාම වැටුප් ඉල්ලීම සාර්ථකව ඉදිරිපත් කරන ලදී!",
+    "Submission Failed": "ඉදිරිපත් කිරීම අසාර්ථකයි",
+    "Failed to submit request. Please try again.": "ඉල්ලීම ඉදිරිපත් කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "Submission Error": "ඉදිරිපත් කිරීමේ දෝෂයක්",
+    "An error occurred while submitting your request. Please try again.": "ඔබගේ ඉල්ලීම ඉදිරිපත් කිරීමේදී දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "No response from server. Please check your internet connection.": "සේවාදායකයෙන් ප්‍රතිචාරයක් නැත. කරුණාකර ඔබගේ අන්තර්ජාල සම්බන්ධතාව පරීක්ෂා කරන්න."
   },
   "GoviPensionStatus": {
     "Application Already Submitted!": "අයදුම්පත දැනටමත් යොමු කර ඇත!",
@@ -1092,7 +1148,9 @@
     "Congratulations!": "සුභ පැතුම්!",
     "You are now eligible for the pension scheme.": "ඔබ දැන් විශ්‍රාම වැටුප් යෝජනාවට සුදුසුකම් ලබා ඇත.",
     "Try Again!": "නැවත උත්සාහ කරන්න!",
-    "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "ඔබගේ විශ්‍රාම වැටුප් ඉල්ලීම ප්‍රතික්ෂේප කර ඇති බව දැනුම් දෙමින් අපි කණගාටු වෙමු. කරුණාකර අනාගතයේ නැවත උත්සාහ කරන්න."
+    "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "ඔබගේ විශ්‍රාම වැටුප් ඉල්ලීම ප්‍රතික්ෂේප කර ඇති බව දැනුම් දෙමින් අපි කණගාටු වෙමු. කරුණාකර අනාගතයේ නැවත උත්සාහ කරන්න.",
+    "Not Eligible Yet": "තවමත් සුදුසුකම් ලබා නැත",
+    "The farmer haven’t completed any cultivation yet.": "ගොවියා තවමත් කිසිදු වගාවක් සම්පූර්ණ කර නොමැත."
   },
   "Permission": {
     "locationAccess": "Location Access",
@@ -1395,7 +1453,7 @@
     "DisconnectFailedMessage": "තරාදිය විසන්ධි කිරීමට අසමත් විය.",
     "PcBridgeSuffix": "PC බ්‍රිජ්"
   },
-   "WifiScaleService": {
+  "WifiScaleService": {
     "InvalidIpError": "කරුණාකර වලංගු Wi-Fi තරාදි IP ලිපිනයක් ඇතුළත් කරන්න",
     "ConnectionTimedOut": "{{ip}}:{{port}} හි තරාදියට සම්බන්ධ වීමේ කාලය ඉකුත් විය.\n\nකරුණාකර ඔබගේ දුරකථනය තරාදිය ඇති එකම Wi-Fi ජාලයේ ඇති බව තහවුරු කරන්න.",
     "ConnectionRefused": "{{ip}}:{{port}} හි තරාදියට සම්බන්ධ විය නොහැක: {{reason}}",
@@ -1403,13 +1461,6 @@
     "BridgeUnreachable": "{{ip}}:{{port}} හි තරාදි බ්‍රිජ් වෙත ළඟාවිය නොහැක.\n\nExpo Go හි, පළමුව ඔබගේ පරිගණකයේ බ්‍රිජය ධාවනය කරන්න:\n  node services/scale/scale-bridge.js\n\nඉන්පසු යෙදුමේ ඔබගේ පරිගණකයේ Wi-Fi IP (උදා: 192.168.1.13) සහ පෝට් 3001 ඇතුළත් කරන්න.",
     "BridgeBadStatus": "{{ip}}:{{port}} හි බ්‍රිජය HTTP {{status}} ලබා දුන්නේය.\nඔබගේ පරිගණකයේ scale-bridge.js ධාවනය වන බව තහවුරු කරන්න.",
     "BridgeInvalidResponse": "{{ip}}:{{port}} හි බ්‍රිජය අවලංගු ප්‍රතිචාරයක් ලබා දුන්නේය."
-  },
-  "GlobalSearchModal": {
-    "SearchPlaceholder": "සොයන්න...",
-    "NoResultsText": "අයිතම හමු නොවීය",
-    "DoneButton": "සම්පූර්ණයි",
-    "Loading": "පූරණය වේ...",
-    "SelectedCount": "{{count}} තෝරා ඇත"
   },
   "Calendar": {
     "months": {
@@ -1437,6 +1488,52 @@
     },
     "Done": "අවසන්",
     "Cancel": "අවලංගු කරන්න"
+  },
+  "Countries": {
+    "Sri Lanka": "ශ්‍රී ලංකාව",
+    "Vietnam": "වියට්නාමය",
+    "Cambodia": "කාම්බෝජය",
+    "Bangladesh": "බංග්ලාදේශය",
+    "India": "ඉන්දියාව",
+    "Netherlands": "නෙදර්ලන්තය"
+  },
+  "Months": {
+    "Jan": "ජන",
+    "Feb": "පෙබ",
+    "Mar": "මාර්තු",
+    "Apr": "අප්‍රේල්",
+    "May": "මැයි",
+    "Jun": "ජූනි",
+    "Jul": "ජූලි",
+    "Aug": "අගෝ",
+    "Sep": "සැප්",
+    "Oct": "ඔක්",
+    "Nov": "නොවැ",
+    "Dec": "දෙසැ"
+  },
+  "Time": {
+    "AM": "පෙ.ව.",
+    "PM": "ප.ව."
+  },
+  "Roles": {
+    "Collection Centre Head": "එකතු කිරීමේ මධ්‍යස්ථාන ප්‍රධානී",
+    "Distribution Centre Head": "බෙදාහැරීමේ මධ්‍යස්ථාන ප්‍රධානී",
+    "Collection Centre Manager": "එකතු කිරීමේ මධ්‍යස්ථාන කළමනාකරු",
+    "Distribution Centre Manager": "බෙදාහැරීමේ මධ්‍යස්ථාන කළමනාකරු",
+    "of": "හි"
+  },
+  "Validating email...": "විද්යුත් තැපෑල සත්යාපනය කරමින් පවතී",
+  "Validating mail": "විද්යුත් තැපෑල සත්යාපනය කරමින් පවතී",
+  "BannedScreen": {
+    "Access Denied": "ප්‍රවේශය ප්‍රතික්ෂේප විය",
+    "Account Rejected": "ගිණුම ප්‍රතික්ෂේප කර ඇත",
+    "Account Not Approved": "ගිණුම අනුමත කර නැත",
+    "Pending Verification": "සත්‍යාපනය වෙමින් පවතී",
+    "Your account has been rejected or is not approved.": "ඔබගේ ගිණුම ප්‍රතික්ෂේප කර ඇත හෝ අනුමත කර නැත.",
+    "Your account approval has been revoked by the administrator.": "පරිපාලක විසින් ඔබගේ ගිණුම් අනුමැතිය අවලංගු කර ඇත.",
+    "Your account status is pending verification.": "ඔබගේ ගිණුමේ තත්ත්වය සත්‍යාපනය වෙමින් පවතී.",
+    "Please contact Polygon Customer Support for further details.": "වැඩිදුර විස්තර සඳහා කරුණාකර Polygon පාරිභෝගික සහාය අමතන්න.",
+    "Back to Login": "නැවත පුරනය වීමට"
   },
   "PDFReport": {
   "title": "එක්රැස් කිරීමේ නිලධාරී වාර්තාව",

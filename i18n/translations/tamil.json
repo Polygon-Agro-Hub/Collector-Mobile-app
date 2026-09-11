@@ -21,7 +21,7 @@
     "Progress": "நிலை",
     "Scan": "QR ஐ ஸ்கேன் செய்யவும்",
     "Search": "NIC மூலம் தேடவும்",
-    "LoadingTargetStatus":"இலக்கு நிலையை ஏற்றுகிறது..."
+    "LoadingTargetStatus": "இலக்கு நிலையை ஏற்றுகிறது..."
   },
   "Error": {
     "error": "மன்னிக்கவும்",
@@ -267,7 +267,7 @@
     "Cancel": "ரத்துசெய்",
     "Cannot add negative values for load.": "Cannot add negative values for load.",
     "Product replacement successful": "தயாரிப்பு மாற்றீடு வெற்றிகரமாக முடிந்தது!",
-    "AttachmentHasBeenSavedToYourSelectedFolder":"இணைப்பு நீங்கள் தேர்ந்தெடுத்த கோப்புறையில் சேமிக்கப்பட்டுள்ளது.r"
+    "AttachmentHasBeenSavedToYourSelectedFolder": "இணைப்பு நீங்கள் தேர்ந்தெடுத்த கோப்புறையில் சேமிக்கப்பட்டுள்ளது.r"
   },
   "SideMenu": {
     "LNG": "en",
@@ -377,7 +377,25 @@
     "EnterAccountNumber": "கணக்கு எண்ணை உள்ளிடவும்.",
     "EnterAccountName": "கணக்கு வைத்திருப்பவரின் பெயரை உள்ளிடவும்.",
     "SelectBank": "தயவுசெய்து வங்கியைத் தேர்ந்தெடுக்கவும்",
-    "SelectBranch": "தயவுசெய்து கிளையைத் தேர்ந்தெடுக்கவும்."
+    "SelectBranch": "தயவுசெய்து கிளையைத் தேர்ந்தெடுக்கவும்.",
+    "SelectDistrictPlaceholder": "--மாவட்டத்தைத் தேர்ந்தெடுக்கவும்--",
+    "--Select District--": "--மாவட்டத்தைத் தேர்ந்தெடுக்கவும்--",
+    "--Select Bank--": "--வங்கியை தேர்ந்தெடு--",
+    "--Select Branch--": "--கிளையைத் தேர்ந்தெடு--",
+    "SearchDistrict": "மாவட்டத்தைத் தேடுங்கள்...",
+    "SearchBank": "வங்கியைத் தேடுங்கள்...",
+    "SearchBranch": "கிளையைத் தேடுங்கள்...",
+    "OK": "சரி"
+  },
+  "GlobalSearchModal": {
+    "Search": "தேடுங்கள்...",
+    "Done": "முடிந்தது",
+    "No items found": "உருப்படிகள் எதுவும் கிடைக்கவில்லை",
+    "SearchPlaceholder": "தேடுக...",
+    "NoResultsText": "எந்த உருப்படியும் கிடைக்கவில்லை",
+    "DoneButton": "முடிந்தது",
+    "Loading": "ஏற்றுகிறது...",
+    "SelectedCount": "{{count}} தேர்ந்தெடுக்கப்பட்டது"
   },
   "PriceChart": {
     "LNG": "ta",
@@ -398,6 +416,7 @@
     "LNG": "ta",
     "OTPVerification": "OTP சரிபார்ப்பு",
     "EnterCode": "OTP எண்ணை உள்ளிடவும்",
+    "Enter Verification Code": "சரிபார்ப்புக் குறியீட்டை உள்ளிடவும்",
     "OTPCode": "OTP குறியீடு",
     "Didreceive": "OTP கிடைக்கவில்லை!",
     "Verify": "சரிபார்க்கவும்",
@@ -452,8 +471,8 @@
     "Please select both a crop and a variety before adding": "சேர்ப்பதற்கு முன் ஒரு பயிர் மற்றும் ஒரு வகை இரண்டையும் தேர்ந்தெடுக்கவும்.",
     "Are you sure you want to delete previously added": "முன்பு சேர்க்கப்பட்ட {{varietyName}} ஐ நீக்க விரும்புகிறீர்களா?",
     "Are you sure you want to delete grade": "முன்பு சேர்க்கப்பட்ட {{varietyName}} - தரம் {{grade}} ஐ நீக்க விரும்புகிறீர்களா?",
-    "UnsavedChanges":"சேமிக்கப்படாத மாற்றங்கள்",
-    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet":"இதுவரை சேர்க்கப்படாத பயிர் விவரங்களை நீங்கள் உள்ளிட்டுள்ளீர்கள். அவற்றைச் சேர்க்க 'Add' என்பதைக் கிளிக் செய்யவும் அல்லது தொடர படிவத்தை (form) அழிக்கவும்."
+    "UnsavedChanges": "சேமிக்கப்படாத மாற்றங்கள்",
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "இதுவரை சேர்க்கப்படாத பயிர் விவரங்களை நீங்கள் உள்ளிட்டுள்ளீர்கள். அவற்றைச் சேர்க்க 'Add' என்பதைக் கிளிக் செய்யவும் அல்லது தொடர படிவத்தை (form) அழிக்கவும்."
   },
   "ReportPage": {
     "LNG": "ta",
@@ -584,6 +603,7 @@
     "Cancel": "ரத்து செய்",
     "Next": "அடுத்து",
     "Phone Number 01 and Phone Number 02 cannot be the same.": "தொலைபேசி எண் 01 மற்றும் 02 ஒரே மாதிரியாக இருக்க முடியாது.",
+    "ValidatingEmail": "மின்னஞ்சல் சரிபார்க்கப்படுகிறது...",
     "Submit": "சமர்ப்பிக்கவும்"
   },
   "AddOfficerAddressDetails": {
@@ -656,7 +676,8 @@
     "Drivers": "இயக்குனர்கள்",
     "Not Approved": "இன்னும் அங்கீகரிக்கப்படவில்லை",
     "No officers found": "- அதிகாரிகள் யாரும் காணப்படவில்லை -",
-    "No drivers found": "- ஓட்டுநர்கள் யாரும் காணப்படவில்லை -"
+    "No drivers found": "- ஓட்டுநர்கள் யாரும் காணப்படவில்லை -",
+    "EMPID": "பணியாளர் எண் :"
   },
   "EditTargetManager": {
     "LNG": "ta",
@@ -880,7 +901,8 @@
     "Success": "வெற்றி",
     "SuccessMessage": "வங்கி விவரங்கள் வெற்றிகரமாக புதுப்பிக்கப்பட்டது!",
     "Failed": "தோல்வி",
-    "FailedMessage": "வங்கி விவரங்களை புதுப்பிக்க முடியவில்லை!"
+    "FailedMessage": "வங்கி விவரங்களை புதுப்பிக்க முடியவில்லை!",
+    "OK": "சரி"
   },
   "PrivacyPlicy": {
     "LNG": "ta",
@@ -1074,7 +1096,41 @@
     "October": "அக்டோபர்",
     "November": "நவம்பர்",
     "December": "டிசம்பர்",
-    "Enteravalidenic": "செல்லுபடியாகும் தேசிய அடையாள அட்டை (NIC) எண்ணை உள்ளிடவும்."
+    "Enteravalidenic": "செல்லுபடியாகும் தேசிய அடையாள அட்டை (NIC) எண்ணை உள்ளிடவும்.",
+    "Enter a valid NIC number": "செல்லுபடியாகும் தேசிய அடையாள அட்டை எண்ணை உள்ளிடவும்",
+    "Invalid NIC": "செல்லுபடியாகாத தேசிய அடையாள அட்டை",
+    "NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)": "தேசிய அடையாள அட்டை 9 இலக்கங்களுடன் V/v (எ.கா. 123456789V) அல்லது 12 இலக்கங்களாக (எ.கா. 199912345678) இருக்க வேண்டும்",
+    "Successor's NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)": "வாரிசின் தேசிய அடையாள அட்டை 9 இலக்கங்களுடன் V/v (எ.கா. 123456789V) அல்லது 12 இலக்கங்களாக (எ.கா. 199912345678) இருக்க வேண்டும்",
+    "Confirm Submission": "சமர்ப்பிப்பை உறுதிப்படுத்தவும்",
+    "Are you sure you want to submit this pension request?": "இந்த ஓய்வூதியக் கோரிக்கையைச் சமர்ப்பிக்க விரும்புகிறீர்களா?",
+    "Yes": "ஆம்",
+    "No": "இல்லை",
+    "Validation Error": "சரிபார்ப்புப் பிழை",
+    "Error": "பிழை",
+    "Please enter your full name": "தயவுசெய்து உங்கள் முழுப் பெயரை உள்ளிடவும்",
+    "Please select your date of birth": "தயவுசெய்து உங்கள் பிறந்த தேதியைத் தேர்ந்தெடுக்கவும்",
+    "NIC number is required": "தேசிய அடையாள அட்டை எண் தேவை",
+    "Please upload NIC front image": "தயவுசெய்து தேசிய அடையாள அட்டை முன்பக்கப் படத்தை பதிவேற்றவும்",
+    "Please upload NIC back image": "தயவுசெய்து தேசிய அடையாள அட்டை பின்பக்கப் படத்தை பதிவேற்றவும்",
+    "Please enter successor's full name": "தயவுசெய்து வாரிசின் முழுப் பெயரை உள்ளிடவும்",
+    "Please select relationship": "தயவுசெய்து உறவுமுறையைத் தேர்ந்தெடுக்கவும்",
+    "Please select successor's date of birth": "தயவுசெய்து வாரிசின் பிறந்த தேதியைத் தேர்ந்தெடுக்கவும்",
+    "Please enter successor's NIC number": "தயவுசெய்து வாரிசின் தேசிய அடையாள அட்டை எண்ணை உள்ளிடவும்",
+    "Please upload successor's NIC front image": "தயவுசெய்து வாரிசின் தேசிய அடையாள அட்டை முன்பக்கப் படத்தை பதிவேற்றவும்",
+    "Please upload successor's NIC back image": "தயவுசெய்து வாரிசின் தேசிய அடையாள அட்டை பின்பக்கப் படத்தை பதிவேற்றவும்",
+    "Please upload successor's birth certificate front image": "தயவுசெய்து வாரிசின் பிறப்புச் சான்றிதழ் முன்பக்கப் படத்தை பதிவேற்றவும்",
+    "Please upload successor's birth certificate back image": "தயவுசெய்து வாரிசின் பிறப்புச் சான்றிதழ் பின்பக்கப் படத்தை பதிவேற்றவும்",
+    "Please complete all required fields": "தயவுசெய்து தேவையான அனைத்துப் புலங்களையும் நிரப்பவும்",
+    "Failed to pick image. Please try again.": "படத்தைத் தேர்ந்தெடுக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "Session Expired": "அமர்வு காலாவதியானது",
+    "Please login again to continue.": "தொடர தயவுசெய்து மீண்டும் உள்நுழையவும்.",
+    "Success!": "வெற்றி!",
+    "Pension Request Submitted Successfully!": "ஓய்வூதியக் கோரிக்கை வெற்றிகரமாகச் சமர்ப்பிக்கப்பட்டது!",
+    "Submission Failed": "சமர்ப்பிப்பு தோல்வியடைந்தது",
+    "Failed to submit request. Please try again.": "கோரிக்கையைச் சமர்ப்பிக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "Submission Error": "சமர்ப்பிப்புப் பிழை",
+    "An error occurred while submitting your request. Please try again.": "உங்கள் கோரிக்கையைச் சமர்ப்பிக்கும் போது பிழை ஏற்பட்டது. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "No response from server. Please check your internet connection.": "சேவையகத்திலிருந்து பதில் இல்லை. தயவுசெய்து உங்கள் இணைய இணைப்பைச் சரிபார்க்கவும்."
   },
   "GoviPensionStatus": {
     "Application Already Submitted!": "விண்ணப்பம் ஏற்கனவே சமர்ப்பிக்கப்பட்டது!",
@@ -1085,14 +1141,16 @@
     "GoBack": "திரும்பிச் செல்லவும்",
     "View My Pension Account": "எனது பென்ஷன் கணக்கைக் காண்க",
     "Loading status...": "நிலை ஏற்றப்படுகிறது...",
-    "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": " looks like the farmer has already Itapplied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.விவசாயி ஏற்கனவே {{date}} அன்று ஓய்வூதியத்திற்கு விண்ணப்பித்திருப்பது போல் தெரிகிறது. விண்ணப்பம் தற்போது மதிப்பாய்வில் உள்ளது. விரைவில் ஒரு முடிவு பகிரப்படும். GoViCare செயலி மூலம் விவசாயி எந்த நேரத்திலும் நிலையைக் கண்காணிக்கலாம்.",
-    "The pension application submitted on {{date}} has been reviewed and was not approved.": "{{தேதி}} அன்று சமர்ப்பிக்கப்பட்ட ஓய்வூதிய விண்ணப்பம் மதிப்பாய்வு செய்யப்பட்டு அங்கீகரிக்கப்படவில்லை.",
+    "It looks like the farmer has already applied for the pension on {{date}}. The application is currently under review. A decision will be shared soon. The farmer can track the status anytime through the GoViCare app.": "விவசாயி ஏற்கனவே {{date}} அன்று ஓய்வூதியத்திற்கு விண்ணப்பித்திருப்பது போல் தெரிகிறது. விண்ணப்பம் தற்போது மதிப்பாய்வில் உள்ளது. விரைவில் ஒரு முடிவு பகிரப்படும். GoViCare செயலி மூலம் விவசாயி எந்த நேரத்திலும் நிலையைக் கண்காணிக்கலாம்.",
+    "The pension application submitted on {{date}} has been reviewed and was not approved.": "{{date}} அன்று சமர்ப்பிக்கப்பட்ட ஓய்வூதிய விண்ணப்பம் மதிப்பாய்வு செய்யப்பட்டு அங்கீகரிக்கப்படவில்லை.",
     "Stay Tuned!": "காத்திருங்கள்!",
     "We're taking a closer look at your pension application and will update you soon. This process might take a while.": "நாங்கள் உங்கள் பென்ஷன் விண்ணப்பத்தை கவனமாக பரிசீலித்து வருகிறோம், விரைவில் உங்களுக்கு புதுப்பிப்பு தெரிவிப்போம். இந்த செயல்முறை சிறிது நேரம் எடுக்கலாம்.",
     "Congratulations!": "வாழ்த்துக்கள்!",
     "You are now eligible for the pension scheme.": "நீங்கள் இப்போது பென்ஷன் திட்டத்திற்கு தகுதிபெற்றுள்ளீர்கள்.",
     "Try Again!": "மீண்டும் முயற்சிக்கவும்!",
-    "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "உங்கள் பென்ஷன் கோரிக்கை நிராகரிக்கப்பட்டதை தெரிவித்து வருந்துகிறோம். தயவுசெய்து எதிர்காலத்தில் மீண்டும் முயற்சிக்க விருப்பத்தோடு இருங்கள்."
+    "We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.": "உங்கள் பென்ஷன் கோரிக்கை நிராகரிக்கப்பட்டதை தெரிவித்து வருந்துகிறோம். தயவுசெய்து எதிர்காலத்தில் மீண்டும் முயற்சிக்க விருப்பத்தோடு இருங்கள்.",
+    "Not Eligible Yet": "இன்னும் தகுதி பெறவில்லை",
+    "The farmer haven’t completed any cultivation yet.": "விவசாயி இதுவரை எந்த சாகுபடியையும் முடிக்கவில்லை."
   },
   "Permission": {
     "locationAccess": "Location Access",
@@ -1395,7 +1453,7 @@
     "DisconnectFailedMessage": "அளவுகோலைத் துண்டிக்க முடியவில்லை.",
     "PcBridgeSuffix": "PC பிரிட்ஜ்"
   },
-   "WifiScaleService": {
+  "WifiScaleService": {
     "InvalidIpError": "தயவுசெய்து சரியான Wi-Fi அளவுகோல் IP முகவரியை உள்ளிடவும்",
     "ConnectionTimedOut": "{{ip}}:{{port}} இல் உள்ள அளவுகோலுடன் இணைப்பு நேரம் முடிந்தது.\n\nஉங்கள் தொலைபேசி அளவுகோல் இருக்கும் அதே Wi-Fi நெட்வொர்க்கில் இருப்பதை உறுதிசெய்யவும்.",
     "ConnectionRefused": "{{ip}}:{{port}} இல் உள்ள அளவுகோலுடன் இணைக்க முடியவில்லை: {{reason}}",
@@ -1404,14 +1462,7 @@
     "BridgeBadStatus": "{{ip}}:{{port}} இல் உள்ள பிரிட்ஜ் HTTP {{status}} ஐ திருப்பியது.\nஉங்கள் PCயில் scale-bridge.js இயங்குவதை உறுதிசெய்யவும்.",
     "BridgeInvalidResponse": "{{ip}}:{{port}} இல் உள்ள பிரிட்ஜ் தவறான பதிலைத் திருப்பியது."
   },
-   "GlobalSearchModal": {
-    "SearchPlaceholder": "தேடுக...",
-    "NoResultsText": "எந்த உருப்படியும் கிடைக்கவில்லை",
-    "DoneButton": "முடிந்தது",
-    "Loading": "ஏற்றுகிறது...",
-    "SelectedCount": "{{count}} தேர்ந்தெடுக்கப்பட்டது"
-  },
-    "Calendar": {
+  "Calendar": {
     "months": {
       "January": "ஜனவரி",
       "February": "பிப்ரவரி",
@@ -1437,6 +1488,52 @@
     },
     "Done": "முடிந்தது",
     "Cancel": "ரத்து செய்"
+  },
+  "Countries": {
+    "Sri Lanka": "இலங்கை",
+    "Vietnam": "வியட்நாம்",
+    "Cambodia": "கம்போடியா",
+    "Bangladesh": "வங்காளதேசம்",
+    "India": "இந்தியா",
+    "Netherlands": "நெதர்லாந்து"
+  },
+  "Months": {
+    "Jan": "ஜன",
+    "Feb": "பிப்",
+    "Mar": "மார்ச்",
+    "Apr": "ஏப்",
+    "May": "மே",
+    "Jun": "ஜூன்",
+    "Jul": "ஜூலை",
+    "Aug": "ஆக",
+    "Sep": "செப்",
+    "Oct": "அக்",
+    "Nov": "நவ",
+    "Dec": "டிச"
+  },
+  "Time": {
+    "AM": "மு.ப.",
+    "PM": "பி.ப."
+  },
+  "Roles": {
+    "Collection Centre Head": "சேகரிப்பு மையத் தலைவர்",
+    "Distribution Centre Head": "விநியோக மையத் தலைவர்",
+    "Collection Centre Manager": "சேகரிப்பு மைய மேலாளர்",
+    "Distribution Centre Manager": "விநியோக மைய மேலாளர்",
+    "of": "இன்"
+  },
+  "Validating email...": "மின்னஞ்சல் சரிபார்க்கப்படுகிறது...",
+  "Validating mail": "மின்னஞ்சல் சரிபார்க்கப்படுகிறது...",
+  "BannedScreen": {
+    "Access Denied": "அணுகல் மறுக்கப்பட்டது",
+    "Account Rejected": "கணக்கு நிராகரிக்கப்பட்டது",
+    "Account Not Approved": "கணக்கு அங்கீகரிக்கப்படவில்லை",
+    "Pending Verification": "சரிபார்ப்பு நிலுவையில் உள்ளது",
+    "Your account has been rejected or is not approved.": "உங்கள் கணக்கு நிராகரிக்கப்பட்டது அல்லது அங்கீகரிக்கப்படவில்லை.",
+    "Your account approval has been revoked by the administrator.": "நிர்வாகியால் உங்கள் கணக்கு ஒப்புதல் ரத்து செய்யப்பட்டுள்ளது.",
+    "Your account status is pending verification.": "உங்கள் கணக்கு நிலை சரிபார்ப்பில் உள்ளது.",
+    "Please contact Polygon Customer Support for further details.": "கூடுதல் விவரங்களுக்கு Polygon வாடிக்கையாளர் ஆதரவைத் தொடர்பு கொள்ளவும்.",
+    "Back to Login": "மீண்டும் உள்நுழைய"
   },
   "PDFReport": {
   "title": "சேகரிப்பு அதிகாரி அறிக்கை",
