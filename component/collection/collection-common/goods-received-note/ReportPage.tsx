@@ -81,7 +81,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
   const { userId, registeredFarmerId } = route.params || {};
   const [crops, setCrops] = useState<Crop[]>([]);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const totalSum = crops.reduce(
     (sum: number, crop: any) => sum + parseFloat(crop.total || 0),
@@ -311,10 +311,12 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
     const uri = await generatePDF();
 
     if (uri) {
+      const isSinhala = (i18n.language || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `PurchaseReport_${
-        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-      }_${date}.pdf`;
+      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
 
       try {
         if (Platform.OS === "android") {
@@ -424,10 +426,12 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
 const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
+      const isSinhala = (i18n.language || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `PurchaseReport_${
-        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-      }_${date}.pdf`;
+      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
       try {
@@ -446,7 +450,7 @@ const handleSharePDF = async () => {
         });
       }
     } else {
-      Alert.alert("Error.error", t("Error.somethingWentWrong"));
+      Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
     }
   };
   

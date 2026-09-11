@@ -202,7 +202,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         Alert.alert(
           t("Error.error"),
           t("Error.Please enter prices for all grades before submitting"),
-          [{ text: t("SearchPrice.OK") }],
+          [{ text: t("AlertModal.OK", "OK") }],
         );
         return;
       }
@@ -210,7 +210,11 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
       if (isManager && !areAllPricesValid()) {
         Alert.alert(
           t("Error.error"),
-          "Please ensure all prices are within the allowed range before submitting.",
+          t(
+            "PriceChart.Please ensure all prices are within the allowed range before submitting.",
+            "Please ensure all prices are within the allowed range before submitting.",
+          ),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
         return;
       }
@@ -244,7 +248,11 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           }));
 
         if (requestData.length === 0) {
-          Alert.alert(t("Error.error"), t("Error.No prices to update"));
+          Alert.alert(
+            t("Error.error"),
+            t("Error.No prices to update"),
+            [{ text: t("AlertModal.OK", "OK") }],
+          );
           setIsSubmitting(false);
           return;
         }
@@ -271,7 +279,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
               : t("Error.The price request was sent successfully"),
             [
               {
-                text: t("SearchPrice.OK"),
+                text: t("AlertModal.OK", "OK"),
                 onPress: () => {
                   setIsEditable(false);
                   setButtonText(getInitialButtonText());
@@ -295,6 +303,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
             t(
               "Error.You must change the prices before submitting. Please update the values.",
             ),
+            [{ text: t("AlertModal.OK", "OK") }],
           );
         } else {
           console.error("Error submitting price request:", error);
@@ -302,6 +311,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           Alert.alert(
             t("Error.error"),
             t("Error.Failed to submit price update."),
+            [{ text: t("AlertModal.OK", "OK") }],
           );
         }
       } finally {
@@ -426,7 +436,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
                       }}
                     >
                       <Text className="text-[#000000] font-medium mr-1">
-                        Rs.
+                        {t("PriceChart.Rs", "Rs.")}{" "}
                       </Text>
                       <TextInput
                         className="flex-1 text-[#000000] font-medium"

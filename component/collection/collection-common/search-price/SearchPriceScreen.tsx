@@ -47,6 +47,8 @@ interface SearchPriceScreenProps {
 const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   navigation,
 }) => {
+  const [rawCrops, setRawCrops] = useState<any[]>([]);
+  const [rawVarieties, setRawVarieties] = useState<any[]>([]);
   const [cropOptions, setCropOptions] = useState<CropOption[]>([]);
   const [varietyOptions, setVarietyOptions] = useState<
     { label: string; value: string }[]
@@ -61,20 +63,92 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   const [loading, setLoading] = useState(false);
   const [jobRole, setJobRole] = useState<string | null>(null);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
-  useEffect(() => {
-    const fetchLanguage = async () => {
-      try {
-        const lang = await AsyncStorage.getItem("@user_language");
-        setSelectedLanguage(lang || "en");
-      } catch (error) {
-        console.error("Error fetching language preference:", error);
+  const getFormattedCropOptions = useCallback(
+    (crops: any[]) => {
+      const lang = (i18n.language || selectedLanguage || "en").toLowerCase();
+      const isSinhala = lang.startsWith("si");
+      const isTamil = lang.startsWith("ta");
+
+      return crops.map((crop: any) => {
+        const cropName = isSinhala
+          ? crop.cropNameSinhala || crop.cropNameEnglish
+          : isTamil
+          ? crop.cropNameTamil || crop.cropNameEnglish
+          : crop.cropNameEnglish || crop.cropNameSinhala || crop.cropNameTamil;
+
+        return {
+          label: cropName,
+          value: crop.id.toString(),
+          cropName: cropName,
+        };
+      });
+    },
+    [i18n.language, selectedLanguage],
+  );
+
+  const getFormattedVarietyOptions = useCallback(
+    (varieties: any[]) => {
+      const lang = (i18n.language || selectedLanguage || "en").toLowerCase();
+      const isSinhala = lang.startsWith("si");
+      const isTamil = lang.startsWith("ta");
+
+      return varieties.map((variety: any) => {
+        const varietyName = isSinhala
+          ? variety.varietySinhala || variety.varietyEnglish
+          : isTamil
+          ? variety.varietyTamil || variety.varietyEnglish
+          : variety.varietyEnglish || variety.varietySinhala || variety.varietyTamil;
+
+        return {
+          label: varietyName,
+          value: variety.id.toString(),
+        };
+      });
+    },
+    [i18n.language, selectedLanguage],
+  );
+
+  const fetchCropNames = useCallback(async () => {
+    setLoadingCrops(true);
+    try {
+      const token = store.getState().auth.token;
+
+      const response = await api.get(
+        "api/unregisteredfarmercrop/get-crop-names",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const crops = response.data || [];
+      setRawCrops(crops);
+      setCropOptions(getFormattedCropOptions(crops));
+    } catch (error) {
+      console.error("Failed to fetch crop names:", error);
+    } finally {
+      setLoadingCrops(false);
+    }
+  }, [getFormattedCropOptions]);
+
+  const fetchLanguagePreference = useCallback(async () => {
+    try {
+      const lang = await AsyncStorage.getItem("@user_language");
+      if (lang) {
+        setSelectedLanguage(lang);
       }
-    };
-    fetchLanguage();
+    } catch (error) {
+      console.error("Error fetching language preference:", error);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchLanguagePreference();
+  }, [fetchLanguagePreference]);
 
   useEffect(() => {
     const fetchJobRole = async () => {
@@ -88,14 +162,27 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
     fetchJobRole();
   }, []);
 
+  useEffect(() => {
+    if (rawCrops.length > 0) {
+      setCropOptions(getFormattedCropOptions(rawCrops));
+    }
+  }, [rawCrops, getFormattedCropOptions]);
+
+  useEffect(() => {
+    if (rawVarieties.length > 0) {
+      setVarietyOptions(getFormattedVarietyOptions(rawVarieties));
+    }
+  }, [rawVarieties, getFormattedVarietyOptions]);
+
   const resetForm = useCallback(() => {
     setSelectedCrop(null);
     setSelectedVariety(null);
+    setRawVarieties([]);
     setVarietyOptions([]);
     setCropModalVisible(false);
     setVarietyModalVisible(false);
     fetchCropNames();
-  }, []);
+  }, [fetchCropNames]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -113,79 +200,30 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
   useFocusEffect(
     useCallback(() => {
       setLoading(false);
+      fetchLanguagePreference();
       resetForm();
       return () => {};
-    }, [resetForm]),
+    }, [resetForm, fetchLanguagePreference]),
   );
-
-  useEffect(() => {
-    if (selectedLanguage) {
-      fetchCropNames();
-    }
-  }, [selectedLanguage]);
-
-  const fetchCropNames = async () => {
-    setLoadingCrops(true);
-    try {
-      const token = store.getState().auth.token;
-
-      const response = await api.get(
-        "api/unregisteredfarmercrop/get-crop-names",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      const fetchLanguage = async () => {
-        try {
-          const lang = await AsyncStorage.getItem("@user_language");
-          setSelectedLanguage(lang || "en");
-        } catch (error) {
-          console.error("Error fetching language preference:", error);
-        }
-      };
-      fetchLanguage();
-
-      const formattedData = response.data.map((crop: any) => {
-        let cropName;
-        switch (selectedLanguage) {
-          case "si":
-            cropName = crop.cropNameSinhala;
-            break;
-          case "ta":
-            cropName = crop.cropNameTamil;
-            break;
-          default:
-            cropName = crop.cropNameEnglish;
-        }
-
-        return {
-          label: cropName,
-          value: crop.id.toString(),
-          cropName: cropName,
-        };
-      });
-
-      setCropOptions(formattedData);
-    } catch (error) {
-      console.error("Failed to fetch crop names:", error);
-    } finally {
-      setLoadingCrops(false);
-    }
-  };
 
   const handleVarietyModalOpen = () => {
     if (!selectedCrop) {
-      Alert.alert(t("Error.error"), "Please select crop first");
+      Alert.alert(
+        t("Error.error"),
+        t(
+          "SearchPrice.Please select crop first",
+          t("Error.Please select crop first", "Please select crop first"),
+        ),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
       return;
     }
     setVarietyModalVisible(true);
   };
 
-  const fetchVarieties = async () => {
+  const fetchVarieties = useCallback(async () => {
     if (!selectedCrop) {
+      setRawVarieties([]);
       setVarietyOptions([]);
       setSelectedVariety(null);
       return;
@@ -203,36 +241,19 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         },
       );
 
-      const formattedData = response.data.map((variety: any) => {
-        let varietyName;
-        switch (selectedLanguage) {
-          case "si":
-            varietyName = variety.varietySinhala;
-            break;
-          case "ta":
-            varietyName = variety.varietyTamil;
-            break;
-          default:
-            varietyName = variety.varietyEnglish;
-        }
-
-        return {
-          label: varietyName,
-          value: variety.id.toString(),
-        };
-      });
-
-      setVarietyOptions(formattedData);
+      const varieties = response.data || [];
+      setRawVarieties(varieties);
+      setVarietyOptions(getFormattedVarietyOptions(varieties));
     } catch (error) {
       console.error("Failed to fetch varieties:", error);
     } finally {
       setLoadingVarieties(false);
     }
-  };
+  }, [selectedCrop, getFormattedVarietyOptions]);
 
   useEffect(() => {
     fetchVarieties();
-  }, [selectedCrop]);
+  }, [fetchVarieties]);
 
   const handleSearch = () => {
     if (selectedCrop && selectedVariety) {
@@ -254,7 +275,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
       Alert.alert(
         t("SearchPrice.Selection Required"),
         t("SearchPrice.Please select both Crop and Variety to continue"),
-        [{ text: t("SearchPrice.OK") }],
+        [{ text: t("AlertModal.OK", "OK") }],
       );
     }
   };

@@ -214,6 +214,8 @@
     "Your password must contain": "Your password must contain a minimum of 8 characters with 1 Uppercase, Numbers & Special characters.",
     "Your password must contain a minimum": "Your password must contain a minimum of 8 characters with 1 Uppercase, Numbers & Special characters.",
     "New password and confirm password do not match": "New password and confirm password do not match",
+    "New password cannot be the same as the current password.": "New password cannot be the same as the current password.",
+    "Please ensure all prices are within the allowed range before submitting.": "Please ensure all prices are within the allowed range before submitting.",
     "Password updated successfully": "Password updated successfully",
     "Access denied": "Access denied. Your role is not authorized to use this application.",
     "Please fill all fields": "Please fill all fields",
@@ -326,6 +328,7 @@
     "Search": "Search",
     "Selection Required": "Selection Required",
     "Please select both Crop and Variety to continue": "Please select both Crop and Variety to continue.",
+    "Please select crop first": "Please select crop first",
     "OK": "OK"
   },
   "SearchFarmer": {
@@ -410,7 +413,10 @@
     "Submit Request": "Submit Request",
     "Edit Price": "Edit Price",
     "Update": "Update",
-    "AllowedRange": "Allowed Rs.{{minPrice}} - Rs.{{maxPrice}}"
+    "AllowedRange": "Allowed Rs.{{minPrice}} - Rs.{{maxPrice}}",
+    "Rs": "Rs.",
+    "Rs.": "Rs.",
+    "Please ensure all prices are within the allowed range before submitting.": "Please ensure all prices are within the allowed range before submitting."
   },
   "Otpverification": {
     "LNG": "en",
@@ -445,7 +451,11 @@
     "Download": "Download",
     "Share": "Share",
     "Apply For Pension": "Apply For Pension",
-    "Checking pension status...": "Checking pension status..."
+    "Checking pension status...": "Checking pension status...",
+    "Authentication token not found": "Authentication token not found",
+    "Authentication failed. Please login again.": "Authentication failed. Please login again.",
+    "Failed to check pension status": "Failed to check pension status",
+    "Failed to check pension status. Please try again.": "Failed to check pension status. Please try again."
   },
   "UnregisteredCropDetails": {
     "LNG": "en",
@@ -590,7 +600,9 @@
     "CurrentPassword": "Current Password",
     "NewPassword": "New Password",
     "ConfirmNewPassword": "Confirm New Password",
-    "Next": "Next"
+    "Next": "Next",
+    "New password cannot be the same as the current password.": "New password cannot be the same as the current password.",
+    "New password and confirm password do not match": "New password and confirm password do not match"
   },
   "QRScanner": {
     "LNG": "en",
@@ -601,7 +613,10 @@
     "Failed": "Failed!",
     "SearchNIC": "Search by User’s NIC number",
     "Requesting for camera permission": "Requesting for camera permission",
-    "ScantheQR": "Scan the QR"
+    "ScantheQR": "Scan the QR",
+    "Re-Scan": "Re-Scan",
+    "Re-scan": "Re-Scan",
+    "Rescan": "Re-Scan"
   },
   "Registeredfarmer": {
     "LNG": "en",
@@ -1451,6 +1466,8 @@
   "AlertModal": {
     "Cannot Proceed!": "Cannot Proceed!",
     "Re-Scan": "Re-Scan",
+    "Re-scan": "Re-Scan",
+    "Rescan": "Re-Scan",
     "Open Ongoing Activity": "Open Ongoing Activity",
     "OK": "OK"
   },
