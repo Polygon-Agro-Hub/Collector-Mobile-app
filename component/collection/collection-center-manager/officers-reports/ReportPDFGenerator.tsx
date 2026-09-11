@@ -80,7 +80,7 @@ export const handleGeneratePDF = async (
   language?: string,
 ) => {
   try {
-    const t = getPdfTranslator(language);
+    const t = getPdfTranslator(language as ReportLanguage || "en");
 
 
     const formattedFromDate = validateAndFormatDate(fromDate);
@@ -164,7 +164,7 @@ export const handleGeneratePDF = async (
     const generatedDate = new Date().toLocaleDateString();
     const generatedTime = formatDisplayTime(
       new Date().toLocaleTimeString(),
-      language,
+      language! as ReportLanguage || "en",
     );
 
     const htmlContent = `

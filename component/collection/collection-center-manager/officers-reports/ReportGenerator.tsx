@@ -145,7 +145,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         formatDate(endDate),
         officerId,
         collectionOfficerId,
-        i18n.language,
         getCurrentReportLanguage(),
       );
 
@@ -271,7 +270,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       formatDate(endDate),
       officerId,
       collectionOfficerId,
-      i18n.language,
       getCurrentReportLanguage(),
     );
     if (fileUri && (await Sharing.isAvailableAsync())) {

@@ -385,6 +385,10 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
       return "";
     }
 
+    const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+    const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+    const currencyPrefix = isSinhala ? "රු." : isTamil ? "ரூ." : "Rs.";
+
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
       return sum + Number(crop.subTotal);
     }, 0);
@@ -626,7 +630,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         <div class="total-row">
           <div class="total-box">
             <div class="total-label">${t("NewReport.Full Total (Rs.)")}</div>
-            <div class="total-value">Rs. ${formatNumberWithCommas(totalSum)}</div>
+            <div class="total-value">${currencyPrefix} ${formatNumberWithCommas(totalSum)}</div>
           </div>
         </div>
         
