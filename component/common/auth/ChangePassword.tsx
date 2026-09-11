@@ -52,12 +52,20 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
 
   const validatePassword = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      Alert.alert(t("Error.error"), t("Error.All fields are required"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.All fields are required"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
       return false;
     }
 
     if (newPassword.length < 8) {
-      Alert.alert(t("Error.error"), t("Error.Your password must contain"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Your password must contain"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
       return false;
     }
 
@@ -65,12 +73,17 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       Alert.alert(
         t("Error.error"),
         t("Error.Your password must contain a minimum"),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
 
     if (!/[0-9]/.test(newPassword)) {
-      Alert.alert(t("Error.error"), t("Error.Your password must contain"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Your password must contain"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
       return false;
     }
 
@@ -78,6 +91,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       Alert.alert(
         t("Error.error"),
         t("Error.Your password must contain a minimum"),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
@@ -85,7 +99,14 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     if (newPassword === currentPassword) {
       Alert.alert(
         t("Error.error"),
-        "New password cannot be the same as the current password.",
+        t(
+          "Error.New password cannot be the same as the current password.",
+          t(
+            "ChangePassword.New password cannot be the same as the current password.",
+            "New password cannot be the same as the current password.",
+          ),
+        ),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
@@ -93,7 +114,14 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     if (newPassword !== confirmPassword) {
       Alert.alert(
         t("Error.error"),
-        "New password and confirm password do not match",
+        t(
+          "Error.New password and confirm password do not match",
+          t(
+            "ChangePassword.New password and confirm password do not match",
+            "New password and confirm password do not match",
+          ),
+        ),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
@@ -140,7 +168,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
         t("Error.Password updated successfully"),
         [
           {
-            text: "OK",
+            text: t("AlertModal.OK", "OK"),
             onPress: async () => {
               // Clear session — user must log in again with new password
               store.dispatch(logoutUser());
@@ -156,12 +184,24 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 401) {
-          Alert.alert(t("Error.error"), t("Error.Invalid current password"));
+          Alert.alert(
+            t("Error.error"),
+            t("Error.Invalid current password"),
+            [{ text: t("AlertModal.OK", "OK") }],
+          );
         } else {
-          Alert.alert(t("Error.error"), t("Error.Failed to update password"));
+          Alert.alert(
+            t("Error.error"),
+            t("Error.Failed to update password"),
+            [{ text: t("AlertModal.OK", "OK") }],
+          );
         }
       } else {
-        Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+        Alert.alert(
+          t("Error.error"),
+          t("Error.somethingWentWrong"),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
       }
     } finally {
       setIsLoading(false);

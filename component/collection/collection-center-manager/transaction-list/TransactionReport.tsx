@@ -652,13 +652,15 @@ const handleDownloadPDF = async () => {
       const uri = await generatePDF();
 
       if (!uri) {
-        Alert.alert("Error", "PDF was not generated.");
+        Alert.alert(t("Error.error"), t("Error.PDF was not generated."));
         return;
       }
 
-      const fileName = `PurchaseReport_${
-        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-      }_${selectedDate}.pdf`;
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const fileName = `${prefix}_${grnNumber}_${selectedDate}.pdf`;
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");
@@ -715,14 +717,14 @@ const handleDownloadPDF = async () => {
               );
             } else {
               Alert.alert(
-                "Permission Denied",
+                t("Error.Permission Denied") || "Permission Denied",
                 "Storage permission is required to save the PDF."
               );
             }
           }
         } else {
           Alert.alert(
-            "Permission Denied",
+            t("Error.Permission Denied") || "Permission Denied",
             "Storage permission is required to save the PDF."
           );
         }
@@ -745,19 +747,23 @@ const handleDownloadPDF = async () => {
             });
           }
         } else {
-          Alert.alert("Error", "Sharing is not available on this device");
+          Alert.alert(t("Error.error"), t("Error.Sharing is not available on this device"));
         }
       }
     } catch (error) {
       console.error("Download error:", error);
-      Alert.alert("Error", "Failed to prepare PDF for download.");
+      Alert.alert(t("Error.error"), t("Error.Failed to prepare PDF for download."));
     }
   };
 
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const fileName = `PurchaseReport_${crops.length > 0 ? crops[0].invoiceNumber : "N/A"}_${selectedDate}.pdf`;
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const fileName = `${prefix}_${grnNumber}_${selectedDate}.pdf`;
 
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 

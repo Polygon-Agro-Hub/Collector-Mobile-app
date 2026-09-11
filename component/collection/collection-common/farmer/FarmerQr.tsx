@@ -99,6 +99,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         Alert.alert(
           t("Error.error"),
           t("Error.Failed to fetch farmer details"),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
         setLoading(false);
       }
@@ -114,7 +115,11 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       const token = store.getState().auth.token;
 
       if (!token) {
-        Alert.alert(t("Error.error"), "Authentication token not found");
+        Alert.alert(
+          t("Error.error"),
+          t("FarmerQr.Authentication token not found", "Authentication token not found"),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
         setCheckingPensionStatus(false);
         return;
       }
@@ -160,9 +165,13 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
           });
         }
       } else {
+        const errorMsg = statusResponse.data?.message;
         Alert.alert(
           t("Error.error"),
-          statusResponse.data.message || "Failed to check pension status",
+          errorMsg
+            ? (t(`FarmerQr.${errorMsg}`, errorMsg) as string)
+            : t("FarmerQr.Failed to check pension status", "Failed to check pension status"),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
       }
     } catch (error: any) {
@@ -172,14 +181,27 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
       if (error.response?.status === 401) {
         Alert.alert(
           t("Error.error"),
-          "Authentication failed. Please login again.",
+          t(
+            "FarmerQr.Authentication failed. Please login again.",
+            "Authentication failed. Please login again.",
+          ),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
       } else if (error.response?.data?.message) {
-        Alert.alert(t("Error.error"), error.response.data.message);
+        const errorMsg = error.response.data.message;
+        Alert.alert(
+          t("Error.error"),
+          (t(`FarmerQr.${errorMsg}`, errorMsg) as string),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
       } else {
         Alert.alert(
           t("Error.error"),
-          "Failed to check pension status. Please try again.",
+          t(
+            "FarmerQr.Failed to check pension status. Please try again.",
+            "Failed to check pension status. Please try again.",
+          ),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
       }
     }
@@ -188,24 +210,40 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
   const downloadQRCode = async () => {
     try {
       if (!farmerQRCode) {
-        Alert.alert(t("Error.error"), t("Error.noQRCodeAvailable"));
+        Alert.alert(
+          t("Error.error"),
+          t("Error.noQRCodeAvailable"),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
         return;
       }
 
       const success = await saveImageToGallery(farmerQRCode, "Farmer_QRCode");
       if (success) {
-        Alert.alert(t("QRcode.successTitle") || "Success", t("Error.AttachmentHasBeenSavedToYourSelectedFolder"));
+        Alert.alert(
+          t("QRcode.successTitle", "Success"),
+          t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
       }
     } catch (error) {
       console.error("Download error:", error);
-      Alert.alert(t("Error.error"), t("Error.failedSaveQRCode"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.failedSaveQRCode"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
     }
   };
 
   const shareQRCode = async () => {
     try {
       if (!farmerQRCode) {
-        Alert.alert(t("Error.error"), t("Error.noQRCodeAvailable"));
+        Alert.alert(
+          t("Error.error"),
+          t("Error.noQRCodeAvailable"),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
         return;
       }
 
@@ -221,11 +259,16 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         Alert.alert(
           t("QRcode.sharingUnavailableTitle"),
           t("QRcode.sharingUnavailableMessage"),
+          [{ text: t("AlertModal.OK", "OK") }],
         );
       }
     } catch (error) {
       console.error("Share error:", error);
-      Alert.alert(t("Main.error"), t("QRcode.failedShareQRCode"));
+      Alert.alert(
+        t("Error.error"),
+        t("QRcode.failedShareQRCode"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
     }
   };
 

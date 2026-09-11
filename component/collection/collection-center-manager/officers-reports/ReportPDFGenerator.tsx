@@ -77,7 +77,7 @@ export const handleGeneratePDF = async (
   toDate: string,
   officerId: string,
   collectionOfficerId: number,
-  language: ReportLanguage = "en",
+  language?: string,
 ) => {
   try {
     const t = getPdfTranslator(language);
@@ -147,8 +147,8 @@ export const handleGeneratePDF = async (
 
     const tableRows = formattedData.length
       ? formattedData
-          .map(
-            (item) => `
+        .map(
+          (item) => `
               <tr>
                 <td>${item.date}</td>
                 <td>${item.total > 0 ? `${item.total}kg` : `<em>${t("noData")}</em>`}</td>
@@ -306,7 +306,10 @@ export const handleGeneratePDF = async (
       base64: false,
     });
 
-    const fileUri = `${(FileSystem as any).documentDirectory}Report_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
+    const isSinhala = (language || "en").toLowerCase().startsWith("si");
+    const isTamil = (language || "en").toLowerCase().startsWith("ta");
+    const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "Report";
+    const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
     await FileSystem.copyAsync({
       from: uri,
       to: fileUri,

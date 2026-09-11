@@ -145,6 +145,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         formatDate(endDate),
         officerId,
         collectionOfficerId,
+        i18n.language,
         getCurrentReportLanguage(),
       );
 
@@ -153,9 +154,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         return;
       }
 
+      const isSinhala = (i18n.language || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "Report";
       const fmtForFileName = (d: Date) =>
         `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      const fileName = `Report_${officerId}_From_${fmtForFileName(startDate!)}_To_${fmtForFileName(endDate!)}.pdf`;
+      const fileName = `${prefix}_${officerId}_From_${fmtForFileName(startDate!)}_To_${fmtForFileName(endDate!)}.pdf`;
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");
@@ -267,6 +271,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       formatDate(endDate),
       officerId,
       collectionOfficerId,
+      i18n.language,
       getCurrentReportLanguage(),
     );
     if (fileUri && (await Sharing.isAvailableAsync())) {
