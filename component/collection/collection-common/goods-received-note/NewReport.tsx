@@ -51,6 +51,8 @@ interface PersonalAndBankDetails {
   bankName: string | null;
   branchName: string | null;
   companyNameEnglish: string | null;
+  companyNameSinhala: string | null;
+  companyNameTamil: string | null;
   collectionCenterName: string | null;
 }
 
@@ -99,6 +101,35 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   useEffect(() => {
     fetchSelectedLanguage();
   }, []);
+
+  const getCompanyName = () => {
+    const authState = store.getState().auth;
+    const lang = i18n.language || selectedLanguage;
+    switch (lang) {
+      case "si":
+        return (
+          details?.companyNameSinhala ||
+          authState?.companyNameSinhala ||
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+      case "ta":
+        return (
+          details?.companyNameTamil ||
+          authState?.companyNameTamil ||
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+      default:
+        return (
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+    }
+  };
 
   const getCropName = (crop: Crop) => {
     if (!crop) return t("ManagerTransactions.Loading");
@@ -175,6 +206,27 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         );
 
         const data = detailsResponse.data;
+        const authState = store.getState().auth;
+        const storedSinhala = await AsyncStorage.getItem("companyNameSinhala");
+        const storedTamil = await AsyncStorage.getItem("companyNameTamil");
+        const storedEnglish = await AsyncStorage.getItem("companyNameEnglish");
+
+        const companyEnglish =
+          data.companyNameEnglish ||
+          authState.companyNameEnglish ||
+          storedEnglish ||
+          "";
+        const companySinhala =
+          data.companyNameSinhala ||
+          authState.companyNameSinhala ||
+          storedSinhala ||
+          companyEnglish;
+        const companyTamil =
+          data.companyNameTamil ||
+          authState.companyNameTamil ||
+          storedTamil ||
+          companyEnglish;
+
         setDetails({
           userId: data.userId ?? "",
           firstName: data.firstName ?? "",
@@ -187,7 +239,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           accHolderName: data.accHolderName ?? "",
           bankName: data.bankName ?? "",
           branchName: data.branchName ?? "",
-          companyNameEnglish: data.companyNameEnglish ?? "company name",
+          companyNameEnglish: companyEnglish,
+          companyNameSinhala: companySinhala,
+          companyNameTamil: companyTamil,
           collectionCenterName: data.centerName ?? "Collection Centre",
         });
       } catch (detailsError) {
@@ -398,7 +452,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="received-by-section">
           <div>
             <div class="section-title">${t("NewReport.Received By")}</div>
-            <div>${t("NewReport.Company Name")} ${details.companyNameEnglish || ""}</div>
+            <div>${t("NewReport.Company Name")} ${getCompanyName()}</div>
           </div>
           <div>
             <div>&nbsp;</div>
@@ -680,7 +734,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             <View className="border border-gray-300 rounded-lg p-2">
               <Text>
                 <Text className="">{t("NewReport.Company Name")}</Text>{" "}
-                {details?.companyNameEnglish || ""}
+                {getCompanyName()}
               </Text>
               <Text>
                 <Text className="">{t("NewReport.Centre")}</Text>{" "}

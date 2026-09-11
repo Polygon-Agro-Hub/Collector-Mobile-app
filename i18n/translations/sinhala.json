@@ -1551,5 +1551,22 @@
     "Your account status is pending verification.": "ඔබගේ ගිණුමේ තත්ත්වය සත්‍යාපනය වෙමින් පවතී.",
     "Please contact Polygon Customer Support for further details.": "වැඩිදුර විස්තර සඳහා කරුණාකර Polygon පාරිභෝගික සහාය අමතන්න.",
     "Back to Login": "නැවත පුරනය වීමට"
-  }
+  },
+  "PDFReport": {
+  "title": "එක්රැස් කිරීමේ නිලධාරී වාර්තාව",
+  "from": "සිට",
+  "to": "දක්වා",
+  "empId": "සේවක අංකය",
+  "role": "තනතුර",
+  "firstName": "මුල් නම",
+  "lastName": "අවසන් නම",
+  "weight": "බර",
+  "collections": "එකතු කිරීම්",
+  "date": "දිනය",
+  "totalWeight": "මුළු බර",
+  "totalCollections": "මුළු එකතු කිරීම්",
+  "noData": "-දත්ත නැත-",
+  "noTransactions": "{{from}} සහ {{to}} අතර ගනුදෙනු සිදු වී නැත",
+  "generatedOn": "මෙම වාර්තාව {{date}} දින {{time}} ට උත්පාදනය කරන ලදී"
+}
 }

@@ -1616,5 +1616,22 @@
     "Your account status is pending verification.": "Your account status is pending verification.",
     "Please contact Polygon Customer Support for further details.": "Please contact Polygon Customer Support for further details.",
     "Back to Login": "Back to Login"
-  }
+  },
+  "PDFReport": {
+  "title": "Collection Officer Report",
+  "from": "From",
+  "to": "To",
+  "empId": "EMP ID",
+  "role": "Role",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "weight": "Weight",
+  "collections": "Collections",
+  "date": "Date",
+  "totalWeight": "Total Weight",
+  "totalCollections": "Total Collections",
+  "noData": "-No Data-",
+  "noTransactions": "No transactions occurred between {{from}} and {{to}}",
+  "generatedOn": "This report is generated on {{date}} at {{time}}"
+}
 }
