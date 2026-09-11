@@ -513,8 +513,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           }}
         >
           <Text
-            style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+            style={[{flexShrink: 0 , fontSize: 16 }, getTextStyle(selectedLanguage)]}
             className="text-center text-base text-[#606060] font-semibold"
+       
           >
             {isEditable ? t("PriceChart.Cancel") : t("PriceChart.Go")}
           </Text>

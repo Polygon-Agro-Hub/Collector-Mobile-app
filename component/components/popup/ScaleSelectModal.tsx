@@ -180,7 +180,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
               </View>
               <TouchableOpacity
                 onPress={handleDisconnect}
-                style={{ paddingVertical: 6, paddingHorizontal: 12, backgroundColor: "#fee2e2", borderRadius: 20, borderWidth: 1, borderColor: "#fca5a5" }}
+                style={{ paddingVertical: 6, paddingHorizontal: 10, backgroundColor: "#fee2e2", borderRadius: 20, borderWidth: 1, borderColor: "#fca5a5" }}
               >
                 <Text style={{ fontSize: 12, fontWeight: "bold", color: "#dc2626" }}>
                   {t("ScaleSelectModal.Disconnect")}

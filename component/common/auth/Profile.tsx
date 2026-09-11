@@ -456,13 +456,27 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.FirstName")}
               </Text>
               <View
-                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] text-base"
-                    style={inputTextStyle}
+                    style={[
+                      {
+                        paddingHorizontal: 16,
+                        color: "#000000",
+                        minWidth: 250,
+                        fontSize: 14,
+                      },
+                      inputTextStyle,
+                    ]}
                     value={getfirstName()}
                     editable={false}
                     scrollEnabled={false}
@@ -479,13 +493,27 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.LastName")}
               </Text>
               <View
-                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] text-base"
-                    style={inputTextStyle}
+                    style={[
+                      {
+                        paddingHorizontal: 16,
+                        color: "#000000",
+                        minWidth: 250,
+                        fontSize: 14,
+                      },
+                      inputTextStyle,
+                    ]}
                     value={getlastName()}
                     editable={false}
                     scrollEnabled={false}
@@ -502,13 +530,27 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.Company")}
               </Text>
               <View
-                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] text-base"
-                    style={inputTextStyle}
+                    style={[
+                      {
+                        paddingHorizontal: 16,
+                        color: "#000000",
+                        minWidth: 250,
+                        fontSize: 14,
+                      },
+                      inputTextStyle,
+                    ]}
                     value={getcompanyName()}
                     editable={false}
                     scrollEnabled={false}
@@ -525,12 +567,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.CenterCode")}
               </Text>
               <View
-                className="px-4 border border-[#F4F4F4] bg-[#F4F4F4] rounded-3xl"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={profileData.regcode}
                   editable={false}
                 />
@@ -545,13 +601,27 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.CenterName")}
               </Text>
               <View
-                className="rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <TextInput
-                    className="px-4 text-black min-w-[250px] text-base"
-                    style={inputTextStyle}
+                    style={[
+                      {
+                        paddingHorizontal: 16,
+                        color: "#000000",
+                        minWidth: 250,
+                        fontSize: 14,
+                      },
+                      inputTextStyle,
+                    ]}
                     value={profileData.collectionCenterName}
                     editable={false}
                     scrollEnabled={false}
@@ -568,12 +638,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.Job")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={getTranslatedJobRole(
                     profileData.jobRole,
                     selectedLanguage,
@@ -591,12 +675,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.NIC")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={profileData.nicNumber}
                   editable={false}
                 />
@@ -611,12 +709,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.Phone1")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={newPhoneNumber}
                   placeholder="7XXXXXXXX"
                   placeholderTextColor="#A3A3A3"
@@ -641,12 +753,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.Phone2")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={newPhoneNumber2}
                   placeholder="7XXXXXXXX"
                   placeholderTextColor="#A3A3A3"
@@ -671,12 +797,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.House")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={profileData.houseNumber}
                   editable={false}
                 />
@@ -691,12 +831,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.Street")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={profileData.streetName}
                   editable={false}
                 />
@@ -711,12 +865,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.City")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={getTranslatedCity(
                     profileData.city,
                     profileData.district,
@@ -735,12 +903,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.District")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={getTranslatedDistrict(
                     profileData.district,
                     selectedLanguage,
@@ -758,12 +940,26 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                 {t("Profile.Province")}
               </Text>
               <View
-                className="px-4 rounded-3xl border border-[#F4F4F4] bg-[#F4F4F4]"
-                style={inputWrapperStyle}
+                style={[
+                  {
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#F4F4F4",
+                    backgroundColor: "#F4F4F4",
+                  },
+                  inputWrapperStyle,
+                ]}
               >
                 <TextInput
-                  className="text-black text-base"
-                  style={inputTextStyle}
+                  style={[
+                    {
+                      paddingHorizontal: 16,
+                      color: "#000000",
+                      minWidth: 250,
+                      fontSize: 14,
+                    },
+                    inputTextStyle,
+                  ]}
                   value={getTranslatedProvince(
                     profileData.province,
                     selectedLanguage,

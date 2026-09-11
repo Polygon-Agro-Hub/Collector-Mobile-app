@@ -24,6 +24,12 @@ import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
+// Separate axios instance WITHOUT the app's global interceptors.
+// This prevents the global 401 handler (which shows "Token Expired"
+// and force-logs the user out) from hijacking a wrong-current-password
+// response, which also comes back as 401 from this endpoint.
+const plainAxios = axios.create();
+
 type ChangePasswordNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ChangePassword"
@@ -112,7 +118,11 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     try {
       setIsLoading(true);
       const token = store.getState().auth.token;
-      await axios.post(
+
+      // Use plainAxios here (not the default axios instance) so the
+      // app-wide 401 interceptor cannot intercept a wrong-current-password
+      // response and show "Token Expired" instead of the correct message.
+      await plainAxios.post(
         `${environment.API_BASE_URL}api/collection-officer/change-password`,
         {
           currentPassword,
@@ -134,7 +144,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             onPress: async () => {
               // Clear session — user must log in again with new password
               store.dispatch(logoutUser());
-navigation.reset({
+              navigation.reset({
                 index: 0,
                 routes: [{ name: "Login" }],
               });
@@ -249,17 +259,17 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4] text-black text-base"
+                className="bg-[#F4F4F4] text-black"
                 secureTextEntry={secureCurrent}
                 onChangeText={setCurrentPassword}
                 value={currentPassword}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
+                  paddingVertical: 0,
                   fontSize: 16,
-                  lineHeight: 22,
-                  paddingVertical: 8,
-                  includeFontPadding: true,
-                  textAlignVertical: "center",
-                  color: "#000000",
+                  height: "100%",
+                  includeFontPadding: false,
                 }}
               />
               <TouchableOpacity
@@ -278,7 +288,7 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 text-black text-base"
+                className="bg-[#F4F4F4] text-black"
                 secureTextEntry={secureNew}
                 value={newPassword}
                 onChangeText={(text) => {
@@ -286,12 +296,12 @@ navigation.reset({
                   setNewPassword(cleanText);
                 }}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
+                  paddingVertical: 0,
                   fontSize: 16,
-                  lineHeight: 22,
-                  paddingVertical: 8,
-                  includeFontPadding: true,
-                  textAlignVertical: "center",
-                  color: "#000000",
+                  height: "100%",
+                  includeFontPadding: false,
                 }}
               />
               <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
@@ -308,7 +318,7 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4] text-black text-base"
+                className="bg-[#F4F4F4] text-black"
                 secureTextEntry={secureConfirm}
                 onChangeText={(text) => {
                   const cleanText = text.replace(/\s/g, "");
@@ -316,12 +326,12 @@ navigation.reset({
                 }}
                 value={confirmPassword}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
+                  paddingVertical: 0,
                   fontSize: 16,
-                  lineHeight: 22,
-                  paddingVertical: 8,
-                  includeFontPadding: true,
-                  textAlignVertical: "center",
-                  color: "#000000",
+                  height: "100%",
+                  includeFontPadding: false,
                 }}
               />
               <TouchableOpacity

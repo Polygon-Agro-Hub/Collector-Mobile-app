@@ -554,7 +554,9 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const handleSubmit = () => {
     Alert.alert(
       t("GoviPensionForm.Confirm Submission"),
-      t("GoviPensionForm.Are you sure you want to submit this pension request?"),
+      t(
+        "GoviPensionForm.Are you sure you want to submit this pension request?",
+      ),
       [
         { text: t("GoviPensionForm.No"), style: "cancel" },
         { text: t("GoviPensionForm.Yes"), onPress: () => submitForm() },
@@ -802,7 +804,14 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
           }
           placeholder={t("GoviPensionForm.--Type here--")}
           placeholderTextColor="#585858"
-          className="bg-[#F4F4F4] rounded-2xl px-4 h-[50px] text-[#070707] text-sm"
+          style={{
+            backgroundColor: "#F4F4F4",
+            borderRadius: 16,
+            paddingHorizontal: 16,
+            height: 50,
+            color: "#070707",
+            fontSize: 14,
+          }}
           autoCapitalize="words"
           editable={!farmerName}
         />
@@ -933,7 +942,14 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
             }
             placeholder={t("GoviPensionForm.--Type here--")}
             placeholderTextColor="#585858"
-            className="bg-[#F4F4F4] rounded-2xl px-4 h-[50px] text-[#070707] text-sm"
+            style={{
+              backgroundColor: "#F4F4F4",
+              borderRadius: 16,
+              paddingHorizontal: 16,
+              height: 50,
+              color: "#070707",
+              fontSize: 14,
+            }}
             autoCapitalize="words"
           />
         </View>
@@ -1020,7 +1036,14 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
                   onChangeText={handleSuccessorNicChange}
                   placeholder={t("GoviPensionForm.--Type here--")}
                   placeholderTextColor="#585858"
-                  className="bg-[#F4F4F4] rounded-2xl px-4 py-3 text-[#070707] text-sm"
+                  style={{
+                    backgroundColor: "#F4F4F4",
+                    borderRadius: 16,
+                    paddingHorizontal: 16,
+                    height: 50,
+                    color: "#070707",
+                    fontSize: 14,
+                  }}
                   keyboardType="default"
                   autoCapitalize="characters"
                   maxLength={13}
@@ -1253,7 +1276,7 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
       {/* Action Buttons */}
       <View
-        className="px-5 pt-3 bg-white "
+        className="px-5 pt-3 mb-5   bg-white "
         style={{ paddingBottom: Math.max(insets.bottom, 16) }}
       >
         {currentSection === 1 ? (
