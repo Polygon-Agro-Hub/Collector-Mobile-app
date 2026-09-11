@@ -111,6 +111,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       Alert.alert(
         t("Error.error"),
         t("Error.Please fill in all required fields."),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       setLoading(false);
       return;
@@ -129,11 +130,21 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       let otpMessage = "";
       let companyName = "";
 
-      if (PreferdLanguage === "Sinhala") {
+      const normLang = (PreferdLanguage || "").toLowerCase().trim();
+      if (
+        normLang === "sinhala" ||
+        normLang === "si" ||
+        normLang === "sinhalese" ||
+        normLang === "සිංහල"
+      ) {
         companyName =
           (store.getState().auth.companyNameSinhala) || "PolygonAgro";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
-      } else if (PreferdLanguage === "Tamil") {
+      } else if (
+        normLang === "tamil" ||
+        normLang === "ta" ||
+        normLang === "தமிழ்"
+      ) {
         companyName =
           (store.getState().auth.companyNameTamil) || "PolygonAgro";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
@@ -165,7 +176,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
       });
       setLoading(false);
     } catch (error) {
-      Alert.alert(t("Error.error"), t("Error.otpSendFailed"));
+      Alert.alert(t("Error.error"), t("Error.otpSendFailed"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
       setLoading(false);
     }
   };
@@ -226,11 +239,10 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.AccountNum")}
             </Text>
             <TextInput
-              className={`border ${
-                accNumberError
+              className={`border ${accNumberError
                   ? "border-red-500"
                   : "border-[#F4F4F4] bg-[#F4F4F4]"
-              } p-3 rounded-full h-[50px]`}
+                } p-3 rounded-full h-[50px]`}
               keyboardType="numeric"
               value={accNumber}
               onChangeText={(text) => {
@@ -298,7 +310,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               <Text
                 style={{ color: bankName ? "#000" : "#9CA3AF", fontSize: 14 }}
               >
-                {bankName || "Select Bank"}
+                {bankName || t("UnregisteredFarmerDetails.Select Bank", "--Select Bank--")}
               </Text>
               <MaterialIcons
                 name="keyboard-arrow-down"
@@ -319,6 +331,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                   Alert.alert(
                     t("Error.error"),
                     t("UnregisteredFarmerDetails.SelectBank"),
+                    [{ text: t("AlertModal.OK", "OK") }],
                   );
                   return;
                 }
@@ -339,7 +352,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               <Text
                 style={{ color: branchName ? "#000" : "#9CA3AF", fontSize: 14 }}
               >
-                {branchName || "Select Branch"}
+                {branchName || t("UnregisteredFarmerDetails.Select Branch", "--Select Branch--")}
               </Text>
               <MaterialIcons
                 name="keyboard-arrow-down"
@@ -350,9 +363,8 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           </View>
 
           <TouchableOpacity
-            className={`py-4 rounded-full items-center mt-5 h-[50px] ${
-              loading ? "bg-gray-400 opacity-50" : "bg-[#000000] "
-            }`}
+            className={`py-4 rounded-full items-center mt-5 h-[50px] ${loading ? "bg-gray-400 opacity-50" : "bg-[#000000] "
+              }`}
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
@@ -396,7 +408,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           setBankName(val);
           setBranchName("");
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.SearchBankName")}
+        searchPlaceholder={t("UnregisteredFarmerDetails.SearchBank", "Search bank...")}
         multiSelect={false}
       />
 
@@ -411,7 +423,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           const val = items[0] ?? "";
           setBranchName(val);
         }}
-        searchPlaceholder={t("AddOfficerAddressDetails.SearchBranchName")}
+        searchPlaceholder={t("UnregisteredFarmerDetails.SearchBranch", "Search branch...")}
         multiSelect={false}
       />
     </KeyboardAvoidingView>

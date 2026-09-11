@@ -79,13 +79,18 @@ const NotEligibleScreen: React.FC<NotEligibleScreenProps> = ({
 
         {/* Status Title */}
         <View className="items-center mb-6">
-          <Text className="text-xl font-bold text-black">Not Eligible Yet</Text>
+          <Text className="text-xl font-bold text-black">
+            {t("GoviPensionStatus.Not Eligible Yet", "Not Eligible Yet")}
+          </Text>
         </View>
 
         {/* Status Content */}
         <View className="px-8 mb-8">
           <Text className="text-md text-[#4B6B87] text-center leading-5">
-            The farmer haven’t completed any cultivation yet.
+            {t(
+              "GoviPensionStatus.The farmer haven’t completed any cultivation yet.",
+              "The farmer haven’t completed any cultivation yet.",
+            )}
           </Text>
         </View>
 

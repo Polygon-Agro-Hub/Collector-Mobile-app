@@ -378,7 +378,9 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     updateFormData("successorNicNumber", final);
 
     setSuccessorNicError(
-      final && !nicRegex.test(final) ? "Enter a valid NIC number" : "",
+      final && !nicRegex.test(final)
+        ? t("GoviPensionForm.Enter a valid NIC number")
+        : "",
     );
   };
 
@@ -439,7 +441,10 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
         }
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to pick image. Please try again.");
+      Alert.alert(
+        t("GoviPensionForm.Error"),
+        t("GoviPensionForm.Failed to pick image. Please try again."),
+      );
       console.error("Image picker error:", error);
     }
   };
@@ -487,30 +492,47 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
   const handleNext = () => {
     if (currentSection === 1) {
       if (!formData.fullName.trim()) {
-        Alert.alert("Validation Error", "Please enter your full name");
+        Alert.alert(
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.Please enter your full name"),
+        );
         return;
       }
       if (!formData.dateOfBirth) {
-        Alert.alert("Validation Error", "Please select your date of birth");
+        Alert.alert(
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.Please select your date of birth"),
+        );
         return;
       }
       if (!formData.nicNumber.trim()) {
-        Alert.alert("Validation Error", "NIC number is required");
+        Alert.alert(
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.NIC number is required"),
+        );
         return;
       }
       if (!validateNIC(formData.nicNumber)) {
         Alert.alert(
-          "Invalid NIC",
-          "NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)",
+          t("GoviPensionForm.Invalid NIC"),
+          t(
+            "GoviPensionForm.NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)",
+          ),
         );
         return;
       }
       if (!formData.nicFrontImage) {
-        Alert.alert("Validation Error", "Please upload NIC front image");
+        Alert.alert(
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.Please upload NIC front image"),
+        );
         return;
       }
       if (!formData.nicBackImage) {
-        Alert.alert("Validation Error", "Please upload NIC back image");
+        Alert.alert(
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.Please upload NIC back image"),
+        );
         return;
       }
       setCurrentSection(2);
@@ -531,11 +553,11 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
 
   const handleSubmit = () => {
     Alert.alert(
-      "Confirm Submission",
-      "Are you sure you want to submit this pension request?",
+      t("GoviPensionForm.Confirm Submission"),
+      t("GoviPensionForm.Are you sure you want to submit this pension request?"),
       [
-        { text: "No", style: "cancel" },
-        { text: "Yes", onPress: () => submitForm() },
+        { text: t("GoviPensionForm.No"), style: "cancel" },
+        { text: t("GoviPensionForm.Yes"), onPress: () => submitForm() },
       ],
       { cancelable: true },
     );
@@ -545,66 +567,84 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     const isOver17 = isSuccessorOver17();
 
     if (!formData.successorFullName.trim()) {
-      Alert.alert("Validation Error", "Please enter successor's full name");
+      Alert.alert(
+        t("GoviPensionForm.Validation Error"),
+        t("GoviPensionForm.Please enter successor's full name"),
+      );
       return;
     }
     if (!formData.successorRelationship) {
-      Alert.alert("Validation Error", "Please select relationship");
+      Alert.alert(
+        t("GoviPensionForm.Validation Error"),
+        t("GoviPensionForm.Please select relationship"),
+      );
       return;
     }
     if (!formData.successorDateOfBirth) {
       Alert.alert(
-        "Validation Error",
-        "Please select successor's date of birth",
+        t("GoviPensionForm.Validation Error"),
+        t("GoviPensionForm.Please select successor's date of birth"),
       );
       return;
     }
 
     if (isOver17) {
       if (!formData.successorNicNumber.trim()) {
-        Alert.alert("Validation Error", "Please enter successor's NIC number");
+        Alert.alert(
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.Please enter successor's NIC number"),
+        );
         return;
       }
       if (!validateNIC(formData.successorNicNumber)) {
         Alert.alert(
-          "Invalid NIC",
-          "Successor's NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)",
+          t("GoviPensionForm.Invalid NIC"),
+          t(
+            "GoviPensionForm.Successor's NIC must be either 9 digits followed by V/v (e.g., 123456789V) or 12 digits (e.g., 199912345678)",
+          ),
         );
         return;
       }
       if (!formData.successorNicFrontImage) {
         Alert.alert(
-          "Validation Error",
-          "Please upload successor's NIC front image",
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.Please upload successor's NIC front image"),
         );
         return;
       }
       if (!formData.successorNicBackImage) {
         Alert.alert(
-          "Validation Error",
-          "Please upload successor's NIC back image",
+          t("GoviPensionForm.Validation Error"),
+          t("GoviPensionForm.Please upload successor's NIC back image"),
         );
         return;
       }
     } else {
       if (!formData.successorBirthCertFrontImage) {
         Alert.alert(
-          "Validation Error",
-          "Please upload successor's birth certificate front image",
+          t("GoviPensionForm.Validation Error"),
+          t(
+            "GoviPensionForm.Please upload successor's birth certificate front image",
+          ),
         );
         return;
       }
       if (!formData.successorBirthCertBackImage) {
         Alert.alert(
-          "Validation Error",
-          "Please upload successor's birth certificate back image",
+          t("GoviPensionForm.Validation Error"),
+          t(
+            "GoviPensionForm.Please upload successor's birth certificate back image",
+          ),
         );
         return;
       }
     }
 
     if (!isFormComplete()) {
-      Alert.alert("Error", "Please complete all required fields");
+      Alert.alert(
+        t("GoviPensionForm.Error"),
+        t("GoviPensionForm.Please complete all required fields"),
+      );
       return;
     }
 
@@ -613,8 +653,8 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
     try {
       const token = store.getState().auth.token;
       if (!token) {
-        setModalTitle("Session Expired");
-        setModalMessage("Please login again to continue.");
+        setModalTitle(t("GoviPensionForm.Session Expired"));
+        setModalMessage(t("GoviPensionForm.Please login again to continue."));
         setShowErrorModal(true);
         setIsSubmitting(false);
         return;
@@ -677,39 +717,41 @@ const GoviPensionForm: React.FC<GoviPensionFormProps> = ({ navigation }) => {
       );
 
       if (response.data.status || response.data.success) {
-        setModalTitle("Success!");
+        setModalTitle(t("GoviPensionForm.Success!"));
         setModalMessage(
           <View className="items-center">
             <Text className="text-center text-[#000000] text-base">
-              Pension Request Submitted Successfully!
+              {t("GoviPensionForm.Pension Request Submitted Successfully!")}
             </Text>
           </View>,
         );
         setShowSuccessModal(true);
       } else {
-        setModalTitle("Submission Failed");
+        setModalTitle(t("GoviPensionForm.Submission Failed"));
         setModalMessage(
           response.data.message ||
-            "Failed to submit request. Please try again.",
+            t("GoviPensionForm.Failed to submit request. Please try again."),
         );
         setShowErrorModal(true);
       }
     } catch (error: any) {
       console.error("Error submitting pension request:", error);
-      let errorMessage =
-        "An error occurred while submitting your request. Please try again.";
+      let errorMessage = t(
+        "GoviPensionForm.An error occurred while submitting your request. Please try again.",
+      );
 
       if (error.response) {
         errorMessage =
           error.response.data?.message || error.response.statusText;
       } else if (error.request) {
-        errorMessage =
-          "No response from server. Please check your internet connection.";
+        errorMessage = t(
+          "GoviPensionForm.No response from server. Please check your internet connection.",
+        );
       } else {
         errorMessage = error.message || errorMessage;
       }
 
-      setModalTitle("Submission Error");
+      setModalTitle(t("GoviPensionForm.Submission Error"));
       setModalMessage(errorMessage);
       setShowErrorModal(true);
     } finally {

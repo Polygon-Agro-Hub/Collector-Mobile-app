@@ -31,15 +31,38 @@ interface GoviPensionStatusProps {
 
 type StatusType = "To Review" | "Approved" | "Rejected";
 
-const formatDate = (dateString: string | undefined): string => {
+const FULL_MONTH_KEYS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const formatDate = (
+  dateString: string | undefined,
+  t: any,
+): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+
+  const monthKey = FULL_MONTH_KEYS[date.getMonth()];
+  const month = t(
+    `GoviPensionForm.${monthKey}`,
+    t(`FullMonths.${monthKey}`, monthKey),
+  );
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  return `${month} ${day}, ${year}`;
 };
 
 const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
@@ -51,7 +74,7 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
   const { status, creatAt } = route.params || {};
   const currentStatus = (status as StatusType) || "To Review";
 
-  const formattedDate = formatDate(creatAt);
+  const formattedDate = formatDate(creatAt, t);
 
   const getStatusConfig = () => {
     switch (currentStatus) {
@@ -80,10 +103,14 @@ const GoviPensionStatus: React.FC<GoviPensionStatusProps> = ({
         return {
           image: require("../../../../assets/images/govi-pension/try-again.webp"),
           title: t("GoviPensionStatus.Application Rejected!"),
-          content: t(
-            "GoviPensionStatus.The pension application submitted on {{date}} has been reviewed and was not approved.",
-            { date: formattedDate },
-          ),
+          content: formattedDate
+            ? t(
+                "GoviPensionStatus.The pension application submitted on {{date}} has been reviewed and was not approved.",
+                { date: formattedDate },
+              )
+            : t(
+                "GoviPensionStatus.We're sorry to inform you that your pension request has been rejected. Please feel free to try again in the future.",
+              ),
         };
       default:
         return {
