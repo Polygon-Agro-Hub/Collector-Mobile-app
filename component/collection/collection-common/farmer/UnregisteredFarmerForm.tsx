@@ -783,7 +783,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           if (val && fieldErrors.district)
             setFieldErrors((prev) => ({ ...prev, district: "" }));
         }}
-        searchPlaceholder="Search district..."
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchDistrict")}
         multiSelect={false}
       />
 
@@ -801,7 +801,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           if (val && fieldErrors.bankName)
             setFieldErrors((prev) => ({ ...prev, bankName: "" }));
         }}
-        searchPlaceholder="Search bank..."
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchBankName")}
         multiSelect={false}
       />
 
@@ -818,7 +818,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           if (val && fieldErrors.branchName)
             setFieldErrors((prev) => ({ ...prev, branchName: "" }));
         }}
-        searchPlaceholder="Search branch..."
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchBranchName")}
         multiSelect={false}
       />
     </KeyboardAvoidingView>

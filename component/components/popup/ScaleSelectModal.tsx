@@ -15,6 +15,7 @@ import {
 import { FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import NetInfo from "@react-native-community/netinfo";
+import { useTranslation } from "react-i18next";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
 interface ScaleSelectModalProps {
@@ -23,13 +24,22 @@ interface ScaleSelectModalProps {
 }
 
 const isExpoGo = Constants.appOwnership === "expo";
-const DEFAULT_IP = isExpoGo ? "192.168.1.13" : "192.168.1.23";
-const DEFAULT_PORT = isExpoGo ? "3001" : "33581";
+
+// Device config is data, not translated text — keep the model name out of the
+// translation files and only translate the descriptive suffix around it.
+const DEFAULT_DEVICE = {
+  name: "BUDRY MFD-300",
+  ip: isExpoGo ? "192.168.1.13" : "192.168.1.23",
+  port: isExpoGo ? "3001" : "33581",
+};
+const DEFAULT_IP = DEFAULT_DEVICE.ip;
+const DEFAULT_PORT = DEFAULT_DEVICE.port;
 
 export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   visible,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
   const [ipAddress, setIpAddress] = useState<string>(DEFAULT_IP);
   const [port, setPort] = useState<string>(DEFAULT_PORT);
@@ -62,7 +72,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
 
   const handleConnect = async () => {
     if (!ipAddress.trim()) {
-      Alert.alert("Input Required", "Please enter the scale IP address.");
+      Alert.alert(
+        t("ScaleSelectModal.InputRequiredTitle"),
+        t("ScaleSelectModal.InputRequiredMessage"),
+      );
       return;
     }
 
@@ -70,10 +83,16 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
     try {
       const parsedPort = parseInt(port.trim() || "8080", 10);
       await wifiScaleService.connectWifiScale(ipAddress.trim(), parsedPort);
-      Alert.alert("Connected", "Successfully connected to BUDRY MFD-300 Wi-Fi Scale.");
+      Alert.alert(
+        t("ScaleSelectModal.ConnectedTitle"),
+        t("ScaleSelectModal.ConnectedMessage", { deviceName: DEFAULT_DEVICE.name }),
+      );
       onClose();
     } catch (err: any) {
-      Alert.alert("Connection Failed", err.message || "Could not connect to BUDRY MFD-300 Wi-Fi Scale.");
+      Alert.alert(
+        t("ScaleSelectModal.ConnectionFailedTitle"),
+        err.message || t("ScaleSelectModal.ConnectionFailedMessage", { deviceName: DEFAULT_DEVICE.name }),
+      );
     } finally {
       setIsConnecting(false);
     }
@@ -82,9 +101,12 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   const handleDisconnect = async () => {
     try {
       await wifiScaleService.disconnectScale();
-      Alert.alert("Disconnected", "Disconnected from BUDRY MFD-300 Wi-Fi Scale.");
+      Alert.alert(
+        t("ScaleSelectModal.DisconnectedTitle"),
+        t("ScaleSelectModal.DisconnectedMessage", { deviceName: DEFAULT_DEVICE.name }),
+      );
     } catch (err: any) {
-      Alert.alert("Error", "Failed to disconnect scale.");
+      Alert.alert(t("ScaleSelectModal.ErrorTitle"), t("ScaleSelectModal.DisconnectFailedMessage"));
     }
   };
 
@@ -111,7 +133,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
               <FontAwesome6 name="weight-scale" size={24} color="black" />
               <View>
                 <Text style={{ fontSize: 18, fontWeight: "bold", color: "#020617" }}>
-                  Select Wi-Fi Scale
+                  {t("ScaleSelectModal.SelectWifiScale")}
                 </Text>
               </View>
             </View>
@@ -131,10 +153,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 13, fontWeight: "bold", color: "#9f1239" }}>
-                  Wi-Fi is Off
+                  {t("ScaleSelectModal.WifiOffTitle")}
                 </Text>
                 <Text style={{ fontSize: 11, color: "#be123c", marginTop: 2 }}>
-                  Please turn on Wi-Fi on your phone to connect to the scale.
+                  {t("ScaleSelectModal.WifiOffMessage")}
                 </Text>
               </View>
             </View>
@@ -152,7 +174,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                     {scaleStatus.scale.name}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#166534" }}>
-                    Connected & Ready ({scaleStatus.scale.ip}:{scaleStatus.scale.port || 8080})
+                    {t("ScaleSelectModal.ConnectedReady")} ({scaleStatus.scale.ip}:{scaleStatus.scale.port || 8080})
                   </Text>
                 </View>
               </View>
@@ -160,7 +182,9 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 onPress={handleDisconnect}
                 style={{ paddingVertical: 6, paddingHorizontal: 12, backgroundColor: "#fee2e2", borderRadius: 20, borderWidth: 1, borderColor: "#fca5a5" }}
               >
-                <Text style={{ fontSize: 12, fontWeight: "bold", color: "#dc2626" }}>Disconnect</Text>
+                <Text style={{ fontSize: 12, fontWeight: "bold", color: "#dc2626" }}>
+                  {t("ScaleSelectModal.Disconnect")}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -198,10 +222,11 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 </View>
                 <View>
                   <Text style={{ fontSize: 14, fontWeight: "bold", color: "#0f172a" }}>
-                    {isExpoGo ? "BUDRY MFD-300 (PC Bridge)" : "BUDRY MFD-300"}
+                    {DEFAULT_DEVICE.name}
+                    {isExpoGo ? ` (${t("ScaleSelectModal.PcBridgeSuffix")})` : ""}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#64748b" }}>
-                    IP: {DEFAULT_IP} | Port: {DEFAULT_PORT}
+                    {t("ScaleSelectModal.IpLabel")}: {DEFAULT_DEVICE.ip} | {t("ScaleSelectModal.PortLabel")}: {DEFAULT_DEVICE.port}
                   </Text>
                 </View>
               </View>
@@ -212,12 +237,12 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
             <View style={{ gap: 12, marginBottom: 20 }}>
               <View>
                 <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155", marginBottom: 4 }}>
-                  Scale IP Address
+                  {t("ScaleSelectModal.ScaleIpAddress")}
                 </Text>
                 <TextInput
                   value={ipAddress}
                   onChangeText={setIpAddress}
-                  placeholder="e.g. 192.168.1.100"
+                  placeholder={t("ScaleSelectModal.IpPlaceholder")}
                   keyboardType="numeric"
                   style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
                 />
@@ -225,7 +250,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
 
               <View>
                 <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155", marginBottom: 4 }}>
-                  Port Number
+                  {t("ScaleSelectModal.PortNumber")}
                 </Text>
                 <TextInput
                   value={port}
@@ -264,7 +289,9 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 <>
                   <MaterialIcons name="wifi" size={20} color="#000000" />
                   <Text style={{ fontSize: 16, fontWeight: "bold", color: "#000000" }}>
-                    {scaleStatus.connected ? "Reconnect Scale" : "Connect Scale"}
+                    {scaleStatus.connected
+                      ? t("ScaleSelectModal.ReconnectScale")
+                      : t("ScaleSelectModal.ConnectScale")}
                   </Text>
                 </>
               )}

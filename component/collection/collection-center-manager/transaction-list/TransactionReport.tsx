@@ -120,7 +120,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
   }, []);
 
   const getCropName = (crop: Crop) => {
-    if (!crop) return "Loading...";
+    if (!crop) return t("ManagerTransactions.Loading");
 
     switch (selectedLanguage) {
       case "si":
@@ -133,7 +133,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
   };
 
   const getVarietyName = (crop: Crop) => {
-    if (!crop) return "Loading...";
+    if (!crop) return t("ManagerTransactions.Loading");
 
     switch (selectedLanguage) {
       case "si":
@@ -593,8 +593,8 @@ const handleDownloadPDF = async () => {
             });
 
             Alert.alert(
-              "Success",
-              "Attachment has been saved to your selected folder",
+              t("Error.Success"),
+              t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
             );
           } catch (e) {
             // Permission might have been revoked, try to request again
@@ -617,8 +617,8 @@ const handleDownloadPDF = async () => {
               });
 
               Alert.alert(
-                "Success",
-                "Attachment has been saved to your selected folder",
+                t("Error.Success"),
+                t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
               );
             } else {
               Alert.alert(

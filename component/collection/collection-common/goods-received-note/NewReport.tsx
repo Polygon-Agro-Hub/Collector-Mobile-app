@@ -101,7 +101,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   }, []);
 
   const getCropName = (crop: Crop) => {
-    if (!crop) return "Loading...";
+    if (!crop) return t("ManagerTransactions.Loading");
 
     switch (selectedLanguage) {
       case "si":
@@ -114,7 +114,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   };
 
   const getVarietyName = (crop: Crop) => {
-    if (!crop) return "Loading...";
+    if (!crop) return t("ManagerTransactions.Loading");
 
     switch (selectedLanguage) {
       case "si":
@@ -504,7 +504,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
 
             Alert.alert(
               t("Error.Success") || "Success",
-              "Attachment has been saved to your selected folder",
+              t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
             );
           } catch (e) {
             // Permission might have been revoked, try to request again
@@ -528,7 +528,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
 
               Alert.alert(
                 t("Error.Success") || "Success",
-                "Attachment has been saved to your selected folder",
+                t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
               );
             } else {
               Alert.alert(

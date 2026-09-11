@@ -308,7 +308,7 @@ const PassTargetScreen: React.FC<PassTargetScreenProps> = ({
     <View className="flex-1 bg-white">
       <CustomHeader
         title={getvarietyName() || ""}
-        subtitle={grade ? `Grade : ${grade}` : ""}
+        subtitle={grade ? t("SetTargetScreen.GradeG", { grade }) : ""}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() =>

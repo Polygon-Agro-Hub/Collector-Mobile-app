@@ -7,7 +7,6 @@ import {
   Alert,
   BackHandler,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
@@ -23,6 +22,8 @@ import LottieView from "lottie-react-native";
 import i18n from "@/i18n/i18n";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
+import CustomCalendar from "@/component/components/popup/CustomcalendarModal";
+
 
 type ReportGeneratorNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -171,7 +172,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
             Alert.alert(
               t("Error.Success") || "Success",
-              "Attachment has been saved to your selected folder",
+              t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
             );
           } catch (e) {
             // Permission might have been revoked, try to request again
@@ -200,7 +201,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
               Alert.alert(
                 t("Error.Success") || "Success",
-                "Attachment has been saved to your selected folder",
+                t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
               );
             } else {
               Alert.alert(
@@ -277,26 +278,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     )}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
-  const handleDateChange = (
-    event: any,
-    selectedDate: Date | undefined,
-    type: string,
-  ) => {
-    if (event.type === "set") {
-      if (type === "start") {
-        setStartDate(selectedDate || startDate);
-        setEndDate(undefined);
-        setShowStartPicker(false);
-      } else {
-        setEndDate(selectedDate || endDate);
-        setShowEndPicker(false);
-      }
-    } else {
-      if (type === "start") setShowStartPicker(false);
-      else setShowEndPicker(false);
-    }
-  };
-
   const handleBackPress = useCallback(() => {
     navigation.navigate("OfficerSummary" as any, {
       collectionOfficerId,
@@ -352,7 +333,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           </Text>
           <View className="flex-row items-center">
             <TouchableOpacity
-              onPress={() => setShowStartPicker((prev) => !prev)}
+              onPress={() => setShowStartPicker(true)}
               className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-1 flex-row justify-between items-center"
             >
               <Text className="text-[#858585] italic">
@@ -366,31 +347,16 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             </TouchableOpacity>
           </View>
 
-          {showStartPicker && Platform.OS === "android" && (
-            <DateTimePicker
-              value={startDate || new Date()}
-              mode="date"
-              display="default"
-              maximumDate={getTodayInColombo()}
-              onChange={(event, date) => handleDateChange(event, date, "start")}
-            />
-          )}
-          {showStartPicker && Platform.OS === "ios" && (
-            <>
-              <View className=" justify-center items-center z-50 absolute -ml-2 mt-[30%] bg-gray-100  rounded-lg">
-                <DateTimePicker
-                  value={startDate || new Date()}
-                  mode="date"
-                  display="inline"
-                  style={{ width: 320, height: 260 }}
-                  maximumDate={getTodayInColombo()}
-                  onChange={(event, date) =>
-                    handleDateChange(event, date, "start")
-                  }
-                />
-              </View>
-            </>
-          )}
+          <CustomCalendar
+            visible={showStartPicker}
+            value={startDate || new Date()}
+            maximumDate={getTodayInColombo()}
+            onClose={() => setShowStartPicker(false)}
+            onConfirm={(date) => {
+              setStartDate(date);
+              setEndDate(undefined);
+            }}
+          />
         </View>
 
         <View className="mb-6">
@@ -399,7 +365,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           </Text>
           <TouchableOpacity
             onPress={() => {
-              if (startDate) setShowEndPicker((prev) => !prev);
+              if (startDate) setShowEndPicker(true);
             }}
             disabled={!startDate}
             className="border border-[#F4F4F4] rounded-full px-4 py-3 h-[50px] flex-row justify-between items-center"
@@ -419,33 +385,14 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             />
           </TouchableOpacity>
 
-          {showEndPicker && Platform.OS === "android" && (
-            <DateTimePicker
-              value={endDate || new Date()}
-              mode="date"
-              display="default"
-              maximumDate={getTodayInColombo()}
-              minimumDate={startDate}
-              onChange={(event, date) => handleDateChange(event, date, "end")}
-            />
-          )}
-          {showEndPicker && Platform.OS === "ios" && (
-            <>
-              <View className=" justify-center items-center z-50 absolute -ml-2 mt-[30%] bg-gray-100  rounded-lg">
-                <DateTimePicker
-                  value={endDate || new Date()}
-                  mode="date"
-                  display="inline"
-                  style={{ width: 320, height: 260 }}
-                  maximumDate={getTodayInColombo()}
-                  minimumDate={startDate}
-                  onChange={(event, date) =>
-                    handleDateChange(event, date, "end")
-                  }
-                />
-              </View>
-            </>
-          )}
+          <CustomCalendar
+            visible={showEndPicker}
+            value={endDate || startDate || new Date()}
+            maximumDate={getTodayInColombo()}
+            minimumDate={startDate}
+            onClose={() => setShowEndPicker(false)}
+            onConfirm={(date) => setEndDate(date)}
+          />
         </View>
 
         <View className="flex-row justify-center gap-2 items-center">

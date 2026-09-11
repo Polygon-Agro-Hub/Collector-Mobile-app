@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import NetInfo from "@react-native-community/netinfo";
+import i18n from "i18next";
 import { SavedScale, saveSelectedScale, getSavedScale, clearSavedScale } from "@/utils/scale/scale-storage";
 
 export interface ScaleStatus {
@@ -143,7 +144,7 @@ class WifiScaleService {
   async connectWifiScale(ip: string, port: number = 33581): Promise<ScaleStatus> {
     const cleanIp = ip.trim();
     if (!cleanIp) {
-      throw new Error("Please enter a valid Wi-Fi Scale IP address");
+      throw new Error(i18n.t("WifiScaleService.InvalidIpError"));
     }
 
     // Clean up any previous socket or polling
@@ -171,7 +172,7 @@ class WifiScaleService {
           this.notifyListeners();
           reject(
             new Error(
-              `Connection timed out to scale at ${cleanIp}:${port}.\n\nPlease ensure your phone is on the same Wi-Fi network as the scale.`
+              i18n.t("WifiScaleService.ConnectionTimedOut", { ip: cleanIp, port })
             )
           );
         }
@@ -227,7 +228,11 @@ class WifiScaleService {
             this.notifyListeners();
             reject(
               new Error(
-                `Could not connect to scale at ${cleanIp}:${port}: ${err.message || "Connection refused"}`
+                i18n.t("WifiScaleService.ConnectionRefused", {
+                  ip: cleanIp,
+                  port,
+                  reason: err.message || i18n.t("WifiScaleService.ConnectionRefusedDefaultReason"),
+                })
               )
             );
           } else {
@@ -273,26 +278,18 @@ class WifiScaleService {
       clearTimeout(timeoutId);
     } catch (fetchErr: any) {
       clearTimeout(timeoutId);
-      throw new Error(
-        `Cannot reach scale bridge at ${ip}:${port}.\n\n` +
-        `In Expo Go, run the bridge on your PC first:\n` +
-        `  node services/scale/scale-bridge.js\n\n` +
-        `Then enter your PC's Wi-Fi IP (e.g. 192.168.1.13) and port 3001 in the app.`
-      );
+      throw new Error(i18n.t("WifiScaleService.BridgeUnreachable", { ip, port }));
     }
 
     if (!res.ok) {
-      throw new Error(
-        `Bridge at ${ip}:${port} returned HTTP ${res.status}.\n` +
-        `Make sure scale-bridge.js is running on your PC.`
-      );
+      throw new Error(i18n.t("WifiScaleService.BridgeBadStatus", { ip, port, status: res.status }));
     }
 
     let data: any;
     try {
       data = await res.json();
     } catch {
-      throw new Error(`Bridge at ${ip}:${port} returned an invalid response.`);
+      throw new Error(i18n.t("WifiScaleService.BridgeInvalidResponse", { ip, port }));
     }
 
     // Bridge is reachable — mark as connected even if scale is still reconnecting

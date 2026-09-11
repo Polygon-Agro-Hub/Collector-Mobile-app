@@ -20,7 +20,8 @@
     "Yourtarget": "Your Target",
     "Progress": "Progress",
     "Scan": "Scan QR",
-    "Search": "Search By NIC"
+    "Search": "Search By NIC",
+    "LoadingTargetStatus":"Loading target status..."
   },
   "Error": {
     "error": "Sorry",
@@ -265,7 +266,8 @@
     "Phone call is not supported on this device": "Phone call is not supported on this device.",
     "Cancel": "Cancel",
     "Cannot add negative values for load.": "Cannot add negative values for load.",
-    "Product replacement successful": "Product replacement successful"
+    "Product replacement successful": "Product replacement successful",
+    "AttachmentHasBeenSavedToYourSelectedFolder":"Attachment has been saved to your selected folder"
   },
   "SideMenu": {
     "LNG": "en",
@@ -449,7 +451,9 @@
     "Incomplete Selection": "Incomplete Selection",
     "Please select both a crop and a variety before adding": "Please select both a crop and a variety before adding.",
     "Are you sure you want to delete previously added": "Are you sure you want to delete previously added {{varietyName}}?",
-    "Are you sure you want to delete grade": "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}}?"
+    "Are you sure you want to delete grade": "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}}?",
+    "UnsavedChanges":"Unsaved Changes",
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet":"You have entered crop details that haven't been added yet. Please click 'Add' to include them, or clear the form to proceed."
   },
   "ReportPage": {
     "LNG": "en",
@@ -724,6 +728,7 @@
     "No": "No",
     "Variety": "Variety",
     "Grade": "Grade",
+    "GradeG": "Grade : {{grade}}",
     "Target": "Target",
     "kg": "(kg)",
     "Action": "Action",
@@ -1364,5 +1369,73 @@
     "EnableLocationAccessToAccessLocationInformation": "Enable location access to connect Bluetooth printers and verify collection routes.",
     "UnableToRequestLocationPermissionPleaseTryAgain": "Unable to request location permission. Please try again.",
     "LocationAccessIsRequiredPleaseEnableItInSettings": "Location access is required for Bluetooth printer and collection features. Please enable it in settings."
+  },
+  "ScaleSelectModal": {
+    "SelectWifiScale": "Select Wi-Fi Scale",
+    "WifiOffTitle": "Wi-Fi is Off",
+    "WifiOffMessage": "Please turn on Wi-Fi on your phone to connect to the scale.",
+    "ConnectedReady": "Connected & Ready",
+    "Disconnect": "Disconnect",
+    "IpLabel": "IP",
+    "PortLabel": "Port",
+    "ScaleIpAddress": "Scale IP Address",
+    "IpPlaceholder": "e.g. 192.168.1.100",
+    "PortNumber": "Port Number",
+    "ReconnectScale": "Reconnect Scale",
+    "ConnectScale": "Connect Scale",
+    "InputRequiredTitle": "Input Required",
+    "InputRequiredMessage": "Please enter the scale IP address.",
+    "ConnectedTitle": "Connected",
+    "ConnectedMessage": "Successfully connected to {{deviceName}} Wi-Fi Scale.",
+    "ConnectionFailedTitle": "Connection Failed",
+    "ConnectionFailedMessage": "Could not connect to {{deviceName}} Wi-Fi Scale.",
+    "DisconnectedTitle": "Disconnected",
+    "DisconnectedMessage": "Disconnected from {{deviceName}} Wi-Fi Scale.",
+    "ErrorTitle": "Error",
+    "DisconnectFailedMessage": "Failed to disconnect scale.",
+    "PcBridgeSuffix": "PC Bridge"
+  },
+  "WifiScaleService": {
+    "InvalidIpError": "Please enter a valid Wi-Fi Scale IP address",
+    "ConnectionTimedOut": "Connection timed out to scale at {{ip}}:{{port}}.\n\nPlease ensure your phone is on the same Wi-Fi network as the scale.",
+    "ConnectionRefused": "Could not connect to scale at {{ip}}:{{port}}: {{reason}}",
+    "ConnectionRefusedDefaultReason": "Connection refused",
+    "BridgeUnreachable": "Cannot reach scale bridge at {{ip}}:{{port}}.\n\nIn Expo Go, run the bridge on your PC first:\n  node services/scale/scale-bridge.js\n\nThen enter your PC's Wi-Fi IP (e.g. 192.168.1.13) and port 3001 in the app.",
+    "BridgeBadStatus": "Bridge at {{ip}}:{{port}} returned HTTP {{status}}.\nMake sure scale-bridge.js is running on your PC.",
+    "BridgeInvalidResponse": "Bridge at {{ip}}:{{port}} returned an invalid response."
+  },
+   "GlobalSearchModal": {
+    "SearchPlaceholder": "Search...",
+    "NoResultsText": "No items found",
+    "DoneButton": "Done",
+    "Loading": "Loading...",
+    "SelectedCount": "{{count}} selected"
+  },
+  "Calendar": {
+    "months": {
+      "January": "January",
+      "February": "February",
+      "March": "March",
+      "April": "April",
+      "May": "May",
+      "June": "June",
+      "July": "July",
+      "August": "August",
+      "September": "September",
+      "October": "October",
+      "November": "November",
+      "December": "December"
+    },
+    "weekdays": {
+      "Sun": "Sun",
+      "Mon": "Mon",
+      "Tue": "Tue",
+      "Wed": "Wed",
+      "Thu": "Thu",
+      "Fri": "Fri",
+      "Sat": "Sat"
+    },
+    "Done": "Done",
+    "Cancel": "Cancel"
   }
 }

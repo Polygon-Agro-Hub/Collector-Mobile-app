@@ -172,7 +172,7 @@ const ClaimOfficer: React.FC = () => {
           t("Error.Failed to claim the officer. Please try again later."),
         );
       } else {
-        Alert.alert("Success", t("Error.Employee successfully claimed."));
+        Alert.alert(t("Error.Success"), t("Error.Employee successfully claimed."));
         setOfficerFound(false);
         setOfficerDetails(null);
         setEmpID("");

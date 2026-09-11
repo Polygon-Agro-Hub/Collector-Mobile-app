@@ -381,7 +381,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   };
 
   const getcompanyName = () => {
-    if (!profileData) return "Loading...";
+    if (!profileData) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return profileData.companyNameSinhala;
@@ -393,7 +393,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   };
 
   const getfirstName = () => {
-    if (!profileData) return "Loading...";
+    if (!profileData) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return profileData.firstNameSinhala;
@@ -405,7 +405,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
   };
 
   const getlastName = () => {
-    if (!profileData) return "Loading...";
+    if (!profileData) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return profileData.lastNameSinhala;

@@ -20,7 +20,8 @@
     "Yourtarget": "உங்கள் இலக்கு",
     "Progress": "நிலை",
     "Scan": "QR ஐ ஸ்கேன் செய்யவும்",
-    "Search": "NIC மூலம் தேடவும்"
+    "Search": "NIC மூலம் தேடவும்",
+    "LoadingTargetStatus":"இலக்கு நிலையை ஏற்றுகிறது..."
   },
   "Error": {
     "error": "மன்னிக்கவும்",
@@ -265,7 +266,8 @@
     "Phone call is not supported on this device": "இந்த சாதனத்தில் தொலைபேசி அழைப்பு ஆதரிக்கப்படவில்லை.",
     "Cancel": "ரத்துசெய்",
     "Cannot add negative values for load.": "Cannot add negative values for load.",
-    "Product replacement successful": "தயாரிப்பு மாற்றீடு வெற்றிகரமாக முடிந்தது!"
+    "Product replacement successful": "தயாரிப்பு மாற்றீடு வெற்றிகரமாக முடிந்தது!",
+    "AttachmentHasBeenSavedToYourSelectedFolder":"இணைப்பு நீங்கள் தேர்ந்தெடுத்த கோப்புறையில் சேமிக்கப்பட்டுள்ளது.r"
   },
   "SideMenu": {
     "LNG": "en",
@@ -449,7 +451,9 @@
     "Incomplete Selection": "முழுமையற்ற தேர்வு",
     "Please select both a crop and a variety before adding": "சேர்ப்பதற்கு முன் ஒரு பயிர் மற்றும் ஒரு வகை இரண்டையும் தேர்ந்தெடுக்கவும்.",
     "Are you sure you want to delete previously added": "முன்பு சேர்க்கப்பட்ட {{varietyName}} ஐ நீக்க விரும்புகிறீர்களா?",
-    "Are you sure you want to delete grade": "முன்பு சேர்க்கப்பட்ட {{varietyName}} - தரம் {{grade}} ஐ நீக்க விரும்புகிறீர்களா?"
+    "Are you sure you want to delete grade": "முன்பு சேர்க்கப்பட்ட {{varietyName}} - தரம் {{grade}} ஐ நீக்க விரும்புகிறீர்களா?",
+    "UnsavedChanges":"சேமிக்கப்படாத மாற்றங்கள்",
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet":"இதுவரை சேர்க்கப்படாத பயிர் விவரங்களை நீங்கள் உள்ளிட்டுள்ளீர்கள். அவற்றைச் சேர்க்க 'Add' என்பதைக் கிளிக் செய்யவும் அல்லது தொடர படிவத்தை (form) அழிக்கவும்."
   },
   "ReportPage": {
     "LNG": "ta",
@@ -704,8 +708,8 @@
   },
   "ReportGenerator": {
     "LNG": "ta",
-    "Start Date": "தொடக்க திகதி:",
-    "End Date": "முடிவு திகதி:",
+    "Start Date": "தொடக்க திகதி",
+    "End Date": "முடிவு திகதி",
     "Reset": "மீட்டமை",
     "Generate": "உருவாக்கு",
     "IDNO": "ID எண் :",
@@ -724,6 +728,7 @@
     "No": "எண்",
     "Variety": "வகை",
     "Grade": "தரம்",
+    "GradeG": "தரம் : {{grade}}",
     "Target": "இலக்கு",
     "kg": "(kg)",
     "Action": "செயல்",
@@ -1364,5 +1369,73 @@
     "EnableLocationAccessToAccessLocationInformation": "புளூடூத் அச்சுப்பொறியை இணைக்கவும் சேகரிப்புப் பாதைகளைச் சரிபார்க்கவும் இருப்பிட அணுகலை இயக்கவும்.",
     "UnableToRequestLocationPermissionPleaseTryAgain": "இருப்பிட அனுமதியைக் கோர முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
     "LocationAccessIsRequiredPleaseEnableItInSettings": "புளூடூத் அச்சுப்பொறி மற்றும் சேகரிப்பு அம்சங்களுக்கு இருப்பிட அணுகல் தேவை. தயவுசெய்து அமைப்புகளில் அதை இயக்கவும்."
+  },
+  "ScaleSelectModal": {
+    "SelectWifiScale": "Wi-Fi அளவுகோலைத் தேர்ந்தெடுக்கவும்",
+    "WifiOffTitle": "Wi-Fi முடக்கப்பட்டுள்ளது",
+    "WifiOffMessage": "அளவுகோலுடன் இணைக்க உங்கள் தொலைபேசியில் Wi-Fi ஐ இயக்கவும்.",
+    "ConnectedReady": "இணைக்கப்பட்டு தயார்",
+    "Disconnect": "துண்டிக்கவும்",
+    "IpLabel": "IP",
+    "PortLabel": "போர்ட்",
+    "ScaleIpAddress": "அளவுகோலின் IP முகவரி",
+    "IpPlaceholder": "எ.கா. 192.168.1.100",
+    "PortNumber": "போர்ட் எண்",
+    "ReconnectScale": "மீண்டும் இணைக்கவும்",
+    "ConnectScale": "அளவுகோலை இணைக்கவும்",
+    "InputRequiredTitle": "தகவல் தேவை",
+    "InputRequiredMessage": "தயவுசெய்து அளவுகோலின் IP முகவரியை உள்ளிடவும்.",
+    "ConnectedTitle": "இணைக்கப்பட்டது",
+    "ConnectedMessage": "{{deviceName}} Wi-Fi அளவுகோலுடன் வெற்றிகரமாக இணைக்கப்பட்டது.",
+    "ConnectionFailedTitle": "இணைப்பு தோல்வியடைந்தது",
+    "ConnectionFailedMessage": "{{deviceName}} Wi-Fi அளவுகோலுடன் இணைக்க முடியவில்லை.",
+    "DisconnectedTitle": "துண்டிக்கப்பட்டது",
+    "DisconnectedMessage": "{{deviceName}} Wi-Fi அளவுகோலிலிருந்து துண்டிக்கப்பட்டது.",
+    "ErrorTitle": "பிழை",
+    "DisconnectFailedMessage": "அளவுகோலைத் துண்டிக்க முடியவில்லை.",
+    "PcBridgeSuffix": "PC பிரிட்ஜ்"
+  },
+   "WifiScaleService": {
+    "InvalidIpError": "தயவுசெய்து சரியான Wi-Fi அளவுகோல் IP முகவரியை உள்ளிடவும்",
+    "ConnectionTimedOut": "{{ip}}:{{port}} இல் உள்ள அளவுகோலுடன் இணைப்பு நேரம் முடிந்தது.\n\nஉங்கள் தொலைபேசி அளவுகோல் இருக்கும் அதே Wi-Fi நெட்வொர்க்கில் இருப்பதை உறுதிசெய்யவும்.",
+    "ConnectionRefused": "{{ip}}:{{port}} இல் உள்ள அளவுகோலுடன் இணைக்க முடியவில்லை: {{reason}}",
+    "ConnectionRefusedDefaultReason": "இணைப்பு நிராகரிக்கப்பட்டது",
+    "BridgeUnreachable": "{{ip}}:{{port}} இல் உள்ள அளவுகோல் பிரிட்ஜை அடைய முடியவில்லை.\n\nExpo Go இல், முதலில் உங்கள் PCயில் பிரிட்ஜை இயக்கவும்:\n  node services/scale/scale-bridge.js\n\nபின்னர் உங்கள் PCயின் Wi-Fi IP (எ.கா. 192.168.1.13) மற்றும் போர்ட் 3001 ஐ ஆப்பில் உள்ளிடவும்.",
+    "BridgeBadStatus": "{{ip}}:{{port}} இல் உள்ள பிரிட்ஜ் HTTP {{status}} ஐ திருப்பியது.\nஉங்கள் PCயில் scale-bridge.js இயங்குவதை உறுதிசெய்யவும்.",
+    "BridgeInvalidResponse": "{{ip}}:{{port}} இல் உள்ள பிரிட்ஜ் தவறான பதிலைத் திருப்பியது."
+  },
+   "GlobalSearchModal": {
+    "SearchPlaceholder": "தேடுக...",
+    "NoResultsText": "எந்த உருப்படியும் கிடைக்கவில்லை",
+    "DoneButton": "முடிந்தது",
+    "Loading": "ஏற்றுகிறது...",
+    "SelectedCount": "{{count}} தேர்ந்தெடுக்கப்பட்டது"
+  },
+    "Calendar": {
+    "months": {
+      "January": "ஜனவரி",
+      "February": "பிப்ரவரி",
+      "March": "மார்ச்",
+      "April": "ஏப்ரல்",
+      "May": "மே",
+      "June": "ஜூன்",
+      "July": "ஜூலை",
+      "August": "ஆகஸ்ட்",
+      "September": "செப்டம்பர்",
+      "October": "அக்டோபர்",
+      "November": "நவம்பர்",
+      "December": "டிசம்பர்"
+    },
+    "weekdays": {
+      "Sun": "ஞாயி",
+      "Mon": "திங்",
+      "Tue": "செவ்",
+      "Wed": "புத",
+      "Thu": "வியா",
+      "Fri": "வெள்",
+      "Sat": "சனி"
+    },
+    "Done": "முடிந்தது",
+    "Cancel": "ரத்து செய்"
   }
 }

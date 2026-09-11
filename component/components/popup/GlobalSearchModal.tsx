@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 interface GlobalSearchModalProps {
   visible: boolean;
@@ -27,10 +28,6 @@ interface GlobalSearchModalProps {
   isLoading?: boolean;
 }
 
-// Hoisted to module scope so it's a STABLE reference across renders.
-// If this were a default parameter (searchKeys = ["label"]), a brand new
-// array would be created on every render, which would keep retriggering
-// the filtering useEffect below forever ("Maximum update depth exceeded").
 const DEFAULT_SEARCH_KEYS = ["label"];
 const DEFAULT_SELECTED_ITEMS: string[] = [];
 
@@ -41,15 +38,25 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   data,
   selectedItems = DEFAULT_SELECTED_ITEMS,
   onSelect,
-  searchPlaceholder = "Search...",
-  doneButtonText = "Done",
-  noResultsText = "No items found",
+  searchPlaceholder,
+  doneButtonText,
+  noResultsText,
   multiSelect = false,
   renderItem,
   searchKeys = DEFAULT_SEARCH_KEYS,
   showSearch = true,
   isLoading = false,
 }) => {
+  const { t } = useTranslation();
+
+
+  const resolvedSearchPlaceholder =
+    searchPlaceholder ?? t("GlobalSearchModal.SearchPlaceholder");
+  const resolvedDoneButtonText =
+    doneButtonText ?? t("GlobalSearchModal.DoneButton");
+  const resolvedNoResultsText =
+    noResultsText ?? t("GlobalSearchModal.NoResultsText");
+
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState(data);
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedItems);
@@ -59,13 +66,9 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     if (visible) {
       setSearchValue("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [visible]);
-  // NOTE: intentionally NOT depending on `selectedItems` by reference here.
-  // We only want this to run when the modal opens/closes (visible changes).
-  // If the caller passes a fresh array literal each render (e.g. `assignee ? [assignee] : []`),
-  // including it in the deps would reset searchValue/selectedValues on every render.
-  // Make sure the caller memoizes `selectedItems` (see RecieveTargetScreen fix).
+
 
   useEffect(() => {
     if (!showSearch || !searchValue.trim()) {
@@ -86,8 +89,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     setFilteredData(filtered);
   }, [searchValue, data, searchKeys, showSearch]);
 
-  // Close on Android hardware back while the modal itself is open,
-  // instead of letting the event bubble to the screen underneath.
+
   useEffect(() => {
     if (!visible) return;
 
@@ -159,7 +161,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       >
         <MaterialIcons name="search" size={20} color="#666" />
         <TextInput
-          placeholder={searchPlaceholder}
+          placeholder={resolvedSearchPlaceholder}
           value={searchValue}
           onChangeText={setSearchValue}
           placeholderTextColor="#7F7F7F"
@@ -169,8 +171,6 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             flex: 1,
             marginLeft: 8,
             fontSize: 16,
-            // iOS fix: explicit height + paddingVertical:0 prevents text clipping
-            // (descenders like g, j, y, f, p, q getting cut off)
             height: 50,
             paddingVertical: 0,
             includeFontPadding: false,
@@ -190,7 +190,9 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       return (
         <View className="px-4 py-12 items-center justify-center">
           <ActivityIndicator size="large" color="#6839CF" />
-          <Text className="text-sm mt-3 text-[#6839CF]">Loading...</Text>
+          <Text className="text-sm mt-3 text-[#6839CF]">
+            {t("GlobalSearchModal.Loading")}
+          </Text>
         </View>
       );
     }
@@ -198,7 +200,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     if (filteredData.length === 0) {
       return (
         <View className="px-4 py-8 items-center">
-          <Text className="text-gray-500 text-base">{noResultsText}</Text>
+          <Text className="text-gray-500 text-base">{resolvedNoResultsText}</Text>
         </View>
       );
     }
@@ -238,7 +240,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
               <Text className="text-lg font-semibold">{title}</Text>
               {multiSelect && selectedValues.length > 0 && (
                 <Text className="text-sm text-gray-500">
-                  {selectedValues.length} selected
+                  {t("GlobalSearchModal.SelectedCount", { count: selectedValues.length })}
                 </Text>
               )}
             </View>
@@ -261,7 +263,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 onPress={handleDone}
               >
                 <Text className="text-white font-semibold text-base">
-                  {doneButtonText}
+                  {resolvedDoneButtonText}
                 </Text>
               </TouchableOpacity>
             </View>

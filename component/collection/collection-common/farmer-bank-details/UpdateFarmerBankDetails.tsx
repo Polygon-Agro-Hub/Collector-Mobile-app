@@ -396,7 +396,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           setBankName(val);
           setBranchName("");
         }}
-        searchPlaceholder="Search bank..."
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchBankName")}
         multiSelect={false}
       />
 
@@ -411,7 +411,7 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
           const val = items[0] ?? "";
           setBranchName(val);
         }}
-        searchPlaceholder="Search branch..."
+        searchPlaceholder={t("AddOfficerAddressDetails.SearchBranchName")}
         multiSelect={false}
       />
     </KeyboardAvoidingView>

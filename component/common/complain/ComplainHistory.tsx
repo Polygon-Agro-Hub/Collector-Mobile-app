@@ -480,7 +480,7 @@ ${signature}${replyTime}`,
               <Text className="text-gray-800 text-base leading-relaxed text-left">
                 {selectedComplain
                   ? getReplyTemplate(selectedComplain)
-                  : "Loading..."}
+                  : t("ManagerTransactions.Loading")}
               </Text>
             </View>
           </ScrollView>

@@ -20,7 +20,8 @@
     "Yourtarget": "ඔබේ ඉලක්ක",
     "Progress": "ප්‍රගතිය",
     "Scan": "QR ස්කෑන් කිරිම",
-    "Search": "NIC මගින් සොයන්න"
+    "Search": "NIC මගින් සොයන්න",
+    "LoadingTargetStatus":"ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී..."
   },
   "Error": {
     "error": "සමාවෙන්න",
@@ -264,8 +265,9 @@
     "An error occurred while fetching orders": "ඇණවුම් ලබා ගැනීමේදී දෝෂයක් සිදු විය.",
     "Phone call is not supported on this device": "මෙම උපාංගයෙන් දුරකථන ඇමතුම් ලබා ගත නොහැක.",
     "Cancel": "අවලංගු කරන්න",
-    "Cannot add negative values for load.": "භාරය සඳහා සෘණ අගයන් ඇතුල් කළ නොහැක (kg).",
-    "Product replacement successful": "නිෂ්පාදන ප්‍රතිස්ථාපනය සාර්ථකයි!"
+    "Cannot add negative values for load.": "භාරය සඳහා සෘණ අගයන් ඇතුල් කළ නොහැක (කි.ග්‍රෑ.).",
+    "Product replacement successful": "නිෂ්පාදන ප්‍රතිස්ථාපනය සාර්ථකයි!",
+    "AttachmentHasBeenSavedToYourSelectedFolder":"ඇමුණුම ඔබ තෝරාගත් ෆෝල්ඩරයේ සුරැකී ඇත."
   },
   "SideMenu": {
     "LNG": "si",
@@ -306,9 +308,9 @@
     "No": "අංකය",
     "Variety": "ප්‍රභේදය",
     "Grade": "ශ්‍රේණිය",
-    "Target": "ඉලක්කය (kg)",
-    "Todo()": "කළ යුතු (kg)",
-    "Completedkg": "සම්පූර්ණ (kg)",
+    "Target": "ඉලක්කය (කි.ග්‍රෑ.)",
+    "Todo()": "කළ යුතු (කි.ග්‍රෑ.)",
+    "Completedkg": "සම්පූර්ණ (කි.ග්‍රෑ.)",
     "noCompletedTargets": "සම්පූර්ණ කළ ඉලක්ක හමු නොවීය",
     "NoTodoItems": "ඉලක්ක හමු නොවීය",
     "Out": "පිටත් කල",
@@ -449,7 +451,9 @@
     "Incomplete Selection": "අසම්පූර්ණ තේරීමකි",
     "Please select both a crop and a variety before adding": "එකතු කිරීමට පෙර කරුණාකර බෝගයක් සහ ප්‍රභේදයක් යන දෙකම තෝරන්න.",
     "Are you sure you want to delete previously added": "කලින් එකතු කළ {{varietyName}} මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
-    "Are you sure you want to delete grade": "කලින් එකතු කළ {{varietyName}} - ශ්‍රේණිය {{grade}} මැකීමට අවශ්‍ය බව ඔබට විශ්වාසද?"
+    "Are you sure you want to delete grade": "කලින් එකතු කළ {{varietyName}} - ශ්‍රේණිය {{grade}} මැකීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
+    "UnsavedChanges":"සුරැක නොමැති වෙනස්කම්",
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet":"ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න."
   },
   "ReportPage": {
     "LNG": "si",
@@ -614,8 +618,8 @@
     "No": "අංකය",
     "Variety": "ප්‍රභේදය",
     "Grade": "ශ්‍රේණිය",
-    "Target": "ඉලක්කය (kg)",
-    "Todo()": "කළ යුතු (kg)"
+    "Target": "ඉලක්කය (කි.ග්‍රෑ.)",
+    "Todo()": "කළ යුතු (කි.ග්‍රෑ.)"
   },
   "ClaimOfficer": {
     "LNG": "si",
@@ -656,12 +660,12 @@
   },
   "EditTargetManager": {
     "LNG": "si",
-    "TotalTarget": "මධ්‍යස්ථානයේ සඳහා මුළු ඉලක්කය (කිලෝග්‍රෑම්)",
-    "My Target": "මගේ ඉලක්කය (කිලෝග්‍රෑම්)",
+    "TotalTarget": "මධ්‍යස්ථානයේ සඳහා මුළු ඉලක්කය (කි.ග්‍රෑ.)",
+    "My Target": "මගේ ඉලක්කය (කි.ග්‍රෑ.)",
     "Pass": "ලබාදෙන්න",
     "Receive": "ලබාගන්න",
-    "Amount": "කළ යුතු ප්‍රමාණය (කිලෝග්‍රෑම්)",
-    "Assigned Target": "පවරන ලද ඉලක්කය (කිලෝග්‍රෑම්)"
+    "Amount": "කළ යුතු ප්‍රමාණය (කි.ග්‍රෑ.)",
+    "Assigned Target": "පවරන ලද ඉලක්කය (කි.ග්‍රෑ.)"
   },
   "ManagerTransactions": {
     "LNG": "si",
@@ -672,7 +676,7 @@
     "Notransactions": "තෝරාගත් දිනය සඳහා ගනුදෙනු හමු නොවීය.",
     "Search": "ජාතික හැඳුනුම්පත් අංකය, නම අනුව සොයන්න",
     "All": "සියල්ල",
-    "TotalRs": "මුළු මුදල: රු.",
+    "TotalRs": "මුළු මුදල: රු. ",
     "ID": "අංකය",
     "Loading": "පූරණය වෙමින්..."
   },
@@ -691,11 +695,11 @@
   "PassTargetBetweenOfficers": {
     "LNG": "si",
     "maximum amount": "ඔබට ලබා දිය හැකි උපරිම ප්‍රමාණය:",
-    "kg": "kg",
+    "kg": "කි.ග්‍රෑ.",
     "Short Stock Assignee": "කෙටි කොටස් භාරකරු",
-    "Amount": "ප්‍රමාණය (Kg)",
+    "Amount": "ප්‍රමාණය (කි.ග්‍රෑ.)",
     "Save": "සුරකින්න",
-    "maximum amount receive": "ලැබිය හැකි උපරිම ප්‍රමාණය (Kg):",
+    "maximum amount receive": "ලැබිය හැකි උපරිම ප්‍රමාණය (කි.ග්‍රෑ.):",
     "Select an officer": "--නිලධාරියෙකු තෝරන්න--",
     "No Officers Found": "නිලධාරීන් හමු නොවීය",
     "Search an officer": "--නිලධාරියෙකු සොයන්න--",
@@ -704,8 +708,8 @@
   },
   "ReportGenerator": {
     "LNG": "si",
-    "Start Date": "ආරම්භක දිනය:",
-    "End Date": "අවසන් දිනය:",
+    "Start Date": "ආරම්භක දිනය",
+    "End Date": "අවසන් දිනය",
     "Reset": "නැවත සකසන්න",
     "Generate": "උත්පාදනය කරන්න",
     "IDNO": "ID NO :",
@@ -724,8 +728,9 @@
     "No": "අංකය",
     "Variety": "ප්‍රභේදය",
     "Grade": "ශ්‍රේණිය",
+    "GradeG": "ශ්‍රේණිය : {{grade}}",
     "Target": "ඉලක්කය",
-    "kg": "(kg)",
+    "kg": "(කි.ග්‍රෑ.)",
     "Action": "ක්‍රියාව",
     "Save": "සුරකින්න"
   },
@@ -844,9 +849,9 @@
     "Variety": "ප්‍රභේදය",
     "Grade": "ශ්‍රේණිය",
     "Unit Price(Rs.)": "ඒකක මිල (රු.)",
-    "Quantity(kg)": "ප්‍රමාණය (kg)",
+    "Quantity(kg)": "ප්‍රමාණය (කි.ග්‍රෑ.)",
     "Sub Total(Rs.)": "අනු මුදල (රු.)",
-    "Full Total (Rs.) Rs.": "සම්පූර්ණ එකතුව (රු.) : රු.",
+    "Full Total (Rs.) Rs.": "සම්පූර්ණ එකතුව (රු.) : රු. ",
     "Note": "සටහන:",
     "GRNnote": "මෙම භාණ්ඩ ලදුපත් සටහන (GRN) ඉදිරි පෙළ කාර්ය මණ්ඩලය විසින් ගන්නා ලද මූලික මිනුම් මත පදනම්ව තාවකාලික වාර්තාවක් ලෙස ක්‍රි්යා කරයි. අවසාන සත්‍යාපනය එකතු කිරීමේ මධ්‍යස්ථානයේදී සිදු කෙරේ. එකතු කිරීමේ මධ්‍යස්ථානයේ වාර්තා කර ඇති මිනුම සියලුම විෂමතා අවස්ථාවන්හිදී තීරණාත්මක බැඳීම ලෙස සලකනු ලැබේ. මිනුම් විචල්‍යතාවයෙන් පැන නගින ඕනෑම අවථාවක යම් බලපෑමක් නිවැරදි කිරීමට සංවිධානයට අයිතියක් ඇති අතර මූලික වැරදි ගණනය කිරීම් හේතුවෙන් සිදුවන පාඩු සඳහා වගකිව යුතු නොවේ.",
     "Download": "බාගත කරන්න",
@@ -1298,21 +1303,21 @@
   "PurchaseShortage": {
     "Assigned Products": "පවරන ලද නිෂ්පාදන",
     "No assigned products message": "- අද මිලදී ගැනීම සඳහා ඔබට කිසිදු නිෂ්පාදනයක් පවරා නොමැත. -",
-    "Shortage": "හිඟය (kg)",
-    "Assigned": "පවරන ලද (kg)",
+    "Shortage": "හිඟය (කි.ග්‍රෑ.)",
+    "Assigned": "පවරන ලද (කි.ග්‍රෑ.)",
     "Ceiling Price": "උපරිම මිල: රු. {{price}}",
     "Purchase": "මිලදී ගන්න",
     "Collect : ": "එකතු කිරීමට : ",
     "Collected : ": "එකතු කළ : ",
     "Price per kg : ": "කිලෝවක මිල : ",
-    "Buying Quantity in kg": "මිලදී ගන්නා ප්‍රමාණය (kg)",
-    "Enter Buying Quantity placeholder": "--මිලදී ගන්නා ප්‍රමාණය (kg) ඇතුළත් කරන්න--",
+    "Buying Quantity in kg": "මිලදී ගන්නා ප්‍රමාණය (කි.ග්‍රෑ.)",
+    "Enter Buying Quantity placeholder": "--මිලදී ගන්නා ප්‍රමාණය (කි.ග්‍රෑ.) ඇතුළත් කරන්න--",
     "Purchasing Price (Rs.)": "මිලදී ගැනීමේ මිල (රු.)",
     "Enter Purchasing Price placeholder": "--මිලදී ගැනීමේ මිල (රු.) ඇතුළත් කරන්න--",
     "Upload Invoice": "ඉන්වොයිසිය උඩුගත කරන්න",
     "Please upload the invoice slip/bill": "කරුණාකර ඉන්වොයිස් පත්‍රිකාව/බිල්පත උඩුගත කරන්න",
-    "Please enter a valid quantity in kg.": "කරුණාකර වලංගු ප්‍රමාණයක් (kg) ඇතුළත් කරන්න.",
-    "Quantity cannot exceed remaining shortage": "ප්‍රමාණය ඉතිරි හිඟය වන {{kg}} kg ඉක්මවිය නොහැක.",
+    "Please enter a valid quantity in kg.": "කරුණාකර වලංගු ප්‍රමාණයක් (කි.ග්‍රෑ.) ඇතුළත් කරන්න.",
+    "Quantity cannot exceed remaining shortage": "ප්‍රමාණය ඉතිරි හිඟය වන {{kg}} කි.ග්‍රෑ. ඉක්මවිය නොහැක.",
     "Please enter a valid price per kg.": "කරුණාකර කිලෝවක් සඳහා වලංගු මිලක් ඇතුළත් කරන්න.",
     "Price cannot exceed ceiling": "මිල රු. {{price}} ඉක්මවිය නොහැක",
     "Invoice Required": "ඉන්වොයිසිය අවශ්‍යයි",
@@ -1364,5 +1369,73 @@
     "EnableLocationAccessToAccessLocationInformation": "බ්ලූටූත් මුද්‍රණ යන්ත්‍ර සම්බන්ධ කිරීමට සහ එකතු කිරීමේ මාර්ග තහවුරු කිරීමට ස්ථාන ප්‍රවේශය සක්‍රිය කරන්න.",
     "UnableToRequestLocationPermissionPleaseTryAgain": "ස්ථාන අවසරය ඉල්ලීමට නොහැක. කරුණාකර නැවත උත්සාහ කරන්න.",
     "LocationAccessIsRequiredPleaseEnableItInSettings": "බ්ලූටූත් මුද්‍රණ යන්ත්‍ර සහ එකතු කිරීමේ විශේෂාංග සඳහා ස්ථාන ප්‍රවේශය අවශ්‍ය වේ. කරුණාකර එය සැකසුම් තුළ සක්‍රිය කරන්න."
+  },
+  "ScaleSelectModal": {
+    "SelectWifiScale": "Wi-Fi තරාදිය තෝරන්න",
+    "WifiOffTitle": "Wi-Fi අක්‍රියයි",
+    "WifiOffMessage": "තරාදියට සම්බන්ධ වීමට ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න.",
+    "ConnectedReady": "සම්බන්ධ වී සූදානම්",
+    "Disconnect": "විසන්ධි කරන්න",
+    "IpLabel": "IP",
+    "PortLabel": "පෝට්",
+    "ScaleIpAddress": "තරාදියේ IP ලිපිනය",
+    "IpPlaceholder": "උදා: 192.168.1.100",
+    "PortNumber": "පෝට් අංකය",
+    "ReconnectScale": "නැවත සම්බන්ධ කරන්න",
+    "ConnectScale": "තරාදිය සම්බන්ධ කරන්න",
+    "InputRequiredTitle": "තොරතුරු අවශ්‍යයි",
+    "InputRequiredMessage": "කරුණාකර තරාදියේ IP ලිපිනය ඇතුළත් කරන්න.",
+    "ConnectedTitle": "සම්බන්ධ විය",
+    "ConnectedMessage": "{{deviceName}} Wi-Fi තරාදියට සාර්ථකව සම්බන්ධ විය.",
+    "ConnectionFailedTitle": "සම්බන්ධතාවය අසාර්ථකයි",
+    "ConnectionFailedMessage": "{{deviceName}} Wi-Fi තරාදියට සම්බන්ධ විය නොහැක.",
+    "DisconnectedTitle": "විසන්ධි විය",
+    "DisconnectedMessage": "{{deviceName}} Wi-Fi තරාදියෙන් විසන්ධි විය.",
+    "ErrorTitle": "දෝෂයකි",
+    "DisconnectFailedMessage": "තරාදිය විසන්ධි කිරීමට අසමත් විය.",
+    "PcBridgeSuffix": "PC බ්‍රිජ්"
+  },
+   "WifiScaleService": {
+    "InvalidIpError": "කරුණාකර වලංගු Wi-Fi තරාදි IP ලිපිනයක් ඇතුළත් කරන්න",
+    "ConnectionTimedOut": "{{ip}}:{{port}} හි තරාදියට සම්බන්ධ වීමේ කාලය ඉකුත් විය.\n\nකරුණාකර ඔබගේ දුරකථනය තරාදිය ඇති එකම Wi-Fi ජාලයේ ඇති බව තහවුරු කරන්න.",
+    "ConnectionRefused": "{{ip}}:{{port}} හි තරාදියට සම්බන්ධ විය නොහැක: {{reason}}",
+    "ConnectionRefusedDefaultReason": "සම්බන්ධතාවය ප්‍රතික්ෂේප විය",
+    "BridgeUnreachable": "{{ip}}:{{port}} හි තරාදි බ්‍රිජ් වෙත ළඟාවිය නොහැක.\n\nExpo Go හි, පළමුව ඔබගේ පරිගණකයේ බ්‍රිජය ධාවනය කරන්න:\n  node services/scale/scale-bridge.js\n\nඉන්පසු යෙදුමේ ඔබගේ පරිගණකයේ Wi-Fi IP (උදා: 192.168.1.13) සහ පෝට් 3001 ඇතුළත් කරන්න.",
+    "BridgeBadStatus": "{{ip}}:{{port}} හි බ්‍රිජය HTTP {{status}} ලබා දුන්නේය.\nඔබගේ පරිගණකයේ scale-bridge.js ධාවනය වන බව තහවුරු කරන්න.",
+    "BridgeInvalidResponse": "{{ip}}:{{port}} හි බ්‍රිජය අවලංගු ප්‍රතිචාරයක් ලබා දුන්නේය."
+  },
+  "GlobalSearchModal": {
+    "SearchPlaceholder": "සොයන්න...",
+    "NoResultsText": "අයිතම හමු නොවීය",
+    "DoneButton": "සම්පූර්ණයි",
+    "Loading": "පූරණය වේ...",
+    "SelectedCount": "{{count}} තෝරා ඇත"
+  },
+  "Calendar": {
+    "months": {
+      "January": "ජනවාරි",
+      "February": "පෙබරවාරි",
+      "March": "මාර්තු",
+      "April": "අප්‍රේල්",
+      "May": "මැයි",
+      "June": "ජූනි",
+      "July": "ජූලි",
+      "August": "අගෝස්තු",
+      "September": "සැප්තැම්බර්",
+      "October": "ඔක්තෝබර්",
+      "November": "නොවැම්බර්",
+      "December": "දෙසැම්බර්"
+    },
+    "weekdays": {
+      "Sun": "ඉරි",
+      "Mon": "සඳු",
+      "Tue": "අඟ",
+      "Wed": "බදා",
+      "Thu": "බ්‍රහ",
+      "Fri": "සිකු",
+      "Sat": "සෙන"
+    },
+    "Done": "අවසන්",
+    "Cancel": "අවලංගු කරන්න"
   }
 }

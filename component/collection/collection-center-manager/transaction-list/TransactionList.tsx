@@ -6,24 +6,22 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  Platform,
   BackHandler,
-  ScrollView,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { scale } from "react-native-size-matters";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { RootStackParamList } from "@/types/types";
 import environment from "@/environment/environment";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { Entypo } from "@expo/vector-icons";
-import { Modal } from "react-native";
+import CustomCalendar from "@/component/components/popup/CustomcalendarModal";
+
 
 type TransactionListNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -77,11 +75,47 @@ const TransactionList: React.FC<TransactionListProps> = ({
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
 
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+
+  const fetchSelectedLanguage = async () => {
+    try {
+      const lang = await AsyncStorage.getItem("@user_language");
+      if (lang === "en" || lang === "si" || lang === "ta") {
+        setSelectedLanguage(lang);
+      } else {
+        setSelectedLanguage("en");
+      }
+    } catch (error) {
+      console.error("Error fetching language preference:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSelectedLanguage();
+  }, []);
+
+  // Sinhala and Tamil glyphs run wider/taller than Latin at the same
+  // point size, so the search placeholder needs a smaller font to avoid
+  // clipping/wrapping inside the fixed-height search bar.
+  const searchFontSize =
+    selectedLanguage === "si" || selectedLanguage === "ta" ? 11 : 16;
+
   const getCurrentDate = () => {
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, "0");
     const day = today.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Formats a Date using its LOCAL year/month/day. Never use
+  // date.toISOString() for date-only values here: toISOString() converts
+  // to UTC, and for a positive UTC offset (e.g. Sri Lanka, +5:30) a local
+  // midnight date rolls back to the previous day (20th -> 19th).
+  const formatDateLocal = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -165,7 +199,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
   useEffect(() => {
     if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().split("T")[0];
+      const formattedDate = formatDateLocal(selectedDate);
       fetchTransactions(formattedDate);
     }
   }, [selectedDate]);
@@ -262,14 +296,14 @@ const TransactionList: React.FC<TransactionListProps> = ({
             <Text style={{ color: "white", fontSize: 16, marginTop: 4 }}>
               {t("ManagerTransactions.Selected Date")}{" "}
               {selectedDate
-                ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+                ? formatDateLocal(selectedDate).replace(/-/g, "/")
                 : "N/A"}
             </Text>
           </View>
 
           {/* Calendar Icon - absolute right */}
           <TouchableOpacity
-            onPress={() => setShowDatePicker((prev) => !prev)}
+            onPress={() => setShowDatePicker(true)}
             style={{ position: "absolute", right: 0 }}
           >
             <Ionicons name="calendar-outline" size={24} color="white" />
@@ -308,7 +342,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
           className="items-center justify-center"
         >
           <TextInput
-            style={{ flex: 1, fontSize: 16, fontStyle: "italic", color: "#000000" }}
+            style={{ flex: 1, fontSize: searchFontSize, fontStyle: "italic", color: "#000000" }}
             placeholder={t("ManagerTransactions.Search")}
             placeholderTextColor="grey"
             value={searchQuery}
@@ -328,76 +362,14 @@ const TransactionList: React.FC<TransactionListProps> = ({
           </TouchableOpacity>
         </View>
 
-        {showDatePicker && Platform.OS === "android" && (
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            display="default"
-            maximumDate={new Date()}
-            onChange={(event, date) => {
-              setShowDatePicker(false);
-              if (date) {
-                const today = new Date();
-                setSelectedDate(date > today ? today : date);
-              }
-            }}
-          />
-        )}
-
-        {showDatePicker && Platform.OS === "ios" && (
-          <Modal
-            transparent
-            animationType="fade"
-            visible={showDatePicker}
-            onRequestClose={() => setShowDatePicker(false)}
-          >
-            <TouchableOpacity
-              style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)" }}
-              activeOpacity={1}
-              onPress={() => setShowDatePicker(false)}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <TouchableOpacity activeOpacity={1}>
-                  <View
-                    style={{
-                      backgroundColor: "#ffffff", // solid, not translucent
-                      borderRadius: 12,
-                      padding: 8,
-                      // force a real opaque surface behind the blur
-                      overflow: "hidden",
-                    }}
-                  >
-                    <DateTimePicker
-                      value={selectedDate}
-                      mode="date"
-                      display="inline"
-                      themeVariant="light"
-                      maximumDate={new Date()}
-                      style={{
-                        width: 320,
-                        height: 260,
-                        backgroundColor: "#ffffff",
-                      }}
-                      onChange={(event, date) => {
-                        setShowDatePicker(false);
-                        if (date) {
-                          const today = new Date();
-                          setSelectedDate(date > today ? today : date);
-                        }
-                      }}
-                    />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          </Modal>
-        )}
+        {/* Shared custom calendar — used on both Android and iOS */}
+        <CustomCalendar
+          visible={showDatePicker}
+          value={selectedDate}
+          maximumDate={new Date()}
+          onClose={() => setShowDatePicker(false)}
+          onConfirm={(date) => setSelectedDate(date)}
+        />
 
         <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
           <Text
@@ -475,7 +447,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                       accountHolderName: item.accountHolderName,
                       bankName: item.bankName,
                       branchName: item.branchName,
-                      selectedDate: selectedDate.toISOString().split("T")[0],
+                      selectedDate: formatDateLocal(selectedDate),
                       selectedTime: selectedDate
                         .toLocaleTimeString([], {
                           hour: "2-digit",

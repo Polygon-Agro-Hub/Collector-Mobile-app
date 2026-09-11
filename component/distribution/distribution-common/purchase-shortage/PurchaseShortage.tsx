@@ -111,7 +111,7 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
       />
 
       {loading && !refreshing ? (
-        <LoadingPage fullScreen message="Loading..." />
+        <LoadingPage fullScreen message={t("ManagerTransactions.Loading")} />
       ) : products.length === 0 ? (
         /* Empty State */
         <NoDataScreen message={t("PurchaseShortage.No assigned products message", "- You don't have any products assigned for purchase today. -")} />

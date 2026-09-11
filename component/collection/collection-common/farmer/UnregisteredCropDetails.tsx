@@ -110,7 +110,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
           </Text>
           <View className="flex-row gap-3">
             <TouchableOpacity
-              className="flex-1 py-3 px-5 border border-gray-300 rounded-lg items-center min-w-[80px]"
+              className="flex-1 py-3 px-5 border border-gray-300 rounded-lg items-center justify-center min-w-[80px]"
               onPress={onCancel}
             >
               <Text className="text-gray-700 text-base font-medium">
@@ -118,7 +118,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="flex-1 py-3 px-5 bg-red-500 rounded-lg items-center min-w-[80px]"
+              className="flex-1 py-3 px-5 bg-red-500 rounded-lg items-center justify-center min-w-[80px]"
               onPress={onDelete}
             >
               <Text className="text-white text-base font-medium">
@@ -136,7 +136,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   navigation,
 }) => {
   const { width: screenWidth } = useWindowDimensions();
-  const cardWidth = screenWidth - 134; // screenWidth - 24*2 (padding) - 38*2 (arrows) - 10 (margins)
+  const cardWidth = screenWidth - 134; 
   const itemWidth = cardWidth + 10;
   const [cropCount, setCropCount] = useState(1);
   const [cropNames, setCropNames] = useState<Crop[]>([]);
@@ -1144,7 +1144,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                       textAlign: "center",
                                     }}
                                   >
-                                    {crop[`grade${grade}quan`]}kg
+                                    {crop[`grade${grade}quan`]}{t("PassTargetBetweenOfficers.kg")}
                                   </Text>
 
                                   {/* Delete-grade button / spinner */}
@@ -1305,7 +1305,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                         {grade}
                       </Text>
                       <TextInput
-                        placeholder="Rs."
+                        placeholder={t("ReceivedCash.Rs")}
                         placeholderTextColor="#A3A3A3"
                         keyboardType="numeric"
                         value={unitPrices[grade]?.toString() || ""}
@@ -1339,7 +1339,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                         }}
                       >
                         <TextInput
-                          placeholder="kg"
+                          placeholder={t("PassTargetBetweenOfficers.kg")}
                           placeholderTextColor="#A3A3A3"
                           value={quantities[grade]}
                           editable={false}
@@ -1516,7 +1516,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           const found = cropNames.find((c) => c.id === id);
           if (found) handleCropChange(found);
         }}
-        searchPlaceholder={t("search")}
+        searchPlaceholder={t("GlobalSearchModal.SearchPlaceholder")}
         multiSelect={false}
       />
 
@@ -1531,7 +1531,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           const id = items[0];
           if (id) handleVarietyChange(id);
         }}
-        searchPlaceholder={t("search")}
+        searchPlaceholder={t("GlobalSearchModal.SearchPlaceholder")}
         multiSelect={false}
         isLoading={loadingVarieties}
       />

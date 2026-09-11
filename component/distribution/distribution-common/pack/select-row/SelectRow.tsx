@@ -441,7 +441,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
       {loading ? (
         <View className="flex-1 justify-center items-center bg-white">
-          <LoadingPage message="Loading..." fullScreen />
+          <LoadingPage message={t("ManagerTransactions.Loading")} fullScreen />
         </View>
       ) : (
         <ScrollView

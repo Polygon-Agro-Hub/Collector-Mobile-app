@@ -344,7 +344,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
 
               Alert.alert(
                 t("Error.Success") || "Success",
-                "Attachment has been saved to your selected folder",
+                t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
               );
             } catch (e) {
               // Permission might have been revoked, try to request again
@@ -368,7 +368,7 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
 
                 Alert.alert(
                   t("Error.Success") || "Success",
-                  "Attachment has been saved to your selected folder",
+                  t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
                 );
               } else {
                 Alert.alert(

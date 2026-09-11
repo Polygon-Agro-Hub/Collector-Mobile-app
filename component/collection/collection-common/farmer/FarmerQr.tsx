@@ -194,7 +194,7 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
 
       const success = await saveImageToGallery(farmerQRCode, "Farmer_QRCode");
       if (success) {
-        Alert.alert(t("QRcode.successTitle") || "Success", "Attachment has been saved to your selected folder");
+        Alert.alert(t("QRcode.successTitle") || "Success", t("Error.AttachmentHasBeenSavedToYourSelectedFolder"));
       }
     } catch (error) {
       console.error("Download error:", error);
