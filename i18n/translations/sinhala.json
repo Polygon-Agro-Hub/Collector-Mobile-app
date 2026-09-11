@@ -910,7 +910,8 @@
     "Info": "තොරතුරු",
     "Use the 'Save to Files' option to save to Downloads": "බාගැනීම් වලට සුරැකීමට 'ගොනු වලට සුරකින්න' විකල්පය භාවිතා කරන්න.",
     "Failed to prepare PDF for download": "බාගත කිරීම සඳහා PDF සකස් කිරීමට අසමත් විය.",
-    "Full Total (Rs.)": "සම්පූර්ණ එකතුව (රු.) :"
+    "Full Total (Rs.)": "සම්පූර්ණ එකතුව (රු.) :",
+    "Rs": "රු."
   },
   "BankDetailsUpdate": {
     "Success": "සාර්ථකයි",
