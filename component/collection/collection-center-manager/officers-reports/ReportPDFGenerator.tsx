@@ -46,6 +46,7 @@ export const handleGeneratePDF = async (
   toDate: string,
   officerId: string,
   collectionOfficerId: number,
+  language?: string,
 ) => {
   try {
     const formattedFromDate = validateAndFormatDate(fromDate);
@@ -112,15 +113,15 @@ export const handleGeneratePDF = async (
 
     const tableRows = formattedData.length
       ? formattedData
-          .map(
-            (item) => `
+        .map(
+          (item) => `
               <tr>
                 <td>${item.date}</td>
                 <td>${item.total > 0 ? `${item.total}kg` : "<em>-No Data-</em>"}</td>
                 <td>${item.TCount > 0 ? formatCount(item.TCount) : "<em>-No Data-</em>"}</td>
               </tr>`,
-          )
-          .join("")
+        )
+        .join("")
       : `<tr><td colspan="3" style="text-align: center; font-style: italic;">No transactions occurred between ${fromDate} and ${toDate}</td></tr>`;
 
     const htmlContent = `
@@ -259,7 +260,10 @@ export const handleGeneratePDF = async (
       base64: false,
     });
 
-    const fileUri = `${(FileSystem as any).documentDirectory}Report_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
+    const isSinhala = (language || "en").toLowerCase().startsWith("si");
+    const isTamil = (language || "en").toLowerCase().startsWith("ta");
+    const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "Report";
+    const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
     await FileSystem.moveAsync({
       from: uri,
       to: fileUri,

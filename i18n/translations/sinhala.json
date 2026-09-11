@@ -166,7 +166,6 @@
     "Please enter prices for all grades before submitting": "උඩුගත කිරීමට පෙර සියලුම ශ්‍රේණි සඳහා මිල ගණන් ඇතුළත් කරන්න.",
     "incorrectOTPCode": "ඔබ ඇතුළත් කළ OTP අංකය වැරදියි. කරුණාකර නැවත උත්සාහ කරන්න.",
     "Ok": "හරි",
-    "Please select crop first": "කරුණාකර පළමුව බෝගයක් තෝරන්න.",
     "Password is not allowed to be empty": "මුරපදය හිස්ව තැබිය නොහැක.",
     "Employee ID is not allowed to be empty": "මුරපදය සහ සේවක පරිශීලක අංකය හිස්ව තැබිය නොහැක.",
     "Phone Number 1 already exists": "දුරකථන අංකය 1 වලංගු නොවේ.",
@@ -214,6 +213,9 @@
     "Your password must contain": "ඔබගේ මුරපදයේ අවම වශයෙන් අක්ෂර 8 ක් අඩංගු විය යුතු අතර එක් කැපිටල් අකුරක්, අංක සහ විශේෂ සංකේතයක් අඩංගු විය යුතුය.",
     "Your password must contain a minimum": "ඔබගේ මුරපදයේ අවම වශයෙන් අක්ෂර 8 ක් අඩංගු විය යුතු අතර එක් ලොකු අකුරක්, අංක සහ විශේෂ අක්ෂරයක් අඩංගු විය යුතුය.",
     "New password and confirm password do not match": "නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය නොගැලපේ.",
+    "New password cannot be the same as the current password.": "නව මුරපදය වත්මන් මුරපදයට සමාන විය නොහැක.",
+    "Please select crop first": "කරුණාකර පළමුව බෝගය තෝරන්න.",
+    "Please ensure all prices are within the allowed range before submitting.": "කරුණාකර ඉදිරිපත් කිරීමට පෙර සියලුම මිල ගණන් අවසර ලත් පරාසය තුළ ඇති බවට තහවුරු කරගන්න.",
     "Password updated successfully": "මුරපදය සාර්ථකව යාවත්කාලීන කරන ලදී",
     "Access denied": "ප්‍රවේශය ප්‍රතික්ෂේප කරන ලදී. මෙම යෙදුම භාවිතා කිරීමට ඔබගේ රැකියා භූමිකාවට අවසර නැත.",
     "Please fill all fields": "කරුණාකර සියලුම ක්ෂේත්‍ර පුරවන්න.",
@@ -226,7 +228,7 @@
     "Please add at least one crop to proceed": "ඉදිරියට යාමට කරුණාකර අවම වශයෙන් එක් බෝගයක් හෝ එක් කරන්න.",
     "Failed to generate invoice number": "ඉන්වොයිස් අංකය ජනනය කිරීමට අපොහොසත් විය. කරුණාකර නැවත උත්සාහ කරන්න",
     "Failed to submit crop details": "බෝග විස්තර ඉදිරිපත් කිරීමට අපොහොසත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
-    "Please enter Employee ID in uppercase letters": "කරුණාකර සේවක හැඳුනුම්පත මහකුරුවලින් ඇතුළත් කරන්න.",
+    "Please enter Employee ID in uppercase letters": "කරුණාකර සේවක හැඳුනුම්පත ඉංග්‍රීසි කැපිටල් අකුරින් ඇතුළත් කරන්න.",
     "Failed to update password": "මුරපදය යාවත්කාලීන කිරීමට අසමත් විය",
     "Distribution Centre Head are not allowed to access this application": "බෙදාහැරීමේ මධ්‍යස්ථාන ප්‍රධානීන්ට මෙම යෙදුමට ප්‍රවේශ වීමට අවසර නැත",
     "Please select at least one preferred language": "කරුණාකර අවම වශයෙන් එක් කැමති භාෂාවක් තෝරන්න.",
@@ -326,6 +328,7 @@
     "Search": "සොයන්න",
     "Selection Required": "තේරීමක් අවශ්‍යයි",
     "Please select both Crop and Variety to continue": "කරුණාකර ඉදිරියට යාමට බෝගයක් සහ ප්‍රභේදයක් යන දෙකම තෝරන්න.",
+    "Please select crop first": "කරුණාකර පළමුව බෝගය තෝරන්න.",
     "OK": "හරි"
   },
   "SearchFarmer": {
@@ -333,7 +336,7 @@
     "Search": "සොයන්න",
     "EnterFarmer": "ගොවියාගේ ජාතික හැඳුනුම්පත් අංකය ඇතුළත් කරන්න",
     "Searching": "සොයමින්...",
-    "EnterNIC": "ජාතික හැඳුනුම්පත් අංකය මෙහි ඇතුලත් කරන්න",
+    "EnterNIC": "ජා.හැ. අංකය ඇතුළත් කරන්න",
     "Noregistered": "මෙම අංකය සඳහා ලියාපදිංචි ගොවියෙක්  නැත ",
     "RegisterFarmer": "ගොවියා ලියාපදිංචි කරන්න",
     "Result Found": "හමු වූ ප්‍රතිඵල:",
@@ -410,7 +413,10 @@
     "Submit Request": "ඉල්ලීම ඉදිරිපත් කරන්න",
     "Edit Price": "මිල සංස්කරණය කරන්න",
     "Update": "යාවත්කාලීන කරන්න",
-    "AllowedRange": "අවසර ඇත රු.{{minPrice}} - රු.{{maxPrice}}"
+    "AllowedRange": "අවසර ඇත රු.{{minPrice}} - රු.{{maxPrice}}",
+    "Rs": "රු.",
+    "Rs.": "රු.",
+    "Please ensure all prices are within the allowed range before submitting.": "කරුණාකර ඉදිරිපත් කිරීමට පෙර සියලුම මිල ගණන් අවසර ලත් පරාසය තුළ ඇති බවට තහවුරු කරගන්න."
   },
   "Otpverification": {
     "LNG": "si",
@@ -445,7 +451,11 @@
     "Download": "බාගත කරන්න",
     "Share": "බෙදාගන්න",
     "Apply For Pension": "විශ්‍රාම වැටුප සඳහා අයදුම් කරන්න",
-    "Checking pension status...": "විශ්‍රාම වැටුප් තත්වය පරීක්ෂා කරමින්..."
+    "Checking pension status...": "විශ්‍රාම වැටුප් තත්වය පරීක්ෂා කරමින්...",
+    "Authentication token not found": "සත්‍යාපන ටෝකනය හමු නොවීය.",
+    "Authentication failed. Please login again.": "සත්‍යාපනය අසමත් විය. කරුණාකර නැවත පුරනය වන්න.",
+    "Failed to check pension status": "විශ්‍රාම වැටුප් තත්ත්වය පරීක්ෂා කිරීමට අසමත් විය.",
+    "Failed to check pension status. Please try again.": "විශ්‍රාම වැටුප් තත්ත්වය පරීක්ෂා කිරීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න."
   },
   "UnregisteredCropDetails": {
     "LNG": "si",
@@ -525,7 +535,9 @@
     "CurrentPassword": "වත්මන් මුර පදය",
     "NewPassword": "නව මුරපදය",
     "ConfirmNewPassword": "නව මුරපදය තහවුරු කරන්න",
-    "Next": "ඊළඟ"
+    "Next": "ඊළඟ",
+    "New password cannot be the same as the current password.": "නව මුරපදය වත්මන් මුරපදයට සමාන විය නොහැක.",
+    "New password and confirm password do not match": "නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය නොගැලපේ."
   },
   "QRScanner": {
     "LNG": "si",
@@ -536,7 +548,10 @@
     "Failed": "අසාර්ථකයි!",
     "SearchNIC": "පරිශීලකයාගේ NIC අංකය අනුව සොයන්න",
     "Requesting for camera permission": "කැමරා අවසරය ඉල්ලා සිටීම",
-    "ScantheQR": "QR කේතය ස්කෑන් කරන්න"
+    "ScantheQR": "QR කේතය ස්කෑන් කරන්න",
+    "Re-Scan": "නැවත ස්කෑන් කරන්න",
+    "Re-scan": "නැවත ස්කෑන් කරන්න",
+    "Rescan": "නැවත ස්කෑන් කරන්න"
   },
   "Registeredfarmer": {
     "LNG": "si",
@@ -1385,7 +1400,9 @@
   },
   "AlertModal": {
     "Cannot Proceed!": "ඉදිරියට යා නොහැක!",
-    "Re-Scan": "නැවත පරිලෝකනය කරන්න",
+    "Re-Scan": "නැවත ස්කෑන් කරන්න",
+    "Re-scan": "නැවත ස්කෑන් කරන්න",
+    "Rescan": "නැවත ස්කෑන් කරන්න",
     "Open Ongoing Activity": "ක්‍රියාකාරකම විවෘත කරන්න",
     "OK": "හරි"
   },

@@ -79,7 +79,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const { userId, registeredFarmerId } = route.params || {};
   const [crops, setCrops] = useState<Crop[]>([]);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
@@ -472,10 +472,12 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         return;
       }
 
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `GRN_${
-        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-      }_${date}.pdf`;
+      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");
@@ -581,10 +583,12 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `GRN_${
-        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-      }_${date}.pdf`;
+      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
 
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
