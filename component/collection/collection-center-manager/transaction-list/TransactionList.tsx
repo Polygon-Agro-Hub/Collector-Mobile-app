@@ -291,7 +291,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                 textAlign: "center",
               }}
             >
-              EMP {t("ManagerTransactions.ID")} : {officerId}
+              {t("ClaimOfficer.EMPID")} : {officerId}
             </Text>
             <Text style={{ color: "white", fontSize: 16, marginTop: 4 }}>
               {t("ManagerTransactions.Selected Date")}{" "}

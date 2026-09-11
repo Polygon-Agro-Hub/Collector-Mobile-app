@@ -1437,5 +1437,22 @@
     },
     "Done": "Done",
     "Cancel": "Cancel"
-  }
+  },
+  "PDFReport": {
+  "title": "Collection Officer Report",
+  "from": "From",
+  "to": "To",
+  "empId": "EMP ID",
+  "role": "Role",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "weight": "Weight",
+  "collections": "Collections",
+  "date": "Date",
+  "totalWeight": "Total Weight",
+  "totalCollections": "Total Collections",
+  "noData": "-No Data-",
+  "noTransactions": "No transactions occurred between {{from}} and {{to}}",
+  "generatedOn": "This report is generated on {{date}} at {{time}}"
+}
 }

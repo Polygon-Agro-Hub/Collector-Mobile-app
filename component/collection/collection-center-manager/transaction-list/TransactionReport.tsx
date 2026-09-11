@@ -54,6 +54,8 @@ interface PersonalAndBankDetails {
   bankName: string | null;
   branchName: string | null;
   companyNameEnglish: string | null;
+  companyNameSinhala: string | null;
+  companyNameTamil: string | null;
   collectionCenterName: string | null;
 }
 
@@ -96,7 +98,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
 
   const [crops, setCrops] = useState<Crop[]>([]);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
@@ -118,6 +120,53 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
   useEffect(() => {
     fetchSelectedLanguage();
   }, []);
+
+  const getCompanyName = () => {
+    const authState = store.getState().auth;
+    const lang = i18n.language || selectedLanguage;
+    switch (lang) {
+      case "si":
+        return (
+          details?.companyNameSinhala ||
+          authState?.companyNameSinhala ||
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+      case "ta":
+        return (
+          details?.companyNameTamil ||
+          authState?.companyNameTamil ||
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+      default:
+        return (
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+    }
+  };
+
+  const formatDisplayTime = (timeStr?: string) => {
+    if (!timeStr) return "";
+    const lang = i18n.language || selectedLanguage;
+    if (lang === "si") {
+      return timeStr
+        .replace(/\s*AM/gi, " පෙ.ව.")
+        .replace(/\s*PM/gi, " ප.ව.")
+        .trim();
+    }
+    if (lang === "ta") {
+      return timeStr
+        .replace(/\s*AM/gi, " மு.ப.")
+        .replace(/\s*PM/gi, " பி.ப.")
+        .trim();
+    }
+    return timeStr;
+  };
 
   const getCropName = (crop: Crop) => {
     if (!crop) return t("ManagerTransactions.Loading");
@@ -195,6 +244,27 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         };
 
         setOfficerDetails(officerDetails);
+
+        if (
+          data.companyNameSinhala ||
+          data.companyNameTamil ||
+          data.companyNameEnglish
+        ) {
+          setDetails((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              companyNameSinhala:
+                prev.companyNameSinhala || data.companyNameSinhala || null,
+              companyNameTamil:
+                prev.companyNameTamil || data.companyNameTamil || null,
+              companyNameEnglish:
+                prev.companyNameEnglish || data.companyNameEnglish || null,
+              collectionCenterName:
+                prev.collectionCenterName || data.collectionCenterName || null,
+            };
+          });
+        }
       } else {
         Alert.alert("Error", response.data.message);
       }
@@ -230,6 +300,27 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         );
 
         const data = detailsResponse.data;
+        const authState = store.getState().auth;
+        const storedSinhala = await AsyncStorage.getItem("companyNameSinhala");
+        const storedTamil = await AsyncStorage.getItem("companyNameTamil");
+        const storedEnglish = await AsyncStorage.getItem("companyNameEnglish");
+
+        const companyEnglish =
+          data.companyNameEnglish ||
+          authState.companyNameEnglish ||
+          storedEnglish ||
+          "";
+        const companySinhala =
+          data.companyNameSinhala ||
+          authState.companyNameSinhala ||
+          storedSinhala ||
+          companyEnglish;
+        const companyTamil =
+          data.companyNameTamil ||
+          authState.companyNameTamil ||
+          storedTamil ||
+          companyEnglish;
+
         setDetails({
           userId: data.userId ?? "",
           firstName: data.firstName ?? "",
@@ -242,7 +333,9 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
           accHolderName: data.accHolderName ?? "",
           bankName: data.bankName ?? "",
           branchName: data.branchName ?? "",
-          companyNameEnglish: data.companyNameEnglish ?? "company name",
+          companyNameEnglish: companyEnglish,
+          companyNameSinhala: companySinhala,
+          companyNameTamil: companyTamil,
           collectionCenterName: data.centerName ?? "Collection Centre",
         });
       } catch (detailsError) {
@@ -474,7 +567,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
             <strong>${t("NewReport.GRN No")}</strong> ${crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
           </div>
           <div class="header-item">
-            <strong>${t("NewReport.Date")}</strong> ${formattedDate} ${selectedTime}
+           <strong>${t("NewReport.Date")}</strong> ${formattedDate} ${formatDisplayTime(selectedTime)}
           </div>
         </div>
         
@@ -492,7 +585,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         <div class="received-by-section">
           <div>
             <div class="section-title">${t("NewReport.Received By")}</div>
-            <div>${t("NewReport.Company Name")} ${details.companyNameEnglish || ""}</div>
+            <div>${t("NewReport.Company Name")} ${getCompanyName()}</div>
           </div>
           <div>
             <div>&nbsp;</div>
@@ -717,7 +810,7 @@ const handleDownloadPDF = async () => {
             {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
           </Text>
           <Text className="text-sm">
-            {t("NewReport.Date")} {formattedDate} {selectedTime}
+            {t("NewReport.Date")} {formattedDate} {formatDisplayTime(selectedTime)}
           </Text>
         </View>
 
@@ -746,7 +839,7 @@ const handleDownloadPDF = async () => {
           <View className="border border-gray-300 rounded-lg p-2">
             <Text>
               <Text className="">{t("NewReport.Company Name")}</Text>{" "}
-              {details?.companyNameEnglish || ""}
+              {getCompanyName()}
             </Text>
             <Text>
               <Text className="">{t("NewReport.Centre")}</Text>{" "}

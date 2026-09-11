@@ -2,6 +2,37 @@ import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system/legacy";
 import axios from "axios";
 import environment from "@/environment/environment";
+import i18n from "@/i18n/i18n";
+
+type ReportLanguage = "en" | "si" | "ta";
+
+// Pulls a fixed-language translator scoped to the "PDFReport" namespace/section
+// of your en/si/ta JSON files, so this file stays in sync with the rest of
+// the app's translations instead of keeping its own copy.
+const getPdfTranslator = (language: ReportLanguage) => {
+  const fixedT = i18n.getFixedT(language);
+  return (key: string, vars?: Record<string, string>) =>
+    fixedT(`PDFReport.${key}`, vars);
+};
+
+// Converts a raw "AM"/"PM" time string into the Sinhala/Tamil equivalent,
+// same convention used in the TransactionReport screen.
+const formatDisplayTime = (timeStr: string, lang: ReportLanguage): string => {
+  if (!timeStr) return "";
+  if (lang === "si") {
+    return timeStr
+      .replace(/\s*AM/gi, " පෙ.ව.")
+      .replace(/\s*PM/gi, " ප.ව.")
+      .trim();
+  }
+  if (lang === "ta") {
+    return timeStr
+      .replace(/\s*AM/gi, " மு.ப.")
+      .replace(/\s*PM/gi, " பி.ப.")
+      .trim();
+  }
+  return timeStr;
+};
 
 const normalizeResponseDate = (dateString: string): string => {
   const [month, day, year] = dateString.split("/");
@@ -46,8 +77,12 @@ export const handleGeneratePDF = async (
   toDate: string,
   officerId: string,
   collectionOfficerId: number,
+  language: ReportLanguage = "en",
 ) => {
   try {
+    const t = getPdfTranslator(language);
+
+
     const formattedFromDate = validateAndFormatDate(fromDate);
     const formattedToDate = validateAndFormatDate(toDate);
 
@@ -116,20 +151,29 @@ export const handleGeneratePDF = async (
             (item) => `
               <tr>
                 <td>${item.date}</td>
-                <td>${item.total > 0 ? `${item.total}kg` : "<em>-No Data-</em>"}</td>
-                <td>${item.TCount > 0 ? formatCount(item.TCount) : "<em>-No Data-</em>"}</td>
+                <td>${item.total > 0 ? `${item.total}kg` : `<em>${t("noData")}</em>`}</td>
+                <td>${item.TCount > 0 ? formatCount(item.TCount) : `<em>${t("noData")}</em>`}</td>
               </tr>`,
           )
           .join("")
-      : `<tr><td colspan="3" style="text-align: center; font-style: italic;">No transactions occurred between ${fromDate} and ${toDate}</td></tr>`;
+      : `<tr><td colspan="3" style="text-align: center; font-style: italic;">${t(
+          "noTransactions",
+          { from: fromDate, to: toDate },
+        )}</td></tr>`;
+
+    const generatedDate = new Date().toLocaleDateString();
+    const generatedTime = formatDisplayTime(
+      new Date().toLocaleTimeString(),
+      language,
+    );
 
     const htmlContent = `
       <!DOCTYPE html>
-      <html lang="en">
+      <html lang="${language}">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Collection Officer Report</title>
+        <title>${t("title")}</title>
         <style>
           * {
             box-sizing: border-box;
@@ -210,45 +254,48 @@ export const handleGeneratePDF = async (
       </head>
       <body>
         <div class="container">
-          <h1>Collection Officer Report</h1>
+          <h1>${t("title")}</h1>
 
           <table class="header-table">
             <tr>
-              <td class="header-label">From</td>
+              <td class="header-label">${t("from")}</td>
               <td class="header-value">${fromDate}</td>
-              <td class="header-label">To</td>
+              <td class="header-label">${t("to")}</td>
               <td class="header-value">${toDate}</td>
             </tr>
             <tr>
-              <td class="header-label">EMP ID</td>
+              <td class="header-label">${t("empId")}</td>
               <td class="header-value">${officerId}</td>
-              <td class="header-label">Role</td>
+              <td class="header-label">${t("role")}</td>
               <td class="header-value">${jobRole}</td>
             </tr>
             <tr>
-              <td class="header-label">First Name</td>
+              <td class="header-label">${t("firstName")}</td>
               <td class="header-value">${firstName}</td>
-              <td class="header-label">Last Name</td>
+              <td class="header-label">${t("lastName")}</td>
               <td class="header-value">${lastName}</td>
             </tr>
             <tr>
-              <td class="header-label">Weight</td>
+              <td class="header-label">${t("weight")}</td>
               <td class="header-value">${totalWeight}kg</td>
-              <td class="header-label">Collections</td>
+              <td class="header-label">${t("collections")}</td>
               <td class="header-value">${totalFarmers}</td>
             </tr>
           </table>
 
           <table class="data-table">
             <tr>
-              <th>Date</th>
-              <th>Total Weight</th>
-              <th>Total Collections</th>
+              <th>${t("date")}</th>
+              <th>${t("totalWeight")}</th>
+              <th>${t("totalCollections")}</th>
             </tr>
             ${tableRows}
           </table>
 
-          <div class="footer">This report is generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</div>
+          <div class="footer">${t("generatedOn", {
+            date: generatedDate,
+            time: generatedTime,
+          })}</div>
         </div>
       </body>
       </html>
@@ -260,7 +307,7 @@ export const handleGeneratePDF = async (
     });
 
     const fileUri = `${(FileSystem as any).documentDirectory}Report_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
-    await FileSystem.moveAsync({
+    await FileSystem.copyAsync({
       from: uri,
       to: fileUri,
     });

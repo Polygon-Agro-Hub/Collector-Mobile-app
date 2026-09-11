@@ -24,6 +24,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import DownloadShareButtons from "@/component/components/buttons/DownloadShareButtons";
 import CustomCalendar from "@/component/components/popup/CustomcalendarModal";
 
+type ReportLanguage = "en" | "si" | "ta";
 
 type ReportGeneratorNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -51,7 +52,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   const [showEndPicker, setShowEndPicker] = useState(false);
 
   const [generateAgain, setGenerateAgain] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n: i18nInstance } = useTranslation();
 
   const {
     officerId,
@@ -60,6 +61,17 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     officerName,
     phoneNumber2,
   } = route.params;
+
+  // Normalizes i18next's current language (which can come back as "si-LK",
+  // "ta-IN", etc. depending on device locale) down to the "en" | "si" | "ta"
+  // union that ReportPDFGenerator expects, with a safe fallback to "en".
+  const getCurrentReportLanguage = (): ReportLanguage => {
+    const base = i18nInstance.language?.split("-")[0];
+    if (base === "si" || base === "ta" || base === "en") {
+      return base;
+    }
+    return "en";
+  };
 
   const getTodayInColombo = () => {
     const now = new Date();
@@ -97,6 +109,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       formatDate(endDate),
       officerId,
       collectionOfficerId,
+      getCurrentReportLanguage(),
     );
 
     if (fileUri) {
@@ -132,6 +145,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         formatDate(endDate),
         officerId,
         collectionOfficerId,
+        getCurrentReportLanguage(),
       );
 
       if (!uri) {
@@ -253,6 +267,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       formatDate(endDate),
       officerId,
       collectionOfficerId,
+      getCurrentReportLanguage(),
     );
     if (fileUri && (await Sharing.isAvailableAsync())) {
       await Sharing.shareAsync(fileUri, { mimeType: "application/pdf" });
