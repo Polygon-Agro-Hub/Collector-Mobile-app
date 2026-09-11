@@ -1,9 +1,9 @@
 const environment = {
   // LOCAL --------------------
-  API_BASE_URL: "http://192.168.8.155:3000/agro-api/collection-api/",
+  API_BASE_URL: "http://192.168.8.180:3000/agro-api/collection-api/",
 
   // DEV --------------------
-  // API_BASE_URL: "https://collector-api.polygonagro.com/agro-api/collection-api/",
+  //API_BASE_URL: "https://collector-api.polygonagro.com/agro-api/collection-api/",
 
   // UAT --------------------
   // API_BASE_URL: "https://collector-mobile-app-api-uat.vercel.app/agro-api/collection-api/",
