@@ -301,21 +301,37 @@ export const handleGeneratePDF = async (
       </html>
     `;
 
-    const { uri } = await Print.printToFileAsync({
+    const { uri, base64 } = await Print.printToFileAsync({
       html: htmlContent,
-      base64: false,
+      base64: true,
     });
 
     const isSinhala = (language || "en").toLowerCase().startsWith("si");
     const isTamil = (language || "en").toLowerCase().startsWith("ta");
     const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "Report";
     const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
-    await FileSystem.copyAsync({
-      from: uri,
-      to: fileUri,
-    });
 
-    return fileUri;
+    if (base64) {
+      try {
+        await FileSystem.writeAsStringAsync(fileUri, base64, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        return fileUri;
+      } catch (writeErr) {
+        console.warn("writeAsStringAsync failed, falling back:", writeErr);
+      }
+    }
+
+    try {
+      await FileSystem.copyAsync({
+        from: uri,
+        to: fileUri,
+      });
+      return fileUri;
+    } catch (copyErr) {
+      console.warn("copyAsync failed, returning original print URI:", copyErr);
+      return uri;
+    }
   } catch (error) {
     console.error("Failed to generate PDF:", error);
     return null;

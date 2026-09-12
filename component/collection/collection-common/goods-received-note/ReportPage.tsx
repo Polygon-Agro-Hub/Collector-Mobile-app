@@ -298,7 +298,25 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
     `;
 
     try {
-      const { uri } = await Print.printToFileAsync({ html });
+      const { uri, base64 } = await Print.printToFileAsync({ html, base64: true });
+      const isSinhala = (i18n.language || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const date = new Date().toISOString().slice(0, 10);
+      const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${grnNumber}_${date}.pdf`;
+
+      if (base64) {
+        try {
+          await FileSystem.writeAsStringAsync(fileUri, base64, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          return fileUri;
+        } catch (writeErr) {
+          console.warn("writeAsStringAsync failed in ReportPage:", writeErr);
+        }
+      }
+
       return uri;
     } catch (error) {
       console.error("Error generating PDF:", error);

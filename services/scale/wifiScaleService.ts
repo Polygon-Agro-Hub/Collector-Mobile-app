@@ -49,6 +49,7 @@ class WifiScaleService {
   private tcpClient: any = null;
   private pollInterval: NodeJS.Timeout | null = null;
   private isConnecting: boolean = false;
+  private pendingConnectionReject: ((err: any) => void) | null = null;
 
   constructor() {
     // Wrap in try/catch so a failed auto-connect never prevents app startup
@@ -62,10 +63,13 @@ class WifiScaleService {
 
   private initNetInfoListener() {
     NetInfo.addEventListener((state) => {
-      const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
-      if (!isWifi) {
+      // Only disconnect if the device is explicitly offline / disconnected.
+      // Do NOT check state.isWifiEnabled, because on Android isWifiEnabled returns false
+      // when location permission is denied ("Don't Allow"), even if Wi-Fi is actively connected.
+      const isOffline = state.isConnected === false || state.type === "none";
+      if (isOffline) {
         if (this.isConnected || this.isConnecting) {
-          console.log("[WifiScaleService] Wi-Fi lost/disabled - disconnecting scale");
+          console.log("[WifiScaleService] Network disconnected - disconnecting scale");
           this.closeSocket();
           this.stopHttpPolling();
           this.isConnected = false;
@@ -163,9 +167,22 @@ class WifiScaleService {
 
     return new Promise((resolve, reject) => {
       let isSettled = false;
+
+      this.pendingConnectionReject = (err: any) => {
+        if (!isSettled) {
+          isSettled = true;
+          clearTimeout(timeoutId);
+          this.isConnecting = false;
+          this.isConnected = false;
+          this.notifyListeners();
+          reject(err);
+        }
+      };
+
       const timeoutId = setTimeout(() => {
         if (!isSettled) {
           isSettled = true;
+          this.pendingConnectionReject = null;
           this.closeSocket();
           this.isConnecting = false;
           this.isConnected = false;
@@ -188,6 +205,7 @@ class WifiScaleService {
           () => {
             if (isSettled) return;
             isSettled = true;
+            this.pendingConnectionReject = null;
             clearTimeout(timeoutId);
 
             this.tcpClient = client;
@@ -221,6 +239,7 @@ class WifiScaleService {
           console.error("Scale TCP socket error:", err);
           if (!isSettled) {
             isSettled = true;
+            this.pendingConnectionReject = null;
             clearTimeout(timeoutId);
             this.closeSocket();
             this.isConnecting = false;
@@ -250,6 +269,7 @@ class WifiScaleService {
       } catch (err: any) {
         if (!isSettled) {
           isSettled = true;
+          this.pendingConnectionReject = null;
           clearTimeout(timeoutId);
           this.isConnecting = false;
           this.closeSocket();
@@ -366,6 +386,11 @@ class WifiScaleService {
   }
 
   private closeSocket() {
+    if (this.pendingConnectionReject) {
+      const rejectFn = this.pendingConnectionReject;
+      this.pendingConnectionReject = null;
+      rejectFn(new Error(i18n.t("WifiScaleService.Disconnected") || "Scale connection closed"));
+    }
     if (this.tcpClient) {
       try {
         this.tcpClient.destroy();

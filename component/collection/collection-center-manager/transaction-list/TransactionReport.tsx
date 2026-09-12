@@ -641,7 +641,23 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
     </html>
     `;
     try {
-      const { uri } = await Print.printToFileAsync({ html });
+      const { uri, base64 } = await Print.printToFileAsync({ html, base64: true });
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${grnNumber}_${selectedDate}.pdf`;
+
+      if (base64) {
+        try {
+          await FileSystem.writeAsStringAsync(fileUri, base64, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          return fileUri;
+        } catch (writeErr) {
+          console.warn("writeAsStringAsync failed in TransactionReport:", writeErr);
+        }
+      }
 
       return uri;
     } catch (error) {

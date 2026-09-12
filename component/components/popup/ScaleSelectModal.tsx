@@ -62,7 +62,9 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
       }
     });
     const unsubscribeNet = NetInfo.addEventListener((state) => {
-      setIsWifiEnabled(state.isWifiEnabled ?? state.type === "wifi");
+      // Do not use state.isWifiEnabled alone because on Android it returns false if location permission is denied ("Don't Allow")
+      const isOnline = state.isConnected !== false && state.type !== "none";
+      setIsWifiEnabled(isOnline);
     });
     return () => {
       unsubscribeScale();
@@ -82,7 +84,23 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
     setIsConnecting(true);
     try {
       const parsedPort = parseInt(port.trim() || "8080", 10);
-      await wifiScaleService.connectWifiScale(ipAddress.trim(), parsedPort);
+      const connectPromise = wifiScaleService.connectWifiScale(ipAddress.trim(), parsedPort);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                t("WifiScaleService.ConnectionTimedOut", {
+                  ip: ipAddress.trim(),
+                  port: parsedPort,
+                }) || "Scale connection timed out",
+              ),
+            ),
+          8000,
+        ),
+      );
+      await Promise.race([connectPromise, timeoutPromise]);
+
       Alert.alert(
         t("ScaleSelectModal.ConnectedTitle"),
         t("ScaleSelectModal.ConnectedMessage", { deviceName: DEFAULT_DEVICE.name }),
@@ -164,23 +182,62 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
 
           {/* Currently Connected Scale Banner */}
           {scaleStatus.connected && scaleStatus.scale && (
-            <View style={{ marginTop: 16, backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#bbf7d0", borderRadius: 16, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#dcfce7", alignItems: "center", justifyContent: "center" }}>
+            <View
+              style={{
+                marginTop: 16,
+                backgroundColor: "#f0fdf4",
+                borderWidth: 1,
+                borderColor: "#bbf7d0",
+                borderRadius: 16,
+                padding: 14,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12, flex: 1, marginRight: 8 }}>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: "#dcfce7",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
                   <MaterialCommunityIcons name="wifi-check" size={22} color="#16a34a" />
                 </View>
-                <View>
-                  <Text style={{ fontSize: 14, fontWeight: "bold", color: "#14532d" }}>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{ fontSize: 14, fontWeight: "bold", color: "#14532d" }}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
                     {scaleStatus.scale.name}
                   </Text>
-                  <Text style={{ fontSize: 12, color: "#166534" }}>
-                    {t("ScaleSelectModal.ConnectedReady")} ({scaleStatus.scale.ip}:{scaleStatus.scale.port || 8080})
+                  <Text
+                    style={{ fontSize: 12, color: "#166534", marginTop: 2 }}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {t("ScaleSelectModal.ConnectedReady")}
                   </Text>
                 </View>
               </View>
               <TouchableOpacity
                 onPress={handleDisconnect}
-                style={{ paddingVertical: 6, paddingHorizontal: 10, backgroundColor: "#fee2e2", borderRadius: 20, borderWidth: 1, borderColor: "#fca5a5" }}
+                style={{
+                  paddingVertical: 6,
+                  paddingHorizontal: 12,
+                  backgroundColor: "#fee2e2",
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: "#fca5a5",
+                  flexShrink: 0,
+                }}
               >
                 <Text style={{ fontSize: 12, fontWeight: "bold", color: "#dc2626" }}>
                   {t("ScaleSelectModal.Disconnect")}
