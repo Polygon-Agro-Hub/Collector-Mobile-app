@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import NetInfo from "@react-native-community/netinfo";
+import i18n from "i18next";
 import { SavedScale, saveSelectedScale, getSavedScale, clearSavedScale } from "@/utils/scale/scale-storage";
 
 export interface ScaleStatus {
@@ -48,6 +49,7 @@ class WifiScaleService {
   private tcpClient: any = null;
   private pollInterval: NodeJS.Timeout | null = null;
   private isConnecting: boolean = false;
+  private pendingConnectionReject: ((err: any) => void) | null = null;
 
   constructor() {
     // Wrap in try/catch so a failed auto-connect never prevents app startup
@@ -61,10 +63,13 @@ class WifiScaleService {
 
   private initNetInfoListener() {
     NetInfo.addEventListener((state) => {
-      const isWifi = state.isWifiEnabled ?? (state.type === "wifi" && Boolean(state.isConnected));
-      if (!isWifi) {
+      // Only disconnect if the device is explicitly offline / disconnected.
+      // Do NOT check state.isWifiEnabled, because on Android isWifiEnabled returns false
+      // when location permission is denied ("Don't Allow"), even if Wi-Fi is actively connected.
+      const isOffline = state.isConnected === false || state.type === "none";
+      if (isOffline) {
         if (this.isConnected || this.isConnecting) {
-          console.log("[WifiScaleService] Wi-Fi lost/disabled - disconnecting scale");
+          console.log("[WifiScaleService] Network disconnected - disconnecting scale");
           this.closeSocket();
           this.stopHttpPolling();
           this.isConnected = false;
@@ -143,7 +148,7 @@ class WifiScaleService {
   async connectWifiScale(ip: string, port: number = 33581): Promise<ScaleStatus> {
     const cleanIp = ip.trim();
     if (!cleanIp) {
-      throw new Error("Please enter a valid Wi-Fi Scale IP address");
+      throw new Error(i18n.t("WifiScaleService.InvalidIpError"));
     }
 
     // Clean up any previous socket or polling
@@ -162,16 +167,29 @@ class WifiScaleService {
 
     return new Promise((resolve, reject) => {
       let isSettled = false;
+
+      this.pendingConnectionReject = (err: any) => {
+        if (!isSettled) {
+          isSettled = true;
+          clearTimeout(timeoutId);
+          this.isConnecting = false;
+          this.isConnected = false;
+          this.notifyListeners();
+          reject(err);
+        }
+      };
+
       const timeoutId = setTimeout(() => {
         if (!isSettled) {
           isSettled = true;
+          this.pendingConnectionReject = null;
           this.closeSocket();
           this.isConnecting = false;
           this.isConnected = false;
           this.notifyListeners();
           reject(
             new Error(
-              `Connection timed out to scale at ${cleanIp}:${port}.\n\nPlease ensure your phone is on the same Wi-Fi network as the scale.`
+              i18n.t("WifiScaleService.ConnectionTimedOut", { ip: cleanIp, port })
             )
           );
         }
@@ -187,6 +205,7 @@ class WifiScaleService {
           () => {
             if (isSettled) return;
             isSettled = true;
+            this.pendingConnectionReject = null;
             clearTimeout(timeoutId);
 
             this.tcpClient = client;
@@ -220,6 +239,7 @@ class WifiScaleService {
           console.error("Scale TCP socket error:", err);
           if (!isSettled) {
             isSettled = true;
+            this.pendingConnectionReject = null;
             clearTimeout(timeoutId);
             this.closeSocket();
             this.isConnecting = false;
@@ -227,7 +247,11 @@ class WifiScaleService {
             this.notifyListeners();
             reject(
               new Error(
-                `Could not connect to scale at ${cleanIp}:${port}: ${err.message || "Connection refused"}`
+                i18n.t("WifiScaleService.ConnectionRefused", {
+                  ip: cleanIp,
+                  port,
+                  reason: err.message || i18n.t("WifiScaleService.ConnectionRefusedDefaultReason"),
+                })
               )
             );
           } else {
@@ -245,6 +269,7 @@ class WifiScaleService {
       } catch (err: any) {
         if (!isSettled) {
           isSettled = true;
+          this.pendingConnectionReject = null;
           clearTimeout(timeoutId);
           this.isConnecting = false;
           this.closeSocket();
@@ -273,26 +298,18 @@ class WifiScaleService {
       clearTimeout(timeoutId);
     } catch (fetchErr: any) {
       clearTimeout(timeoutId);
-      throw new Error(
-        `Cannot reach scale bridge at ${ip}:${port}.\n\n` +
-        `In Expo Go, run the bridge on your PC first:\n` +
-        `  node services/scale/scale-bridge.js\n\n` +
-        `Then enter your PC's Wi-Fi IP (e.g. 192.168.1.13) and port 3001 in the app.`
-      );
+      throw new Error(i18n.t("WifiScaleService.BridgeUnreachable", { ip, port }));
     }
 
     if (!res.ok) {
-      throw new Error(
-        `Bridge at ${ip}:${port} returned HTTP ${res.status}.\n` +
-        `Make sure scale-bridge.js is running on your PC.`
-      );
+      throw new Error(i18n.t("WifiScaleService.BridgeBadStatus", { ip, port, status: res.status }));
     }
 
     let data: any;
     try {
       data = await res.json();
     } catch {
-      throw new Error(`Bridge at ${ip}:${port} returned an invalid response.`);
+      throw new Error(i18n.t("WifiScaleService.BridgeInvalidResponse", { ip, port }));
     }
 
     // Bridge is reachable — mark as connected even if scale is still reconnecting
@@ -369,6 +386,11 @@ class WifiScaleService {
   }
 
   private closeSocket() {
+    if (this.pendingConnectionReject) {
+      const rejectFn = this.pendingConnectionReject;
+      this.pendingConnectionReject = null;
+      rejectFn(new Error(i18n.t("WifiScaleService.Disconnected") || "Scale connection closed"));
+    }
     if (this.tcpClient) {
       try {
         this.tcpClient.destroy();

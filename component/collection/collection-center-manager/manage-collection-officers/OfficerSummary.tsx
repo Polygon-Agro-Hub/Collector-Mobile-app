@@ -171,7 +171,7 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
       if (data.status === "success") {
         setModalVisible(false);
         Alert.alert(
-          "Success",
+          t("Error.Success"),
           t("DisclaimOfficer.Employee successfully disclaimed."),
         );
         navigation.navigate("Main", { screen: "CollectionOfficersList" });

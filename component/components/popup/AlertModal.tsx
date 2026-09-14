@@ -228,18 +228,129 @@ Alert.alert = (title, message, buttons, options) => {
   if (hasMultipleButtons) {
     originalAlert(title, message, buttons, options);
   } else {
+    const combinedText =
+      `${title || ""} ${typeof message === "string" ? message : ""}`.toLowerCase();
+
+    const ERROR_KEYWORDS = [
+      // English
+      "unsuccessful",
+      "fail",
+      "failed",
+      "failure",
+      "error",
+      "invalid",
+      "unable",
+      "cannot",
+      "could not",
+      "warning",
+      "denied",
+      "rejected",
+      "banned",
+      "expired",
+      "wrong",
+      "missing",
+      "not found",
+      "sorry",
+      // Sinhala
+      "අසාර්ථක", // failed / unsuccessful
+      "අසමත්", // failed / unable
+      "දෝෂ", // error
+      "වැරදි", // wrong
+      "සමාවෙන්න", // sorry
+      "කණගාටුයි", // sorry
+      "නොහැක", // cannot
+      "නොහැකි", // unable
+      "ප්‍රතික්ෂේප", // rejected
+      "වලංගු නැත", // invalid
+      "වලංගු නොවන", // invalid
+      "අවලංගු", // invalid
+      "අවසර නැත", // permission denied
+      "හමු නොවීය", // not found
+      // Tamil
+      "தோல்வி", // fail / failure / unsuccessful
+      "பிழை", // error
+      "தவறு", // wrong
+      "மன்னிக்கவும்", // sorry
+      "முடியாது", // cannot
+      "இயலவில்லை", // unable
+      "நிராகரிக்கப்பட்டது", // rejected
+      "செல்லுபடியாகாது", // invalid
+      "அனுமதி இல்லை", // permission denied
+      "காணப்படவில்லை", // not found
+    ];
+
     const SUCCESS_KEYWORDS = [
+      // English
       "success",
+      "successful",
+      "successfully",
       "connected",
       "completed",
+      "complete",
       "done",
       "saved",
       "updated",
       "sent",
+      "verified",
+      "approved",
+      "confirmed",
+      "created",
+      "submitted",
+      "claimed",
+      "disclaimed",
+      "generated",
+      "passed",
+      "received",
+      "added",
+      // Sinhala
+      "සාර්ථක", // covers සාර්ථක, සාර්ථකයි, සාර්ථකව, etc.
+      "සම්බන්ධ විය", // successfully connected
+      "සුරකින ලදී", // saved
+      "යාවත්කාලීන කරන ලදී", // updated
+      "යවන ලදී", // sent
+      "යවා ඇත", // sent
+      "එවා ඇත", // resent
+      "සම්පූර්ණ", // completed
+      "ඉදිරිපත් කරන ලදී", // submitted
+      "අනුමත කරන ලදී", // approved
+      "ලැබුණි", // received
+      "මාරු කරන ලදී", // transferred
+      "ජනනය කරන ලදී", // generated
+      "නිර්මාණය කරන ලදී", // created
+      "පවරන ලදී", // assigned
+      "භාර දී ඇත", // handed over
+      // Tamil
+      "வெற்றி", // covers வெற்றி, வெற்றி!, வெற்றிகரமாக, etc.
+      "இணைக்கப்பட்டது", // connected
+      "சேமிக்கப்பட்டது", // saved
+      "புதுப்பிக்கப்பட்டது", // updated
+      "அனுப்பப்பட்டது", // sent
+      "முழுமையடைந்தது", // completed
+      "சமர்ப்பிக்கப்பட்டது", // submitted
+      "ஒப்படைக்கப்பட்டது", // handed over
+      "உருவாக்கப்பட்டது", // created
+      "அங்கீகரிக்கப்பட்டது", // approved
+      "பெறப்பட்டது", // received
+      "மாற்றப்பட்டது", // transferred
+      "ஒதுக்கப்பட்டது", // assigned
     ];
-    const combinedText =
-      `${title || ""} ${typeof message === "string" ? message : ""}`.toLowerCase();
-    const isSuccess = SUCCESS_KEYWORDS.some((kw) => combinedText.includes(kw));
+
+    const hasErrorKeyword = ERROR_KEYWORDS.some((kw) =>
+      combinedText.includes(kw.toLowerCase())
+    );
+
+    const hasSuccessKeyword = SUCCESS_KEYWORDS.some((kw) =>
+      combinedText.includes(kw.toLowerCase())
+    );
+
+    const explicitType = (options as any)?.type;
+    const isSuccess =
+      explicitType === "success"
+        ? true
+        : explicitType === "error"
+        ? false
+        : !hasErrorKeyword && hasSuccessKeyword;
+
     const type = isSuccess ? "success" : "error";
 
     const onCloseCallback = () => {
@@ -248,14 +359,24 @@ Alert.alert = (title, message, buttons, options) => {
       }
     };
 
+    const autoClose =
+      (options as any)?.autoClose !== undefined
+        ? (options as any).autoClose
+        : isSuccess === true;
+
+    const showOkButton =
+      (options as any)?.showOkButton !== undefined
+        ? (options as any).showOkButton
+        : !isSuccess;
+
     if (globalAlertListener) {
       globalAlertListener(
         title || "",
         message || "",
         type,
         onCloseCallback,
-        isSuccess === true,
-        !isSuccess,
+        autoClose,
+        showOkButton,
       );
     } else {
       originalAlert(title, message, buttons, options);

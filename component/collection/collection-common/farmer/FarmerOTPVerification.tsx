@@ -122,13 +122,17 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     Keyboard.dismiss();
 
     if (code.length !== 5) {
-      Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"));
+      Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
       return;
     }
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
-      Alert.alert(t("Error.Sorry"), t("Error.noInternet"));
+      Alert.alert(t("Error.Sorry"), t("Error.noInternet"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
       return;
     }
 
@@ -230,6 +234,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           Alert.alert(
             t("Error.Sorry"),
             t("Otpverification.invalidOTP"),
+            [{ text: t("AlertModal.OK", "OK") }],
           );
       }
     } catch (error: any) {
@@ -243,9 +248,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           { text: t("Otpverification.ResendOTP"), onPress: handleResendOTP },
         ]);
       } else if (errStatusCode === "1001") {
-        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
       } else {
-        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
       }
     }
   };
@@ -263,11 +272,21 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       let otpMessage = "";
       let companyName = "";
 
-      if (PreferdLanguage === "Sinhala") {
+      const normLang = (PreferdLanguage || "").toLowerCase().trim();
+      if (
+        normLang === "sinhala" ||
+        normLang === "si" ||
+        normLang === "sinhalese" ||
+        normLang === "සිංහල"
+      ) {
         companyName =
           (store.getState().auth.companyNameSinhala) || "PolygonAgro";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
-      } else if (PreferdLanguage === "Tamil") {
+      } else if (
+        normLang === "tamil" ||
+        normLang === "ta" ||
+        normLang === "தமிழ்"
+      ) {
         companyName =
           (store.getState().auth.companyNameTamil) || "PolygonAgro";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
@@ -297,14 +316,20 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         setTimer(240);
         setDisabledResend(true);
 
-        Alert.alert(t("Otpverification.Success"), t("Error.otpResent"));
+        Alert.alert(t("Otpverification.Success"), t("Error.otpResent"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
         setTimeout(() => inputRefs.current[0]?.focus(), 300);
       } else {
-        Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
+        Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
+      Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
     }
   };
 
@@ -362,7 +387,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
   return (
     <View className="flex-1 bg-white">
       <CustomHeader
-        title={t("")}
+        title={t("Otpverification.OTPVerification", "OTP Verification")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() =>
@@ -391,7 +416,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
           <View className="mb-7">
             <Text className="text-black text-center font-bold text-[22px]">
-              {t("Otpverification.EnterCode")}
+              {t("Otpverification.EnterCode", t("Otpverification.Enter Verification Code", "Enter Verification Code"))}
             </Text>
           </View>
 

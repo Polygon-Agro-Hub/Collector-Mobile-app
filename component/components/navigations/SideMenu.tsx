@@ -213,7 +213,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   };
 
   const getFullName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;

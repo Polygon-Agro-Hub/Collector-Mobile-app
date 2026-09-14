@@ -390,7 +390,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         {/* Body */}
         <View className="flex-1 w-full bg-white">
           {loading || tabLoading ? (
-            <LoadingPage fullScreen message={t("Loading...") || "Loading..."} />
+            <LoadingPage fullScreen message={t("ManagerTransactions.Loading") || t("ManagerTransactions.Loading")} />
           ) : errorMessage ? (
             <View
               style={{ flex: 1, height: scale(300), justifyContent: "center" }}

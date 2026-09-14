@@ -88,7 +88,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   };
 
   const getFullName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (language) {
       case "si":
         return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
@@ -100,7 +100,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   };
 
   const getCompanyName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (language) {
       case "si":
         return profile.companyNameSinhala;
@@ -124,7 +124,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
 
       const success = await saveImageToGallery(QR, "Officer_QRCode");
       if (success) {
-        Alert.alert(t("Error.Success") || "Success", "Attachment has been saved to your selected folder");
+        Alert.alert(t("Error.Success") || "Success", t("Error.AttachmentHasBeenSavedToYourSelectedFolder"));
       }
     } catch (error) {
       console.error("Download error:", error);

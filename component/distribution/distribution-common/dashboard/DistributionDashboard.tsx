@@ -155,7 +155,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   );
 
   const getFullName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
@@ -167,7 +167,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   };
 
   const getcompanyName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return `${profile.companyNameSinhala}`;

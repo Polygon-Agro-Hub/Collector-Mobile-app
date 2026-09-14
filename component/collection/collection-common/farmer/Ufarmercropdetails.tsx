@@ -317,7 +317,7 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
         data={cropItems}
         selectedItems={cropValue ? [cropValue] : []}
         onSelect={(items) => setCropValue(items[0] ?? null)}
-        searchPlaceholder="Search crop..."
+        searchPlaceholder={t("GlobalSearchModal.SearchPlaceholder")}
         multiSelect={false}
       />
 
@@ -329,7 +329,7 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
         data={qualityItems}
         selectedItems={qualityValue ? [qualityValue] : []}
         onSelect={(items) => setQualityValue(items[0] ?? null)}
-        searchPlaceholder="Search quality..."
+        searchPlaceholder={t("GlobalSearchModal.SearchPlaceholder")}
         multiSelect={false}
         showSearch={false}
       />

@@ -51,6 +51,8 @@ interface PersonalAndBankDetails {
   bankName: string | null;
   branchName: string | null;
   companyNameEnglish: string | null;
+  companyNameSinhala: string | null;
+  companyNameTamil: string | null;
   collectionCenterName: string | null;
 }
 
@@ -79,7 +81,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const { userId, registeredFarmerId } = route.params || {};
   const [crops, setCrops] = useState<Crop[]>([]);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [selectedLanguage, setSelectedLanguage] = useState("en");
 
@@ -100,8 +102,37 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     fetchSelectedLanguage();
   }, []);
 
+  const getCompanyName = () => {
+    const authState = store.getState().auth;
+    const lang = i18n.language || selectedLanguage;
+    switch (lang) {
+      case "si":
+        return (
+          details?.companyNameSinhala ||
+          authState?.companyNameSinhala ||
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+      case "ta":
+        return (
+          details?.companyNameTamil ||
+          authState?.companyNameTamil ||
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+      default:
+        return (
+          details?.companyNameEnglish ||
+          authState?.companyNameEnglish ||
+          ""
+        );
+    }
+  };
+
   const getCropName = (crop: Crop) => {
-    if (!crop) return "Loading...";
+    if (!crop) return t("ManagerTransactions.Loading");
 
     switch (selectedLanguage) {
       case "si":
@@ -114,7 +145,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   };
 
   const getVarietyName = (crop: Crop) => {
-    if (!crop) return "Loading...";
+    if (!crop) return t("ManagerTransactions.Loading");
 
     switch (selectedLanguage) {
       case "si":
@@ -175,6 +206,27 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         );
 
         const data = detailsResponse.data;
+        const authState = store.getState().auth;
+        const storedSinhala = await AsyncStorage.getItem("companyNameSinhala");
+        const storedTamil = await AsyncStorage.getItem("companyNameTamil");
+        const storedEnglish = await AsyncStorage.getItem("companyNameEnglish");
+
+        const companyEnglish =
+          data.companyNameEnglish ||
+          authState.companyNameEnglish ||
+          storedEnglish ||
+          "";
+        const companySinhala =
+          data.companyNameSinhala ||
+          authState.companyNameSinhala ||
+          storedSinhala ||
+          companyEnglish;
+        const companyTamil =
+          data.companyNameTamil ||
+          authState.companyNameTamil ||
+          storedTamil ||
+          companyEnglish;
+
         setDetails({
           userId: data.userId ?? "",
           firstName: data.firstName ?? "",
@@ -187,7 +239,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           accHolderName: data.accHolderName ?? "",
           bankName: data.bankName ?? "",
           branchName: data.branchName ?? "",
-          companyNameEnglish: data.companyNameEnglish ?? "company name",
+          companyNameEnglish: companyEnglish,
+          companyNameSinhala: companySinhala,
+          companyNameTamil: companyTamil,
           collectionCenterName: data.centerName ?? "Collection Centre",
         });
       } catch (detailsError) {
@@ -236,6 +290,10 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       );
       return "";
     }
+
+    const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+    const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+    const currencyPrefix = isSinhala ? "රු." : isTamil ? "ரூ." : "Rs.";
 
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
       return sum + Number(crop.subTotal);
@@ -398,7 +456,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="received-by-section">
           <div>
             <div class="section-title">${t("NewReport.Received By")}</div>
-            <div>${t("NewReport.Company Name")} ${details.companyNameEnglish || ""}</div>
+            <div>${t("NewReport.Company Name")} ${getCompanyName()}</div>
           </div>
           <div>
             <div>&nbsp;</div>
@@ -439,7 +497,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         <div class="total-row">
           <div class="total-box">
             <div class="total-label">${t("NewReport.Full Total (Rs.)")}</div>
-            <div class="total-value">Rs. ${formatNumberWithCommas(totalSum)}</div>
+            <div class="total-value">${currencyPrefix} ${formatNumberWithCommas(totalSum)}</div>
           </div>
         </div>
         
@@ -450,7 +508,24 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     </html>
     `;
     try {
-      const { uri } = await Print.printToFileAsync({ html });
+      const { uri, base64 } = await Print.printToFileAsync({ html, base64: true });
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const date = new Date().toISOString().slice(0, 10);
+      const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${grnNumber}_${date}.pdf`;
+
+      if (base64) {
+        try {
+          await FileSystem.writeAsStringAsync(fileUri, base64, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          return fileUri;
+        } catch (writeErr) {
+          console.warn("writeAsStringAsync failed in NewReport:", writeErr);
+        }
+      }
 
       return uri;
     } catch (error) {
@@ -472,10 +547,12 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         return;
       }
 
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `GRN_${
-        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-      }_${date}.pdf`;
+      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");
@@ -504,7 +581,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
 
             Alert.alert(
               t("Error.Success") || "Success",
-              "Attachment has been saved to your selected folder",
+              t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
             );
           } catch (e) {
             // Permission might have been revoked, try to request again
@@ -528,7 +605,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
 
               Alert.alert(
                 t("Error.Success") || "Success",
-                "Attachment has been saved to your selected folder",
+                t("Error.AttachmentHasBeenSavedToYourSelectedFolder"),
               );
             } else {
               Alert.alert(
@@ -581,10 +658,12 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
+      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
+      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `GRN_${
-        crops.length > 0 ? crops[0].invoiceNumber : "N/A"
-      }_${date}.pdf`;
+      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
 
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
@@ -676,7 +755,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             <View className="border border-gray-300 rounded-lg p-2">
               <Text>
                 <Text className="">{t("NewReport.Company Name")}</Text>{" "}
-                {details?.companyNameEnglish || ""}
+                {getCompanyName()}
               </Text>
               <Text>
                 <Text className="">{t("NewReport.Centre")}</Text>{" "}

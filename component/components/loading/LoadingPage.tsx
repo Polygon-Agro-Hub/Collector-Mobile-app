@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import React from "react";
 import {
   View,
@@ -34,7 +35,7 @@ const LoadingPage: React.FC<LoadingPageProps> = ({
           className="text-sm font-bold text-[#030E25] text-center"
           style={messageStyle}
         >
-          {message || "Loading..."}
+          {message || t("ManagerTransactions.Loading")}
         </Text>
       </View>
     </View>

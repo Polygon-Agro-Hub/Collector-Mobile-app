@@ -7,19 +7,20 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  Platform,
   BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { scale } from "react-native-size-matters";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { RootStackParamList } from "@/types/types";
 import environment from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { Entypo } from "@expo/vector-icons";
+import CustomCalendar from "@/component/components/popup/CustomcalendarModal";
+
+
 type ManagerTransactionsNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ManagerTransactions"
@@ -72,6 +73,17 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, "0");
     const day = today.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Formats a Date using its LOCAL year/month/day. Never use
+  // date.toISOString() for date-only values here: toISOString() converts
+  // to UTC, and for a positive UTC offset (e.g. Sri Lanka, +5:30) a local
+  // midnight date rolls back to the previous day (20th -> 19th).
+  const formatDateLocal = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -183,7 +195,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
 
   useEffect(() => {
     if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().split("T")[0];
+      const formattedDate = formatDateLocal(selectedDate);
       fetchTransactions(formattedDate);
     }
   }, [selectedDate]);
@@ -226,7 +238,6 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                 screen: "CollectionDashboard",
               })
             }
-            // className="bg-[#FFFFFF1A] rounded-full p-2 justify-center  items-center"
             style={{
               position: "absolute",
               left: 0,
@@ -249,19 +260,19 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                 textAlign: "center",
               }}
             >
-              My Collection
+              {t("ManagerDashboard.MyCollection")}
             </Text>
 
             <Text className="text-white" style={{ fontSize: 16 }}>
               {t("ManagerTransactions.Selected Date")}{" "}
               {selectedDate
-                ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+                ? formatDateLocal(selectedDate).replace(/-/g, "/")
                 : "N/A"}
             </Text>
           </View>
 
           <TouchableOpacity
-            onPress={() => setShowDatePicker((prev) => !prev)}
+            onPress={() => setShowDatePicker(true)}
             style={{ position: "absolute", right: 0 }}
           >
             <Ionicons name="calendar-outline" size={24} color="white" />
@@ -276,7 +287,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           style={{ marginTop: -22 }}
         >
           <TextInput
-            style={{ flex: 1, fontSize: 16, fontStyle: "italic", color: "#000000" }}
+            style={{ flex: 1, fontSize: 12, fontStyle: "italic", color: "#000000" }}
             placeholder={t("ManagerTransactions.Search")}
             placeholderTextColor="grey"
             value={searchQuery}
@@ -295,42 +306,14 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* Android date picker */}
-        {showDatePicker && Platform.OS === "android" && (
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            display="default"
-            maximumDate={new Date()}
-            onChange={(event, date) => {
-              setShowDatePicker(false);
-              if (date) {
-                const today = new Date();
-                setSelectedDate(date > today ? today : date);
-              }
-            }}
-          />
-        )}
-
-        {/* iOS date picker */}
-        {showDatePicker && Platform.OS === "ios" && (
-          <View className="justify-center items-center z-50 absolute ml-6 mt-[52%] bg-gray-100 rounded-lg">
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="inline"
-              maximumDate={new Date()}
-              style={{ width: 320, height: 260 }}
-              onChange={(event, date) => {
-                setShowDatePicker(false);
-                if (date) {
-                  const today = new Date();
-                  setSelectedDate(date > today ? today : date);
-                }
-              }}
-            />
-          </View>
-        )}
+        {/* Shared custom calendar — used on both Android and iOS */}
+        <CustomCalendar
+          visible={showDatePicker}
+          value={selectedDate}
+          maximumDate={new Date()}
+          onClose={() => setShowDatePicker(false)}
+          onConfirm={(date) => setSelectedDate(date)}
+        />
 
         {/* List header */}
         <View className="px-4 mt-4">
@@ -392,7 +375,7 @@ const ManagerTransactions: React.FC<ManagerTransactionsProps> = ({
                       accountHolderName: item.accountHolderName,
                       bankName: item.bankName,
                       branchName: item.branchName,
-                      selectedDate: selectedDate.toISOString().split("T")[0],
+                      selectedDate: formatDateLocal(selectedDate),
                       selectedTime: selectedDate
                         .toLocaleTimeString([], {
                           hour: "2-digit",

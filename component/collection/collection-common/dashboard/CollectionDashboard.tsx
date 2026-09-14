@@ -184,7 +184,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   );
 
   const getFullName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
@@ -196,7 +196,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   };
 
   const getcompanyName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return `${profile.companyNameSinhala}`;
@@ -228,7 +228,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       return (
         <View className="bg-white rounded-3xl mt-3 p-4 shadow-lg">
           <Text className="text-center text-gray-500">
-            Loading target status...
+            {t("CollectionOfficerDashboard.LoadingTargetStatus")}
           </Text>
         </View>
       );
