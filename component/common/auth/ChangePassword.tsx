@@ -24,6 +24,12 @@ import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
+// Separate axios instance WITHOUT the app's global interceptors.
+// This prevents the global 401 handler (which shows "Token Expired"
+// and force-logs the user out) from hijacking a wrong-current-password
+// response, which also comes back as 401 from this endpoint.
+const plainAxios = axios.create();
+
 type ChangePasswordNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ChangePassword"
@@ -46,12 +52,20 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
 
   const validatePassword = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      Alert.alert(t("Error.error"), t("Error.All fields are required"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.All fields are required"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
       return false;
     }
 
     if (newPassword.length < 8) {
-      Alert.alert(t("Error.error"), t("Error.Your password must contain"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Your password must contain"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
       return false;
     }
 
@@ -59,12 +73,17 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       Alert.alert(
         t("Error.error"),
         t("Error.Your password must contain a minimum"),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
 
     if (!/[0-9]/.test(newPassword)) {
-      Alert.alert(t("Error.error"), t("Error.Your password must contain"));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Your password must contain"),
+        [{ text: t("AlertModal.OK", "OK") }],
+      );
       return false;
     }
 
@@ -72,6 +91,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
       Alert.alert(
         t("Error.error"),
         t("Error.Your password must contain a minimum"),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
@@ -79,7 +99,14 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     if (newPassword === currentPassword) {
       Alert.alert(
         t("Error.error"),
-        "New password cannot be the same as the current password.",
+        t(
+          "Error.New password cannot be the same as the current password.",
+          t(
+            "ChangePassword.New password cannot be the same as the current password.",
+            "New password cannot be the same as the current password.",
+          ),
+        ),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
@@ -87,7 +114,14 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     if (newPassword !== confirmPassword) {
       Alert.alert(
         t("Error.error"),
-        "New password and confirm password do not match",
+        t(
+          "Error.New password and confirm password do not match",
+          t(
+            "ChangePassword.New password and confirm password do not match",
+            "New password and confirm password do not match",
+          ),
+        ),
+        [{ text: t("AlertModal.OK", "OK") }],
       );
       return false;
     }
@@ -112,7 +146,11 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
     try {
       setIsLoading(true);
       const token = store.getState().auth.token;
-      await axios.post(
+
+      // Use plainAxios here (not the default axios instance) so the
+      // app-wide 401 interceptor cannot intercept a wrong-current-password
+      // response and show "Token Expired" instead of the correct message.
+      await plainAxios.post(
         `${environment.API_BASE_URL}api/collection-officer/change-password`,
         {
           currentPassword,
@@ -130,11 +168,11 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
         t("Error.Password updated successfully"),
         [
           {
-            text: "OK",
+            text: t("AlertModal.OK", "OK"),
             onPress: async () => {
               // Clear session — user must log in again with new password
               store.dispatch(logoutUser());
-navigation.reset({
+              navigation.reset({
                 index: 0,
                 routes: [{ name: "Login" }],
               });
@@ -146,12 +184,24 @@ navigation.reset({
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 401) {
-          Alert.alert(t("Error.error"), t("Error.Invalid current password"));
+          Alert.alert(
+            t("Error.error"),
+            t("Error.Invalid current password"),
+            [{ text: t("AlertModal.OK", "OK") }],
+          );
         } else {
-          Alert.alert(t("Error.error"), t("Error.Failed to update password"));
+          Alert.alert(
+            t("Error.error"),
+            t("Error.Failed to update password"),
+            [{ text: t("AlertModal.OK", "OK") }],
+          );
         }
       } else {
-        Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+        Alert.alert(
+          t("Error.error"),
+          t("Error.somethingWentWrong"),
+          [{ text: t("AlertModal.OK", "OK") }],
+        );
       }
     } finally {
       setIsLoading(false);
@@ -249,17 +299,17 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4] text-black text-base"
+                className="bg-[#F4F4F4] text-black"
                 secureTextEntry={secureCurrent}
                 onChangeText={setCurrentPassword}
                 value={currentPassword}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
+                  paddingVertical: 0,
                   fontSize: 16,
-                  lineHeight: 22,
-                  paddingVertical: 8,
-                  includeFontPadding: true,
-                  textAlignVertical: "center",
-                  color: "#000000",
+                  height: "100%",
+                  includeFontPadding: false,
                 }}
               />
               <TouchableOpacity
@@ -278,7 +328,7 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 text-black text-base"
+                className="bg-[#F4F4F4] text-black"
                 secureTextEntry={secureNew}
                 value={newPassword}
                 onChangeText={(text) => {
@@ -286,12 +336,12 @@ navigation.reset({
                   setNewPassword(cleanText);
                 }}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
+                  paddingVertical: 0,
                   fontSize: 16,
-                  lineHeight: 22,
-                  paddingVertical: 8,
-                  includeFontPadding: true,
-                  textAlignVertical: "center",
-                  color: "#000000",
+                  height: "100%",
+                  includeFontPadding: false,
                 }}
               />
               <TouchableOpacity onPress={() => setSecureNew(!secureNew)}>
@@ -308,7 +358,7 @@ navigation.reset({
             </Text>
             <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
               <TextInput
-                className="flex-1 bg-[#F4F4F4] text-black text-base"
+                className="bg-[#F4F4F4] text-black"
                 secureTextEntry={secureConfirm}
                 onChangeText={(text) => {
                   const cleanText = text.replace(/\s/g, "");
@@ -316,12 +366,12 @@ navigation.reset({
                 }}
                 value={confirmPassword}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
+                  paddingVertical: 0,
                   fontSize: 16,
-                  lineHeight: 22,
-                  paddingVertical: 8,
-                  includeFontPadding: true,
-                  textAlignVertical: "center",
-                  color: "#000000",
+                  height: "100%",
+                  includeFontPadding: false,
                 }}
               />
               <TouchableOpacity

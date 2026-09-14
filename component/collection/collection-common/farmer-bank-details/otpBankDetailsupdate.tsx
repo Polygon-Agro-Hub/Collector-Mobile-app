@@ -176,18 +176,24 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     Keyboard.dismiss();
 
     if (code.length !== 5) {
-      Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"));
+      Alert.alert(t("Error.Sorry"), t("Otpverification.completeOTP"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
       return;
     }
 
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
-      Alert.alert(t("Error.Sorry"), t("Error.noInternet"));
+      Alert.alert(t("Error.Sorry"), t("Error.noInternet"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
       return;
     }
 
     if (isOtpExpired || timer === 0) {
-      Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+      Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
       return;
     }
 
@@ -265,11 +271,15 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
         case "1002":
           setIsOtpExpired(true);
-          Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+          Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
+            { text: t("AlertModal.OK", "OK") },
+          ]);
           break;
 
         default:
-          Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+          Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"), [
+            { text: t("AlertModal.OK", "OK") },
+          ]);
       }
     } catch (error: any) {
       console.error("OTP Verification Error:", error);
@@ -278,11 +288,17 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
       if (errStatusCode === "1002") {
         setIsOtpExpired(true);
-        Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"));
+        Alert.alert(t("Error.Sorry"), t("Otpverification.OTPExpired"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
       } else if (errStatusCode === "1001") {
-        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"));
+        Alert.alert(t("Error.Sorry"), t("Otpverification.invalidOTP"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
       } else {
-        Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"));
+        Alert.alert(t("Error.Sorry"), t("Error.somethingWentWrong"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
       }
     }
   };
@@ -300,11 +316,21 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       let otpMessage = "";
       let companyName = "";
 
-      if (PreferdLanguage === "Sinhala") {
+      const normLang = (PreferdLanguage || "").toLowerCase().trim();
+      if (
+        normLang === "sinhala" ||
+        normLang === "si" ||
+        normLang === "sinhalese" ||
+        normLang === "සිංහල"
+      ) {
         companyName =
           (store.getState().auth.companyNameSinhala) || "PolygonAgro";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
-      } else if (PreferdLanguage === "Tamil") {
+      } else if (
+        normLang === "tamil" ||
+        normLang === "ta" ||
+        normLang === "தமிழ்"
+      ) {
         companyName =
           (store.getState().auth.companyNameTamil) || "PolygonAgro";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
@@ -326,7 +352,9 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       if (response.data.referenceId) {
         await AsyncStorage.setItem("referenceId", response.data.referenceId);
         setReferenceId(response.data.referenceId);
-        Alert.alert(t("Otpverification.Success"), t("Error.otpResent"));
+        Alert.alert(t("Otpverification.Success"), t("Error.otpResent"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
         setTimer(240);
         setDisabledResend(true);
         setIsOtpExpired(false);
@@ -336,11 +364,15 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         inputRefs.current.forEach((ref) => ref?.clear());
         inputRefs.current[0]?.focus();
       } else {
-        Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
+        Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
-      Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"));
+      Alert.alert(t("Error.Sorry"), t("Error.otpResendFailed"), [
+        { text: t("AlertModal.OK", "OK") },
+      ]);
     }
   };
 
@@ -358,7 +390,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       style={{ flex: 1 }}
     >
       <CustomHeader
-        title={t("")}
+        title={t("Otpverification.OTPVerification", "OTP Verification")}
         showBackButton={true}
         navigation={navigation}
         onBackPress={() =>
@@ -393,7 +425,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
           <View className="mb-7">
             <Text className="text-black text-center font-bold text-[22px]">
-              {t("Otpverification.EnterCode")}
+              {t("Otpverification.EnterCode", t("Otpverification.Enter Verification Code", "Enter Verification Code"))}
             </Text>
           </View>
 
@@ -472,6 +504,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             message={t("BankDetailsUpdate.SuccessMessage")}
             type="success"
             duration={2000}
+            showOkButton={true}
             onClose={handleSuccessCompletion}
           />
 
@@ -481,6 +514,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
             message={t("BankDetailsUpdate.FailedMessage")}
             type="error"
             duration={2000}
+            showOkButton={true}
             onClose={handleFailCompletion}
           />
 

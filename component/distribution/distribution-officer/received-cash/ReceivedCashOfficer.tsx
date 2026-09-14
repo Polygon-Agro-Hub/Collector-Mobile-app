@@ -63,7 +63,7 @@ interface ApiTransaction {
   paymentMethod: string;
   isPaid: number;
   amount: number;
-  moneyPaid: number; 
+  moneyPaid: number;
   processStatus: string;
   orderId: number;
   userId: number;
@@ -329,7 +329,9 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
         title={t("ReceivedCash.Received Cash")}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
+        onBackPress={() =>
+          navigation.navigate("Main", { screen: "DistridutionaDashboard" })
+        }
       />
 
       <View className="flex-1 w-full mx-auto px-6">
@@ -337,7 +339,10 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
         <View className="bg-white py-3 flex-row items-center justify-between">
           <Text className="text-sm font-medium text-gray-900">
             {t("ReceivedCash.All")} (
-            {transactions.length.toString().padStart(2, "0")})
+            {transactions.length === 0
+              ? "0"
+              : transactions.length.toString().padStart(2, "0")}
+            )
           </Text>
         </View>
 
@@ -413,7 +418,8 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
             renderItem={renderTransaction}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{
-              paddingBottom: selectedTransactions.size > 0 ? insets.bottom + 80 : 20,
+              paddingBottom:
+                selectedTransactions.size > 0 ? insets.bottom + 80 : 20,
             }}
             ListEmptyComponent={EmptyState}
             refreshControl={

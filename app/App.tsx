@@ -229,6 +229,7 @@ function AppContent() {
     };
   }, [isOfflineAlertShown]);
 
+  // Handle online/offline status updates
   const onlineStatus = async () => {
     AppState.addEventListener("change", async (nextAppState) => {
       const storedEmpId = store.getState().auth.empId;

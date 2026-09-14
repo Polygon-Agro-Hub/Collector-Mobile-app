@@ -13,6 +13,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 interface OrderItem {
   id: string;
@@ -23,6 +24,7 @@ interface OrderItem {
 }
 
 export default function SelectOrder({ route, navigation }: { route: any; navigation: any }) {
+  const { t } = useTranslation();
   const { group, type = "Retail" } = route.params || {
     group: { id: 1, timeSlot: "08:00 AM - 12:00 PM", ordersLeft: 20 },
     type: "Retail",
@@ -153,15 +155,15 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
       {/* Order count positioned after custom header */}
       <View className="items-center -mt-6 pb-2 bg-white">
         <Text className="text-md text-[#980775]">
-          <Text className="font-bold">{isRetail ? "Retail" : "Wholesale"} {totalCount} </Text>
-          <Text className="font-normal">{totalCount === 1 ? "Order" : "Orders"}</Text>
+          <Text className="font-bold">{isRetail ? t("AssignGroups.Retail", "Retail") : t("AssignGroups.Wholesale", "Wholesale")} {totalCount} </Text>
+          <Text className="font-normal">{totalCount === 1 ? t("AssignGroups.Order", "Order") : t("AssignGroups.Orders", "Orders")}</Text>
         </Text>
       </View>
 
       {loading ? (
         <View className="flex-grow justify-center items-center py-20" style={{ flex: 1 }}>
           <ActivityIndicator size="large" color="#980775" />
-          <Text className="text-[#54617D] text-sm mt-3 font-semibold">Loading orders...</Text>
+          <Text className="text-[#54617D] text-sm mt-3 font-semibold">{t("AssignGroups.Loading orders...", "Loading orders...")}</Text>
         </View>
       ) : (
         <ScrollView
@@ -183,7 +185,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
             {allChecked && <Ionicons name="checkmark" size={16} color="white" />}
           </View>
           <Text className="text-[#030E25] font-extrabold text-base">
-            All {totalCount} Orders
+            {t("AssignGroups.All Orders", { count: totalCount, defaultValue: `All ${totalCount} Orders` })}
           </Text>
         </TouchableOpacity>
 
@@ -207,7 +209,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
                   {allPickupChecked && <Ionicons name="checkmark" size={16} color="white" />}
                 </View>
                 <Text className="text-[#030E25] font-bold text-base">
-                  All Pickup Orders ({String(pickupCount).padStart(2, "0")})
+                  {t("AssignGroups.All Pickup Orders", { count: String(pickupCount).padStart(2, "0"), defaultValue: `All Pickup Orders (${String(pickupCount).padStart(2, "0")})` })}
                 </Text>
               </TouchableOpacity>
 
@@ -257,7 +259,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
                   {allDeliveryChecked && <Ionicons name="checkmark" size={16} color="white" />}
                 </View>
                 <Text className="text-[#030E25] font-bold text-base">
-                  All Delivery Orders ({String(deliveryCount).padStart(2, "0")})
+                  {t("AssignGroups.All Delivery Orders", { count: String(deliveryCount).padStart(2, "0"), defaultValue: `All Delivery Orders (${String(deliveryCount).padStart(2, "0")})` })}
                 </Text>
               </TouchableOpacity>
 
@@ -310,7 +312,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
             activeOpacity={0.8}
           >
             <FontAwesome name="minus" size={18} color="white" />
-            <Text className="text-white font-extrabold text-base">Deselect All</Text>
+            <Text className="text-white font-extrabold text-base">{t("AssignGroups.Deselect All", "Deselect All")}</Text>
           </TouchableOpacity>
 
           {/* Continue Button */}
@@ -328,7 +330,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
             activeOpacity={0.8}
           >
             <FontAwesome name="check" size={18} color="white" />
-            <Text className="text-white font-extrabold text-base">Continue ({checkedCount})</Text>
+            <Text className="text-white font-extrabold text-base">{t("AssignGroups.Continue", { count: checkedCount, defaultValue: `Continue (${checkedCount})` })}</Text>
           </TouchableOpacity>
         </View>
       )}

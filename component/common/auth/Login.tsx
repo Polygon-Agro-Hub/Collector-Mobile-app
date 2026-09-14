@@ -110,11 +110,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
       if (response.ok && data.jobRole) {
         if (!ALLOWED_ROLES.includes(data.jobRole.toLowerCase())) {
-          setEmpIdError(
-            t(
-              "Error.Access Denied",
-            ),
-          );
+          setEmpIdError(t("Error.Access Denied"));
           return;
         } else {
           setEmpIdError("");
@@ -176,7 +172,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
     setLoading(true);
     store.dispatch(logoutUser());
-const netState = await NetInfo.fetch();
+    const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
       setLoading(false);
       Alert.alert(t("Error.error"), "No internet connection");
@@ -206,12 +202,7 @@ const netState = await NetInfo.fetch();
         setLoading(false);
 
         if (data.reason === "role_not_allowed") {
-          Alert.alert(
-            t("Error.error"),
-            t(
-              "Error.Access Denied",
-            ),
-          );
+          Alert.alert(t("Error.error"), t("Error.Access Denied"));
           return;
         }
 
@@ -262,19 +253,12 @@ const netState = await NetInfo.fetch();
 
       if (!ALLOWED_ROLES.includes(jobRole.toLowerCase())) {
         setLoading(false);
-        Alert.alert(
-          t("Error.error"),
-          t(
-            "Error.Access Denied",
-          ),
-        );
+        Alert.alert(t("Error.error"), t("Error.Access Denied"));
         return;
       }
 
       const timestamp = new Date();
-      const expirationTime = new Date(
-        timestamp.getTime() + 8 * 60 * 60 * 1000,
-      );
+      const expirationTime = new Date(timestamp.getTime() + 8 * 60 * 60 * 1000);
 
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("jobRole", jobRole);
@@ -393,7 +377,12 @@ const netState = await NetInfo.fetch();
         <View className="items-center">
           <Image
             source={loginImage}
-            style={{ width: 270, height: 270, maxWidth: "100%", alignSelf: "center" }}
+            style={{
+              width: 270,
+              height: 270,
+              maxWidth: "100%",
+              alignSelf: "center",
+            }}
             className="w-[270px] h-[270px]"
             resizeMode="contain"
           />
@@ -422,17 +411,17 @@ const netState = await NetInfo.fetch();
               resizeMode="contain"
             />
             <TextInput
-              className="flex-1 text-black text-base pl-2"
+              className="px-2   text-black"
               onChangeText={handleEmpIdChange}
               autoCapitalize="characters"
               value={empid}
               style={{
+                flex: 1,
+                minWidth: 0,
+                paddingVertical: 0,
                 fontSize: 16,
-                lineHeight: 22,
-                paddingVertical: 8,
-                includeFontPadding: true,
-                textAlignVertical: "center",
-                color: "#000000",
+                height: "100%",
+                includeFontPadding: false,
               }}
             />
           </View>
@@ -456,17 +445,17 @@ const netState = await NetInfo.fetch();
               resizeMode="contain"
             />
             <TextInput
-              className="flex-1 text-black text-base pl-2"
+              className="px-2   text-black"
               secureTextEntry={secureTextEntry}
               onChangeText={handlePasswordChange}
               value={password}
               style={{
+                flex: 1,
+                minWidth: 0,
+                paddingVertical: 0,
                 fontSize: 16,
-                lineHeight: 22,
-                paddingVertical: 8,
-                includeFontPadding: true,
-                textAlignVertical: "center",
-                color: "#000000",
+                height: "100%",
+                includeFontPadding: false,
               }}
             />
             <TouchableOpacity

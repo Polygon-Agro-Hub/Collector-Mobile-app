@@ -388,7 +388,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               showsVerticalScrollIndicator={true}
-              contentContainerStyle={{ paddingBottom:80 }}
+              contentContainerStyle={{ paddingBottom: 80 }}
             >
               {/* Table Data */}
               {loading ? (
@@ -445,11 +445,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                             {index + 1}
                           </Text>
                         ) : (
-                          <Ionicons
-                            name="flag"
-                            size={18}
-                            color="#980775"
-                          />
+                          <Ionicons name="flag" size={18} color="#980775" />
                         )}
                       </View>
 
@@ -494,12 +490,13 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                       </View>
 
                       {/* Todo / Completed */}
+                      {/* Todo / Completed */}
                       <View
                         style={{ width: 100 }}
                         className="justify-center items-center px-1 py-3"
                       >
                         <Text
-                          className="text-center font-medium text-gray-800 text-sm"
+                          className="text-center font-medium text-gray-800 text-xs"
                           numberOfLines={2}
                         >
                           {selectedToggle === "Completed"

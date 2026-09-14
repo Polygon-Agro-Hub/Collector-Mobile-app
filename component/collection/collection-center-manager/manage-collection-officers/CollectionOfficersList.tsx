@@ -258,7 +258,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
             {getOfficerName(item)}
           </Text>
           <Text className="text-sm text-gray-500">
-            EMP ID : {item.empId}
+            {t("CollectionOfficersList.EMPID")} {item.empId}
           </Text>
         </View>
 

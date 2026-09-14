@@ -79,6 +79,9 @@ export class BluetoothPrinterService {
       if (json) {
         const device: PrinterDevice = JSON.parse(json);
         this.connectedDevice = device;
+        if (device.id === "EXPO_GO_VIRTUAL_PRINTER" || !getBleManager()) {
+          this.targetCharacteristic = { isVirtual: true };
+        }
         return device;
       }
     } catch (e) {
@@ -93,13 +96,17 @@ export class BluetoothPrinterService {
   ): Promise<void> {
     const manager = getBleManager();
     if (!manager) {
-      if (onError) {
-        onError(
-          new Error(
-            "Bluetooth BLE scanning requires a native development build (APK). It is not supported in Expo Go."
-          )
-        );
-      }
+      // Running in Expo Go: Provide a Virtual TSPL Thermal Printer for testing
+      setTimeout(() => {
+        onDeviceFound({
+          id: "EXPO_GO_VIRTUAL_PRINTER",
+          name: "Virtual TSPL Printer (Expo Go)",
+          displayName: "Virtual TSPL Printer (Expo Go)",
+          address: "Virtual BLE Channel (Simulated)",
+          rssi: -45,
+          nativeDevice: null,
+        });
+      }, 300);
       return;
     }
 
@@ -148,6 +155,14 @@ export class BluetoothPrinterService {
 
     try {
       this.stopScan();
+
+      if (device.id === "EXPO_GO_VIRTUAL_PRINTER" || !manager) {
+        // Virtual connection for Expo Go environment
+        this.connectedDevice = device;
+        this.targetCharacteristic = { isVirtual: true };
+        await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
+        return true;
+      }
 
       if (manager && device.nativeDevice) {
         let connected = device.nativeDevice;
@@ -199,6 +214,13 @@ export class BluetoothPrinterService {
   public async printTSPL(tsplCommand: string): Promise<boolean> {
     if (!this.connectedDevice) {
       throw new Error("No printer connected. Please connect to a printer first.");
+    }
+
+    if (this.targetCharacteristic?.isVirtual || this.connectedDevice.id === "EXPO_GO_VIRTUAL_PRINTER") {
+      // Simulate physical printer output in Expo Go
+      console.log("🖨️ [Expo Go Virtual Printer] Successfully simulated TSPL print (50x30mm):\n", tsplCommand.slice(0, 150) + "...");
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      return true;
     }
 
     if (!this.targetCharacteristic) {

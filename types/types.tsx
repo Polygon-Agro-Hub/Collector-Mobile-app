@@ -70,6 +70,7 @@ export type RootStackParamList = {
   pickupOrderIds: (string | undefined)[];
 };
   CameraAccess: undefined;
+  LocationAccess: undefined;
   QRScanner: {
     userId: any;
   };

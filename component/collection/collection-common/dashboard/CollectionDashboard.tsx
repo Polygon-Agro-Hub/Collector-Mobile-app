@@ -23,6 +23,10 @@ import DashboardSkeleton from "@/component/components/skeletons/DashboardSkeleto
 import { useSelector } from "react-redux";
 import { RootState } from "@/services/reducxStore";
 import { ROLES } from "@/constants/user-roles";
+import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
+import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
+import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
 
 type CollectionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -59,6 +63,24 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   const [refreshing, setRefreshing] = useState(false);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+  // Device Connection State (Wi-Fi Scale BUDRY MFD-300)
+  const [isScaleModalVisible, setIsScaleModalVisible] = useState<boolean>(false);
+  const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
+  const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    const unsubscribe = wifiScaleService.subscribe((status) => {
+      setScaleStatus(status);
+    });
+    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+      setIsWifiEnabled(state.isWifiEnabled ?? state.type === "wifi");
+    });
+    return () => {
+      unsubscribe();
+      unsubscribeNetInfo();
+    };
+  }, []);
 
   const jobRole = useSelector((state: RootState) => state.auth.jobRole);
 
@@ -150,6 +172,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
 
   useFocusEffect(
     useCallback(() => {
+      fetchSelectedLanguage();
       const onBackPress = () => true;
       BackHandler.addEventListener("hardwareBackPress", onBackPress);
       const subscription = BackHandler.addEventListener(
@@ -161,7 +184,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   );
 
   const getFullName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
@@ -173,7 +196,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   };
 
   const getcompanyName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (selectedLanguage) {
       case "si":
         return `${profile.companyNameSinhala}`;
@@ -205,7 +228,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       return (
         <View className="bg-white rounded-3xl mt-3 p-4 shadow-lg">
           <Text className="text-center text-gray-500">
-            Loading target status...
+            {t("CollectionOfficerDashboard.LoadingTargetStatus")}
           </Text>
         </View>
       );
@@ -353,6 +376,175 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
           </View>
         </TouchableOpacity>
 
+        {/* Wi-Fi Scale Section - Exact Design matching 3 states (Compact & Opens Bottom Popup) */}
+        {!isWifiEnabled ? (
+          /* State 3: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => setIsScaleModalVisible(true)}
+            style={{
+              marginTop: 10,
+              backgroundColor: "#FDF0F1",
+              borderRadius: 28,
+              paddingVertical: 10,
+              paddingHorizontal: 14,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: "#FFFFFF",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: "#E91233",
+                  letterSpacing: -0.2,
+                }}
+              >
+                {selectedLanguage === "si"
+                  ? "Wi-Fi අක්‍රියයි"
+                  : selectedLanguage === "ta"
+                  ? "Wi-Fi முடக்கப்பட்டுள்ளது"
+                  : "Wi-Fi is Off"}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#0F172A",
+                  fontWeight: "500",
+                  marginTop: 1,
+                  lineHeight: 16,
+                }}
+              >
+                {selectedLanguage === "si"
+                  ? "ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න."
+                  : selectedLanguage === "ta"
+                  ? "உங்கள் தொலைபேசியில் Wi-Fi இயக்கவும்."
+                  : "Please turn on Wi-Fi on your phone to connect to the scale."}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ) : scaleStatus.connected && scaleStatus.scale ? (
+          /* State 2: Connected State - #FAE432 background, black text/icon */
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => setIsScaleModalVisible(true)}
+            style={{
+              marginTop: 10,
+              backgroundColor: "#FAE432",
+              borderRadius: 28,
+              paddingVertical: 10,
+              paddingHorizontal: 14,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: "#000000",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 12,
+              }}
+            >
+              <MaterialCommunityIcons name="wifi" size={24} color="#FFFFFF" />
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 17,
+                  fontWeight: "bold",
+                  color: "#000000",
+                  letterSpacing: -0.3,
+                }}
+              >
+                {selectedLanguage === "si"
+                  ? "තරාදිය සම්බන්ධ විය"
+                  : selectedLanguage === "ta"
+                  ? "இணைக்கப்பட்ட அளவுகள்"
+                  : "Scale Connected"}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "500",
+                  color: "#000000",
+                  marginTop: 1,
+                }}
+              >
+                {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
+              </Text>
+            </View>
+
+            <MaterialIcons name="chevron-right" size={26} color="#000000" />
+          </TouchableOpacity>
+        ) : (
+          /* State 1: Not Connected - #1266FD background, white text/icon */
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => setIsScaleModalVisible(true)}
+            style={{
+              marginTop: 10,
+              backgroundColor: "#1266FD",
+              borderRadius: 28,
+              paddingVertical: 10,
+              paddingHorizontal: 14,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: "#FFFFFF",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 12,
+              }}
+            >
+              <MaterialCommunityIcons name="wifi" size={24} color="#1266FD" />
+            </View>
+
+            <Text
+              style={{
+                flex: 1,
+                fontSize: 17,
+                fontWeight: "bold",
+                color: "#FFFFFF",
+                letterSpacing: -0.2,
+              }}
+            >
+              {selectedLanguage === "si"
+                ? "තරාදිය සම්බන්ධ කරන්න"
+                : selectedLanguage === "ta"
+                ? "அளவுகோலை இணைக்கவும்"
+                : "Connect Scale"}
+            </Text>
+
+            <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+          </TouchableOpacity>
+        )}
+
+        {/* Keep Going Section - Placed Below Devices Section */}
         {renderTargetStatus()}
 
         {/* Target Progress Section */}
@@ -458,6 +650,11 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
           ))}
         </View>
       </View>
+
+      <ScaleSelectModal
+        visible={isScaleModalVisible}
+        onClose={() => setIsScaleModalVisible(false)}
+      />
     </ScrollView>
   );
 };

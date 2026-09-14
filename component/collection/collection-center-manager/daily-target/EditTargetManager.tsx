@@ -149,7 +149,7 @@ const EditTargetManager: React.FC<EditTargetManagerProps> = ({
         {/* Header */}
         <CustomHeader
           title={getvarietyName() || ""}
-          subtitle={grade ? `Grade : ${grade}` : ""}
+          subtitle={grade ? t("SetTargetScreen.GradeG", { grade }) : ""}
           showBackButton={true}
           navigation={navigation}
           onBackPress={() => navigateBack()}

@@ -1,12 +1,13 @@
 import store from "@/services/reducxStore";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { RootStackParamList } from "@/types/types";
 import axios from "axios";
@@ -17,6 +18,7 @@ import LottieView from "lottie-react-native";
 import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
 
 type CenterTargetNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -160,6 +162,22 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
     fetchData();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("CollectionDashboard" as any);
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
   const getvarietyName = (TargetData: TargetData) => {
     switch (selectedLanguage) {
       case "si":
@@ -178,7 +196,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
         title={centerCode || ""}
         showBackButton={true}
         navigation={navigation}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={() => navigation.navigate("CollectionDashboard" as any)}
         textColor="white"
         bgColor="#282828"
         iconBgColor="#FFFFFF1A"
@@ -396,11 +414,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                             {index + 1}
                           </Text>
                         ) : (
-                          <Ionicons
-                            name="flag"
-                            size={18}
-                            color="#980775"
-                          />
+                          <Ionicons name="flag" size={18} color="#980775" />
                         )}
                       </View>
 
@@ -445,12 +459,13 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
                       </View>
 
                       {/* Todo / Completed */}
+                      {/* Todo / Completed */}
                       <View
                         style={{ width: 100 }}
                         className="justify-center items-center px-1 py-3"
                       >
                         <Text
-                          className="text-center font-medium text-gray-800 text-sm"
+                          className="text-center font-medium text-gray-800 text-xs"
                           numberOfLines={2}
                         >
                           {selectedToggle === "Completed"

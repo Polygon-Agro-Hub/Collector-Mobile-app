@@ -257,7 +257,10 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
         <View className="bg-white px-4 py-3 flex-row items-center ">
           <Text className="text-sm font-medium text-gray-900">
             {t("ReceivedCash.All")} (
-            {transactions.length.toString().padStart(2, "0")})
+            {transactions.length === 0
+              ? "0"
+              : transactions.length.toString().padStart(2, "0")}
+            )
           </Text>
         </View>
 

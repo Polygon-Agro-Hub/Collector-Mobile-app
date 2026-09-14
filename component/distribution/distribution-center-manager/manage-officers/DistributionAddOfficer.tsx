@@ -326,16 +326,16 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
   }, [jobRole, formData.userId]);
 
   // Country Data Initializer
-  useMemo(() => {
+  useEffect(() => {
     const initialItems = countryData.map((country) => ({
       label: `${country.emoji}  ${country.dial_code}`,
       value: country.dial_code,
-      countryName: country.name,
+      countryName: t(`Countries.${country.name}`, country.name),
       flag: country.emoji,
       dialCode: country.dial_code,
     }));
     setCountryItems(initialItems);
-  }, []);
+  }, [t, i18n.language]);
 
   // Scroll to top when view is focused or step changes
   useFocusEffect(
@@ -507,15 +507,6 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
   };
 
   const handleImagePick = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      Alert.alert(
-        t("Error.Permission required"),
-        t("Error.Permission required message"),
-      );
-      return;
-    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -1844,7 +1835,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 />
                 {isValidating && (
                   <Text className="text-gray-500 text-xs mt-1 ml-2">
-                    {t("Validating email...")}
+                    {t("AddOfficerBasicDetails.ValidatingEmail", t("Validating email..."))}
                   </Text>
                 )}
                 {(errorEmail || fieldErrors.email) && (

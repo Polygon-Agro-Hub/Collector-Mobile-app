@@ -17,6 +17,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import { useIsFocused } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 const CircularClockTimer = ({
   seconds,
@@ -93,6 +94,7 @@ export default function ConfirmRowAssign({
   route: any;
   navigation: any;
 }) {
+  const { t } = useTranslation();
   const {
     selectedOrdersCount = 20,
     selectedOrderIds = [],
@@ -124,7 +126,7 @@ export default function ConfirmRowAssign({
     !!route.params?.isWholesale;
 
   const orderTypeTag = isWholesale ? "(W)" : "(R)";
-  const orderText = selectedOrdersCount === 1 ? "Order" : "Orders";
+  const orderText = selectedOrdersCount === 1 ? t("AssignGroups.Order", "Order") : t("AssignGroups.Orders", "Orders");
   const orderTextLower = selectedOrdersCount === 1 ? "order" : "orders";
 
   const handleConfirm = async () => {
@@ -156,7 +158,13 @@ export default function ConfirmRowAssign({
       if (response.data && response.data.success) {
         Alert.alert(
           "Success",
-          `Successfully assigned ${selectedOrdersCount} ${orderTextLower} to ${selectedRow.name} for the ${group.timeSlot} slot.`,
+          t("AssignGroups.Successfully assigned orders", {
+            count: selectedOrdersCount,
+            orderText: orderTextLower,
+            rowName: selectedRow.name,
+            timeSlot: group.timeSlot,
+            defaultValue: `Successfully assigned ${selectedOrdersCount} ${orderTextLower} to ${selectedRow.name} for the ${group.timeSlot} slot.`,
+          }),
           [
             {
               text: "OK",
@@ -169,13 +177,13 @@ export default function ConfirmRowAssign({
       } else {
         Alert.alert(
           "Error",
-          response.data.message || "Failed to assign orders.",
+          response.data.message || t("AssignGroups.Failed to assign orders.", "Failed to assign orders."),
         );
         setTimerRunning(true);
       }
     } catch (error) {
       console.error("Error assigning orders to packing row:", error);
-      Alert.alert("Error", "An error occurred while assigning orders.");
+      Alert.alert("Error", t("AssignGroups.An error occurred while assigning orders.", "An error occurred while assigning orders."));
       setTimerRunning(true);
     } finally {
       setSubmitting(false);
@@ -252,7 +260,7 @@ export default function ConfirmRowAssign({
     <View className="flex-1 bg-white">
       {/* Custom Header */}
       <CustomHeader
-        title="Confirm Action"
+        title={t("AssignGroups.Confirm Action", "Confirm Action")}
         navigation={navigation}
         onBackPress={handleBack}
       />
@@ -265,8 +273,7 @@ export default function ConfirmRowAssign({
         <View className="items-center mt-4">
           {/* Top description text */}
           <Text className="text-sm text-center px-12 text-[#676771] mb-4 leading-relaxed">
-            Marking as completed in 30 seconds.{"\n"}
-            Tap on back button make changes.
+            {t("AssignGroups.Marking as completed in 30 seconds.", "Marking as completed in 30 seconds.\nTap on back button make changes.")}
           </Text>
 
           {/* 30s Countdown Circular Clock Design */}
@@ -281,7 +288,7 @@ export default function ConfirmRowAssign({
               </View>
               <View className="flex-1">
                 <Text className="text-xs text-[#676771] font-medium">
-                  Selected Section
+                  {t("AssignGroups.Selected Section", "Selected Section")}
                 </Text>
                 <Text className="text-sm font-extrabold text-[#030E25] mt-1">
                   {group.timeSlot} {orderTypeTag}
@@ -304,7 +311,7 @@ export default function ConfirmRowAssign({
               </View>
               <View className="flex-1">
                 <Text className="text-xs text-[#676771] font-medium">
-                  Assigning to Row
+                  {t("AssignGroups.Assigning to Row", "Assigning to Row")}
                 </Text>
                 <Text className="text-base font-extrabold text-[#030E25] mt-1">
                   {selectedRow.name}
@@ -340,7 +347,7 @@ export default function ConfirmRowAssign({
             <>
               <FontAwesome name="check" size={16} color="white" />
               <Text className="text-white font-extrabold text-base">
-                Confirm
+                {t("AssignGroups.Confirm", "Confirm")}
               </Text>
             </>
           )}

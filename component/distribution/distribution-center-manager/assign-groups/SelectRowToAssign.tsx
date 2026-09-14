@@ -13,6 +13,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 interface RowItem {
   id: string;
@@ -22,6 +23,7 @@ interface RowItem {
 }
 
 export default function SelectRowToAssign({ route, navigation }: { route: any; navigation: any }) {
+  const { t } = useTranslation();
   const { selectedOrdersCount = 20, selectedOrderIds = [], group = { id: 1, timeSlot: "08:00 AM - 12:00 PM" } } = route.params || {};
   const insets = useSafeAreaInsets();
 
@@ -109,7 +111,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
     <View className="flex-1 bg-white">
       {/* Custom Header with absolutely centered title */}
       <CustomHeader
-        title="Select a Row to Assign"
+        title={t("AssignGroups.Select a Row to Assign", "Select a Row to Assign")}
         navigation={navigation}
         onBackPress={handleBack}
       />
@@ -117,7 +119,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
       <View className="flex-1 px-6">
         {/* Description text */}
         <Text className="text-sm text-center px-6 text-[#676771] mt-4 mb-5 leading-relaxed">
-          Choose the packing row where the selected orders will be assigned.
+          {t("AssignGroups.Choose the packing row where the selected orders will be assigned.", "Choose the packing row where the selected orders will be assigned.")}
         </Text>
 
         {/* Orders Count Card */}
@@ -126,7 +128,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
             <FontAwesome name="archive" size={18} color="#030E25" />
           </View>
           <View>
-            <Text className="text-xs text-[#676771] font-medium">Orders Count</Text>
+            <Text className="text-xs text-[#676771] font-medium">{t("AssignGroups.Orders Count", "Orders Count")}</Text>
             <Text className="text-xl font-extrabold text-[#030E25] mt-0.5">{selectedOrdersCount}</Text>
           </View>
         </View>
@@ -134,7 +136,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
         {loading ? (
           <View className="flex-1 justify-center items-center py-20">
             <ActivityIndicator size="large" color="#030E25" />
-            <Text className="text-[#676771] text-sm mt-3 font-semibold">Loading rows...</Text>
+            <Text className="text-[#676771] text-sm mt-3 font-semibold">{t("AssignGroups.Loading rows...", "Loading rows...")}</Text>
           </View>
         ) : rows.length === 0 ? (
           /* Empty state view matching the screenshot */
@@ -142,7 +144,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
             <View className="w-24 h-24 bg-[#FAFAFB] rounded-full items-center justify-center mb-4">
               <Ionicons name="folder-open-outline" size={50} color="#ACB5BE" />
             </View>
-            <Text className="text-[#ACB5BE] text-sm italic font-medium">- No rows found. -</Text>
+            <Text className="text-[#ACB5BE] text-sm italic font-medium">{t("AssignGroups.No rows found", "- No rows found. -")}</Text>
           </View>
         ) : (
           /* Scrollable list of packing rows */
@@ -189,7 +191,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                       </Text>
                       <Text className="text-xs text-[#676771] mt-1 font-medium">
                         {row.allocatedCount}{" "}
-                        {row.allocatedCount === 1 ? "Order" : "Orders"} Allocated
+                        {row.allocatedCount === 1 ? t("AssignGroups.Order Allocated", "Order Allocated") : t("AssignGroups.Orders Allocated", "Orders Allocated")}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -220,7 +222,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
             activeOpacity={0.8}
           >
             <FontAwesome name="check" size={16} color="white" />
-            <Text className="text-white font-extrabold text-base">Assign</Text>
+            <Text className="text-white font-extrabold text-base">{t("AssignGroups.Assign", "Assign")}</Text>
           </TouchableOpacity>
         </View>
       )}

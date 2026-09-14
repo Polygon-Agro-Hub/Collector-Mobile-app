@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system/legacy";
-import * as MediaLibrary from "expo-media-library";
+import { saveImageToGallery } from "@/utils/mediaSave";
 import * as Sharing from "expo-sharing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -88,7 +88,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   };
 
   const getFullName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (language) {
       case "si":
         return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
@@ -100,7 +100,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   };
 
   const getCompanyName = () => {
-    if (!profile) return "Loading...";
+    if (!profile) return t("ManagerTransactions.Loading");
     switch (language) {
       case "si":
         return profile.companyNameSinhala;
@@ -122,21 +122,10 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const { status } = await MediaLibrary.requestPermissionsAsync(true);
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "Gallery access is required to save QR Code.",
-        );
-        return;
+      const success = await saveImageToGallery(QR, "Officer_QRCode");
+      if (success) {
+        Alert.alert(t("Error.Success") || "Success", t("Error.AttachmentHasBeenSavedToYourSelectedFolder"));
       }
-
-      const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
-      const response = await FileSystem.downloadAsync(QR, fileUri);
-      const asset = await MediaLibrary.createAssetAsync(response.uri);
-      await MediaLibrary.createAlbumAsync("Download", asset, false);
-
-      Alert.alert(t("Error.Success") || "Success", "Attachment has been saved to your selected folder");
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(t("Error.error"), t("Error.failedSaveQRCode"));

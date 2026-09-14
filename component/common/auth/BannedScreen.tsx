@@ -14,6 +14,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
+import { useTranslation } from "react-i18next";
+
 type BannedScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "BannedScreen"
@@ -25,6 +27,7 @@ interface BannedScreenProps {
 }
 
 const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const { statusType, message } = route.params || {};
 
   useFocusEffect(
@@ -41,7 +44,7 @@ const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
   const handleBackToLogin = async () => {
     try {
       store.dispatch(logoutUser());
-navigation.reset({
+      navigation.reset({
         index: 0,
         routes: [{ name: "Login" }],
       });
@@ -51,24 +54,37 @@ navigation.reset({
     }
   };
 
-  let title = "Access Denied";
-  let description = "Your account has been rejected or is not approved.";
+  let titleKey = "Access Denied";
+  let defaultTitle = "Access Denied";
+  let descKey = "Your account has been rejected or is not approved.";
+  let defaultDesc = "Your account has been rejected or is not approved.";
 
-  if (statusType === "rejected" || statusType === "Rejected") {
-    title = "Account Rejected";
-    description =
-      "Your account approval has been revoked by the administrator.";
-  } else if (statusType === "not_approved" || statusType === "Not Approved") {
-    title = "Account Not Approved";
-    description =
-      "Your account approval has been revoked by the administrator.";
-  } else if (statusType === "pending" || statusType === "Pending") {
-    title = "Pending Verification";
-    description = "Your account status is pending verification.";
+  const normalizedStatus = (statusType || "").toLowerCase().trim();
+  if (normalizedStatus === "rejected") {
+    titleKey = "Account Rejected";
+    defaultTitle = "Account Rejected";
+    descKey = "Your account approval has been revoked by the administrator.";
+    defaultDesc = "Your account approval has been revoked by the administrator.";
+  } else if (
+    normalizedStatus === "not_approved" ||
+    normalizedStatus === "not approved"
+  ) {
+    titleKey = "Account Not Approved";
+    defaultTitle = "Account Not Approved";
+    descKey = "Your account approval has been revoked by the administrator.";
+    defaultDesc = "Your account approval has been revoked by the administrator.";
+  } else if (normalizedStatus === "pending") {
+    titleKey = "Pending Verification";
+    defaultTitle = "Pending Verification";
+    descKey = "Your account status is pending verification.";
+    defaultDesc = "Your account status is pending verification.";
   }
 
+  const title = t(`BannedScreen.${titleKey}`, defaultTitle);
+  let description = t(`BannedScreen.${descKey}`, defaultDesc);
+
   if (message) {
-    description = message;
+    description = t(message, t(`BannedScreen.${message}`, t(`Error.${message}`, message)));
   }
 
   return (
@@ -104,11 +120,13 @@ navigation.reset({
               {description}
             </Text>
             <Text className="text-[#747474] text-center mt-2 text-base font-semibold">
-              Please contact Polygon Customer Support for further details.
+              {t(
+                "BannedScreen.Please contact Polygon Customer Support for further details.",
+                "Please contact Polygon Customer Support for further details.",
+              )}
             </Text>
           </View>
 
-          {/* Button - Centered */}
           {/* Button - Centered */}
           <View style={{ alignItems: "center", marginTop: 80 }}>
             {/* Outer view: shadow only */}
@@ -153,7 +171,7 @@ navigation.reset({
                       fontSize: 18,
                     }}
                   >
-                    Back to Login
+                    {t("BannedScreen.Back to Login", "Back to Login")}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>

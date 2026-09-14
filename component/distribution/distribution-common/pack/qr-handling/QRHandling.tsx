@@ -21,6 +21,7 @@ import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
 import { usePrinter } from "@/services/printer/usePrinter";
 import { PrinterSelectModal } from "@/component/components/popup/PrinterSelectModal";
+import { useTranslation } from "react-i18next";
 import {
   formatTimeSlot,
   getTimeSlotPriority,
@@ -35,6 +36,7 @@ interface OrderData {
 }
 
 export default function QRHandling({ navigation }: { navigation: any }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [rowId, setRowId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"todo" | "done">("todo");
@@ -252,7 +254,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
               }}
               numberOfLines={1}
             >
-              {connectedDevice ? (connectedDevice.displayName || connectedDevice.name) : "No Thermal Printer Connected"}
+              {connectedDevice ? (connectedDevice.displayName || connectedDevice.name) : t("QRHandling.No Printer Connected", "No Printer Connected")}
             </Text>
             <Text
               style={{
@@ -260,7 +262,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                 color: connectedDevice ? "#166534" : "#B91C1C",
               }}
             >
-              {connectedDevice ? "Bluetooth Ready (50x30mm TSPL)" : "Tap to connect Bluetooth printer"}
+              {connectedDevice ? t("QRHandling.Bluetooth Ready", "Bluetooth Ready (50x30mm TSPL)") : t("QRHandling.Tap to scan & connect printer", "Tap to scan & connect printer")}
             </Text>
           </View>
         </View>
@@ -276,7 +278,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           activeOpacity={0.8}
         >
           <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "700" }}>
-            {connectedDevice ? "Change" : "Connect"}
+            {connectedDevice ? t("QRHandling.Change", "Change") : t("QRHandling.Connect", "Connect")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -291,11 +293,10 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           {/* Header Title section */}
           <View className="items-center mt-5 mb-5 px-4">
             <Text className="text-xl font-bold text-slate-950 text-center">
-              Welcome to QR Handling
+              {t("QRHandling.QR Handling", "Welcome to QR Handling")}
             </Text>
             <Text className="text-[#54617D] text-sm text-center mt-1">
-              Please wait and check again.{"\n"}This row doesn't have a daily
-              target yet.
+              {t("Packing.No daily target for row", "Please wait and check again.\nThis row doesn't have a daily target yet.")}
             </Text>
           </View>
 
@@ -317,7 +318,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           {/* Header Title section */}
           <View className="items-center mt-5 mb-5 px-4">
             <Text className="text-xl font-bold text-slate-950">
-              Welcome to QR Handling
+              {t("QRHandling.QR Handling", "Welcome to QR Handling")}
             </Text>
             <Text className="text-[#54617D] text-sm mt-1">
               Tap the order to print it.
@@ -339,7 +340,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                   activeTab === "todo" ? "text-white" : "text-[#54617D]"
                 }`}
               >
-                To Do ({todoOrders.length === 0 ? "0" : String(todoOrders.length).padStart(2, "0")})
+                {t("QRHandling.To Do", { count: todoOrders.length === 0 ? "0" : String(todoOrders.length).padStart(2, "0"), defaultValue: `To Do (${todoOrders.length === 0 ? "0" : String(todoOrders.length).padStart(2, "0")})` })}
               </Text>
             </TouchableOpacity>
 
@@ -356,7 +357,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                   activeTab === "done" ? "text-white" : "text-[#54617D]"
                 }`}
               >
-                Done ({doneOrders.length === 0 ? "0" : String(doneOrders.length).padStart(2, "0")})
+                {t("QRHandling.Done", { count: doneOrders.length === 0 ? "0" : String(doneOrders.length).padStart(2, "0"), defaultValue: `Done (${doneOrders.length === 0 ? "0" : String(doneOrders.length).padStart(2, "0")})` })}
               </Text>
             </TouchableOpacity>
           </View>
@@ -384,7 +385,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                     />
                   </View>
                   <Text className="text-[#54617D] text-sm font-medium text-center mt-4">
-                    No orders to print in To Do list.
+                    {t("DistributionCenterTarget.No targets in To Do list.", "No orders to print in To Do list.")}
                   </Text>
                 </View>
               ) : (
@@ -410,6 +411,9 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                         disabled={!isTop}
                         onPress={() => {
                           if (isTop) {
+                            // Fallback to Redux store rowId in case useState async hasn't resolved yet
+                            // This prevents "Position Empty" (NO_OFFICER_ASSIGNED) error on the backend
+                            const resolvedRowId = rowId ?? store.getState().auth.activeAssignment?.rowId ?? null;
                             const nextOrder = todoOrders[idx + 1];
                             navigation.navigate("ReadyToPrint", {
                               processOrderId: order.id,
@@ -421,7 +425,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                               packagesCount: (order as any).packagesCount || 0,
                               alacarteCount: (order as any).alacarteCount || 0,
                               packagesList: (order as any).packagesList || [],
-                              rowId: rowId,
+                              rowId: resolvedRowId,
                               nextOrderNumber: nextOrder
                                 ? `${nextOrder.orderNumber} (${nextOrder.type})`
                                 : null,
@@ -501,7 +505,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                     />
                   </View>
                   <Text className="text-[#54617D] text-sm font-medium text-center mt-4">
-                    No completed orders in Done list yet.
+                    {t("DistributionCenterTarget.No targets in Out list yet.", "No completed orders in Done list yet.")}
                   </Text>
                 </View>
               ) : (
@@ -529,7 +533,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                             alacarteCount: (order as any).alacarteCount || 0,
                             packagesList: (order as any).packagesList || [],
                             isReprint: true,
-                            buttonLabel: "Start Again",
+                            buttonLabel: t("QRHandling.Start Again", "Start Again"),
                           });
                         }}
                         className={`flex-row items-center bg-white rounded-2xl p-4 shadow-sm ${cardBorderColor}`}

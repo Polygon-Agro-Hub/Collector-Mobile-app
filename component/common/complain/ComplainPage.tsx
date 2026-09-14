@@ -11,6 +11,7 @@ import {
   Platform,
   ActivityIndicator,
   BackHandler,
+  ScrollView,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
@@ -19,7 +20,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ScrollView } from "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import {
   useNavigation,
@@ -104,6 +104,12 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
               return { value: item.id, label: categoryValue };
             })
             .filter((item: { value: any }) => item.value);
+
+          mappedCategories.sort((a: { label: string }, b: { label: string }) =>
+            (a.label || "").localeCompare(b.label || "", undefined, {
+              sensitivity: "base",
+            })
+          );
 
           setCategory(mappedCategories);
         }
@@ -216,9 +222,9 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
   return (
     <>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        enabled
-        className="flex-1 bg-white"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+        className="bg-white"
       >
         <View className="flex-1 bg-white">
           {loading ? (
@@ -228,6 +234,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
               className="flex-1 bg-white"
               contentContainerStyle={{
                 flexGrow: 1,
+                paddingBottom: 40,
                 backgroundColor: "white",
               }}
               keyboardShouldPersistTaps="handled"
@@ -241,10 +248,10 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 transparent
               />
 
-              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-white justify-center">
+              <View className="flex-1 px-4 max-w-[500px] w-full mx-auto bg-white">
                 <Image
                   source={require("../../../assets/images/complain/complain.webp")}
-                  className="w-48 h-48 mx-auto"
+                  className="w-48 h-48 mx-auto mt-2"
                   resizeMode="contain"
                 />
 
