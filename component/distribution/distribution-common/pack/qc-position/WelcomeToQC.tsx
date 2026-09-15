@@ -27,6 +27,7 @@ import { clearActiveAssignment } from "../../../../../store/authSlice";
 import { useTranslation } from "react-i18next";
 
 import { QCStatus } from "@/constants/packing/status-types";
+import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
 
 interface QCItem {
   id: number;
@@ -38,7 +39,7 @@ interface QCItem {
   image: string;
 }
 
-import { formatTimeSlot } from "@/constants/packing/time-slots";
+import { formatTimeSlot, formatOrderTitle } from "@/constants/packing/time-slots";
 
 const formatWeightDisplay = (weightStr: string) => {
   if (!weightStr) return weightStr;
@@ -78,6 +79,7 @@ export default function WelcomeToQC({
   const [trackingRows, setTrackingRows] = useState<any[]>([]);
   const [alacarteCount, setAlacarteCount] = useState<number>(0);
   const [isAlacarteActive, setIsAlacarteActive] = useState<boolean>(false);
+  const [isMainContainer, setIsMainContainer] = useState<boolean>(false);
   const [displayOrderTitle, setDisplayOrderTitle] = useState<string>(
     initialOrderNumber || ""
   );
@@ -205,6 +207,14 @@ export default function WelcomeToQC({
           setPackagesList(activeData.packagesList || []);
           setAlacarteCount(activeData.alacarteCount || 0);
           setIsAlacarteActive(!!activeData.isAlacarteActive);
+          setIsMainContainer(
+            Boolean(
+              activeData.isMainContainerBox ||
+              Number(activeData.isMainContainerActive) === 1 ||
+              activeData.activeOrderPackageId === -1 ||
+              activeData.isMainContainer
+            )
+          );
           setTrackingRows(activeData.trackingRows || []);
           if (activeData.timeSlot) {
             setScheduledTime(formatTimeSlot(activeData.timeSlot));
@@ -307,17 +317,100 @@ export default function WelcomeToQC({
           { headers: { Authorization: `Bearer ${token}` } }
         ).catch(() => {});
 
-        setAlertMessage("Packing has been completed successfully.");
+        if (status === "no_items") {
+          const isMainFromTracking = trackingRows.some(
+            (r: any) =>
+              Number(r.id) === Number(activeTrackingId) &&
+              (Number(r.isMainContainer) === 1 || r.isMainContainer === true)
+          );
+          const isMainOrder = isMainContainer || isMainFromTracking || activeOrderPackageId === -1;
+
+          if (isMainOrder) {
+            setAlertMessage(
+              t(
+                "Packing.Main Container has been received.",
+                "Main Container has been received."
+              )
+            );
+          } else {
+            setAlertMessage(
+              t(
+                "Packing.Packing has been moved to the next position.",
+                "Packing has been moved to the next position."
+              )
+            );
+          }
+        } else {
+          setAlertMessage(
+            t(
+              "Packing.Packing has been completed successfully.",
+              "Packing has been completed successfully."
+            )
+          );
+        }
         setAlertVisible(true);
       } else if (advanceRes.data && !advanceRes.data.success) {
-        Alert.alert("Station Busy", advanceRes.data.message || "The next station is currently busy.");
+        const code = advanceRes.data.code || advanceRes.data.data?.code;
+        const targetPos = advanceRes.data.targetPosition || advanceRes.data.data?.targetPosition || (officerPosIndex ? officerPosIndex + 1 : 2);
+        const occupiedInv = advanceRes.data.occupiedInvoice || advanceRes.data.data?.occupiedInvoice || "";
+
+        if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+          Alert.alert(
+            t("Packing.Position Busy", "Position Busy"),
+            t("Packing.Position Busy Message", {
+              position: targetPos,
+              invoice: occupiedInv,
+              defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+            })
+          );
+        } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+          Alert.alert(
+            t("Packing.Position Not Available", "Position Not Available"),
+            t("Packing.No Officer Assigned Message", {
+              position: targetPos,
+              defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+            })
+          );
+        } else {
+          Alert.alert(
+            t("Packing.Error", "Error"),
+            advanceRes.data.message || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
+          );
+        }
         setIsAdvancing(false);
       } else {
         setIsAdvancing(false);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error advancing QC box:", err);
-      Alert.alert("Error", "Failed to advance QC position.");
+      const data = err?.response?.data;
+      const code = data?.code || data?.data?.code;
+      const targetPos = data?.targetPosition || data?.data?.targetPosition || (officerPosIndex ? officerPosIndex + 1 : 2);
+      const occupiedInv = data?.occupiedInvoice || data?.data?.occupiedInvoice || "";
+
+      if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+        Alert.alert(
+          t("Packing.Position Busy", "Position Busy"),
+          t("Packing.Position Busy Message", {
+            position: targetPos,
+            invoice: occupiedInv,
+            defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+          })
+        );
+      } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+        Alert.alert(
+          t("Packing.Position Not Available", "Position Not Available"),
+          t("Packing.No Officer Assigned Message", {
+            position: targetPos,
+            defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+          })
+        );
+      } else {
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          data?.message || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
+        );
+      }
       setIsAdvancing(false);
     }
   };
@@ -393,7 +486,7 @@ export default function WelcomeToQC({
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
       <CustomHeader
-        title={status === "no_target" || loading ? "" : displayOrderTitle}
+        title={status === "no_target" || loading ? "" : formatOrderTitle(displayOrderTitle, t)}
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
         rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
@@ -401,7 +494,7 @@ export default function WelcomeToQC({
 
       {loading ? (
         <View className="flex-1 bg-white">
-          <LoadingPage />
+          <LoadingPage message={t("Packing.Loading", t("ManagerTransactions.Loading", "Loading..."))} />
         </View>
       ) : (
         <>
@@ -419,10 +512,10 @@ export default function WelcomeToQC({
                 </View>
                 <View>
                   <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
-                    {t("Packing.Scheduled Time :", "Scheduled Time :")}
+                    {t("Packing.Delivery Time", "Delivery Time")}
                   </Text>
                   <Text className="text-[#030E25] font-extrabold text-base">
-                    {scheduledTime}
+                    {formatTimeSlot(scheduledTime, t)}
                   </Text>
                 </View>
               </View>
@@ -632,7 +725,7 @@ export default function WelcomeToQC({
       <AlertModal
         visible={alertVisible}
         type="success"
-        title="Success"
+        title={t("Packing.Success", "Success")}
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);

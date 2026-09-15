@@ -14,6 +14,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { formatTimeSlot, formatOrderCategory } from "@/constants/packing/time-slots";
 
 interface OrderItem {
   id: string;
@@ -143,11 +144,19 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
     });
   };
 
+  const formatOrderSubtitle = (item: OrderItem) => {
+    if (!item.subtitle) return "";
+    if (item.type === "pickup") {
+      return t("AssignGroups.Pickup Orders", "රැගෙන යාමේ ඇණවුම්");
+    }
+    return formatOrderCategory(item.subtitle, t);
+  };
+
   return (
     <View className="flex-1 bg-white">
       {/* Custom Header with absolutely centered titles */}
       <CustomHeader
-        title={group.timeSlot}
+        title={formatTimeSlot(group.timeSlot, t)}
         navigation={navigation}
         onBackPress={handleBack}
       />
@@ -230,7 +239,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
                     </View>
                     <View>
                       <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
-                      <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
+                      <Text className="text-[#676771] text-xs mt-0.5">{formatOrderSubtitle(item)}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -280,7 +289,7 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
                     </View>
                     <View>
                       <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
-                      <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
+                      <Text className="text-[#676771] text-xs mt-0.5">{formatOrderSubtitle(item)}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}

@@ -33,6 +33,24 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
     route.params?.selectedRowId || route.params?.selectedRow?.id || null
   );
 
+  const getRowNumber = (rowName?: string) => {
+    if (!rowName) return "";
+    const match = rowName.match(/\d+/);
+    return match ? match[0] : rowName;
+  };
+
+  const formatRowTitle = (rowName?: string) => {
+    if (!rowName) return "";
+    const num = getRowNumber(rowName);
+    if (num) {
+      return t("AssignGroups.Row {{number}}", {
+        number: num,
+        defaultValue: t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` }),
+      });
+    }
+    return rowName;
+  };
+
   const handleBack = () => {
     navigation.navigate("SelectOrder", {
       ...route.params,
@@ -187,7 +205,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                     {/* Row Info */}
                     <View className="flex-1">
                       <Text className="font-extrabold text-[#030E25] text-base">
-                        {row.name}
+                        {formatRowTitle(row.name)}
                       </Text>
                       <Text className="text-xs text-[#676771] mt-1 font-medium">
                         {row.allocatedCount}{" "}

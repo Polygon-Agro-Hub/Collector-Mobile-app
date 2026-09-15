@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import React from "react";
 import {
   View,
@@ -8,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 interface LoadingPageProps {
   message?: string;
@@ -22,6 +22,7 @@ const LoadingPage: React.FC<LoadingPageProps> = ({
   messageStyle,
   fullScreen = true,
 }) => {
+  const { t } = useTranslation();
   return (
     <View
       className="flex-1 w-full justify-center items-center bg-white"
@@ -35,7 +36,7 @@ const LoadingPage: React.FC<LoadingPageProps> = ({
           className="text-sm font-bold text-[#030E25] text-center"
           style={messageStyle}
         >
-          {message || t("ManagerTransactions.Loading")}
+          {message || t("Packing.Loading", t("ManagerTransactions.Loading", "Loading..."))}
         </Text>
       </View>
     </View>

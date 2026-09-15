@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
 import LoadingPage from "@/component/components/loading/LoadingPage";
+import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import { useTranslation } from "react-i18next";
 
 // Define TypeScript interfaces for our sample data
@@ -51,6 +52,55 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [activeAssignment, setActiveAssignment] = useState<any | null>(null);
+
+  const getRowNumber = (row: RowData | null | undefined) => {
+    if (!row) return "";
+    if (row.rowIndex !== undefined && row.rowIndex !== null) {
+      return String(row.rowIndex);
+    }
+    const match = row.name?.match(/\d+/);
+    return match ? match[0] : row.name;
+  };
+
+  const formatRowTitle = (row: RowData | null | undefined) => {
+    if (!row) return "";
+    const num = getRowNumber(row);
+    if (num) {
+      return t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` });
+    }
+    return row.name;
+  };
+
+  const getPositionNumber = (position: PositionData | any | null | undefined) => {
+    if (!position) return "";
+    if (position.pIndex !== undefined && position.pIndex !== null) {
+      return String(position.pIndex);
+    }
+    const match = position.name?.match(/\d+/);
+    if (match) return match[0];
+    if (position.leftLabel && !isNaN(Number(position.leftLabel))) {
+      return String(Number(position.leftLabel));
+    }
+    return "";
+  };
+
+  const formatPositionName = (position: PositionData | any | null | undefined) => {
+    if (!position) return "";
+    if (position.type === "QR" || position.pType === "QR" || position.name === "QR Handling Position") {
+      return t("Packing.QR Handling Position", "QR Handling Position");
+    }
+    if (position.type === "QC" || position.pType === "QC" || position.name === "QC Position") {
+      return t("Packing.QC Position", "QC Position");
+    }
+    const posNum = getPositionNumber(position);
+    if (!posNum) {
+      return t("Packing.Packing Position", "Packing Position");
+    }
+    return t("Packing.Packing Position {{number}}", {
+      number: posNum,
+      defaultValue: `Packing Position ${posNum}`,
+    });
+  };
 
   const fetchPositionsSilently = async (rowId: number) => {
     try {
@@ -214,12 +264,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         } else if (assignment.type === "NOR") {
           navigation.replace("WelcomeToPacking", {
             positionId: assignment.positionId,
-            positionName: assignment.name,
+            positionName: formatPositionName(assignment),
             rowId: assignment.rowId,
           });
         } else if (assignment.type === "QC") {
           navigation.replace("WelcomeToQC", {
-            positionName: assignment.name,
+            positionName: formatPositionName(assignment),
             rowId: assignment.rowId,
           });
         }
@@ -323,8 +373,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const handlePositionSelect = (position: PositionData) => {
     if (position.status === "Occupied") {
       Alert.alert(
-        "Position Occupied",
-        `Position "${position.name}" is currently occupied by another officer. Please select an available position.`
+        t("Packing.Position Occupied", "Position Occupied"),
+        t(
+          "Packing.Position occupied alert",
+          `Position "${formatPositionName(position)}" is currently occupied by another officer. Please select an available position.`,
+          { name: formatPositionName(position) }
+        )
       );
       return;
     }
@@ -373,12 +427,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 } else if (selectedPosition.type === "NOR") {
                   navigation.navigate("WelcomeToPacking", { 
                     positionId: selectedPosition.id,
-                    positionName: selectedPosition.name,
+                    positionName: formatPositionName(selectedPosition),
                     rowId: selectedRow?.id,
                   });
                 } else if (selectedPosition.type === "QC") {
                   navigation.navigate("WelcomeToQC", { 
-                    positionName: selectedPosition.name,
+                    positionName: formatPositionName(selectedPosition),
                     rowId: selectedRow?.id,
                   });
                 }
@@ -441,8 +495,24 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
       {loading ? (
         <View className="flex-1 justify-center items-center bg-white">
-          <LoadingPage message={t("ManagerTransactions.Loading")} fullScreen />
+          <LoadingPage message={t("Packing.Loading", t("ManagerTransactions.Loading", "Loading..."))} fullScreen />
         </View>
+      ) : step === 1 && rows.length === 0 ? (
+        <ScrollView
+          className="flex-1 bg-white"
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <NoDataScreen
+            message={t(
+              "Packing.Rows are not available. Please wait until rows are available to obtain a position.",
+              "Rows are not available. Please wait until rows are available to obtain a position."
+            )}
+          />
+        </ScrollView>
       ) : (
         <ScrollView
           className="flex-1 bg-white"
@@ -488,7 +558,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                     {/* Content */}
                     <View className="flex-1">
                       <Text className="font-bold text-slate-950 text-base">
-                        {row.name}
+                        {formatRowTitle(row)}
                       </Text>
                       <Text className="text-xs text-[#54617D] mt-0.5">
                         {row.positionsCount}{" "}
@@ -508,9 +578,9 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           <>
             {/* Step 2 Title */}
             <Text className="text-lg text-center text-slate-600 mb-6 mt-2">
-              {t("Packing.Selected :", "Selected :")}{" "}
+              {t("Packing.Selected: Row", "Selected: Row")}{" "}
               <Text className="font-extrabold text-slate-950">
-                {selectedRow?.name}
+                {getRowNumber(selectedRow)}
               </Text>
             </Text>
 
@@ -578,7 +648,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                           isOccupied ? "text-[#54617D]" : "text-slate-950"
                         }`}
                       >
-                        {position.name}
+                        {formatPositionName(position)}
                       </Text>
                       {/* Badge status */}
                       <View className="flex-row mt-1">
@@ -642,9 +712,9 @@ export default function SelectRow({ navigation }: { navigation: any }) {
             {/* Modal Description */}
             <Text className="text-[#54617D] text-sm text-center leading-relaxed px-2 mb-6">
               {t("Packing.You are selecting position in row", {
-                posName: selectedPosition?.name,
-                rowName: selectedRow?.name,
-                defaultValue: `If you confirm, from now upon you will be assigned to ${selectedPosition?.name} of ${selectedRow?.name}.`
+                posName: formatPositionName(selectedPosition),
+                rowName: formatRowTitle(selectedRow),
+                defaultValue: `If you confirm, from now upon you will be assigned to ${formatPositionName(selectedPosition)} of ${formatRowTitle(selectedRow)}.`
               })}
             </Text>
 

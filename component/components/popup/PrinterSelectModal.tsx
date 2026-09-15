@@ -111,17 +111,19 @@ export const PrinterSelectModal: React.FC<PrinterSelectModalProps> = ({
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
               <ActivityIndicator size="large" color="#4f46e5" />
               <Text style={{ marginTop: 12, fontSize: 14, fontWeight: "600", color: "#334155" }}>
-                Connecting to Printer...
+                {t("QRHandling.Connecting to Printer...", "Connecting to Printer...")}
               </Text>
             </View>
           ) : devices.length === 0 ? (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 40 }}>
               <MaterialCommunityIcons name="bluetooth-off" size={48} color="#94a3b8" />
               <Text style={{ marginTop: 12, fontSize: 14, fontWeight: "600", color: "#64748b" }}>
-                {isScanning ? "Scanning for Bluetooth printers..." : "No Bluetooth printers found."}
+                {isScanning
+                  ? t("QRHandling.Scanning for Bluetooth printers...", "Scanning for Bluetooth printers...")
+                  : t("QRHandling.No Bluetooth printers found.", "No Bluetooth printers found.")}
               </Text>
               <Text style={{ marginTop: 4, fontSize: 12, color: "#94a3b8", textAlign: "center" }}>
-                Turn on your Bluetooth label printer & tap "Scan Devices"
+                {t("QRHandling.Turn on printer prompt", 'Turn on your Bluetooth label printer & tap "Scan Devices"')}
               </Text>
             </View>
           ) : (
