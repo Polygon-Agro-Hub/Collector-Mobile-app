@@ -125,7 +125,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [countryItems, setCountryItems] = useState<CountryItem[]>([]);
+  const countryItems = useMemo<CountryItem[]>(() => {
+    return countryData.map((country) => ({
+      label: `${country.emoji}  ${country.dial_code}`,
+      value: country.dial_code,
+      countryName: t(`Countries.${country.name}`, country.name),
+      flag: country.emoji,
+      dialCode: country.dial_code,
+    }));
+  }, [t, i18n.language]);
   const [phoneCode1ModalVisible, setPhoneCode1ModalVisible] = useState(false);
   const [phoneCode2ModalVisible, setPhoneCode2ModalVisible] = useState(false);
   const [currentCountryCodeModal, setCurrentCountryCodeModal] = useState<
@@ -324,18 +332,6 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
       fetchEmpId(jobRole);
     }
   }, [jobRole, formData.userId]);
-
-  // Country Data Initializer
-  useEffect(() => {
-    const initialItems = countryData.map((country) => ({
-      label: `${country.emoji}  ${country.dial_code}`,
-      value: country.dial_code,
-      countryName: t(`Countries.${country.name}`, country.name),
-      flag: country.emoji,
-      dialCode: country.dial_code,
-    }));
-    setCountryItems(initialItems);
-  }, [t, i18n.language]);
 
   // Scroll to top when view is focused or step changes
   useFocusEffect(
@@ -1835,7 +1831,13 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 />
                 {isValidating && (
                   <Text className="text-gray-500 text-xs mt-1 ml-2">
-                    {t("AddOfficerBasicDetails.ValidatingEmail", t("Validating email..."))}
+                    {t(
+                      "AddOfficerBasicDetails.ValidatingEmail",
+                      t(
+                        "AddOfficerBasicDetails.Validating mail",
+                        "විද්‍යුත් තැපෑල සත්‍යාපනය කරමින් පවතී",
+                      ),
+                    )}
                   </Text>
                 )}
                 {(errorEmail || fieldErrors.email) && (

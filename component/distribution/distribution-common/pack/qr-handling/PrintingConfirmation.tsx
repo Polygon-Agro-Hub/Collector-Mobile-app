@@ -182,7 +182,12 @@ export default function PrintingConfirmation({
       setIsPrinterModalOpen(false);
       setIsPrintSuccess(false);
       setAlertType("success");
-      setAlertTitle(t("QRHandling.Printer Connected", "Printer Connected"));
+      setAlertTitle(
+        t(
+          "QRHandling.Printer Connected Successfully",
+          "Printer Connected Successfully"
+        )
+      );
       setAlertMessage(
         t("QRHandling.Connected to {{deviceName}}", {
           deviceName: device.displayName || device.name,

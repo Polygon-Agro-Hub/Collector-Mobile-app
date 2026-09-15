@@ -36,7 +36,9 @@ const LoadingPage: React.FC<LoadingPageProps> = ({
           className="text-sm font-bold text-[#030E25] text-center"
           style={messageStyle}
         >
-          {message || t("Packing.Loading", t("ManagerTransactions.Loading", "Loading..."))}
+          {message && message !== "Loading..." && message !== "Loading"
+            ? message
+            : t("Loading", t("Packing.Loading", t("ManagerTransactions.Loading", "පූරණය වෙමින්...")))}
         </Text>
       </View>
     </View>

@@ -64,6 +64,7 @@ const FailedModal: React.FC<FailedModalProps> = ({
       onRescan={onRescan}
       autoClose={autoClose}
       duration={duration}
+      showOkButton={true}
     />
   );
 };
@@ -201,9 +202,12 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
 
     timerRef.current = setTimeout(() => {
       if (!scanned && !loading && isFocusedRef.current) {
-        setModalTitle("Scan Timeout");
+        setModalTitle(t("ReceivedCashQrCode.Scan Timeout", "Scan Timeout"));
         setModalMessage(
-          "The QR code could not be detected within the time limit. Please check and try again.",
+          t(
+            "ReceivedCashQrCode.Scan timeout message",
+            "The QR code could not be detected within the time limit. Please check and try again."
+          ),
         );
         setShowRescanButton(true);
         setShowTimeoutModal(true);
@@ -367,161 +371,181 @@ const ReceivedCashQrCode: React.FC<ReceivedCashQrCodeProps> = ({
 
   console.log("STATE →", { scanned, loading, showErrorModal, showSuccessModal, modalTitle });
 
-const handleBarCodeScanned = async ({
-  type,
-  data,
-}: {
-  type: string;
-  data: string;
-}) => {
-  // ✅ FIX: single, synchronous, ref-based guard.
-  if (isProcessingRef.current || !isFocusedRef.current) return;
-  isProcessingRef.current = true;
+  const handleBarCodeScanned = async ({
+    type,
+    data,
+  }: {
+    type: string;
+    data: string;
+  }) => {
+    // Single, synchronous, ref-based guard
+    if (isProcessingRef.current || !isFocusedRef.current) return;
+    isProcessingRef.current = true;
 
-  setScanned(true);
-  setLoading(true);
+    setScanned(true);
+    setLoading(true);
 
-  if (timerRef.current) {
-    clearTimeout(timerRef.current);
-  }
-
-  // Safety net: no matter what happens below, never let the overlay
-  // stay up longer than 20s.
-  if (loadingSafetyRef.current) clearTimeout(loadingSafetyRef.current);
-  loadingSafetyRef.current = setTimeout(() => {
-    setLoading(false);
-  }, 20000);
-
-  try {
-    const cashOfficerCode = extractCashOfficerCode(data);
-
-    if (!cashOfficerCode) {
-      setModalTitle("Failed!");
-      setModalMessage(
-        "The QR code is not identified.\nPlease check and try again.",
-      );
-      setShowRescanButton(true);
-      setShowErrorModal(true);
-      return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
 
-    if (!validateDCMOfficerCode(cashOfficerCode)) {
-      setModalTitle("Failed!");
-      setModalMessage(
-        "Invalid officer code format.\nMust be DCM followed by 5 digits (e.g., DCM00001).",
-      );
-      setShowRescanButton(true);
-      setShowErrorModal(true);
-      return;
-    }
+    // Safety net: no matter what happens below, never let the overlay
+    // stay up longer than 20s.
+    if (loadingSafetyRef.current) clearTimeout(loadingSafetyRef.current);
+    loadingSafetyRef.current = setTimeout(() => {
+      setLoading(false);
+    }, 20000);
 
-    const result = await handOverCashToOfficer(
-      selectedTransactions,
-      cashOfficerCode,
-    );
+    try {
+      const cashOfficerCode = extractCashOfficerCode(data);
 
-    // Check for success based on the actual response structure
-    if (result.status === "success") {
-      setModalTitle(t("qrcode.success"));
-      setModalMessage(
-        <View className="items-center">
-          <Text className="text-center text-[#000000] text-base">
-            <Text className="font-bold">
-              {t("qrcode.Rs")}.{" "}
-              {totalCash.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })} {" "}
-            </Text>
-            {t("qrcode.has been successfully handed over to")}
-            <Text className="font-bold">
-              {" "}
-              {cashOfficerCode.toUpperCase()}
-            </Text>
-            .
-          </Text>
-        </View>,
-      );
-
-      setShowSuccessModal(true);
-    } else {
-      // This handles cases where the backend returns an error status
-      setModalTitle(t("error"));
-      setModalMessage(result?.message || t("cashHandoverFailed"));
-      setShowRescanButton(true);
-      setShowErrorModal(true);
-    }
-  } catch (error: any) {
-    console.error("Error processing QR scan:", error);
-
-    // Extract the error message properly
-    let title = "Failed!";
-    let message = "The QR code is not identified.\nPlease check and try again.";
-
-    // Get the error message from various possible locations
-    const errorMessage = 
-      error?.response?.data?.message || 
-      error?.data?.message || 
-      error?.message || 
-      "";
-
-    const statusCode = 
-      error?.response?.status || 
-      error?.status || 
-      error?.data?.status;
-
-    // Check for specific validation errors from the backend
-    if (errorMessage.includes("already handed over") || 
-        errorMessage.includes("already processed")) {
-      title = "Already Processed!";
-      message = "These transactions have already been handed over.";
-    } else if (statusCode === 404) {
-      title = "Officer Not Found";
-      message = errorMessage || "The cash officer code is not recognized.";
-    } else if (statusCode === 403) {
-      title = "Not Valid!";
-      // Show the specific validation message from the backend
-      message = errorMessage || "This Manager's ID is not acceptable.";
-      
-      // Check for specific validation scenarios
-      if (errorMessage.includes("not in the same centre")) {
-        message = "This DCM officer is not in the same centre.";
-      } else if (errorMessage.includes("Manager's ID is not acceptable")) {
-        message = "This Manager's ID is not approved or not valid.";
+      if (!cashOfficerCode || !validateDCMOfficerCode(cashOfficerCode)) {
+        setModalTitle(t("ReceivedCashQrCode.Failed!", "Failed!"));
+        setModalMessage(
+          t(
+            "ReceivedCashQrCode.QR not identified",
+            "The QR code is not identified. Please check and try again."
+          )
+        );
+        setShowRescanButton(true);
+        setShowErrorModal(true);
+        return;
       }
-    } else if (statusCode === 400) {
-      title = "Invalid Request";
-      message = errorMessage || "Invalid request. Please try again.";
-    } else if (statusCode === 409) {
-      title = "Already Processed!";
-      message = errorMessage || "These transactions have already been handed over.";
-    } else if (errorMessage.includes("Network error")) {
-      title = "Network Error";
-      message = "Please check your internet connection and try again.";
-    } else if (statusCode === 401) {
-      title = "Session Expired";
-      message = "Please login again to continue.";
-    } else if (statusCode === 500) {
-      title = "Server Error";
-      message = "Internal server error. Please try again later.";
-    } else if (errorMessage) {
-      // Use the exact error message from the backend
-      message = errorMessage;
-    }
 
-    setModalTitle(title);
-    setModalMessage(message);
-    setShowRescanButton(true);
-    setShowErrorModal(true);
-  } finally {
-    if (loadingSafetyRef.current) {
-      clearTimeout(loadingSafetyRef.current);
-      loadingSafetyRef.current = null;
+      const result = await handOverCashToOfficer(
+        selectedTransactions,
+        cashOfficerCode,
+      );
+
+      // Check for success based on the actual response structure
+      if (result.status === "success" || result.success) {
+        setModalTitle(t("qrcode.success", "Success!"));
+        const formattedTotalCash = totalCash.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        setModalMessage(
+          <View className="items-center">
+            <Text className="text-center text-[#000000] text-base font-medium">
+              {t("ReceivedCashQrCode.cashHandoverSuccess", {
+                amount: formattedTotalCash,
+                officerCode: cashOfficerCode.toUpperCase(),
+                defaultValue: `Rs. ${formattedTotalCash} has been successfully handed over to ${cashOfficerCode.toUpperCase()}.`,
+              })}
+            </Text>
+          </View>,
+        );
+
+        setShowSuccessModal(true);
+      } else {
+        // This handles cases where the backend returns an error status
+        setModalTitle(t("qrcode.error", "Error"));
+        setModalMessage(result?.message || t("qrcode.cashHandoverFailed", "Failed to hand over cash"));
+        setShowRescanButton(true);
+        setShowErrorModal(true);
+      }
+    } catch (error: any) {
+      console.error("Error processing QR scan:", error);
+
+      // Extract the error message properly
+      let title = t("ReceivedCashQrCode.Failed!", "Failed!");
+      let message: string | React.ReactElement = t(
+        "ReceivedCashQrCode.QR not identified",
+        "The QR code is not identified. Please check and try again."
+      );
+
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.data?.message ||
+        error?.message ||
+        "";
+
+      const statusCode =
+        error?.response?.status ||
+        error?.status ||
+        error?.data?.status;
+
+      if (
+        errorMessage.toLowerCase().includes("same centre") ||
+        errorMessage.toLowerCase().includes("same center") ||
+        errorMessage.toLowerCase().includes("centre") ||
+        errorMessage.toLowerCase().includes("center")
+      ) {
+        title = t("ReceivedCashQrCode.Not Valid!", "Not Valid!");
+        message = t(
+          "ReceivedCashQrCode.This DCM officer is not in the same centre.",
+          "This DCM officer is not in the same centre."
+        );
+      } else if (
+        errorMessage.toLowerCase().includes("manager") ||
+        errorMessage.toLowerCase().includes("not approved") ||
+        errorMessage.toLowerCase().includes("not acceptable") ||
+        errorMessage.toLowerCase().includes("not valid") ||
+        errorMessage.toLowerCase().includes("invalid") ||
+        statusCode === 403
+      ) {
+        title = t("ReceivedCashQrCode.Not Valid!", "Not Valid!");
+        message = t(
+          "ReceivedCashQrCode.This Manager's ID is not approved or not valid.",
+          "This Manager's ID is not approved or not valid."
+        );
+      } else if (
+        statusCode === 409 ||
+        errorMessage.toLowerCase().includes("already handed over") ||
+        errorMessage.toLowerCase().includes("already processed")
+      ) {
+        title = t("ReceivedCashQrCode.Already Processed!", "Already Processed!");
+        message = errorMessage || t(
+          "ReceivedCashQrCode.These transactions have already been handed over.",
+          "These transactions have already been handed over."
+        );
+      } else if (statusCode === 400) {
+        title = t("ReceivedCashQrCode.Invalid Request", "Invalid Request");
+        message = errorMessage || t(
+          "ReceivedCashQrCode.Invalid request. Please try again.",
+          "Invalid request. Please try again."
+        );
+      } else if (statusCode === 401) {
+        title = t("ReceivedCashQrCode.Session Expired", "Session Expired");
+        message = t(
+          "ReceivedCashQrCode.Please login again to continue.",
+          "Please login again to continue."
+        );
+      } else if (statusCode === 404) {
+        title = t("ReceivedCashQrCode.Officer Not Found", "Officer Not Found");
+        message = errorMessage || t(
+          "ReceivedCashQrCode.The cash officer code is not recognized.",
+          "The cash officer code is not recognized."
+        );
+      } else if (statusCode === 500) {
+        title = t("ReceivedCashQrCode.Server Error", "Server Error");
+        message = t(
+          "ReceivedCashQrCode.Internal server error. Please try again later.",
+          "Internal server error. Please try again later."
+        );
+      } else if (errorMessage.toLowerCase().includes("network error")) {
+        title = t("ReceivedCashQrCode.Network Error", "Network Error");
+        message = t(
+          "ReceivedCashQrCode.Please check your internet connection and try again.",
+          "Please check your internet connection and try again."
+        );
+      } else if (errorMessage) {
+        message = errorMessage;
+      }
+
+      setModalTitle(title);
+      setModalMessage(message);
+      setShowRescanButton(true);
+      setShowErrorModal(true);
+    } finally {
+      if (loadingSafetyRef.current) {
+        clearTimeout(loadingSafetyRef.current);
+        loadingSafetyRef.current = null;
+      }
+      setLoading(false);
+      isProcessingRef.current = false;
     }
-    setLoading(false);
-    isProcessingRef.current = false;
-  }
-};
+  };
 
   const handleErrorModalClose = () => {
     setShowErrorModal(false);
@@ -553,7 +577,7 @@ const handleBarCodeScanned = async ({
         </View>
         <Text className="text-white text-lg mt-4">
           {" "}
-          {t("qrcode.Loading camera")}
+          {t("qrcode.Loading camera", "Loading camera...")}
         </Text>
       </SafeAreaView>
     );
@@ -585,7 +609,7 @@ const handleBarCodeScanned = async ({
           <View className="bg-black/80 p-6 rounded-xl items-center">
             <ActivityIndicator size="large" color="#ffffff" />
             <Text className="text-white text-lg font-semibold mt-4">
-              {t("qrcode.Handing Over Cash")}
+              {t("qrcode.Handing Over Cash", "Handing Over Cash...")}
             </Text>
           </View>
         </View>
@@ -593,8 +617,11 @@ const handleBarCodeScanned = async ({
 
       <FailedModal
         visible={showTimeoutModal}
-        title="Scan Timeout"
-        message="The QR code could not be detected within the time limit. Please check and try again."
+        title={t("ReceivedCashQrCode.Scan Timeout", "Scan Timeout")}
+        message={t(
+          "ReceivedCashQrCode.Scan timeout message",
+          "The QR code could not be detected within the time limit. Please check and try again."
+        )}
         onClose={handleTimeoutModalClose}
         showRescanButton={true}
         onRescan={handleTimeoutRescan}

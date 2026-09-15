@@ -22,6 +22,7 @@ import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { formatTimeSlot, formatReadyDateTime } from "@/constants/packing/time-slots";
 
 type ViewPickupOrdersNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -138,15 +139,12 @@ const ViewPickupOrders: React.FC<ViewPickupOrdersProps> = ({
   };
 
   const scheduledDate = formatScheduleDate(order.sheduleDate);
-  const formattedTime = formatScheduleTime(order.sheduleTime);
-  const timeSlot = `${scheduledDate} (${formattedTime})`;
+  const formattedTime = formatTimeSlot(formatScheduleTime(order.sheduleTime), t);
+  const timeSlot = formattedTime
+    ? `${scheduledDate} (${formattedTime})`
+    : scheduledDate;
 
- const readyDate = new Date(order.packTime);
-  const readyTime = `At ${readyDate.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  })} on ${readyDate.getFullYear()}/${String(readyDate.getMonth() + 1).padStart(2, "0")}/${String(readyDate.getDate()).padStart(2, "0")}`;
+  const readyTime = formatReadyDateTime(order.packTime, t);
 
   const remaining = Number(order.remainingAmount ?? order.fullTotal) || 0;
   const isPaid = order.isPaid && order.paymentMethod === "Card";

@@ -15,6 +15,7 @@ import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 type ScanDriverQRNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -26,6 +27,7 @@ interface ScanDriverQRProps {
 }
 
 const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
+  const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
@@ -205,7 +207,9 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
         <View className="bg-black/50 p-8 rounded-full">
           <ActivityIndicator size="large" color="#F7CA21" />
         </View>
-        <Text className="text-white text-lg mt-4">Loading camera...</Text>
+        <Text className="text-white text-lg mt-4">
+          {t("qrcode.Loading camera", t("Loading camera...", "කැමරාව පූරණය වෙමින්..."))}
+        </Text>
       </SafeAreaView>
     );
   }
