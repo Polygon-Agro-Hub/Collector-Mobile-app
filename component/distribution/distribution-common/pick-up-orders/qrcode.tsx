@@ -329,19 +329,24 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
         const scannedOrderId = extractOrderId(data);
 
         if (!scannedOrderId) {
-          setModalTitle("Failed!");
-          setModalMessage("You have scanned the wrong package.");
+          setModalTitle(t("qrcode.Failed!", "Failed!"));
+          setModalMessage(
+            t(
+              "qrcode.You have scanned the wrong package.",
+              "You have scanned the wrong package."
+            )
+          );
           setShowRescanButton(true);
           setShowErrorModal(true);
           return;
         }
 
         if (scannedOrderId === expectedOrderId) {
-          setModalTitle("Success!");
+          setModalTitle(t("qrcode.success", "Success!"));
           setModalMessage(
             <View className="items-center">
               <Text className="text-center text-[#000000] mb-3 mt-2 font-bold text-lg">
-                Order ID:
+                {t("qrcode.Order ID", "Order ID")}:
               </Text>
               <Text className="text-center font-bold text-[#000000] text-lg">
                 #{scannedOrderId}
@@ -350,8 +355,13 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
           );
           setShowSuccessModal(true);
         } else {
-          setModalTitle("Failed!");
-          setModalMessage("You have scanned the wrong package.");
+          setModalTitle(t("qrcode.Failed!", "Failed!"));
+          setModalMessage(
+            t(
+              "qrcode.You have scanned the wrong package.",
+              "You have scanned the wrong package."
+            )
+          );
           setShowRescanButton(true);
           setShowErrorModal(true);
         }
@@ -532,7 +542,9 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
         <View className="bg-black/50 p-8 rounded-full">
           <ActivityIndicator size="large" color="black" />
         </View>
-        <Text className="text-white text-lg mt-4">Loading camera...</Text>
+        <Text className="text-white text-lg mt-4">
+          {t("qrcode.Loading camera", t("Loading camera...", "කැමරාව පූරණය වෙමින්..."))}
+        </Text>
       </SafeAreaView>
     );
   }
@@ -576,8 +588,11 @@ const Qrcode: React.FC<QrcodeProps> = ({ navigation, route }) => {
       {/* Timeout Modal */}
       <AlertModal
         visible={showTimeoutModal}
-        title="Scan Timeout"
-        message="The QR code could not be detected within the time limit. Please check and try again."
+        title={t("qrcode.Scan Timeout", "Scan Timeout")}
+        message={t(
+          "qrcode.Scan timeout message",
+          "The QR code could not be detected within the time limit. Please check and try again."
+        )}
         onClose={handleTimeoutModalClose}
         showRescanButton={true}
         onRescan={handleTimeoutRescan}

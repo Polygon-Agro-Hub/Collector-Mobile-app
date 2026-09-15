@@ -77,15 +77,33 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
   };
 
   const formatDateTime = (dateString: string) => {
+    if (!dateString) return "";
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     const hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
+    const isPM = hours >= 12;
     const displayHours = hours % 12 || 12;
 
+    const am = t("Time.AM", { defaultValue: "AM" });
+    const isSinhala = am === "පෙ.ව." || t("AddOfficerBasicDetails.LNG") === "si";
+    const isTamil = am === "முற்பகல்" || t("AddOfficerBasicDetails.LNG") === "ta";
+
+    if (isSinhala) {
+      const period = isPM ? "ප.ව." : "පෙ.ව.";
+      return `${year}/${month}/${day} ${period} ${displayHours}:${minutes}`;
+    }
+
+    if (isTamil) {
+      const period = isPM ? "பிற்பகல்" : "முற்பகல்";
+      return `${year}/${month}/${day} ${period} ${displayHours}:${minutes}`;
+    }
+
+    const ampm = isPM ? "PM" : "AM";
     return `${year}/${month}/${day} ${displayHours}:${minutes} ${ampm}`;
   };
 
@@ -118,23 +136,25 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
 
       if (response.data.success) {
         const mappedData: Transaction[] = response.data.data.map(
-          (item: any) => ({
-            id:
-              item.pickupOrderId?.toString() || item.processOrderId?.toString(),
-            orderId:
-              item.processOrderOrderId || item.pickupOrderOrderId || "N/A",
-            cash: parseFloat(item.handOverPrice) || 0,
-            receivedTime: item.handOverTime
-              ? formatDateTime(item.handOverTime)
-              : formatDateTime(item.pickupCreatedAt),
-            date: item.handOverTime
-              ? extractDate(item.handOverTime)
-              : extractDate(item.pickupCreatedAt),
-            pickupOrderId: item.pickupOrderId?.toString(),
-            invoiceNo: item.invNo,
-            paymentMethod: item.paymentMethod,
-            transactionId: item.transactionId,
-          }),
+          (item: any) => {
+            const rawTime = item.handOverTime || item.pickupCreatedAt;
+            return {
+              id:
+                item.pickupOrderId?.toString() || item.processOrderId?.toString(),
+              orderId:
+                item.processOrderOrderId || item.pickupOrderOrderId || "N/A",
+              cash: parseFloat(item.handOverPrice) || 0,
+              fullTotal: item.handOverPrice || "0",
+              receivedTime: rawTime ? formatDateTime(rawTime) : "",
+              date: item.handOverTime
+                ? extractDate(item.handOverTime)
+                : extractDate(item.pickupCreatedAt),
+              pickupOrderId: item.pickupOrderId?.toString(),
+              invoiceNo: item.invNo,
+              paymentMethod: item.paymentMethod,
+              transactionId: item.transactionId,
+            };
+          },
         );
 
         setAllTransactions(mappedData);

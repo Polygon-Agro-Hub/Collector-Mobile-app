@@ -375,12 +375,18 @@ export default function DigitalSignature({
     }
 
     Alert.alert(
-      "Confirm Signature",
-      "Are you sure you want to save this signature for pickup?",
+      t("DigitalSignature.Confirm Signature", "Confirm Signature"),
+      t(
+        "DigitalSignature.Confirm signature message",
+        "Are you sure you want to save this signature for pickup?"
+      ),
       [
-        { text: "Cancel", style: "cancel" },
         {
-          text: "Yes, Save",
+          text: t("DigitalSignature.Cancel", "Cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("DigitalSignature.Yes, Save", "Yes, Save"),
           onPress: async () => {
             await saveSignature(signature);
           },
@@ -674,7 +680,7 @@ export default function DigitalSignature({
                 marginLeft: 8,
               }}
             >
-              {t("Common.Done", "Done")}
+              {t("DigitalSignature.Done", "Done")}
             </Text>
           </TouchableOpacity>
         )}
@@ -683,7 +689,7 @@ export default function DigitalSignature({
       {/* ── SUCCESS MODAL ── */}
       <AlertModal
         visible={showSuccessModal}
-        title="Successful!"
+        title={t("DigitalSignature.Successful!", "Successful!")}
         message={successMessage}
         type="success"
         onClose={handleSuccessModalClose}

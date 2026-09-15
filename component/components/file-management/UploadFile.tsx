@@ -16,6 +16,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Linking from "expo-linking";
 import * as Sharing from "expo-sharing";
+import { useTranslation } from "react-i18next";
 import PdfViewer from "./PdfViewer";
 
 
@@ -39,13 +40,17 @@ export default function UploadFile({
   onFileChange,
   maxSizeMB = 5,
 }: UploadFileProps) {
+  const { t } = useTranslation();
   const [previewVisible, setPreviewVisible] = useState(false);
   const MAX_FILE_SIZE_BYTES = maxSizeMB * 1024 * 1024;
 
   const showFileTooLargeAlert = () => {
     Alert.alert(
-      "File Too Large",
-      `File is too large. Please upload an image or file smaller than ${maxSizeMB} MB.`,
+      t("UploadFile.File Too Large", "File Too Large"),
+      t("UploadFile.File is too large", {
+        maxSizeMB,
+        defaultValue: `File is too large. Please upload an image or file smaller than ${maxSizeMB} MB.`,
+      }),
     );
   };
 
@@ -84,7 +89,10 @@ export default function UploadFile({
       }
     } catch (err) {
       console.error("Error picking image:", err);
-      Alert.alert("Upload Error", "Failed to select file. Please try again.");
+      Alert.alert(
+        t("UploadFile.Upload Error", "Upload Error"),
+        t("UploadFile.Failed to select file. Please try again.", "Failed to select file. Please try again.")
+      );
     }
   };
 
@@ -124,18 +132,21 @@ export default function UploadFile({
       });
     } catch (err) {
       console.error("Error picking document:", err);
-      Alert.alert("Upload Error", "Failed to select file. Please try again.");
+      Alert.alert(
+        t("UploadFile.Upload Error", "Upload Error"),
+        t("UploadFile.Failed to select file. Please try again.", "Failed to select file. Please try again.")
+      );
     }
   };
 
   const handleUploadPress = () => {
     Alert.alert(
-      "Select Upload Source",
-      "Choose how you want to upload your file",
+      t("UploadFile.Select Upload Source", "Select Upload Source"),
+      t("UploadFile.Choose how you want to upload your file", "Choose how you want to upload your file"),
       [
-        { text: "Photo Library", onPress: pickImage },
-        { text: "Browse Files / PDF", onPress: pickDocument },
-        { text: "Cancel", style: "cancel" },
+        { text: t("UploadFile.Photo Library", "Photo Library"), onPress: pickImage },
+        { text: t("UploadFile.Browse Files / PDF", "Browse Files / PDF"), onPress: pickDocument },
+        { text: t("UploadFile.Cancel", "Cancel"), style: "cancel" },
       ],
     );
   };
@@ -170,8 +181,11 @@ export default function UploadFile({
     } catch (error) {
       console.log("Error opening PDF externally:", error);
       Alert.alert(
-        "Couldn't open PDF",
-        "Please make sure you have a PDF viewer app installed.",
+        t("UploadFile.Couldn't open PDF", "Couldn't open PDF"),
+        t(
+          "UploadFile.Please make sure you have a PDF viewer app installed.",
+          "Please make sure you have a PDF viewer app installed."
+        ),
       );
     }
   };
@@ -189,10 +203,13 @@ export default function UploadFile({
             <FontAwesome5 name="cloud-upload-alt" size={26} color="#3B82F6" />
           </View>
           <Text className="mt-3 text-base font-semibold text-gray-900">
-            Tap to Upload
+            {t("UploadFile.Tap to Upload", "Tap to Upload")}
           </Text>
           <Text className="mt-1 text-xs text-gray-400">
-            JPG, PNG, PDF up to {maxSizeMB}MB
+            {t("UploadFile.JPG, PNG, PDF up to MB", {
+              maxSizeMB,
+              defaultValue: `JPG, PNG, PDF up to ${maxSizeMB}MB`,
+            })}
           </Text>
         </TouchableOpacity>
       ) : (
@@ -201,7 +218,7 @@ export default function UploadFile({
           <View className="flex-row items-center">
             <Ionicons name="checkmark-circle" size={16} color="#0CB353" />
             <Text className="ml-1.5 text-sm font-medium text-[#0CB353]">
-              File Uploaded
+              {t("UploadFile.File Uploaded", "File Uploaded")}
             </Text>
           </View>
 
@@ -245,7 +262,7 @@ export default function UploadFile({
               >
                 <FontAwesome6 name="eye" size={16} color="#0850F0" />
                 <Text className="ml-2 text-sm font-semibold text-[#0850F0]">
-                  Preview Full Image
+                  {t("UploadFile.Preview Full Image", "Preview Full Image")}
                 </Text>
               </TouchableOpacity>
             </>
@@ -281,7 +298,7 @@ export default function UploadFile({
               >
                 <FontAwesome6 name="eye" size={16} color="#0850F0" />
                 <Text className="ml-2 text-sm font-semibold text-[#0850F0]">
-                  Preview PDF
+                  {t("UploadFile.Preview PDF", "Preview PDF")}
                 </Text>
               </TouchableOpacity>
             </>

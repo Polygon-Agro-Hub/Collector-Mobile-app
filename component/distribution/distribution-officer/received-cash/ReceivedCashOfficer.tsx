@@ -87,18 +87,37 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
   const [loading, setLoading] = useState(true);
 
   const formatApiDate = (dateString: string) => {
+    if (!dateString) return { date: "", time: "" };
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return { date: dateString, time: dateString };
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     const hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
+    const isPM = hours >= 12;
     const formattedHours = hours % 12 || 12;
+
+    const am = t("Time.AM", { defaultValue: "AM" });
+    const isSinhala = am === "පෙ.ව." || t("AddOfficerBasicDetails.LNG") === "si";
+    const isTamil = am === "முற்பகல்" || t("AddOfficerBasicDetails.LNG") === "ta";
+
+    let timeStr = "";
+    if (isSinhala) {
+      const period = isPM ? "ප.ව." : "පෙ.ව.";
+      timeStr = `${year}/${month}/${day} ${period} ${formattedHours}:${minutes}`;
+    } else if (isTamil) {
+      const period = isPM ? "பிற்பகல்" : "முற்பகல்";
+      timeStr = `${year}/${month}/${day} ${period} ${formattedHours}:${minutes}`;
+    } else {
+      const ampm = isPM ? "PM" : "AM";
+      timeStr = `${year}/${month}/${day} ${formattedHours}:${minutes} ${ampm}`;
+    }
 
     return {
       date: `${year}-${month}-${day}`,
-      time: `${year}/${month}/${day} ${formattedHours}:${minutes} ${ampm}`,
+      time: timeStr,
     };
   };
 

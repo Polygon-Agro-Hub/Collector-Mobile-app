@@ -30,8 +30,7 @@ export const SRI_LANKA_DISTRICTS = [
 
 /**
  * Formats raw timeSlot key into standard human-readable time string
- * (Restricted to 3 standard formats: 08:00 AM - 12:00 PM, 12:00 PM - 04:00 PM, 04:00 PM - 09:00 PM)
- * and translates AM / PM tokens according to active language.
+ * and translates AM / PM tokens with prefix format (e.g. පෙ.ව. 08:00 - ප.ව. 12:00) according to active language.
  * @param timeSlot raw timeSlot string
  * @param t optional translation function
  * @returns formatted string
@@ -43,19 +42,90 @@ export const formatTimeSlot = (
   if (!timeSlot) return "";
   let standard = TIME_SLOT_MAP[timeSlot] || timeSlot;
 
+  // Clean "within" prefix and trim
+  standard = standard.replace(/within\s*/i, "").trim();
+
   // Normalize previous localized tokens back to AM/PM so formatTimeSlot is idempotent
   standard = standard
     .replace(/පෙ\.ව\.|මුற்பகல்/g, "AM")
     .replace(/ප\.ව\.|பிற்பகல்/g, "PM");
 
+  // Handle shorthand patterns like 8AM - 12PM or 8AM-12PM
+  standard = standard.replace(/(\d{1,2})\s*(AM|PM)/gi, (match, h, p) => {
+    return `${h.padStart(2, "0")}:00 ${p.toUpperCase()}`;
+  });
+
   const am = t ? t("Time.AM", { defaultValue: "AM" }) : i18n.t("Time.AM", { defaultValue: "AM" });
   const pm = t ? t("Time.PM", { defaultValue: "PM" }) : i18n.t("Time.PM", { defaultValue: "PM" });
+
+  const isSinhala = am === "පෙ.ව." || (t && t("AddOfficerBasicDetails.LNG") === "si");
+  const isTamil = am === "முற்பகல்" || (t && t("AddOfficerBasicDetails.LNG") === "ta");
+
+  if (isSinhala) {
+    return standard
+      .replace(/(\d{1,2}:\d{2})\s*AM/gi, "පෙ.ව. $1")
+      .replace(/(\d{1,2}:\d{2})\s*PM/gi, "ප.ව. $1")
+      .replace(/\bAM\b/gi, "පෙ.ව.")
+      .replace(/\bPM\b/gi, "ප.ව.");
+  }
+
+  if (isTamil) {
+    return standard
+      .replace(/(\d{1,2}:\d{2})\s*AM/gi, "முற்பகல் $1")
+      .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பிற்பகல் $1")
+      .replace(/\bAM\b/gi, "முற்பகல்")
+      .replace(/\bPM\b/gi, "பிற்பகல்");
+  }
 
   return standard
     .replace(/(\d+:\d+)\s*AM/gi, `$1 ${am}`)
     .replace(/(\d+:\d+)\s*PM/gi, `$1 ${pm}`)
     .replace(/\bAM\b/gi, am)
     .replace(/\bPM\b/gi, pm);
+};
+
+/**
+ * Formats Ready Time according to language:
+ * Sinhala: "[පෙ.ව./ප.ව.] [H:MM] ට [YYYY/MM/DD] දින" -> e.g. "ප.ව. 1:00 ට 2026/09/12 දින"
+ * Tamil: "[முற்பகல்/பிற்பகல்] [H:MM] மணிக்கு [YYYY/MM/DD] அன்று" -> e.g. "பிற்பகல் 1:00 மணிக்கு 2026/09/12 அன்று"
+ * English: "At [H:MM AM/PM] on [YYYY/MM/DD]" -> e.g. "At 1:00 PM on 2026/09/12"
+ */
+export const formatReadyDateTime = (
+  packTimeInput?: string | Date | null,
+  t?: any
+): string => {
+  if (!packTimeInput) return "";
+  const date = new Date(packTimeInput);
+  if (isNaN(date.getTime())) return String(packTimeInput);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const formattedDate = `${year}/${month}/${day}`;
+
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const isPM = hours >= 12;
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+  const time12 = `${hours}:${minutes}`;
+
+  const am = t ? t("Time.AM", { defaultValue: "AM" }) : i18n.t("Time.AM", { defaultValue: "AM" });
+  const isSinhala = am === "පෙ.ව." || (t && t("AddOfficerBasicDetails.LNG") === "si");
+  const isTamil = am === "முற்பகல்" || (t && t("AddOfficerBasicDetails.LNG") === "ta");
+
+  if (isSinhala) {
+    const period = isPM ? "ප.ව." : "පෙ.ව.";
+    return `${period} ${time12} ට ${formattedDate} දින`;
+  }
+
+  if (isTamil) {
+    const period = isPM ? "பிற்பகல்" : "முற்பகல்";
+    return `${period} ${time12} மணிக்கு ${formattedDate} அன்று`;
+  }
+
+  const ampm = isPM ? "PM" : "AM";
+  return `At ${time12} ${ampm} on ${formattedDate}`;
 };
 
 /**

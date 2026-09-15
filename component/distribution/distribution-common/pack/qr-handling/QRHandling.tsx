@@ -76,21 +76,21 @@ export default function QRHandling({ navigation }: { navigation: any }) {
     const success = await connectToDevice(device);
     if (success) {
       setIsPrinterModalOpen(false);
-      Alert.alert(
-        t("QRHandling.Printer Connected", "Printer Connected"),
+      setAlertType("success");
+      setAlertTitle(
+        t(
+          "QRHandling.Printer Connected Successfully",
+          "Printer Connected Successfully"
+        )
+      );
+      setAlertMessage(
         t("QRHandling.Connected to {{deviceName}}", {
           deviceName: device.displayName || device.name,
           defaultValue: `Connected to ${device.displayName || device.name}`,
         })
       );
+      setAlertVisible(true);
     } else {
-      Alert.alert(
-        t("QRHandling.Printer Error", "Printer Error"),
-        t(
-          "QRHandling.Failed to connect to printer",
-          "Failed to connect to printer. Please check if the printer is on and in range."
-        )
-      );
       setAlertType("error");
       setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
       setAlertMessage(

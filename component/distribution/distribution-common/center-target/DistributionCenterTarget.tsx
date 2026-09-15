@@ -324,8 +324,8 @@ export default function DistributionCenterTarget({
                           order.status === "Out"
                             ? t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")
                             : order.status === "Opened"
-                            ? t("DistributionCenterTarget.Opened", "විවෘත කළ")
-                            : t("DistributionCenterTarget.Pending", "අපරිපූර්ණ");
+                            ? t("DistributionCenterTarget.Opened", "සකස් කරමින්")
+                            : t("DistributionCenterTarget.Pending", "අසම්පූර්ණයි");
 
                         const displayStatus = `(${rowTranslated}) ${statusTranslated}`;
 

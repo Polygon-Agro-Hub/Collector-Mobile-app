@@ -29,6 +29,7 @@ import authState, { RootState } from "@/services/reducxStore";
 import { useSelector } from "react-redux";
 import { ROLES } from "@/constants/user-roles";
 import useUserStore from "@/store/userStore";
+import { formatTimeSlot, formatReadyDateTime } from "@/constants/packing/time-slots";
 
 type CollectionOfficersListNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -541,16 +542,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   const phoneDisplay = phone2 ? `${phone1}, ${phone2}` : phone1;
 
   const scheduledDate = formatDateYMD(order.sheduleDate);
-  const scheduledDisplay = `${scheduledDate} (${order.sheduleTime})`;
+  const formattedScheduledTime = formatTimeSlot(order.sheduleTime, t);
+  const scheduledDisplay = formattedScheduledTime
+    ? `${scheduledDate} (${formattedScheduledTime})`
+    : scheduledDate;
 
-  const readyDate = new Date(order.packTime);
-  const readyMonth = String(readyDate.getMonth() + 1).padStart(2, "0");
-  const readyDay = String(readyDate.getDate()).padStart(2, "0");
-  const readyTimeDisplay = `At ${readyDate.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })} on ${readyDate.getFullYear()}/${readyMonth}/${readyDay}`;
+  const readyTimeDisplay = formatReadyDateTime(order.packTime, t);
 
   const formatCurrency = (amount: number | undefined | null): string => {
     const numericAmount = Number(amount) || 0;
