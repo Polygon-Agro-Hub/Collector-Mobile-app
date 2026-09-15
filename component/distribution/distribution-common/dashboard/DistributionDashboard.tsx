@@ -295,6 +295,21 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       onPress: () => navigation.navigate("PurchaseShortage" as any),
     });
 
+    // 6. Receive Products
+    items.push({
+      key: "receive_products",
+      title: t("DistridutionaDashboard.ReceiveProducts", "Receive Products"),
+      icon: (
+        <Image
+          source={require("../../../../assets/images/distribution-common/dashboard/receive-products.webp")}
+          style={{ width: 32, height: 32 }}
+          className="w-8 h-8 absolute top-2 right-2"
+          resizeMode="contain"
+        />
+      ),
+      onPress: () => navigation.navigate("ReceivedProductsToday" as any),
+    });
+
     return items;
   };
 

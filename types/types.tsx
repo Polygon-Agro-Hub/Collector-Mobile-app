@@ -50,6 +50,42 @@ export type RootStackParamList = {
         driverName?: string;
       }
     | undefined;
+  ReceivedProductsToday: undefined;
+  DistributionScanDriverQR: undefined;
+  ReceivedProductsSummary:
+    | {
+        vehicleNo?: string;
+        items?: any[];
+      }
+    | undefined;
+  UnloadingProducts:
+    | {
+        loadCode?: string;
+        vehicleNo?: string;
+        items?: any[];
+      }
+    | undefined;
+  WeighTheLoad:
+    | {
+        loadCode?: string;
+        product?: any;
+        updatedGrade?: {
+          gradeId: string;
+          unloadedWeightKg: number;
+          unloadedCrates: number;
+        };
+      }
+    | undefined;
+  WeighGrade:
+    | {
+        productName?: string;
+        productImage?: string;
+        gradeTitle?: string;
+        gradeId?: string;
+        loadedWeightKg?: number;
+        loadedCrates?: number;
+      }
+    | undefined;
   SideMenu: undefined;
   ReadytoPickupOrders: undefined;
   SinChangePassword: undefined;

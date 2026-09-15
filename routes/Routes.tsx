@@ -101,6 +101,12 @@ import SelectRowToAssign from "@/component/distribution/distribution-center-mana
 import ConfirmRowAssign from "@/component/distribution/distribution-center-manager/assign-groups/ConfirmRowAssign";
 import DistributionCenterTarget from "@/component/distribution/distribution-common/center-target/DistributionCenterTarget";
 import OrderDetails from "@/component/distribution/distribution-common/center-target/OrderDetails";
+import ReceivedProductsToday from "@/component/distribution/distribution-common/receive-products/received-products-today/ReceivedProductsToday";
+import DistributionScanDriverQR from "@/component/distribution/distribution-common/receive-products/scan-driver-qr/ScanDriverQR";
+import ReceivedProductsSummary from "@/component/distribution/distribution-common/receive-products/received-products-summary/ReceivedProductsSummary";
+import UnloadingProducts from "@/component/distribution/distribution-common/receive-products/unloading-products/UnloadingProducts";
+import WeighTheLoad from "@/component/distribution/distribution-common/receive-products/weigh-the-load/WeighTheLoad";
+import WeighGrade from "@/component/distribution/distribution-common/receive-products/weigh-grade/WeighGrade";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -624,6 +630,36 @@ const DISTRIBUTION_STACK_SCREENS: StackRouteConfig[] = [
   {
     name: "ReceivedCashTransfer",
     component: ReceivedCashTransfer as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReceivedProductsToday",
+    component: ReceivedProductsToday as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "DistributionScanDriverQR",
+    component: DistributionScanDriverQR as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReceivedProductsSummary",
+    component: ReceivedProductsSummary as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "UnloadingProducts",
+    component: UnloadingProducts as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "WeighTheLoad",
+    component: WeighTheLoad as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "WeighGrade",
+    component: WeighGrade as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
 ];
