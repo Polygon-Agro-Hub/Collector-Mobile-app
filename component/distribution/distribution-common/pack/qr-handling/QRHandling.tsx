@@ -85,8 +85,11 @@ export default function QRHandling({ navigation }: { navigation: any }) {
       );
     } else {
       Alert.alert(
-        "Printer Error",
-        "Failed to connect to printer. Please check if the printer is on and in range."
+        t("QRHandling.Printer Error", "Printer Error"),
+        t(
+          "QRHandling.Failed to connect to printer",
+          "Failed to connect to printer. Please check if the printer is on and in range."
+        )
       );
       setAlertType("error");
       setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
@@ -145,7 +148,13 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
             store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
-            Alert.alert("Position Released", "Your position has been released by the manager.");
+            Alert.alert(
+              t("Packing.Position Released", "Position Released"),
+              t(
+                "Packing.Your position has been released by the manager.",
+                "Your position has been released by the manager."
+              )
+            );
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
           }
         }

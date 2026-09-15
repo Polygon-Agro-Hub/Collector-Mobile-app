@@ -139,7 +139,13 @@ export default function WelcomeToQC({
           if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
             store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
-            Alert.alert("Position Released", "Your position has been released by the manager.");
+            Alert.alert(
+              t("Packing.Position Released", "Position Released"),
+              t(
+                "Packing.Your position has been released by the manager.",
+                "Your position has been released by the manager."
+              )
+            );
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
           }
         }

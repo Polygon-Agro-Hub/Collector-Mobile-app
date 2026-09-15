@@ -178,7 +178,7 @@ export default function ConfirmRowAssign({
 
       if (response.data && response.data.success) {
         Alert.alert(
-          "Success",
+          t("Packing.Success", "Success"),
           t("AssignGroups.Successfully assigned orders", {
             count: selectedOrdersCount,
             orderText: orderTextLower,
@@ -188,7 +188,7 @@ export default function ConfirmRowAssign({
           }),
           [
             {
-              text: "OK",
+              text: t("AlertModal.OK", "OK"),
               onPress: () => {
                 navigation.navigate("Group", { assignedGroupId: group.id });
               },
@@ -197,14 +197,17 @@ export default function ConfirmRowAssign({
         );
       } else {
         Alert.alert(
-          "Error",
+          t("Packing.Error", "Error"),
           response.data.message || t("AssignGroups.Failed to assign orders.", "Failed to assign orders."),
         );
         setTimerRunning(true);
       }
     } catch (error) {
       console.error("Error assigning orders to packing row:", error);
-      Alert.alert("Error", t("AssignGroups.An error occurred while assigning orders.", "An error occurred while assigning orders."));
+      Alert.alert(
+        t("Packing.Error", "Error"),
+        t("AssignGroups.An error occurred while assigning orders.", "An error occurred while assigning orders.")
+      );
       setTimerRunning(true);
     } finally {
       setSubmitting(false);
