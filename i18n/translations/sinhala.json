@@ -21,7 +21,10 @@
     "Progress": "ප්‍රගතිය",
     "Scan": "QR ස්කෑන් කිරිම",
     "Search": "NIC මගින් සොයන්න",
-    "LoadingTargetStatus": "ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී..."
+    "LoadingTargetStatus": "ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී...",
+    "Collection": "එකතු කිරීම්",
+    "Transport": "ප්‍රවාහනය",
+    "ReadyToTransport": "ප්‍රවාහනයට සූදානම්"
   },
   "Error": {
     "error": "සමාවෙන්න",
@@ -591,7 +594,8 @@
     "CenterTarget": "මධ්‍යස්ථාන ඉලක්කය",
     "MyCollection": "මගේ එකතුව",
     "Collection": "එකතු කිරීම්",
-    "Transport": "ප්‍රවාහනය"
+    "Transport": "ප්‍රවාහනය",
+    "ReadyToTransport": "ප්‍රවාහනයට සූදානම්"
   },
   "AddOfficerBasicDetails": {
     "LNG": "si",
@@ -1525,7 +1529,61 @@
     "DisconnectedMessage": "{{deviceName}} Wi-Fi තරාදියෙන් විසන්ධි විය.",
     "ErrorTitle": "දෝෂයකි",
     "DisconnectFailedMessage": "තරාදිය විසන්ධි කිරීමට අසමත් විය.",
-    "PcBridgeSuffix": "PC බ්‍රිජ්"
+    "PcBridgeSuffix": "PC බ්‍රිජ්",
+    "ScaleConnected": "තරාදිය සම්බන්ධ විය",
+    "TransportComingSoon": "ප්‍රවාහන මොඩියුලය ළඟදීම පැමිණේ."
+  },
+  "SentProductsToday": {
+    "Title": "අද යවන ලද නිෂ්පාදන",
+    "NoLoadsToday": "- අද භාණ්ඩ යවා නැත -",
+    "Crates": "ක්‍රේට්",
+    "AddLoadTitle": "නව පැටවීමක් එක් කරන්න",
+    "AddLoadMessage": "ප්‍රවාහනය සඳහා නිෂ්පාදන සූදානම් කර යවන්න."
+  },
+  "SelectDistributionCentre": {
+    "Title": "බෙදාහැරීමේ මධ්‍යස්ථානය තෝරන්න",
+    "NoCentresFound": "- බෙදාහැරීමේ මධ්‍යස්ථාන හමු නොවීය -",
+    "SelectAndContinue": "තෝරා ඉදිරියට යන්න",
+    "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී"
+  },
+  "LoadingToVehicle": {
+    "Variety": "ප්‍රභේදය",
+    "CropName": "බෝග නාමය",
+    "VarietyLabel": "ප්‍රභේදය",
+    "SelectCrop": "බෝගය තෝරන්න",
+    "SelectVariety": "ප්‍රභේදය තෝරන්න",
+    "FinishLoading": "පැටවීම අවසන් කරන්න",
+    "AddMoreItems": "තවත් ද්‍රව්‍ය එක් කරන්න",
+    "ItemSavedTitle": "ද්‍රව්‍යය එක් කරන ලදී!",
+    "ItemSavedMessage": "ප්‍රභේදය {{num}} සුරැකිණි. ඔබට දැන් ඊළඟ ප්‍රභේදය පැටවිය හැක.",
+    "FinishLoadingTitle": "පැටවීම සම්පූර්ණයි",
+    "FinishLoadingMessage": "{{vehicleNo}} රථයට සාර්ථකව පටවන ලදී.",
+    "OK": "හරි"
+  },
+  "LoadingToVehicleSummary": {
+    "Title": "සාරාංශය",
+    "ConfirmAndContinue": "තහවුරු කර ඉදිරියට යන්න",
+    "TotalWeight": "මුළු බර",
+    "TotalCrates": "මුළු කූඩ ගණන",
+    "Crates": "කූඩ",
+    "Weight": "බර"
+  },
+  "LoadQR": {
+    "Title": "පැටවුම් QR කේතය",
+    "ReadyForTransport": "ප්‍රවාහනයට සූදානම්",
+    "LoadCode": "පැටවුම් අංකය",
+    "VehicleNo": "වාහන අංකය",
+    "Driver": "රියදුරු",
+    "Done": "අවසන්",
+    "CompleteTitle": "පැටවීම සම්පූර්ණයි",
+    "CompleteMessage": "පැටවුම් තොරතුරු සහ QR කේතය සාර්ථකව ජනනය කරන ලදී."
+  },
+  "LoadAssigned": {
+    "Title": "පැටවුම පවරන ලදී",
+    "TransferID": "මාරු කිරීමේ අංකය",
+    "Driver": "රියදුරු",
+    "VehicleRegistrationNumber": "වාහන ලියාපදිංචි අංකය",
+    "GoToHome": "මුල් පිටුවට යන්න"
   },
   "WifiScaleService": {
     "InvalidIpError": "කරුණාකර වලංගු Wi-Fi තරාදි IP ලිපිනයක් ඇතුළත් කරන්න",

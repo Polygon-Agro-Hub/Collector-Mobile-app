@@ -21,7 +21,10 @@
     "Progress": "நிலை",
     "Scan": "QR ஐ ஸ்கேன் செய்யவும்",
     "Search": "NIC மூலம் தேடவும்",
-    "LoadingTargetStatus": "இலக்கு நிலையை ஏற்றுகிறது..."
+    "LoadingTargetStatus": "இலக்கு நிலையை ஏற்றுகிறது...",
+    "Collection": "சேகரிப்பு",
+    "Transport": "போக்குவரத்து",
+    "ReadyToTransport": "போக்குவரத்துக்கு தயார்"
   },
   "Error": {
     "error": "மன்னிக்கவும்",
@@ -591,7 +594,8 @@
     "CenterTarget": "மைய இலக்கு",
     "MyCollection": "எனது சேகரிப்பு",
     "Collection": "சேகரிப்பு",
-    "Transport": "போக்குவரத்து"
+    "Transport": "போக்குவரத்து",
+    "ReadyToTransport": "போக்குவரத்துக்கு தயார்"
   },
   "AddOfficerBasicDetails": {
     "LNG": "ta",
@@ -1525,7 +1529,61 @@
     "DisconnectedMessage": "{{deviceName}} Wi-Fi அளவுகோலிலிருந்து துண்டிக்கப்பட்டது.",
     "ErrorTitle": "பிழை",
     "DisconnectFailedMessage": "அளவுகோலைத் துண்டிக்க முடியவில்லை.",
-    "PcBridgeSuffix": "PC பிரிட்ஜ்"
+    "PcBridgeSuffix": "PC பிரிட்ஜ்",
+    "ScaleConnected": "இணைக்கப்பட்ட அளவுகள்",
+    "TransportComingSoon": "போக்குவரத்து தொகுதி விரைவில் வரும்."
+  },
+  "SentProductsToday": {
+    "Title": "இன்று அனுப்பப்பட்ட பொருட்கள்",
+    "NoLoadsToday": "- இன்று சுமை எதுவும் இல்லை -",
+    "Crates": "பெட்டிகள்",
+    "AddLoadTitle": "புதிய சுமையைச் சேர்க்கவும்",
+    "AddLoadMessage": "போக்குவரத்துக்கான தயாரிப்புகளை உருவாக்கி அனுப்பவும்."
+  },
+  "SelectDistributionCentre": {
+    "Title": "விநியோக மையத்தைத் தேர்ந்தெடுக்கவும்",
+    "NoCentresFound": "- விநியோக மையங்கள் எதுவும் கிடைக்கவில்லை -",
+    "SelectAndContinue": "தேர்ந்தெடுத்து தொடரவும்",
+    "CentreSelectedTitle": "மையம் தேர்ந்தெடுக்கப்பட்டது"
+  },
+  "LoadingToVehicle": {
+    "Variety": "வகை",
+    "CropName": "பயிர் பெயர்",
+    "VarietyLabel": "வகை",
+    "SelectCrop": "பயிரைத் தேர்ந்தெடுக்கவும்",
+    "SelectVariety": "வகையைத் தேர்ந்தெடுக்கவும்",
+    "FinishLoading": "ஏற்றுதலை முடிக்கவும்",
+    "AddMoreItems": "மேலும் பொருட்களைச் சேர்க்கவும்",
+    "ItemSavedTitle": "பொருள் சேர்க்கப்பட்டது!",
+    "ItemSavedMessage": "வகை {{num}} சேமிக்கப்பட்டது. இப்போது அடுத்த வகையை ஏற்றலாம்.",
+    "FinishLoadingTitle": "ஏற்றுதல் முடிந்தது",
+    "FinishLoadingMessage": "{{vehicleNo}} வாகனத்தில் வெற்றிகரமாக ஏற்றப்பட்டது.",
+    "OK": "சரி"
+  },
+  "LoadingToVehicleSummary": {
+    "Title": "சுருக்கம்",
+    "ConfirmAndContinue": "உறுதிசெய்து தொடரவும்",
+    "TotalWeight": "மொத்த எடை",
+    "TotalCrates": "மொத்த பெட்டிகள்",
+    "Crates": "பெட்டிகள்",
+    "Weight": "எடை"
+  },
+  "LoadQR": {
+    "Title": "ஏற்றுதல் QR குறியீடு",
+    "ReadyForTransport": "போக்குவரத்துக்கு தயார்",
+    "LoadCode": "ஏற்றுதல் குறியீடு",
+    "VehicleNo": "வாகன எண்",
+    "Driver": "ஓட்டுநர்",
+    "Done": "முடிந்தது",
+    "CompleteTitle": "ஏற்றுதல் முடிந்தது",
+    "CompleteMessage": "ஏற்றுதல் விவரங்கள் மற்றும் QR குறியீடு வெற்றிகரமாக உருவாக்கப்பட்டது."
+  },
+  "LoadAssigned": {
+    "Title": "ஏற்றுதல் ஒதுக்கப்பட்டது",
+    "TransferID": "பரிமாற்ற எண்",
+    "Driver": "ஓட்டுநர்",
+    "VehicleRegistrationNumber": "வாகன பதிவு எண்",
+    "GoToHome": "முகப்புக்குச் செல்லவும்"
   },
   "WifiScaleService": {
     "InvalidIpError": "தயவுசெய்து சரியான Wi-Fi அளவுகோல் IP முகவரியை உள்ளிடவும்",

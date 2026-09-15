@@ -14,6 +14,42 @@ export type RootStackParamList = {
   Ufarmercropdetails: undefined;
   CollectionOfficerDashboard: undefined;
   CollectionDashboard: undefined;
+  SentProductsToday: undefined;
+  ScanDriverQR: undefined;
+  SelectDistributionCentre: undefined;
+  LoadingToVehicle:
+    | {
+        vehicleNo?: string;
+        centreId?: string;
+        centreName?: string;
+      }
+    | undefined;
+  LoadingToVehicleSummary:
+    | {
+        vehicleNo?: string;
+        centreId?: string;
+        centreName?: string;
+        loadCode?: string;
+        items?: any[];
+      }
+    | undefined;
+  LoadQR:
+    | {
+        loadCode?: string;
+        vehicleNo?: string;
+        driverName?: string;
+        driverId?: string;
+        centreName?: string;
+      }
+    | undefined;
+  LoadAssigned:
+    | {
+        loadCode?: string;
+        vehicleNo?: string;
+        driverId?: string;
+        driverName?: string;
+      }
+    | undefined;
   SideMenu: undefined;
   ReadytoPickupOrders: undefined;
   SinChangePassword: undefined;

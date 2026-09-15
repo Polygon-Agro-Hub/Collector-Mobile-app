@@ -21,7 +21,10 @@
     "Progress": "Progress",
     "Scan": "Scan QR",
     "Search": "Search By NIC",
-    "LoadingTargetStatus": "Loading target status..."
+    "LoadingTargetStatus": "Loading target status...",
+    "Collection": "Collection",
+    "Transport": "Transport",
+    "ReadyToTransport": "Ready to Transport"
   },
   "Error": {
     "error": "Sorry",
@@ -656,7 +659,8 @@
     "CenterTarget": "Centre Target",
     "MyCollection": "My Collection",
     "Collection": "Collection",
-    "Transport": "Transport"
+    "Transport": "Transport",
+    "ReadyToTransport": "Ready to Transport"
   },
   "AddOfficerBasicDetails": {
     "LNG": "en",
@@ -1590,7 +1594,61 @@
     "DisconnectedMessage": "Disconnected from {{deviceName}} Wi-Fi Scale.",
     "ErrorTitle": "Error",
     "DisconnectFailedMessage": "Failed to disconnect scale.",
-    "PcBridgeSuffix": "PC Bridge"
+    "PcBridgeSuffix": "PC Bridge",
+    "ScaleConnected": "Scale Connected",
+    "TransportComingSoon": "Ready to Transport feature is ready."
+  },
+  "SentProductsToday": {
+    "Title": "Sent Products Today",
+    "NoLoadsToday": "- No loads today -",
+    "Crates": "Crates",
+    "AddLoadTitle": "Add New Load",
+    "AddLoadMessage": "Create and dispatch products for transport."
+  },
+  "SelectDistributionCentre": {
+    "Title": "Select Distribution Centre",
+    "NoCentresFound": "- No distribution centres found -",
+    "SelectAndContinue": "Select & Continue",
+    "CentreSelectedTitle": "Centre Selected"
+  },
+  "LoadingToVehicle": {
+    "Variety": "Variety",
+    "CropName": "Crop Name",
+    "VarietyLabel": "Variety",
+    "SelectCrop": "Select Crop",
+    "SelectVariety": "Select Variety",
+    "FinishLoading": "Finish Loading",
+    "AddMoreItems": "Add More Items",
+    "ItemSavedTitle": "Item Added!",
+    "ItemSavedMessage": "Variety {{num}} saved. You can now load the next variety.",
+    "FinishLoadingTitle": "Loading Complete",
+    "FinishLoadingMessage": "Vehicle {{vehicleNo}} loaded successfully.",
+    "OK": "OK"
+  },
+  "LoadingToVehicleSummary": {
+    "Title": "Summery",
+    "ConfirmAndContinue": "Confirm & Continue",
+    "TotalWeight": "Total Weight",
+    "TotalCrates": "Total Crates",
+    "Crates": "Crates",
+    "Weight": "Weight"
+  },
+  "LoadQR": {
+    "Title": "Load QR",
+    "ReadyForTransport": "Ready for Transport",
+    "LoadCode": "Load Reference Code",
+    "VehicleNo": "Vehicle No",
+    "Driver": "Driver",
+    "Done": "Done",
+    "CompleteTitle": "Load Completed",
+    "CompleteMessage": "Load details and QR code generated successfully."
+  },
+  "LoadAssigned": {
+    "Title": "Load Assigned",
+    "TransferID": "Transfer ID",
+    "Driver": "Driver",
+    "VehicleRegistrationNumber": "Vehicle Registration Number",
+    "GoToHome": "Go to Home"
   },
   "WifiScaleService": {
     "InvalidIpError": "Please enter a valid Wi-Fi Scale IP address",

@@ -64,6 +64,13 @@ import otpBankDetailsupdate from "@/component/collection/collection-common/farme
 import GoviPensionForm from "@/component/collection/collection-common/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/collection/collection-common/govi-pension/GoviPensionStatus";
 import NotEligibleScreen from "@/component/collection/collection-common/govi-pension/NotEligibleScreen";
+import SentProductsToday from "@/component/collection/collection-common/transport/SentProductsToday";
+import ScanDriverQR from "@/component/collection/collection-common/transport/ScanDriverQR";
+import SelectDistributionCentre from "@/component/collection/collection-common/transport/SelectDistributionCentre";
+import LoadingToVehicle from "@/component/collection/collection-common/transport/LoadingToVehicle";
+import LoadingToVehicleSummary from "@/component/collection/collection-common/transport/LoadingToVehicleSummary";
+import LoadQR from "@/component/collection/collection-common/transport/LoadQR";
+import LoadAssigned from "@/component/collection/collection-common/transport/LoadAssigned";
 
 // --- Distribution Screens ---
 import DistributionDashboard from "@/component/distribution/distribution-common/dashboard/DistributionDashboard";
@@ -428,6 +435,41 @@ const COLLECTION_STACK_SCREENS: StackRouteConfig[] = [
   {
     name: "NotEligibleScreen",
     component: NotEligibleScreen as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "SentProductsToday",
+    component: SentProductsToday as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "ScanDriverQR",
+    component: ScanDriverQR as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "SelectDistributionCentre",
+    component: SelectDistributionCentre as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadingToVehicle",
+    component: LoadingToVehicle as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadingToVehicleSummary",
+    component: LoadingToVehicleSummary as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadQR",
+    component: LoadQR as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadAssigned",
+    component: LoadAssigned as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
 ];
