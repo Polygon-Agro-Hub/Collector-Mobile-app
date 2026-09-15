@@ -18,6 +18,7 @@ import environment from "@/environment/environment";
 import { useIsFocused } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { formatTimeSlot } from "@/constants/packing/time-slots";
 
 const CircularClockTimer = ({
   seconds,
@@ -125,7 +126,27 @@ export default function ConfirmRowAssign({
     String(group?.title || "").includes("(W)") ||
     !!route.params?.isWholesale;
 
-  const orderTypeTag = isWholesale ? "(W)" : "(R)";
+  const getRowNumber = (rowName?: string) => {
+    if (!rowName) return "";
+    const match = rowName.match(/\d+/);
+    return match ? match[0] : rowName;
+  };
+
+  const formatRowTitle = (rowName?: string) => {
+    if (!rowName) return "";
+    const num = getRowNumber(rowName);
+    if (num) {
+      return t("AssignGroups.Row {{number}}", {
+        number: num,
+        defaultValue: t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` }),
+      });
+    }
+    return rowName;
+  };
+
+  const orderTypeTag = isWholesale
+    ? `(${t("AssignGroups.Wholesale", "Wholesale")})`
+    : `(${t("AssignGroups.Retail", "Retail")})`;
   const orderText = selectedOrdersCount === 1 ? t("AssignGroups.Order", "Order") : t("AssignGroups.Orders", "Orders");
   const orderTextLower = selectedOrdersCount === 1 ? "order" : "orders";
 
@@ -161,9 +182,9 @@ export default function ConfirmRowAssign({
           t("AssignGroups.Successfully assigned orders", {
             count: selectedOrdersCount,
             orderText: orderTextLower,
-            rowName: selectedRow.name,
-            timeSlot: group.timeSlot,
-            defaultValue: `Successfully assigned ${selectedOrdersCount} ${orderTextLower} to ${selectedRow.name} for the ${group.timeSlot} slot.`,
+            rowName: formatRowTitle(selectedRow?.name),
+            timeSlot: formatTimeSlot(group?.timeSlot, t),
+            defaultValue: `Successfully assigned ${selectedOrdersCount} ${orderTextLower} to ${formatRowTitle(selectedRow?.name)} for the ${formatTimeSlot(group?.timeSlot, t)} slot.`,
           }),
           [
             {
@@ -291,7 +312,7 @@ export default function ConfirmRowAssign({
                   {t("AssignGroups.Selected Section", "Selected Section")}
                 </Text>
                 <Text className="text-sm font-extrabold text-[#030E25] mt-1">
-                  {group.timeSlot} {orderTypeTag}
+                  {formatTimeSlot(group.timeSlot, t)} {orderTypeTag}
                 </Text>
                 <Text className="text-xl font-extrabold text-[#030E25] mt-1">
                   {selectedOrdersCount} {orderText}
@@ -314,7 +335,7 @@ export default function ConfirmRowAssign({
                   {t("AssignGroups.Assigning to Row", "Assigning to Row")}
                 </Text>
                 <Text className="text-base font-extrabold text-[#030E25] mt-1">
-                  {selectedRow.name}
+                  {formatRowTitle(selectedRow?.name)}
                 </Text>
               </View>
             </View>

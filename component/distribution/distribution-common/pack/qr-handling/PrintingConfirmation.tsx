@@ -29,6 +29,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import environment from "@/environment/environment";
 import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
+import { formatTimeSlot, formatOrderCategory } from "@/constants/packing/time-slots";
 import { useTranslation } from "react-i18next";
 
 export default function PrintingConfirmation({
@@ -135,6 +136,7 @@ export default function PrintingConfirmation({
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [alertTitle, setAlertTitle] = useState<string>("Success");
+  const [isPrintSuccess, setIsPrintSuccess] = useState<boolean>(false);
 
   const activeStep = steps[currentStep - 1] || steps[0];
   const qrValue = cleanInv || invoiceNumber || orderNumber;
@@ -178,9 +180,15 @@ export default function PrintingConfirmation({
     const success = await connectToDevice(device);
     if (success) {
       setIsPrinterModalOpen(false);
+      setIsPrintSuccess(false);
       setAlertType("success");
-      setAlertTitle("Printer Connected");
-      setAlertMessage(`Connected to ${device.displayName || device.name}`);
+      setAlertTitle(t("QRHandling.Printer Connected", "Printer Connected"));
+      setAlertMessage(
+        t("QRHandling.Connected to {{deviceName}}", {
+          deviceName: device.displayName || device.name,
+          defaultValue: `Connected to ${device.displayName || device.name}`,
+        })
+      );
       setAlertVisible(true);
     }
   };
@@ -191,9 +199,12 @@ export default function PrintingConfirmation({
     if (!connectedDevice) {
       handleOpenPrinterModal();
       setAlertType("error");
-      setAlertTitle("Printer Required");
+      setAlertTitle(t("QRHandling.Printer Required", "Printer Required"));
       setAlertMessage(
-        "Please connect to a Bluetooth thermal printer first before printing.",
+        t(
+          "QRHandling.Connect printer before printing message",
+          "Please connect to a Bluetooth thermal printer first before printing."
+        )
       );
       setAlertVisible(true);
       return;
@@ -232,15 +243,29 @@ export default function PrintingConfirmation({
         if (response.data && response.data.success === false) {
           const code = response.data.code;
           const msg = response.data.message || "An error occurred.";
-          setAlertType("error");
-          if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
-            setAlertTitle("Position Busy");
-          } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
-            setAlertTitle("Position Empty");
+          const targetPos = response.data.targetPosition || 1;
+          const occupiedInv = response.data.occupiedInvoice || "";
+          if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+            setAlertTitle(t("Packing.Position Busy", "Position Busy"));
+            setAlertMessage(
+              t("Packing.Position Busy Message", {
+                position: targetPos,
+                invoice: occupiedInv,
+                defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+              })
+            );
+          } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+            setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+            setAlertMessage(
+              t("Packing.No Officer Assigned Message", {
+                position: targetPos,
+                defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+              })
+            );
           } else {
-            setAlertTitle("Error");
+            setAlertTitle(t("Packing.Error", "Error"));
+            setAlertMessage(msg);
           }
-          setAlertMessage(msg);
           setAlertVisible(true);
           setIsProcessing(false);
           return; // Stop here! Do NOT print sticker
@@ -267,15 +292,29 @@ export default function PrintingConfirmation({
         if (response.data && response.data.success === false) {
           const code = response.data.code;
           const msg = response.data.message || "An error occurred.";
-          setAlertType("error");
-          if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
-            setAlertTitle("Position Busy");
-          } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
-            setAlertTitle("Position Empty");
+          const targetPos = response.data.targetPosition || 1;
+          const occupiedInv = response.data.occupiedInvoice || "";
+          if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+            setAlertTitle(t("Packing.Position Busy", "Position Busy"));
+            setAlertMessage(
+              t("Packing.Position Busy Message", {
+                position: targetPos,
+                invoice: occupiedInv,
+                defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+              })
+            );
+          } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+            setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+            setAlertMessage(
+              t("Packing.No Officer Assigned Message", {
+                position: targetPos,
+                defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+              })
+            );
           } else {
-            setAlertTitle("Error");
+            setAlertTitle(t("Packing.Error", "Error"));
+            setAlertMessage(msg);
           }
-          setAlertMessage(msg);
           setAlertVisible(true);
           setIsProcessing(false);
           return; // Stop here! Do NOT print sticker
@@ -319,10 +358,13 @@ export default function PrintingConfirmation({
         }
 
         setAlertType("error");
-        setAlertTitle("Printer Error");
+        setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
         setAlertMessage(
           printErr?.message ||
-            "Failed to print sticker on thermal printer. Order state was reverted. Please check your printer connection and try again.",
+            t(
+              "QRHandling.Failed to print sticker message",
+              "Failed to print sticker on thermal printer. Order state was reverted. Please check your printer connection and try again."
+            )
         );
         setAlertVisible(true);
         setIsProcessing(false);
@@ -330,17 +372,15 @@ export default function PrintingConfirmation({
       }
 
       // 4. Physical printing succeeded!
-      const printerName = connectedDevice.displayName || connectedDevice.name;
+      setIsPrintSuccess(true);
       setAlertType("success");
-      setAlertTitle("Print Successful");
-      if (currentStep < steps.length) {
-        const stepName = steps[currentStep - 1]?.label || "Package";
-        setAlertMessage(`${stepName} QR label printed on ${printerName}!`);
-      } else {
-        setAlertMessage(
-          `All packages for order ${orderNumber} printed on ${printerName}!`,
-        );
-      }
+      setAlertTitle(t("QRHandling.Success", "Success!"));
+      setAlertMessage(
+        t(
+          "QRHandling.QR code printed successfully!",
+          "QR code printed successfully!"
+        )
+      );
       setAlertVisible(true);
       setIsProcessing(false);
     } catch (err: any) {
@@ -373,14 +413,29 @@ export default function PrintingConfirmation({
       }
 
       setAlertType("error");
-      if (code === PACKING_ERROR_CODES.STATION_OCCUPIED) {
-        setAlertTitle("Position Busy");
-      } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED) {
-        setAlertTitle("Position Empty");
+      const targetPos = err.response?.data?.targetPosition || 1;
+      const occupiedInv = err.response?.data?.occupiedInvoice || "";
+      if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+        setAlertTitle(t("Packing.Position Busy", "Position Busy"));
+        setAlertMessage(
+          t("Packing.Position Busy Message", {
+            position: targetPos,
+            invoice: occupiedInv,
+            defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+          })
+        );
+      } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+        setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+        setAlertMessage(
+          t("Packing.No Officer Assigned Message", {
+            position: targetPos,
+            defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+          })
+        );
       } else {
-        setAlertTitle("Print Error");
+        setAlertTitle(t("Packing.Print Error", "Print Error"));
+        setAlertMessage(msg);
       }
-      setAlertMessage(msg);
       setAlertVisible(true);
       setIsProcessing(false);
     }
@@ -499,7 +554,7 @@ export default function PrintingConfirmation({
                     marginTop: 2,
                   }}
                 >
-                  {activeCategory}
+                  {formatOrderCategory(activeCategory, t)}
                 </Text>
                 <Text
                   numberOfLines={1}
@@ -532,7 +587,7 @@ export default function PrintingConfirmation({
                     marginTop: 1,
                   }}
                 >
-                  {activeTimeSlot}
+                  {formatTimeSlot(activeTimeSlot, t)}
                 </Text>
                 <Text
                   numberOfLines={1}
@@ -738,7 +793,8 @@ export default function PrintingConfirmation({
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);
-          if (alertType === "success") {
+          if (isPrintSuccess) {
+            setIsPrintSuccess(false);
             if (currentStep >= steps.length) {
               navigation.navigate("QRHandling");
             } else {

@@ -20,6 +20,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { formatPositionDisplayName } from "@/constants/packing/time-slots";
 
 interface Product {
   id: number;
@@ -126,14 +127,17 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
         {/* Page Title */}
         <View className="items-center mb-4 mt-4">
           <Text className="text-xl font-extrabold text-[#030E25] text-center">
-            {t("Packing.Welcome to", { positionName: positionName, defaultValue: `Welcome to ${positionName}` })}
+            {t("Packing.Welcome to", {
+              positionName: formatPositionDisplayName(positionName, t),
+              defaultValue: `Welcome to ${formatPositionDisplayName(positionName, t)}`,
+            })}
           </Text>
         </View>
 
         {loading ? (
           <View className="flex-grow justify-center items-center py-20" style={{ flex: 1 }}>
             <ActivityIndicator size="large" color="#030E25" />
-            <Text className="text-[#54617D] text-sm mt-3 font-semibold">{t("Packing.Loading products...", "Loading products...")}</Text>
+            <Text className="text-[#54617D] text-sm mt-3 font-semibold">{t("Packing.Loading products...", t("Packing.Loading", "Loading products..."))}</Text>
           </View>
         ) : (
           <View className="flex-grow" style={{ flex: 1, justifyContent: hasData ? "flex-start" : "center" }}>
@@ -232,7 +236,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
         visible={endShiftModalVisible}
         onClose={() => setEndShiftModalVisible(false)}
         navigation={navigation}
-        positionText={positionName}
+        positionText={formatPositionDisplayName(positionName, t)}
       />
     </View>
   );
