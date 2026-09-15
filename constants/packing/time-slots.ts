@@ -24,7 +24,8 @@ export const SRI_LANKA_DISTRICTS = [
   "Kandy", "Kegalle", "Kilinochchi", "Kurunegala", "Mannar",
   "Matale", "Matara", "Moneragala", "Monaragala", "Mullaitivu",
   "Nuwara Eliya", "NuwaraEliya", "Polonnaruwa", "Puttalam",
-  "Ratnapura", "Rathnapura", "Trincomalee", "Vavuniya"
+  "Ratnapura", "Rathnapura", "Trincomalee", "Vavuniya",
+  "Moragahahena", "Horana", "Homagama", "Maharagama", "Kottawa", "Piliyandala", "Kaduwela"
 ];
 
 /**
@@ -44,7 +45,7 @@ export const formatTimeSlot = (
 
   // Normalize previous localized tokens back to AM/PM so formatTimeSlot is idempotent
   standard = standard
-    .replace(/පෙ\.ව\.|முற்பகல்/g, "AM")
+    .replace(/පෙ\.ව\.|මුற்பகல்/g, "AM")
     .replace(/ප\.ව\.|பிற்பகல்/g, "PM");
 
   const am = t ? t("Time.AM", { defaultValue: "AM" }) : i18n.t("Time.AM", { defaultValue: "AM" });
@@ -154,23 +155,53 @@ export const formatPositionDisplayName = (positionName?: string | null, t?: any)
 };
 
 /**
+ * Formats row display name (e.g. "Row 1" -> "පේළිය 1")
+ */
+export const formatRowTitle = (rowName?: string | { name?: string; rowIndex?: number } | null, t?: any): string => {
+  if (!rowName) return "";
+  const translate = (key: string, optsOrDef: any) => {
+    if (t) return t(key, optsOrDef);
+    return i18n.t(key, typeof optsOrDef === "string" ? { defaultValue: optsOrDef } : optsOrDef);
+  };
+
+  const raw = typeof rowName === "string" ? rowName : (rowName.name || (rowName.rowIndex ? `Row ${rowName.rowIndex}` : ""));
+  const match = raw.match(/\d+/);
+  if (match) {
+    const num = match[0];
+    return translate("Packing.Row {{number}}", {
+      number: num,
+      defaultValue: `Row ${num}`,
+    });
+  }
+  return raw;
+};
+
+/**
  * Formats order title with localized (R)/(W) or (Retail)/(Wholesale) tag
  */
-export const formatOrderTitle = (orderTitle?: string | null, t?: any): string => {
+export const formatOrderTitle = (
+  orderTitle?: string | null,
+  typeOrT?: string | any,
+  maybeT?: any
+): string => {
   if (!orderTitle) return "";
+  const t = typeof typeOrT === "function" ? typeOrT : maybeT;
+  const rawType = typeof typeOrT === "string" ? typeOrT : "";
+
   const isWholesale =
+    rawType.toUpperCase().startsWith("W") ||
     orderTitle.includes("(W)") ||
     orderTitle.includes("(Wholesale)") ||
     orderTitle.includes("(තොග)") ||
-    orderTitle.includes("(மொத்தம்)");
+    orderTitle.includes("(மொத்தம்)") ||
+    orderTitle.toUpperCase().endsWith(" W") ||
+    orderTitle.toUpperCase().includes("(W");
+
   const cleanInv = orderTitle.replace(/\s*\([^\)]*\)/g, "").trim();
   const typeLabel = formatOrderType(isWholesale ? "W" : "R", t);
   return `${cleanInv} (${typeLabel})`;
 };
 
-/**
- * Returns sorting priority rank for a given time slot (1 for morning, 2 for afternoon, 3 for evening, 4 fallback)
- */
 export const getTimeSlotPriority = (rawTimeSlot?: string, formattedTimeSlot?: string): number => {
   const str = (rawTimeSlot || formattedTimeSlot || "").toLowerCase();
   if (str === "8-12" || str.includes("8:00 am") || str.includes("08:00 am")) return 1;

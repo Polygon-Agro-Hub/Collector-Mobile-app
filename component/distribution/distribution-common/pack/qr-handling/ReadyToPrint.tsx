@@ -186,6 +186,11 @@ export default function ReadyToPrint({
       <View className="px-6 pt-4 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
         <TouchableOpacity
           onPress={() => {
+            const isReprint = Boolean(route.params?.isReprint);
+            const startButtonText = isReprint
+              ? t("QRHandling.Start Again", "Start Again")
+              : t("QRHandling.Start", "Start");
+
             navigation.navigate("PrintingConfirmation", {
               ...route.params,
               orderNumber: displayOrderNumber,
@@ -196,10 +201,8 @@ export default function ReadyToPrint({
               alacarteCount: alacarteCount,
               trackingRows: route.params?.trackingRows || [],
               rowId: route.params?.rowId ?? store.getState().auth.activeAssignment?.rowId ?? null,
-              isReprint: route.params?.isReprint || false,
-              buttonLabel: route.params?.isReprint
-                ? (route.params?.buttonLabel || t("QRHandling.Start Again", "Start Again"))
-                : t("QRHandling.Start", "Start"),
+              isReprint: isReprint,
+              buttonLabel: startButtonText,
               date: route.params?.date,
             });
           }}
@@ -224,7 +227,7 @@ export default function ReadyToPrint({
             }}
           >
             {route.params?.isReprint
-              ? (route.params?.buttonLabel || t("QRHandling.Start Again", "Start Again"))
+              ? t("QRHandling.Start Again", "Start Again")
               : t("QRHandling.Start", "Start")}
           </Text>
         </TouchableOpacity>

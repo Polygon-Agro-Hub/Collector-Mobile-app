@@ -319,7 +319,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     try {
       const token = store.getState().auth.token;
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
+        );
         return;
       }
 
@@ -330,12 +333,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       if (response.data && response.data.success) {
         setRows(response.data.data);
       } else {
-        Alert.alert("Error", response.data.message || "Failed to fetch rows.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          response.data.message || t("Packing.Failed to fetch rows.", "Failed to fetch rows.")
+        );
       }
     } catch (error: any) {
       console.error("Error fetching rows:", error);
-      const errMsg = error.response?.data?.message || "An error occurred while fetching rows.";
-      Alert.alert("Error", errMsg);
+      const errMsg = error.response?.data?.message || t("Packing.Failed to fetch rows.", "An error occurred while fetching rows.");
+      Alert.alert(t("Packing.Error", "Error"), errMsg);
     } finally {
       setLoading(false);
     }
@@ -347,7 +353,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       setLoading(true);
       const token = store.getState().auth.token;
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
+        );
         return;
       }
 
@@ -359,12 +368,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         setPositions(response.data.data);
         setStep(2);
       } else {
-        Alert.alert("Error", response.data.message || "Failed to fetch positions.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          response.data.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
+        );
       }
     } catch (error: any) {
       console.error("Error fetching positions:", error);
-      const errMsg = error.response?.data?.message || "An error occurred while fetching positions.";
-      Alert.alert("Error", errMsg);
+      const errMsg = error.response?.data?.message || t("Packing.Failed to fetch positions.", "An error occurred while fetching positions.");
+      Alert.alert(t("Packing.Error", "Error"), errMsg);
     } finally {
       setLoading(false);
     }
@@ -392,7 +404,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       setSubmitting(true);
       const token = store.getState().auth.token;
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
+        );
         return;
       }
 
@@ -416,11 +431,11 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         dispatch(setActiveAssignmentAction(assignmentData));
 
         Alert.alert(
-          "Confirmation Success",
-          "You have been successfully assigned to this position",
+          t("Packing.Confirmation Success", "Confirmation Success"),
+          t("Packing.You have been successfully assigned to this position", "You have been successfully assigned to this position"),
           [
             {
-              text: "OK",
+              text: t("AlertModal.OK", "OK"),
               onPress: () => {
                 if (selectedPosition.type === "QR") {
                   navigation.navigate("QRHandling");
@@ -441,12 +456,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           ]
         );
       } else {
-        Alert.alert("Error", response.data.message || "Failed to assign position.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          response.data.message || t("Packing.Failed to assign position.", "Failed to assign position.")
+        );
       }
     } catch (error: any) {
       console.error("Error assigning position:", error);
-      const errMsg = error.response?.data?.message || "An error occurred while confirming assignment.";
-      Alert.alert("Error", errMsg);
+      const errMsg = error.response?.data?.message || t("Packing.An error occurred while confirming assignment.", "An error occurred while confirming assignment.");
+      Alert.alert(t("Packing.Error", "Error"), errMsg);
     } finally {
       setSubmitting(false);
     }
