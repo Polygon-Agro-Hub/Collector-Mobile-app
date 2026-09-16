@@ -36,7 +36,7 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
   const getRowNumber = (rowName?: string) => {
     if (!rowName) return "";
     const match = rowName.match(/\d+/);
-    return match ? match[0] : rowName;
+    return match ? match[0] : "";
   };
 
   const formatRowTitle = (rowName?: string) => {
@@ -48,7 +48,14 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
         defaultValue: t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` }),
       });
     }
-    return rowName;
+    const clean = rowName.trim().toLowerCase();
+    if (clean === "rows") {
+      return t("AssignGroups.Rows", t("Packing.Rows", t("Rows", "පේළි")));
+    }
+    if (clean === "row") {
+      return t("AssignGroups.Row", t("Packing.Row", t("Row", "පේළිය")));
+    }
+    return t(rowName, rowName);
   };
 
   const handleBack = () => {
@@ -208,8 +215,14 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                         {formatRowTitle(row.name)}
                       </Text>
                       <Text className="text-xs text-[#676771] mt-1 font-medium">
-                        {row.allocatedCount}{" "}
-                        {row.allocatedCount === 1 ? t("AssignGroups.Order Allocated", "Order Allocated") : t("AssignGroups.Orders Allocated", "Orders Allocated")}
+                        {t("AssignGroups.OrdersAllocatedCount", {
+                          count: row.allocatedCount,
+                          defaultValue: `${row.allocatedCount} ${
+                            row.allocatedCount === 1
+                              ? t("AssignGroups.Order Allocated", "Order Allocated")
+                              : t("AssignGroups.Orders Allocated", "Orders Allocated")
+                          }`,
+                        })}
                       </Text>
                     </View>
                   </TouchableOpacity>

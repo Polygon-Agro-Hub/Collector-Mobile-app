@@ -129,7 +129,7 @@ export default function ConfirmRowAssign({
   const getRowNumber = (rowName?: string) => {
     if (!rowName) return "";
     const match = rowName.match(/\d+/);
-    return match ? match[0] : rowName;
+    return match ? match[0] : "";
   };
 
   const formatRowTitle = (rowName?: string) => {
@@ -141,7 +141,14 @@ export default function ConfirmRowAssign({
         defaultValue: t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` }),
       });
     }
-    return rowName;
+    const clean = rowName.trim().toLowerCase();
+    if (clean === "rows") {
+      return t("AssignGroups.Rows", t("Packing.Rows", t("Rows", "පේළි")));
+    }
+    if (clean === "row") {
+      return t("AssignGroups.Row", t("Packing.Row", t("Row", "පේළිය")));
+    }
+    return t(rowName, rowName);
   };
 
   const orderTypeTag = isWholesale
