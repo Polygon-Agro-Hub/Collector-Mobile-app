@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 import {
   MaterialIcons,
   Ionicons,
@@ -22,6 +23,9 @@ import {
   AntDesign,
   Entypo,
 } from "@expo/vector-icons";
+import axios from "axios";
+import environment from "@/environment/environment";
+import store from "@/services/reducxStore";
 
 type LoadingToVehicleNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -64,78 +68,71 @@ interface SavedSet {
 interface SavedVariety {
   id: string;
   varietyNumber: number;
+  cropId?: string;
   cropLabel: string;
+  varietyId?: string;
   varietyLabel: string;
   sets: SavedSet[];
 }
 
-const CROPS_DATA = [
-  { label: "Bell Pepper", value: "bell_pepper" },
-  { label: "Onion", value: "onion" },
-  { label: "Tomato", value: "tomato" },
-  { label: "Carrot", value: "carrot" },
-  { label: "Cabbage", value: "cabbage" },
-  { label: "Leeks", value: "leeks" },
-  { label: "Beans", value: "beans" },
-  { label: "Potato", value: "potato" },
-];
-
-const VARIETIES_DATA: Record<string, Array<{ label: string; value: string }>> = {
-  bell_pepper: [
-    { label: "Red Bell Pepper", value: "red_bell_pepper" },
-    { label: "Yellow Bell Pepper", value: "yellow_bell_pepper" },
-    { label: "Green Bell Pepper", value: "green_bell_pepper" },
-  ],
-  onion: [
-    { label: "Red Onion", value: "red_onion" },
-    { label: "Big Onion", value: "big_onion" },
-  ],
-  tomato: [
-    { label: "Roma Tomato", value: "roma_tomato" },
-    { label: "Cherry Tomato", value: "cherry_tomato" },
-    { label: "Beefsteak Tomato", value: "beefsteak_tomato" },
-  ],
-  carrot: [
-    { label: "Nantes Carrot", value: "nantes_carrot" },
-    { label: "Baby Carrot", value: "baby_carrot" },
-    { label: "Chantenay Carrot", value: "chantenay_carrot" },
-  ],
-  cabbage: [
-    { label: "Green Cabbage", value: "green_cabbage" },
-    { label: "Red Cabbage", value: "red_cabbage" },
-  ],
-  leeks: [
-    { label: "Giant Musselburgh", value: "giant_musselburgh" },
-    { label: "American Flag", value: "american_flag" },
-  ],
-  beans: [
-    { label: "Green Beans", value: "green_beans" },
-    { label: "Butter Beans", value: "butter_beans" },
-  ],
-  potato: [
-    { label: "Granola Potato", value: "granola_potato" },
-    { label: "Desiree Potato", value: "desiree_potato" },
-  ],
-};
-
-const DEFAULT_VARIETIES = [
-  { label: "Red Bell Pepper", value: "red_bell_pepper" },
-  { label: "Red Onion", value: "red_onion" },
-  { label: "Yellow Bell Pepper", value: "yellow_bell_pepper" },
-  { label: "Green Bell Pepper", value: "green_bell_pepper" },
-];
+interface OptionItem {
+  label: string;
+  value: string;
+}
 
 export default function LoadingToVehicle({
   navigation,
   route,
 }: LoadingToVehicleProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
-  const vehicleNo = route.params?.vehicleNo || "BKH-5578";
+  const vehicleNo = route.params?.vehicleNo || "N/A";
+
+  // Crops / Varieties fetched from API
+  const [rawCrops, setRawCrops] = useState<any[]>([]);
+  const [rawVarieties, setRawVarieties] = useState<Record<string, any[]>>({});
+  const [cropsData, setCropsData] = useState<OptionItem[]>([]);
+  const [varietiesData, setVarietiesData] = useState<Record<string, OptionItem[]>>({});
+  const [cropsLoading, setCropsLoading] = useState<boolean>(true);
 
   const [varietyIndex, setVarietyIndex] = useState(1);
-  const [selectedCrop, setSelectedCrop] = useState<{ label: string; value: string } | null>(null);
-  const [selectedVariety, setSelectedVariety] = useState<{ label: string; value: string } | null>(null);
+  const [selectedCrop, setSelectedCrop] = useState<OptionItem | null>(null);
+  const [selectedVariety, setSelectedVariety] = useState<OptionItem | null>(null);
+
+  // Helper for localized naming
+  const formatCropOption = useCallback(
+    (crop: any): OptionItem => {
+      const lang = (i18n.language || "en").toLowerCase();
+      let label = crop.cropNameEnglish || crop.label || "";
+      if (lang.startsWith("si") && crop.cropNameSinhala) {
+        label = crop.cropNameSinhala;
+      } else if (lang.startsWith("ta") && crop.cropNameTamil) {
+        label = crop.cropNameTamil;
+      }
+      return {
+        label: label || crop.cropNameEnglish || crop.label,
+        value: String(crop.value || crop.cropId || crop.id),
+      };
+    },
+    [i18n.language],
+  );
+
+  const formatVarietyOption = useCallback(
+    (variety: any): OptionItem => {
+      const lang = (i18n.language || "en").toLowerCase();
+      let label = variety.varietyNameEnglish || variety.label || "";
+      if (lang.startsWith("si") && variety.varietyNameSinhala) {
+        label = variety.varietyNameSinhala;
+      } else if (lang.startsWith("ta") && variety.varietyNameTamil) {
+        label = variety.varietyNameTamil;
+      }
+      return {
+        label: label || variety.varietyNameEnglish || variety.label,
+        value: String(variety.value || variety.varietyId || variety.id),
+      };
+    },
+    [i18n.language],
+  );
 
   // Saved varieties for top carousel
   const [savedVarieties, setSavedVarieties] = useState<SavedVariety[]>([]);
@@ -196,6 +193,72 @@ export default function LoadingToVehicle({
       ],
     },
   ]);
+
+  // Fetch crops + varieties
+  const fetchCropsAndVarieties = useCallback(async () => {
+    try {
+      setCropsLoading(true);
+      const authToken = store.getState().auth.token;
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/transport/crops-varieties`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+
+      if (response.data.success && response.data.data) {
+        const cropsList: any[] = response.data.data.crops || [];
+        const varietiesObj: Record<string, any[]> = response.data.data.varieties || {};
+
+        setRawCrops(cropsList);
+        setRawVarieties(varietiesObj);
+
+        setCropsData(cropsList.map((c) => formatCropOption(c)));
+
+        const formattedVarieties: Record<string, OptionItem[]> = {};
+        Object.keys(varietiesObj).forEach((cropId) => {
+          formattedVarieties[cropId] = (varietiesObj[cropId] || []).map((v) =>
+            formatVarietyOption(v),
+          );
+        });
+        setVarietiesData(formattedVarieties);
+      } else {
+        setCropsData([]);
+        setVarietiesData({});
+      }
+    } catch (err) {
+      console.error("Error fetching crops and varieties:", err);
+      Alert.alert(
+        t("Error.error", "Error"),
+        t("Error.Failed to fetch crops.", "Failed to fetch crops and varieties."),
+      );
+      setCropsData([]);
+      setVarietiesData({});
+    } finally {
+      setCropsLoading(false);
+    }
+  }, [t, formatCropOption, formatVarietyOption]);
+
+  useEffect(() => {
+    fetchCropsAndVarieties();
+  }, [fetchCropsAndVarieties]);
+
+  // Re-format labels on language change
+  useEffect(() => {
+    if (rawCrops.length > 0) {
+      setCropsData(rawCrops.map((c) => formatCropOption(c)));
+    }
+    if (Object.keys(rawVarieties).length > 0) {
+      const formatted: Record<string, OptionItem[]> = {};
+      Object.keys(rawVarieties).forEach((k) => {
+        formatted[k] = (rawVarieties[k] || []).map((v) => formatVarietyOption(v));
+      });
+      setVarietiesData(formatted);
+    }
+  }, [i18n.language, rawCrops, rawVarieties, formatCropOption, formatVarietyOption]);
 
   // Toggle grade checkbox / row
   const handleToggleGrade = (gradeKey: "A" | "B" | "C") => {
@@ -361,7 +424,9 @@ export default function LoadingToVehicle({
     const newSavedVariety: SavedVariety = {
       id: `variety-${Date.now()}`,
       varietyNumber: varietyIndex,
+      cropId: selectedCrop?.value,
       cropLabel: selectedCrop?.label || "Crop",
+      varietyId: selectedVariety?.value,
       varietyLabel:
         selectedVariety?.label ||
         selectedCrop?.label ||
@@ -476,6 +541,7 @@ export default function LoadingToVehicle({
         totalWeight += weightVal;
         totalCratesCount += cratesNum;
         return {
+          gradeKey: s.gradeKey,
           grade: `Grade ${s.gradeKey}`,
           set: s.setNumber,
           crates: cratesNum,
@@ -485,6 +551,11 @@ export default function LoadingToVehicle({
 
       summaryList.push({
         id: v.id,
+        varietyNumber: v.varietyNumber,
+        cropId: v.cropId,
+        cropLabel: v.cropLabel,
+        varietyId: v.varietyId,
+        varietyLabel: v.varietyLabel,
         cropName: v.varietyLabel || v.cropLabel,
         imageUri:
           "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=150&auto=format&fit=crop&q=80",
@@ -508,6 +579,7 @@ export default function LoadingToVehicle({
             currentTotalWeight += weightVal;
             currentTotalCrates += cratesNum;
             currentGradeSets.push({
+              gradeKey: g.gradeKey,
               grade: `Grade ${g.gradeKey}`,
               set: s.setNumber,
               crates: cratesNum,
@@ -521,6 +593,14 @@ export default function LoadingToVehicle({
     if (currentGradeSets.length > 0) {
       summaryList.push({
         id: `current-variety-${Date.now()}`,
+        varietyNumber: varietyIndex,
+        cropId: selectedCrop?.value,
+        cropLabel: selectedCrop?.label || "Crop",
+        varietyId: selectedVariety?.value,
+        varietyLabel:
+          selectedVariety?.label ||
+          selectedCrop?.label ||
+          `Variety ${varietyIndex}`,
         cropName:
           selectedVariety?.label ||
           selectedCrop?.label ||
@@ -533,17 +613,38 @@ export default function LoadingToVehicle({
       });
     }
 
+    // Save to Redux store
+    store.dispatch({
+      type: "transport/setLoadedVarieties",
+      payload: summaryList,
+    });
+
     navigation.navigate("LoadingToVehicleSummary", {
       vehicleNo,
       centreId: route.params?.centreId,
       centreName: route.params?.centreName,
+      driverId: route.params?.driverId,
+      driverEmpId: route.params?.driverEmpId,
+      driverName: route.params?.driverName,
+      vehicleId: route.params?.vehicleId,
       items: summaryList.length > 0 ? summaryList : undefined,
     });
   };
 
   const varietyOptions = selectedCrop
-    ? VARIETIES_DATA[selectedCrop.value] || DEFAULT_VARIETIES
-    : DEFAULT_VARIETIES;
+    ? varietiesData[selectedCrop.value] || []
+    : [];
+
+  if (cropsLoading) {
+    return (
+      <View className="flex-1 bg-white">
+        <CustomHeader title={vehicleNo} navigation={navigation} />
+        <LoadingPage
+          message={t("LoadingToVehicle.LoadingCrops", "Loading...")}
+        />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">
@@ -717,15 +818,21 @@ export default function LoadingToVehicle({
             </Text>
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => setIsVarietyModalVisible(true)}
-              className="bg-[#F4F6F9] rounded-full h-[50px] px-4 flex-row items-center justify-between"
+              onPress={() => selectedCrop && setIsVarietyModalVisible(true)}
+              disabled={!selectedCrop}
+              className={`rounded-full h-[50px] px-4 flex-row items-center justify-between ${
+                selectedCrop ? "bg-[#F4F6F9]" : "bg-[#F4F6F9] opacity-60"
+              }`}
             >
               <Text
                 className={`text-sm font-medium ${
                   selectedVariety ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
               >
-                {selectedVariety?.label || "--Select Variety--"}
+                {selectedVariety?.label ||
+                  (selectedCrop
+                    ? "--Select Variety--"
+                    : "--Select Crop First--")}
               </Text>
               <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
             </TouchableOpacity>
@@ -984,16 +1091,23 @@ export default function LoadingToVehicle({
         <View className="pt-6 pb-2 gap-3">
           {/* Finish Loading Button */}
           <TouchableOpacity
+            disabled={!canFinishLoading}
             onPress={handleFinishLoading}
             activeOpacity={0.8}
-            className="w-full h-[50px] rounded-full items-center justify-center bg-[#000000]"
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 6,
-              elevation: 5,
-            }}
+            className={`w-full h-[50px] rounded-full items-center justify-center ${
+              canFinishLoading ? "bg-[#000000]" : "bg-[#ACB5BE]"
+            }`}
+            style={
+              canFinishLoading
+                ? {
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 6,
+                    elevation: 5,
+                  }
+                : undefined
+            }
           >
             <Text className="text-white font-extrabold text-base">
               {t("LoadingToVehicle.FinishLoading", "Finish Loading")}
@@ -1032,11 +1146,11 @@ export default function LoadingToVehicle({
         visible={isCropModalVisible}
         onClose={() => setIsCropModalVisible(false)}
         title={t("LoadingToVehicle.SelectCrop", "Select Crop")}
-        data={CROPS_DATA}
+        data={cropsData}
         selectedItems={selectedCrop ? [selectedCrop.value] : []}
         onSelect={(selectedValues) => {
           if (selectedValues.length > 0) {
-            const found = CROPS_DATA.find((c) => c.value === selectedValues[0]);
+            const found = cropsData.find((c) => c.value === selectedValues[0]);
             if (found) {
               setSelectedCrop(found);
               setSelectedVariety(null);

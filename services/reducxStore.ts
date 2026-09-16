@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer, { setUser, setActiveAssignment } from "../store/authSlice";
+import transportReducer from "../store/transportSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
+    transport: transportReducer,
   },
 });
 

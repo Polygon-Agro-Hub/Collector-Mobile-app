@@ -16,12 +16,28 @@ export type RootStackParamList = {
   CollectionDashboard: undefined;
   SentProductsToday: undefined;
   ScanDriverQR: undefined;
-  SelectDistributionCentre: undefined;
+  SelectDistributionCentre:
+    | {
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        vehicleId?: number;
+        vehicleNo?: string;
+        vType?: string;
+        vCapacity?: string;
+      }
+    | undefined;
   LoadingToVehicle:
     | {
         vehicleNo?: string;
         centreId?: string;
         centreName?: string;
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        vehicleId?: number;
+        vType?: string;
+        vCapacity?: string;
       }
     | undefined;
   LoadingToVehicleSummary:
@@ -29,6 +45,10 @@ export type RootStackParamList = {
         vehicleNo?: string;
         centreId?: string;
         centreName?: string;
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        vehicleId?: number;
         loadCode?: string;
         items?: any[];
       }

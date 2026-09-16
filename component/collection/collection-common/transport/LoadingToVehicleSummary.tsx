@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
@@ -14,6 +16,10 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import store from "@/services/reducxStore";
+import environment from "@/environment/environment";
+import { clearTransportLoad } from "@/store/transportSlice";
 
 type LoadingToVehicleSummaryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -39,6 +45,10 @@ export interface GradeSetItem {
 
 export interface CropLoadData {
   id: string;
+  cropId?: string;
+  cropLabel?: string;
+  varietyId?: string;
+  varietyLabel?: string;
   cropName: string;
   imageUri: string;
   totalWeightKg: number;
@@ -107,13 +117,66 @@ export default function LoadingToVehicleSummary({
   const [items] = useState<CropLoadData[]>(
     passedItems && passedItems.length > 0 ? passedItems : MOCK_SUMMARY_ITEMS
   );
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const handleConfirmAndContinue = () => {
-    navigation.navigate("LoadQR", {
-      loadCode,
-      vehicleNo,
-      centreName: route.params?.centreName,
-    });
+  const handleConfirmAndContinue = async () => {
+    try {
+      setSubmitting(true);
+      const authToken = store.getState().auth.token;
+      const transportState = store.getState().transport;
+
+      // Extract driverId and centreId from route params or Redux
+      const driverId = route.params?.driverId ?? transportState.driverId;
+      const centreId = route.params?.centreId ?? transportState.centreId;
+
+      // Build items payload
+      const reduxItems = transportState.loadedVarieties;
+      const sourceItems = items.length > 0 ? items : (reduxItems as any[]);
+      const finalItems = sourceItems.map((item: any) => ({
+        varietyId: item.varietyId || item.id,
+        gradeSets: item.gradeSets || [],
+      }));
+
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/transport/save-load`,
+        {
+          driverId,
+          centreId,
+          items: finalItems,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        const { transferCode } = response.data.data;
+        store.dispatch(clearTransportLoad());
+        navigation.navigate("LoadQR", {
+          loadCode: transferCode || loadCode,
+          vehicleNo: route.params?.vehicleNo || vehicleNo,
+          centreName: route.params?.centreName,
+          driverId: route.params?.driverEmpId || transportState.driverEmpId || undefined,
+          driverName: route.params?.driverName || transportState.driverName || undefined,
+        });
+      } else {
+        Alert.alert(
+          t("Error.error", "Error"),
+          response.data.message || t("LoadingToVehicleSummary.SaveFailed", "Failed to save transport load.")
+        );
+      }
+    } catch (error: any) {
+      console.error("Error saving transport load:", error);
+      Alert.alert(
+        t("Error.error", "Error"),
+        error?.response?.data?.message ||
+          t("LoadingToVehicleSummary.SaveFailed", "Failed to save transport load. Please try again.")
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -280,6 +343,7 @@ export default function LoadingToVehicleSummary({
         <View className="pt-4 pb-2">
           <TouchableOpacity
             onPress={handleConfirmAndContinue}
+            disabled={submitting}
             activeOpacity={0.8}
             className="w-full h-[50px] bg-[#000000] rounded-full items-center justify-center"
             style={{
@@ -288,11 +352,16 @@ export default function LoadingToVehicleSummary({
               shadowOpacity: 0.2,
               shadowRadius: 5,
               elevation: 4,
+              opacity: submitting ? 0.7 : 1,
             }}
           >
-            <Text className="text-white font-extrabold text-base">
-              {t("LoadingToVehicleSummary.ConfirmAndContinue", "Confirm & Continue")}
-            </Text>
+            {submitting ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text className="text-white font-extrabold text-base">
+                {t("LoadingToVehicleSummary.ConfirmAndContinue", "Confirm & Continue")}
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>

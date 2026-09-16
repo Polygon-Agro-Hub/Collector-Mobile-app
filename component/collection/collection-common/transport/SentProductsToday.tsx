@@ -1,18 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   Alert,
+  RefreshControl,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import store from "@/services/reducxStore";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import AddButton from "@/component/components/buttons/AddButton";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 import { MaterialIcons } from "@expo/vector-icons";
+import environment from "@/environment/environment";
 
 type SentProductsTodayNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -31,43 +36,60 @@ export interface SentProductItem {
   time: string;
 }
 
-const DUMMY_SENT_PRODUCTS: SentProductItem[] = [
-  {
-    id: "1",
-    crates: 20,
-    weight: "200.78 kg",
-    destination: "Colombo 02",
-    time: "At 06:00 AM",
-  },
-  {
-    id: "2",
-    crates: 3,
-    weight: "10.78 kg",
-    destination: "Colombo 07",
-    time: "At 06:30 AM",
-  },
-  {
-    id: "3",
-    crates: 10,
-    weight: "5.00 kg",
-    destination: "Colombo 02",
-    time: "At 07:00 AM",
-  },
-  {
-    id: "4",
-    crates: 1,
-    weight: "0.8 kg",
-    destination: "Colombo 02",
-    time: "At 07:30 AM",
-  },
-];
-
 export default function SentProductsToday({ navigation }: SentProductsTodayProps) {
   const { t } = useTranslation();
-  const [products, setProducts] = useState<SentProductItem[]>(DUMMY_SENT_PRODUCTS);
+
+  const [products, setProducts] = useState<SentProductItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const fetchSentProducts = useCallback(async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      const authToken = store.getState().auth.token;
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/transport/sent-today`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+
+      if (response.data.success) {
+        setProducts(response.data.data);
+      } else {
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error("Error fetching sent products:", err);
+      Alert.alert(
+        t("Error.error", "Error"),
+        t("Error.Failed to fetch sent products.", "Failed to fetch sent products."),
+      );
+      setProducts([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    fetchSentProducts();
+  }, [fetchSentProducts]);
 
   const handleAdd = () => {
     navigation.navigate("ScanDriverQR");
+  };
+
+  const handleRefresh = () => {
+    fetchSentProducts(true);
   };
 
   const formatIndex = (index: number) => {
@@ -83,15 +105,30 @@ export default function SentProductsToday({ navigation }: SentProductsTodayProps
       />
 
       <View className="flex-1 relative">
-        {products.length === 0 ? (
+        {loading ? (
+          /* Loading State */
+          <LoadingPage
+            message={t("SentProductsToday.Loading", "Loading...")}
+          />
+        ) : products.length === 0 ? (
           /* Empty State */
-          <NoDataScreen message={t("SentProductsToday.NoLoadsToday", "- No loads today -")} />
+          <NoDataScreen
+            message={t("SentProductsToday.NoLoadsToday", "- No loads today -")}
+          />
         ) : (
           /* List of Sent Products Cards */
           <ScrollView
             className="flex-1 px-6 pt-4"
             contentContainerStyle={{ paddingBottom: 100 }}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                colors={["#030E25"]}
+                tintColor="#030E25"
+              />
+            }
           >
             {products.map((item, index) => (
               <TouchableOpacity

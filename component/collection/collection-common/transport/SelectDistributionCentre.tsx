@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,15 +12,27 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
+import LoadingPage from "@/component/components/loading/LoadingPage";
 import { FontAwesome6 } from "@expo/vector-icons";
+import axios from "axios";
+import environment from "@/environment/environment";
+import store from "@/services/reducxStore";
+
+import { RouteProp } from "@react-navigation/native";
 
 type SelectDistributionCentreNavigationProps = StackNavigationProp<
   RootStackParamList,
   "SelectDistributionCentre"
 >;
 
+type SelectDistributionCentreRouteProps = RouteProp<
+  RootStackParamList,
+  "SelectDistributionCentre"
+>;
+
 interface SelectDistributionCentreProps {
   navigation: SelectDistributionCentreNavigationProps;
+  route: SelectDistributionCentreRouteProps;
 }
 
 export interface DistributionCentreItem {
@@ -29,39 +41,75 @@ export interface DistributionCentreItem {
   code: string;
 }
 
-const DUMMY_CENTRES: DistributionCentreItem[] = [
-  {
-    id: "1",
-    name: "Ampara Centre",
-    code: "D-APAA-01",
-  },
-  {
-    id: "2",
-    name: "Bambalapitiya Centre",
-    code: "D-WPCB-01",
-  },
-  {
-    id: "3",
-    name: "Kollupitiya Centre",
-    code: "D-WPCK-01",
-  },
-];
-
 export default function SelectDistributionCentre({
   navigation,
+  route,
 }: SelectDistributionCentreProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const [centres] = useState<DistributionCentreItem[]>(DUMMY_CENTRES);
+
+  const [centres, setCentres] = useState<DistributionCentreItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedCentreId, setSelectedCentreId] = useState<string | null>(null);
+
+  const fetchCentres = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      const authToken = store.getState().auth.token;
+    
+       const response = await axios.get(
+              `${environment.API_BASE_URL}api/transport/distribution-centres`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+              },
+            );
+
+      if (response.data.success) {
+        setCentres(response.data.data);
+      } else {
+        setCentres([]);
+      }
+    } catch (err) {
+      console.error("Error fetching collection centres:", err);
+      Alert.alert(
+        t("Error.error", "Error"),
+        t("Error.Failed to fetch centres.", "Failed to fetch distribution centres."),
+      );
+      setCentres([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    fetchCentres();
+  }, [fetchCentres]);
 
   const handleContinue = () => {
     if (!selectedCentreId) return;
     const selectedCentre = centres.find((c) => c.id === selectedCentreId);
+
+    store.dispatch({
+      type: "transport/setTransportDestination",
+      payload: {
+        centreId: selectedCentre?.id ?? null,
+        centreName: selectedCentre?.name ?? null,
+      },
+    });
+
     navigation.navigate("LoadingToVehicle", {
-      vehicleNo: "BKH-5578",
+      vehicleNo: route.params?.vehicleNo || "N/A",
       centreId: selectedCentre?.id,
       centreName: selectedCentre?.name,
+      driverId: route.params?.driverId,
+      driverEmpId: route.params?.driverEmpId,
+      driverName: route.params?.driverName,
+      vehicleId: route.params?.vehicleId,
+      vType: route.params?.vType,
+      vCapacity: route.params?.vCapacity,
     });
   };
 
@@ -74,7 +122,12 @@ export default function SelectDistributionCentre({
       />
 
       <View className="flex-1">
-        {centres.length === 0 ? (
+        {loading ? (
+          /* Loading State */
+          <LoadingPage
+            message={t("SelectDistributionCentre.Loading", "Loading...")}
+          />
+        ) : centres.length === 0 ? (
           /* Empty State */
           <NoDataScreen
             message={t(

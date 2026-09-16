@@ -16,6 +16,9 @@ import { AlertModal } from "@/component/components/popup/AlertModal";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import store from "@/services/reducxStore";
+import environment from "@/environment/environment";
 
 type ScanDriverQRNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -40,6 +43,19 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
   const [showRescanButton, setShowRescanButton] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | React.ReactElement>("");
   const [modalType, setModalType] = useState<"error" | "success">("error");
+
+  // Holds the verified driver payload until navigation happens on modal close
+  const verifiedDriverRef = useRef<{
+    driverId: number;
+    empId: string;
+    fullName: string;
+    jobRole: string;
+    vehicleId?: number | null;
+    vehicleNo?: string | null;
+    vRegNo?: string | null;
+    vType?: string | null;
+    vCapacity?: string | null;
+  } | null>(null);
 
   const isFocusedRef = useRef(true);
 
@@ -101,8 +117,13 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
     timerRef.current = setTimeout(() => {
       if (!scanned && !loading && isFocusedRef.current) {
-        setModalTitle("Scan Timeout");
-        setModalMessage("The QR code is not identified. Please check and try again.");
+        setModalTitle(t("qrcode.ScanTimeout", "Scan Timeout"));
+        setModalMessage(
+          t(
+            "qrcode.ScanTimeoutMessage",
+            "The QR code is not identified. Please check and try again.",
+          ),
+        );
         setShowRescanButton(true);
         setModalType("error");
         setShowTimeoutModal(true);
@@ -115,6 +136,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       clearTimeout(timerRef.current);
     }
 
+    verifiedDriverRef.current = null;
     setScanned(false);
     setShowTimeoutModal(false);
     setShowErrorModal(false);
@@ -157,27 +179,84 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       clearTimeout(timerRef.current);
     }
 
-    // Process Driver QR code (dummy / simulated identification)
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setModalTitle("Successful!");
-      setModalMessage(
-        <View className="items-center">
-          <Text className="text-center text-[#4E4E4E] mb-2 mt-2">
-            QR code identified successfully.
-          </Text>
-          <Text className="text-center font-bold text-[#000000]">
-            Driver : DRV00001,
-          </Text>
-          <Text className="text-center font-bold text-[#000000]">
-            Amal Perera
-          </Text>
-        </View>
+
+    try {
+      const authToken = store.getState().auth.token;
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/transport/verify-driver-qr`,
+        { qrData: data },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
       );
-      setModalType("success");
-      setShowSuccessModal(true);
-    }, 600);
+
+      setLoading(false);
+
+      if (response.data.success) {
+        const driver = response.data.data;
+        verifiedDriverRef.current = driver;
+
+        setModalTitle(t("qrcode.Successful", "Successful!"));
+        setModalMessage(
+          <View className="items-center">
+            <Text className="text-center text-[#4E4E4E] mb-2 mt-2">
+              {t("qrcode.QRIdentified", "QR code identified successfully.")}
+            </Text>
+            <Text className="text-center font-bold text-[#000000]">
+              {t("qrcode.Driver", "Driver")} : {driver.empId},
+            </Text>
+            <Text className="text-center font-bold text-[#000000]">
+              {driver.fullName}
+            </Text>
+          </View>,
+        );
+        setModalType("success");
+        setShowSuccessModal(true);
+      }
+    } catch (err: any) {
+      setLoading(false);
+
+      const errData = err?.response?.data;
+      const code = errData?.code;
+
+      if (code === "UNAUTHORIZED_ROLE") {
+        setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
+        setModalMessage(
+          t(
+            "qrcode.UnauthorizedMessage",
+            "Driver access has been rejected. Please contact the company for assistance.",
+          ),
+        );
+        setShowRescanButton(false);
+        setModalType("error");
+        setShowErrorModal(true);
+        return;
+      }
+
+      if (code === "INVALID_QR") {
+        setModalTitle(t("qrcode.Error", "Error!"));
+        setModalMessage(
+          t("qrcode.InvalidQR", "Invalid QR code. Please scan a valid driver QR code."),
+        );
+        setShowRescanButton(true);
+        setModalType("error");
+        setShowErrorModal(true);
+        return;
+      }
+
+      // Generic / network / server error
+      console.error("Error verifying driver QR:", err);
+      setModalTitle(t("qrcode.Error", "Error!"));
+      setModalMessage(
+        t("qrcode.VerifyFailed", "Something went wrong. Please try again."),
+      );
+      setShowRescanButton(true);
+      setModalType("error");
+      setShowErrorModal(true);
+    }
   };
 
   const handleErrorModalClose = () => {
@@ -188,7 +267,32 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
     setScanned(false);
-    navigation.navigate("SelectDistributionCentre");
+
+    const driver = verifiedDriverRef.current;
+    verifiedDriverRef.current = null;
+
+    if (driver) {
+      store.dispatch({
+        type: "transport/setTransportDriver",
+        payload: {
+          driverId: driver.driverId,
+          driverEmpId: driver.empId,
+          driverName: driver.fullName,
+          vehicleId: driver.vehicleId ?? null,
+          vehicleNo: (driver.vRegNo || driver.vehicleNo) ?? null,
+        },
+      });
+    }
+
+    navigation.navigate("SelectDistributionCentre", {
+      driverId: driver?.driverId,
+      driverEmpId: driver?.empId,
+      driverName: driver?.fullName,
+      vehicleId: driver?.vehicleId ?? undefined,
+      vehicleNo: (driver?.vRegNo || driver?.vehicleNo) ?? undefined,
+      vType: driver?.vType ?? undefined,
+      vCapacity: driver?.vCapacity ?? undefined,
+    });
   };
 
   const handleTimeoutModalClose = () => {
@@ -208,7 +312,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           <ActivityIndicator size="large" color="#F7CA21" />
         </View>
         <Text className="text-white text-lg mt-4">
-          {t("qrcode.Loading camera", t("Loading camera...", "කැමරාව පූරණය වෙමින්..."))}
+          {t("qrcode.Loading camera", "කැමරාව පූරණය වෙමින්...")}
         </Text>
       </SafeAreaView>
     );
@@ -237,7 +341,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           <View className="bg-black/80 p-6 rounded-xl items-center">
             <ActivityIndicator size="large" color="#F7CA21" />
             <Text className="text-white text-lg font-semibold mt-4">
-              Identifying Driver...
+              {t("qrcode.IdentifyingDriver", "Identifying Driver...")}
             </Text>
           </View>
         </View>
@@ -246,8 +350,11 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       {/* Timeout Modal */}
       <AlertModal
         visible={showTimeoutModal}
-        title="Scan Timeout"
-        message="The QR code could not be detected within the time limit. Please check and try again."
+        title={t("qrcode.ScanTimeout", "Scan Timeout")}
+        message={t(
+          "qrcode.ScanTimeoutMessage",
+          "The QR code could not be detected within the time limit. Please check and try again.",
+        )}
         type="error"
         onClose={handleTimeoutModalClose}
         showRescanButton={true}
@@ -256,7 +363,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
         autoClose={true}
       />
 
-      {/* Error Modal */}
+      {/* Error / Unauthorized Modal */}
       <AlertModal
         visible={showErrorModal}
         title={modalTitle}
@@ -306,7 +413,6 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
           {/* Scan Frame Container */}
           <View className="flex-1 justify-center items-center">
-            {/* Scan Frame with Camera */}
             <View
               style={{
                 width: wp(80),
@@ -316,7 +422,6 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
                 position: "relative",
               }}
             >
-              {/* Camera View inside the frame */}
               <CameraView
                 style={{
                   position: "absolute",
@@ -334,7 +439,6 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
                 }
               />
 
-              {/* Animated Scan Line */}
               <Animated.View
                 style={{
                   width: "100%",
@@ -348,124 +452,27 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
               />
 
               {/* Corner Markers - Top Left */}
-              <View
-                style={{
-                  position: "absolute",
-                  top: -3,
-                  left: -3,
-                  width: 50,
-                  height: 50,
-                  zIndex: 20,
-                }}
-              >
-                <View
-                  style={{
-                    width: 50,
-                    height: 12,
-                    backgroundColor: "#F7CA21",
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
-                  }}
-                />
-                <View
-                  style={{
-                    width: 12,
-                    height: 38,
-                    backgroundColor: "#F7CA21",
-                    borderBottomLeftRadius: 20,
-                  }}
-                />
+              <View style={{ position: "absolute", top: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
+                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
+                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderBottomLeftRadius: 20 }} />
               </View>
 
               {/* Corner Markers - Top Right */}
-              <View
-                style={{
-                  position: "absolute",
-                  top: -3,
-                  right: -3,
-                  width: 50,
-                  height: 50,
-                  zIndex: 20,
-                }}
-              >
-                <View
-                  style={{
-                    width: 50,
-                    height: 12,
-                    backgroundColor: "#F7CA21",
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
-                  }}
-                />
-                <View
-                  style={{
-                    width: 12,
-                    height: 38,
-                    backgroundColor: "#F7CA21",
-                    borderBottomRightRadius: 20,
-                    alignSelf: "flex-end",
-                  }}
-                />
+              <View style={{ position: "absolute", top: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
+                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
+                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderBottomRightRadius: 20, alignSelf: "flex-end" }} />
               </View>
 
               {/* Corner Markers - Bottom Left */}
-              <View
-                style={{
-                  position: "absolute",
-                  bottom: -3,
-                  left: -3,
-                  width: 50,
-                  height: 50,
-                  zIndex: 20,
-                }}
-              >
-                <View
-                  style={{
-                    width: 12,
-                    height: 38,
-                    backgroundColor: "#F7CA21",
-                    borderTopLeftRadius: 20,
-                  }}
-                />
-                <View
-                  style={{
-                    width: 50,
-                    height: 12,
-                    backgroundColor: "#F7CA21",
-                    borderBottomLeftRadius: 20,
-                  }}
-                />
+              <View style={{ position: "absolute", bottom: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
+                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderTopLeftRadius: 20 }} />
+                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderBottomLeftRadius: 20 }} />
               </View>
 
               {/* Corner Markers - Bottom Right */}
-              <View
-                style={{
-                  position: "absolute",
-                  bottom: -3,
-                  right: -3,
-                  width: 50,
-                  height: 50,
-                  zIndex: 20,
-                }}
-              >
-                <View
-                  style={{
-                    width: 12,
-                    height: 38,
-                    backgroundColor: "#F7CA21",
-                    borderTopRightRadius: 20,
-                    alignSelf: "flex-end",
-                  }}
-                />
-                <View
-                  style={{
-                    width: 50,
-                    height: 12,
-                    backgroundColor: "#F7CA21",
-                    borderBottomLeftRadius: 20,
-                    borderBottomRightRadius: 20,
-                  }}
-                />
+              <View style={{ position: "absolute", bottom: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
+                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderTopRightRadius: 20, alignSelf: "flex-end" }} />
+                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} />
               </View>
             </View>
           </View>
