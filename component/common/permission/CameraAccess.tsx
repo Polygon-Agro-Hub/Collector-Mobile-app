@@ -174,7 +174,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
           </Text>
 
           {/* Feature 1: QR Scanning */}
-          <View className="bg-[#1E1E1E] p-4 rounded-xl mb-3 border border-gray-800 flex-row items-start">
+          <View className="bg-[#1E1E1E] p-4 rounded-xl mb-4 border border-gray-800 flex-row items-start">
             <View className="bg-[#980775]/20 p-2.5 rounded-lg mr-3 mt-0.5 border border-[#980775]/40">
               <MaterialCommunityIcons
                 name="qrcode-scan"
@@ -189,28 +189,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
               </Text>
               <Text className="text-gray-400 text-xs leading-4">
                 {t("CameraAccess.FeatureQRDesc") ||
-                  "Scan farmer IDs, pickup orders, and cash handover QR codes for quick identification, verification, and secure transactions."}
-              </Text>
-            </View>
-          </View>
-
-          {/* Feature 2: Inspection / Document Photos */}
-          <View className="bg-[#1E1E1E] p-4 rounded-xl mb-4 border border-gray-800 flex-row items-start">
-            <View className="bg-[#980775]/20 p-2.5 rounded-lg mr-3 mt-0.5 border border-[#980775]/40">
-              <MaterialCommunityIcons
-                name="camera-outline"
-                size={24}
-                color="#E879F9"
-              />
-            </View>
-            <View className="flex-1">
-              <Text className="text-white font-semibold text-base mb-1">
-                {t("CameraAccess.FeatureInspectionTitle") ||
-                  "Crop Quality Inspection & Documents"}
-              </Text>
-              <Text className="text-gray-400 text-xs leading-4">
-                {t("CameraAccess.FeatureInspectionDesc") ||
-                  "Capture real-time crop grade photos (Grade A, B, C) during collection and document verification photos for farmers and officers."}
+                  "Scan driver QR codes, farmer IDs, pickup orders, and cash handover QR codes for quick identification, verification, and secure transport & collection operations."}
               </Text>
             </View>
           </View>
@@ -225,7 +204,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
             />
             <Text className="text-gray-300 text-xs flex-1 leading-4">
               {t("CameraAccess.DisclosureFooter") ||
-                "Camera access is only active while scanning QR codes or capturing crop inspection photos. No photos or videos are captured without your explicit tap."}
+                "Camera access is only active while scanning QR codes. No photos or videos are recorded without your explicit action."}
             </Text>
           </View>
 

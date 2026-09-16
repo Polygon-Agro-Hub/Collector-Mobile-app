@@ -1187,7 +1187,14 @@
     "Order ID": "ඇණවුම් අංකය",
     "Failed!": "අසාර්ථකයි!",
     "You have scanned the wrong package.": "ඔබ වැරදි පැකේජය ස්කෑන් කර ඇත.",
-    "You cannot transfer the maximum amount of": "You cannot transfer the maximum amount of"
+    "You cannot transfer the maximum amount of": "You cannot transfer the maximum amount of",
+    "InvalidQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු රියදුරු QR කේතයක් ස්කෑන් කරන්න.",
+    "Unauthorized": "අනවසරයි!",
+    "UnauthorizedMessage": "රියදුරු ප්‍රවේශය ප්‍රතික්ෂේප කර ඇත. කරුණාකර සහාය සඳහා සමාගම අමතන්න.",
+    "Successful": "සාර්ථකයි!",
+    "Error": "දෝෂයකි!",
+    "QRIdentified": "QR කේතය සාර්ථකව හඳුනා ගන්නා ලදී.",
+    "Driver": "රියදුරු"
   },
   "GoviPensionForm": {
     "GoViPension": "ගොවි පැන්ෂන්",
@@ -1680,14 +1687,12 @@
     "ProminentDisclosureTitle": "CoDi-Net කැමරාව භාවිතා කරන්නේ ඇයි",
     "ProminentDisclosureIntro": "පහත සඳහන් මෙහෙයුම් විශේෂාංග සක්‍රීය කිරීමට CoDi-Net කැමරා ප්‍රවේශය අවශ්‍ය වේ:",
     "FeatureQRTitle": "ක්ෂණික QR කේත පරිලෝකනය",
-    "FeatureQRDesc": "ක්ෂණික හඳුනාගැනීම්, තහවුරු කිරීම් සහ ආරක්ෂිත ගනුදෙනු සඳහා ගොවි හැඳුනුම්පත්, ඇණවුම් සහ මුදල් භාරදීමේ QR කේත පරිලෝකනය කිරීම.",
-    "FeatureInspectionTitle": "බෝග තත්ත්ව පරීක්ෂාව සහ ලේඛන",
-    "FeatureInspectionDesc": "එකතු කිරීමේදී බෝග ශ්‍රේණිගත කිරීමේ (A, B, C) තත්‍ය කාලීන ඡායාරූප සහ ගොවීන් හා නිලධාරීන්ගේ ලියාපදිංචි ලේඛන ඡායාරූප ලබා ගැනීම.",
-    "DisclosureFooter": "කැමරා ප්‍රවේශය සක්‍රිය වන්නේ QR පරිලෝකනය හෝ බෝග පරීක්ෂා කිරීමේ ඡායාරූප ගැනීමේදී පමණි. ඔබගේ අවසරයකින් තොරව කිසිදු ඡායාරූපයක් හෝ වීඩියෝවක් ගනු නොලැබේ.",
+    "FeatureQRDesc": "ක්ෂණික හඳුනාගැනීම්, තහවුරු කිරීම් සහ ආරක්ෂිත ප්‍රවාහන හා එකතු කිරීමේ මෙහෙයුම් සඳහා රියදුරු, ගොවි හැඳුනුම්පත්, ඇණවුම් සහ මුදල් භාරදීමේ QR කේත පරිලෝකනය කිරීම.",
+    "DisclosureFooter": "කැමරා ප්‍රවේශය සක්‍රිය වන්නේ QR පරිලෝකනය කිරීමේදී පමණි. ඔබගේ අවසරයකින් තොරව කිසිදු ඡායාරූපයක් හෝ වීඩියෝවක් ගනු නොලැබේ.",
     "PermissionDenied": "අවසර ප්‍රතික්ෂේප කරන ලදී",
-    "EnableCameraAccessToCapturePhotos": "ඡායාරූප ගැනීමට සහ ලේඛන පරිලෝකනය කිරීමට කැමරා ප්‍රවේශය සක්‍රිය කරන්න.",
+    "EnableCameraAccessToCapturePhotos": "එකතු කිරීමේ, ප්‍රවාහන සහ බෙදාහැරීමේ මෙහෙයුම් සඳහා QR කේත පරිලෝකනය කිරීමට කැමරා ප්‍රවේශය සක්‍රිය කරන්න.",
     "UnableToRequestCameraPermissionPleaseTryAgain": "කැමරා අවසරය ඉල්ලීමට නොහැක. කරුණාකර නැවත උත්සාහ කරන්න.",
-    "CameraAccessIsRequiredPleaseEnableItInSettings": "පරිලෝකනය සහ බෝග ඡායාරූප සඳහා කැමරා ප්‍රවේශය අවශ්‍ය වේ. කරුණාකර එය සැකසුම් තුළ සක්‍රිය කරන්න."
+    "CameraAccessIsRequiredPleaseEnableItInSettings": "කැමරා ප්‍රවේශය අවශ්‍ය වේ. කරුණාකර එය සැකසුම් තුළ සක්‍රිය කරන්න."
   },
   "LocationAccess": {
     "Allow": "ඉඩ දෙන්න",
@@ -1772,7 +1777,10 @@
     "Weight": "බර"
   },
   "LoadQR": {
-    "Title": "පැටවුම් QR කේතය",
+    "Title": "ජනනය කළ QR කේතය",
+    "ScanQRImmediately": "වහාම QR පරිලෝකනය කරන්න",
+    "ShowQRToOfficer": "මෙම QR කේතය අදාළ නිලධාරියාට පෙන්වන්න.",
+    "Notice": "පැටවුම් පැවරීමේ ප්‍රමාදයන් වළක්වා ගැනීමට කරුණාකර වහාම QR පරිලෝකනය කරන්න.",
     "ReadyForTransport": "ප්‍රවාහනයට සූදානම්",
     "LoadCode": "පැටවුම් අංකය",
     "VehicleNo": "වාහන අංකය",

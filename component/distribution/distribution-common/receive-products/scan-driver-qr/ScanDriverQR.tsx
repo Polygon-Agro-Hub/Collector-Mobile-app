@@ -14,7 +14,12 @@ import { Entypo } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import CameraAccess from "@/component/common/permission/CameraAccess";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
+import axios from "axios";
+import store from "@/services/reducxStore";
+import environment from "@/environment/environment";
 
 type DistributionScanDriverQRNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,6 +33,7 @@ interface DistributionScanDriverQRProps {
 const ScanDriverQR: React.FC<DistributionScanDriverQRProps> = ({
   navigation,
 }) => {
+  const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
@@ -42,6 +48,18 @@ const ScanDriverQR: React.FC<DistributionScanDriverQRProps> = ({
     ""
   );
   const [modalType, setModalType] = useState<"error" | "success">("error");
+
+  const verifiedDriverRef = useRef<{
+    driverId: number;
+    empId: string;
+    fullName: string;
+    jobRole: string;
+    vehicleId?: number | null;
+    vehicleNo?: string | null;
+    vRegNo?: string | null;
+    vType?: string | null;
+    vCapacity?: string | null;
+  } | null>(null);
 
   const isFocusedRef = useRef(true);
 
@@ -161,27 +179,109 @@ const ScanDriverQR: React.FC<DistributionScanDriverQRProps> = ({
       clearTimeout(timerRef.current);
     }
 
-    // Process Driver QR code
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setModalTitle("Successful!");
+    // Validate JSON format {"empId": "DRVXXXXX"}
+    let isFormatValid = false;
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed && typeof parsed === "object") {
+        const empId = parsed.empId || parsed.empld;
+        if (empId && typeof empId === "string" && /^DRV\d+$/i.test(empId.trim())) {
+          isFormatValid = true;
+        }
+      }
+    } catch (e) {
+      isFormatValid = false;
+    }
+
+    if (!isFormatValid) {
+      setModalTitle(t("qrcode.Error", "Error!"));
       setModalMessage(
-        <View className="items-center">
-          <Text className="text-center text-[#4E4E4E] mb-2 mt-2">
-            QR code identified successfully.
-          </Text>
-          <Text className="text-center font-bold text-[#000000]">
-            Driver : DRV00001,
-          </Text>
-          <Text className="text-center font-bold text-[#000000]">
-            Amal Perera
-          </Text>
-        </View>
+        t(
+          "qrcode.InvalidQR",
+          "Invalid QR code.\nPlease scan a valid driver QR code."
+        )
       );
-      setModalType("success");
-      setShowSuccessModal(true);
-    }, 600);
+      setShowRescanButton(true);
+      setModalType("error");
+      setShowErrorModal(true);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const authToken = store.getState().auth.token;
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/transport/verify-driver-qr`,
+        { qrData: data },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+
+      setLoading(false);
+
+      if (response.data.success) {
+        const driver = response.data.data;
+        verifiedDriverRef.current = driver;
+
+        setModalTitle(t("qrcode.Successful", "Successful!"));
+        setModalMessage(
+          <View className="items-center">
+            <Text className="text-center text-[#4E4E4E] mb-2 mt-2">
+              {t("qrcode.QRIdentified", "QR code identified successfully.")}
+            </Text>
+            <Text className="text-center font-bold text-[#000000]">
+              {t("qrcode.Driver", "Driver")} : {driver.empId}, {driver.fullName}
+            </Text>
+          </View>,
+        );
+        setModalType("success");
+        setShowSuccessModal(true);
+      }
+    } catch (err: any) {
+      setLoading(false);
+
+      const errData = err?.response?.data;
+      const code = errData?.code;
+
+      if (code === "UNAUTHORIZED_ROLE" || code === "UNAUTHORIZED_STATUS") {
+        setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
+        setModalMessage(
+          t(
+            "qrcode.UnauthorizedMessage",
+            "Driver access has been rejected. Please contact the company for assistance.",
+          ),
+        );
+        setShowRescanButton(false);
+        setModalType("error");
+        setShowErrorModal(true);
+        return;
+      }
+
+      if (code === "INVALID_QR") {
+        setModalTitle(t("qrcode.Error", "Error!"));
+        setModalMessage(
+          t("qrcode.InvalidQR", "Invalid QR code.\nPlease scan a valid driver QR code."),
+        );
+        setShowRescanButton(true);
+        setModalType("error");
+        setShowErrorModal(true);
+        return;
+      }
+
+      // Generic / network / server error
+      console.error("Error verifying driver QR:", err);
+      setModalTitle(t("qrcode.Error", "Error!"));
+      setModalMessage(
+        t("qrcode.VerifyFailed", "Something went wrong. Please try again."),
+      );
+      setShowRescanButton(true);
+      setModalType("error");
+      setShowErrorModal(true);
+    }
   };
 
   const handleErrorModalClose = () => {
@@ -192,7 +292,19 @@ const ScanDriverQR: React.FC<DistributionScanDriverQRProps> = ({
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
     setScanned(false);
-    navigation.navigate("ReceivedProductsSummary");
+
+    const driver = verifiedDriverRef.current;
+    verifiedDriverRef.current = null;
+
+    navigation.navigate("ReceivedProductsSummary", {
+      driverId: driver?.driverId,
+      driverEmpId: driver?.empId,
+      driverName: driver?.fullName,
+      vehicleId: driver?.vehicleId ?? undefined,
+      vehicleNo: (driver?.vRegNo || driver?.vehicleNo) ?? undefined,
+      vType: driver?.vType ?? undefined,
+      vCapacity: driver?.vCapacity ?? undefined,
+    } as any);
   };
 
   const handleTimeoutModalClose = () => {
@@ -286,24 +398,14 @@ const ScanDriverQR: React.FC<DistributionScanDriverQRProps> = ({
       <View className="flex-1">
         {/* Semi-transparent overlay */}
         <View className="flex-1 bg-black/50">
-          {/* Back Button */}
-          <View className="flex-row items-center justify-between px-4 py-3 relative mt-6">
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              className="items-start"
-              disabled={loading}
-            >
-              <Entypo
-                name="chevron-left"
-                size={25}
-                color="black"
-                style={{
-                  backgroundColor: loading ? "#666" : "#F7FAFF",
-                  borderRadius: 50,
-                  padding: wp(2.5),
-                }}
-              />
-            </TouchableOpacity>
+          {/* Custom Header with no title */}
+          <View>
+            <CustomHeader
+              title=""
+              navigation={navigation}
+              transparent={true}
+              iconBgColor="#F7FAFF"
+            />
           </View>
 
           {/* Scan Frame Container */}

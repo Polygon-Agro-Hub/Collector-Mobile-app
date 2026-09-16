@@ -1249,10 +1249,16 @@
     "QR not identified": "The QR code is not identified.\nPlease check and try again.",
     "Invalid QR format": "Invalid officer code format.\nMust be DCM followed by 5 digits (e.g., DCM00001).",
     "Pickup details saved successfully": "Pickup details for order: {{orderId}} has been saved successfully!",
-    "Order ID": "Order ID",
     "Failed!": "Failed!",
     "You have scanned the wrong package.": "You have scanned the wrong package.",
-    "You cannot transfer the maximum amount of": "You cannot transfer the maximum amount of"
+    "You cannot transfer the maximum amount of": "You cannot transfer the maximum amount of",
+    "InvalidQR": "Invalid QR code.\nPlease scan a valid driver QR code.",
+    "Unauthorized": "Unauthorized!",
+    "UnauthorizedMessage": "Driver access has been rejected. Please contact the company for assistance.",
+    "Successful": "Successful!",
+    "Error": "Error!",
+    "QRIdentified": "QR code identified successfully.",
+    "Driver": "Driver"
   },
   "GoviPensionForm": {
     "GoViPension": "GoViPension",
@@ -1749,14 +1755,12 @@
     "ProminentDisclosureTitle": "Why CoDi-Net Uses Camera",
     "ProminentDisclosureIntro": "CoDi-Net requires camera access to enable the following operational features:",
     "FeatureQRTitle": "Instant QR Code Scanning",
-    "FeatureQRDesc": "Scan farmer IDs, pickup orders, and cash handover QR codes for quick identification, verification, and secure transactions.",
-    "FeatureInspectionTitle": "Crop Quality Inspection & Documents",
-    "FeatureInspectionDesc": "Capture real-time crop grade photos (Grade A, B, C) during collection and document verification photos for farmers and officers.",
-    "DisclosureFooter": "Camera access is only active while scanning QR codes or capturing crop inspection photos. No photos or videos are captured without your explicit tap.",
+    "FeatureQRDesc": "Scan driver QR codes, farmer IDs, pickup orders, and cash handover QR codes for quick identification, verification, and secure transport & collection operations.",
+    "DisclosureFooter": "Camera access is only active while scanning QR codes. No photos or videos are recorded without your explicit action.",
     "PermissionDenied": "Permission Denied",
-    "EnableCameraAccessToCapturePhotos": "Enable access to the camera to scan QR codes and capture crop inspection photos.",
+    "EnableCameraAccessToCapturePhotos": "Enable access to the camera to scan QR codes for collection, transport, and distribution operations.",
     "UnableToRequestCameraPermissionPleaseTryAgain": "Unable to request camera permission. Please try again.",
-    "CameraAccessIsRequiredPleaseEnableItInSettings": "Camera access is required for scanning and crop photos. Please enable it in settings."
+    "CameraAccessIsRequiredPleaseEnableItInSettings": "Camera access is required. Please enable it in settings."
   },
   "LocationAccess": {
     "Allow": "Allow",
@@ -1841,7 +1845,10 @@
     "Weight": "Weight"
   },
   "LoadQR": {
-    "Title": "Load QR",
+    "Title": "Generated QR",
+    "ScanQRImmediately": "Scan QR Immediately",
+    "ShowQRToOfficer": "Show this QR to the relevant officer.",
+    "Notice": "Please scan the QR immediately to avoid delays in load assignment.",
     "ReadyForTransport": "Ready for Transport",
     "LoadCode": "Load Reference Code",
     "VehicleNo": "Vehicle No",

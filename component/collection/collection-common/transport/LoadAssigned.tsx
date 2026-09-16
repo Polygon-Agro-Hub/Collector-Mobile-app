@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,9 @@ import LottieView from "lottie-react-native";
 import { FontAwesome5, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import store from "@/services/reducxStore";
+import environment from "@/environment/environment";
 
 type LoadAssignedNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -30,9 +33,49 @@ interface LoadAssignedProps {
 export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const loadCode = route.params?.loadCode || "L-DRV00001260911001";
-  const driverId = route.params?.driverId || "DRV00001";
-  const vehicleNo = route.params?.vehicleNo || "WP AB 1234";
+
+  const [loadCode, setLoadCode] = useState<string>(route.params?.loadCode || "");
+  const [driverId, setDriverId] = useState<string>(
+    route.params?.driverId || route.params?.driverName || ""
+  );
+  const [vehicleNo, setVehicleNo] = useState<string>(route.params?.vehicleNo || "");
+
+  const transportIdentifier = route.params?.transportId || route.params?.loadCode;
+
+  const fetchLoadDetails = useCallback(async () => {
+    if (!transportIdentifier) return;
+
+    try {
+      const authToken = store.getState().auth.token;
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/transport/load/${transportIdentifier}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        const data = response.data.data;
+        if (data.transferCode) setLoadCode(data.transferCode);
+        if (data.driverEmpId) {
+          setDriverId(data.driverEmpId);
+        } else if (data.driverName) {
+          setDriverId(data.driverName);
+        }
+        if (data.vehicleNo && data.vehicleNo !== "N/A") {
+          setVehicleNo(data.vehicleNo);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching load details in LoadAssigned:", err);
+    }
+  }, [transportIdentifier]);
+
+  useEffect(() => {
+    fetchLoadDetails();
+  }, [fetchLoadDetails]);
 
   const handleGoToHome = () => {
     navigation.navigate("CollectionDashboard");
@@ -94,7 +137,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
                   {t("LoadAssigned.TransferID", "Transfer ID")}
                 </Text>
                 <Text className="text-white text-base font-bold mt-0.5">
-                  {loadCode}
+                  {loadCode || "—"}
                 </Text>
               </View>
             </View>
@@ -112,7 +155,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
                   {t("LoadAssigned.Driver", "Driver")}
                 </Text>
                 <Text className="text-white text-base font-bold mt-0.5">
-                  {driverId}
+                  {driverId || "—"}
                 </Text>
               </View>
             </View>
@@ -133,7 +176,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
                   )}
                 </Text>
                 <Text className="text-white text-base font-bold mt-0.5">
-                  {vehicleNo}
+                  {vehicleNo || "—"}
                 </Text>
               </View>
             </View>

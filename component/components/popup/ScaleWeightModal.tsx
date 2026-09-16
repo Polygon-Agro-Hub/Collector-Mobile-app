@@ -179,11 +179,12 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
 
                 {/* Continue button */}
                 <TouchableOpacity
+                  disabled={displayWeight <= 0}
                   activeOpacity={0.85}
                   onPress={handleContinue}
                   style={{
                     width: "100%",
-                    backgroundColor: "#000000",
+                    backgroundColor: displayWeight > 0 ? "#000000" : "#ACB5BE",
                     paddingVertical: 14,
                     borderRadius: 30,
                     alignItems: "center",

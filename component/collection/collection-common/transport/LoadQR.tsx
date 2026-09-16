@@ -12,8 +12,9 @@ import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { Ionicons } from "@expo/vector-icons";
-import LottieView from "lottie-react-native";
 import QRCode from "react-native-qrcode-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 type LoadQRNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,9 +29,13 @@ interface LoadQRProps {
 }
 
 const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
-  const loadCode = route.params?.loadCode || "L-DRV00001260914001";
-  const vehicleNo = route.params?.vehicleNo || "WP AB 1234";
-  const driverId = route.params?.driverId || "DRV00001";
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const transportId = route.params?.transportId;
+  const loadCode = route.params?.loadCode || "";
+  const vehicleNo = route.params?.vehicleNo || "";
+  const driverId = route.params?.driverId || "";
+  const driverName = route.params?.driverName || "";
 
   useFocusEffect(
     React.useCallback(() => {
@@ -48,11 +53,13 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
     }, [navigation]),
   );
 
-  const handleScanQRImmediately = () => {
+  const handleNavigateToLoadAssigned = () => {
     navigation.navigate("LoadAssigned", {
+      transportId,
       loadCode,
       vehicleNo,
       driverId,
+      driverName,
     });
   };
 
@@ -60,9 +67,9 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
     <View className="flex-1 bg-white">
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
 
-      {/* Header with Load Code as Title */}
+      {/* Header with Title */}
       <CustomHeader
-        title="Generated QR"
+        title={t("LoadQR.Title", "Generated QR")}
         navigation={navigation}
         showBackButton={true}
         showLanguageSelector={false}
@@ -71,62 +78,92 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
 
       <ScrollView
         className="flex-1 px-5 pt-4"
-        contentContainerStyle={{ alignItems: "center" }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingBottom: insets.bottom + 16,
+        }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Dark Prompt Banner (Clickable -> Navigates to LoadAssigned with Lottie right icon) */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={handleScanQRImmediately}
-          className="w-full rounded-2xl p-4 flex-row items-center mb-8"
-          style={{ backgroundColor: "#17262C" }}
-        >
+        <View className="w-full items-center">
+          {/* Dark Prompt Banner */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleNavigateToLoadAssigned}
+            className="w-full rounded-2xl p-4 flex-row items-center mb-8"
+            style={{ backgroundColor: "#17262C" }}
+          >
             <View className="mr-3 p-2 border-r border-gray-600">
               <Ionicons name="qr-code" size={32} color="#FFFFFF" />
             </View>
             <View className="flex-1">
               <Text className="text-white text-base font-bold mb-1">
-                Scan QR Immediately
+                {t("LoadQR.ScanQRImmediately", "Scan QR Immediately")}
               </Text>
               <Text className="text-gray-300 text-xs font-normal">
-                Show this QR to the relevant officer.
+                {t("LoadQR.ShowQRToOfficer", "Show this QR to the relevant officer.")}
               </Text>
             </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        {/* QR Code Container with Yellow Border */}
-        <View className="items-center justify-center mb-8">
-          <View
-            className="bg-white p-6 rounded-3xl items-center justify-center"
-            style={{
-              borderWidth: 2,
-              borderColor: "#FFE066",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.08,
-              shadowRadius: 8,
-              elevation: 3,
-            }}
-          >
-            <QRCode
-              value={loadCode}
-              size={240}
-              color="#000000"
-              backgroundColor="#FFFFFF"
-            />
+          {/* QR Code Container with Yellow Border */}
+          <View className="items-center justify-center mb-8">
+            <View
+              className="bg-white p-6 rounded-3xl items-center justify-center"
+              style={{
+                borderWidth: 2,
+                borderColor: "#FFE066",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
+                elevation: 3,
+              }}
+            >
+              <QRCode
+                value={loadCode || "N/A"}
+                size={240}
+                color="#000000"
+                backgroundColor="#FFFFFF"
+              />
+            </View>
+          </View>
+
+          {/* Info / Notice Footer Box */}
+          <View className="w-full bg-[#F5F7FA] rounded-2xl p-4 flex-row items-center border border-gray-100">
+            <View className="mr-3 p-1.5 border-r border-gray-300">
+              <View className="w-7 h-7 rounded-full bg-black items-center justify-center">
+                <Text className="text-white font-extrabold text-sm">!</Text>
+              </View>
+            </View>
+            <Text className="flex-1 text-xs text-gray-700 font-medium leading-4">
+              {t(
+                "LoadQR.Notice",
+                "Please scan the QR immediately to avoid delays in load assignment."
+              )}
+            </Text>
           </View>
         </View>
 
-        {/* Info / Notice Footer Box */}
-        <View className="w-full bg-[#F5F7FA] rounded-2xl p-4 flex-row items-center border border-gray-100">
-          <View className="mr-3 p-1.5 border-r border-gray-300">
-            <View className="w-7 h-7 rounded-full bg-black items-center justify-center">
-              <Text className="text-white font-extrabold text-sm">!</Text>
-            </View>
-          </View>
-          <Text className="flex-1 text-xs text-gray-700 font-medium leading-4">
-            Please scan the QR immediately to avoid delays in load assignment.
-          </Text>
+        {/* Bottom Button to navigate to Load Assigned */}
+        <View className="w-full pt-6 pb-2">
+          <TouchableOpacity
+            onPress={handleNavigateToLoadAssigned}
+            activeOpacity={0.8}
+            className="w-full h-[54px] rounded-full bg-[#000000] items-center justify-center"
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 6,
+              elevation: 5,
+            }}
+          >
+            <Text className="text-white font-extrabold text-base">
+              {t("LoadAssigned.Title", "Load Assigned")}
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>

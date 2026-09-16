@@ -31,6 +31,7 @@ export type RootStackParamList = {
     | {
         vehicleNo?: string;
         centreId?: string;
+        disComCenId?: string;
         centreName?: string;
         driverId?: number;
         driverEmpId?: string;
@@ -42,8 +43,10 @@ export type RootStackParamList = {
     | undefined;
   LoadingToVehicleSummary:
     | {
+        transportId?: string | number;
         vehicleNo?: string;
         centreId?: string;
+        disComCenId?: string;
         centreName?: string;
         driverId?: number;
         driverEmpId?: string;
@@ -51,10 +54,12 @@ export type RootStackParamList = {
         vehicleId?: number;
         loadCode?: string;
         items?: any[];
+        isViewOnly?: boolean;
       }
     | undefined;
   LoadQR:
     | {
+        transportId?: string | number;
         loadCode?: string;
         vehicleNo?: string;
         driverName?: string;
@@ -64,6 +69,7 @@ export type RootStackParamList = {
     | undefined;
   LoadAssigned:
     | {
+        transportId?: string | number;
         loadCode?: string;
         vehicleNo?: string;
         driverId?: string;

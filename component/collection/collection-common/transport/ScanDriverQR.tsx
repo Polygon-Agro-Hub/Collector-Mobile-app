@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   Animated,
   ActivityIndicator,
 } from "react-native";
@@ -10,15 +9,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { Entypo } from "@expo/vector-icons";
 import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import CameraAccess from "@/component/common/permission/CameraAccess";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
+import { DRIVER_ROLES } from "@/constants/user-roles";
 
 type ScanDriverQRNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -175,8 +175,32 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
     setScanned(true);
 
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
+    // Validate JSON format {"empId": "DRVXXXXX"}
+    let isFormatValid = false;
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed && typeof parsed === "object") {
+        const empId = parsed.empId || parsed.empld;
+        if (empId && typeof empId === "string" && /^DRV\d+$/i.test(empId.trim())) {
+          isFormatValid = true;
+        }
+      }
+    } catch (e) {
+      isFormatValid = false;
+    }
+
+    if (!isFormatValid) {
+      setModalTitle(t("qrcode.Error", "Error!"));
+      setModalMessage(
+        t(
+          "qrcode.InvalidQR",
+          "Invalid QR code.\nPlease scan a valid driver QR code."
+        )
+      );
+      setShowRescanButton(true);
+      setModalType("error");
+      setShowErrorModal(true);
+      return;
     }
 
     setLoading(true);
@@ -197,6 +221,25 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
       if (response.data.success) {
         const driver = response.data.data;
+
+        // Strictly validate that the driver role is Heavy Weight Driver
+        if (
+          driver.jobRole &&
+          driver.jobRole.trim().toLowerCase() !== DRIVER_ROLES.HEAVY_WEIGHT_DRIVER.toLowerCase()
+        ) {
+          setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
+          setModalMessage(
+            t(
+              "qrcode.UnauthorizedMessage",
+              "Driver access has been rejected. Please contact the company for assistance.",
+            ),
+          );
+          setShowRescanButton(false);
+          setModalType("error");
+          setShowErrorModal(true);
+          return;
+        }
+
         verifiedDriverRef.current = driver;
 
         setModalTitle(t("qrcode.Successful", "Successful!"));
@@ -206,10 +249,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
               {t("qrcode.QRIdentified", "QR code identified successfully.")}
             </Text>
             <Text className="text-center font-bold text-[#000000]">
-              {t("qrcode.Driver", "Driver")} : {driver.empId},
-            </Text>
-            <Text className="text-center font-bold text-[#000000]">
-              {driver.fullName}
+              {t("qrcode.Driver", "Driver")} : {driver.empId}, {driver.fullName}
             </Text>
           </View>,
         );
@@ -222,7 +262,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       const errData = err?.response?.data;
       const code = errData?.code;
 
-      if (code === "UNAUTHORIZED_ROLE") {
+      if (code === "UNAUTHORIZED_ROLE" || code === "UNAUTHORIZED_STATUS") {
         setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
         setModalMessage(
           t(
@@ -239,7 +279,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       if (code === "INVALID_QR") {
         setModalTitle(t("qrcode.Error", "Error!"));
         setModalMessage(
-          t("qrcode.InvalidQR", "Invalid QR code. Please scan a valid driver QR code."),
+          t("qrcode.InvalidQR", "Invalid QR code.\nPlease scan a valid driver QR code."),
         );
         setShowRescanButton(true);
         setModalType("error");
@@ -273,6 +313,9 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
     if (driver) {
       store.dispatch({
+        type: "transport/clearTransportLoad",
+      });
+      store.dispatch({
         type: "transport/setTransportDriver",
         payload: {
           driverId: driver.driverId,
@@ -280,6 +323,8 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           driverName: driver.fullName,
           vehicleId: driver.vehicleId ?? null,
           vehicleNo: (driver.vRegNo || driver.vehicleNo) ?? null,
+          vType: driver.vType ?? null,
+          vCapacity: driver.vCapacity ?? null,
         },
       });
     }
@@ -391,24 +436,14 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       <View className="flex-1">
         {/* Semi-transparent overlay */}
         <View className="flex-1 bg-black/50">
-          {/* Back Button */}
-          <View className="flex-row items-center justify-between px-4 py-3 relative mt-6">
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              className="items-start"
-              disabled={loading}
-            >
-              <Entypo
-                name="chevron-left"
-                size={25}
-                color="black"
-                style={{
-                  backgroundColor: loading ? "#666" : "#F7FAFF",
-                  borderRadius: 50,
-                  padding: wp(2.5),
-                }}
-              />
-            </TouchableOpacity>
+          {/* Custom Header with no title */}
+          <View>
+            <CustomHeader
+              title=""
+              navigation={navigation}
+              transparent={true}
+              iconBgColor="#F7FAFF"
+            />
           </View>
 
           {/* Scan Frame Container */}

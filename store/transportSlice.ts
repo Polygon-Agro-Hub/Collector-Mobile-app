@@ -21,14 +21,59 @@ export interface LoadedVarietyItem {
   gradeSets: LoadedGradeSet[];
 }
 
+export interface SavedSet {
+  id: string;
+  gradeKey: "A" | "B" | "C";
+  setNumber: number;
+  crates: string;
+  weight: number;
+}
+
+export interface SavedVariety {
+  id: string;
+  varietyNumber: number;
+  cropId?: string;
+  cropLabel: string;
+  varietyId?: string;
+  varietyLabel: string;
+  sets: SavedSet[];
+}
+
+export interface CrateSetState {
+  id: string;
+  setNumber: number;
+  crates: string;
+  weight: number | null;
+  isExpanded: boolean;
+}
+
+export interface GradeDataState {
+  gradeKey: "A" | "B" | "C";
+  title: string;
+  isSelected: boolean;
+  sets: CrateSetState[];
+}
+
+export interface CurrentVarietyState {
+  varietyIndex: number;
+  selectedCrop: { label: string; value: string } | null;
+  selectedVariety: { label: string; value: string } | null;
+  grades: GradeDataState[];
+}
+
 export interface TransportState {
   driverId: number | null;
   driverEmpId: string | null;
   driverName: string | null;
   vehicleId: number | null;
   vehicleNo: string | null;
+  vType: string | null;
+  vCapacity: string | null;
   centreId: string | null;
+  disComCenId: string | null;
   centreName: string | null;
+  savedVarieties: SavedVariety[];
+  currentVariety: CurrentVarietyState | null;
   loadedVarieties: LoadedVarietyItem[];
 }
 
@@ -38,8 +83,13 @@ const initialState: TransportState = {
   driverName: null,
   vehicleId: null,
   vehicleNo: null,
+  vType: null,
+  vCapacity: null,
   centreId: null,
+  disComCenId: null,
   centreName: null,
+  savedVarieties: [],
+  currentVariety: null,
   loadedVarieties: [],
 };
 
@@ -55,6 +105,8 @@ const transportSlice = createSlice({
         driverName?: string | null;
         vehicleId?: number | null;
         vehicleNo?: string | null;
+        vType?: string | null;
+        vCapacity?: string | null;
       }>
     ) => {
       state.driverId = action.payload.driverId ?? null;
@@ -62,16 +114,32 @@ const transportSlice = createSlice({
       state.driverName = action.payload.driverName ?? null;
       state.vehicleId = action.payload.vehicleId ?? null;
       state.vehicleNo = action.payload.vehicleNo ?? null;
+      state.vType = action.payload.vType ?? null;
+      state.vCapacity = action.payload.vCapacity ?? null;
     },
     setTransportDestination: (
       state,
       action: PayloadAction<{
         centreId?: string | null;
+        disComCenId?: string | null;
         centreName?: string | null;
       }>
     ) => {
       state.centreId = action.payload.centreId ?? null;
+      state.disComCenId = action.payload.disComCenId ?? null;
       state.centreName = action.payload.centreName ?? null;
+    },
+    setSavedVarieties: (
+      state,
+      action: PayloadAction<SavedVariety[]>
+    ) => {
+      state.savedVarieties = action.payload;
+    },
+    setCurrentVariety: (
+      state,
+      action: PayloadAction<CurrentVarietyState | null>
+    ) => {
+      state.currentVariety = action.payload;
     },
     addLoadedVariety: (state, action: PayloadAction<LoadedVarietyItem>) => {
       state.loadedVarieties.push(action.payload);
@@ -93,8 +161,13 @@ const transportSlice = createSlice({
       state.driverName = null;
       state.vehicleId = null;
       state.vehicleNo = null;
+      state.vType = null;
+      state.vCapacity = null;
       state.centreId = null;
+      state.disComCenId = null;
       state.centreName = null;
+      state.savedVarieties = [];
+      state.currentVariety = null;
       state.loadedVarieties = [];
     },
   },
@@ -103,6 +176,8 @@ const transportSlice = createSlice({
 export const {
   setTransportDriver,
   setTransportDestination,
+  setSavedVarieties,
+  setCurrentVariety,
   addLoadedVariety,
   removeLoadedVariety,
   setLoadedVarieties,

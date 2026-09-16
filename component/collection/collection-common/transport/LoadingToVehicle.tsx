@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
@@ -15,9 +17,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
+import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
+import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import {
   MaterialIcons,
+  MaterialCommunityIcons,
   Ionicons,
   FontAwesome,
   AntDesign,
@@ -26,6 +31,7 @@ import {
 import axios from "axios";
 import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
+import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
 type LoadingToVehicleNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -72,13 +78,61 @@ interface SavedVariety {
   cropLabel: string;
   varietyId?: string;
   varietyLabel: string;
+  imageUri?: string;
   sets: SavedSet[];
 }
 
 interface OptionItem {
   label: string;
   value: string;
+  image?: string;
+  bgColor?: string;
 }
+
+const createInitialGrades = (): GradeData[] => [
+  {
+    gradeKey: "A",
+    title: "Grade A",
+    isSelected: false,
+    sets: [
+      {
+        id: `set-a-${Date.now()}-1`,
+        setNumber: 1,
+        crates: "",
+        weight: null,
+        isExpanded: true,
+      },
+    ],
+  },
+  {
+    gradeKey: "B",
+    title: "Grade B",
+    isSelected: false,
+    sets: [
+      {
+        id: `set-b-${Date.now()}-1`,
+        setNumber: 1,
+        crates: "",
+        weight: null,
+        isExpanded: true,
+      },
+    ],
+  },
+  {
+    gradeKey: "C",
+    title: "Grade C",
+    isSelected: false,
+    sets: [
+      {
+        id: `set-c-${Date.now()}-1`,
+        setNumber: 1,
+        crates: "",
+        weight: null,
+        isExpanded: true,
+      },
+    ],
+  },
+];
 
 export default function LoadingToVehicle({
   navigation,
@@ -86,7 +140,10 @@ export default function LoadingToVehicle({
 }: LoadingToVehicleProps) {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
-  const vehicleNo = route.params?.vehicleNo || "N/A";
+  const vehicleNo = route.params?.vehicleNo || store.getState().transport.vehicleNo || "N/A";
+
+  // Redux state for restoring previously selected data
+  const transportState = store.getState().transport;
 
   // Crops / Varieties fetched from API
   const [rawCrops, setRawCrops] = useState<any[]>([]);
@@ -95,9 +152,57 @@ export default function LoadingToVehicle({
   const [varietiesData, setVarietiesData] = useState<Record<string, OptionItem[]>>({});
   const [cropsLoading, setCropsLoading] = useState<boolean>(true);
 
-  const [varietyIndex, setVarietyIndex] = useState(1);
-  const [selectedCrop, setSelectedCrop] = useState<OptionItem | null>(null);
-  const [selectedVariety, setSelectedVariety] = useState<OptionItem | null>(null);
+  // Restore current variety state from Redux if available
+  const [varietyIndex, setVarietyIndex] = useState<number>(
+    transportState.currentVariety?.varietyIndex ??
+      (transportState.savedVarieties && transportState.savedVarieties.length > 0
+        ? transportState.savedVarieties.length + 1
+        : 1)
+  );
+  const [selectedCrop, setSelectedCrop] = useState<OptionItem | null>(
+    transportState.currentVariety?.selectedCrop || null
+  );
+  const [selectedVariety, setSelectedVariety] = useState<OptionItem | null>(
+    transportState.currentVariety?.selectedVariety || null
+  );
+
+  // Restore saved varieties from Redux
+  const [savedVarieties, setSavedVarieties] = useState<SavedVariety[]>(
+    transportState.savedVarieties || []
+  );
+  const [carouselIndex, setCarouselIndex] = useState<number>(
+    transportState.savedVarieties && transportState.savedVarieties.length > 0
+      ? transportState.savedVarieties.length - 1
+      : 0
+  );
+
+  // Restore active form grades from Redux if available
+  const [grades, setGrades] = useState<GradeData[]>(
+    transportState.currentVariety?.grades && transportState.currentVariety.grades.length > 0
+      ? transportState.currentVariety.grades
+      : createInitialGrades()
+  );
+
+  // Synchronize saved varieties with Redux store
+  useEffect(() => {
+    store.dispatch({
+      type: "transport/setSavedVarieties",
+      payload: savedVarieties,
+    });
+  }, [savedVarieties]);
+
+  // Synchronize current working variety with Redux store
+  useEffect(() => {
+    store.dispatch({
+      type: "transport/setCurrentVariety",
+      payload: {
+        varietyIndex,
+        selectedCrop,
+        selectedVariety,
+        grades,
+      },
+    });
+  }, [varietyIndex, selectedCrop, selectedVariety, grades]);
 
   // Helper for localized naming
   const formatCropOption = useCallback(
@@ -112,6 +217,8 @@ export default function LoadingToVehicle({
       return {
         label: label || crop.cropNameEnglish || crop.label,
         value: String(crop.value || crop.cropId || crop.id),
+        image: crop.image || crop.cropImage || "",
+        bgColor: crop.bgColor || crop.cropBgColor || "",
       };
     },
     [i18n.language],
@@ -129,70 +236,47 @@ export default function LoadingToVehicle({
       return {
         label: label || variety.varietyNameEnglish || variety.label,
         value: String(variety.value || variety.varietyId || variety.id),
+        image: variety.image || variety.varietyImage || "",
+        bgColor: variety.bgColor || variety.varietyBgColor || "",
       };
     },
     [i18n.language],
   );
-
-  // Saved varieties for top carousel
-  const [savedVarieties, setSavedVarieties] = useState<SavedVariety[]>([]);
-  const [carouselIndex, setCarouselIndex] = useState(0);
 
   const [isCropModalVisible, setIsCropModalVisible] = useState(false);
   const [isVarietyModalVisible, setIsVarietyModalVisible] = useState(false);
 
   const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
 
+  // Delete Set Confirmation Modal State
+  const [setToDelete, setSetToDelete] = useState<{
+    id: string;
+    gradeKey: "A" | "B" | "C";
+    gradeTitle: string;
+    setNumber: number;
+  } | null>(null);
+
+  // Scale Connection State
+  const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
+    wifiScaleService.getStatus()
+  );
+  const [isScaleSelectModalVisible, setIsScaleSelectModalVisible] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    const unsubscribe = wifiScaleService.subscribe((status) => {
+      setScaleStatus(status);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   // Active target for scale modal: { gradeKey, setId }
   const [scaleTarget, setScaleTarget] = useState<{
     gradeKey: "A" | "B" | "C";
     setId: string;
   } | null>(null);
-
-  const [grades, setGrades] = useState<GradeData[]>([
-    {
-      gradeKey: "A",
-      title: "Grade A",
-      isSelected: false,
-      sets: [
-        {
-          id: "set-a-1",
-          setNumber: 1,
-          crates: "",
-          weight: null,
-          isExpanded: true,
-        },
-      ],
-    },
-    {
-      gradeKey: "B",
-      title: "Grade B",
-      isSelected: false,
-      sets: [
-        {
-          id: "set-b-1",
-          setNumber: 1,
-          crates: "",
-          weight: null,
-          isExpanded: true,
-        },
-      ],
-    },
-    {
-      gradeKey: "C",
-      title: "Grade C",
-      isSelected: false,
-      sets: [
-        {
-          id: "set-c-1",
-          setNumber: 1,
-          crates: "",
-          weight: null,
-          isExpanded: true,
-        },
-      ],
-    },
-  ]);
 
   // Fetch crops + varieties
   const fetchCropsAndVarieties = useCallback(async () => {
@@ -370,17 +454,19 @@ export default function LoadingToVehicle({
     );
   };
 
-  // Set weight from scale modal
+  // Set weight from scale modal (cannot be 0)
   const handleScaleContinue = (weight: number) => {
-    if (!scaleTarget) return;
-    const finalWeight = weight > 0 ? weight : 90.1;
+    if (!scaleTarget || weight <= 0) {
+      setScaleTarget(null);
+      return;
+    }
     setGrades((prev) =>
       prev.map((g) => {
         if (g.gradeKey === scaleTarget.gradeKey) {
           return {
             ...g,
             sets: g.sets.map((s) =>
-              s.id === scaleTarget.setId ? { ...s, weight: finalWeight } : s
+              s.id === scaleTarget.setId ? { ...s, weight } : s
             ),
           };
         }
@@ -390,11 +476,14 @@ export default function LoadingToVehicle({
     setScaleTarget(null);
   };
 
-  // Check if current variety has completed sets
+  // Check if current variety has completed sets (crates > 0 and weight > 0)
   const hasCompletedSets = grades.some(
     (g) =>
       g.isSelected &&
-      g.sets.some((s) => s.crates.trim() !== "" && s.weight !== null)
+      g.sets.some((s) => {
+        const cratesNum = parseInt(s.crates, 10);
+        return !isNaN(cratesNum) && cratesNum > 0 && s.weight !== null && s.weight > 0;
+      })
   );
 
   // Can finish loading if either saved items exist OR current variety is completed
@@ -408,7 +497,8 @@ export default function LoadingToVehicle({
     grades.forEach((g) => {
       if (g.isSelected) {
         g.sets.forEach((s) => {
-          if (s.crates.trim() !== "" && s.weight !== null) {
+          const cratesNum = parseInt(s.crates, 10);
+          if (!isNaN(cratesNum) && cratesNum > 0 && s.weight !== null && s.weight > 0) {
             completedSets.push({
               id: s.id,
               gradeKey: g.gradeKey,
@@ -421,6 +511,11 @@ export default function LoadingToVehicle({
       }
     });
 
+    const imageUri =
+      selectedVariety?.image ||
+      selectedCrop?.image ||
+      "";
+
     const newSavedVariety: SavedVariety = {
       id: `variety-${Date.now()}`,
       varietyNumber: varietyIndex,
@@ -431,6 +526,7 @@ export default function LoadingToVehicle({
         selectedVariety?.label ||
         selectedCrop?.label ||
         `Variety ${varietyIndex}`,
+      imageUri,
       sets: completedSets,
     };
 
@@ -443,50 +539,7 @@ export default function LoadingToVehicle({
     setVarietyIndex((prev) => prev + 1);
     setSelectedCrop(null);
     setSelectedVariety(null);
-    setGrades([
-      {
-        gradeKey: "A",
-        title: "Grade A",
-        isSelected: false,
-        sets: [
-          {
-            id: `set-a-${Date.now()}-1`,
-            setNumber: 1,
-            crates: "",
-            weight: null,
-            isExpanded: true,
-          },
-        ],
-      },
-      {
-        gradeKey: "B",
-        title: "Grade B",
-        isSelected: false,
-        sets: [
-          {
-            id: `set-b-${Date.now()}-1`,
-            setNumber: 1,
-            crates: "",
-            weight: null,
-            isExpanded: true,
-          },
-        ],
-      },
-      {
-        gradeKey: "C",
-        title: "Grade C",
-        isSelected: false,
-        sets: [
-          {
-            id: `set-c-${Date.now()}-1`,
-            setNumber: 1,
-            crates: "",
-            weight: null,
-            isExpanded: true,
-          },
-        ],
-      },
-    ]);
+    setGrades(createInitialGrades());
   };
 
   // Delete an entire saved variety from carousel
@@ -527,6 +580,29 @@ export default function LoadingToVehicle({
     });
   };
 
+  // Helper to resolve DB image for a variety/crop
+  const getImageForVariety = (varietyId?: string, cropId?: string, explicitImage?: string) => {
+    if (explicitImage && explicitImage.trim() !== "") return explicitImage;
+    if (varietyId) {
+      const allVarieties = Object.values(rawVarieties).flat();
+      const varietyObj = allVarieties.find(
+        (item: any) => String(item.varietyId || item.value || item.id) === String(varietyId)
+      );
+      if (varietyObj && (varietyObj.image || varietyObj.varietyImage)) {
+        return varietyObj.image || varietyObj.varietyImage;
+      }
+    }
+    if (cropId) {
+      const cropObj = rawCrops.find(
+        (item: any) => String(item.cropId || item.value || item.id) === String(cropId)
+      );
+      if (cropObj && (cropObj.image || cropObj.cropImage)) {
+        return cropObj.image || cropObj.cropImage;
+      }
+    }
+    return "";
+  };
+
   // Handle Finish Loading
   const handleFinishLoading = () => {
     const summaryList: any[] = [];
@@ -549,6 +625,8 @@ export default function LoadingToVehicle({
         };
       });
 
+      const finalImageUri = getImageForVariety(v.varietyId, v.cropId, v.imageUri);
+
       summaryList.push({
         id: v.id,
         varietyNumber: v.varietyNumber,
@@ -557,8 +635,7 @@ export default function LoadingToVehicle({
         varietyId: v.varietyId,
         varietyLabel: v.varietyLabel,
         cropName: v.varietyLabel || v.cropLabel,
-        imageUri:
-          "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=150&auto=format&fit=crop&q=80",
+        imageUri: finalImageUri,
         totalWeightKg: totalWeight,
         totalCrates: totalCratesCount,
         gradeSets,
@@ -573,9 +650,9 @@ export default function LoadingToVehicle({
     grades.forEach((g) => {
       if (g.isSelected) {
         g.sets.forEach((s) => {
-          if (s.crates.trim() !== "" || s.weight !== null) {
-            const cratesNum = parseInt(s.crates, 10) || 0;
-            const weightVal = s.weight || 0;
+          const cratesNum = parseInt(s.crates, 10);
+          const weightVal = s.weight;
+          if (!isNaN(cratesNum) && cratesNum > 0 && weightVal !== null && weightVal > 0) {
             currentTotalWeight += weightVal;
             currentTotalCrates += cratesNum;
             currentGradeSets.push({
@@ -591,6 +668,12 @@ export default function LoadingToVehicle({
     });
 
     if (currentGradeSets.length > 0) {
+      const finalImageUri = getImageForVariety(
+        selectedVariety?.value,
+        selectedCrop?.value,
+        selectedVariety?.image || selectedCrop?.image
+      );
+
       summaryList.push({
         id: `current-variety-${Date.now()}`,
         varietyNumber: varietyIndex,
@@ -605,8 +688,7 @@ export default function LoadingToVehicle({
           selectedVariety?.label ||
           selectedCrop?.label ||
           `Variety ${varietyIndex}`,
-        imageUri:
-          "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=150&auto=format&fit=crop&q=80",
+        imageUri: finalImageUri,
         totalWeightKg: currentTotalWeight,
         totalCrates: currentTotalCrates,
         gradeSets: currentGradeSets,
@@ -621,12 +703,13 @@ export default function LoadingToVehicle({
 
     navigation.navigate("LoadingToVehicleSummary", {
       vehicleNo,
-      centreId: route.params?.centreId,
-      centreName: route.params?.centreName,
-      driverId: route.params?.driverId,
-      driverEmpId: route.params?.driverEmpId,
-      driverName: route.params?.driverName,
-      vehicleId: route.params?.vehicleId,
+      centreId: route.params?.centreId ?? store.getState().transport.centreId ?? undefined,
+      disComCenId: route.params?.disComCenId ?? store.getState().transport.disComCenId ?? undefined,
+      centreName: route.params?.centreName ?? store.getState().transport.centreName ?? undefined,
+      driverId: route.params?.driverId ?? store.getState().transport.driverId ?? undefined,
+      driverEmpId: route.params?.driverEmpId ?? store.getState().transport.driverEmpId ?? undefined,
+      driverName: route.params?.driverName ?? store.getState().transport.driverName ?? undefined,
+      vehicleId: route.params?.vehicleId ?? store.getState().transport.vehicleId ?? undefined,
       items: summaryList.length > 0 ? summaryList : undefined,
     });
   };
@@ -647,7 +730,11 @@ export default function LoadingToVehicle({
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <KeyboardAvoidingView
+      className="flex-1 bg-white"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+    >
       {/* Header without [] in vehicle number */}
       <CustomHeader
         title={vehicleNo}
@@ -656,16 +743,63 @@ export default function LoadingToVehicle({
 
       <ScrollView
         className="flex-1"
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "space-between",
           paddingHorizontal: 24,
           paddingTop: 8,
-          paddingBottom: insets.bottom + 16,
+          paddingBottom: insets.bottom + 100,
         }}
         showsVerticalScrollIndicator={false}
       >
         <View>
+          {/* Connect Scale Blue Button - Shown ONLY when scale is NOT connected */}
+          {!scaleStatus.connected && (
+            <TouchableOpacity
+              activeOpacity={0.88}
+              onPress={() => setIsScaleSelectModalVisible(true)}
+              style={{
+                marginTop: 4,
+                marginBottom: 12,
+                backgroundColor: "#1266FD",
+                borderRadius: 28,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: "#FFFFFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <MaterialCommunityIcons name="wifi" size={24} color="#1266FD" />
+              </View>
+
+              <Text
+                style={{
+                  flex: 1,
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: "#FFFFFF",
+                  letterSpacing: -0.2,
+                }}
+              >
+                {t("ScaleSelectModal.ConnectScale", "Connect Scale")}
+              </Text>
+
+              <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+            </TouchableOpacity>
+          )}
+
           {/* Top Carousel of Saved Varieties (shown when items exist) */}
           {savedVarieties.length > 0 && (
             <View className="mb-2">
@@ -929,7 +1063,12 @@ export default function LoadingToVehicle({
                                     <TouchableOpacity
                                       activeOpacity={0.8}
                                       onPress={() =>
-                                        handleDeleteSet(grade.gradeKey, set.id)
+                                        setSetToDelete({
+                                          id: set.id,
+                                          gradeKey: grade.gradeKey,
+                                          gradeTitle: grade.title,
+                                          setNumber: set.setNumber,
+                                        })
                                       }
                                       className="w-8 h-8 rounded-full bg-[#EF4444] items-center justify-center shadow-sm"
                                       style={{
@@ -1176,14 +1315,51 @@ export default function LoadingToVehicle({
         }}
       />
 
+      {/* Scale Select Modal */}
+      <ScaleSelectModal
+        visible={isScaleSelectModalVisible}
+        onClose={() => setIsScaleSelectModalVisible(false)}
+      />
+
       {/* Scale Weight Modal */}
       <ScaleWeightModal
         visible={scaleTarget !== null}
         onClose={() => setScaleTarget(null)}
         onContinue={handleScaleContinue}
-        scaleName="Budry MFD - 300"
-        initialWeight={90.1}
+        scaleName={scaleStatus.scale?.name || "Budry MFD - 300"}
+        initialWeight={
+          (() => {
+            if (!scaleTarget) return 0;
+            const targetGrade = grades.find(
+              (g) => g.gradeKey === scaleTarget.gradeKey
+            );
+            const targetSet = targetGrade?.sets.find(
+              (s) => s.id === scaleTarget.setId
+            );
+            return targetSet?.weight ?? 0;
+          })()
+        }
       />
-    </View>
+
+      {/* Delete Set Warning Confirmation Modal */}
+      <WarningConfirmation
+        visible={setToDelete !== null}
+        message={`Are you sure you want to delete added\n${
+          selectedVariety?.label ||
+          selectedCrop?.label ||
+          t("LoadingToVehicle.Crop", "Crop")
+        } - ${setToDelete?.gradeTitle} - Set ${setToDelete?.setNumber} ?`}
+        onConfirm={() => {
+          if (setToDelete) {
+            handleDeleteSet(setToDelete.gradeKey, setToDelete.id);
+            setSetToDelete(null);
+          }
+        }}
+        onCancel={() => setSetToDelete(null)}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+      />
+    </KeyboardAvoidingView>
   );
 }

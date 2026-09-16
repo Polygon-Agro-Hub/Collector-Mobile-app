@@ -37,6 +37,7 @@ interface SelectDistributionCentreProps {
 
 export interface DistributionCentreItem {
   id: string;
+  disComCenId?: string | null;
   name: string;
   code: string;
 }
@@ -96,6 +97,7 @@ export default function SelectDistributionCentre({
       type: "transport/setTransportDestination",
       payload: {
         centreId: selectedCentre?.id ?? null,
+        disComCenId: selectedCentre?.disComCenId ?? null,
         centreName: selectedCentre?.name ?? null,
       },
     });
@@ -103,6 +105,7 @@ export default function SelectDistributionCentre({
     navigation.navigate("LoadingToVehicle", {
       vehicleNo: route.params?.vehicleNo || "N/A",
       centreId: selectedCentre?.id,
+      disComCenId: selectedCentre?.disComCenId || undefined,
       centreName: selectedCentre?.name,
       driverId: route.params?.driverId,
       driverEmpId: route.params?.driverEmpId,

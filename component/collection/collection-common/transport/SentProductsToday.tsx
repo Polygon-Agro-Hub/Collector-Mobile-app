@@ -30,6 +30,10 @@ interface SentProductsTodayProps {
 
 export interface SentProductItem {
   id: string;
+  transferCode?: string;
+  vehicleNo?: string;
+  driverEmpId?: string;
+  driverName?: string;
   crates: number;
   weight: string;
   destination: string;
@@ -136,8 +140,13 @@ export default function SentProductsToday({ navigation }: SentProductsTodayProps
                 activeOpacity={0.75}
                 onPress={() => {
                   navigation.navigate("LoadingToVehicleSummary", {
-                    vehicleNo: "WP AB 1234",
-                    loadCode: "L-DRV00001260911001",
+                    transportId: item.id,
+                    loadCode: item.transferCode,
+                    vehicleNo: item.vehicleNo,
+                    driverEmpId: item.driverEmpId,
+                    driverName: item.driverName,
+                    centreName: item.destination,
+                    isViewOnly: true,
                   });
                 }}
                 className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 my-2"
