@@ -21,7 +21,12 @@
     "Loading camera...": "කැමරාව පූරණය වෙමින්...",
     "Loading camera": "කැමරාව පූරණය වෙමින්...",
     "Loading orders": "ඇණවුම් පූරණය වෙමින්...",
-    "Loading orders...": "ඇණවුම් පූරණය වෙමින්..."
+    "Loading orders...": "ඇණවුම් පූරණය වෙමින්...",
+    "Go Back": "ආපසු යන්න",
+    "GoBack": "ආපසු යන්න",
+    "Cancel": "අවලංගු කරන්න",
+    "Confirm": "තහවුරු කරන්න",
+    "Submitting": "යොමු කරමින්..."
   },
   "Main": {
     "No Internet Connection": "අන්තර්ජාල සම්බන්ධතාවයක් නැත",
@@ -296,7 +301,8 @@
     "Cancel": "අවලංගු කරන්න",
     "Cannot add negative values for load.": "භාරය සඳහා සෘණ අගයන් ඇතුල් කළ නොහැක (කි.ග්‍රෑ.).",
     "Product replacement successful": "නිෂ්පාදන ප්‍රතිස්ථාපනය සාර්ථකයි!",
-    "AttachmentHasBeenSavedToYourSelectedFolder": "ඇමුණුම ඔබ තෝරාගත් ෆෝල්ඩරයේ සුරැකී ඇත."
+    "AttachmentHasBeenSavedToYourSelectedFolder": "ඇමුණුම ඔබ තෝරාගත් ෆෝල්ඩරයේ සුරැකී ඇත.",
+    "No Search Result Found": "සෙවුම් ප්‍රතිඵල හමු නොවීය"
   },
   "SideMenu": {
     "LNG": "si",
@@ -420,12 +426,16 @@
   "GlobalSearchModal": {
     "Search": "සොයන්න...",
     "Done": "හරි",
-    "No items found": "අයිතම හමු නොවීය",
+    "No items found": "සෙවුම් ප්‍රතිඵල හමු නොවීය",
     "SearchPlaceholder": "සොයන්න...",
-    "NoResultsText": "අයිතම හමු නොවීය",
+    "NoResultsText": "සෙවුම් ප්‍රතිඵල හමු නොවීය",
+    "No Search Result Found": "සෙවුම් ප්‍රතිඵල හමු නොවීය",
     "DoneButton": "සම්පූර්ණයි",
     "Loading": "පූරණය වේ...",
-    "SelectedCount": "{{count}} තෝරා ඇත"
+    "SelectedCount": "{{count}} තෝරා ඇත",
+    "Search...": "සොයන්න...",
+    "search": "සොයන්න...",
+    "search text": "සොයන්න..."
   },
   "PriceChart": {
     "LNG": "si",
@@ -553,7 +563,17 @@
     "QRCode": "මගේ QR කේතය",
     "Noavailable": "QR කේතයක් නොමැත.",
     "Download": "බාගත කරන්න",
-    "Share": "බෙදාගන්න"
+    "Share": "බෙදාගන්න",
+    "Success": "සාර්ථකයි!",
+    "SuccessMessage": "ඇමුණුම ඔබ තෝරාගත් ෆෝල්ඩරයේ සුරැකී ඇත.",
+    "SavedToFolder": "ඇමුණුම ඔබ තෝරාගත් ෆෝල්ඩරයේ සුරැකී ඇත.",
+    "savedToGallery": "QR කේතය ඔබේ ගැලරියට සුරැකීම සාර්ථකයි.",
+    "NoQrAvailable": "QR කේතයක් නොමැත.",
+    "FailedSave": "QR කේතය සුරැකීම අසාර්ථක විය.",
+    "FailedShare": "QR කේතය බෙදා ගැනීම අසාර්ථක විය.",
+    "SharingUnavailableTitle": "බෙදාගැනීමේ විශේෂාංගය නොමැත",
+    "SharingUnavailable": "මෙම උපාංගයෙන් බෙදාගැනීම සිදු කළ නොහැක.",
+    "OK": "හරි"
   },
   "ChangePassword": {
     "LNG": "si",
@@ -1006,7 +1026,48 @@
     "Pickup Order Scan": "රැගෙන යාමේ ඇණවුම් ස්කෑන් කිරීම",
     "Start Packing": "ඇසිරීම අරඹන්න",
     "Assign Groups": "කණ්ඩායම් පැවරීම",
-    "Purchase Shortage": "හිඟ භෝග මිලදී ගැනීම"
+    "Purchase Shortage": "හිඟ භෝග මිලදී ගැනීම",
+    "Receive Products": "නිෂ්පාදන ලබා ගැනීම",
+    "ReceiveProducts": "නිෂ්පාදන ලබා ගැනීම"
+  },
+  "ReceivedProductsToday": {
+    "Title": "අද ලැබුණු නිෂ්පාදන",
+    "NoProductsReceivedToday": "- අද නිෂ්පාදන ලැබී නැත -",
+    "Crates": "කූඩ"
+  },
+  "ReceivedProductsSummary": {
+    "Title": "සාරාංශය",
+    "StartUnloading": "බෑම අරඹන්න"
+  },
+  "UnloadingProducts": {
+    "Title": "නිෂ්පාදන බෑම",
+    "Subtitle": "සෑම නිෂ්පාදන ශ්‍රේණියක්ම බා බර කිරන්න",
+    "ToWeigh": "බර කිරීමට",
+    "Weighed": "බර කිරූ",
+    "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
+    "ReportMismatch": "වෙනස වාර්තා කරන්න",
+    "ReportedMismatch": "වෙනස වාර්තා කර ඇත",
+    "FinishUnloading": "බෑම අවසන් කරන්න",
+    "SuccessTitle": "සාර්ථකයි!",
+    "SuccessMessage": "නිෂ්පාදන සාර්ථකව බාන ලදී"
+  },
+  "WeighTheLoad": {
+    "Title": "බර කිරන්න",
+    "TotalWeight": "මුළු බර",
+    "TotalCrates": "මුළු කූඩ ගණන",
+    "LoadedWeight": "පටවන ලද බර",
+    "LoadedCrates": "පටවන ලද කූඩ",
+    "UnloadedWeight": "බාන ලද බර",
+    "UnloadedCrates": "බාන ලද කූඩ",
+    "MarkAsUnloaded": "බාන ලද බව සලකුණු කරන්න",
+    "SuccessTitle": "සාර්ථකව බාන ලදී!"
+  },
+  "WeighGrade": {
+    "Title": "බර කිරන්න",
+    "LoadedWeight": "පටවන ලද බර",
+    "TotalCrates": "මුළු කූඩ ගණන",
+    "Continue": "ඉදිරියට යන්න",
+    "MaxCratesReached": "උපරිම කූඩ ප්‍රමාණයට ළඟා වී ඇත"
   },
   "OpenedOrderScreen": {
     "INV No": "INV අංකය :",
@@ -1304,9 +1365,23 @@
   "PurchaseProduct": {
     "Cancel": "අවලංගු කරන්න",
     "Purchase": "මිලදී ගන්න",
+    "Go Back": "ආපසු යන්න",
     "GoBack": "ආපසු යන්න",
     "Submitting": "යොමු කරමින්...",
-    "Confirm": "තහවුරු කරන්න"
+    "Confirm": "තහවුරු කරන්න",
+    "Collect": "එකතු කිරීමට : ",
+    "Collect : ": "එකතු කිරීමට : ",
+    "Collect :": "එකතු කිරීමට : ",
+    "Collected": "එකතු කළ : ",
+    "Collected : ": "එකතු කළ : ",
+    "Collected :": "එකතු කළ : ",
+    "Price per kg": "කිලෝවක මිල : ",
+    "Price per kg : ": "කිලෝවක මිල : ",
+    "Price per kg :": "කිලෝවක මිල : ",
+    "kg": "කි.ග්‍රෑ.",
+    "Rs. ": "රු. ",
+    "Rs.": "රු.",
+    "Rs": "රු."
   },
   "AssignGroups": {
     "Groups": "කණ්ඩායම්",
@@ -1341,6 +1416,7 @@
     "Order Allocated": "ඇණවුමක් වෙන් කර ඇත",
     "Orders Allocated": "ඇණවුම් වෙන් කර ඇත",
     "OrdersAllocatedCount": "ඇණවුම් {{count}} ක් වෙන් කර ඇත",
+    "SelectedOrdersCount": "ඇණවුම් {{count}} ක්",
     "Row {{number}}": "පේළිය {{number}}",
     "Row": "පේළිය",
     "Rows": "පේළි",
@@ -1354,7 +1430,9 @@
     "Confirm": "තහවුරු කරන්න",
     "Successfully assigned orders": "{{timeSlot}} කාල පරාසය සඳහා {{rowName}} වෙත ඇණවුම් {{count}} ක් සාර්ථකව පවරන ලදී.",
     "Failed to assign orders.": "ඇණවුම් පැවරීම අසාර්ථක විය.",
-    "An error occurred while assigning orders.": "ඇණවුම් පැවරීමේදී දෝෂයක් සිදුවිය."
+    "An error occurred while assigning orders.": "ඇණවුම් පැවරීමේදී දෝෂයක් සිදුවිය.",
+    "Success!": "සාර්ථකයි!",
+    "Target assigned Successfully!": "ඉලක්කය සාර්ථකව පවරන ලදී!"
   },
   "DistributionCenterTarget": {
     "Centre Target": "මධ්‍යස්ථාන ඉලක්කය",
@@ -1381,6 +1459,8 @@
     "Packing Positions": "ඇසුරුම් ස්ථාන",
     "Positions": "ස්ථාන",
     "Position": "ස්ථානය",
+    "PositionsAvailableCount": "ස්ථාන {{count}} ක්",
+    "PositionsCount": "ස්ථාන {{count}} ක්",
     "Row": "පේළිය",
     "Rows": "පේළි",
     "Row {{number}}": "පේළිය {{number}}",
@@ -1395,6 +1475,8 @@
     "Loading...": "පූරණය වෙමින්...",
     "No packing rows found": "- ඇසුරුම් පේළි කිසිවක් හමු නොවීය. -",
     "Rows are not available. Please wait until rows are available to obtain a position.": "පේළි නොමැත. ස්ථානයක් ලබා ගැනීම සඳහා පේළි ලබා ගත හැකි වන තෙක් කරුණාකර රැඳී සිටින්න.",
+    "No Orders Assigned!": "ඇණවුම් පවරා නොමැත!",
+    "No orders assigned message": "පේළි {{number}} සඳහා තවමත් ඇණවුම් පවරා නොමැත. ඇණවුම් පවරන තෙක් රැඳී සිට නැවත පරීක්ෂා කරන්න.",
     "Select a Position": "ස්ථානයක් තෝරන්න",
     "Choose your assigned position in": "{{rowName}} හි ඔබට නියමිත ස්ථානය තෝරන්න.",
     "Available": "ලබාගත හැකිය",
@@ -1475,7 +1557,7 @@
     "Print QR": "QR මුද්‍රණය",
     "Reprint QR": "නැවත QR මුද්‍රණය",
     "No Printer Connected": "මුද්‍රණ යන්ත්‍රයක් සම්බන්ධ කර නොමැත",
-    "Bluetooth Ready": "බ්ලූටූත් සූදානම් (50x30mm TSPL)",
+    "Bluetooth Ready": "සම්බන්ධ වී ඇත. සූදානම් (50x30mm TSPL)",
     "Tap to scan & connect printer": "ස්කෑන් කර සම්බන්ධ කිරීමට ඔබන්න",
     "Connect": "සම්බන්ධ කරන්න",
     "Change": "වෙනස් කරන්න",
@@ -1550,9 +1632,15 @@
     "Assigned": "පවරන ලද (කි.ග්‍රෑ.)",
     "Ceiling Price": "උපරිම මිල: රු. {{price}}",
     "Purchase": "මිලදී ගන්න",
+    "Collect": "එකතු කිරීමට : ",
     "Collect : ": "එකතු කිරීමට : ",
+    "Collect :": "එකතු කිරීමට : ",
+    "Collected": "එකතු කළ : ",
     "Collected : ": "එකතු කළ : ",
+    "Collected :": "එකතු කළ : ",
+    "Price per kg": "කිලෝවක මිල : ",
     "Price per kg : ": "කිලෝවක මිල : ",
+    "Price per kg :": "කිලෝවක මිල : ",
     "Buying Quantity in kg": "මිලදී ගන්නා ප්‍රමාණය (කි.ග්‍රෑ.)",
     "Enter Buying Quantity placeholder": "--මිලදී ගන්නා ප්‍රමාණය (කි.ග්‍රෑ.) ඇතුළත් කරන්න--",
     "Purchasing Price (Rs.)": "මිලදී ගැනීමේ මිල (රු.)",
@@ -1566,7 +1654,13 @@
     "Invoice Required": "ඉන්වොයිසිය අවශ්‍යයි",
     "Please upload invoice before confirming": "තහවුරු කිරීමට පෙර කරුණාකර ඉන්වොයිස් ගොනුව උඩුගත කරන්න.",
     "Purchase details submitted successfully!": "මිලදී ගැනීමේ විස්තර සාර්ථකව ඉදිරිපත් කරන ලදී!",
-    "Submission Error": "ඉදිරිපත් කිරීමේ දෝෂයකි"
+    "Submission Error": "ඉදිරිපත් කිරීමේ දෝෂයකි",
+    "kg": "කි.ග්‍රෑ.",
+    "Rs. ": "රු. ",
+    "Purchase Confirmed": "මිලදී ගැනීම තහවුරු විය",
+    "The Product Has Been Purchased Successfully": "නිෂ්පාදනය සාර්ථකව මිලදී ගන්නා ලදී",
+    "Failed to submit purchase. Please try again.": "මිලදී ගැනීම ඉදිරිපත් කිරීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "Go Back": "ආපසු යන්න"
   },
   "AlertModal": {
     "Cannot Proceed!": "ඉදිරියට යා නොහැක!",

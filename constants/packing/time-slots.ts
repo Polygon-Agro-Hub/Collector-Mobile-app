@@ -45,21 +45,36 @@ export const formatTimeSlot = (
   // Clean "within" prefix and trim
   standard = standard.replace(/within\s*/i, "").trim();
 
-  // Normalize previous localized tokens back to AM/PM so formatTimeSlot is idempotent
+  // Normalize en-dash / em-dash to hyphen
+  standard = standard.replace(/[–—]/g, "-");
+
+  // Normalize localized tokens and positions to standard "HH:MM AM - HH:MM PM"
   standard = standard
+    .replace(/(?:පෙ\.ව\.|මුற்பகல்)\s*(\d{1,2}(?:[:.]\d{2})?)/gi, "$1 AM")
+    .replace(/(?:ප\.ව\.|பிற்பகல்)\s*(\d{1,2}(?:[:.]\d{2})?)/gi, "$1 PM")
+    .replace(/(\d{1,2}(?:[:.]\d{2})?)\s*(?:පෙ\.ව\.|මුற்பகல்)/gi, "$1 AM")
+    .replace(/(\d{1,2}(?:[:.]\d{2})?)\s*(?:ප\.ව\.|பிற்பகல்)/gi, "$1 PM")
     .replace(/පෙ\.ව\.|මුற்பகல்/g, "AM")
     .replace(/ප\.ව\.|பிற்பகல்/g, "PM");
 
-  // Handle shorthand patterns like 8AM - 12PM or 8AM-12PM
-  standard = standard.replace(/(\d{1,2})\s*(AM|PM)/gi, (match, h, p) => {
-    return `${h.padStart(2, "0")}:00 ${p.toUpperCase()}`;
+  // Handle shorthand patterns like 8AM, 8 AM, 8.00 AM -> 08:00 AM
+  standard = standard.replace(/(\d{1,2})(?:[:.](\d{2}))?\s*(AM|PM)/gi, (match, h, m, p) => {
+    const mins = m || "00";
+    return `${h.padStart(2, "0")}:${mins} ${p.toUpperCase()}`;
   });
 
   const am = t ? t("Time.AM", { defaultValue: "AM" }) : i18n.t("Time.AM", { defaultValue: "AM" });
   const pm = t ? t("Time.PM", { defaultValue: "PM" }) : i18n.t("Time.PM", { defaultValue: "PM" });
 
-  const isSinhala = am === "පෙ.ව." || (t && t("AddOfficerBasicDetails.LNG") === "si");
-  const isTamil = am === "முற்பகல்" || (t && t("AddOfficerBasicDetails.LNG") === "ta");
+  const currentLang =
+    (t && t("SignIn.LNG")) ||
+    (t && t("LNG")) ||
+    (t && t("AddOfficerBasicDetails.LNG")) ||
+    i18n.language ||
+    "en";
+
+  const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
+  const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
 
   if (isSinhala) {
     return standard

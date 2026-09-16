@@ -185,14 +185,8 @@ export default function ConfirmRowAssign({
 
       if (response.data && response.data.success) {
         Alert.alert(
-          t("Packing.Success", "Success"),
-          t("AssignGroups.Successfully assigned orders", {
-            count: selectedOrdersCount,
-            orderText: orderTextLower,
-            rowName: formatRowTitle(selectedRow?.name),
-            timeSlot: formatTimeSlot(group?.timeSlot, t),
-            defaultValue: `Successfully assigned ${selectedOrdersCount} ${orderTextLower} to ${formatRowTitle(selectedRow?.name)} for the ${formatTimeSlot(group?.timeSlot, t)} slot.`,
-          }),
+          t("AssignGroups.Success!", "Success!"),
+          t("AssignGroups.Target assigned Successfully!", "Target assigned Successfully!"),
           [
             {
               text: t("AlertModal.OK", "OK"),
@@ -325,7 +319,10 @@ export default function ConfirmRowAssign({
                   {formatTimeSlot(group.timeSlot, t)} {orderTypeTag}
                 </Text>
                 <Text className="text-xl font-extrabold text-[#030E25] mt-1">
-                  {selectedOrdersCount} {orderText}
+                  {t("AssignGroups.SelectedOrdersCount", {
+                    count: selectedOrdersCount,
+                    defaultValue: `${selectedOrdersCount} ${orderText}`,
+                  })}
                 </Text>
               </View>
             </View>

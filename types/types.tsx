@@ -151,7 +151,7 @@ export type RootStackParamList = {
   ManagerTransactions: undefined;
   SearchFarmerScreen: undefined;
   DistridutionaDashboard: undefined;
-  PurchaseShortage: undefined;
+  PurchaseShortage: { products?: any[] } | undefined;
   PurchaseProduct: { product?: any } | undefined;
   DistributionOfficersList: undefined;
   ReceivedCash: undefined;

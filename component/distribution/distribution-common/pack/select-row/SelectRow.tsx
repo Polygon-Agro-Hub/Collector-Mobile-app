@@ -20,6 +20,7 @@ import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
+import { AlertModal } from "@/component/components/popup/AlertModal";
 import { useTranslation } from "react-i18next";
 
 // Define TypeScript interfaces for our sample data
@@ -28,6 +29,12 @@ interface RowData {
   name: string;
   positionsCount: number;
   rowIndex?: number;
+  allocatedCount?: number;
+  orderCount?: number;
+  ordersCount?: number;
+  ordersAssigned?: number;
+  totalOrders?: number;
+  hasOrders?: boolean;
 }
 
 interface PositionData {
@@ -45,6 +52,8 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [noOrdersModalVisible, setNoOrdersModalVisible] = useState(false);
+  const [noOrdersRowNumber, setNoOrdersRowNumber] = useState("");
 
   const [rows, setRows] = useState<RowData[]>([]);
   const [positions, setPositions] = useState<PositionData[]>([]);
@@ -348,6 +357,22 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   };
 
   const handleRowSelect = async (row: RowData) => {
+    const rowNum = getRowNumber(row);
+
+    // If row data already indicates no orders
+    if (
+      (row.allocatedCount !== undefined && row.allocatedCount === 0) ||
+      (row.orderCount !== undefined && row.orderCount === 0) ||
+      (row.ordersCount !== undefined && row.ordersCount === 0) ||
+      (row.totalOrders !== undefined && row.totalOrders === 0) ||
+      (row.ordersAssigned !== undefined && row.ordersAssigned === 0) ||
+      (row.hasOrders !== undefined && row.hasOrders === false)
+    ) {
+      setNoOrdersRowNumber(rowNum);
+      setNoOrdersModalVisible(true);
+      return;
+    }
+
     setSelectedRow(row);
     try {
       setLoading(true);
@@ -365,18 +390,51 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       });
 
       if (response.data && response.data.success) {
+        const resData = response.data;
+        if (
+          (resData.allocatedCount !== undefined && resData.allocatedCount === 0) ||
+          (resData.orderCount !== undefined && resData.orderCount === 0) ||
+          (resData.ordersCount !== undefined && resData.ordersCount === 0) ||
+          (resData.totalOrders !== undefined && resData.totalOrders === 0) ||
+          (resData.ordersAssigned !== undefined && resData.ordersAssigned === 0) ||
+          (resData.hasOrders !== undefined && resData.hasOrders === false)
+        ) {
+          setNoOrdersRowNumber(rowNum);
+          setNoOrdersModalVisible(true);
+          return;
+        }
+
         setPositions(response.data.data);
         setStep(2);
       } else {
-        Alert.alert(
-          t("Packing.Error", "Error"),
-          response.data.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
-        );
+        const msg = (response.data?.message || "").toLowerCase();
+        if (
+          msg.includes("no order") ||
+          (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
+        ) {
+          setNoOrdersRowNumber(rowNum);
+          setNoOrdersModalVisible(true);
+        } else {
+          Alert.alert(
+            t("Packing.Error", "Error"),
+            response.data.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
+          );
+        }
       }
     } catch (error: any) {
       console.error("Error fetching positions:", error);
-      const errMsg = error.response?.data?.message || t("Packing.Failed to fetch positions.", "An error occurred while fetching positions.");
-      Alert.alert(t("Packing.Error", "Error"), errMsg);
+      const errMsg = error.response?.data?.message || "";
+      const msg = errMsg.toLowerCase();
+      if (
+        msg.includes("no order") ||
+        (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
+      ) {
+        setNoOrdersRowNumber(rowNum);
+        setNoOrdersModalVisible(true);
+      } else {
+        const displayMsg = errMsg || t("Packing.Failed to fetch positions.", "An error occurred while fetching positions.");
+        Alert.alert(t("Packing.Error", "Error"), displayMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -579,9 +637,14 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                         {formatRowTitle(row)}
                       </Text>
                       <Text className="text-xs text-[#54617D] mt-0.5">
-                        {row.positionsCount}{" "}
-                        {row.positionsCount === 1 ? t("Packing.Position", "Position") : t("Packing.Positions", "Positions")}{" "}
-                        {t("Packing.Available", "Available")}
+                        {t("Packing.PositionsAvailableCount", {
+                          count: row.positionsCount,
+                          defaultValue: `${row.positionsCount} ${
+                            row.positionsCount === 1
+                              ? t("Packing.Position", "Position")
+                              : t("Packing.Positions", "Positions")
+                          } ${t("Packing.Available", "Available")}`,
+                        })}
                       </Text>
                     </View>
 
@@ -782,6 +845,20 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
+
+      {/* No Orders Assigned Alert Modal */}
+      <AlertModal
+        visible={noOrdersModalVisible}
+        title={t("Packing.No Orders Assigned!", "No Orders Assigned!")}
+        message={t("Packing.No orders assigned message", {
+          number: noOrdersRowNumber,
+          defaultValue: `No orders are assigned to Row ${noOrdersRowNumber} yet. Please wait until orders are assigned and check again.`,
+        })}
+        type="error"
+        showOkButton={true}
+        autoClose={true}
+        onClose={() => setNoOrdersModalVisible(false)}
+      />
     </View>
   );
 }

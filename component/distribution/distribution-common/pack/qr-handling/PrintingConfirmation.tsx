@@ -627,7 +627,7 @@ export default function PrintingConfirmation({
                     marginTop: 1,
                   }}
                 >
-                  {isWholesale ? t("AssignGroups.Wholesale", "Wholesale") : t("AssignGroups.Retail", "Retail")}
+                  {isWholesale ? "Wholesale" : "Retail"}
                 </Text>
                 <Text
                   numberOfLines={1}
@@ -649,7 +649,7 @@ export default function PrintingConfirmation({
                     marginTop: 1,
                   }}
                 >
-                  {formatTimeSlot(activeTimeSlot, t)}
+                  {activeTimeSlot}
                 </Text>
                 <Text
                   numberOfLines={1}

@@ -21,6 +21,9 @@ import { useTranslation } from "react-i18next";
 import { Feather, FontAwesome6 } from "@expo/vector-icons";
 import DashboardSkeleton from "@/component/components/skeletons/DashboardSkeleton";
 
+import { LanguageContext } from "@/context/LanguageContext";
+import { useContext } from "react";
+
 type DistributionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
   "DistridutionaDashboard"
@@ -56,13 +59,14 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
   const fetchSelectedLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
+      setSelectedLanguage(lang || i18n.language || language || "en");
     } catch (error) {
       console.error("❌ Error fetching language preference:", error);
     }
@@ -139,13 +143,14 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     setRefreshing(true);
     await fetchUserProfile();
     await fetchTargetPercentage();
+    await fetchSelectedLanguage();
     setRefreshing(false);
   };
 
   useFocusEffect(
     useCallback(() => {
+      fetchSelectedLanguage();
       const onBackPress = () => true;
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress,
@@ -154,32 +159,41 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     }, []),
   );
 
+  const getCurrentLanguage = (): string => {
+    return (i18n.language || language || selectedLanguage || "en")
+      .toLowerCase()
+      .substring(0, 2);
+  };
+
   const getFullName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
+        return `${profile.firstNameSinhala || profile.firstNameEnglish || ""} ${profile.lastNameSinhala || profile.lastNameEnglish || ""}`.trim();
       case "ta":
-        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
+        return `${profile.firstNameTamil || profile.firstNameEnglish || ""} ${profile.lastNameTamil || profile.lastNameEnglish || ""}`.trim();
       default:
-        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+        return `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim();
     }
   };
 
   const getcompanyName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.companyNameSinhala}`;
+        return `${profile.companyNameSinhala || profile.companyNameEnglish || ""}`;
       case "ta":
-        return `${profile.companyNameTamil}`;
+        return `${profile.companyNameTamil || profile.companyNameEnglish || ""}`;
       default:
-        return `${profile.companyNameEnglish} `;
+        return `${profile.companyNameEnglish || ""}`;
     }
   };
 
-  const getTextStyle = (language: string) => {
-    if (language === "si") {
+  const getTextStyle = (lang?: string) => {
+    const activeLang = lang || getCurrentLanguage();
+    if (activeLang === "si") {
       return {
         fontSize: 14,
         lineHeight: 20,

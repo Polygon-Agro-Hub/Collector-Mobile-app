@@ -33,6 +33,9 @@ type CollectionDashboardNavigationProps = StackNavigationProp<
   "CollectionDashboard"
 >;
 
+import { LanguageContext } from "@/context/LanguageContext";
+import { useContext } from "react";
+
 interface CollectionDashboardProps {
   navigation: CollectionDashboardNavigationProps;
 }
@@ -61,7 +64,8 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
   const [activeTab, setActiveTab] = useState<"collection" | "transport">("collection");
@@ -185,32 +189,41 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     }, []),
   );
 
+  const getCurrentLanguage = (): string => {
+    return (i18n.language || language || selectedLanguage || "en")
+      .toLowerCase()
+      .substring(0, 2);
+  };
+
   const getFullName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
+        return `${profile.firstNameSinhala || profile.firstNameEnglish || ""} ${profile.lastNameSinhala || profile.lastNameEnglish || ""}`.trim();
       case "ta":
-        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
+        return `${profile.firstNameTamil || profile.firstNameEnglish || ""} ${profile.lastNameTamil || profile.lastNameEnglish || ""}`.trim();
       default:
-        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+        return `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim();
     }
   };
 
   const getcompanyName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.companyNameSinhala}`;
+        return `${profile.companyNameSinhala || profile.companyNameEnglish || ""}`;
       case "ta":
-        return `${profile.companyNameTamil}`;
+        return `${profile.companyNameTamil || profile.companyNameEnglish || ""}`;
       default:
-        return `${profile.companyNameEnglish} `;
+        return `${profile.companyNameEnglish || ""}`;
     }
   };
 
-  const getTextStyle = (language: string) => {
-    if (language === "si") {
+  const getTextStyle = (lang?: string) => {
+    const activeLang = lang || getCurrentLanguage();
+    if (activeLang === "si") {
       return {
         fontSize: 14,
         lineHeight: 20,
