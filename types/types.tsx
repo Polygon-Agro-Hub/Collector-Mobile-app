@@ -77,25 +77,36 @@ export type RootStackParamList = {
       }
     | undefined;
   ReceivedProductsToday: undefined;
+  ScanLoadQR: undefined;
   DistributionScanDriverQR: undefined;
   ReceivedProductsSummary:
     | {
+        transportId?: string | number;
+        loadCode?: string;
         vehicleNo?: string;
+        driverEmpId?: string;
+        driverName?: string;
+        origin?: string;
         items?: any[];
       }
     | undefined;
   UnloadingProducts:
     | {
-        loadCode?: string;
-        vehicleNo?: string;
+        transportId?: string | number | null;
+        loadCode?: string | null;
+        vehicleNo?: string | null;
         items?: any[];
       }
     | undefined;
   WeighTheLoad:
     | {
-        loadCode?: string;
+        transportId?: string | number | null;
+        varietyId?: string;
+        productId?: string;
+        loadCode?: string | null;
         product?: any;
         updatedGrade?: {
+          varietyId?: string;
           gradeId: string;
           unloadedWeightKg: number;
           unloadedCrates: number;
@@ -104,6 +115,9 @@ export type RootStackParamList = {
     | undefined;
   WeighGrade:
     | {
+        varietyId?: string;
+        productId?: string;
+        product?: any;
         productName?: string;
         productImage?: string;
         gradeTitle?: string;

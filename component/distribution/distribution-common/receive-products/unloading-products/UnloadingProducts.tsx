@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,16 +6,28 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-  Modal,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
+import LoadingPage from "@/component/components/loading/LoadingPage";
+import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { AlertModal } from "@/component/components/popup/AlertModal";
+import axios from "axios";
+import store from "@/services/reducxStore";
+import environment from "@/environment/environment";
+import {
+  initUnloadTransfer,
+  clearUnloadState,
+  UnloadVarietyItem,
+  UnloadedGradeItem,
+} from "@/store/unloadSlice";
 
 type UnloadingProductsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -32,19 +44,6 @@ interface UnloadingProductsProps {
   route: UnloadingProductsRouteProp;
 }
 
-export interface UnloadProductItem {
-  id: string;
-  name: string;
-  image: string;
-  weighed: boolean;
-  expectedKg?: number;
-  measuredKg?: number;
-  expectedCrates?: number;
-  receivedCrates?: number;
-  grade?: string;
-  hasMismatch?: boolean;
-}
-
 export interface MismatchItem {
   id: string;
   productName: string;
@@ -56,91 +55,77 @@ export interface MismatchItem {
   receivedCrates?: number;
 }
 
-const DEFAULT_UNLOAD_PRODUCTS: UnloadProductItem[] = [
-  {
-    id: "1",
-    name: "Avacado",
-    image:
-      "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=200&auto=format&fit=crop&q=80",
-    weighed: false,
-    expectedKg: 20.0,
-    measuredKg: 20.0,
-    expectedCrates: 4,
-    receivedCrates: 4,
-    grade: "Grade A",
-  },
-  {
-    id: "2",
-    name: "Batana",
-    image:
-      "https://images.unsplash.com/photo-1506917728037-b6af01a7d403?w=200&auto=format&fit=crop&q=80",
-    weighed: false,
-    expectedKg: 20.0,
-    measuredKg: 10.0,
-    expectedCrates: 4,
-    receivedCrates: 3,
-    grade: "Grade A",
-    hasMismatch: true,
-  },
-  {
-    id: "3",
-    name: "Cardamom",
-    image:
-      "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=200&auto=format&fit=crop&q=80",
-    weighed: false,
-    expectedKg: 15.0,
-    measuredKg: 15.0,
-    expectedCrates: 2,
-    receivedCrates: 2,
-    grade: "Grade A",
-  },
-  {
-    id: "4",
-    name: "Garlic",
-    image:
-      "https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=200&auto=format&fit=crop&q=80",
-    weighed: false,
-    expectedKg: 20.0,
-    measuredKg: 10.0,
-    expectedCrates: 3,
-    receivedCrates: 3,
-    grade: "Grade B",
-    hasMismatch: true,
-  },
-  {
-    id: "5",
-    name: "Sri Lankan Yellow Lemon",
-    image:
-      "https://images.unsplash.com/photo-1590502593747-42a996133562?w=200&auto=format&fit=crop&q=80",
-    weighed: false,
-    expectedKg: 18.0,
-    measuredKg: 18.0,
-    expectedCrates: 3,
-    receivedCrates: 3,
-    grade: "Grade A",
-  },
-];
+const DEFAULT_CROP_IMAGE =
+  "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=150&auto=format&fit=crop&q=80";
 
-const INITIAL_MISMATCHES: MismatchItem[] = [
-  {
-    id: "m-1",
-    productName: "Batana",
-    grade: "Grade A",
-    expectedKg: 20.0,
-    measuredKg: 10.0,
-    differenceKg: 10.0,
-    expectedCrates: 4,
-    receivedCrates: 3,
-  },
-  {
-    id: "m-2",
-    productName: "Garlic",
-    grade: "Grade B",
-    expectedKg: 20.0,
-    measuredKg: 10.0,
-    differenceKg: 10.0,
-  },
-];
+const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
+  return (rawItems || []).map((item, idx) => {
+    const gradesMap: Record<
+      string,
+      { gradeTitle: string; loadedWeightKg: number; loadedCrates: number }
+    > = {};
+
+    if (Array.isArray(item.gradeSets) && item.gradeSets.length > 0) {
+      item.gradeSets.forEach((gs: any) => {
+        const gTitle =
+          gs.grade ||
+          (gs.gradeKey ? `Grade ${gs.gradeKey}` : `Grade A`);
+        if (!gradesMap[gTitle]) {
+          gradesMap[gTitle] = {
+            gradeTitle: gTitle,
+            loadedWeightKg: 0,
+            loadedCrates: 0,
+          };
+        }
+        gradesMap[gTitle].loadedWeightKg +=
+          parseFloat(gs.weightKg ?? gs.weight) || 0;
+        gradesMap[gTitle].loadedCrates +=
+          parseInt(gs.crates, 10) || 0;
+      });
+    }
+
+    const gradesList: UnloadedGradeItem[] = Object.keys(gradesMap).map(
+      (key, gIdx) => ({
+        id: `g-${gIdx + 1}`,
+        gradeTitle: gradesMap[key].gradeTitle,
+        loadedWeightKg: gradesMap[key].loadedWeightKg,
+        loadedCrates: gradesMap[key].loadedCrates,
+        unloadedWeightKg: null,
+        unloadedCrates: null,
+      })
+    );
+
+    return {
+      id: String(item.varietyId || item.id || `prod-${idx}`),
+      varietyId: item.varietyId ? String(item.varietyId) : undefined,
+      name:
+        item.cropName ||
+        item.varietyLabel ||
+        item.cropLabel ||
+        "Crop Item",
+      image: item.imageUri || DEFAULT_CROP_IMAGE,
+      weighed: false,
+      expectedKg: parseFloat(item.totalWeightKg) || 0,
+      measuredKg: 0,
+      expectedCrates: parseInt(item.totalCrates, 10) || 0,
+      receivedCrates: 0,
+      grades:
+        gradesList.length > 0
+          ? gradesList
+          : [
+              {
+                id: "g-1",
+                gradeTitle: "Grade A",
+                loadedWeightKg: parseFloat(item.totalWeightKg) || 0,
+                loadedCrates: parseInt(item.totalCrates, 10) || 0,
+                unloadedWeightKg: null,
+                unloadedCrates: null,
+              },
+            ],
+      hasMismatch: false,
+    };
+  });
+};
 
 export default function UnloadingProducts({
   navigation,
@@ -148,85 +133,173 @@ export default function UnloadingProducts({
 }: UnloadingProductsProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const loadCode = route.params?.loadCode || "L-DIO00001260912001";
+  const loadCode = route.params?.loadCode || "";
+  const transportId = route.params?.transportId;
+  const passedItems = route.params?.items;
 
-  const [products, setProducts] = useState<UnloadProductItem[]>(
-    DEFAULT_UNLOAD_PRODUCTS
-  );
-  const [mismatchReported, setMismatchReported] = useState<boolean>(false);
-  const [showMismatchModal, setShowMismatchModal] = useState<boolean>(false);
+  const [products, setProducts] = useState<UnloadVarietyItem[]>(() => {
+    const reduxVarieties = store.getState().unload.varieties;
+    if (reduxVarieties && reduxVarieties.length > 0) {
+      return reduxVarieties;
+    }
+    if (Array.isArray(passedItems) && passedItems.length > 0) {
+      return mapRawItemsToProducts(passedItems);
+    }
+    return [];
+  });
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
 
-  // Split and sort alphabetically (A-Z)
+  // Sync with Redux state on every screen focus
+  useFocusEffect(
+    useCallback(() => {
+      const reduxVarieties = store.getState().unload.varieties;
+      if (reduxVarieties && reduxVarieties.length > 0) {
+        setProducts(reduxVarieties);
+      }
+    }, [])
+  );
+
+  const fetchLoadDetails = useCallback(async () => {
+    const identifier = transportId || loadCode;
+    if (!identifier) return;
+
+    try {
+      setLoading(true);
+      const authToken = store.getState().auth.token;
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/transport/load/${identifier}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.data.success && response.data.data) {
+        const data = response.data.data;
+        if (Array.isArray(data.items)) {
+          const mapped = mapRawItemsToProducts(data.items);
+          store.dispatch(
+            initUnloadTransfer({
+              transportId,
+              loadCode: data.transferCode || loadCode,
+              vehicleNo: data.vehicleNo,
+              driverEmpId: data.driverEmpId,
+              driverName: data.driverName,
+              varieties: mapped,
+            })
+          );
+          setProducts(store.getState().unload.varieties);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching transfer items in UnloadingProducts:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [transportId, loadCode]);
+
+  useEffect(() => {
+    const reduxState = store.getState().unload;
+    const isAlreadyInitialized =
+      reduxState.varieties &&
+      reduxState.varieties.length > 0 &&
+      ((transportId && String(reduxState.transportId) === String(transportId)) ||
+        (loadCode && reduxState.loadCode === loadCode));
+
+    if (!isAlreadyInitialized) {
+      if (Array.isArray(passedItems) && passedItems.length > 0) {
+        const mapped = mapRawItemsToProducts(passedItems);
+        store.dispatch(
+          initUnloadTransfer({
+            transportId,
+            loadCode,
+            vehicleNo: route.params?.vehicleNo,
+            varieties: mapped,
+          })
+        );
+        setProducts(store.getState().unload.varieties);
+      } else if (transportId || loadCode) {
+        fetchLoadDetails();
+      }
+    }
+  }, [passedItems, transportId, loadCode, route.params?.vehicleNo, fetchLoadDetails]);
+
+  // Split and sort alphabetically in A to Z order
   const toWeighProducts = useMemo(() => {
-    return products
+    return [...products]
       .filter((p) => !p.weighed)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      );
   }, [products]);
 
   const weighedProducts = useMemo(() => {
-    return products
+    return [...products]
       .filter((p) => p.weighed)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      );
   }, [products]);
 
-  // Check if mismatches should be shown (when there are weighed products with mismatches)
-  const activeMismatches = useMemo(() => {
-    const weighedMismatchNames = weighedProducts
-      .filter((p) => p.hasMismatch)
-      .map((p) => p.name);
-    return INITIAL_MISMATCHES.filter((m) =>
-      weighedMismatchNames.includes(m.productName)
-    );
+  // Check if mismatches exist among weighed products
+  const activeMismatches: MismatchItem[] = useMemo(() => {
+    const mismatches: MismatchItem[] = [];
+    weighedProducts.forEach((p) => {
+      (p.grades || []).forEach((g) => {
+        if (
+          g.unloadedWeightKg !== null &&
+          g.unloadedCrates !== null &&
+          (Math.abs(g.unloadedWeightKg - g.loadedWeightKg) > 0.01 ||
+            g.unloadedCrates !== g.loadedCrates)
+        ) {
+          mismatches.push({
+            id: `${p.id}-${g.id}`,
+            productName: p.name,
+            grade: g.gradeTitle,
+            expectedKg: g.loadedWeightKg,
+            measuredKg: g.unloadedWeightKg,
+            differenceKg: Math.abs(g.unloadedWeightKg - g.loadedWeightKg),
+            expectedCrates: g.loadedCrates,
+            receivedCrates: g.unloadedCrates,
+          });
+        }
+      });
+    });
+    return mismatches;
   }, [weighedProducts]);
 
-  const hasPendingMismatch = activeMismatches.length > 0 && !mismatchReported;
-
-  const handleToggleProduct = (item: UnloadProductItem) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === item.id ? { ...p, weighed: !p.weighed } : p))
-    );
-  };
-
+  // Report mismatch button clicked: per user request, do nothing for now
   const handleReportMismatch = () => {
-    setShowMismatchModal(true);
+    // No-op for now as requested
   };
 
-  const handleCloseMismatchModal = () => {
-    setShowMismatchModal(false);
-    setMismatchReported(true);
-  };
+  const handleProductPress = (item: UnloadVarietyItem) => {
+    const currentUnload = store.getState().unload;
+    const finalTransportId = transportId || currentUnload.transportId;
+    const finalLoadCode = loadCode || currentUnload.loadCode;
 
-  const handleFinishUnloading = () => {
-    if (hasPendingMismatch) return;
     navigation.navigate("WeighTheLoad", {
-      loadCode,
-    });
-  };
-
-  const handleProductPress = (item: UnloadProductItem) => {
-    navigation.navigate("WeighTheLoad", {
-      loadCode,
+      transportId: finalTransportId,
+      loadCode: finalLoadCode,
+      varietyId: item.id,
+      productId: item.id,
       product: {
         id: item.id,
         name: item.name,
         image: item.image,
-        totalWeightKg: item.expectedKg || 90.0,
-        totalCrates: item.expectedCrates || 14,
-        grades: [
+        totalWeightKg: item.expectedKg || 0,
+        totalCrates: item.expectedCrates || 0,
+        grades: item.grades || [
           {
             id: "g-1",
-            gradeTitle: "A Grade",
-            loadedWeightKg: (item.expectedKg || 90.0) * 0.67,
-            loadedCrates: Math.round((item.expectedCrates || 14) * 0.7),
-            unloadedWeightKg: null,
-            unloadedCrates: null,
-          },
-          {
-            id: "g-2",
-            gradeTitle: "B Grade",
-            loadedWeightKg: (item.expectedKg || 90.0) * 0.33,
-            loadedCrates: Math.max(1, (item.expectedCrates || 14) - Math.round((item.expectedCrates || 14) * 0.7)),
+            gradeTitle: "Grade A",
+            loadedWeightKg: item.expectedKg || 0,
+            loadedCrates: item.expectedCrates || 0,
             unloadedWeightKg: null,
             unloadedCrates: null,
           },
@@ -235,7 +308,117 @@ export default function UnloadingProducts({
     });
   };
 
-  const renderProductCard = (item: UnloadProductItem, isWeighed: boolean) => (
+  const allWeighed = useMemo(() => {
+    return products.length > 0 && products.every((p) => p.weighed);
+  }, [products]);
+
+  const handleFinishUnloading = async () => {
+    if (submitting) return;
+
+    if (!allWeighed) {
+      Alert.alert(
+        t("Warning", "Warning"),
+        t(
+          "UnloadingProducts.PleaseWeighAllProducts",
+          "Please weigh all products before finishing unloading."
+        )
+      );
+      return;
+    }
+
+    const currentUnload = store.getState().unload;
+    const finalTransportId = transportId || currentUnload.transportId || null;
+    const finalLoadCode = loadCode || currentUnload.loadCode || null;
+
+    if (!finalTransportId && !finalLoadCode) {
+      Alert.alert(
+        t("Error.error", "Error"),
+        t("Error.TransportID or Load Code is required", "Transport ID or Load Code is required.")
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const authToken = store.getState().auth.token;
+
+      let success = false;
+      let errorMsg = "";
+
+      try {
+        const response = await axios.post(
+          `${environment.API_BASE_URL}api/distribution/finish-unloading`,
+          {
+            transportId: finalTransportId,
+            loadCode: finalLoadCode,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+        if (response.data.success) {
+          success = true;
+        } else {
+          errorMsg = response.data.message;
+        }
+      } catch (distErr: any) {
+        // Fallback endpoint if needed
+        try {
+          const resp2 = await axios.post(
+            `${environment.API_BASE_URL}api/transport/finish-unloading`,
+            {
+              transportId: finalTransportId,
+              loadCode: finalLoadCode,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+          if (resp2.data.success) {
+            success = true;
+          } else {
+            errorMsg = resp2.data.message;
+          }
+        } catch (transErr: any) {
+          errorMsg =
+            transErr?.response?.data?.message ||
+            distErr?.response?.data?.message ||
+            transErr?.message ||
+            "Failed to finish unloading";
+        }
+      }
+
+      if (success) {
+        store.dispatch(clearUnloadState());
+        setShowSuccessModal(true);
+      } else {
+        Alert.alert(
+          t("Error.error", "Error"),
+          errorMsg || t("Error.Failed to finish unloading", "Failed to finish unloading.")
+        );
+      }
+    } catch (err: any) {
+      console.error("Error finishing unloading:", err);
+      Alert.alert(
+        t("Error.error", "Error"),
+        err?.response?.data?.message ||
+          t("Error.Failed to finish unloading", "Failed to finish unloading.")
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    navigation.navigate("ReceivedProductsToday");
+  };
+
+  const renderProductCard = (item: UnloadVarietyItem, isWeighed: boolean) => (
     <View key={item.id} className="w-[48%] mb-6">
       <TouchableOpacity
         activeOpacity={0.8}
@@ -265,7 +448,7 @@ export default function UnloadingProducts({
         {/* Floating action indicator */}
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => handleToggleProduct(item)}
+          onPress={() => handleProductPress(item)}
           className={`w-7 h-7 rounded-full items-center justify-center absolute -bottom-3.5 ${
             isWeighed ? "bg-[#980775]" : "bg-black"
           }`}
@@ -297,194 +480,185 @@ export default function UnloadingProducts({
         navigation={navigation}
       />
 
-      <ScrollView
-        className="flex-1 px-6"
-        contentContainerStyle={{
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 40,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Subtitle */}
-        <Text className="text-center text-[#79747E] text-xs mb-4">
-          {t(
-            "UnloadingProducts.Subtitle",
-            "Click on the product you want to unload."
-          )}
-        </Text>
+      {loading ? (
+        <LoadingPage message={t("Loading", "Loading...")} />
+      ) : products.length === 0 ? (
+        <NoDataScreen
+          message={t("UnloadingProducts.NoItems", "- No items found for this transfer -")}
+        />
+      ) : (
+        <View className="flex-1 justify-between">
+          <ScrollView
+            className="flex-1 px-6"
+            contentContainerStyle={{
+              paddingTop: 8,
+              paddingBottom: 24,
+            }}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Subtitle */}
+            <Text className="text-center text-[#79747E] text-xs mb-4">
+              {t(
+                "UnloadingProducts.Subtitle",
+                "Click on the product you want to unload."
+              )}
+            </Text>
 
-        {/* SECTION: To Weigh */}
-        {toWeighProducts.length > 0 && (
-          <View className="mb-4">
-            <View className="flex-row items-center justify-center my-3">
-              <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-              <Text className="mx-4 font-bold text-sm text-[#17262C]">
-                {t("UnloadingProducts.ToWeigh", "To Weigh")}
-              </Text>
-              <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-            </View>
-
-            <View className="flex-row flex-wrap justify-between pt-1">
-              {toWeighProducts.map((item) => renderProductCard(item, false))}
-            </View>
-          </View>
-        )}
-
-        {/* SECTION: Weighed */}
-        {weighedProducts.length > 0 && (
-          <View className="mb-4">
-            <View className="flex-row items-center justify-center my-3">
-              <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-              <Text className="mx-4 font-bold text-sm text-[#17262C]">
-                {t("UnloadingProducts.Weighed", "Weighed")}
-              </Text>
-              <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-            </View>
-
-            <View className="flex-row flex-wrap justify-between pt-1">
-              {weighedProducts.map((item) => renderProductCard(item, true))}
-            </View>
-          </View>
-        )}
-
-        {/* SECTION: Mismatch Detected */}
-        {activeMismatches.length > 0 && (
-          <View className="mt-2 mb-4 gap-3">
-            {activeMismatches.map((mismatch) => (
-              <View
-                key={mismatch.id}
-                className="bg-[#FEECEB] rounded-2xl p-4"
-              >
-                {/* Warning Header */}
-                <View className="flex-row items-center mb-2">
-                  <MaterialCommunityIcons
-                    name="alert"
-                    size={18}
-                    color="#FF3B30"
-                  />
-                  <Text className="ml-1.5 font-bold text-sm text-[#FF3B30]">
-                    {t(
-                      "UnloadingProducts.MismatchDetected",
-                      "Mismatch Detected"
-                    )}
+            {/* SECTION: To Weigh */}
+            {toWeighProducts.length > 0 && (
+              <View className="mb-4">
+                <View className="flex-row items-center justify-center my-3">
+                  <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
+                  <Text className="mx-4 font-bold text-sm text-[#17262C]">
+                    {t("UnloadingProducts.ToWeigh", "To Weigh")}
                   </Text>
+                  <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
                 </View>
 
-                {/* Details */}
-                <Text className="text-xs text-black mb-1 font-bold">
-                  Product : {mismatch.productName}
-                </Text>
-                <Text className="text-xs text-black mb-2 font-bold">
-                  Quality : {mismatch.grade}
-                </Text>
+                <View className="flex-row flex-wrap justify-between pt-1">
+                  {toWeighProducts.map((item) => renderProductCard(item, false))}
+                </View>
+              </View>
+            )}
 
-                {/* Numbered Difference Points */}
-                <Text className="text-xs text-black leading-5">
-                  1. Expected{" "}
-                  <Text className="font-bold">
-                    {mismatch.expectedKg.toFixed(2)} kg
+            {/* SECTION: Weighed */}
+            {weighedProducts.length > 0 && (
+              <View className="mb-4">
+                <View className="flex-row items-center justify-center my-3">
+                  <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
+                  <Text className="mx-4 font-bold text-sm text-[#17262C]">
+                    {t("UnloadingProducts.Weighed", "Weighed")}
                   </Text>
-                  , but measured{" "}
-                  <Text className="font-bold">
-                    {mismatch.measuredKg.toFixed(2)} kg
-                  </Text>
-                  . Difference is{" "}
-                  <Text className="font-bold">
-                    {mismatch.differenceKg.toFixed(2)} kg
-                  </Text>
-                  .
-                </Text>
+                  <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
+                </View>
 
-                {mismatch.expectedCrates !== undefined &&
-                  mismatch.receivedCrates !== undefined && (
-                    <Text className="text-xs text-[#17262C] leading-5 mt-1">
-                      2. Expected crates count is{" "}
-                      <Text className="font-bold">
-                        {mismatch.expectedCrates}
+                <View className="flex-row flex-wrap justify-between pt-1">
+                  {weighedProducts.map((item) => renderProductCard(item, true))}
+                </View>
+              </View>
+            )}
+
+            {/* SECTION: Mismatch Detected */}
+            {activeMismatches.length > 0 && (
+              <View className="mt-2 mb-4 gap-3">
+                {activeMismatches.map((mismatch) => (
+                  <View
+                    key={mismatch.id}
+                    className="bg-[#FEECEB] rounded-2xl p-4"
+                  >
+                    {/* Warning Header */}
+                    <View className="flex-row items-center mb-2">
+                      <MaterialCommunityIcons
+                        name="alert"
+                        size={18}
+                        color="#FF3B30"
+                      />
+                      <Text className="ml-1.5 font-bold text-sm text-[#FF3B30]">
+                        {t(
+                          "UnloadingProducts.MismatchDetected",
+                          "Mismatch Detected"
+                        )}
                       </Text>
-                      , but received crate count is{" "}
+                    </View>
+
+                    {/* Details */}
+                    <Text className="text-xs text-black mb-1 font-bold">
+                      Product : {mismatch.productName}
+                    </Text>
+                    <Text className="text-xs text-black mb-2 font-bold">
+                      Quality : {mismatch.grade}
+                    </Text>
+
+                    {/* Numbered Difference Points */}
+                    <Text className="text-xs text-black leading-5">
+                      1. Expected{" "}
                       <Text className="font-bold">
-                        {mismatch.receivedCrates}
+                        {mismatch.expectedKg.toFixed(2)} kg
+                      </Text>
+                      , but measured{" "}
+                      <Text className="font-bold">
+                        {mismatch.measuredKg.toFixed(2)} kg
+                      </Text>
+                      . Difference is{" "}
+                      <Text className="font-bold">
+                        {mismatch.differenceKg.toFixed(2)} kg
                       </Text>
                       .
                     </Text>
-                  )}
-              </View>
-            ))}
-          </View>
-        )}
 
-        {/* Action Buttons */}
-        <View className="pt-3 pb-2 gap-3">
-          {/* Mismatch Action Button (if mismatches exist) */}
-          {activeMismatches.length > 0 && (
+                    {mismatch.expectedCrates !== undefined &&
+                      mismatch.receivedCrates !== undefined && (
+                        <Text className="text-xs text-[#17262C] leading-5 mt-1">
+                          2. Expected crates count is{" "}
+                          <Text className="font-bold">
+                            {mismatch.expectedCrates}
+                          </Text>
+                          , but received crate count is{" "}
+                          <Text className="font-bold">
+                            {mismatch.receivedCrates}
+                          </Text>
+                          .
+                        </Text>
+                      )}
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Mismatch Action Button (if mismatches exist) */}
+            {activeMismatches.length > 0 && (
+              <View className="pt-2 pb-2">
+                <TouchableOpacity
+                  onPress={handleReportMismatch}
+                  activeOpacity={0.8}
+                  className="w-full h-[48px] rounded-full items-center justify-center bg-[#FF3B30]"
+                  style={{
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 3,
+                    elevation: 3,
+                  }}
+                >
+                  <Text className="font-bold text-sm text-white">
+                    {t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </ScrollView>
+
+          {/* Fixed Bottom Container for Finish Unloading */}
+          <View
+            className="px-6 pt-3 bg-white border-t border-gray-100"
+            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+          >
             <TouchableOpacity
-              onPress={handleReportMismatch}
+              onPress={handleFinishUnloading}
+              disabled={!allWeighed || submitting}
               activeOpacity={0.8}
-              className={`w-full h-[48px] rounded-full items-center justify-center ${mismatchReported
-                  ? "bg-white border border-[#FF3B30]"
-                  : "bg-[#FF3B30]"
-                }`}
+              className={`w-full h-[52px] rounded-full items-center justify-center ${
+                !allWeighed || submitting ? "bg-[#A0A4A8]" : "bg-[#000000]"
+              }`}
               style={{
                 shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: mismatchReported ? 0 : 0.15,
-                shadowRadius: 3,
-                elevation: mismatchReported ? 0 : 3,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: !allWeighed || submitting ? 0.05 : 0.2,
+                shadowRadius: 5,
+                elevation: !allWeighed || submitting ? 1 : 4,
               }}
             >
-              <Text
-                className={`font-bold text-sm ${mismatchReported ? "text-[#FF3B30]" : "text-white"
-                  }`}
-              >
-                {mismatchReported
-                  ? t(
-                    "UnloadingProducts.ReportedMismatch",
-                    "Reported Mismatch"
-                  )
-                  : t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
-              </Text>
+              {submitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text className="text-white font-extrabold text-base">
+                  {t("UnloadingProducts.FinishUnloading", "Finish Unloading")}
+                </Text>
+              )}
             </TouchableOpacity>
-          )}
-
-          {/* Finish Unloading Button */}
-          <TouchableOpacity
-            onPress={handleFinishUnloading}
-            disabled={hasPendingMismatch}
-            activeOpacity={0.8}
-            className={`w-full h-[48px] rounded-full items-center justify-center ${hasPendingMismatch ? "bg-[#A0A4A8]" : "bg-[#000000]"
-              }`}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: hasPendingMismatch ? 0 : 0.2,
-              shadowRadius: 4,
-              elevation: hasPendingMismatch ? 0 : 3,
-            }}
-          >
-            <Text className="text-white font-extrabold text-sm">
-              {t("UnloadingProducts.FinishUnloading", "Finish Unloading")}
-            </Text>
-          </TouchableOpacity>
+          </View>
         </View>
-      </ScrollView>
-
-      {/* AlertModal for Mismatch Reported */}
-      <AlertModal
-        visible={showMismatchModal}
-        title={t(
-          "UnloadingProducts.MismatchReportedTitle",
-          "Mismatch Reported!"
-        )}
-        message={t(
-          "UnloadingProducts.MismatchReportedMessage",
-          "Load mismatch has been successfully reported."
-        )}
-        type="success"
-        onClose={handleCloseMismatchModal}
-        duration={3000}
-        autoClose={true}
-      />
+      )}
 
       {/* AlertModal for Unload Success */}
       <AlertModal
@@ -498,13 +672,15 @@ export default function UnloadingProducts({
                 "Products unloaded successfully."
               )}
             </Text>
-            <Text className="text-center font-bold text-sm text-[#17262C]">
-              {loadCode}.
-            </Text>
+            {loadCode ? (
+              <Text className="text-center font-bold text-sm text-[#17262C]">
+                {loadCode}.
+              </Text>
+            ) : null}
           </View>
         }
         type="success"
-        onClose={handleCloseMismatchModal}
+        onClose={handleCloseSuccessModal}
         duration={3000}
         autoClose={true}
       />

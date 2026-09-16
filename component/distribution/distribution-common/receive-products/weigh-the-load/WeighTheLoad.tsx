@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   StatusBar,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { MaterialCommunityIcons, Ionicons, FontAwesome5, MaterialIcons, AntDesign } from "@expo/vector-icons";
@@ -19,6 +19,8 @@ import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal"
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 import NetInfo from "@react-native-community/netinfo";
+import store from "@/services/reducxStore";
+import { updateVarietyGrades } from "@/store/unloadSlice";
 
 type WeighTheLoadNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -53,31 +55,13 @@ export interface CropWeighData {
   grades: GradeWeighItem[];
 }
 
-const DEFAULT_CROP_DATA: CropWeighData = {
-  id: "2",
-  name: "Batana",
-  image:
-    "https://images.unsplash.com/photo-1506917728037-b6af01a7d403?w=200&auto=format&fit=crop&q=80",
-  totalWeightKg: 90.0,
-  totalCrates: 14,
-  grades: [
-    {
-      id: "g-1",
-      gradeTitle: "A Grade",
-      loadedWeightKg: 60.0,
-      loadedCrates: 10,
-      unloadedWeightKg: null,
-      unloadedCrates: null,
-    },
-    {
-      id: "g-2",
-      gradeTitle: "B Grade",
-      loadedWeightKg: 30.0,
-      loadedCrates: 4,
-      unloadedWeightKg: null,
-      unloadedCrates: null,
-    },
-  ],
+const EMPTY_CROP_DATA: CropWeighData = {
+  id: "",
+  name: "",
+  image: "",
+  totalWeightKg: 0,
+  totalCrates: 0,
+  grades: [],
 };
 
 export default function WeighTheLoad({
@@ -88,11 +72,113 @@ export default function WeighTheLoad({
   const insets = useSafeAreaInsets();
 
   const passedProduct = route.params?.product;
-  const [cropData, setCropData] = useState<CropWeighData>(
-    passedProduct || DEFAULT_CROP_DATA
-  );
+  const targetVarietyId =
+    passedProduct?.id ||
+    route.params?.varietyId ||
+    route.params?.productId ||
+    route.params?.updatedGrade?.varietyId ||
+    "";
+
+  const getInitialCropData = (): CropWeighData => {
+    if (targetVarietyId) {
+      const reduxVariety = store
+        .getState()
+        .unload.varieties.find((v) => String(v.id) === String(targetVarietyId));
+      if (reduxVariety) {
+        return {
+          id: reduxVariety.id,
+          name: reduxVariety.name,
+          image: reduxVariety.image,
+          totalWeightKg: reduxVariety.expectedKg,
+          totalCrates: reduxVariety.expectedCrates,
+          grades: reduxVariety.grades,
+        };
+      }
+    }
+    return passedProduct || EMPTY_CROP_DATA;
+  };
+
+  const [cropData, setCropData] = useState<CropWeighData>(getInitialCropData);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [gradeToDelete, setGradeToDelete] = useState<GradeWeighItem | null>(null);
+
+  // Sync on route parameter changes (e.g. returning with updatedGrade)
+  useEffect(() => {
+    const vId =
+      route.params?.product?.id ||
+      route.params?.varietyId ||
+      route.params?.productId ||
+      route.params?.updatedGrade?.varietyId ||
+      cropData.id;
+
+    if (vId) {
+      const reduxVariety = store
+        .getState()
+        .unload.varieties.find((v) => String(v.id) === String(vId));
+
+      if (reduxVariety) {
+        let grades = reduxVariety.grades;
+
+        if (route.params?.updatedGrade && route.params.updatedGrade.gradeId) {
+          const { gradeId, unloadedWeightKg, unloadedCrates } =
+            route.params.updatedGrade;
+          grades = grades.map((g) =>
+            g.id === gradeId
+              ? { ...g, unloadedWeightKg, unloadedCrates }
+              : g
+          );
+          store.dispatch(
+            updateVarietyGrades({
+              varietyId: reduxVariety.id,
+              grades,
+            })
+          );
+        }
+
+        setCropData({
+          id: reduxVariety.id,
+          name: reduxVariety.name,
+          image: reduxVariety.image,
+          totalWeightKg: reduxVariety.expectedKg,
+          totalCrates: reduxVariety.expectedCrates,
+          grades,
+        });
+        return;
+      }
+    }
+
+    if (route.params?.product) {
+      setCropData(route.params.product);
+    }
+  }, [route.params]);
+
+  // Sync on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      const vId =
+        route.params?.product?.id ||
+        route.params?.varietyId ||
+        route.params?.productId ||
+        route.params?.updatedGrade?.varietyId ||
+        cropData.id;
+
+      if (vId) {
+        const reduxVariety = store
+          .getState()
+          .unload.varieties.find((v) => String(v.id) === String(vId));
+        if (reduxVariety) {
+          setCropData({
+            id: reduxVariety.id,
+            name: reduxVariety.name,
+            image: reduxVariety.image,
+            totalWeightKg: reduxVariety.expectedKg,
+            totalCrates: reduxVariety.expectedCrates,
+            grades: reduxVariety.grades,
+          });
+        }
+      }
+    }, [route.params, cropData.id])
+  );
 
   // Scale Connection State
   const [isScaleModalVisible, setIsScaleModalVisible] = useState<boolean>(false);
@@ -112,24 +198,11 @@ export default function WeighTheLoad({
     };
   }, []);
 
-  useEffect(() => {
-    if (route.params?.updatedGrade) {
-      const { gradeId, unloadedWeightKg, unloadedCrates } =
-        route.params.updatedGrade;
-      setCropData((prev) => ({
-        ...prev,
-        grades: prev.grades.map((g) =>
-          g.id === gradeId
-            ? { ...g, unloadedWeightKg, unloadedCrates }
-            : g
-        ),
-      }));
-    }
-  }, [route.params?.updatedGrade]);
-
-  const isAllUnloaded = cropData.grades.every(
-    (g) => g.unloadedWeightKg !== null && g.unloadedCrates !== null
-  );
+  const isAllUnloaded =
+    cropData.grades.length > 0 &&
+    cropData.grades.every(
+      (g) => g.unloadedWeightKg !== null && g.unloadedCrates !== null
+    );
 
   const activeMismatches = cropData.grades
     .filter(
@@ -152,6 +225,8 @@ export default function WeighTheLoad({
 
   const handleGradePress = (grade: GradeWeighItem) => {
     navigation.navigate("WeighGrade", {
+      varietyId: cropData.id,
+      productId: cropData.id,
       productName: cropData.name,
       productImage: cropData.image,
       gradeTitle: grade.gradeTitle,
@@ -172,25 +247,56 @@ export default function WeighTheLoad({
 
   const handleConfirmDeleteGrade = () => {
     if (!gradeToDelete) return;
-    setCropData((prev) => ({
-      ...prev,
-      grades: prev.grades.map((g) =>
+    setCropData((prev) => {
+      const updatedGrades = prev.grades.map((g) =>
         g.id === gradeToDelete.id
           ? { ...g, unloadedWeightKg: null, unloadedCrates: null }
           : g
-      ),
-    }));
+      );
+      if (prev.id) {
+        store.dispatch(
+          updateVarietyGrades({
+            varietyId: prev.id,
+            grades: updatedGrades,
+          })
+        );
+      }
+      return {
+        ...prev,
+        grades: updatedGrades,
+      };
+    });
     setGradeToDelete(null);
   };
 
   const handleMarkAsUnloaded = () => {
     if (!isAllUnloaded) return;
+    if (cropData.id) {
+      store.dispatch(
+        updateVarietyGrades({
+          varietyId: cropData.id,
+          grades: cropData.grades,
+        })
+      );
+    }
     setShowSuccessModal(true);
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    navigation.navigate("UnloadingProducts");
+    if (cropData.id) {
+      store.dispatch(
+        updateVarietyGrades({
+          varietyId: cropData.id,
+          grades: cropData.grades,
+        })
+      );
+    }
+    const currentUnloadState = store.getState().unload;
+    navigation.navigate("UnloadingProducts", {
+      transportId: currentUnloadState.transportId || route.params?.loadCode,
+      loadCode: currentUnloadState.loadCode || route.params?.loadCode,
+    });
   };
 
   const renderScaleSection = () => {
@@ -524,10 +630,18 @@ export default function WeighTheLoad({
                       {t("WeighTheLoad.UnloadedWeight", "Unloaded Weight")}
                     </Text>
                     <Text
+                      style={{
+                        color:
+                          grade.unloadedWeightKg === null
+                            ? "#79747E"
+                            : Math.abs(grade.unloadedWeightKg - grade.loadedWeightKg) > 0.01
+                            ? "#FF383C"
+                            : "#17262C",
+                      }}
                       className={`text-base mt-0.5 ${
                         grade.unloadedWeightKg !== null
-                          ? "font-bold text-[#17262C]"
-                          : "text-[#79747E]"
+                          ? "font-bold"
+                          : ""
                       }`}
                     >
                       {grade.unloadedWeightKg !== null
@@ -546,10 +660,18 @@ export default function WeighTheLoad({
                       {t("WeighTheLoad.UnloadedCrates", "Unloaded Crates")}
                     </Text>
                     <Text
+                      style={{
+                        color:
+                          grade.unloadedCrates === null
+                            ? "#79747E"
+                            : grade.unloadedCrates !== grade.loadedCrates
+                            ? "#FF383C"
+                            : "#17262C",
+                      }}
                       className={`text-base mt-0.5 ${
                         grade.unloadedCrates !== null
-                          ? "font-bold text-[#17262C]"
-                          : "text-[#79747E]"
+                          ? "font-bold"
+                          : ""
                       }`}
                     >
                       {grade.unloadedCrates !== null

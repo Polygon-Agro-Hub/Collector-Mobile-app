@@ -18,6 +18,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
+import store from "@/services/reducxStore";
+import { updateVarietyGrades } from "@/store/unloadSlice";
 
 type WeighGradeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -49,21 +51,20 @@ export default function WeighGrade({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
-  const productName = route.params?.productName || "Batana";
-  const productImage =
-    route.params?.productImage ||
-    "https://images.unsplash.com/photo-1506917728037-b6af01a7d403?w=200&auto=format&fit=crop&q=80";
-  const gradeTitle = route.params?.gradeTitle || "A Grade";
+  const productName = route.params?.productName || "";
+  const productImage = route.params?.productImage || "";
+  const gradeTitle = route.params?.gradeTitle || "Grade A";
   const gradeId = route.params?.gradeId || "g-1";
-  const loadedWeightKg = route.params?.loadedWeightKg || 60.0;
-  const loadedCrates = route.params?.loadedCrates || 10;
+  const varietyId = route.params?.varietyId || route.params?.productId || "";
+  const loadedWeightKg = typeof route.params?.loadedWeightKg === "number" ? route.params.loadedWeightKg : 0;
+  const loadedCrates = typeof route.params?.loadedCrates === "number" ? route.params.loadedCrates : 0;
 
   // Initialize with 1 set defaulted to loadedCrates count
   const [sets, setSets] = useState<SetWeighItem[]>([
     {
       id: `set-1`,
       setNumber: 1,
-      crates: String(loadedCrates),
+      crates: loadedCrates > 0 ? String(loadedCrates) : "",
       weight: null,
       isExpanded: true,
     },
@@ -173,7 +174,7 @@ export default function WeighGrade({
   // Receive weight from ScaleWeightModal
   const handleScaleContinue = (measuredWeight: number) => {
     if (!activeSetIdForScale) return;
-    const finalWeight = measuredWeight > 0 ? measuredWeight : 30.0;
+    const finalWeight = measuredWeight >= 0 ? measuredWeight : 0;
     setSets((prev) =>
       prev.map((s) =>
         s.id === activeSetIdForScale ? { ...s, weight: finalWeight } : s
@@ -202,8 +203,35 @@ export default function WeighGrade({
       0
     );
 
+    if (varietyId) {
+      const currentVariety = store
+        .getState()
+        .unload.varieties.find((v) => String(v.id) === String(varietyId));
+      if (currentVariety) {
+        const updatedGrades = currentVariety.grades.map((g) =>
+          g.id === gradeId
+            ? {
+                ...g,
+                unloadedWeightKg: totalUnloadedWeight,
+                unloadedCrates: totalUnloadedCrates,
+              }
+            : g
+        );
+        store.dispatch(
+          updateVarietyGrades({
+            varietyId: String(varietyId),
+            grades: updatedGrades,
+          })
+        );
+      }
+    }
+
     navigation.navigate("WeighTheLoad", {
+      varietyId,
+      productId: varietyId,
+      product: route.params?.product,
       updatedGrade: {
+        varietyId,
         gradeId,
         unloadedWeightKg: totalUnloadedWeight,
         unloadedCrates: totalUnloadedCrates,

@@ -102,7 +102,7 @@ import ConfirmRowAssign from "@/component/distribution/distribution-center-manag
 import DistributionCenterTarget from "@/component/distribution/distribution-common/center-target/DistributionCenterTarget";
 import OrderDetails from "@/component/distribution/distribution-common/center-target/OrderDetails";
 import ReceivedProductsToday from "@/component/distribution/distribution-common/receive-products/received-products-today/ReceivedProductsToday";
-import DistributionScanDriverQR from "@/component/distribution/distribution-common/receive-products/scan-driver-qr/ScanDriverQR";
+import ScanLoadQR from "@/component/distribution/distribution-common/receive-products/scan-load-qr/ScanLoadQR";
 import ReceivedProductsSummary from "@/component/distribution/distribution-common/receive-products/received-products-summary/ReceivedProductsSummary";
 import UnloadingProducts from "@/component/distribution/distribution-common/receive-products/unloading-products/UnloadingProducts";
 import WeighTheLoad from "@/component/distribution/distribution-common/receive-products/weigh-the-load/WeighTheLoad";
@@ -638,8 +638,13 @@ const DISTRIBUTION_STACK_SCREENS: StackRouteConfig[] = [
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {
+    name: "ScanLoadQR",
+    component: ScanLoadQR as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
     name: "DistributionScanDriverQR",
-    component: DistributionScanDriverQR as any,
+    component: ScanLoadQR as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
   {

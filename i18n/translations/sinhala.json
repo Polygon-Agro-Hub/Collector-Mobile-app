@@ -1035,6 +1035,23 @@
     "NoProductsReceivedToday": "- අද නිෂ්පාදන ලැබී නැත -",
     "Crates": "කූඩ"
   },
+  "qrcode": {
+    "ScanLoadQR": "පැටවුම් QR ස්කෑන් කරන්න",
+    "AlignLoadQR": "ස්කෑන් කිරීමට පැටවුම් QR කේතය රාමුව තුළ තබන්න",
+    "InvalidLoadQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු පැටවුම් QR කේතයක් ස්කෑන් කරන්න.",
+    "CenterMismatch": "මෙම පැටවුම වෙනත් බෙදාහැරීමේ මධ්‍යස්ථානයකට පවරා ඇත.",
+    "Error": "දෝෂයකි!",
+    "Successful": "සාර්ථකයි!",
+    "QRIdentified": "QR කේතය සාර්ථකව හඳුනා ගන්නා ලදී.",
+    "LoadCode": "පැටවුම",
+    "Vehicle": "වාහනය",
+    "Driver": "රියදුරු",
+    "Verifying": "තහවුරු කරමින්...",
+    "ScanAgain": "නැවත ස්කෑන් කරන්න",
+    "Timeout": "ස්කෑන් කාලය අවසන් විය",
+    "TimeoutMessage": "QR කේතය හඳුනාගත නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "VerifyFailed": "දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න."
+  },
   "ReceivedProductsSummary": {
     "Title": "සාරාංශය",
     "StartUnloading": "බෑම අරඹන්න"
@@ -1048,6 +1065,7 @@
     "ReportMismatch": "වෙනස වාර්තා කරන්න",
     "ReportedMismatch": "වෙනස වාර්තා කර ඇත",
     "FinishUnloading": "බෑම අවසන් කරන්න",
+    "PleaseWeighAllProducts": "බෑම අවසන් කිරීමට පෙර කරුණාකර සියලුම නිෂ්පාදන බර කරන්න.",
     "SuccessTitle": "සාර්ථකයි!",
     "SuccessMessage": "නිෂ්පාදන සාර්ථකව බාන ලදී"
   },

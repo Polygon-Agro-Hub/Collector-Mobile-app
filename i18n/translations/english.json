@@ -1100,6 +1100,23 @@
     "NoProductsReceivedToday": "- No products were received today -",
     "Crates": "Crates"
   },
+  "qrcode": {
+    "ScanLoadQR": "Scan Load QR",
+    "AlignLoadQR": "Align the Load QR code within the frame to scan",
+    "InvalidLoadQR": "Invalid QR code.\nPlease scan a valid Load QR code.",
+    "CenterMismatch": "This load is assigned to a different distribution center.",
+    "Error": "Error!",
+    "Successful": "Successful!",
+    "QRIdentified": "QR code identified successfully.",
+    "LoadCode": "Load",
+    "Vehicle": "Vehicle",
+    "Driver": "Driver",
+    "Verifying": "Verifying...",
+    "ScanAgain": "Scan Again",
+    "Timeout": "Scan Timeout",
+    "TimeoutMessage": "The QR code is not identified. Please check and try again.",
+    "VerifyFailed": "Something went wrong. Please try again."
+  },
   "ReceivedProductsSummary": {
     "Title": "Summary",
     "StartUnloading": "Start Unloading"
@@ -1113,6 +1130,7 @@
     "ReportMismatch": "Report Mismatch",
     "ReportedMismatch": "Mismatch Reported",
     "FinishUnloading": "Finish Unloading",
+    "PleaseWeighAllProducts": "Please weigh all products before finishing unloading.",
     "SuccessTitle": "Success!",
     "SuccessMessage": "Products unloaded successfully"
   },
