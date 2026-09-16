@@ -21,7 +21,12 @@
     "Loading camera...": "கேமராவை ஏற்றுகிறது...",
     "Loading camera": "கேமராவை ஏற்றுகிறது...",
     "Loading orders": "ஆர்டர்களை ஏற்றுகிறது...",
-    "Loading orders...": "ஆர்டர்கள் ஏற்றப்படுகிறது..."
+    "Loading orders...": "ஆர்டர்கள் ஏற்றப்படுகிறது...",
+    "Go Back": "திரும்பிச் செல்லவும்",
+    "GoBack": "திரும்பிச் செல்லவும்",
+    "Cancel": "ரத்துசெய்",
+    "Confirm": "உறுதிப்படுத்து",
+    "Submitting": "சமர்ப்பிக்கிறது..."
   },
   "Main": {
     "No Internet Connection": "இணைய இணைப்பு இல்லை",
@@ -296,7 +301,8 @@
     "Cancel": "ரத்துசெய்",
     "Cannot add negative values for load.": "Cannot add negative values for load.",
     "Product replacement successful": "தயாரிப்பு மாற்றீடு வெற்றிகரமாக முடிந்தது!",
-    "AttachmentHasBeenSavedToYourSelectedFolder": "இணைப்பு நீங்கள் தேர்ந்தெடுத்த கோப்புறையில் சேமிக்கப்பட்டுள்ளது.r"
+    "AttachmentHasBeenSavedToYourSelectedFolder": "இணைப்பு நீங்கள் தேர்ந்தெடுத்த கோப்புறையில் சேமிக்கப்பட்டுள்ளது.",
+    "No Search Result Found": "தேடல் முடிவுகள் எதுவும் காணப்படவில்லை"
   },
   "SideMenu": {
     "LNG": "en",
@@ -420,12 +426,16 @@
   "GlobalSearchModal": {
     "Search": "தேடுங்கள்...",
     "Done": "முடிந்தது",
-    "No items found": "உருப்படிகள் எதுவும் கிடைக்கவில்லை",
+    "No items found": "தேடல் முடிவுகள் எதுவும் காணப்படவில்லை",
     "SearchPlaceholder": "தேடுக...",
-    "NoResultsText": "எந்த உருப்படியும் கிடைக்கவில்லை",
+    "NoResultsText": "தேடல் முடிவுகள் எதுவும் காணப்படவில்லை",
+    "No Search Result Found": "தேடல் முடிவுகள் எதுவும் காணப்படவில்லை",
     "DoneButton": "முடிந்தது",
     "Loading": "ஏற்றுகிறது...",
-    "SelectedCount": "{{count}} தேர்ந்தெடுக்கப்பட்டது"
+    "SelectedCount": "{{count}} தேர்ந்தெடுக்கப்பட்டது",
+    "Search...": "தேடுங்கள்...",
+    "search": "தேடுங்கள்...",
+    "search text": "தேடுங்கள்..."
   },
   "PriceChart": {
     "LNG": "ta",
@@ -553,7 +563,17 @@
     "QRCode": "எனது QR குறியீடு",
     "Noavailable": "QR குறியீடு எதுவும் இல்லை.",
     "Download": "பதிவிறக்கவும்",
-    "Share": "பகிரவும்"
+    "Share": "பகிரவும்",
+    "Success": "வெற்றி!",
+    "SuccessMessage": "இணைப்பு நீங்கள் தேர்ந்தெடுத்த கோப்புறையில் சேமிக்கப்பட்டுள்ளது.",
+    "SavedToFolder": "இணைப்பு நீங்கள் தேர்ந்தெடுத்த கோப்புறையில் சேமிக்கப்பட்டுள்ளது.",
+    "savedToGallery": "QR குறியீடு உங்கள் கேலரியில் வெற்றிகரமாக சேமிக்கப்பட்டது.",
+    "NoQrAvailable": "QR குறியீடு எதுவும் கிடைக்கவில்லை.",
+    "FailedSave": "QR குறியீட்டைச் சேமிக்க முடியவில்லை.",
+    "FailedShare": "QR குறியீட்டைப் பகிர முடியவில்லை.",
+    "SharingUnavailableTitle": "பகிர்தல் அம்சம் கிடைக்கவில்லை",
+    "SharingUnavailable": "இந்த சாதனத்தில் பகிர்தல் கிடைக்கவில்லை.",
+    "OK": "சரி"
   },
   "ChangePassword": {
     "LNG": "ta",
@@ -1006,7 +1026,48 @@
     "Pickup Order Scan": "பிக்அப் ஆர்டர் ஸ்கேன்",
     "Start Packing": "பொதி செய்வதை தொடங்கு",
     "Assign Groups": "குழுக்களை ஒதுக்கு",
-    "Purchase Shortage": "பற்றாக்குறை கொள்முதல்"
+    "Purchase Shortage": "பற்றாக்குறை கொள்முதல்",
+    "Receive Products": "பொருட்களைப் பெறுதல்",
+    "ReceiveProducts": "பொருட்களைப் பெறுதல்"
+  },
+  "ReceivedProductsToday": {
+    "Title": "இன்று பெறப்பட்ட பொருட்கள்",
+    "NoProductsReceivedToday": "- இன்று பொருட்கள் எதுவும் பெறப்படவில்லை -",
+    "Crates": "கூடைகள்"
+  },
+  "ReceivedProductsSummary": {
+    "Title": "சுருக்கம்",
+    "StartUnloading": "இறக்கத் தொடங்குங்கள்"
+  },
+  "UnloadingProducts": {
+    "Title": "பொருட்கள் இறக்குதல்",
+    "Subtitle": "ஒவ்வொரு தயாரிப்பு தரத்தையும் இறக்கி எடையிடுங்கள்",
+    "ToWeigh": "எடையிட வேண்டியவை",
+    "Weighed": "எடையிடப்பட்டவை",
+    "MismatchDetected": "முரண்பாடு கண்டறியப்பட்டது",
+    "ReportMismatch": "முரண்பாட்டைப் புகாரளிக்கவும்",
+    "ReportedMismatch": "முரண்பாடு புகாரளிக்கப்பட்டது",
+    "FinishUnloading": "இறக்குதலை முடிக்கவும்",
+    "SuccessTitle": "வெற்றி!",
+    "SuccessMessage": "பொருட்கள் வெற்றிகரமாக இறக்கப்பட்டன"
+  },
+  "WeighTheLoad": {
+    "Title": "எடையை அளவிடவும்",
+    "TotalWeight": "மொத்த எடை",
+    "TotalCrates": "மொத்த கூடைகள்",
+    "LoadedWeight": "ஏற்றப்பட்ட எடை",
+    "LoadedCrates": "ஏற்றப்பட்ட கூடைகள்",
+    "UnloadedWeight": "இறக்கப்பட்ட எடை",
+    "UnloadedCrates": "இறக்கப்பட்ட கூடைகள்",
+    "MarkAsUnloaded": "இறக்கப்பட்டதாகக் குறிக்கவும்",
+    "SuccessTitle": "வெற்றிகரமாக இறக்கப்பட்டது!"
+  },
+  "WeighGrade": {
+    "Title": "எடையை அளவிடவும்",
+    "LoadedWeight": "ஏற்றப்பட்ட எடை",
+    "TotalCrates": "மொத்த கூடைகள்",
+    "Continue": "தொடரவும்",
+    "MaxCratesReached": "அதிகபட்ச கூடை வரம்பை அடைந்தது"
   },
   "OpenedOrderScreen": {
     "INV No": "INV எண்:",
@@ -1304,9 +1365,23 @@
   "PurchaseProduct": {
     "Cancel": "ரத்துசெய்",
     "Purchase": "கொள்முதல் செய்",
-    "GoBack": "திரும்பிச் செல்",
+    "Go Back": "திரும்பிச் செல்லவும்",
+    "GoBack": "திரும்பிச் செல்லவும்",
     "Submitting": "சமர்ப்பிக்கிறது...",
-    "Confirm": "உறுதிப்படுத்து"
+    "Confirm": "உறுதிப்படுத்து",
+    "Collect": "சேகரிக்க : ",
+    "Collect : ": "சேகரிக்க : ",
+    "Collect :": "சேகரிக்க : ",
+    "Collected": "சேகரிக்கப்பட்டது : ",
+    "Collected : ": "சேகரிக்கப்பட்டது : ",
+    "Collected :": "சேகரிக்கப்பட்டது : ",
+    "Price per kg": "கிலோவுக்கான விலை : ",
+    "Price per kg : ": "கிலோவுக்கான விலை : ",
+    "Price per kg :": "கிலோவுக்கான விலை : ",
+    "kg": "கிலோ",
+    "Rs. ": "ரூ. ",
+    "Rs.": "ரூ.",
+    "Rs": "ரூ."
   },
   "AssignGroups": {
     "Groups": "குழுக்கள்",
@@ -1341,6 +1416,7 @@
     "Order Allocated": "ஆர்டர் ஒதுக்கப்பட்டுள்ளது",
     "Orders Allocated": "ஆர்டர்கள் ஒதுக்கப்பட்டுள்ளன",
     "OrdersAllocatedCount": "{{count}} ஆர்டர்கள் ஒதுக்கப்பட்டுள்ளன",
+    "SelectedOrdersCount": "{{count}} ஆர்டர்கள்",
     "Row {{number}}": "வரிசை {{number}}",
     "Row": "வரிசை",
     "Rows": "வரிசைகள்",
@@ -1354,7 +1430,9 @@
     "Confirm": "உறுதிப்படுத்து",
     "Successfully assigned orders": "{{timeSlot}} இடைவெளிக்கான {{rowName}} க்கு {{count}} {{orderText}} வெற்றிகரமாக ஒதுக்கப்பட்டது.",
     "Failed to assign orders.": "ஆர்டர்களை ஒதுக்க முடியவில்லை.",
-    "An error occurred while assigning orders.": "ஆர்டர்களை ஒதுக்கும்போது பிழை ஏற்பட்டது."
+    "An error occurred while assigning orders.": "ஆர்டர்களை ஒதுக்கும்போது பிழை ஏற்பட்டது.",
+    "Success!": "வெற்றி!",
+    "Target assigned Successfully!": "இலக்கு வெற்றிகரமாக ஒதுக்கப்பட்டது!"
   },
   "DistributionCenterTarget": {
     "Centre Target": "மைய இலக்கு",
@@ -1381,6 +1459,8 @@
     "Packing Positions": "பேக்கிங் நிலைகள்",
     "Positions": "நிலைகள்",
     "Position": "நிலை",
+    "PositionsAvailableCount": "{{count}} நிலைகள் உள்ளன",
+    "PositionsCount": "{{count}} நிலைகள்",
     "Row": "வரிசை",
     "Rows": "வரிசைகள்",
     "Row {{number}}": "வரிசை {{number}}",
@@ -1395,6 +1475,8 @@
     "Loading...": "ஏற்றுகிறது...",
     "No packing rows found": "- பேக்கிங் வரிசைகள் எதுவும் காணப்படவில்லை. -",
     "Rows are not available. Please wait until rows are available to obtain a position.": "வரிசைகள் கிடைக்கவில்லை. ஒரு நிலையைப் பெறுவதற்கு வரிசைகள் கிடைக்கும் வரை தயவுசெய்து காத்திருக்கவும்.",
+    "No Orders Assigned!": "ஆர்டர்கள்!",
+    "No orders assigned message": "வரிசைகள் {{number}}-க்கு இன்னும் ஆர்டர்கள் ஒதுக்கப்படவில்லை. ஆர்டர்கள் ஒதுக்கப்படும் வரை காத்திருந்து மீண்டும் சரிபார்க்கவும்.",
     "Select a Position": "ஒரு நிலையைத் தேர்ந்தெடுக்கவும்",
     "Choose your assigned position in": "{{rowName}} இல் உங்களுக்கு ஒதுக்கப்பட்ட நிலையைத் தேர்வு செய்யவும்.",
     "Available": "கிடைக்கக்கூடியது",
@@ -1550,9 +1632,15 @@
     "Assigned": "ஒதுக்கப்பட்டது (kg)",
     "Ceiling Price": "உச்ச விலை: ரூ. {{price}}",
     "Purchase": "கொள்முதல் செய்",
+    "Collect": "சேகரிக்க : ",
     "Collect : ": "சேகரிக்க : ",
+    "Collect :": "சேகரிக்க : ",
+    "Collected": "சேகரிக்கப்பட்டது : ",
     "Collected : ": "சேகரிக்கப்பட்டது : ",
+    "Collected :": "சேகரிக்கப்பட்டது : ",
+    "Price per kg": "கிலோவுக்கான விலை : ",
     "Price per kg : ": "கிலோவுக்கான விலை : ",
+    "Price per kg :": "கிலோவுக்கான விலை : ",
     "Buying Quantity in kg": "வாங்கும் அளவு (kg)",
     "Enter Buying Quantity placeholder": "--வாங்கும் அளவை (kg) உள்ளிடவும்--",
     "Purchasing Price (Rs.)": "கொள்முதல் விலை (ரூ.)",
@@ -1566,7 +1654,13 @@
     "Invoice Required": "விலைப்பட்டியல் தேவை",
     "Please upload invoice before confirming": "உறுதிப்படுத்துவதற்கு முன் விலைப்பட்டியல் கோப்பைப் பதிவேற்றவும்.",
     "Purchase details submitted successfully!": "கொள்முதல் விவரங்கள் வெற்றிகரமாக சமர்ப்பிக்கப்பட்டன!",
-    "Submission Error": "சமர்ப்பிப்பு பிழை"
+    "Submission Error": "சமர்ப்பிப்பு பிழை",
+    "kg": "கிலோ",
+    "Rs. ": "ரூ. ",
+    "Purchase Confirmed": "கொள்முதல் உறுதிசெய்யப்பட்டது",
+    "The Product Has Been Purchased Successfully": "தயாரிப்பு வெற்றிகரமாக வாங்கப்பட்டது",
+    "Failed to submit purchase. Please try again.": "கொள்முதலை சமர்ப்பிக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "Go Back": "திரும்பிச் செல்லவும்"
   },
   "AlertModal": {
     "Cannot Proceed!": "தொடர முடியாது!",
@@ -1777,20 +1871,20 @@
     "Back to Login": "மீண்டும் உள்நுழைய"
   },
   "PDFReport": {
-  "title": "சேகரிப்பு அதிகாரி அறிக்கை",
-  "from": "இருந்து",
-  "to": "வரை",
-  "empId": "பணியாளர் எண்",
-  "role": "பதவி",
-  "firstName": "முதல் பெயர்",
-  "lastName": "கடைசி பெயர்",
-  "weight": "எடை",
-  "collections": "சேகரிப்புகள்",
-  "date": "தேதி",
-  "totalWeight": "மொத்த எடை",
-  "totalCollections": "மொத்த சேகரிப்புகள்",
-  "noData": "-தரவு இல்லை-",
-  "noTransactions": "{{from}} மற்றும் {{to}} இடையே பரிவர்த்தனைகள் நடைபெறவில்லை",
-  "generatedOn": "இந்த அறிக்கை {{date}} அன்று {{time}} மணிக்கு உருவாக்கப்பட்டது"
-}
+    "title": "சேகரிப்பு அதிகாரி அறிக்கை",
+    "from": "இருந்து",
+    "to": "வரை",
+    "empId": "பணியாளர் எண்",
+    "role": "பதவி",
+    "firstName": "முதல் பெயர்",
+    "lastName": "கடைசி பெயர்",
+    "weight": "எடை",
+    "collections": "சேகரிப்புகள்",
+    "date": "தேதி",
+    "totalWeight": "மொத்த எடை",
+    "totalCollections": "மொத்த சேகரிப்புகள்",
+    "noData": "-தரவு இல்லை-",
+    "noTransactions": "{{from}} மற்றும் {{to}} இடையே பரிவர்த்தனைகள் நடைபெறவில்லை",
+    "generatedOn": "இந்த அறிக்கை {{date}} அன்று {{time}} மணிக்கு உருவாக்கப்பட்டது"
+  }
 }

@@ -504,7 +504,6 @@ const RecieveTargetBetweenOfficers: React.FC<
         }}
         searchPlaceholder={t("PassTargetBetweenOfficers.Search an officer")}
         multiSelect={false}
-        noResultsText={t("Error.No officers available.")}
       />
     </>
   );

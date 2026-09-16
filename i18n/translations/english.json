@@ -21,7 +21,12 @@
     "Loading camera...": "Loading camera...",
     "Loading camera": "Loading camera...",
     "Loading orders": "Loading orders...",
-    "Loading orders...": "Loading orders..."
+    "Loading orders...": "Loading orders...",
+    "Go Back": "Go Back",
+    "GoBack": "Go Back",
+    "Cancel": "Cancel",
+    "Confirm": "Confirm",
+    "Submitting": "Submitting..."
   },
   "Main": {
     "No Internet Connection": "No Internet Connection",
@@ -296,7 +301,8 @@
     "Cancel": "Cancel",
     "Cannot add negative values for load.": "Cannot add negative values for load.",
     "Product replacement successful": "Product replacement successful",
-    "AttachmentHasBeenSavedToYourSelectedFolder": "Attachment has been saved to your selected folder"
+    "AttachmentHasBeenSavedToYourSelectedFolder": "Attachment has been saved to your selected folder",
+    "No Search Result Found": "No Search Result Found"
   },
   "SideMenu": {
     "LNG": "en",
@@ -420,12 +426,16 @@
   "GlobalSearchModal": {
     "Search": "Search...",
     "Done": "Done",
-    "No items found": "No items found",
+    "No items found": "No Search Result Found",
     "SearchPlaceholder": "Search...",
-    "NoResultsText": "No items found",
+    "NoResultsText": "No Search Result Found",
+    "No Search Result Found": "No Search Result Found",
     "DoneButton": "Done",
     "Loading": "Loading...",
-    "SelectedCount": "{{count}} selected"
+    "SelectedCount": "{{count}} selected",
+    "Search...": "Search...",
+    "search": "Search...",
+    "search text": "Search..."
   },
   "PriceChart": {
     "LNG": "en",
@@ -618,7 +628,17 @@
     "QRCode": "My QR Code",
     "Noavailable": "No QR Code available.",
     "Download": "Download",
-    "Share": "Share"
+    "Share": "Share",
+    "Success": "Success!",
+    "SuccessMessage": "Attachment has been saved to your selected folder.",
+    "SavedToFolder": "Attachment has been saved to your selected folder.",
+    "savedToGallery": "QR Code has been saved to your gallery successfully.",
+    "NoQrAvailable": "No QR Code available.",
+    "FailedSave": "Failed to save QR Code.",
+    "FailedShare": "Failed to share QR Code.",
+    "SharingUnavailableTitle": "Sharing Unavailable",
+    "SharingUnavailable": "Sharing is not available on this device.",
+    "OK": "OK"
   },
   "ChangePassword": {
     "LNG": "en",
@@ -1071,7 +1091,48 @@
     "Pickup Order Scan": "Pickup Order Scan",
     "Start Packing": "Start Packing",
     "Assign Groups": "Assign Groups",
-    "Purchase Shortage": "Purchase Shortage"
+    "Purchase Shortage": "Purchase Shortage",
+    "Receive Products": "Receive Products",
+    "ReceiveProducts": "Receive Products"
+  },
+  "ReceivedProductsToday": {
+    "Title": "Received Products Today",
+    "NoProductsReceivedToday": "- No products were received today -",
+    "Crates": "Crates"
+  },
+  "ReceivedProductsSummary": {
+    "Title": "Summary",
+    "StartUnloading": "Start Unloading"
+  },
+  "UnloadingProducts": {
+    "Title": "Unloading Products",
+    "Subtitle": "Unload and weigh each product grade",
+    "ToWeigh": "To Weigh",
+    "Weighed": "Weighed",
+    "MismatchDetected": "Mismatch Detected",
+    "ReportMismatch": "Report Mismatch",
+    "ReportedMismatch": "Mismatch Reported",
+    "FinishUnloading": "Finish Unloading",
+    "SuccessTitle": "Success!",
+    "SuccessMessage": "Products unloaded successfully"
+  },
+  "WeighTheLoad": {
+    "Title": "Weigh the load",
+    "TotalWeight": "Total Weight",
+    "TotalCrates": "Total Crates",
+    "LoadedWeight": "Loaded Weight",
+    "LoadedCrates": "Loaded Crates",
+    "UnloadedWeight": "Unloaded Weight",
+    "UnloadedCrates": "Unloaded Crates",
+    "MarkAsUnloaded": "Mark as Unloaded",
+    "SuccessTitle": "Unloaded Successfully!"
+  },
+  "WeighGrade": {
+    "Title": "Weigh the load",
+    "LoadedWeight": "Loaded Weight",
+    "TotalCrates": "Total Crates",
+    "Continue": "Continue",
+    "MaxCratesReached": "Maximum Crates Reached"
   },
   "OpenedOrderScreen": {
     "INV No": "INV No :",
@@ -1369,9 +1430,23 @@
   "PurchaseProduct": {
     "Cancel": "Cancel",
     "Purchase": "Purchase",
+    "Go Back": "Go Back",
     "GoBack": "Go Back",
     "Submitting": "Submitting...",
-    "Confirm": "Confirm"
+    "Confirm": "Confirm",
+    "Collect": "Collect : ",
+    "Collect : ": "Collect : ",
+    "Collect :": "Collect : ",
+    "Collected": "Collected : ",
+    "Collected : ": "Collected : ",
+    "Collected :": "Collected : ",
+    "Price per kg": "Price per kg : ",
+    "Price per kg : ": "Price per kg : ",
+    "Price per kg :": "Price per kg : ",
+    "kg": "kg",
+    "Rs. ": "Rs. ",
+    "Rs.": "Rs.",
+    "Rs": "Rs."
   },
   "AssignGroups": {
     "Groups": "Groups",
@@ -1407,6 +1482,8 @@
     "Orders Allocated": "Orders Allocated",
     "OrdersAllocatedCount": "{{count}} Orders Allocated",
     "OrdersAllocatedCount_one": "1 Order Allocated",
+    "SelectedOrdersCount": "{{count}} Orders",
+    "SelectedOrdersCount_one": "1 Order",
     "Row {{number}}": "Row {{number}}",
     "Row": "Row",
     "Rows": "Rows",
@@ -1420,7 +1497,9 @@
     "Confirm": "Confirm",
     "Successfully assigned orders": "Successfully assigned {{count}} {{orderText}} to {{rowName}} for the {{timeSlot}} slot.",
     "Failed to assign orders.": "Failed to assign orders.",
-    "An error occurred while assigning orders.": "An error occurred while assigning orders."
+    "An error occurred while assigning orders.": "An error occurred while assigning orders.",
+    "Success!": "Success!",
+    "Target assigned Successfully!": "Target assigned Successfully!"
   },
   "DistributionCenterTarget": {
     "Centre Target": "Centre Target",
@@ -1447,6 +1526,10 @@
     "Packing Positions": "Packing Positions",
     "Positions": "Positions",
     "Position": "Position",
+    "PositionsAvailableCount": "{{count}} Positions Available",
+    "PositionsAvailableCount_one": "1 Position Available",
+    "PositionsCount": "{{count}} Positions",
+    "PositionsCount_one": "1 Position",
     "Row": "Row",
     "Rows": "Rows",
     "Row {{number}}": "Row {{number}}",
@@ -1461,6 +1544,8 @@
     "Loading...": "Loading...",
     "No packing rows found": "- No packing rows found. -",
     "Rows are not available. Please wait until rows are available to obtain a position.": "Rows are not available. Please wait until rows are available to obtain a position.",
+    "No Orders Assigned!": "No Orders Assigned!",
+    "No orders assigned message": "No orders are assigned to Row {{number}} yet. Please wait until orders are assigned and check again.",
     "Select a Position": "Select a Position",
     "Choose your assigned position in": "Choose your assigned position in {{rowName}}.",
     "Available": "Available",
@@ -1616,9 +1701,15 @@
     "Assigned": "Assigned (kg)",
     "Ceiling Price": "Ceiling Price: Rs. {{price}}",
     "Purchase": "Purchase",
+    "Collect": "Collect : ",
     "Collect : ": "Collect : ",
+    "Collect :": "Collect : ",
+    "Collected": "Collected : ",
     "Collected : ": "Collected : ",
+    "Collected :": "Collected : ",
+    "Price per kg": "Price per kg : ",
     "Price per kg : ": "Price per kg : ",
+    "Price per kg :": "Price per kg : ",
     "Buying Quantity in kg": "Buying Quantity in kg",
     "Enter Buying Quantity placeholder": "--Enter Buying Quantity in kg--",
     "Purchasing Price (Rs.)": "Purchasing Price (Rs.)",
@@ -1632,7 +1723,13 @@
     "Invoice Required": "Invoice Required",
     "Please upload invoice before confirming": "Please upload the invoice file before confirming.",
     "Purchase details submitted successfully!": "Purchase details submitted successfully!",
-    "Submission Error": "Submission Error"
+    "Submission Error": "Submission Error",
+    "kg": "kg",
+    "Rs. ": "Rs. ",
+    "Purchase Confirmed": "Purchase Confirmed",
+    "The Product Has Been Purchased Successfully": "The Product Has Been Purchased Successfully",
+    "Failed to submit purchase. Please try again.": "Failed to submit purchase. Please try again.",
+    "Go Back": "Go Back"
   },
   "AlertModal": {
     "Cannot Proceed!": "Cannot Proceed!",

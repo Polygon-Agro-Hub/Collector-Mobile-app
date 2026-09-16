@@ -48,12 +48,56 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   isLoading = false,
 }) => {
   const { t } = useTranslation();
-  const effectiveSearchPlaceholder =
-    searchPlaceholder || t("GlobalSearchModal.Search", "Search...");
-  const effectiveDoneText =
-    doneButtonText || t("GlobalSearchModal.Done", "Done");
-  const effectiveNoResultsText =
-    noResultsText || t("GlobalSearchModal.No items found", "No items found");
+
+  const formatSearchPlaceholder = (placeholder?: string) => {
+    if (!placeholder) {
+      return t("GlobalSearchModal.Search", t("GlobalSearchModal.SearchPlaceholder", "Search..."));
+    }
+    const trimmed = placeholder.trim();
+    if (
+      trimmed.toLowerCase() === "search" ||
+      trimmed.toLowerCase() === "search..." ||
+      trimmed.toLowerCase() === "search…" ||
+      trimmed.toLowerCase() === "search text"
+    ) {
+      return t("GlobalSearchModal.Search", t("GlobalSearchModal.SearchPlaceholder", "Search..."));
+    }
+    return t(placeholder, placeholder);
+  };
+
+  const formatNoResultsText = (text?: string) => {
+    if (!text) {
+      return t(
+        "GlobalSearchModal.No Search Result Found",
+        t("GlobalSearchModal.No items found", t("GlobalSearchModal.NoResultsText", "No Search Result Found"))
+      );
+    }
+    const trimmed = text.trim().toLowerCase();
+    if (
+      trimmed === "no items found" ||
+      trimmed === "no item found" ||
+      trimmed === "no results found" ||
+      trimmed === "no search result found" ||
+      trimmed === "no search results found" ||
+      trimmed === "no results" ||
+      trimmed === "- no items found. -" ||
+      trimmed === "- no results found. -" ||
+      trimmed === "no officers found" ||
+      trimmed === "නිලධාරීන් හමු නොවීය"
+    ) {
+      return t(
+        "GlobalSearchModal.No Search Result Found",
+        t("GlobalSearchModal.No items found", "No Search Result Found")
+      );
+    }
+    return t(text, text);
+  };
+
+  const effectiveSearchPlaceholder = formatSearchPlaceholder(searchPlaceholder);
+  const effectiveDoneText = doneButtonText
+    ? t(doneButtonText, doneButtonText)
+    : t("GlobalSearchModal.Done", t("GlobalSearchModal.DoneButton", "Done"));
+  const effectiveNoResultsText = formatNoResultsText(noResultsText);
 
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState(data);
@@ -234,7 +278,7 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>
-              <Text className="text-lg font-semibold">{title}</Text>
+              <Text className="text-lg font-semibold">{t(title, title)}</Text>
               {multiSelect && selectedValues.length > 0 && (
                 <Text className="text-sm text-gray-500">
                   {t("GlobalSearchModal.SelectedCount", { count: selectedValues.length })}

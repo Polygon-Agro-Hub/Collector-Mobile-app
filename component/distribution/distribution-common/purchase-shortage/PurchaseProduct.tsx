@@ -223,7 +223,7 @@ export default function PurchaseProduct({
       Alert.alert(
         "Submission Error",
         err.response?.data?.message ||
-          "Failed to submit purchase. Please try again.",
+        "Failed to submit purchase. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -263,14 +263,12 @@ export default function PurchaseProduct({
           subtitle={
             <View className="flex-row items-center justify-center gap-2 w-36">
               <View
-                className={`h-1.5 flex-1 rounded-full ${
-                  step === 1 ? "bg-[#030E25]" : "bg-[#E1E7EE]"
-                }`}
+                className={`h-1.5 flex-1 rounded-full ${step === 1 ? "bg-[#030E25]" : "bg-[#E1E7EE]"
+                  }`}
               />
               <View
-                className={`h-1.5 flex-1 rounded-full ${
-                  step === 2 ? "bg-[#030E25]" : "bg-[#E1E7EE]"
-                }`}
+                className={`h-1.5 flex-1 rounded-full ${step === 2 ? "bg-[#030E25]" : "bg-[#E1E7EE]"
+                  }`}
               />
             </View>
           }
@@ -298,17 +296,17 @@ export default function PurchaseProduct({
               {productName}
             </Text>
             <Text className="text-md text-[#54617D] mt-1">
-              {step === 1 ? t("PurchaseShortage.Collect : ", "Collect : ") : t("PurchaseShortage.Collected : ", "Collected : ")}
+              {step === 1 ? t("PurchaseProduct.Collect : ", "Collect : ") : t("PurchaseShortage.Collected : ", "Collected : ")}
               <Text className="text-[#980775] font-extrabold">
                 {step === 1
-                  ? `${formatKg(defaultKg)} kg`
-                  : `${formatKg(buyingQty)} kg`}
+                  ? `${formatKg(defaultKg)} ${t("PurchaseShortage.kg", "kg")}`
+                  : `${formatKg(buyingQty)} ${t("PurchaseShortage.kg", "kg")}`}
               </Text>
             </Text>
             <Text className="text-md text-[#54617D] mt-0.5">
               {t("PurchaseShortage.Price per kg : ", "Price per kg : ")}
               <Text style={{ color: "#AC7F5E" }} className="font-bold">
-                Rs.{" "}
+                {t("PurchaseShortage.Rs. ", "Rs. ")}
                 {step === 1
                   ? formatPriceDisplay(gradeAPrice)
                   : formatPriceDisplay(purchasingPrice)}
@@ -338,11 +336,10 @@ export default function PurchaseProduct({
                     fontStyle: buyingQty ? "normal" : "italic",
                     color: buyingQty ? "#000000" : "#576879",
                   }}
-                  className={`rounded-full px-5 h-[50px] text-sm font-semibold ${
-                    qtyError
-                      ? "border border-red-500 bg-[#E9ECF1]"
-                      : "bg-[#F0F3F6]"
-                  }`}
+                  className={`rounded-full px-5 h-[50px] text-sm font-semibold ${qtyError
+                    ? "border border-red-500 bg-[#E9ECF1]"
+                    : "bg-[#F0F3F6]"
+                    }`}
                 />
                 {qtyError ? (
                   <View className="flex-row items-center mt-2 pl-2">
@@ -374,11 +371,10 @@ export default function PurchaseProduct({
                     fontStyle: purchasingPrice ? "normal" : "italic",
                     color: purchasingPrice ? "#000000" : "#576879",
                   }}
-                  className={`rounded-full px-5 h-[50px] text-sm font-semibold ${
-                    priceError
-                      ? "border border-red-500 bg-[#E9ECF1]"
-                      : "bg-[#F0F3F6]"
-                  }`}
+                  className={`rounded-full px-5 h-[50px] text-sm font-semibold ${priceError
+                    ? "border border-red-500 bg-[#E9ECF1]"
+                    : "bg-[#F0F3F6]"
+                    }`}
                 />
                 {priceError ? (
                   <View className="flex-row items-center mt-2 pl-2">
@@ -468,7 +464,7 @@ export default function PurchaseProduct({
               <TouchableOpacity
                 onPress={() => setStep(1)}
                 disabled={submitting}
-                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center mb-3"
+                className="w-full h-[50px] bg-[#E9ECF1] rounded-full items-center justify-center px-4 mb-3 flex-row"
                 activeOpacity={0.8}
                 style={{
                   shadowColor: "#000000",
@@ -480,14 +476,16 @@ export default function PurchaseProduct({
               >
                 <Text
                   className="text-[#030E25] text-center font-extrabold text-sm"
+                  numberOfLines={1}
                   style={{
                     color: "#030E25",
                     fontSize: 14,
                     fontWeight: "800",
                     textAlign: "center",
+                    includeFontPadding: false,
                   }}
                 >
-                  {t("Common.Go Back", "Go Back")}
+                  {t("PurchaseProduct.Go Back", t("Common.Go Back", "Go Back"))}
                 </Text>
               </TouchableOpacity>
 
@@ -532,8 +530,11 @@ export default function PurchaseProduct({
         {/* Success Popup Modal with successful.json animation */}
         <AlertModal
           visible={successModalVisible}
-          title="Purchase Confirmed"
-          message="The Product Has Been Purchased Successfully"
+          title={t("PurchaseShortage.Purchase Confirmed", "Purchase Confirmed")}
+          message={t(
+            "PurchaseShortage.The Product Has Been Purchased Successfully",
+            "The Product Has Been Purchased Successfully"
+          )}
           type="success"
           autoClose={true}
           duration={3000}

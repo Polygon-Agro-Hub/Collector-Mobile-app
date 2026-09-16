@@ -118,24 +118,39 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   const downloadQRCode = async () => {
     try {
       if (!QR) {
-        Alert.alert(t("Error.error"), t("Error.No QR Code available."));
+        Alert.alert(
+          t("Error.error", "Error"),
+          t("OfficerQr.NoQrAvailable", t("Error.No QR Code available.", "No QR Code available.")),
+          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+        );
         return;
       }
 
       const success = await saveImageToGallery(QR, "Officer_QRCode");
       if (success) {
-        Alert.alert(t("Error.Success") || "Success", t("Error.AttachmentHasBeenSavedToYourSelectedFolder"));
+        Alert.alert(
+          t("OfficerQr.Success", t("Error.Success", "Success")),
+          t("OfficerQr.SuccessMessage", t("Error.AttachmentHasBeenSavedToYourSelectedFolder", "Attachment has been saved to your selected folder"))
+        );
       }
     } catch (error) {
       console.error("Download error:", error);
-      Alert.alert(t("Error.error"), t("Error.failedSaveQRCode"));
+      Alert.alert(
+        t("Error.error", "Error"),
+        t("OfficerQr.FailedSave", t("Error.failedSaveQRCode", "Failed to save QR Code.")),
+        [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+      );
     }
   };
 
   const shareQRCode = async () => {
     try {
       if (!QR) {
-        Alert.alert(t("Error.error"), t("Error.No QR Code available."));
+        Alert.alert(
+          t("Error.error", "Error"),
+          t("OfficerQr.NoQrAvailable", t("Error.No QR Code available.", "No QR Code available.")),
+          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+        );
         return;
       }
 
@@ -145,17 +160,22 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(response.uri, {
           mimeType: "image/png",
-          dialogTitle: "Share QR Code",
+          dialogTitle: t("OfficerQr.Share", "Share QR Code"),
         });
       } else {
         Alert.alert(
-          "Sharing Unavailable",
-          "Sharing is not available on this device.",
+          t("OfficerQr.SharingUnavailableTitle", "Sharing Unavailable"),
+          t("OfficerQr.SharingUnavailable", "Sharing is not available on this device."),
+          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
         );
       }
     } catch (error) {
       console.error("Share error:", error);
-      Alert.alert(t("Error.error"), t("Error.Failed to share QR Code."));
+      Alert.alert(
+        t("Error.error", "Error"),
+        t("OfficerQr.FailedShare", t("Error.Failed to share QR Code.", "Failed to share QR Code.")),
+        [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+      );
     }
   };
 

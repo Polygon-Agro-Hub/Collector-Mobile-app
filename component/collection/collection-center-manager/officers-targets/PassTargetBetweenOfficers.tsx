@@ -443,7 +443,6 @@ const PassTargetBetweenOfficers: React.FC<
         onSelect={(items) => setAssignee(items[0] ?? "")}
         searchPlaceholder={t("PassTargetBetweenOfficers.Search an officer")}
         multiSelect={false}
-        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </View>
   );
