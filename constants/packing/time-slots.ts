@@ -240,10 +240,20 @@ export const formatRowTitle = (rowName?: string | { name?: string; rowIndex?: nu
     const num = match[0];
     return translate("Packing.Row {{number}}", {
       number: num,
-      defaultValue: `Row ${num}`,
+      defaultValue: translate("AssignGroups.Row {{number}}", {
+        number: num,
+        defaultValue: `Row ${num}`,
+      }),
     });
   }
-  return raw;
+  const clean = raw.trim().toLowerCase();
+  if (clean === "rows") {
+    return translate("Packing.Rows", translate("AssignGroups.Rows", translate("Rows", "පේළි")));
+  }
+  if (clean === "row") {
+    return translate("Packing.Row", translate("AssignGroups.Row", translate("Row", "පේළිය")));
+  }
+  return translate(raw, raw);
 };
 
 /**
