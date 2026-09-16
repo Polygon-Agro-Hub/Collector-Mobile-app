@@ -1,0 +1,322 @@
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  BackHandler,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "@/types/types";
+import { useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import i18n from "@/i18n/i18n";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
+import { useFocusEffect } from "@react-navigation/native";
+
+type EditTargetScreenNavigationProps = StackNavigationProp<
+  RootStackParamList,
+  "EditTargetScreen"
+>;
+
+interface EditTargetScreenProps {
+  navigation: EditTargetScreenNavigationProps;
+  route: {
+    params: {
+      varietyNameEnglish: string;
+      varietyNameSinhala: string;
+      varietyNameTamil: string;
+      grade: string;
+      varietyId: string;
+      target: string;
+      todo: string;
+      qty: string;
+      collectionOfficerId: number;
+      officerId: string;
+      officerName: string;
+      phoneNumber1: string;
+      phoneNumber2: string;
+      image: string;
+    };
+  };
+}
+
+const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
+  navigation,
+  route,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { t } = useTranslation();
+
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const lang = await AsyncStorage.getItem("@user_language");
+        if (lang) {
+          setSelectedLanguage(lang);
+        }
+      } catch (error) {
+        console.error("Error fetching language preference:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const {
+    varietyNameEnglish,
+    grade,
+    target,
+    todo,
+    qty,
+    varietyId,
+    collectionOfficerId,
+    varietyNameSinhala,
+    varietyNameTamil,
+    officerId,
+
+    officerName,
+    phoneNumber1,
+    phoneNumber2,
+
+    image,
+  } = route.params;
+
+  const getvarietyName = () => {
+    switch (selectedLanguage) {
+      case "si":
+        return route.params.varietyNameSinhala;
+      case "ta":
+        return route.params.varietyNameTamil;
+      default:
+        return route.params.varietyNameEnglish;
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsEditing(false);
+      const handleBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Main",
+              params: {
+                screen: "DailyTargetListForOfficers",
+                params: {
+                  varietyId,
+                  officerId,
+                  officerName,
+                  phoneNumber1,
+                  phoneNumber2,
+                  collectionOfficerId,
+                  image,
+                  varietyNameEnglish,
+                  grade,
+                  target,
+                  todo,
+                  varietyNameSinhala,
+                  varietyNameTamil,
+                },
+              },
+            },
+          ],
+        });
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        handleBackPress,
+      );
+
+      return () => subscription.remove();
+    }, [navigation]),
+  );
+
+  return (
+    <View className="flex-1 bg-white">
+      {/* Header */}
+
+      <CustomHeader
+        title={getvarietyName() || ""}
+        subtitle={grade ? `Grade : ${grade}` : ""}
+        showBackButton={true}
+        navigation={navigation}
+        onBackPress={() =>
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Main",
+                params: {
+                  screen: "DailyTargetListForOfficers",
+                  params: {
+                    varietyId,
+                    officerId,
+                    officerName,
+                    phoneNumber1,
+                    phoneNumber2,
+                    collectionOfficerId,
+                    image,
+                    varietyNameEnglish,
+                    grade,
+                    target,
+                    todo,
+
+                    varietyNameSinhala,
+                    varietyNameTamil,
+                  },
+                },
+              },
+            ],
+          })
+        }
+        textColor="white"
+        bgColor="#282828"
+        iconBgColor="#FFFFFF1A"
+      />
+
+      {/* Content */}
+      <View className="mt-6 gap-y-6 p-8 w-full max-w-[500px] mx-auto">
+        {/* Total Target */}
+        <View>
+          <Text className="text-[#475A6A] font-medium">
+            {t("EditTargetManager.TotalTarget")}
+          </Text>
+          <TextInput
+            className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 mt-2 text-gray-800 h-[50px] "
+            value={qty.toString()}
+            editable={false}
+          />
+        </View>
+
+        {/* My Target */}
+        <View>
+          <Text className="text-gray-600 font-medium">
+            {t("EditTargetManager.Assigned Target")}
+          </Text>
+          <View className="flex-row items-center mt-2 border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 h-[50px]">
+            <Text className="flex-1 text-gray-800">
+              {" "}
+              {target ? target.toString() : "0"}{" "}
+            </Text>
+            <TouchableOpacity onPress={() => setIsEditing((prev) => !prev)}>
+              <Ionicons
+                name={isEditing ? "pencil" : "pencil"}
+                size={20}
+                color={isEditing ? "#F4F4F4" : "black"}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Buttons in Edit Mode */}
+          {isEditing && (
+            <View className="flex-row justify-center gap-4 mt-4 p-5">
+              <TouchableOpacity
+                className="flex-1 bg-[#FF0700] px-6 py-2 rounded-full items-center h-[50px] justify-center"
+                onPress={() =>
+                  navigation.navigate("PassTargetBetweenOfficers" as any, {
+                    varietyNameEnglish,
+                    grade,
+                    target,
+                    todo,
+                    qty,
+                    varietyId,
+                    collectionOfficerId,
+                    officerName,
+                    varietyNameSinhala,
+                    varietyNameTamil,
+                    officerId,
+                    phoneNumber1,
+                    phoneNumber2,
+                    image,
+                  })
+                }
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
+              >
+                <Text
+                  className="text-white font-medium"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 12 }
+                        : { fontSize: 16 },
+                  ]}
+                >
+                  {t("EditTargetManager.Pass")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 bg-[#980775] px-6 py-2 rounded-full items-center justify-center"
+                onPress={() =>
+                  navigation.navigate("RecieveTargetBetweenOfficers" as any, {
+                     varietyNameEnglish,
+                    grade,
+                    target,
+                    todo,
+                    qty,
+                    varietyId,
+                    collectionOfficerId,
+                    officerName,
+                    varietyNameSinhala,
+                    varietyNameTamil,
+                    officerId,
+                    phoneNumber1,
+                    phoneNumber2,
+                    image,
+                  })
+                }
+                style={{
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 10,
+                  elevation: 6,
+                }}
+              >
+                <Text
+                  className="text-white font-medium"
+                  style={[
+                    i18n.language === "si"
+                      ? { fontSize: 13 }
+                      : i18n.language === "ta"
+                        ? { fontSize: 12 }
+                        : { fontSize: 16 },
+                  ]}
+                >
+                  {t("EditTargetManager.Receive")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* To Do Amount */}
+        <View>
+          <Text className="text-gray-600 font-medium">
+            {t("EditTargetManager.Amount")}
+          </Text>
+          <TextInput
+            className="border border-[#F4F4F4] bg-[#F4F4F4] rounded-full px-3 py-2 mt-2 text-gray-800 h-[50px]"
+            value={todo.toString()}
+            editable={false}
+          />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+export default EditTargetScreen;
