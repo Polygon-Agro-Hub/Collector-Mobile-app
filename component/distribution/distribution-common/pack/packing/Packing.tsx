@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
+import { Ionicons, FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import LottieView from "lottie-react-native";
@@ -234,7 +234,7 @@ export default function Packing({
                     packName: resolvedPackName,
                     categoryType: isAlacarte ? "alacarte" : "package",
                     checked: false,
-                    image: item.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+                    image: item.image || "",
                   };
                 });
                 mappedItems.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
@@ -513,12 +513,20 @@ export default function Packing({
                         elevation: 1,
                       }}
                     >
-                      <View className="w-16 h-16 rounded-xl items-center justify-center mr-3.5 overflow-hidden">
-                        <Image
-                          source={{ uri: item.image }}
-                          className="w-full h-full"
-                          resizeMode="contain"
-                        />
+                      <View className="w-16 h-16 rounded-xl items-center justify-center mr-3.5 overflow-hidden bg-gray-100">
+                        {item.image ? (
+                          <Image
+                            source={{ uri: item.image }}
+                            className="w-full h-full"
+                            resizeMode="contain"
+                          />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="sprout"
+                            size={28}
+                            color="#54617D"
+                          />
+                        )}
                       </View>
                       <View className="flex-1 mr-2">
                         <Text className="text-[#030E25] font-semibold text-base leading-5">

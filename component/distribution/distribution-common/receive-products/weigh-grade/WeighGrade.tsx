@@ -203,6 +203,12 @@ export default function WeighGrade({
       0
     );
 
+    const formattedSets = sets.map((s, idx) => ({
+      setIndex: s.setNumber || idx + 1,
+      crates: parseInt(s.crates, 10) || 0,
+      weightKg: s.weight || 0,
+    }));
+
     if (varietyId) {
       const currentVariety = store
         .getState()
@@ -214,6 +220,7 @@ export default function WeighGrade({
                 ...g,
                 unloadedWeightKg: totalUnloadedWeight,
                 unloadedCrates: totalUnloadedCrates,
+                sets: formattedSets,
               }
             : g
         );
@@ -235,6 +242,7 @@ export default function WeighGrade({
         gradeId,
         unloadedWeightKg: totalUnloadedWeight,
         unloadedCrates: totalUnloadedCrates,
+        sets: formattedSets,
       },
     });
   };

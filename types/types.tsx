@@ -110,6 +110,11 @@ export type RootStackParamList = {
           gradeId: string;
           unloadedWeightKg: number;
           unloadedCrates: number;
+          sets?: {
+            setIndex: number;
+            crates: number;
+            weightKg: number;
+          }[];
         };
       }
     | undefined;

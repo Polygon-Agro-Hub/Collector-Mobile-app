@@ -75,11 +75,24 @@ export default function UploadFile({
           ? (asset.fileSize / (1024 * 1024)).toFixed(1) + " MB"
           : "1.2 MB";
 
+        let base64Data = asset.base64
+          ? `data:image/jpeg;base64,${asset.base64}`
+          : undefined;
+
+        if (!base64Data && asset.uri) {
+          try {
+            const raw = await FileSystem.readAsStringAsync(asset.uri, {
+              encoding: FileSystem.EncodingType.Base64,
+            });
+            base64Data = `data:image/jpeg;base64,${raw}`;
+          } catch (e) {
+            console.warn("Could not read image as base64:", e);
+          }
+        }
+
         onFileChange({
           uri: asset.uri,
-          base64: asset.base64
-            ? `data:image/jpeg;base64,${asset.base64}`
-            : undefined,
+          base64: base64Data,
           name:
             asset.fileName ||
             "Transfer_Slip_" + Date.now().toString().slice(-6) + ".png",
@@ -109,7 +122,7 @@ export default function UploadFile({
 
       const asset = result.assets[0];
       const isPdf =
-        asset.mimeType === "application/pdf" || asset.name?.endsWith(".pdf");
+        asset.mimeType === "application/pdf" || asset.name?.toLowerCase().endsWith(".pdf");
 
       if (asset.size && asset.size > MAX_FILE_SIZE_BYTES) {
         showFileTooLargeAlert();
@@ -120,8 +133,20 @@ export default function UploadFile({
         ? (asset.size / (1024 * 1024)).toFixed(1) + " MB"
         : "1.2 MB";
 
+      let base64Data: string | undefined;
+      try {
+        const rawBase64 = await FileSystem.readAsStringAsync(asset.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const mime = isPdf ? "application/pdf" : (asset.mimeType || "image/jpeg");
+        base64Data = `data:${mime};base64,${rawBase64}`;
+      } catch (readErr) {
+        console.warn("Could not read document as base64:", readErr);
+      }
+
       onFileChange({
         uri: asset.uri,
+        base64: base64Data,
         name:
           asset.name ||
           (isPdf

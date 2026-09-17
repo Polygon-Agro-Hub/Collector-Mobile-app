@@ -55,24 +55,21 @@ export interface MismatchItem {
   receivedCrates?: number;
 }
 
-const DEFAULT_CROP_IMAGE =
-  "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=150&auto=format&fit=crop&q=80";
-
 const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
   return (rawItems || []).map((item, idx) => {
     const gradesMap: Record<
       string,
-      { gradeTitle: string; loadedWeightKg: number; loadedCrates: number }
+      { gradeTitle: string; gradeKey: string; loadedWeightKg: number; loadedCrates: number }
     > = {};
 
     if (Array.isArray(item.gradeSets) && item.gradeSets.length > 0) {
       item.gradeSets.forEach((gs: any) => {
-        const gTitle =
-          gs.grade ||
-          (gs.gradeKey ? `Grade ${gs.gradeKey}` : `Grade A`);
+        const gKey = (gs.gradeKey || gs.grade || "A").replace(/^Grade\s*/i, "").trim().toUpperCase();
+        const gTitle = gs.grade || `Grade ${gKey}`;
         if (!gradesMap[gTitle]) {
           gradesMap[gTitle] = {
             gradeTitle: gTitle,
+            gradeKey: gKey,
             loadedWeightKg: 0,
             loadedCrates: 0,
           };
@@ -88,6 +85,7 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
       (key, gIdx) => ({
         id: `g-${gIdx + 1}`,
         gradeTitle: gradesMap[key].gradeTitle,
+        gradeKey: gradesMap[key].gradeKey,
         loadedWeightKg: gradesMap[key].loadedWeightKg,
         loadedCrates: gradesMap[key].loadedCrates,
         unloadedWeightKg: null,
@@ -97,13 +95,14 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
 
     return {
       id: String(item.varietyId || item.id || `prod-${idx}`),
+      loadedItemId: item.loadedItemId || item.id,
       varietyId: item.varietyId ? String(item.varietyId) : undefined,
       name:
         item.cropName ||
         item.varietyLabel ||
         item.cropLabel ||
         "Crop Item",
-      image: item.imageUri || DEFAULT_CROP_IMAGE,
+      image: item.imageUri || item.image || "",
       weighed: false,
       expectedKg: parseFloat(item.totalWeightKg) || 0,
       measuredKg: 0,
@@ -116,6 +115,7 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
               {
                 id: "g-1",
                 gradeTitle: "Grade A",
+                gradeKey: "A",
                 loadedWeightKg: parseFloat(item.totalWeightKg) || 0,
                 loadedCrates: parseInt(item.totalCrates, 10) || 0,
                 unloadedWeightKg: null,
@@ -338,6 +338,43 @@ export default function UnloadingProducts({
       return;
     }
 
+    const currentVarieties =
+      store.getState().unload.varieties.length > 0
+        ? store.getState().unload.varieties
+        : products;
+
+    const unloadedItems = currentVarieties.map((prod) => ({
+      loadedItemId: prod.loadedItemId || prod.id,
+      varietyId: prod.varietyId || prod.id,
+      grades: (prod.grades || []).flatMap((g) => {
+        const gradeLetter = (
+          g.gradeKey ||
+          g.gradeTitle.replace(/^Grade\s*/i, "") ||
+          "A"
+        )
+          .trim()
+          .toUpperCase();
+
+        if (Array.isArray(g.sets) && g.sets.length > 0) {
+          return g.sets.map((s) => ({
+            grade: gradeLetter,
+            crateIndex: s.setIndex,
+            crateCount: s.crates,
+            qty: s.weightKg,
+          }));
+        }
+
+        return [
+          {
+            grade: gradeLetter,
+            crateIndex: 1,
+            crateCount: g.unloadedCrates || 0,
+            qty: g.unloadedWeightKg || 0,
+          },
+        ];
+      }),
+    }));
+
     try {
       setSubmitting(true);
       const authToken = store.getState().auth.token;
@@ -351,6 +388,7 @@ export default function UnloadingProducts({
           {
             transportId: finalTransportId,
             loadCode: finalLoadCode,
+            unloadedItems,
           },
           {
             headers: {
@@ -371,6 +409,7 @@ export default function UnloadingProducts({
             {
               transportId: finalTransportId,
               loadCode: finalLoadCode,
+              unloadedItems,
             },
             {
               headers: {
@@ -433,11 +472,17 @@ export default function UnloadingProducts({
           elevation: 2,
         }}
       >
-        <Image
-          source={{ uri: item.image }}
-          className="w-16 h-16 mb-2"
-          resizeMode="contain"
-        />
+        {item.image ? (
+          <Image
+            source={{ uri: item.image }}
+            className="w-16 h-16 mb-2"
+            resizeMode="contain"
+          />
+        ) : (
+          <View className="w-16 h-16 mb-2 items-center justify-center bg-gray-100 rounded-xl">
+            <MaterialCommunityIcons name="sprout" size={32} color="#54617D" />
+          </View>
+        )}
         <Text
           className="font-bold text-xs text-center text-[#17262C]"
           numberOfLines={2}

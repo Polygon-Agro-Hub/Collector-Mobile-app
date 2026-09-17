@@ -120,11 +120,16 @@ export default function WeighTheLoad({
         let grades = reduxVariety.grades;
 
         if (route.params?.updatedGrade && route.params.updatedGrade.gradeId) {
-          const { gradeId, unloadedWeightKg, unloadedCrates } =
+          const { gradeId, unloadedWeightKg, unloadedCrates, sets: updatedSets } =
             route.params.updatedGrade;
           grades = grades.map((g) =>
             g.id === gradeId
-              ? { ...g, unloadedWeightKg, unloadedCrates }
+              ? {
+                  ...g,
+                  unloadedWeightKg,
+                  unloadedCrates,
+                  sets: updatedSets || g.sets,
+                }
               : g
           );
           store.dispatch(

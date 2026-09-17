@@ -1,16 +1,25 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export interface UnloadedGradeSetItem {
+  setIndex: number;
+  crates: number;
+  weightKg: number;
+}
+
 export interface UnloadedGradeItem {
   id: string; // e.g. "g-1"
   gradeTitle: string; // e.g. "Grade A"
+  gradeKey?: string; // e.g. "A"
   loadedWeightKg: number;
   loadedCrates: number;
   unloadedWeightKg: number | null;
   unloadedCrates: number | null;
+  sets?: UnloadedGradeSetItem[];
 }
 
 export interface UnloadVarietyItem {
   id: string; // varietyId / loadedItem id
+  loadedItemId?: number | string;
   varietyId?: string;
   name: string;
   image: string;

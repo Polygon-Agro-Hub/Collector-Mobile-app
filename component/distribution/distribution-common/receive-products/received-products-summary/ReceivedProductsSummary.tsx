@@ -52,9 +52,6 @@ export interface CropLoadData {
   gradeSets: GradeSetItem[];
 }
 
-const DEFAULT_CROP_IMAGE =
-  "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=150&auto=format&fit=crop&q=80";
-
 export default function ReceivedProductsSummary({
   navigation,
   route,
@@ -247,11 +244,17 @@ export default function ReceivedProductsSummary({
               >
                 {/* Crop Header */}
                 <View className="flex-row items-center mb-3">
-                  <Image
-                    source={{ uri: crop.imageUri || DEFAULT_CROP_IMAGE }}
-                    className="w-12 h-12 rounded-xl mr-3"
-                    resizeMode="cover"
-                  />
+                  {crop.imageUri ? (
+                    <Image
+                      source={{ uri: crop.imageUri }}
+                      className="w-12 h-12 rounded-xl mr-3"
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View className="w-12 h-12 rounded-xl bg-gray-100 mr-3 items-center justify-center">
+                      <MaterialCommunityIcons name="sprout" size={24} color="#54617D" />
+                    </View>
+                  )}
                   <Text className="text-base font-bold text-black">
                     {crop.cropName}
                   </Text>
