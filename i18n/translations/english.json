@@ -430,6 +430,7 @@
     "SearchPlaceholder": "Search...",
     "NoResultsText": "No Search Result Found",
     "No Search Result Found": "No Search Result Found",
+    "No Search Results Found": "No Search Result Found",
     "DoneButton": "Done",
     "Loading": "Loading...",
     "SelectedCount": "{{count}} selected",

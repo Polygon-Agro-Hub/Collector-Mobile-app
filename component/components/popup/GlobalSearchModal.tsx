@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { LanguageContext } from "@/context/LanguageContext";
 
 interface GlobalSearchModalProps {
   visible: boolean;
@@ -47,56 +48,76 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   showSearch = true,
   isLoading = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
+  const currentLng = language || i18n.language || "en";
 
   const formatSearchPlaceholder = (placeholder?: string) => {
     if (!placeholder) {
-      return t("GlobalSearchModal.Search", t("GlobalSearchModal.SearchPlaceholder", "Search..."));
+      if (currentLng === "si") return "සොයන්න...";
+      if (currentLng === "ta") return "தேடுங்கள்...";
+      return t("GlobalSearchModal.Search", "Search...");
     }
-    const trimmed = placeholder.trim();
+    const trimmed = placeholder.trim().toLowerCase();
     if (
-      trimmed.toLowerCase() === "search" ||
-      trimmed.toLowerCase() === "search..." ||
-      trimmed.toLowerCase() === "search…" ||
-      trimmed.toLowerCase() === "search text"
+      trimmed === "search" ||
+      trimmed === "search..." ||
+      trimmed === "search…" ||
+      trimmed === "search text"
     ) {
-      return t("GlobalSearchModal.Search", t("GlobalSearchModal.SearchPlaceholder", "Search..."));
+      if (currentLng === "si") return "සොයන්න...";
+      if (currentLng === "ta") return "தேடுங்கள்...";
+      return t("GlobalSearchModal.Search", "Search...");
     }
     return t(placeholder, placeholder);
   };
 
   const formatNoResultsText = (text?: string) => {
-    if (!text) {
-      return t(
-        "GlobalSearchModal.No Search Result Found",
-        t("GlobalSearchModal.No items found", t("GlobalSearchModal.NoResultsText", "No Search Result Found"))
-      );
+    if (text) {
+      const trimmed = text.trim().toLowerCase();
+      const genericVariants = [
+        "no items found",
+        "no item found",
+        "no results found",
+        "no search result found",
+        "no search results found",
+        "no results",
+        "- no items found. -",
+        "- no results found. -",
+        "no officers found",
+        "නිලධාරීන් හමු නොවීය",
+        "no search result found.",
+        "no search results found.",
+      ];
+      if (!genericVariants.includes(trimmed)) {
+        return t(text, text);
+      }
     }
-    const trimmed = text.trim().toLowerCase();
-    if (
-      trimmed === "no items found" ||
-      trimmed === "no item found" ||
-      trimmed === "no results found" ||
-      trimmed === "no search result found" ||
-      trimmed === "no search results found" ||
-      trimmed === "no results" ||
-      trimmed === "- no items found. -" ||
-      trimmed === "- no results found. -" ||
-      trimmed === "no officers found" ||
-      trimmed === "නිලධාරීන් හමු නොවීය"
-    ) {
-      return t(
-        "GlobalSearchModal.No Search Result Found",
-        t("GlobalSearchModal.No items found", "No Search Result Found")
-      );
+
+    if (currentLng === "si") {
+      return "සෙවුම් ප්‍රතිඵල හමු නොවීය";
     }
-    return t(text, text);
+    if (currentLng === "ta") {
+      return "தேடல் முடிவுகள் எதுவும் காணப்படவில்லை";
+    }
+
+    return t(
+      "GlobalSearchModal.No Search Result Found",
+      t("GlobalSearchModal.NoResultsText", "No Search Result Found")
+    );
+  };
+
+  const formatDoneButtonText = (btnText?: string) => {
+    if (!btnText) {
+      if (currentLng === "si") return "හරි";
+      if (currentLng === "ta") return "முடிந்தது";
+      return t("GlobalSearchModal.Done", "Done");
+    }
+    return t(btnText, btnText);
   };
 
   const effectiveSearchPlaceholder = formatSearchPlaceholder(searchPlaceholder);
-  const effectiveDoneText = doneButtonText
-    ? t(doneButtonText, doneButtonText)
-    : t("GlobalSearchModal.Done", t("GlobalSearchModal.DoneButton", "Done"));
+  const effectiveDoneText = formatDoneButtonText(doneButtonText);
   const effectiveNoResultsText = formatNoResultsText(noResultsText);
 
   const [searchValue, setSearchValue] = useState("");
@@ -240,8 +261,10 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
     if (filteredData.length === 0) {
       return (
-        <View className="px-4 py-8 items-center">
-          <Text className="text-gray-500 text-base">{effectiveNoResultsText}</Text>
+        <View className="px-4 py-8 items-center justify-center">
+          <Text className="text-gray-500 text-base text-center font-medium">
+            {effectiveNoResultsText}
+          </Text>
         </View>
       );
     }
@@ -250,6 +273,13 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.value}
+        ListEmptyComponent={
+          <View className="px-4 py-8 items-center justify-center">
+            <Text className="text-gray-500 text-base text-center font-medium">
+              {effectiveNoResultsText}
+            </Text>
+          </View>
+        }
         renderItem={({ item, index }) => {
           const isSelected = selectedValues.includes(item.value);
           const isLast = index === filteredData.length - 1;
