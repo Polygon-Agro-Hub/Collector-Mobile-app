@@ -13,7 +13,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import { MaterialCommunityIcons, Ionicons, FontAwesome5, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons, FontAwesome5, MaterialIcons, AntDesign, FontAwesome6 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
@@ -261,7 +261,7 @@ export default function WeighGrade({
         className="flex-1 px-6"
         contentContainerStyle={{
           paddingTop: 8,
-          paddingBottom: insets.bottom + 40,
+          paddingBottom: 24,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -286,11 +286,7 @@ export default function WeighGrade({
         <View className="flex-row items-center justify-between gap-3 my-3">
           {/* Loaded Weight Card */}
           <View className="flex-1 bg-[#E9ECF1] rounded-2xl p-3.5 items-center justify-center">
-            <MaterialCommunityIcons
-              name="scale"
-              size={20}
-              color="#17262C"
-            />
+            <FontAwesome6 name="weight-scale" size={20} color="black" />
             <Text className="text-[#4E5273] text-xs mt-1">
               {t("WeighGrade.LoadedWeight", "Loaded Weight")}
             </Text>
@@ -333,7 +329,7 @@ export default function WeighGrade({
               >
                 <View className="bg-[#FAE432] rounded-full px-4 py-1">
                   <Text className="font-bold text-xs text-[#000000]">
-                    Set : {item.setNumber}
+                    {t("WeighGrade.Set", "Set")} : {item.setNumber}
                   </Text>
                 </View>
 
@@ -399,8 +395,8 @@ export default function WeighGrade({
                         }`}
                       >
                         {item.weight !== null
-                          ? `${item.weight.toFixed(2)} kg`
-                          : "kg"}
+                          ? `${item.weight.toFixed(2)} ${t("Common.kg", "kg")}`
+                          : t("Common.kg", "kg")}
                       </Text>
                     </TouchableOpacity>
 
@@ -453,29 +449,33 @@ export default function WeighGrade({
           ))}
         </View>
 
-        {/* Bottom Continue Button */}
-        <View className="pt-8 pb-2">
-          <TouchableOpacity
-            onPress={handleContinue}
-            disabled={!isFormComplete}
-            activeOpacity={0.8}
-            className={`w-full h-[50px] rounded-full items-center justify-center ${
-              isFormComplete ? "bg-[#000000]" : "bg-[#A0A4A8]"
-            }`}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: isFormComplete ? 0.2 : 0,
-              shadowRadius: 5,
-              elevation: isFormComplete ? 4 : 0,
-            }}
-          >
-            <Text className="text-white font-extrabold text-base">
-              {t("WeighGrade.Continue", "Continue")}
-            </Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      {/* Fixed Bottom Button: Continue */}
+      <View
+        className="px-6 pt-3 bg-white border-t border-[#E5E7EB]"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      >
+        <TouchableOpacity
+          onPress={handleContinue}
+          disabled={!isFormComplete}
+          activeOpacity={0.8}
+          className={`w-full h-[52px] rounded-full items-center justify-center ${
+            isFormComplete ? "bg-[#000000]" : "bg-[#A0A4A8]"
+          }`}
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isFormComplete ? 0.2 : 0,
+            shadowRadius: 5,
+            elevation: isFormComplete ? 4 : 0,
+          }}
+        >
+          <Text className="text-white font-extrabold text-base">
+            {t("WeighGrade.Continue", "Continue")}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Warning Confirmation Modal for Delete Set */}
       <WarningConfirmation

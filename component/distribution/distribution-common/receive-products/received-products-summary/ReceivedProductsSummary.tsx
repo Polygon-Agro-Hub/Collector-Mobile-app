@@ -278,8 +278,8 @@ export default function ReceivedProductsSummary({
                 >
                   {/* Total Weight */}
                   <View className="flex-1 items-center">
-                    <MaterialCommunityIcons
-                      name="scale"
+                    <FontAwesome6
+                      name="weight-scale"
                       size={24}
                       color="#FFFFFF"
                       style={{ marginBottom: 4 }}
@@ -288,7 +288,7 @@ export default function ReceivedProductsSummary({
                       Total{"\n"}Weight
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
-                      {crop.totalWeightKg.toFixed(2)} kg
+                      {crop.totalWeightKg.toFixed(2)} {t("Common.kg", "kg")}
                     </Text>
                   </View>
 
@@ -304,7 +304,7 @@ export default function ReceivedProductsSummary({
                       style={{ marginBottom: 4 }}
                     />
                     <Text className="text-gray-300 text-xs text-center">
-                      Total{"\n"}Crates
+                      {t("ReceivedProductsSummary.TotalCrates", "Total Crates")}
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
                       {crop.totalCrates}
@@ -329,7 +329,7 @@ export default function ReceivedProductsSummary({
                     >
                       <View className="bg-[#FFF6AD] px-4 py-0.5 rounded-full">
                         <Text className="text-[11px] font-bold text-gray-800">
-                          {gs.grade}  |  Set : {gs.set}
+                          {gs.grade}  |  {t("ReceivedProductsSummary.Set", "Set")} : {gs.set}
                         </Text>
                       </View>
                     </View>
@@ -349,7 +349,7 @@ export default function ReceivedProductsSummary({
                         </View>
                         <View>
                           <Text className="text-[10px] text-black font-medium">
-                            Crates
+                            {t("ReceivedProductsSummary.Crates", "Crates")}
                           </Text>
                           <Text className="text-sm font-bold text-black">
                             {gs.crates}
@@ -360,18 +360,18 @@ export default function ReceivedProductsSummary({
                       {/* Weight Column */}
                       <View className="flex-row items-center gap-x-2">
                         <View className="w-8 h-8 rounded-full bg-[#E5E7EB] items-center justify-center">
-                          <MaterialCommunityIcons
-                            name="scale"
+                          <FontAwesome6
+                            name="weight-scale"
                             size={16}
                             color="#000000"
                           />
                         </View>
                         <View>
                           <Text className="text-[10px] text-black font-medium">
-                            Weight
+                            {t("ReceivedProductsSummary.Weight", "Weight")}
                           </Text>
                           <Text className="text-sm font-bold text-black">
-                            {gs.weightKg.toFixed(2)} kg
+                            {gs.weightKg.toFixed(2)} {t("Common.kg", "kg")}
                           </Text>
                         </View>
                       </View>

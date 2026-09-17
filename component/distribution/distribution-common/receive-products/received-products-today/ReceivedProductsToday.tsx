@@ -203,13 +203,13 @@ export default function ReceivedProductsToday({
                 {/* Load Information */}
                 <View className="flex-1">
                   <Text className="font-extrabold text-[#030E25] text-base">
-                    {t("ReceivedProductsToday.Crates", "Crates")} : {item.crates} | {item.weight}
+                    {t("ReceivedProductsToday.Crates", "Crates")} : {item.crates} | {item.weight ? item.weight.replace(/kg/i, t("Common.kg", "kg")) : ""}
                   </Text>
                   <Text className="text-xs text-[#030E25] mt-1 font-medium">
                     {item.origin}
                   </Text>
                   <Text className="text-xs text-[#54617D] mt-0.5 font-medium">
-                    {item.time}
+                    {item.time ? item.time.replace(/^At\s*/i, `${t("Common.At", "At")} `) : ""}
                   </Text>
                 </View>
 

@@ -190,10 +190,10 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
     }
 
     if (!isFormatValid) {
-      setModalTitle(t("qrcode.Error", "Error!"));
+      setModalTitle(t("ScanDriverQR.Error", "Error!"));
       setModalMessage(
         t(
-          "qrcode.InvalidQR",
+          "ScanDriverQR.InvalidQR",
           "Invalid QR code.\nPlease scan a valid driver QR code."
         )
       );
@@ -227,11 +227,11 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           driver.jobRole &&
           driver.jobRole.trim().toLowerCase() !== DRIVER_ROLES.HEAVY_WEIGHT_DRIVER.toLowerCase()
         ) {
-          setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
+          setModalTitle(t("ScanDriverQR.Unauthorized", "Unauthorized!"));
           setModalMessage(
             t(
-              "qrcode.UnauthorizedMessage",
-              "Driver access has been rejected. Please contact the company for assistance.",
+              "ScanDriverQR.UnauthorizedMessage",
+              "Driver access has been rejected.\nPlease contact the company\nfor assistance.",
             ),
           );
           setShowRescanButton(false);
@@ -242,14 +242,14 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
         verifiedDriverRef.current = driver;
 
-        setModalTitle(t("qrcode.Successful", "Successful!"));
+        setModalTitle(t("ScanDriverQR.Successful", "Successful!"));
         setModalMessage(
           <View className="items-center">
             <Text className="text-center text-[#4E4E4E] mb-2 mt-2">
-              {t("qrcode.QRIdentified", "QR code identified successfully.")}
+              {t("ScanDriverQR.QRIdentified", "QR code identified successfully.")}
             </Text>
             <Text className="text-center font-bold text-[#000000]">
-              {t("qrcode.Driver", "Driver")} : {driver.empId}, {driver.fullName}
+              {t("ScanDriverQR.Driver", "Driver")} : {driver.empId}, {driver.fullName}
             </Text>
           </View>,
         );
@@ -263,11 +263,11 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       const code = errData?.code;
 
       if (code === "UNAUTHORIZED_ROLE" || code === "UNAUTHORIZED_STATUS") {
-        setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
+        setModalTitle(t("ScanDriverQR.Unauthorized", "Unauthorized!"));
         setModalMessage(
           t(
-            "qrcode.UnauthorizedMessage",
-            "Driver access has been rejected. Please contact the company for assistance.",
+            "ScanDriverQR.UnauthorizedMessage",
+            "Driver access has been rejected.\nPlease contact the company\nfor assistance.",
           ),
         );
         setShowRescanButton(false);
@@ -277,9 +277,9 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       }
 
       if (code === "INVALID_QR") {
-        setModalTitle(t("qrcode.Error", "Error!"));
+        setModalTitle(t("ScanDriverQR.Error", "Error!"));
         setModalMessage(
-          t("qrcode.InvalidQR", "Invalid QR code.\nPlease scan a valid driver QR code."),
+          t("ScanDriverQR.InvalidQR", "Invalid QR code.\nPlease scan a valid driver QR code."),
         );
         setShowRescanButton(true);
         setModalType("error");
@@ -439,7 +439,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           {/* Custom Header with no title */}
           <View>
             <CustomHeader
-              title=""
+              title={t("ScanDriverQR.Title", "Scan Driver QR")}
               navigation={navigation}
               transparent={true}
               iconBgColor="#F7FAFF"

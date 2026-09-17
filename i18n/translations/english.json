@@ -25,8 +25,12 @@
     "Go Back": "Go Back",
     "GoBack": "Go Back",
     "Cancel": "Cancel",
-    "Confirm": "Confirm",
-    "Submitting": "Submitting..."
+    "Submitting": "Submitting...",
+    "kg": "kg",
+    "At": "At",
+    "Crates": "Crates",
+    "Set": "Set",
+    "Grade": "Grade"
   },
   "Main": {
     "No Internet Connection": "No Internet Connection",
@@ -1826,10 +1830,18 @@
   },
   "SentProductsToday": {
     "Title": "Sent Products Today",
-    "NoLoadsToday": "- No loads today -",
+    "NoLoadsToday": "No loads today",
     "Crates": "Crates",
     "AddLoadTitle": "Add New Load",
     "AddLoadMessage": "Create and dispatch products for transport."
+  },
+  "ScanDriverQR": {
+    "Title": "Scan Driver QR",
+    "QRIdentified": "QR code identified successfully.",
+    "Driver": "Driver",
+    "InvalidQR": "Invalid QR code.\nPlease scan a valid driver QR code.",
+    "Unauthorized": "Unauthorized!",
+    "UnauthorizedMessage": "Driver access has been rejected.\nPlease contact the company\nfor assistance."
   },
   "SelectDistributionCentre": {
     "Title": "Select Distribution Centre",
@@ -1841,10 +1853,13 @@
     "Variety": "Variety",
     "CropName": "Crop Name",
     "VarietyLabel": "Variety",
-    "SelectCrop": "Select Crop",
-    "SelectVariety": "Select Variety",
+    "SelectCrop": "--Select Crop--",
+    "SelectVariety": "--Select Variety--",
+    "Grade": "Grade",
     "FinishLoading": "Finish Loading",
     "AddMoreItems": "Add More Items",
+    "Set": "Set",
+    "EnterTotalCrates": "Enter Total Crates Count Here",
     "ItemSavedTitle": "Item Added!",
     "ItemSavedMessage": "Variety {{num}} saved. You can now load the next variety.",
     "FinishLoadingTitle": "Loading Complete",
@@ -1857,6 +1872,8 @@
     "TotalWeight": "Total Weight",
     "TotalCrates": "Total Crates",
     "Crates": "Crates",
+    "Set": "Set",
+    "Grade": "Grade",
     "Weight": "Weight"
   },
   "LoadQR": {

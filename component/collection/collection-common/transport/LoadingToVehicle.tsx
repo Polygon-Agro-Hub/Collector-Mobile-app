@@ -857,7 +857,7 @@ export default function LoadingToVehicle({
 
                           {/* Set Label */}
                           <Text className="font-bold text-[#000000] text-sm flex-1 ml-4">
-                            Set {set.setNumber}
+                            {t("LoadingToVehicle.Set", "Set")} {set.setNumber}
                           </Text>
 
                           {/* Delete Set */}
@@ -939,7 +939,7 @@ export default function LoadingToVehicle({
                   selectedCrop ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
               >
-                {selectedCrop?.label || "--Select Crop--"}
+                {selectedCrop?.label || t("LoadingToVehicle.SelectCrop", "--Select Crop--")}
               </Text>
               <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
             </TouchableOpacity>
@@ -965,8 +965,8 @@ export default function LoadingToVehicle({
               >
                 {selectedVariety?.label ||
                   (selectedCrop
-                    ? "--Select Variety--"
-                    : "--Select Crop First--")}
+                    ? t("LoadingToVehicle.SelectVariety", "--Select Variety--")
+                    : t("LoadingToVehicle.SelectCropFirst", "--Select Crop First--"))}
               </Text>
               <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
             </TouchableOpacity>
@@ -1005,7 +1005,7 @@ export default function LoadingToVehicle({
                     )}
                   </View>
                   <Text className="font-bold text-[#0F172A] text-sm">
-                    {grade.title}
+                    {t("LoadingToVehicle.Grade", "Grade")} {grade.gradeKey}
                   </Text>
                 </TouchableOpacity>
 
@@ -1036,7 +1036,7 @@ export default function LoadingToVehicle({
                               {/* Yellow Set Badge */}
                               <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
                                 <Text className="text-xs font-bold text-[#000000]">
-                                  Set : {set.setNumber}
+                                  {t("LoadingToVehicle.Set", "Set")} : {set.setNumber}
                                 </Text>
                               </View>
 
@@ -1098,7 +1098,7 @@ export default function LoadingToVehicle({
                                   placeholder={
                                     focusedSetId === set.id
                                       ? ""
-                                      : "--Enter Total Crates Count Here--"
+                                      : `--${t("LoadingToVehicle.EnterTotalCrates", "Enter Total Crates Count Here")}--`
                                   }
                                   placeholderTextColor="#94A3B8"
                                   value={set.crates}
@@ -1137,8 +1137,8 @@ export default function LoadingToVehicle({
                                       }`}
                                     >
                                       {set.weight !== null
-                                        ? `${set.weight.toFixed(2)} kg`
-                                        : "kg"}
+                                        ? `${set.weight.toFixed(2)} ${t("Common.kg", "kg")}`
+                                        : t("Common.kg", "kg")}
                                     </Text>
                                   </TouchableOpacity>
 

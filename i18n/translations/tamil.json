@@ -25,8 +25,12 @@
     "Go Back": "திரும்பிச் செல்லவும்",
     "GoBack": "திரும்பிச் செல்லவும்",
     "Cancel": "ரத்துசெய்",
-    "Confirm": "உறுதிப்படுத்து",
-    "Submitting": "சமர்ப்பிக்கிறது..."
+    "Submitting": "சமர்ப்பிக்கிறது...",
+    "kg": "கி.கி.",
+    "At": "நேரம் :",
+    "Crates": "பெட்டிகள்",
+    "Set": "வகை",
+    "Grade": "தரம்"
   },
   "Main": {
     "No Internet Connection": "இணைய இணைப்பு இல்லை",
@@ -51,9 +55,9 @@
     "Scan": "QR ஐ ஸ்கேன் செய்யவும்",
     "Search": "NIC மூலம் தேடவும்",
     "LoadingTargetStatus": "இலக்கு நிலையை ஏற்றுகிறது...",
-    "Collection": "சேகரிப்பு",
+    "Collection": "சேகரிப்புகள்",
     "Transport": "போக்குவரத்து",
-    "ReadyToTransport": "போக்குவரத்துக்கு தயார்"
+    "ReadyToTransport": "போக்குவரத்து"
   },
   "Error": {
     "error": "மன்னிக்கவும்",
@@ -638,9 +642,9 @@
     "Search": "NIC மூலம் தேடவும்",
     "CenterTarget": "மைய இலக்கு",
     "MyCollection": "எனது சேகரிப்பு",
-    "Collection": "சேகரிப்பு",
+    "Collection": "சேகரிப்புகள்",
     "Transport": "போக்குவரத்து",
-    "ReadyToTransport": "போக்குவரத்துக்கு தயார்"
+    "ReadyToTransport": "போக்குவரத்து"
   },
   "AddOfficerBasicDetails": {
     "LNG": "ta",
@@ -1034,12 +1038,15 @@
   "ReceivedProductsToday": {
     "Title": "இன்று பெறப்பட்ட பொருட்கள்",
     "NoProductsReceivedToday": "- இன்று பொருட்கள் எதுவும் பெறப்படவில்லை -",
-    "Crates": "கூடைகள்"
+    "Crates": "பெட்டிகள்"
   },
   "ReceivedProductsSummary": {
     "Title": "சுருக்கம்",
     "UnloadedSummary": "இறக்கப்பட்ட சுருக்கம்",
-    "StartUnloading": "இறக்கத் தொடங்குங்கள்"
+    "StartUnloading": "இறக்கத் தொடங்குங்கள்",
+    "Crates": "பெட்டிகள்",
+    "Set": "வகை",
+    "Grade": "தரம்"
   },
   "UnloadingProducts": {
     "Title": "பொருட்கள் இறக்குதல்",
@@ -1057,20 +1064,23 @@
   "WeighTheLoad": {
     "Title": "எடையை அளவிடவும்",
     "TotalWeight": "மொத்த எடை",
-    "TotalCrates": "மொத்த கூடைகள்",
+    "TotalCrates": "பெட்டிகள்",
     "LoadedWeight": "ஏற்றப்பட்ட எடை",
-    "LoadedCrates": "ஏற்றப்பட்ட கூடைகள்",
+    "LoadedCrates": "பெட்டிகள்",
     "UnloadedWeight": "இறக்கப்பட்ட எடை",
-    "UnloadedCrates": "இறக்கப்பட்ட கூடைகள்",
+    "UnloadedCrates": "பெட்டிகள்",
+    "Grade": "தரம்",
     "MarkAsUnloaded": "இறக்கப்பட்டதாகக் குறிக்கவும்",
     "SuccessTitle": "வெற்றிகரமாக இறக்கப்பட்டது!"
   },
   "WeighGrade": {
     "Title": "எடையை அளவிடவும்",
     "LoadedWeight": "ஏற்றப்பட்ட எடை",
-    "TotalCrates": "மொத்த கூடைகள்",
-    "Continue": "தொடரவும்",
-    "MaxCratesReached": "அதிகபட்ச கூடை வரம்பை அடைந்தது"
+    "TotalCrates": "பெட்டிகள்",
+    "Set": "வகை",
+    "Grade": "தரம்",
+    "Continue": "தொடருங்கள்",
+    "MaxCratesReached": "அதிகபட்ச பெட்டி வரம்பை அடைந்தது"
   },
   "OpenedOrderScreen": {
     "INV No": "INV எண்:",
@@ -1757,26 +1767,37 @@
     "TransportComingSoon": "போக்குவரத்து தொகுதி விரைவில் வரும்."
   },
   "SentProductsToday": {
-    "Title": "இன்று அனுப்பப்பட்ட பொருட்கள்",
-    "NoLoadsToday": "- இன்று சுமை எதுவும் இல்லை -",
+    "Title": "இன்று அனுப்பப்பட்ட சரக்குகள்",
+    "NoLoadsToday": "இன்று மொத்தமாக சரக்குகள் எதுவும் அனுப்பப்படவில்லை.",
     "Crates": "பெட்டிகள்",
     "AddLoadTitle": "புதிய சுமையைச் சேர்க்கவும்",
     "AddLoadMessage": "போக்குவரத்துக்கான தயாரிப்புகளை உருவாக்கி அனுப்பவும்."
   },
+  "ScanDriverQR": {
+    "Title": "QR ஸ்கேன்",
+    "QRIdentified": "QR குறியீடு வெற்றிகரமாக அடையாளம் காணப்பட்டது.",
+    "Driver": "ஓட்டுநர்",
+    "InvalidQR": "செல்லுபடியாகாத QR குறியீடு.\nசெல்லுபடியாகும் ஓட்டுநர் QR குறியீட்டை ஸ்கேன் செய்யவும்.",
+    "Unauthorized": "அனுமதி இல்லை!",
+    "UnauthorizedMessage": "ஓட்டுநருக்கான அணுகல் மறுக்கப்பட்டுள்ளது.\nஉதவிக்கு நிறுவனத்தைத் தொடர்பு கொள்ளவும்."
+  },
   "SelectDistributionCentre": {
-    "Title": "விநியோக மையத்தைத் தேர்ந்தெடுக்கவும்",
+    "Title": "தேர்ந்தெடுக்கப்பட்ட மையம்",
     "NoCentresFound": "- விநியோக மையங்கள் எதுவும் கிடைக்கவில்லை -",
-    "SelectAndContinue": "தேர்ந்தெடுத்து தொடரவும்",
+    "SelectAndContinue": "தொடருங்கள்",
     "CentreSelectedTitle": "மையம் தேர்ந்தெடுக்கப்பட்டது"
   },
   "LoadingToVehicle": {
     "Variety": "வகை",
     "CropName": "பயிர் பெயர்",
     "VarietyLabel": "வகை",
-    "SelectCrop": "பயிரைத் தேர்ந்தெடுக்கவும்",
-    "SelectVariety": "வகையைத் தேர்ந்தெடுக்கவும்",
-    "FinishLoading": "ஏற்றுதலை முடிக்கவும்",
-    "AddMoreItems": "மேலும் பொருட்களைச் சேர்க்கவும்",
+    "SelectCrop": "--பயிரைத் தேர்ந்தெடுக்கவும்--",
+    "SelectVariety": "--வகையைத் தேர்ந்தெடுக்கவும்--",
+    "Grade": "தரம்",
+    "FinishLoading": "முடித்து வைக்கவும்",
+    "AddMoreItems": "சேர்",
+    "Set": "வகை",
+    "EnterTotalCrates": "பெட்டிகளின் எண்ணிக்கையை உள்ளிடவும்.",
     "ItemSavedTitle": "பொருள் சேர்க்கப்பட்டது!",
     "ItemSavedMessage": "வகை {{num}} சேமிக்கப்பட்டது. இப்போது அடுத்த வகையை ஏற்றலாம்.",
     "FinishLoadingTitle": "ஏற்றுதல் முடிந்தது",
@@ -1789,6 +1810,8 @@
     "TotalWeight": "மொத்த எடை",
     "TotalCrates": "மொத்த பெட்டிகள்",
     "Crates": "பெட்டிகள்",
+    "Set": "வகை",
+    "Grade": "தரம்",
     "Weight": "எடை"
   },
   "LoadQR": {
