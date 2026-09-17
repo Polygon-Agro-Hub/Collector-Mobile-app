@@ -15,6 +15,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import { useTranslation } from "react-i18next";
+import { formatTimeSlot } from "@/constants/packing/time-slots";
 
 type GroupPageState = "empty" | "active";
 
@@ -148,7 +149,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
                           isDisabled ? "text-[#54617D]" : "text-[#030E25]"
                         }`}
                       >
-                        {group.timeSlot}
+                        {formatTimeSlot(group.timeSlot, t)}
                       </Text>
                       {isDisabled ? (
                         <Text className="text-xs font-bold mt-1 text-[#FF0000]">
@@ -217,7 +218,7 @@ export default function Group({ route, navigation }: { route: any; navigation: a
                           isDisabled ? "text-[#54617D]" : "text-[#030E25]"
                         }`}
                       >
-                        {group.timeSlot}
+                        {formatTimeSlot(group.timeSlot, t)}
                       </Text>
                       {isDisabled ? (
                         <Text className="text-xs font-bold mt-1 text-[#FF0000]">

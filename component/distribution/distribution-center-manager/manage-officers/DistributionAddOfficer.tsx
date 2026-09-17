@@ -15,8 +15,6 @@ import {
 } from "react-native";
 import axios from "axios";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { RadioButton } from "react-native-paper";
-import Checkbox from "expo-checkbox";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -125,7 +123,15 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
   });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [countryItems, setCountryItems] = useState<CountryItem[]>([]);
+  const countryItems = useMemo<CountryItem[]>(() => {
+    return countryData.map((country) => ({
+      label: `${country.emoji}  ${country.dial_code}`,
+      value: country.dial_code,
+      countryName: t(`Countries.${country.name}`, country.name),
+      flag: country.emoji,
+      dialCode: country.dial_code,
+    }));
+  }, [t, i18n.language]);
   const [phoneCode1ModalVisible, setPhoneCode1ModalVisible] = useState(false);
   const [phoneCode2ModalVisible, setPhoneCode2ModalVisible] = useState(false);
   const [currentCountryCodeModal, setCurrentCountryCodeModal] = useState<
@@ -324,18 +330,6 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
       fetchEmpId(jobRole);
     }
   }, [jobRole, formData.userId]);
-
-  // Country Data Initializer
-  useEffect(() => {
-    const initialItems = countryData.map((country) => ({
-      label: `${country.emoji}  ${country.dial_code}`,
-      value: country.dial_code,
-      countryName: t(`Countries.${country.name}`, country.name),
-      flag: country.emoji,
-      dialCode: country.dial_code,
-    }));
-    setCountryItems(initialItems);
-  }, [t, i18n.language]);
 
   // Scroll to top when view is focused or step changes
   useFocusEffect(
@@ -1305,18 +1299,25 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
       );
 
       if (response.status === 201) {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Officer created successfully"),
-        );
         setLoading(false);
         await AsyncStorage.removeItem("officerFormData");
         resetForm();
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("Main", { screen: "CollectionOfficersList" });
-        } else if (jobRole === "Distribution Officer") {
-          navigation.navigate("Main", { screen: "DistributionOfficersList" });
-        }
+        Alert.alert(
+          t("Error.Success", "Success"),
+          t("Error.Officer created successfully", "Officer created successfully"),
+          [
+            {
+              text: t("AlertModal.OK", "OK"),
+              onPress: () => {
+                if (jobRole === "Collection Officer") {
+                  navigation.navigate("Main", { screen: "CollectionOfficersList" });
+                } else if (jobRole === "Distribution Officer") {
+                  navigation.navigate("Main", { screen: "DistributionOfficersList" });
+                }
+              },
+            },
+          ]
+        );
       }
     } catch (err) {
       console.error("Error submitting officer data:", err);
@@ -1463,20 +1464,23 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
 
           <View className="p-2">
             <View className="px-2 mt-6 items-center">
-              <View className="flex flex-row items-center gap-2 justify-between">
-                <Text className="text-base font-medium">
+              <View className="flex flex-row items-center gap-3">
+                <Text className="text-base font-medium mr-1">
                   {t("AddOfficerBasicDetails.Type")}
                 </Text>
                 <TouchableOpacity
                   className="flex-row items-center"
+                  activeOpacity={0.7}
                   onPress={() => handleTypeChange("Permanent")}
                 >
-                  <RadioButton
-                    value="Permanent"
-                    status={type === "Permanent" ? "checked" : "unchecked"}
-                    onPress={() => handleTypeChange("Permanent")}
+                  <Ionicons
+                    name={
+                      type === "Permanent"
+                        ? "radio-button-on"
+                        : "radio-button-off"
+                    }
+                    size={22}
                     color="#980775"
-                    uncheckedColor="#980775"
                   />
                   <Text
                     className="ml-1 text-base text-[#534E4E]"
@@ -1493,15 +1497,18 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="flex-row items-center"
+                  className="flex-row items-center ml-2"
+                  activeOpacity={0.7}
                   onPress={() => handleTypeChange("Temporary")}
                 >
-                  <RadioButton
-                    value="Temporary"
-                    status={type === "Temporary" ? "checked" : "unchecked"}
-                    onPress={() => handleTypeChange("Temporary")}
+                  <Ionicons
+                    name={
+                      type === "Temporary"
+                        ? "radio-button-on"
+                        : "radio-button-off"
+                    }
+                    size={22}
                     color="#980775"
-                    uncheckedColor="#980775"
                   />
                   <Text
                     className="ml-1 text-base text-[#534E4E]"
@@ -1531,16 +1538,27 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                     keyof typeof preferredLanguages
                   >
                 ).map((lang) => (
-                  <View key={lang} className="flex-row items-center gap-1">
-                    <Checkbox
-                      value={preferredLanguages[lang]}
-                      onValueChange={() => toggleLanguage(lang)}
-                      color={preferredLanguages[lang] ? "#980775" : "#980775"}
-                    />
+                  <TouchableOpacity
+                    key={lang}
+                    activeOpacity={0.7}
+                    onPress={() => toggleLanguage(lang)}
+                    className="flex-row items-center gap-2"
+                  >
+                    <View
+                      className={`w-5 h-5 rounded-md items-center justify-center border-2 ${
+                        preferredLanguages[lang]
+                          ? "bg-[#980775] border-[#980775]"
+                          : "border-[#980775] bg-white"
+                      }`}
+                    >
+                      {preferredLanguages[lang] && (
+                        <Ionicons name="checkmark" size={14} color="white" />
+                      )}
+                    </View>
                     <Text className="text-base text-[#534E4E]">
                       {t(`AddOfficerBasicDetails.${lang}`)}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
               {fieldErrors.preferredLanguages && (
@@ -1835,7 +1853,13 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                 />
                 {isValidating && (
                   <Text className="text-gray-500 text-xs mt-1 ml-2">
-                    {t("AddOfficerBasicDetails.ValidatingEmail", t("Validating email..."))}
+                    {t(
+                      "AddOfficerBasicDetails.ValidatingEmail",
+                      t(
+                        "AddOfficerBasicDetails.Validating mail",
+                        "විද්‍යුත් තැපෑල සත්‍යාපනය කරමින් පවතී",
+                      ),
+                    )}
                   </Text>
                 )}
                 {(errorEmail || fieldErrors.email) && (

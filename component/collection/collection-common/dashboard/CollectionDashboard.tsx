@@ -19,7 +19,7 @@ import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
-import DashboardSkeleton from "@/component/components/skeletons/DashboardSkeleton";
+import CollectionDashboardSkeleton from "@/component/components/skeletons/CollectionDashboardSkeleton";
 import { useSelector } from "react-redux";
 import { RootState } from "@/services/reducxStore";
 import { ROLES } from "@/constants/user-roles";
@@ -32,6 +32,9 @@ type CollectionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
   "CollectionDashboard"
 >;
+
+import { LanguageContext } from "@/context/LanguageContext";
+import { useContext } from "react";
 
 interface CollectionDashboardProps {
   navigation: CollectionDashboardNavigationProps;
@@ -61,8 +64,11 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+  const [activeTab, setActiveTab] = useState<"collection" | "transport">("collection");
 
   // Device Connection State (Wi-Fi Scale BUDRY MFD-300)
   const [isScaleModalVisible, setIsScaleModalVisible] = useState<boolean>(false);
@@ -74,7 +80,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       setScaleStatus(status);
     });
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-      setIsWifiEnabled(state.isWifiEnabled ?? state.type === "wifi");
+      setIsWifiEnabled(state.isConnected !== false && state.type !== "none");
     });
     return () => {
       unsubscribe();
@@ -183,32 +189,41 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     }, []),
   );
 
+  const getCurrentLanguage = (): string => {
+    return (i18n.language || language || selectedLanguage || "en")
+      .toLowerCase()
+      .substring(0, 2);
+  };
+
   const getFullName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
+        return `${profile.firstNameSinhala || profile.firstNameEnglish || ""} ${profile.lastNameSinhala || profile.lastNameEnglish || ""}`.trim();
       case "ta":
-        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
+        return `${profile.firstNameTamil || profile.firstNameEnglish || ""} ${profile.lastNameTamil || profile.lastNameEnglish || ""}`.trim();
       default:
-        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+        return `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim();
     }
   };
 
   const getcompanyName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.companyNameSinhala}`;
+        return `${profile.companyNameSinhala || profile.companyNameEnglish || ""}`;
       case "ta":
-        return `${profile.companyNameTamil}`;
+        return `${profile.companyNameTamil || profile.companyNameEnglish || ""}`;
       default:
-        return `${profile.companyNameEnglish} `;
+        return `${profile.companyNameEnglish || ""}`;
     }
   };
 
-  const getTextStyle = (language: string) => {
-    if (language === "si") {
+  const getTextStyle = (lang?: string) => {
+    const activeLang = lang || getCurrentLanguage();
+    if (activeLang === "si") {
       return {
         fontSize: 14,
         lineHeight: 20,
@@ -226,7 +241,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     const prefix = getTranslationPrefix();
     if (isLoadingTarget) {
       return (
-        <View className="bg-white rounded-3xl mt-3 p-4 shadow-lg">
+        <View className="bg-white rounded-[28px] mt-3 p-4 shadow-lg">
           <Text className="text-center text-gray-500">
             {t("CollectionOfficerDashboard.LoadingTargetStatus")}
           </Text>
@@ -236,7 +251,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
 
     if (targetPercentage !== null && targetPercentage < 100) {
       return (
-        <View className="bg-white w-full rounded-[35px] mt-3 p-4 border-[1px] border-[#DF9301] shadow-lg">
+        <View className="bg-white w-full rounded-[28px] mt-3 p-4 border-[1px] border-[#DF9301] shadow-lg">
           <Text className="text-center text-yellow-600 font-bold">
             🚀 {t(`${prefix}.Keep`)}
           </Text>
@@ -247,7 +262,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
       );
     } else {
       return (
-        <View className="bg-white w-full rounded-[35px] mt-3 p-4 border-[1px] border-[#2AAD7A] shadow-lg">
+        <View className="bg-white w-full rounded-[28px] mt-3 p-4 border-[1px] border-[#2AAD7A] shadow-lg">
           <View className="flex-row justify-center items-center mb-2">
             <Image
               source={require("../../../../assets/images/dashboard/hand.webp")}
@@ -263,6 +278,167 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
         </View>
       );
     }
+  };
+
+  const renderScaleSection = () => {
+    if (!isWifiEnabled) {
+      return (
+        /* State 3: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={() => setIsScaleModalVisible(true)}
+          style={{
+            marginTop: 10,
+            backgroundColor: "#FDF0F1",
+            borderRadius: 28,
+            paddingVertical: 10,
+            paddingHorizontal: 14,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <View
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              backgroundColor: "#FFFFFF",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "bold",
+                color: "#E91233",
+                letterSpacing: -0.2,
+              }}
+            >
+              {t("ScaleSelectModal.WifiOffTitle")}
+            </Text>
+            <Text
+              style={{
+                fontSize: 12,
+                color: "#0F172A",
+                fontWeight: "500",
+                marginTop: 1,
+                lineHeight: 16,
+              }}
+            >
+              {t("ScaleSelectModal.WifiOffMessage")}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
+    if (scaleStatus.connected && scaleStatus.scale) {
+      return (
+        /* State 2: Connected State - #FAE432 background, black text/icon */
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={() => setIsScaleModalVisible(true)}
+          style={{
+            marginTop: 10,
+            backgroundColor: "#FAE432",
+            borderRadius: 28,
+            paddingVertical: 10,
+            paddingHorizontal: 14,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              backgroundColor: "#000000",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
+            }}
+          >
+            <MaterialCommunityIcons name="wifi" size={24} color="#FFFFFF" />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 17,
+                fontWeight: "bold",
+                color: "#000000",
+                letterSpacing: -0.3,
+              }}
+            >
+              {t("ScaleSelectModal.ScaleConnected")}
+            </Text>
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "500",
+                color: "#000000",
+                marginTop: 1,
+              }}
+            >
+              {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
+            </Text>
+          </View>
+
+          <MaterialIcons name="chevron-right" size={26} color="#000000" />
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      /* State 1: Not Connected - #1266FD background, white text/icon */
+      <TouchableOpacity
+        activeOpacity={0.88}
+        onPress={() => setIsScaleModalVisible(true)}
+        style={{
+          marginTop: 10,
+          backgroundColor: "#1266FD",
+          borderRadius: 28,
+          paddingVertical: 10,
+          paddingHorizontal: 14,
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: "#FFFFFF",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 12,
+          }}
+        >
+          <MaterialCommunityIcons name="wifi" size={24} color="#1266FD" />
+        </View>
+
+        <Text
+          style={{
+            flex: 1,
+            fontSize: 17,
+            fontWeight: "bold",
+            color: "#FFFFFF",
+            letterSpacing: -0.2,
+          }}
+        >
+          {t("ScaleSelectModal.ConnectScale")}
+        </Text>
+
+        <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+      </TouchableOpacity>
+    );
   };
 
   const getDashboardItems = () => {
@@ -326,9 +502,9 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     return items;
   };
 
-  // Show skeleton while loading profile
-  if (isLoadingProfile || !profile) {
-    return <DashboardSkeleton />;
+  // Show skeleton while loading full dashboard data (profile, target)
+  if (isLoadingProfile || isLoadingTarget || !profile) {
+    return <CollectionDashboardSkeleton />;
   }
 
   return (
@@ -376,279 +552,256 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
           </View>
         </TouchableOpacity>
 
-        {/* Wi-Fi Scale Section - Exact Design matching 3 states (Compact & Opens Bottom Popup) */}
-        {!isWifiEnabled ? (
-          /* State 3: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */
+        {/* Navigation Tabs: Collection & Transport */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 4,
+            marginBottom: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: "#E2E8F0",
+            marginHorizontal: -24,
+          }}
+        >
+          {/* Collection Tab */}
           <TouchableOpacity
-            activeOpacity={0.88}
-            onPress={() => setIsScaleModalVisible(true)}
+            activeOpacity={0.75}
+            onPress={() => setActiveTab("collection")}
             style={{
-              marginTop: 10,
-              backgroundColor: "#FDF0F1",
-              borderRadius: 28,
-              paddingVertical: 10,
-              paddingHorizontal: 14,
+              flex: 1,
               flexDirection: "row",
               alignItems: "center",
-              gap: 12,
+              justifyContent: "center",
+              paddingVertical: 12,
+              gap: 8,
+              position: "relative",
             }}
           >
-            <View
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                backgroundColor: "#FFFFFF",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
+            <Image
+              source={require("../../../../assets/images/collection-common/dashboard/collection-colored.webp")}
+              style={{ width: 24, height: 24 }}
+              resizeMode="contain"
+            />
+            <Text
+              style={[
+                {
                   fontSize: 16,
                   fontWeight: "bold",
-                  color: "#E91233",
-                  letterSpacing: -0.2,
-                }}
-              >
-                {selectedLanguage === "si"
-                  ? "Wi-Fi අක්‍රියයි"
-                  : selectedLanguage === "ta"
-                  ? "Wi-Fi முடக்கப்பட்டுள்ளது"
-                  : "Wi-Fi is Off"}
-              </Text>
-              <Text
+                  color: "#000000",
+                },
+                getTextStyle(selectedLanguage),
+              ]}
+            >
+              {t(`${getTranslationPrefix()}.Collection`)}
+            </Text>
+            {activeTab === "collection" && (
+              <View
                 style={{
-                  fontSize: 12,
-                  color: "#0F172A",
-                  fontWeight: "500",
-                  marginTop: 1,
-                  lineHeight: 16,
+                  position: "absolute",
+                  bottom: -1,
+                  left: 0,
+                  right: 0,
+                  height: 2,
+                  backgroundColor: "#000000",
                 }}
-              >
-                {selectedLanguage === "si"
-                  ? "ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න."
-                  : selectedLanguage === "ta"
-                  ? "உங்கள் தொலைபேசியில் Wi-Fi இயக்கவும்."
-                  : "Please turn on Wi-Fi on your phone to connect to the scale."}
-              </Text>
-            </View>
+              />
+            )}
           </TouchableOpacity>
-        ) : scaleStatus.connected && scaleStatus.scale ? (
-          /* State 2: Connected State - #FAE432 background, black text/icon */
+
+          {/* Transport Tab */}
           <TouchableOpacity
-            activeOpacity={0.88}
-            onPress={() => setIsScaleModalVisible(true)}
+            activeOpacity={0.75}
+            onPress={() => setActiveTab("transport")}
             style={{
-              marginTop: 10,
-              backgroundColor: "#FAE432",
-              borderRadius: 28,
-              paddingVertical: 10,
-              paddingHorizontal: 14,
+              flex: 1,
               flexDirection: "row",
               alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 12,
+              gap: 8,
+              position: "relative",
             }}
           >
-            <View
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                backgroundColor: "#000000",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
-              <MaterialCommunityIcons name="wifi" size={24} color="#FFFFFF" />
-            </View>
-
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 17,
+            <Image
+              source={require("../../../../assets/images/collection-common/dashboard/lorry-colored.webp")}
+              style={{ width: 28, height: 24 }}
+              resizeMode="contain"
+            />
+            <Text
+              style={[
+                {
+                  fontSize: 16,
                   fontWeight: "bold",
                   color: "#000000",
-                  letterSpacing: -0.3,
-                }}
-              >
-                {selectedLanguage === "si"
-                  ? "තරාදිය සම්බන්ධ විය"
-                  : selectedLanguage === "ta"
-                  ? "இணைக்கப்பட்ட அளவுகள்"
-                  : "Scale Connected"}
-              </Text>
-              <Text
+                },
+                getTextStyle(selectedLanguage),
+              ]}
+            >
+              {t(`${getTranslationPrefix()}.Transport`)}
+            </Text>
+            {activeTab === "transport" && (
+              <View
                 style={{
-                  fontSize: 12,
-                  fontWeight: "500",
-                  color: "#000000",
-                  marginTop: 1,
+                  position: "absolute",
+                  bottom: -1,
+                  left: 0,
+                  right: 0,
+                  height: 2,
+                  backgroundColor: "#000000",
+                }}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {activeTab === "collection" ? (
+          <>
+            {/* Wi-Fi Scale Section */}
+            {renderScaleSection()}
+
+            {/* Keep Going Section - Placed Below Devices Section */}
+            {renderTargetStatus()}
+
+            {/* Target Progress Section */}
+            {jobRole === ROLES.COLLECTION_MANAGER ? (
+              <View className="flex-row items-center justify-center gap-4 mt-10 mb-10">
+                <Text
+                  style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                  className="text-gray-700 font-bold text-lg"
+                >
+                  {t("ManagerDashboard.Yourtarget")}
+                </Text>
+                <View className="relative">
+                  <CircularProgress
+                    size={120}
+                    width={8}
+                    fill={targetPercentage !== null ? targetPercentage : 0}
+                    tintColor="#000000"
+                    backgroundColor="#EEEEEE"
+                  />
+                  <View
+                    className="absolute items-center justify-center"
+                    style={{ width: 120, height: 120 }}
+                  >
+                    <Text className="text-2xl font-bold">
+                      {isLoadingTarget
+                        ? "..."
+                        : targetPercentage !== null
+                          ? `${targetPercentage}%`
+                          : "0%"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <View className="items-center justify-center mt-10 mb-10">
+                <View className="relative">
+                  <CircularProgress
+                    size={120}
+                    width={8}
+                    fill={targetPercentage !== null ? targetPercentage : 0}
+                    tintColor="#000000"
+                    backgroundColor="#E5E7EB"
+                  />
+                  <View
+                    className="absolute items-center justify-center"
+                    style={{ width: 120, height: 120 }}
+                  >
+                    <Text className="text-2xl font-bold">
+                      {isLoadingTarget
+                        ? "..."
+                        : targetPercentage !== null
+                          ? `${targetPercentage}%`
+                          : "0%"}
+                    </Text>
+                  </View>
+                </View>
+                <Text
+                  style={[
+                    { fontSize: 18, fontWeight: "bold" },
+                    getTextStyle(selectedLanguage),
+                  ]}
+                  className="text-gray-700 mt-2"
+                >
+                  {t("CollectionOfficerDashboard.Yourtarget")}
+                </Text>
+                <Text
+                  style={[
+                    { fontSize: 18, fontWeight: "bold" },
+                    getTextStyle(selectedLanguage),
+                  ]}
+                  className="text-gray-700"
+                >
+                  {t("CollectionOfficerDashboard.Progress")}
+                </Text>
+              </View>
+            )}
+
+            {/* Action Buttons - dynamic layout */}
+            <View className="flex-row flex-wrap justify-between pb-12 mt-4">
+              {getDashboardItems().map((item) => (
+                <TouchableOpacity
+                  key={item.key}
+                  className="bg-white p-4 rounded-3xl w-[48%] h-40 shadow-lg relative mb-4"
+                  onPress={item.onPress}
+                  style={{
+                    borderColor: item.borderColor,
+                    borderWidth: 1,
+                    shadowColor: "#000000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 10,
+                    elevation: 4,
+                  }}
+                >
+                  {item.icon}
+                  <Text
+                    style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                    className="text-gray-700 text-lg absolute bottom-2 left-4"
+                  >
+                    {item.title}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        ) : (
+          /* Transport Tab Content */
+          <>
+            {/* Wi-Fi Scale Section */}
+            {renderScaleSection()}
+
+            {/* Transport Action Buttons (Accessible to both CCM and COO) */}
+            <View className="flex-row flex-wrap justify-between pb-12 mt-6">
+              <TouchableOpacity
+                className="bg-white p-4 rounded-3xl w-[48%] h-40 shadow-lg relative mb-4"
+                onPress={() => navigation.navigate("SentProductsToday")}
+                style={{
+                  borderColor: "#980775",
+                  borderWidth: 1,
+                  shadowColor: "#000000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 10,
+                  elevation: 4,
                 }}
               >
-                {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
-              </Text>
-            </View>
-
-            <MaterialIcons name="chevron-right" size={26} color="#000000" />
-          </TouchableOpacity>
-        ) : (
-          /* State 1: Not Connected - #1266FD background, white text/icon */
-          <TouchableOpacity
-            activeOpacity={0.88}
-            onPress={() => setIsScaleModalVisible(true)}
-            style={{
-              marginTop: 10,
-              backgroundColor: "#1266FD",
-              borderRadius: 28,
-              paddingVertical: 10,
-              paddingHorizontal: 14,
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                backgroundColor: "#FFFFFF",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
-              <MaterialCommunityIcons name="wifi" size={24} color="#1266FD" />
-            </View>
-
-            <Text
-              style={{
-                flex: 1,
-                fontSize: 17,
-                fontWeight: "bold",
-                color: "#FFFFFF",
-                letterSpacing: -0.2,
-              }}
-            >
-              {selectedLanguage === "si"
-                ? "තරාදිය සම්බන්ධ කරන්න"
-                : selectedLanguage === "ta"
-                ? "அளவுகோலை இணைக்கவும்"
-                : "Connect Scale"}
-            </Text>
-
-            <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
-          </TouchableOpacity>
-        )}
-
-        {/* Keep Going Section - Placed Below Devices Section */}
-        {renderTargetStatus()}
-
-        {/* Target Progress Section */}
-        {jobRole === ROLES.COLLECTION_MANAGER ? (
-          <View className="flex-row items-center justify-center gap-4 mt-10 mb-10">
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-700 font-bold text-lg"
-            >
-              {t("ManagerDashboard.Yourtarget")}
-            </Text>
-            <View className="relative">
-              <CircularProgress
-                size={120}
-                width={8}
-                fill={targetPercentage !== null ? targetPercentage : 0}
-                tintColor="#000000"
-                backgroundColor="#EEEEEE"
-              />
-              <View
-                className="absolute items-center justify-center"
-                style={{ width: 120, height: 120 }}
-              >
-                <Text className="text-2xl font-bold">
-                  {isLoadingTarget
-                    ? "..."
-                    : targetPercentage !== null
-                      ? `${targetPercentage}%`
-                      : "0%"}
+                <Image
+                  source={require("../../../../assets/images/collection-common/dashboard/lorry.webp")}
+                  className="w-10 h-10 absolute top-2 right-2"
+                  resizeMode="contain"
+                />
+                <Text
+                  style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                  className="text-gray-700 text-lg absolute bottom-2 left-4"
+                >
+                  {t(`${getTranslationPrefix()}.ReadyToTransport`)}
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
-          </View>
-        ) : (
-          <View className="items-center justify-center mt-10 mb-10">
-            <View className="relative">
-              <CircularProgress
-                size={120}
-                width={8}
-                fill={targetPercentage !== null ? targetPercentage : 0}
-                tintColor="#000000"
-                backgroundColor="#E5E7EB"
-              />
-              <View
-                className="absolute items-center justify-center"
-                style={{ width: 120, height: 120 }}
-              >
-                <Text className="text-2xl font-bold">
-                  {isLoadingTarget
-                    ? "..."
-                    : targetPercentage !== null
-                      ? `${targetPercentage}%`
-                      : "0%"}
-                </Text>
-              </View>
-            </View>
-            <Text
-              style={[
-                { fontSize: 18, fontWeight: "bold" },
-                getTextStyle(selectedLanguage),
-              ]}
-              className="text-gray-700 mt-2"
-            >
-              {t("CollectionOfficerDashboard.Yourtarget")}
-            </Text>
-            <Text
-              style={[
-                { fontSize: 18, fontWeight: "bold" },
-                getTextStyle(selectedLanguage),
-              ]}
-              className="text-gray-700"
-            >
-              {t("CollectionOfficerDashboard.Progress")}
-            </Text>
-          </View>
+          </>
         )}
-
-        {/* Action Buttons - dynamic layout */}
-        <View className="flex-row flex-wrap justify-between pb-12 mt-4">
-          {getDashboardItems().map((item) => (
-            <TouchableOpacity
-              key={item.key}
-              className="bg-white p-4 rounded-3xl w-[48%] h-40 shadow-lg relative mb-4"
-              onPress={item.onPress}
-              style={{
-                borderColor: item.borderColor,
-                borderWidth: 1,
-                shadowColor: "#000000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 10,
-                elevation: 4,
-              }}
-            >
-              {item.icon}
-              <Text
-                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-gray-700 text-lg absolute bottom-2 left-4"
-              >
-                {item.title}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
       </View>
 
       <ScaleSelectModal

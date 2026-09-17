@@ -21,10 +21,13 @@ import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "../../../../../store/authSlice";
 import { usePrinter } from "@/services/printer/usePrinter";
 import { PrinterSelectModal } from "@/component/components/popup/PrinterSelectModal";
+import AlertModal from "@/component/components/popup/AlertModal";
 import { useTranslation } from "react-i18next";
 import {
   formatTimeSlot,
   getTimeSlotPriority,
+  formatOrderCategory,
+  formatOrderType,
 } from "@/constants/packing/time-slots";
 
 interface OrderData {
@@ -47,6 +50,10 @@ export default function QRHandling({ navigation }: { navigation: any }) {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
   const [isPrinterModalOpen, setIsPrinterModalOpen] = useState<boolean>(false);
+  const [alertVisible, setAlertVisible] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
+  const [alertTitle, setAlertTitle] = useState<string>("Success");
 
   // Bluetooth Printer Hook
   const {
@@ -69,10 +76,30 @@ export default function QRHandling({ navigation }: { navigation: any }) {
     const success = await connectToDevice(device);
     if (success) {
       setIsPrinterModalOpen(false);
-      Alert.alert(
-        "Printer Connected",
-        `Connected to ${device.displayName || device.name}`
+      setAlertType("success");
+      setAlertTitle(
+        t(
+          "QRHandling.Printer Connected Successfully",
+          "Printer Connected Successfully"
+        )
       );
+      setAlertMessage(
+        t("QRHandling.Connected to {{deviceName}}", {
+          deviceName: device.displayName || device.name,
+          defaultValue: `Connected to ${device.displayName || device.name}`,
+        })
+      );
+      setAlertVisible(true);
+    } else {
+      setAlertType("error");
+      setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
+      setAlertMessage(
+        t(
+          "QRHandling.Failed to connect to printer",
+          "Failed to connect to printer. Please check if the printer is on and in range."
+        )
+      );
+      setAlertVisible(true);
     }
   };
 
@@ -121,7 +148,13 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
             store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
-            Alert.alert("Position Released", "Your position has been released by the manager.");
+            Alert.alert(
+              t("Packing.Position Released", "Position Released"),
+              t(
+                "Packing.Your position has been released by the manager.",
+                "Your position has been released by the manager."
+              )
+            );
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
           }
         }
@@ -166,7 +199,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
           id: o.id,
           orderNumber: o.orderNumber,
           type: o.type,
-          timeSlot: formatTimeSlot(o.timeSlot),
+          timeSlot: o.timeSlot,
           category: o.category,
           date: o.date,
           packagesCount: (o.packagesList && o.packagesList.length > 0) ? o.packagesList.length : (o.packagesCount || 0),
@@ -285,7 +318,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
 
       {loading ? (
         <View className="flex-1 justify-center items-center bg-white">
-          <LoadingPage message="Loading orders..." fullScreen />
+          <LoadingPage message={t("QRHandling.Loading orders...", t("ManagerTransactions.Loading", "Loading..."))} fullScreen />
         </View>
       ) : !hasData ? (
         /* SCREEN 1: No Data State */
@@ -321,7 +354,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
               {t("QRHandling.QR Handling", "Welcome to QR Handling")}
             </Text>
             <Text className="text-[#54617D] text-sm mt-1">
-              Tap the order to print it.
+              {t("QRHandling.Tap the order to print it.", "Tap the order to print it.")}
             </Text>
           </View>
 
@@ -330,15 +363,13 @@ export default function QRHandling({ navigation }: { navigation: any }) {
             {/* To Do Tab */}
             <TouchableOpacity
               onPress={() => setActiveTab("todo")}
-              className={`flex-1 h-[50px] rounded-full items-center justify-center ${
-                activeTab === "todo" ? "bg-black" : "bg-[#E9ECF1]"
-              }`}
+              className={`flex-1 h-[50px] rounded-full items-center justify-center ${activeTab === "todo" ? "bg-black" : "bg-[#E9ECF1]"
+                }`}
               activeOpacity={0.8}
             >
               <Text
-                className={`font-bold text-sm ${
-                  activeTab === "todo" ? "text-white" : "text-[#54617D]"
-                }`}
+                className={`font-bold text-sm ${activeTab === "todo" ? "text-white" : "text-[#54617D]"
+                  }`}
               >
                 {t("QRHandling.To Do", { count: todoOrders.length === 0 ? "0" : String(todoOrders.length).padStart(2, "0"), defaultValue: `To Do (${todoOrders.length === 0 ? "0" : String(todoOrders.length).padStart(2, "0")})` })}
               </Text>
@@ -347,15 +378,13 @@ export default function QRHandling({ navigation }: { navigation: any }) {
             {/* Done Tab */}
             <TouchableOpacity
               onPress={() => setActiveTab("done")}
-              className={`flex-1 h-[50px] rounded-full items-center justify-center ${
-                activeTab === "done" ? "bg-black" : "bg-[#E9ECF1]"
-              }`}
+              className={`flex-1 h-[50px] rounded-full items-center justify-center ${activeTab === "done" ? "bg-black" : "bg-[#E9ECF1]"
+                }`}
               activeOpacity={0.8}
             >
               <Text
-                className={`font-bold text-sm ${
-                  activeTab === "done" ? "text-white" : "text-[#54617D]"
-                }`}
+                className={`font-bold text-sm ${activeTab === "done" ? "text-white" : "text-[#54617D]"
+                  }`}
               >
                 {t("QRHandling.Done", { count: doneOrders.length === 0 ? "0" : String(doneOrders.length).padStart(2, "0"), defaultValue: `Done (${doneOrders.length === 0 ? "0" : String(doneOrders.length).padStart(2, "0")})` })}
               </Text>
@@ -417,7 +446,8 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                             const nextOrder = todoOrders[idx + 1];
                             navigation.navigate("ReadyToPrint", {
                               processOrderId: order.id,
-                              orderNumber: `${order.orderNumber} (${order.type})`,
+                              orderNumber: order.orderNumber,
+                              type: order.type,
                               invoiceNumber: order.orderNumber,
                               timeSlot: order.timeSlot,
                               category: order.category,
@@ -427,10 +457,11 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                               packagesList: (order as any).packagesList || [],
                               rowId: resolvedRowId,
                               nextOrderNumber: nextOrder
-                                ? `${nextOrder.orderNumber} (${nextOrder.type})`
+                                ? nextOrder.orderNumber
                                 : null,
+                              nextType: nextOrder ? nextOrder.type : null,
                               nextTimeSlot: nextOrder
-                                ? formatTimeSlot(nextOrder.timeSlot)
+                                ? nextOrder.timeSlot
                                 : null,
                               nextCategory: nextOrder
                                 ? nextOrder.category
@@ -465,17 +496,17 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                           <Text
                             className={`font-bold text-base text-[#030E25]`}
                           >
-                            {order.orderNumber} ({order.type})
+                            {order.orderNumber} ({formatOrderType(order.type, t)})
                           </Text>
                           <Text
                             className={`text-sm font-bold mt-0.5 text-[#030E25]`}
                           >
-                            {order.timeSlot}
+                            {formatTimeSlot(order.timeSlot, t)}
                           </Text>
                           <Text
-                            className={`text-xs mt-0.5 "text-[#676771]`}
+                            className="text-xs mt-0.5 text-[#676771]"
                           >
-                            {order.category}
+                            {formatOrderCategory(order.category, t)}
                           </Text>
                         </View>
 
@@ -505,7 +536,7 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                     />
                   </View>
                   <Text className="text-[#54617D] text-sm font-medium text-center mt-4">
-                    {t("DistributionCenterTarget.No targets in Out list yet.", "No completed orders in Done list yet.")}
+                    {t("QRHandling.No QR Printed yet", "No QR Printed yet")}
                   </Text>
                 </View>
               ) : (
@@ -524,7 +555,8 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                         onPress={() => {
                           navigation.navigate("ReadyToPrint", {
                             processOrderId: order.id,
-                            orderNumber: `${order.orderNumber} (${order.type})`,
+                            orderNumber: order.orderNumber,
+                            type: order.type,
                             invoiceNumber: order.orderNumber,
                             timeSlot: order.timeSlot,
                             category: order.category,
@@ -560,13 +592,13 @@ export default function QRHandling({ navigation }: { navigation: any }) {
                         {/* Content */}
                         <View className="flex-1">
                           <Text className="font-bold text-slate-950 text-base">
-                            {order.orderNumber} ({order.type})
+                            {order.orderNumber} ({formatOrderType(order.type, t)})
                           </Text>
                           <Text className="text-sm font-bold text-slate-900 mt-0.5">
-                            {order.timeSlot}
+                            {formatTimeSlot(order.timeSlot, t)}
                           </Text>
                           <Text className="text-xs text-[#54617D] mt-0.5">
-                            {order.category}
+                            {formatOrderCategory(order.category, t)}
                           </Text>
                         </View>
 
@@ -607,6 +639,14 @@ export default function QRHandling({ navigation }: { navigation: any }) {
         onStartScan={startScan}
         onSelectDevice={handleSelectPrinter}
         onDisconnect={disconnect}
+      />
+
+      <AlertModal
+        visible={alertVisible}
+        type={alertType}
+        title={alertTitle}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
       />
     </View>
   );

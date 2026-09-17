@@ -18,6 +18,7 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { AlertModal } from "@/component/components/popup/AlertModal";
+import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
@@ -375,12 +376,18 @@ export default function DigitalSignature({
     }
 
     Alert.alert(
-      "Confirm Signature",
-      "Are you sure you want to save this signature for pickup?",
+      t("DigitalSignature.Confirm Signature", "Confirm Signature"),
+      t(
+        "DigitalSignature.Confirm signature message",
+        "Are you sure you want to save this signature for pickup?"
+      ),
       [
-        { text: "Cancel", style: "cancel" },
         {
-          text: "Yes, Save",
+          text: t("DigitalSignature.Cancel", "Cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("DigitalSignature.Yes, Save", "Yes, Save"),
           onPress: async () => {
             await saveSignature(signature);
           },
@@ -460,48 +467,11 @@ export default function DigitalSignature({
   return (
     <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
       {/* ── HEADER ── */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-          backgroundColor: "#ffffff",
-          borderBottomWidth: 1,
-          borderBottomColor: "#F0F0F0",
-        }}
-      >
-        {/* Back button */}
-        <TouchableOpacity
-          onPress={handleBackPress}
-          disabled={loading}
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 19,
-            backgroundColor: "#F7FAFF",
-            justifyContent: "center",
-            alignItems: "center",
-            marginRight: 10,
-          }}
-        >
-          <Ionicons name="chevron-back" size={22} color="#000000" />
-        </TouchableOpacity>
-
-        {/* Title */}
-        <Text
-          style={{
-            flex: 1,
-            fontSize: 16,
-            fontWeight: "700",
-            color: "#1A1A1A",
-            textAlign: "center",
-          }}
-          numberOfLines={1}
-        >
-          {t("DigitalSignature.Customer Signature", "Customer's Digital Signature")}
-        </Text>
-      </View>
+      <CustomHeader
+        title={t("DigitalSignature.Customer Signature", "Customer's Digital Signature")}
+        navigation={navigation}
+        onBackPress={handleBackPress}
+      />
 
       {/* ── SIGNATURE CANVAS AREA ── */}
       <View
@@ -584,8 +554,7 @@ export default function DigitalSignature({
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingLeft: Math.max(insets.left + 16, 16),
-          paddingRight: Math.max(insets.right + 16, 16),
+          paddingHorizontal: 16,
           paddingBottom: Math.max(insets.bottom + 8, 12),
           paddingTop: 8,
           height: 64 + Math.max(insets.bottom, 0),
@@ -674,7 +643,7 @@ export default function DigitalSignature({
                 marginLeft: 8,
               }}
             >
-              {t("Common.Done", "Done")}
+              {t("DigitalSignature.Done", "Done")}
             </Text>
           </TouchableOpacity>
         )}
@@ -683,7 +652,7 @@ export default function DigitalSignature({
       {/* ── SUCCESS MODAL ── */}
       <AlertModal
         visible={showSuccessModal}
-        title="Successful!"
+        title={t("DigitalSignature.Successful!", "Successful!")}
         message={successMessage}
         type="success"
         onClose={handleSuccessModalClose}

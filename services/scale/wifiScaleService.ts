@@ -90,10 +90,9 @@ class WifiScaleService {
       let targetIp = saved.ip;
       let targetPort = saved.port || 33581;
 
-      // In Expo Go, the physical scale IP (192.168.1.23:33581) cannot be fetched directly via HTTP.
-      // Automatically redirect to the PC bridge (192.168.1.13:3001).
-      if (Constants.appOwnership === "expo" && targetIp === "192.168.1.23") {
-        targetIp = "192.168.1.13";
+      // In Expo Go, physical scale / bridge IP defaults to 192.168.1.30
+      if (Constants.appOwnership === "expo" && (targetIp === "192.168.1.23" || targetIp === "192.168.1.13")) {
+        targetIp = "192.168.1.30";
         targetPort = 3001;
       }
 

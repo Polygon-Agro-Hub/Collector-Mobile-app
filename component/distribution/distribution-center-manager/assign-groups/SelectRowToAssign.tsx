@@ -33,6 +33,31 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
     route.params?.selectedRowId || route.params?.selectedRow?.id || null
   );
 
+  const getRowNumber = (rowName?: string) => {
+    if (!rowName) return "";
+    const match = rowName.match(/\d+/);
+    return match ? match[0] : "";
+  };
+
+  const formatRowTitle = (rowName?: string) => {
+    if (!rowName) return "";
+    const num = getRowNumber(rowName);
+    if (num) {
+      return t("AssignGroups.Row {{number}}", {
+        number: num,
+        defaultValue: t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` }),
+      });
+    }
+    const clean = rowName.trim().toLowerCase();
+    if (clean === "rows") {
+      return t("AssignGroups.Rows", t("Packing.Rows", t("Rows", "පේළි")));
+    }
+    if (clean === "row") {
+      return t("AssignGroups.Row", t("Packing.Row", t("Row", "පේළිය")));
+    }
+    return t(rowName, rowName);
+  };
+
   const handleBack = () => {
     navigation.navigate("SelectOrder", {
       ...route.params,
@@ -187,11 +212,17 @@ export default function SelectRowToAssign({ route, navigation }: { route: any; n
                     {/* Row Info */}
                     <View className="flex-1">
                       <Text className="font-extrabold text-[#030E25] text-base">
-                        {row.name}
+                        {formatRowTitle(row.name)}
                       </Text>
                       <Text className="text-xs text-[#676771] mt-1 font-medium">
-                        {row.allocatedCount}{" "}
-                        {row.allocatedCount === 1 ? t("AssignGroups.Order Allocated", "Order Allocated") : t("AssignGroups.Orders Allocated", "Orders Allocated")}
+                        {t("AssignGroups.OrdersAllocatedCount", {
+                          count: row.allocatedCount,
+                          defaultValue: `${row.allocatedCount} ${
+                            row.allocatedCount === 1
+                              ? t("AssignGroups.Order Allocated", "Order Allocated")
+                              : t("AssignGroups.Orders Allocated", "Orders Allocated")
+                          }`,
+                        })}
                       </Text>
                     </View>
                   </TouchableOpacity>

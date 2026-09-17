@@ -40,6 +40,7 @@ interface Transaction {
   cash: number;
   fullTotal: string;
   receivedTime: string;
+  rawTime?: string;
   date: string;
   pickupOrderId?: string;
   invoiceNo?: string;
@@ -77,15 +78,72 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
   };
 
   const formatDateTime = (dateString: string) => {
+    if (!dateString) return "";
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      const am = t("Time.AM", { defaultValue: "AM" });
+      const currentLang =
+        (t && t("SignIn.LNG")) ||
+        (t && t("LNG")) ||
+        (t && t("DistridutionaDashboard.LNG")) ||
+        (t && t("AddOfficerBasicDetails.LNG")) ||
+        "en";
+      const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
+      const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
+
+      let cleaned = dateString
+        .replace(/පෙ\.ව\.|මුற்பகல்/gi, "AM")
+        .replace(/ප\.ව\.|பிற்பகல்/gi, "PM");
+
+      if (isSinhala) {
+        return cleaned
+          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "පෙ.ව. $1")
+          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "ප.ව. $1")
+          .replace(/\bAM\b/gi, "පෙ.ව.")
+          .replace(/\bPM\b/gi, "ප.ව.");
+      }
+      if (isTamil) {
+        return cleaned
+          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "முற்பகல் $1")
+          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பிற்பகல் $1")
+          .replace(/\bAM\b/gi, "முற்பகல்")
+          .replace(/\bPM\b/gi, "பிற்பகல்");
+      }
+      return cleaned;
+    }
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    const hours = date.getHours();
+    let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
+    const isPM = hours >= 12;
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+    const displayHours = hours;
 
+    const am = t("Time.AM", { defaultValue: "AM" });
+    const currentLang =
+      (t && t("SignIn.LNG")) ||
+      (t && t("LNG")) ||
+      (t && t("DistridutionaDashboard.LNG")) ||
+      (t && t("AddOfficerBasicDetails.LNG")) ||
+      "en";
+
+    const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
+    const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
+
+    if (isSinhala) {
+      const period = isPM ? "ප.ව." : "පෙ.ව.";
+      return `${year}/${month}/${day} ${period} ${displayHours}:${minutes}`;
+    }
+
+    if (isTamil) {
+      const period = isPM ? "பிற்பகல்" : "முற்பகல்";
+      return `${year}/${month}/${day} ${period} ${displayHours}:${minutes}`;
+    }
+
+    const ampm = isPM ? "PM" : "AM";
     return `${year}/${month}/${day} ${displayHours}:${minutes} ${ampm}`;
   };
 
@@ -118,23 +176,26 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
 
       if (response.data.success) {
         const mappedData: Transaction[] = response.data.data.map(
-          (item: any) => ({
-            id:
-              item.pickupOrderId?.toString() || item.processOrderId?.toString(),
-            orderId:
-              item.processOrderOrderId || item.pickupOrderOrderId || "N/A",
-            cash: parseFloat(item.handOverPrice) || 0,
-            receivedTime: item.handOverTime
-              ? formatDateTime(item.handOverTime)
-              : formatDateTime(item.pickupCreatedAt),
-            date: item.handOverTime
-              ? extractDate(item.handOverTime)
-              : extractDate(item.pickupCreatedAt),
-            pickupOrderId: item.pickupOrderId?.toString(),
-            invoiceNo: item.invNo,
-            paymentMethod: item.paymentMethod,
-            transactionId: item.transactionId,
-          }),
+          (item: any) => {
+            const rawTime = item.handOverTime || item.pickupCreatedAt;
+            return {
+              id:
+                item.pickupOrderId?.toString() || item.processOrderId?.toString(),
+              orderId:
+                item.processOrderOrderId || item.pickupOrderOrderId || "N/A",
+              cash: parseFloat(item.handOverPrice) || 0,
+              fullTotal: item.handOverPrice || "0",
+              receivedTime: rawTime ? formatDateTime(rawTime) : "",
+              rawTime: rawTime || "",
+              date: item.handOverTime
+                ? extractDate(item.handOverTime)
+                : extractDate(item.pickupCreatedAt),
+              pickupOrderId: item.pickupOrderId?.toString(),
+              invoiceNo: item.invNo,
+              paymentMethod: item.paymentMethod,
+              transactionId: item.transactionId,
+            };
+          },
         );
 
         setAllTransactions(mappedData);
@@ -348,7 +409,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
                     </Text>
                   </View>
                   <Text className="text-xs text-[#848484]">
-                    {t("ReceivedCash.Received Time")} : {item.receivedTime}
+                    {t("ReceivedCash.Received Time")} : {formatDateTime(item.rawTime || item.receivedTime)}
                   </Text>
                 </View>
               ))}

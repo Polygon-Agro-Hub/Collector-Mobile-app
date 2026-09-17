@@ -16,6 +16,7 @@ import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Linking from "expo-linking";
 import * as Sharing from "expo-sharing";
+import { useTranslation } from "react-i18next";
 import PdfViewer from "./PdfViewer";
 
 
@@ -26,6 +27,68 @@ export interface UploadFileItem {
   size?: string;
   type?: "image" | "pdf";
   base64?: string;
+}
+
+export async function convertUriToBase64(
+  uri: string,
+  mimeType?: string
+): Promise<string> {
+  // Method 1: FileSystem legacy readAsStringAsync
+  try {
+    const raw = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    if (raw) {
+      const mime =
+        mimeType ||
+        (uri.toLowerCase().endsWith(".pdf")
+          ? "application/pdf"
+          : "image/jpeg");
+      return `data:${mime};base64,${raw}`;
+    }
+  } catch (fsErr) {
+    console.warn("FileSystem read failed, trying alternative methods:", fsErr);
+  }
+
+  // Method 2: Copy to local cache first if content URI, then read
+  if (uri.startsWith("content://") && FileSystem.cacheDirectory) {
+    try {
+      const ext = uri.toLowerCase().endsWith(".pdf") ? "pdf" : "png";
+      const tempPath = `${FileSystem.cacheDirectory}temp_upload_${Date.now()}.${ext}`;
+      await FileSystem.copyAsync({ from: uri, to: tempPath });
+      const raw = await FileSystem.readAsStringAsync(tempPath, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      if (raw) {
+        const mime =
+          mimeType || (ext === "pdf" ? "application/pdf" : "image/jpeg");
+        return `data:${mime};base64,${raw}`;
+      }
+    } catch (copyErr) {
+      console.warn("FileSystem copy and read failed:", copyErr);
+    }
+  }
+
+  // Method 3: fetch blob + FileReader
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to convert file to base64 string"));
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (fetchErr) {
+    console.error("Fetch blob base64 conversion failed:", fetchErr);
+    throw fetchErr;
+  }
 }
 
 interface UploadFileProps {
@@ -39,13 +102,17 @@ export default function UploadFile({
   onFileChange,
   maxSizeMB = 5,
 }: UploadFileProps) {
+  const { t } = useTranslation();
   const [previewVisible, setPreviewVisible] = useState(false);
   const MAX_FILE_SIZE_BYTES = maxSizeMB * 1024 * 1024;
 
   const showFileTooLargeAlert = () => {
     Alert.alert(
-      "File Too Large",
-      `File is too large. Please upload an image or file smaller than ${maxSizeMB} MB.`,
+      t("UploadFile.File Too Large", "File Too Large"),
+      t("UploadFile.File is too large", {
+        maxSizeMB,
+        defaultValue: `File is too large. Please upload an image or file smaller than ${maxSizeMB} MB.`,
+      }),
     );
   };
 
@@ -70,11 +137,24 @@ export default function UploadFile({
           ? (asset.fileSize / (1024 * 1024)).toFixed(1) + " MB"
           : "1.2 MB";
 
+        let base64Data = asset.base64
+          ? `data:image/jpeg;base64,${asset.base64}`
+          : undefined;
+
+        if (!base64Data && asset.uri) {
+          try {
+            base64Data = await convertUriToBase64(
+              asset.uri,
+              asset.mimeType || "image/jpeg"
+            );
+          } catch (e) {
+            console.warn("Could not read image as base64:", e);
+          }
+        }
+
         onFileChange({
           uri: asset.uri,
-          base64: asset.base64
-            ? `data:image/jpeg;base64,${asset.base64}`
-            : undefined,
+          base64: base64Data,
           name:
             asset.fileName ||
             "Transfer_Slip_" + Date.now().toString().slice(-6) + ".png",
@@ -84,7 +164,10 @@ export default function UploadFile({
       }
     } catch (err) {
       console.error("Error picking image:", err);
-      Alert.alert("Upload Error", "Failed to select file. Please try again.");
+      Alert.alert(
+        t("UploadFile.Upload Error", "Upload Error"),
+        t("UploadFile.Failed to select file. Please try again.", "Failed to select file. Please try again.")
+      );
     }
   };
 
@@ -101,7 +184,7 @@ export default function UploadFile({
 
       const asset = result.assets[0];
       const isPdf =
-        asset.mimeType === "application/pdf" || asset.name?.endsWith(".pdf");
+        asset.mimeType === "application/pdf" || asset.name?.toLowerCase().endsWith(".pdf");
 
       if (asset.size && asset.size > MAX_FILE_SIZE_BYTES) {
         showFileTooLargeAlert();
@@ -112,8 +195,19 @@ export default function UploadFile({
         ? (asset.size / (1024 * 1024)).toFixed(1) + " MB"
         : "1.2 MB";
 
+      let base64Data: string | undefined;
+      const mime = isPdf
+        ? "application/pdf"
+        : (asset.mimeType || (asset.name?.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg"));
+      try {
+        base64Data = await convertUriToBase64(asset.uri, mime);
+      } catch (readErr) {
+        console.warn("Could not read document as base64:", readErr);
+      }
+
       onFileChange({
         uri: asset.uri,
+        base64: base64Data,
         name:
           asset.name ||
           (isPdf
@@ -124,18 +218,21 @@ export default function UploadFile({
       });
     } catch (err) {
       console.error("Error picking document:", err);
-      Alert.alert("Upload Error", "Failed to select file. Please try again.");
+      Alert.alert(
+        t("UploadFile.Upload Error", "Upload Error"),
+        t("UploadFile.Failed to select file. Please try again.", "Failed to select file. Please try again.")
+      );
     }
   };
 
   const handleUploadPress = () => {
     Alert.alert(
-      "Select Upload Source",
-      "Choose how you want to upload your file",
+      t("UploadFile.Select Upload Source", "Select Upload Source"),
+      t("UploadFile.Choose how you want to upload your file", "Choose how you want to upload your file"),
       [
-        { text: "Photo Library", onPress: pickImage },
-        { text: "Browse Files / PDF", onPress: pickDocument },
-        { text: "Cancel", style: "cancel" },
+        { text: t("UploadFile.Photo Library", "Photo Library"), onPress: pickImage },
+        { text: t("UploadFile.Browse Files / PDF", "Browse Files / PDF"), onPress: pickDocument },
+        { text: t("UploadFile.Cancel", "Cancel"), style: "cancel" },
       ],
     );
   };
@@ -170,8 +267,11 @@ export default function UploadFile({
     } catch (error) {
       console.log("Error opening PDF externally:", error);
       Alert.alert(
-        "Couldn't open PDF",
-        "Please make sure you have a PDF viewer app installed.",
+        t("UploadFile.Couldn't open PDF", "Couldn't open PDF"),
+        t(
+          "UploadFile.Please make sure you have a PDF viewer app installed.",
+          "Please make sure you have a PDF viewer app installed."
+        ),
       );
     }
   };
@@ -189,10 +289,13 @@ export default function UploadFile({
             <FontAwesome5 name="cloud-upload-alt" size={26} color="#3B82F6" />
           </View>
           <Text className="mt-3 text-base font-semibold text-gray-900">
-            Tap to Upload
+            {t("UploadFile.Tap to Upload", "Tap to Upload")}
           </Text>
           <Text className="mt-1 text-xs text-gray-400">
-            JPG, PNG, PDF up to {maxSizeMB}MB
+            {t("UploadFile.JPG, PNG, PDF up to MB", {
+              maxSizeMB,
+              defaultValue: `JPG, PNG, PDF up to ${maxSizeMB}MB`,
+            })}
           </Text>
         </TouchableOpacity>
       ) : (
@@ -201,7 +304,7 @@ export default function UploadFile({
           <View className="flex-row items-center">
             <Ionicons name="checkmark-circle" size={16} color="#0CB353" />
             <Text className="ml-1.5 text-sm font-medium text-[#0CB353]">
-              File Uploaded
+              {t("UploadFile.File Uploaded", "File Uploaded")}
             </Text>
           </View>
 
@@ -245,7 +348,7 @@ export default function UploadFile({
               >
                 <FontAwesome6 name="eye" size={16} color="#0850F0" />
                 <Text className="ml-2 text-sm font-semibold text-[#0850F0]">
-                  Preview Full Image
+                  {t("UploadFile.Preview Full Image", "Preview Full Image")}
                 </Text>
               </TouchableOpacity>
             </>
@@ -281,7 +384,7 @@ export default function UploadFile({
               >
                 <FontAwesome6 name="eye" size={16} color="#0850F0" />
                 <Text className="ml-2 text-sm font-semibold text-[#0850F0]">
-                  Preview PDF
+                  {t("UploadFile.Preview PDF", "Preview PDF")}
                 </Text>
               </TouchableOpacity>
             </>

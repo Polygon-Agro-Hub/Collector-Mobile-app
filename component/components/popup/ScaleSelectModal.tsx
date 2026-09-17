@@ -29,10 +29,10 @@ const isExpoGo = Constants.appOwnership === "expo";
 // translation files and only translate the descriptive suffix around it.
 const DEFAULT_DEVICE = {
   name: "BUDRY MFD-300",
-  ip: isExpoGo ? "192.168.1.13" : "192.168.1.23",
+  ip: "192.168.1.30",
   port: isExpoGo ? "3001" : "33581",
 };
-const DEFAULT_IP = DEFAULT_DEVICE.ip;
+const DEFAULT_IP = "192.168.1.30";
 const DEFAULT_PORT = DEFAULT_DEVICE.port;
 
 export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
@@ -50,14 +50,9 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
     const unsubscribeScale = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
       if (status.scale?.ip) {
-        if (isExpoGo && status.scale.ip === "192.168.1.23") {
-          setIpAddress("192.168.1.13");
-          setPort("3001");
-        } else {
-          setIpAddress(status.scale.ip);
-          if (status.scale?.port) {
-            setPort(status.scale.port.toString());
-          }
+        setIpAddress(status.scale.ip || "192.168.1.30");
+        if (status.scale?.port) {
+          setPort(status.scale.port.toString());
         }
       }
     });
