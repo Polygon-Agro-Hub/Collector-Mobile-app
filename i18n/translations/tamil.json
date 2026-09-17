@@ -1038,6 +1038,7 @@
   },
   "ReceivedProductsSummary": {
     "Title": "சுருக்கம்",
+    "UnloadedSummary": "இறக்கப்பட்ட சுருக்கம்",
     "StartUnloading": "இறக்கத் தொடங்குங்கள்"
   },
   "UnloadingProducts": {

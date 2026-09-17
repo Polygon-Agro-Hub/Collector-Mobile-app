@@ -37,6 +37,7 @@ export interface VerifiedLoadData {
   centreName?: string;
   origin?: string;
   items?: any[];
+  isUnloaded?: boolean;
 }
 
 const PRIMARY_OUTLINE_COLOR = "#980775";
@@ -272,7 +273,22 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
           errData?.message ||
             t(
               "qrcode.CenterMismatch",
-              "This load is assigned to a different distribution center."
+              "This load is not assigned to your distribution center."
+            )
+        );
+        setShowRescanButton(true);
+        setModalType("error");
+        setShowErrorModal(true);
+        return;
+      }
+
+      if (code === "JOURNEY_NOT_ENDED") {
+        setModalTitle(t("qrcode.Error", "Error!"));
+        setModalMessage(
+          errData?.message ||
+            t(
+              "qrcode.JourneyNotEnded",
+              "This load's journey has not ended yet.\nPlease wait until the driver completes the journey."
             )
         );
         setShowRescanButton(true);
@@ -329,6 +345,8 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         driverName: load.driverName,
         origin: load.centreName || load.origin,
         items: load.items,
+        isUnloaded: load.isUnloaded ?? false,
+        title: load.isUnloaded ? "Unloaded Summery" : undefined,
       });
     } else {
       navigation.navigate("ReceivedProductsToday");

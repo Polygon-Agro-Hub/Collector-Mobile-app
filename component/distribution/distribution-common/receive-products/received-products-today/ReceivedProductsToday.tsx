@@ -131,6 +131,8 @@ export default function ReceivedProductsToday({
       driverEmpId: item.driverEmpId,
       driverName: item.driverName,
       origin: item.origin,
+      isUnloaded: true,
+      title: "Unloaded Summery",
     });
   };
 

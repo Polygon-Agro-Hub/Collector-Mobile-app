@@ -59,6 +59,9 @@ export default function ReceivedProductsSummary({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const transportId = route.params?.transportId;
+  const isUnloadedParam = route.params?.isUnloaded ?? false;
+  const [isUnloaded, setIsUnloaded] = useState<boolean>(isUnloadedParam);
+  const passedTitle = route.params?.title;
 
   const [vehicleNo, setVehicleNo] = useState<string>(
     route.params?.vehicleNo || ""
@@ -86,8 +89,9 @@ export default function ReceivedProductsSummary({
       setLoading(true);
       const authToken = store.getState().auth.token;
 
+      const queryParam = isUnloadedParam ? "?type=unloaded" : "";
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/transport/load/${transportId}`,
+        `${environment.API_BASE_URL}api/transport/load/${transportId}${queryParam}`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -101,6 +105,9 @@ export default function ReceivedProductsSummary({
         if (data.vehicleNo && data.vehicleNo !== "N/A") setVehicleNo(data.vehicleNo);
         if (data.driverEmpId) setDriverEmpId(data.driverEmpId);
         if (data.driverName) setDriverName(data.driverName);
+        if (data.isUnloaded !== undefined) {
+          setIsUnloaded(data.isUnloaded || isUnloadedParam);
+        }
         if (Array.isArray(data.items)) {
           setItems(data.items);
         }
@@ -120,7 +127,7 @@ export default function ReceivedProductsSummary({
     } finally {
       setLoading(false);
     }
-  }, [transportId, t]);
+  }, [transportId, isUnloadedParam, t]);
 
   useEffect(() => {
     fetchLoadDetails();
@@ -141,7 +148,11 @@ export default function ReceivedProductsSummary({
 
       {/* Header */}
       <CustomHeader
-        title={t("ReceivedProductsSummary.Title", "Summery")}
+        title={
+          isUnloaded
+            ? t("ReceivedProductsSummary.UnloadedSummary", passedTitle || "Unloaded Summery")
+            : t("ReceivedProductsSummary.Title", "Summery")
+        }
         navigation={navigation}
       />
 
@@ -373,24 +384,26 @@ export default function ReceivedProductsSummary({
         </View>
 
         {/* Bottom Button: "Start Unloading" */}
-        <View className="pt-4 pb-2">
-          <TouchableOpacity
-            onPress={handleStartUnloading}
-            activeOpacity={0.8}
-            className="w-full h-[50px] bg-[#000000] rounded-full items-center justify-center"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 5,
-              elevation: 4,
-            }}
-          >
-            <Text className="text-white font-extrabold text-base">
-              {t("ReceivedProductsSummary.StartUnloading", "Start Unloading")}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {!isUnloaded && (
+          <View className="pt-4 pb-2">
+            <TouchableOpacity
+              onPress={handleStartUnloading}
+              activeOpacity={0.8}
+              className="w-full h-[50px] bg-[#000000] rounded-full items-center justify-center"
+              style={{
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+                elevation: 4,
+              }}
+            >
+              <Text className="text-white font-extrabold text-base">
+                {t("ReceivedProductsSummary.StartUnloading", "Start Unloading")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
       )}
     </View>

@@ -1103,6 +1103,7 @@
   },
   "ReceivedProductsSummary": {
     "Title": "Summary",
+    "UnloadedSummary": "Unloaded Summery",
     "StartUnloading": "Start Unloading"
   },
   "UnloadingProducts": {

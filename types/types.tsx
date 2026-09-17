@@ -88,6 +88,8 @@ export type RootStackParamList = {
         driverName?: string;
         origin?: string;
         items?: any[];
+        isUnloaded?: boolean;
+        title?: string;
       }
     | undefined;
   UnloadingProducts:
