@@ -1430,6 +1430,7 @@
     "Continue": "தொடரவும் ({{count}})",
     "Select a Row to Assign": "ஒதுக்குவதற்கு ஒரு வரிசையைத் தேர்ந்தெடுக்கவும்",
     "Choose the packing row where the selected orders will be assigned.": "தேர்ந்தெடுக்கப்பட்ட ஆர்டர்கள் ஒதுக்கப்படும் பேக்கிங் வரிசையைத் தேர்வு செய்யவும்.",
+    "Select the row you work with":"நீங்கள் பணிபுரியும் வரிசையைத் தேர்ந்தெடுக்கவும்.",
     "Orders Count": "ஆர்டர்களின் எண்ணிக்கை",
     "Loading rows...": "வரிசைகள் ஏற்றப்படுகிறது...",
     "No rows found": "- வரிசைகள் எதுவும் காணப்படவில்லை. -",

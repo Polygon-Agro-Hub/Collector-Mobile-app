@@ -1494,6 +1494,7 @@
     "Continue": "Continue ({{count}})",
     "Select a Row to Assign": "Select a Row to Assign",
     "Choose the packing row where the selected orders will be assigned.": "Choose the packing row where the selected orders will be assigned.",
+    "Select the row you work with":"Select the row you work with",
     "Orders Count": "Orders Count",
     "Loading rows...": "Loading rows...",
     "No rows found": "- No rows found. -",

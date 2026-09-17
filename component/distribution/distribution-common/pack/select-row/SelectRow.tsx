@@ -604,7 +604,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           <>
             {/* Step 1 Title */}
             <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
-              {t("Packing.Choose the packing row you will be working at.", "Select the row you work with")}
+              {t("Packing.Select the row you work with", "Select the row you work with")}
             </Text>
 
             {/* Step 1 list of rows */}

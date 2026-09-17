@@ -1430,6 +1430,7 @@
     "Continue": "ඉදිරියට යන්න ({{count}})",
     "Select a Row to Assign": "පැවරීම සඳහා පේළියක් තෝරන්න",
     "Choose the packing row where the selected orders will be assigned.": "තෝරාගත් ඇණවුම් පවරනු ලබන ඇසුරුම් පේළිය තෝරන්න.",
+    "Select the row you work with":"ඔබ වැඩ කරන පේළිය තෝරන්න.",
     "Orders Count": "ඇණවුම් ගණන",
     "Loading rows...": "පේළි පූරණය වෙමින්...",
     "No rows found": "- පේළි කිසිවක් හමු නොවීය. -",
