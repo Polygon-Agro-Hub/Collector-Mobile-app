@@ -146,25 +146,6 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
           </View>
         </View>
 
-        {/* Bottom Button to navigate to Load Assigned */}
-        <View className="w-full pt-6 pb-2">
-          <TouchableOpacity
-            onPress={handleNavigateToLoadAssigned}
-            activeOpacity={0.8}
-            className="w-full h-[54px] rounded-full bg-[#000000] items-center justify-center"
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 6,
-              elevation: 5,
-            }}
-          >
-            <Text className="text-white font-extrabold text-base">
-              {t("LoadAssigned.Title", "Load Assigned")}
-            </Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
     </View>
   );

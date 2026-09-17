@@ -38,6 +38,7 @@ export interface SentProductItem {
   weight: string;
   destination: string;
   time: string;
+  conformDriverId?: number | null;
 }
 
 export default function SentProductsToday({ navigation }: SentProductsTodayProps) {
@@ -139,15 +140,25 @@ export default function SentProductsToday({ navigation }: SentProductsTodayProps
                 key={item.id}
                 activeOpacity={0.75}
                 onPress={() => {
-                  navigation.navigate("LoadingToVehicleSummary", {
-                    transportId: item.id,
-                    loadCode: item.transferCode,
-                    vehicleNo: item.vehicleNo,
-                    driverEmpId: item.driverEmpId,
-                    driverName: item.driverName,
-                    centreName: item.destination,
-                    isViewOnly: true,
-                  });
+                  if (item.conformDriverId) {
+                    navigation.navigate("LoadAssigned", {
+                      transportId: item.id,
+                      loadCode: item.transferCode,
+                      vehicleNo: item.vehicleNo,
+                      driverId: item.driverEmpId || item.driverName,
+                      driverName: item.driverName,
+                    });
+                  } else {
+                    navigation.navigate("LoadingToVehicleSummary", {
+                      transportId: item.id,
+                      loadCode: item.transferCode,
+                      vehicleNo: item.vehicleNo,
+                      driverEmpId: item.driverEmpId,
+                      driverName: item.driverName,
+                      centreName: item.destination,
+                      isViewOnly: true,
+                    });
+                  }
                 }}
                 className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 my-2"
                 style={{
