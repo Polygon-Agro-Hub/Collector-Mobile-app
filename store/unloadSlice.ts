@@ -22,6 +22,12 @@ export interface UnloadVarietyItem {
   loadedItemId?: number | string;
   varietyId?: string;
   name: string;
+  varietyNameEnglish?: string;
+  varietyNameSinhala?: string;
+  varietyNameTamil?: string;
+  cropNameEnglish?: string;
+  cropNameSinhala?: string;
+  cropNameTamil?: string;
   image: string;
   weighed: boolean;
   expectedKg: number;
@@ -38,6 +44,9 @@ export interface UnloadState {
   vehicleNo: string | null;
   driverEmpId: string | null;
   driverName: string | null;
+  driverNameEnglish: string | null;
+  driverNameSinhala: string | null;
+  driverNameTamil: string | null;
   varieties: UnloadVarietyItem[];
 }
 
@@ -47,6 +56,9 @@ const initialState: UnloadState = {
   vehicleNo: null,
   driverEmpId: null,
   driverName: null,
+  driverNameEnglish: null,
+  driverNameSinhala: null,
+  driverNameTamil: null,
   varieties: [],
 };
 
@@ -62,6 +74,9 @@ const unloadSlice = createSlice({
         vehicleNo?: string | null;
         driverEmpId?: string | null;
         driverName?: string | null;
+        driverNameEnglish?: string | null;
+        driverNameSinhala?: string | null;
+        driverNameTamil?: string | null;
         varieties: UnloadVarietyItem[];
       }>
     ) => {
@@ -82,6 +97,9 @@ const unloadSlice = createSlice({
         if (action.payload.vehicleNo) state.vehicleNo = action.payload.vehicleNo;
         if (action.payload.driverEmpId) state.driverEmpId = action.payload.driverEmpId;
         if (action.payload.driverName) state.driverName = action.payload.driverName;
+        if (action.payload.driverNameEnglish) state.driverNameEnglish = action.payload.driverNameEnglish;
+        if (action.payload.driverNameSinhala) state.driverNameSinhala = action.payload.driverNameSinhala;
+        if (action.payload.driverNameTamil) state.driverNameTamil = action.payload.driverNameTamil;
 
         const existingMap = new Map(state.varieties.map((v) => [String(v.id), v]));
         action.payload.varieties.forEach((newV) => {
@@ -96,6 +114,9 @@ const unloadSlice = createSlice({
         state.vehicleNo = action.payload.vehicleNo || null;
         state.driverEmpId = action.payload.driverEmpId || null;
         state.driverName = action.payload.driverName || null;
+        state.driverNameEnglish = action.payload.driverNameEnglish || null;
+        state.driverNameSinhala = action.payload.driverNameSinhala || null;
+        state.driverNameTamil = action.payload.driverNameTamil || null;
         state.varieties = action.payload.varieties;
       }
     },
@@ -152,6 +173,9 @@ const unloadSlice = createSlice({
       state.vehicleNo = null;
       state.driverEmpId = null;
       state.driverName = null;
+      state.driverNameEnglish = null;
+      state.driverNameSinhala = null;
+      state.driverNameTamil = null;
       state.varieties = [];
     },
   },

@@ -18,6 +18,8 @@ import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
 
+import { getLocalizedDriverName } from "@/utils/driverLocalization";
+
 type LoadAssignedNavigationProp = StackNavigationProp<
   RootStackParamList,
   "LoadAssigned"
@@ -31,13 +33,16 @@ interface LoadAssignedProps {
 }
 
 export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const [loadCode, setLoadCode] = useState<string>(route.params?.loadCode || "");
-  const [driverId, setDriverId] = useState<string>(
-    route.params?.driverId || route.params?.driverName || ""
+  const [driverEmpId, setDriverEmpId] = useState<string>(
+    route.params?.driverId && /^DRV/i.test(route.params.driverId)
+      ? route.params.driverId
+      : ""
   );
+  const [driverData, setDriverData] = useState<any>(route.params || null);
   const [vehicleNo, setVehicleNo] = useState<string>(route.params?.vehicleNo || "");
 
   const transportIdentifier = route.params?.transportId || route.params?.loadCode;
@@ -60,10 +65,9 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
         const data = response.data.data;
         if (data.transferCode) setLoadCode(data.transferCode);
         if (data.driverEmpId) {
-          setDriverId(data.driverEmpId);
-        } else if (data.driverName) {
-          setDriverId(data.driverName);
+          setDriverEmpId(data.driverEmpId);
         }
+        setDriverData(data);
         if (data.vehicleNo && data.vehicleNo !== "N/A") {
           setVehicleNo(data.vehicleNo);
         }
@@ -155,7 +159,11 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
                   {t("LoadAssigned.Driver", "Driver")}
                 </Text>
                 <Text className="text-white text-base font-bold mt-0.5">
-                  {driverId || "—"}
+                  {getLocalizedDriverName(driverData, i18n.language) ||
+                    driverEmpId ||
+                    route.params?.driverName ||
+                    route.params?.driverId ||
+                    "—"}
                 </Text>
               </View>
             </View>

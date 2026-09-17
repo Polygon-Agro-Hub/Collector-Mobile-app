@@ -55,6 +55,60 @@ export interface MismatchItem {
   receivedCrates?: number;
 }
 
+export const getLocalizedProductName = (
+  item?: {
+    name?: string;
+    cropName?: string;
+    varietyLabel?: string;
+    cropLabel?: string;
+    varietyNameEnglish?: string;
+    varietyNameSinhala?: string;
+    varietyNameTamil?: string;
+    cropNameEnglish?: string;
+    cropNameSinhala?: string;
+    cropNameTamil?: string;
+  } | null,
+  lang?: string
+): string => {
+  if (!item) return "";
+  const currentLang = (lang || "").toLowerCase();
+  if (currentLang.startsWith("si")) {
+    return (
+      item.varietyNameSinhala ||
+      item.cropNameSinhala ||
+      item.name ||
+      item.cropName ||
+      item.varietyNameEnglish ||
+      item.cropNameEnglish ||
+      item.varietyLabel ||
+      item.cropLabel ||
+      ""
+    );
+  }
+  if (currentLang.startsWith("ta")) {
+    return (
+      item.varietyNameTamil ||
+      item.cropNameTamil ||
+      item.name ||
+      item.cropName ||
+      item.varietyNameEnglish ||
+      item.cropNameEnglish ||
+      item.varietyLabel ||
+      item.cropLabel ||
+      ""
+    );
+  }
+  return (
+    item.varietyNameEnglish ||
+    item.cropNameEnglish ||
+    item.name ||
+    item.cropName ||
+    item.varietyLabel ||
+    item.cropLabel ||
+    ""
+  );
+};
+
 const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
   return (rawItems || []).map((item, idx) => {
     const gradesMap: Record<
@@ -102,6 +156,12 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
         item.varietyLabel ||
         item.cropLabel ||
         "Crop Item",
+      varietyNameEnglish: item.varietyNameEnglish || item.varietyLabel,
+      varietyNameSinhala: item.varietyNameSinhala,
+      varietyNameTamil: item.varietyNameTamil,
+      cropNameEnglish: item.cropNameEnglish || item.cropLabel,
+      cropNameSinhala: item.cropNameSinhala,
+      cropNameTamil: item.cropNameTamil,
       image: item.imageUri || item.image || "",
       weighed: false,
       expectedKg: parseFloat(item.totalWeightKg) || 0,
@@ -131,7 +191,7 @@ export default function UnloadingProducts({
   navigation,
   route,
 }: UnloadingProductsProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const loadCode = route.params?.loadCode || "";
   const transportId = route.params?.transportId;
@@ -257,10 +317,11 @@ export default function UnloadingProducts({
           (Math.abs(g.unloadedWeightKg - g.loadedWeightKg) > 0.01 ||
             g.unloadedCrates !== g.loadedCrates)
         ) {
+          const gradeLetter = (g.gradeKey || g.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A";
           mismatches.push({
             id: `${p.id}-${g.id}`,
-            productName: p.name,
-            grade: g.gradeTitle,
+            productName: getLocalizedProductName(p, i18n.language) || p.name,
+            grade: `${t("Common.Grade", "Grade")} ${gradeLetter}`,
             expectedKg: g.loadedWeightKg,
             measuredKg: g.unloadedWeightKg,
             differenceKg: Math.abs(g.unloadedWeightKg - g.loadedWeightKg),
@@ -271,7 +332,7 @@ export default function UnloadingProducts({
       });
     });
     return mismatches;
-  }, [weighedProducts]);
+  }, [weighedProducts, i18n.language, t]);
 
   // Track if mismatch has been reported
   const [mismatchReported, setMismatchReported] = useState(false);
@@ -296,6 +357,12 @@ export default function UnloadingProducts({
       product: {
         id: item.id,
         name: item.name,
+        varietyNameEnglish: item.varietyNameEnglish,
+        varietyNameSinhala: item.varietyNameSinhala,
+        varietyNameTamil: item.varietyNameTamil,
+        cropNameEnglish: item.cropNameEnglish,
+        cropNameSinhala: item.cropNameSinhala,
+        cropNameTamil: item.cropNameTamil,
         image: item.image,
         totalWeightKg: item.expectedKg || 0,
         totalCrates: item.expectedCrates || 0,
@@ -457,15 +524,14 @@ export default function UnloadingProducts({
       } else {
         Alert.alert(
           t("Error.error", "Error"),
-          errorMsg || t("Error.Failed to finish unloading", "Failed to finish unloading.")
+          t("Error.FailedToFinishUnloading", "Failed to finish unloading.")
         );
       }
     } catch (err: any) {
       console.error("Error finishing unloading:", err);
       Alert.alert(
         t("Error.error", "Error"),
-        err?.response?.data?.message ||
-          t("Error.Failed to finish unloading", "Failed to finish unloading.")
+        t("Error.FailedToFinishUnloading", "Failed to finish unloading.")
       );
     } finally {
       setSubmitting(false);
@@ -507,7 +573,7 @@ export default function UnloadingProducts({
           className="font-bold text-xs text-center text-[#17262C]"
           numberOfLines={2}
         >
-          {item.name}
+          {getLocalizedProductName(item, i18n.language) || item.name}
         </Text>
 
         {/* Floating action indicator */}
@@ -628,25 +694,25 @@ export default function UnloadingProducts({
 
                     {/* Details */}
                     <Text className="text-xs text-black mb-1 font-bold">
-                      Product : {mismatch.productName}
+                      {t("Mismatch.Product", "Product")} : {mismatch.productName}
                     </Text>
                     <Text className="text-xs text-black mb-2 font-bold">
-                      Quality : {mismatch.grade}
+                      {t("Mismatch.Quality", "Quality")} : {mismatch.grade}
                     </Text>
 
                     {/* Numbered Difference Points */}
                     <Text className="text-xs text-black leading-5">
-                      1. Expected{" "}
+                      {t("Mismatch.Point1", "1.")} {t("Mismatch.Expected", "Expected")}{" "}
                       <Text className="font-bold">
-                        {mismatch.expectedKg.toFixed(2)} kg
+                        {mismatch.expectedKg.toFixed(2)} {t("Common.kg", "kg")}
                       </Text>
-                      , but measured{" "}
+                      {t("Mismatch.ButMeasured", ", but measured")}{" "}
                       <Text className="font-bold">
-                        {mismatch.measuredKg.toFixed(2)} kg
+                        {mismatch.measuredKg.toFixed(2)} {t("Common.kg", "kg")}
                       </Text>
-                      . Difference is{" "}
+                      {t("Mismatch.DifferenceIs", ". Difference is")}{" "}
                       <Text className="font-bold">
-                        {mismatch.differenceKg.toFixed(2)} kg
+                        {mismatch.differenceKg.toFixed(2)} {t("Common.kg", "kg")}
                       </Text>
                       .
                     </Text>
@@ -654,11 +720,11 @@ export default function UnloadingProducts({
                     {mismatch.expectedCrates !== undefined &&
                       mismatch.receivedCrates !== undefined && (
                         <Text className="text-xs text-[#17262C] leading-5 mt-1">
-                          2. Expected crates count is{" "}
+                          {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedCratesCountIs", "Expected crates count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.expectedCrates}
                           </Text>
-                          , but received crate count is{" "}
+                          {t("Mismatch.ButReceivedCrateCountIs", ", but received crate count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.receivedCrates}
                           </Text>
@@ -673,7 +739,7 @@ export default function UnloadingProducts({
 
           {/* Fixed Bottom Container: Report Mismatch + Finish Unloading */}
           <View
-            className="px-6 pt-3 bg-white border-t border-[#E5E7EB]"
+            className="px-6 pt-3 bg-white"
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}
           >
             {/* Report Mismatch button — shown directly above Finish Unloading when mismatches exist */}
@@ -683,7 +749,9 @@ export default function UnloadingProducts({
                 disabled={mismatchReported}
                 activeOpacity={0.8}
                 className={`w-full h-[52px] rounded-full items-center justify-center mb-3 ${
-                  mismatchReported ? "bg-[#A0A4A8]" : "bg-[#FF3B30]"
+                  mismatchReported
+                    ? "bg-white border-2 border-[#FF3B30]"
+                    : "bg-[#FF3B30]"
                 }`}
                 style={{
                   shadowColor: "#000",
@@ -693,10 +761,12 @@ export default function UnloadingProducts({
                   elevation: mismatchReported ? 1 : 3,
                 }}
               >
-                <Text className="font-bold text-sm text-white">
-                  {mismatchReported
-                    ? t("UnloadingProducts.ReportedMismatch", "Mismatch Reported")
-                    : t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
+                <Text
+                  className={`font-bold text-sm ${
+                    mismatchReported ? "text-[#FF3B30]" : "text-white"
+                  }`}
+                >
+                  {t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
                 </Text>
               </TouchableOpacity>
             )}

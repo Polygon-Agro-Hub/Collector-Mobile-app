@@ -4,6 +4,7 @@ import {
   Text,
   Animated,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -34,6 +35,9 @@ export interface VerifiedLoadData {
   vehicleNo?: string;
   driverEmpId?: string;
   driverName?: string;
+  driverNameEnglish?: string;
+  driverNameSinhala?: string;
+  driverNameTamil?: string;
   centreName?: string;
   origin?: string;
   items?: any[];
@@ -270,11 +274,10 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       if (code === "DISTRIBUTION_CENTER_MISMATCH") {
         setModalTitle(t("qrcode.Error", "Error!"));
         setModalMessage(
-          errData?.message ||
-            t(
-              "qrcode.CenterMismatch",
-              "This load is not assigned to your distribution center."
-            )
+          t(
+            "qrcode.CenterMismatch",
+            "This load is not assigned to your distribution center."
+          )
         );
         setShowRescanButton(true);
         setModalType("error");
@@ -285,11 +288,10 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       if (code === "JOURNEY_NOT_ENDED") {
         setModalTitle(t("qrcode.Error", "Error!"));
         setModalMessage(
-          errData?.message ||
-            t(
-              "qrcode.JourneyNotEnded",
-              "This load's journey has not ended yet.\nPlease wait until the driver completes the journey."
-            )
+          t(
+            "qrcode.JourneyNotEnded",
+            "This load's journey has not ended yet.\nPlease wait until the driver completes the journey."
+          )
         );
         setShowRescanButton(true);
         setModalType("error");
@@ -315,8 +317,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       console.error("Error verifying load QR:", err);
       setModalTitle(t("qrcode.Error", "Error!"));
       setModalMessage(
-        errData?.message ||
-          t("qrcode.VerifyFailed", "Something went wrong. Please try again.")
+        t("qrcode.VerifyFailed", "Something went wrong. Please try again.")
       );
       setShowRescanButton(true);
       setModalType("error");
@@ -343,6 +344,9 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         vehicleNo: load.vehicleNo,
         driverEmpId: load.driverEmpId,
         driverName: load.driverName,
+        driverNameEnglish: load.driverNameEnglish,
+        driverNameSinhala: load.driverNameSinhala,
+        driverNameTamil: load.driverNameTamil,
         origin: load.centreName || load.origin,
         items: load.items,
         isUnloaded: load.isUnloaded ?? false,
@@ -446,83 +450,85 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         autoClose={true}
       />
 
-      <View className="flex-1">
-        {/* Semi-transparent overlay */}
-        <View className="flex-1 bg-black/50">
-          {/* Custom Header with no title */}
-          <View>
-            <CustomHeader
-              title=""
-              navigation={navigation}
-              transparent={true}
-              iconBgColor="#F7FAFF"
+      {/* Full-Screen Camera View */}
+      <CameraView
+        style={StyleSheet.absoluteFill}
+        facing="back"
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr"],
+        }}
+        onBarcodeScanned={
+          scanned || loading ? undefined : handleBarCodeScanned
+        }
+      />
+
+      {/* Dark overlay with clear scan frame in center */}
+      <View className="flex-1 bg-black/35">
+        {/* Custom Header */}
+        <CustomHeader
+          title={t("ScanLoadQR.Title", t("qrcode.ScanLoadQR"))}
+          navigation={navigation}
+          iconBgColor="#F7FAFF"
+          bgColor="#FFFFFF"
+        />
+
+        {/* Scan Frame Container */}
+        <View className="flex-1 justify-center items-center">
+          <View
+            style={{
+              width: wp(80),
+              height: wp(80),
+              borderRadius: 24,
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            {/* Animated Purple Scan Line */}
+            <Animated.View
+              style={{
+                width: "100%",
+                height: 3,
+                backgroundColor: PRIMARY_OUTLINE_COLOR,
+                transform: [{ translateY: scanLineTranslateY }],
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 10,
+                opacity: scanned || loading ? 0 : 1,
+              }}
             />
+
+            {/* Corner Markers - Top Left */}
+            <View style={{ position: "absolute", top: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20 }} />
+            </View>
+
+            {/* Corner Markers - Top Right */}
+            <View style={{ position: "absolute", top: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomRightRadius: 20, alignSelf: "flex-end" }} />
+            </View>
+
+            {/* Corner Markers - Bottom Left */}
+            <View style={{ position: "absolute", bottom: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20 }} />
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20 }} />
+            </View>
+
+            {/* Corner Markers - Bottom Right */}
+            <View style={{ position: "absolute", bottom: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopRightRadius: 20, alignSelf: "flex-end" }} />
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} />
+            </View>
           </View>
 
-          {/* Scan Frame Container */}
-          <View className="flex-1 justify-center items-center">
-            <View
-              style={{
-                width: wp(80),
-                height: wp(80),
-                borderRadius: 24,
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              <CameraView
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                }}
-                facing="back"
-                barcodeScannerSettings={{
-                  barcodeTypes: ["qr"],
-                }}
-                onBarcodeScanned={
-                  scanned || loading ? undefined : handleBarCodeScanned
-                }
-              />
-
-              <Animated.View
-                style={{
-                  width: "100%",
-                  height: 3,
-                  backgroundColor: PRIMARY_OUTLINE_COLOR,
-                  transform: [{ translateY: scanLineTranslateY }],
-                  position: "relative",
-                  zIndex: 10,
-                  opacity: scanned || loading ? 0 : 1,
-                }}
-              />
-
-              {/* Corner Markers - Top Left */}
-              <View style={{ position: "absolute", top: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
-                <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20 }} />
-              </View>
-
-              {/* Corner Markers - Top Right */}
-              <View style={{ position: "absolute", top: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
-                <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomRightRadius: 20, alignSelf: "flex-end" }} />
-              </View>
-
-              {/* Corner Markers - Bottom Left */}
-              <View style={{ position: "absolute", bottom: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20 }} />
-                <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20 }} />
-              </View>
-
-              {/* Corner Markers - Bottom Right */}
-              <View style={{ position: "absolute", bottom: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopRightRadius: 20, alignSelf: "flex-end" }} />
-                <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} />
-              </View>
-            </View>
+          {/* Subtitle helper badge */}
+          <View className="mt-8 bg-black/60 px-5 py-2.5 rounded-full">
+            <Text className="text-white text-xs font-semibold text-center">
+              {t("ScanLoadQR.AlignLoadQR", t("qrcode.AlignLoadQR", "Align the Load QR code within the frame to scan"))}
+            </Text>
           </View>
         </View>
       </View>

@@ -21,6 +21,9 @@ export type RootStackParamList = {
         driverId?: number;
         driverEmpId?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
         vehicleId?: number;
         vehicleNo?: string;
         vType?: string;
@@ -36,6 +39,9 @@ export type RootStackParamList = {
         driverId?: number;
         driverEmpId?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
         vehicleId?: number;
         vType?: string;
         vCapacity?: string;
@@ -51,6 +57,9 @@ export type RootStackParamList = {
         driverId?: number;
         driverEmpId?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
         vehicleId?: number;
         loadCode?: string;
         items?: any[];
@@ -63,6 +72,9 @@ export type RootStackParamList = {
         loadCode?: string;
         vehicleNo?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
         driverId?: string;
         centreName?: string;
       }
@@ -74,6 +86,9 @@ export type RootStackParamList = {
         vehicleNo?: string;
         driverId?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
       }
     | undefined;
   ReceivedProductsToday: undefined;
@@ -86,6 +101,9 @@ export type RootStackParamList = {
         vehicleNo?: string;
         driverEmpId?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
         origin?: string;
         items?: any[];
         isUnloaded?: boolean;

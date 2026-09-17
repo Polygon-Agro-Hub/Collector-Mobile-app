@@ -277,7 +277,7 @@ export default function WeighGrade({
           </Text>
           <View className="bg-[#E9ECF1] rounded-full px-5 py-1.5">
             <Text className="font-bold text-xs text-[#17262C]">
-              {gradeTitle}
+              {t("WeighGrade.Grade", "Grade")} {(gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"}
             </Text>
           </View>
         </View>
@@ -291,7 +291,7 @@ export default function WeighGrade({
               {t("WeighGrade.LoadedWeight", "Loaded Weight")}
             </Text>
             <Text className="font-extrabold text-sm text-[#17262C] mt-0.5">
-              {loadedWeightKg.toFixed(2)} kg
+              {loadedWeightKg.toFixed(2)} {t("Common.kg", "kg")}
             </Text>
           </View>
 
@@ -348,7 +348,7 @@ export default function WeighGrade({
                   {/* Number of Crates Label & Delete Button (for 2nd card onward) */}
                   <View className="flex-row items-center justify-center relative mb-1.5 min-h-[28px]">
                     <Text className="text-center text-[#79747E] text-xs font-medium">
-                      --No. of Creates--
+                      {t("WeighGrade.NoOfCrates", "--No. of Crates--")}
                     </Text>
                     {item.setNumber > 1 && (
                       <TouchableOpacity
@@ -480,7 +480,7 @@ export default function WeighGrade({
       {/* Warning Confirmation Modal for Delete Set */}
       <WarningConfirmation
         visible={setToDelete !== null}
-        message={`Are you sure you want to delete added\n${productName} - ${gradeTitle} - Set ${setToDelete?.setNumber} ?`}
+        message={`Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${(gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`}
         onConfirm={() => {
           if (setToDelete) {
             handleDeleteSet(setToDelete.id);

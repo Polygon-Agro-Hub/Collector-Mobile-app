@@ -21,6 +21,8 @@ import LoadingPage from "@/component/components/loading/LoadingPage";
 import AddButton from "@/component/components/buttons/AddButton";
 import { MaterialIcons } from "@expo/vector-icons";
 
+import { getLocalizedDriverName } from "@/utils/driverLocalization";
+
 type ReceivedProductsTodayNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ReceivedProductsToday"
@@ -36,6 +38,9 @@ export interface ReceivedProductItem {
   vehicleNo?: string;
   driverEmpId?: string;
   driverName?: string;
+  driverNameEnglish?: string;
+  driverNameSinhala?: string;
+  driverNameTamil?: string;
   crates: number;
   weight: string;
   origin: string;
@@ -45,7 +50,7 @@ export interface ReceivedProductItem {
 export default function ReceivedProductsToday({
   navigation,
 }: ReceivedProductsTodayProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [products, setProducts] = useState<ReceivedProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -124,12 +129,16 @@ export default function ReceivedProductsToday({
   };
 
   const handleCardPress = (item: ReceivedProductItem) => {
+    const locDriverName = getLocalizedDriverName(item, i18n.language) || item.driverName;
     navigation.navigate("ReceivedProductsSummary", {
       transportId: item.id,
       loadCode: item.transferCode,
       vehicleNo: item.vehicleNo,
       driverEmpId: item.driverEmpId,
-      driverName: item.driverName,
+      driverName: locDriverName,
+      driverNameEnglish: item.driverNameEnglish,
+      driverNameSinhala: item.driverNameSinhala,
+      driverNameTamil: item.driverNameTamil,
       origin: item.origin,
       isUnloaded: true,
       title: "Unloaded Summery",
@@ -138,6 +147,22 @@ export default function ReceivedProductsToday({
 
   const formatIndex = (index: number) => {
     return String(index + 1).padStart(2, "0");
+  };
+
+  const formatDisplayTime = (timeStr?: string) => {
+    if (!timeStr) return "";
+    let str = timeStr.replace(/^At\s*/i, `${t("Common.At", "At")} `);
+    const lang = (i18n.language || "").toLowerCase();
+    if (lang.startsWith("si")) {
+      str = str
+        .replace(/A\.?M\.?/gi, "පෙ.ව.")
+        .replace(/P\.?M\.?/gi, "ප.ව.");
+    } else if (lang.startsWith("ta")) {
+      str = str
+        .replace(/A\.?M\.?/gi, "முற்பகல்")
+        .replace(/P\.?M\.?/gi, "பிற்பகல்");
+    }
+    return str;
   };
 
   return (
@@ -209,7 +234,7 @@ export default function ReceivedProductsToday({
                     {item.origin}
                   </Text>
                   <Text className="text-xs text-[#54617D] mt-0.5 font-medium">
-                    {item.time ? item.time.replace(/^At\s*/i, `${t("Common.At", "At")} `) : ""}
+                    {formatDisplayTime(item.time)}
                   </Text>
                 </View>
 

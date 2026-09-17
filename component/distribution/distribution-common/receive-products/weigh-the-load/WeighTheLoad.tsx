@@ -21,6 +21,7 @@ import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService
 import NetInfo from "@react-native-community/netinfo";
 import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
+import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
 
 type WeighTheLoadNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -49,6 +50,12 @@ export interface GradeWeighItem {
 export interface CropWeighData {
   id: string;
   name: string;
+  varietyNameEnglish?: string;
+  varietyNameSinhala?: string;
+  varietyNameTamil?: string;
+  cropNameEnglish?: string;
+  cropNameSinhala?: string;
+  cropNameTamil?: string;
   image: string;
   totalWeightKg: number;
   totalCrates: number;
@@ -68,7 +75,7 @@ export default function WeighTheLoad({
   navigation,
   route,
 }: WeighTheLoadProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const passedProduct = route.params?.product;
@@ -88,6 +95,12 @@ export default function WeighTheLoad({
         return {
           id: reduxVariety.id,
           name: reduxVariety.name,
+          varietyNameEnglish: reduxVariety.varietyNameEnglish,
+          varietyNameSinhala: reduxVariety.varietyNameSinhala,
+          varietyNameTamil: reduxVariety.varietyNameTamil,
+          cropNameEnglish: reduxVariety.cropNameEnglish,
+          cropNameSinhala: reduxVariety.cropNameSinhala,
+          cropNameTamil: reduxVariety.cropNameTamil,
           image: reduxVariety.image,
           totalWeightKg: reduxVariety.expectedKg,
           totalCrates: reduxVariety.expectedCrates,
@@ -143,6 +156,12 @@ export default function WeighTheLoad({
         setCropData({
           id: reduxVariety.id,
           name: reduxVariety.name,
+          varietyNameEnglish: reduxVariety.varietyNameEnglish,
+          varietyNameSinhala: reduxVariety.varietyNameSinhala,
+          varietyNameTamil: reduxVariety.varietyNameTamil,
+          cropNameEnglish: reduxVariety.cropNameEnglish,
+          cropNameSinhala: reduxVariety.cropNameSinhala,
+          cropNameTamil: reduxVariety.cropNameTamil,
           image: reduxVariety.image,
           totalWeightKg: reduxVariety.expectedKg,
           totalCrates: reduxVariety.expectedCrates,
@@ -175,6 +194,12 @@ export default function WeighTheLoad({
           setCropData({
             id: reduxVariety.id,
             name: reduxVariety.name,
+            varietyNameEnglish: reduxVariety.varietyNameEnglish,
+            varietyNameSinhala: reduxVariety.varietyNameSinhala,
+            varietyNameTamil: reduxVariety.varietyNameTamil,
+            cropNameEnglish: reduxVariety.cropNameEnglish,
+            cropNameSinhala: reduxVariety.cropNameSinhala,
+            cropNameTamil: reduxVariety.cropNameTamil,
             image: reduxVariety.image,
             totalWeightKg: reduxVariety.expectedKg,
             totalCrates: reduxVariety.expectedCrates,
@@ -217,24 +242,28 @@ export default function WeighTheLoad({
         (Math.abs(g.unloadedWeightKg - g.loadedWeightKg) > 0.01 ||
           g.unloadedCrates !== g.loadedCrates)
     )
-    .map((g) => ({
-      id: g.id,
-      productName: cropData.name,
-      grade: g.gradeTitle,
-      expectedKg: g.loadedWeightKg,
-      measuredKg: g.unloadedWeightKg || 0,
-      differenceKg: Math.abs((g.unloadedWeightKg || 0) - g.loadedWeightKg),
-      expectedCrates: g.loadedCrates,
-      receivedCrates: g.unloadedCrates || 0,
-    }));
+    .map((g) => {
+      const gradeLetter = (g.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A";
+      return {
+        id: g.id,
+        productName: getLocalizedProductName(cropData, i18n.language) || cropData.name,
+        grade: `${t("WeighTheLoad.Grade", "Grade")} ${gradeLetter}`,
+        expectedKg: g.loadedWeightKg,
+        measuredKg: g.unloadedWeightKg || 0,
+        differenceKg: Math.abs((g.unloadedWeightKg || 0) - g.loadedWeightKg),
+        expectedCrates: g.loadedCrates,
+        receivedCrates: g.unloadedCrates || 0,
+      };
+    });
 
   const handleGradePress = (grade: GradeWeighItem) => {
+    const gradeLetter = (grade.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A";
     navigation.navigate("WeighGrade", {
       varietyId: cropData.id,
       productId: cropData.id,
-      productName: cropData.name,
+      productName: getLocalizedProductName(cropData, i18n.language) || cropData.name,
       productImage: cropData.image,
-      gradeTitle: grade.gradeTitle,
+      gradeTitle: `${t("WeighTheLoad.Grade", "Grade")} ${gradeLetter}`,
       gradeId: grade.id,
       loadedWeightKg: grade.loadedWeightKg,
       loadedCrates: grade.loadedCrates,
@@ -503,7 +532,7 @@ export default function WeighTheLoad({
             resizeMode="contain"
           />
           <Text className="font-extrabold text-base text-[#17262C]">
-            {cropData.name}
+            {getLocalizedProductName(cropData, i18n.language) || cropData.name}
           </Text>
         </View>
 
@@ -565,7 +594,7 @@ export default function WeighTheLoad({
               {/* Grade Header */}
               <View className="flex-row items-center justify-between p-4 bg-white">
                 <Text className="font-extrabold text-base text-[#17262C]">
-                  {t("WeighTheLoad.Grade", "Grade")} {grade.gradeTitle.replace(/Grade\s*/i, "")}
+                  {t("WeighTheLoad.Grade", "Grade")} {(grade.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"}
                 </Text>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -719,25 +748,25 @@ export default function WeighTheLoad({
 
                 {/* Details */}
                 <Text className="text-xs text-black mb-1 font-bold">
-                  Product : {mismatch.productName}
+                  {t("Mismatch.Product", "Product")} : {mismatch.productName}
                 </Text>
                 <Text className="text-xs text-black mb-2 font-bold">
-                  Quality : {mismatch.grade}
+                  {t("Mismatch.Quality", "Quality")} : {mismatch.grade}
                 </Text>
 
                 {/* Numbered Difference Points */}
                 <Text className="text-xs text-black leading-5">
-                  1. Expected{" "}
+                  {t("Mismatch.Point1", "1.")} {t("Mismatch.Expected", "Expected")}{" "}
                   <Text className="font-bold">
-                    {mismatch.expectedKg.toFixed(2)} kg
+                    {mismatch.expectedKg.toFixed(2)} {t("Common.kg", "kg")}
                   </Text>
-                  , but measured{" "}
+                  {t("Mismatch.ButMeasured", ", but measured")}{" "}
                   <Text className="font-bold">
-                    {mismatch.measuredKg.toFixed(2)} kg
+                    {mismatch.measuredKg.toFixed(2)} {t("Common.kg", "kg")}
                   </Text>
-                  . Difference is{" "}
+                  {t("Mismatch.DifferenceIs", ". Difference is")}{" "}
                   <Text className="font-bold">
-                    {mismatch.differenceKg.toFixed(2)} kg
+                    {mismatch.differenceKg.toFixed(2)} {t("Common.kg", "kg")}
                   </Text>
                   .
                 </Text>
@@ -745,11 +774,11 @@ export default function WeighTheLoad({
                 {mismatch.expectedCrates !== undefined &&
                   mismatch.receivedCrates !== undefined && (
                     <Text className="text-xs text-[#17262C] leading-5 mt-1">
-                      2. Expected crates count is{" "}
+                      {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedCratesCountIs", "Expected crates count is")}{" "}
                       <Text className="font-bold">
                         {mismatch.expectedCrates}
                       </Text>
-                      , but received crate count is{" "}
+                      {t("Mismatch.ButReceivedCrateCountIs", ", but received crate count is")}{" "}
                       <Text className="font-bold">
                         {mismatch.receivedCrates}
                       </Text>
@@ -764,7 +793,7 @@ export default function WeighTheLoad({
 
       {/* Fixed Bottom Button: Mark as Unloaded */}
       <View
-        className="px-6 pt-3 bg-white border-t border-[#E5E7EB]"
+        className="px-6 pt-3 bg-white"
         style={{ paddingBottom: Math.max(insets.bottom, 16) }}
       >
         <TouchableOpacity
@@ -791,7 +820,7 @@ export default function WeighTheLoad({
       {/* Warning Confirmation Modal for Delete Grade Unloaded Weight */}
       <WarningConfirmation
         visible={gradeToDelete !== null}
-        message={`Are you sure you want to delete added\n${cropData.name} - ${gradeToDelete?.gradeTitle} ?`}
+        message={`Are you sure you want to delete added\n${getLocalizedProductName(cropData, i18n.language) || cropData.name} - ${t("WeighTheLoad.Grade", "Grade")} ${(gradeToDelete?.gradeTitle?.replace(/^Grade\s*/i, "")?.replace(/\s*Grade$/i, ""))?.trim() || "A"} ?`}
         onConfirm={handleConfirmDeleteGrade}
         onCancel={() => setGradeToDelete(null)}
         confirmText="Delete"

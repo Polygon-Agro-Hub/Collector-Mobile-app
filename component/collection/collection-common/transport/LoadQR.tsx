@@ -36,6 +36,9 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
   const vehicleNo = route.params?.vehicleNo || "";
   const driverId = route.params?.driverId || "";
   const driverName = route.params?.driverName || "";
+  const driverNameEnglish = route.params?.driverNameEnglish || "";
+  const driverNameSinhala = route.params?.driverNameSinhala || "";
+  const driverNameTamil = route.params?.driverNameTamil || "";
 
   useFocusEffect(
     React.useCallback(() => {
@@ -60,6 +63,9 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
       vehicleNo,
       driverId,
       driverName,
+      driverNameEnglish,
+      driverNameSinhala,
+      driverNameTamil,
     });
   };
 

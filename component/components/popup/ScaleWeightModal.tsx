@@ -7,6 +7,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { FontAwesome6, Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 import {
   wifiScaleService,
   ScaleStatus,
@@ -27,6 +28,7 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
   scaleName = "Budry MFD - 300",
   initialWeight = 0,
 }) => {
+  const { t } = useTranslation();
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
     wifiScaleService.getStatus(),
   );
@@ -161,7 +163,7 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
                     marginBottom: 16,
                   }}
                 >
-                  Real - Time Scale Weight
+                  {t("ScaleWeightModal.RealTimeScaleWeight", "Real - Time Scale Weight")}
                 </Text>
 
                 {/* Live weight read out */}
@@ -174,7 +176,7 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
                     marginBottom: 20,
                   }}
                 >
-                  {displayWeight.toFixed(2)} kg
+                  {displayWeight.toFixed(2)} {t("Common.kg", "kg")}
                 </Text>
 
                 {/* Continue button */}
@@ -198,7 +200,7 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
                       color: "#FFFFFF",
                     }}
                   >
-                    Continue
+                    {t("ScaleWeightModal.Continue", t("Common.Continue", "Continue"))}
                   </Text>
                 </TouchableOpacity>
               </View>

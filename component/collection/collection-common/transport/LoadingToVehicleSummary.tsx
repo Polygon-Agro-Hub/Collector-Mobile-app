@@ -22,6 +22,8 @@ import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
 import { clearTransportLoad } from "@/store/transportSlice";
+import { getLocalizedProductName } from "@/component/distribution/distribution-common/receive-products/unloading-products/UnloadingProducts";
+import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type LoadingToVehicleSummaryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -52,6 +54,12 @@ export interface CropLoadData {
   cropLabel?: string;
   varietyId?: string;
   varietyLabel?: string;
+  varietyNameEnglish?: string;
+  varietyNameSinhala?: string;
+  varietyNameTamil?: string;
+  cropNameEnglish?: string;
+  cropNameSinhala?: string;
+  cropNameTamil?: string;
   cropName: string;
   imageUri: string;
   totalWeightKg: number;
@@ -63,7 +71,7 @@ export default function LoadingToVehicleSummary({
   navigation,
   route,
 }: LoadingToVehicleSummaryProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const isViewOnly = !!(route.params?.isViewOnly || route.params?.transportId);
@@ -114,7 +122,10 @@ export default function LoadingToVehicleSummary({
         if (data.transferCode) setLoadCode(data.transferCode);
         if (data.vehicleNo) setVehicleNo(data.vehicleNo);
         if (data.driverEmpId) setDriverEmpId(data.driverEmpId);
-        if (data.driverName) setDriverName(data.driverName);
+        if (data.driverName) {
+          const locName = getLocalizedDriverName(data, i18n.language);
+          setDriverName(locName || data.driverName);
+        }
         if (data.centreName) setCentreName(data.centreName);
         if (Array.isArray(data.items)) {
           setItems(data.items);
@@ -197,6 +208,9 @@ export default function LoadingToVehicleSummary({
           centreName: route.params?.centreName || centreName,
           driverId: route.params?.driverEmpId || transportState.driverEmpId || driverEmpId || undefined,
           driverName: route.params?.driverName || transportState.driverName || driverName || undefined,
+          driverNameEnglish: route.params?.driverNameEnglish || transportState.driverNameEnglish || undefined,
+          driverNameSinhala: route.params?.driverNameSinhala || transportState.driverNameSinhala || undefined,
+          driverNameTamil: route.params?.driverNameTamil || transportState.driverNameTamil || undefined,
         });
       } else {
         Alert.alert(
@@ -273,7 +287,7 @@ export default function LoadingToVehicleSummary({
                     </View>
                   )}
                   <Text className="text-base font-bold text-black">
-                    {crop.cropName}
+                    {getLocalizedProductName(crop, i18n.language) || crop.cropName}
                   </Text>
                 </View>
 
@@ -291,7 +305,7 @@ export default function LoadingToVehicleSummary({
                       style={{ marginBottom: 4 }}
                     />
                     <Text className="text-gray-300 text-xs text-center">
-                      Total{"\n"}Weight
+                      {t("LoadingToVehicleSummary.TotalWeight", "Total Weight")}
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
                       {Number(crop.totalWeightKg || 0).toFixed(2)} {t("Common.kg", "kg")}
@@ -335,7 +349,7 @@ export default function LoadingToVehicleSummary({
                       >
                         <View className="bg-[#FFF6AD] px-4 py-0.5 rounded-full">
                           <Text className="text-[11px] font-bold text-gray-800">
-                            {gs.grade}  |  {t("LoadingToVehicleSummary.Set", "Set")} : {gs.set}
+                            {t("LoadingToVehicleSummary.Grade", "Grade")} {gs.grade.replace(/^Grade\s*/i, "")}  |  {t("LoadingToVehicleSummary.Set", "Set")} : {gs.set}
                           </Text>
                         </View>
                       </View>

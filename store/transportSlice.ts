@@ -65,6 +65,9 @@ export interface TransportState {
   driverId: number | null;
   driverEmpId: string | null;
   driverName: string | null;
+  driverNameEnglish: string | null;
+  driverNameSinhala: string | null;
+  driverNameTamil: string | null;
   vehicleId: number | null;
   vehicleNo: string | null;
   vType: string | null;
@@ -81,6 +84,9 @@ const initialState: TransportState = {
   driverId: null,
   driverEmpId: null,
   driverName: null,
+  driverNameEnglish: null,
+  driverNameSinhala: null,
+  driverNameTamil: null,
   vehicleId: null,
   vehicleNo: null,
   vType: null,
@@ -103,6 +109,9 @@ const transportSlice = createSlice({
         driverId?: number | null;
         driverEmpId?: string | null;
         driverName?: string | null;
+        driverNameEnglish?: string | null;
+        driverNameSinhala?: string | null;
+        driverNameTamil?: string | null;
         vehicleId?: number | null;
         vehicleNo?: string | null;
         vType?: string | null;
@@ -112,6 +121,9 @@ const transportSlice = createSlice({
       state.driverId = action.payload.driverId ?? null;
       state.driverEmpId = action.payload.driverEmpId ?? null;
       state.driverName = action.payload.driverName ?? null;
+      state.driverNameEnglish = action.payload.driverNameEnglish ?? null;
+      state.driverNameSinhala = action.payload.driverNameSinhala ?? null;
+      state.driverNameTamil = action.payload.driverNameTamil ?? null;
       state.vehicleId = action.payload.vehicleId ?? null;
       state.vehicleNo = action.payload.vehicleNo ?? null;
       state.vType = action.payload.vType ?? null;
@@ -159,6 +171,9 @@ const transportSlice = createSlice({
       state.driverId = null;
       state.driverEmpId = null;
       state.driverName = null;
+      state.driverNameEnglish = null;
+      state.driverNameSinhala = null;
+      state.driverNameTamil = null;
       state.vehicleId = null;
       state.vehicleNo = null;
       state.vType = null;

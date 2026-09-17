@@ -26,7 +26,7 @@
     "GoBack": "ආපසු යන්න",
     "Cancel": "අවලංගු කරන්න",
     "Submitting": "යොමු කරමින්...",
-    "kg": "කි.ග්රෑ.",
+    "kg": "කි.ග්‍රෑ.",
     "At": "කාලය :",
     "Crates": "පෙට්ටි",
     "Set": "කාණ්ඩය",
@@ -62,6 +62,7 @@
   "Error": {
     "error": "සමාවෙන්න",
     "Error": "දෝෂයක්",
+    "FailedToFinishUnloading": "බෑම අවසන් කිරීමට නොහැකි විය.",
     "Failed to fetch empid.": "සේවක හැඳුනුම්පත සොයා ගැනීමට අසමත් විය.",
     "You cannot transfer the maximum amount of": "ඔබට උපරිම මුදල මාරු කළ නොහැක",
     "This EMP ID is not approved.": "මෙම EMP ID අනුමත කර නැත.",
@@ -1044,9 +1045,13 @@
     "Title": "සාරාංශය",
     "UnloadedSummary": "බාන ලද සාරාංශය",
     "StartUnloading": "බෑම අරඹන්න",
+    "TotalCrates": "පෙට්ටි",
     "Crates": "පෙට්ටි",
     "Set": "කාණ්ඩය",
-    "Grade": "ශ්රේණිය"
+    "Grade": "ශ්‍රේණිය",
+    "Weight": "බර",
+    "Loading": "පැටවුම් විස්තර පූරණය වෙමින්...",
+    "NoItems": "- මෙම පැටවුමෙහි ද්‍රව්‍ය හමු නොවීය -"
   },
   "UnloadingProducts": {
     "Title": "නිෂ්පාදන බෑම",
@@ -1058,8 +1063,24 @@
     "ReportedMismatch": "වෙනස වාර්තා කර ඇත",
     "FinishUnloading": "බෑම අවසන් කරන්න",
     "PleaseWeighAllProducts": "බෑම අවසන් කිරීමට පෙර කරුණාකර සියලුම නිෂ්පාදන බර කරන්න.",
+    "PleaseReportMismatch": "බෑම අවසන් කිරීමට පෙර කරුණාකර වෙනස වාර්තා කරන්න.",
+    "MismatchReportedTitle": "වෙනස වාර්තා කරන ලදී!",
+    "MismatchReportedMessage": "තොගයේ වෙනස සාර්ථකව වාර්තා කරන ලදී.",
     "SuccessTitle": "සාර්ථකයි!",
-    "SuccessMessage": "නිෂ්පාදන සාර්ථකව බාන ලදී"
+    "SuccessMessage": "නිෂ්පාදන සාර්ථකව බාන ලදී",
+    "NoItems": "- මෙම ප්‍රවාහනය සඳහා නිෂ්පාදන හමු නොවීය -"
+  },
+  "Mismatch": {
+    "Product": "නිෂ්පාදනය",
+    "Quality": "ගුණාත්මකභාවය",
+    "Point1": "1.",
+    "Expected": "බලාපොරොත්තු වූ",
+    "ButMeasured": "වුවද මනින ලද්දේ",
+    "DifferenceIs": ". වෙනස",
+    "Point2": "2.",
+    "ExpectedCratesCountIs": "බලාපොරොත්තු වූ පෙට්ටි ගණන",
+    "ButReceivedCrateCountIs": "වුවද ලැබී ඇත්තේ පෙට්ටි",
+    "Kg": "කි.ග්‍රෑ."
   },
   "WeighTheLoad": {
     "Title": "බර කිරන්න",
@@ -1071,7 +1092,8 @@
     "UnloadedCrates": "පෙට්ටි",
     "Grade": "ශ්රේණිය",
     "MarkAsUnloaded": "බාන ලද බව සලකුණු කරන්න",
-    "SuccessTitle": "සාර්ථකව බාන ලදී!"
+    "SuccessTitle": "සාර්ථකව බාන ලදී!",
+    "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත"
   },
   "WeighGrade": {
     "Title": "බර කිරන්න",
@@ -1080,7 +1102,8 @@
     "Set": "කාණ්ඩය",
     "Grade": "ශ්රේණිය",
     "Continue": "ඉදිරියට යන්න",
-    "MaxCratesReached": "උපරිම පෙට්ටි ප්‍රමාණයට ළඟා වී ඇත"
+    "MaxCratesReached": "උපරිම පෙට්ටි ප්‍රමාණයට ළඟා වී ඇත",
+    "NoOfCrates": "--පෙට්ටි ගණන--"
   },
   "OpenedOrderScreen": {
     "INV No": "INV අංකය :",
@@ -1192,7 +1215,9 @@
     "Rs": "රු",
     "has been successfully handed over to": "සාර්ථකව භාර දී ඇත.",
     "Scan Timeout": "ස්කෑන් කිරීමේ කාලය අවසන්",
+    "ScanTimeout": "ස්කෑන් කිරීමේ කාලය අවසන්",
     "Scan timeout message": "QR කේතය නියමිත කාල සීමාව තුළ හඳුනාගත නොහැකි විය. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
+    "ScanTimeoutMessage": "QR කේතය නියමිත කාල සීමාව තුළ හඳුනාගත නොහැකි විය. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
     "Scan Again": "නැවත ස්කෑන් කරන්න",
     "QR not identified": "QR කේතය හඳුනාගත නොහැක.\nකරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
     "Invalid QR format": "වලංගු නොවන නිලධාරී කේත ආකෘතියකි.\nDCM සහ ඉලක්කම් 5ක් විය යුතුය (උදා: DCM00001).",
@@ -1211,7 +1236,8 @@
       "ScanLoadQR": "පැටවුම් QR ස්කෑන් කරන්න",
     "AlignLoadQR": "ස්කෑන් කිරීමට පැටවුම් QR කේතය රාමුව තුළ තබන්න",
     "InvalidLoadQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු පැටවුම් QR කේතයක් ස්කෑන් කරන්න.",
-    "CenterMismatch": "මෙම පැටවුම වෙනත් බෙදාහැරීමේ මධ්‍යස්ථානයකට පවරා ඇත.",
+    "CenterMismatch": "මෙම පැටවුම ඔබේ බෙදාහැරීමේ මධ්‍යස්ථානයට පවරා නොමැත.",
+    "JourneyNotEnded": "මෙම පැටවුමේ ගමන තවමත් අවසන් වී නොමැත.\nරියදුරු විසින් ගමන සම්පූර්ණ කරන තුරු කරුණාකර රැඳී සිටින්න.",
     "LoadCode": "පැටවුම",
     "Vehicle": "වාහනය",
     "Verifying": "තහවුරු කරමින්...",
@@ -1696,11 +1722,15 @@
     "Go Back": "ආපසු යන්න"
   },
   "AlertModal": {
+    "Error": "දෝෂයකි!",
+    "Successful": "සාර්ථකයි!",
     "Cannot Proceed!": "ඉදිරියට යා නොහැක!",
     "Re-Scan": "නැවත ස්කෑන් කරන්න",
     "Re-scan": "නැවත ස්කෑන් කරන්න",
     "Rescan": "නැවත ස්කෑන් කරන්න",
     "Open Ongoing Activity": "ක්‍රියාකාරකම විවෘත කරන්න",
+    "ScanTimeout": "ස්කෑන් කිරීමේ කාලය අවසන්",
+    "ScanTimeoutMessage": "QR කේතය නියමිත කාල සීමාව තුළ හඳුනාගත නොහැකි විය. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
     "OK": "හරි"
   },
   "CameraAccess": {
@@ -1767,6 +1797,10 @@
     "ScaleConnected": "තරාදිය සම්බන්ධ විය",
     "TransportComingSoon": "ප්‍රවාහන මොඩියුලය ළඟදීම පැමිණේ."
   },
+  "ScaleWeightModal": {
+    "RealTimeScaleWeight": "තත්‍ය කාලීන තරාදි බර",
+    "Continue": "ඉදිරියට යන්න"
+  },
   "SentProductsToday": {
     "Title": "අද යවන ලද තොග",
     "NoLoadsToday": "අද තොග ප්රවාහනයන් කර නොමැත",
@@ -1775,12 +1809,17 @@
     "AddLoadMessage": "ප්‍රවාහනය සඳහා නිෂ්පාදන සූදානම් කර යවන්න."
   },
   "ScanDriverQR": {
+    "Error": "දෝෂයකි!",
+    "Successful": "සාර්ථකයි!",
     "Title": "QR ස්කෑන් කරන්න",
     "QRIdentified": "QR කේතය සාර්ථකව හඳුනා ගන්නා ලදී.",
     "Driver": "රියදුරු",
     "InvalidQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු රියදුරු QR කේතයක් ස්කෑන් කරන්න.",
     "Unauthorized": "අවසර නැත!",
-    "UnauthorizedMessage": "රියදුරු ප්රවේශය ප්රතික්ෂේප කර ඇත.\nඋදව් සඳහා කරුණාකර සමාගම හා සම්බන්ධ වන්න."
+    "UnauthorizedMessage": "රියදුරු ප්රවේශය ප්රතික්ෂේප කර ඇත.\nඋදව් සඳහා කරුණාකර සමාගම හා සම්බන්ධ වන්න.",
+    "ScanTimeout": "ස්කෑන් කිරීමේ කාලය අවසන්",
+    "ScanTimeoutMessage": "QR කේතය නියමිත කාල සීමාව තුළ හඳුනාගත නොහැකි විය. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
+    "AlignDriverQR": "ස්කෑන් කිරීමට රියදුරු QR කේතය රාමුව තුළ තබන්න"
   },
   "SelectDistributionCentre": {
     "Title": "මධ්යස්ථානය තෝරන්න",
@@ -1812,8 +1851,12 @@
     "TotalCrates": "පෙට්ටි",
     "Crates": "පෙට්ටි",
     "Set": "කාණ්ඩය",
-    "Grade": "ශ්රේණිය",
-    "Weight": "බර"
+    "Grade": "ශ්‍රේණිය",
+    "Weight": "බර",
+    "Loading": "පැටවුම් විස්තර පූරණය වෙමින්...",
+    "NoItems": "- මෙම පැටවුමෙහි ද්‍රව්‍ය හමු නොවීය -",
+    "ViewQRCode": "QR කේතය බලන්න",
+    "SaveFailed": "ප්‍රවාහන පැටවුම සුරැකීමට නොහැකි විය."
   },
   "LoadQR": {
     "Title": "ජනනය කළ QR කේතය",
