@@ -29,6 +29,68 @@ export interface UploadFileItem {
   base64?: string;
 }
 
+export async function convertUriToBase64(
+  uri: string,
+  mimeType?: string
+): Promise<string> {
+  // Method 1: FileSystem legacy readAsStringAsync
+  try {
+    const raw = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    if (raw) {
+      const mime =
+        mimeType ||
+        (uri.toLowerCase().endsWith(".pdf")
+          ? "application/pdf"
+          : "image/jpeg");
+      return `data:${mime};base64,${raw}`;
+    }
+  } catch (fsErr) {
+    console.warn("FileSystem read failed, trying alternative methods:", fsErr);
+  }
+
+  // Method 2: Copy to local cache first if content URI, then read
+  if (uri.startsWith("content://") && FileSystem.cacheDirectory) {
+    try {
+      const ext = uri.toLowerCase().endsWith(".pdf") ? "pdf" : "png";
+      const tempPath = `${FileSystem.cacheDirectory}temp_upload_${Date.now()}.${ext}`;
+      await FileSystem.copyAsync({ from: uri, to: tempPath });
+      const raw = await FileSystem.readAsStringAsync(tempPath, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      if (raw) {
+        const mime =
+          mimeType || (ext === "pdf" ? "application/pdf" : "image/jpeg");
+        return `data:${mime};base64,${raw}`;
+      }
+    } catch (copyErr) {
+      console.warn("FileSystem copy and read failed:", copyErr);
+    }
+  }
+
+  // Method 3: fetch blob + FileReader
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to convert file to base64 string"));
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (fetchErr) {
+    console.error("Fetch blob base64 conversion failed:", fetchErr);
+    throw fetchErr;
+  }
+}
+
 interface UploadFileProps {
   file: UploadFileItem | null;
   onFileChange: (file: UploadFileItem | null) => void;
@@ -81,10 +143,10 @@ export default function UploadFile({
 
         if (!base64Data && asset.uri) {
           try {
-            const raw = await FileSystem.readAsStringAsync(asset.uri, {
-              encoding: FileSystem.EncodingType.Base64,
-            });
-            base64Data = `data:image/jpeg;base64,${raw}`;
+            base64Data = await convertUriToBase64(
+              asset.uri,
+              asset.mimeType || "image/jpeg"
+            );
           } catch (e) {
             console.warn("Could not read image as base64:", e);
           }
@@ -134,12 +196,11 @@ export default function UploadFile({
         : "1.2 MB";
 
       let base64Data: string | undefined;
+      const mime = isPdf
+        ? "application/pdf"
+        : (asset.mimeType || (asset.name?.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg"));
       try {
-        const rawBase64 = await FileSystem.readAsStringAsync(asset.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        const mime = isPdf ? "application/pdf" : (asset.mimeType || "image/jpeg");
-        base64Data = `data:${mime};base64,${rawBase64}`;
+        base64Data = await convertUriToBase64(asset.uri, mime);
       } catch (readErr) {
         console.warn("Could not read document as base64:", readErr);
       }

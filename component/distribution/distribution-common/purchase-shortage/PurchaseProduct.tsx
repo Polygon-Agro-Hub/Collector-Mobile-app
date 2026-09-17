@@ -20,6 +20,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import UploadFile, {
   UploadFileItem,
+  convertUriToBase64,
 } from "@/component/components/file-management/UploadFile";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import axios from "axios";
@@ -217,31 +218,35 @@ export default function PurchaseProduct({
       setSubmitting(true);
       const token = store.getState().auth.token;
 
-      let slipPayload = uploadedFile.base64;
-      if (!slipPayload && uploadedFile.uri) {
-        try {
-          const raw = await FileSystem.readAsStringAsync(uploadedFile.uri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-          const isPdf = uploadedFile.type === "pdf" || uploadedFile.name?.toLowerCase().endsWith(".pdf");
-          const mime = isPdf ? "application/pdf" : "image/jpeg";
-          slipPayload = `data:${mime};base64,${raw}`;
-        } catch (readErr) {
-          console.warn("Error reading slip file as base64:", readErr);
-        }
-      }
+      const isPdf =
+        uploadedFile.type === "pdf" ||
+        uploadedFile.name?.toLowerCase().endsWith(".pdf");
+
+      const fileExt = uploadedFile.name.split(".").pop()?.toLowerCase() || (isPdf ? "pdf" : "jpg");
+      let fileMime = isPdf
+        ? "application/pdf"
+        : `image/${fileExt === "png" ? "png" : "jpeg"}`;
+
+      const formData = new FormData();
+      formData.append("srtAssignId", String(srtAssignId || 1));
+      formData.append("prchQty", String(parseFloat(buyingQty)));
+      formData.append("prchPrice", String(parseFloat(purchasingPrice.replace(/,/g, ""))));
+      formData.append("reqStatus", "Pending");
+
+      formData.append("slip", {
+        uri: uploadedFile.uri,
+        name: uploadedFile.name || `Transfer_Slip_${Date.now()}.${fileExt}`,
+        type: fileMime,
+      } as any);
 
       await axios.post(
         `${environment.API_BASE_URL}api/purchase-shortage/submit`,
+        formData,
         {
-          srtAssignId: srtAssignId || 1,
-          prchQty: parseFloat(buyingQty),
-          prchPrice: parseFloat(purchasingPrice.replace(/,/g, "")),
-          slip: slipPayload || uploadedFile.uri,
-          reqStatus: "Pending",
-        },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+            "Content-Type": "multipart/form-data",
+          },
         },
       );
 
