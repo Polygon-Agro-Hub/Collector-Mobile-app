@@ -296,7 +296,7 @@ export default function PurchaseProduct({
               {productName}
             </Text>
             <Text className="text-md text-[#54617D] mt-1">
-              {step === 1 ? t("PurchaseProduct.Collect : ", "Collect : ") : t("PurchaseShortage.Collected : ", "Collected : ")}
+              {step === 1 ? t("PurchaseProduct.Collect", "Collect :") : t("PurchaseShortage.Collected", "Collected : ")}
               <Text className="text-[#980775] font-extrabold">
                 {step === 1
                   ? `${formatKg(defaultKg)} ${t("PurchaseShortage.kg", "kg")}`
@@ -304,7 +304,7 @@ export default function PurchaseProduct({
               </Text>
             </Text>
             <Text className="text-md text-[#54617D] mt-0.5">
-              {t("PurchaseShortage.Price per kg : ", "Price per kg : ")}
+              {t("PurchaseShortage.Price per kg", "Price per kg : ")}
               <Text style={{ color: "#AC7F5E" }} className="font-bold">
                 {t("PurchaseShortage.Rs. ", "Rs. ")}
                 {step === 1
