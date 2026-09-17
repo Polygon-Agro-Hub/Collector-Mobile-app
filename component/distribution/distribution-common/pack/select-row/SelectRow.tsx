@@ -11,7 +11,7 @@ import {
   BackHandler,
   RefreshControl,
 } from "react-native";
-import { Entypo, Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
@@ -20,7 +20,6 @@ import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
-import { AlertModal } from "@/component/components/popup/AlertModal";
 import { useTranslation } from "react-i18next";
 
 // Define TypeScript interfaces for our sample data
@@ -32,6 +31,7 @@ interface RowData {
   allocatedCount?: number;
   orderCount?: number;
   ordersCount?: number;
+  targetCount?: number;
   ordersAssigned?: number;
   totalOrders?: number;
   hasOrders?: boolean;
@@ -361,12 +361,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
     // If row data already indicates no orders
     if (
-      (row.allocatedCount !== undefined && row.allocatedCount === 0) ||
-      (row.orderCount !== undefined && row.orderCount === 0) ||
-      (row.ordersCount !== undefined && row.ordersCount === 0) ||
-      (row.totalOrders !== undefined && row.totalOrders === 0) ||
-      (row.ordersAssigned !== undefined && row.ordersAssigned === 0) ||
-      (row.hasOrders !== undefined && row.hasOrders === false)
+      row.hasOrders === false ||
+      (row.ordersCount !== undefined && row.ordersCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.allocatedCount !== undefined && row.allocatedCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.orderCount !== undefined && row.orderCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.totalOrders !== undefined && row.totalOrders === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.ordersAssigned !== undefined && row.ordersAssigned === 0 && (!row.targetCount || row.targetCount === 0))
     ) {
       setNoOrdersRowNumber(rowNum);
       setNoOrdersModalVisible(true);
@@ -392,12 +392,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       if (response.data && response.data.success) {
         const resData = response.data;
         if (
-          (resData.allocatedCount !== undefined && resData.allocatedCount === 0) ||
-          (resData.orderCount !== undefined && resData.orderCount === 0) ||
-          (resData.ordersCount !== undefined && resData.ordersCount === 0) ||
-          (resData.totalOrders !== undefined && resData.totalOrders === 0) ||
-          (resData.ordersAssigned !== undefined && resData.ordersAssigned === 0) ||
-          (resData.hasOrders !== undefined && resData.hasOrders === false)
+          resData.hasOrders === false ||
+          (resData.ordersCount !== undefined && resData.ordersCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.allocatedCount !== undefined && resData.allocatedCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.orderCount !== undefined && resData.orderCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.totalOrders !== undefined && resData.totalOrders === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.ordersAssigned !== undefined && resData.ordersAssigned === 0 && (!resData.targetCount || resData.targetCount === 0))
         ) {
           setNoOrdersRowNumber(rowNum);
           setNoOrdersModalVisible(true);
@@ -409,6 +409,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       } else {
         const msg = (response.data?.message || "").toLowerCase();
         if (
+          response.data?.hasOrders === false ||
           msg.includes("no order") ||
           (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
         ) {
@@ -417,7 +418,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         } else {
           Alert.alert(
             t("Packing.Error", "Error"),
-            response.data.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
+            response.data?.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
           );
         }
       }
@@ -426,6 +427,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       const errMsg = error.response?.data?.message || "";
       const msg = errMsg.toLowerCase();
       if (
+        error.response?.data?.hasOrders === false ||
         msg.includes("no order") ||
         (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
       ) {
@@ -846,19 +848,66 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         </View>
       </Modal>
 
-      {/* No Orders Assigned Alert Modal */}
-      <AlertModal
+      {/* No Orders Assigned Modal matching screenshot */}
+      <Modal
         visible={noOrdersModalVisible}
-        title={t("Packing.No Orders Assigned!", "No Orders Assigned!")}
-        message={t("Packing.No orders assigned message", {
-          number: noOrdersRowNumber,
-          defaultValue: `No orders are assigned to Row ${noOrdersRowNumber} yet. Please wait until orders are assigned and check again.`,
-        })}
-        type="error"
-        showOkButton={true}
-        autoClose={true}
-        onClose={() => setNoOrdersModalVisible(false)}
-      />
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setNoOrdersModalVisible(false)}
+      >
+        <View
+          className="flex-1 justify-center items-center px-6"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+        >
+          <View
+            className="bg-white rounded-3xl p-6 w-full max-w-sm items-center shadow-2xl"
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 8,
+            }}
+          >
+            {/* Exclamation badge in black circle */}
+            <View className="w-12 h-12 rounded-full bg-black items-center justify-center mb-4">
+              <FontAwesome5 name="exclamation" size={22} color="white" />
+            </View>
+
+            {/* Modal Title */}
+            <Text className="text-lg font-bold text-slate-950 text-center mb-3">
+              {t("Packing.No Orders Assigned!", "No Orders Assigned!")}
+            </Text>
+
+            {/* Modal Description */}
+            <Text className="text-[#64748B] text-sm text-center leading-relaxed px-2 mb-6">
+              {t("Packing.No orders assigned message", {
+                number: noOrdersRowNumber,
+                defaultValue: `There are still no orders assigned to Row ${noOrdersRowNumber}. Please wait and re-check once orders have been assigned.`,
+              })}
+            </Text>
+
+            {/* Close Button */}
+            <TouchableOpacity
+              onPress={() => setNoOrdersModalVisible(false)}
+              className="w-full py-4 rounded-full items-center justify-center"
+              style={{
+                backgroundColor: "#D9D9D9",
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+              activeOpacity={0.8}
+            >
+              <Text className="text-slate-800 font-bold text-base">
+                {t("Packing.Close", t("Close", "Close"))}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

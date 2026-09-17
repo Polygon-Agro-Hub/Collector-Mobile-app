@@ -1100,23 +1100,6 @@
     "NoProductsReceivedToday": "- No products were received today -",
     "Crates": "Crates"
   },
-  "qrcode": {
-    "ScanLoadQR": "Scan Load QR",
-    "AlignLoadQR": "Align the Load QR code within the frame to scan",
-    "InvalidLoadQR": "Invalid QR code.\nPlease scan a valid Load QR code.",
-    "CenterMismatch": "This load is assigned to a different distribution center.",
-    "Error": "Error!",
-    "Successful": "Successful!",
-    "QRIdentified": "QR code identified successfully.",
-    "LoadCode": "Load",
-    "Vehicle": "Vehicle",
-    "Driver": "Driver",
-    "Verifying": "Verifying...",
-    "ScanAgain": "Scan Again",
-    "Timeout": "Scan Timeout",
-    "TimeoutMessage": "The QR code is not identified. Please check and try again.",
-    "VerifyFailed": "Something went wrong. Please try again."
-  },
   "ReceivedProductsSummary": {
     "Title": "Summary",
     "StartUnloading": "Start Unloading"
@@ -1276,7 +1259,18 @@
     "Successful": "Successful!",
     "Error": "Error!",
     "QRIdentified": "QR code identified successfully.",
-    "Driver": "Driver"
+    "Driver": "Driver",
+     "ScanLoadQR": "Scan Load QR",
+    "AlignLoadQR": "Align the Load QR code within the frame to scan",
+    "InvalidLoadQR": "Invalid QR code.\nPlease scan a valid Load QR code.",
+    "CenterMismatch": "This load is assigned to a different distribution center.",
+    "LoadCode": "Load",
+    "Vehicle": "Vehicle",
+    "Verifying": "Verifying...",
+    "ScanAgain": "Scan Again",
+    "Timeout": "Scan Timeout",
+    "TimeoutMessage": "The QR code is not identified. Please check and try again.",
+    "VerifyFailed": "Something went wrong. Please try again."
   },
   "GoviPensionForm": {
     "GoViPension": "GoViPension",
@@ -1569,7 +1563,8 @@
     "No packing rows found": "- No packing rows found. -",
     "Rows are not available. Please wait until rows are available to obtain a position.": "Rows are not available. Please wait until rows are available to obtain a position.",
     "No Orders Assigned!": "No Orders Assigned!",
-    "No orders assigned message": "No orders are assigned to Row {{number}} yet. Please wait until orders are assigned and check again.",
+    "No orders assigned message": "There are still no orders assigned to Row {{number}}. Please wait and re-check once orders have been assigned.",
+    "Close": "Close",
     "Select a Position": "Select a Position",
     "Choose your assigned position in": "Choose your assigned position in {{rowName}}.",
     "Available": "Available",

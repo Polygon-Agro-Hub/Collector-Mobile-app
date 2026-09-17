@@ -1035,23 +1035,6 @@
     "NoProductsReceivedToday": "- අද නිෂ්පාදන ලැබී නැත -",
     "Crates": "කූඩ"
   },
-  "qrcode": {
-    "ScanLoadQR": "පැටවුම් QR ස්කෑන් කරන්න",
-    "AlignLoadQR": "ස්කෑන් කිරීමට පැටවුම් QR කේතය රාමුව තුළ තබන්න",
-    "InvalidLoadQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු පැටවුම් QR කේතයක් ස්කෑන් කරන්න.",
-    "CenterMismatch": "මෙම පැටවුම වෙනත් බෙදාහැරීමේ මධ්‍යස්ථානයකට පවරා ඇත.",
-    "Error": "දෝෂයකි!",
-    "Successful": "සාර්ථකයි!",
-    "QRIdentified": "QR කේතය සාර්ථකව හඳුනා ගන්නා ලදී.",
-    "LoadCode": "පැටවුම",
-    "Vehicle": "වාහනය",
-    "Driver": "රියදුරු",
-    "Verifying": "තහවුරු කරමින්...",
-    "ScanAgain": "නැවත ස්කෑන් කරන්න",
-    "Timeout": "ස්කෑන් කාලය අවසන් විය",
-    "TimeoutMessage": "QR කේතය හඳුනාගත නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.",
-    "VerifyFailed": "දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න."
-  },
   "ReceivedProductsSummary": {
     "Title": "සාරාංශය",
     "StartUnloading": "බෑම අරඹන්න"
@@ -1212,7 +1195,18 @@
     "Successful": "සාර්ථකයි!",
     "Error": "දෝෂයකි!",
     "QRIdentified": "QR කේතය සාර්ථකව හඳුනා ගන්නා ලදී.",
-    "Driver": "රියදුරු"
+    "Driver": "රියදුරු",
+      "ScanLoadQR": "පැටවුම් QR ස්කෑන් කරන්න",
+    "AlignLoadQR": "ස්කෑන් කිරීමට පැටවුම් QR කේතය රාමුව තුළ තබන්න",
+    "InvalidLoadQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු පැටවුම් QR කේතයක් ස්කෑන් කරන්න.",
+    "CenterMismatch": "මෙම පැටවුම වෙනත් බෙදාහැරීමේ මධ්‍යස්ථානයකට පවරා ඇත.",
+    "LoadCode": "පැටවුම",
+    "Vehicle": "වාහනය",
+    "Verifying": "තහවුරු කරමින්...",
+    "ScanAgain": "නැවත ස්කෑන් කරන්න",
+    "Timeout": "ස්කෑන් කාලය අවසන් විය",
+    "TimeoutMessage": "QR කේතය හඳුනාගත නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "VerifyFailed": "දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න."
   },
   "GoviPensionForm": {
     "GoViPension": "ගොවි පැන්ෂන්",
@@ -1502,6 +1496,7 @@
     "Rows are not available. Please wait until rows are available to obtain a position.": "පේළි නොමැත. ස්ථානයක් ලබා ගැනීම සඳහා පේළි ලබා ගත හැකි වන තෙක් කරුණාකර රැඳී සිටින්න.",
     "No Orders Assigned!": "ඇණවුම් පවරා නොමැත!",
     "No orders assigned message": "පේළි {{number}} සඳහා තවමත් ඇණවුම් පවරා නොමැත. ඇණවුම් පවරන තෙක් රැඳී සිට නැවත පරීක්ෂා කරන්න.",
+    "Close": "වසන්න",
     "Select a Position": "ස්ථානයක් තෝරන්න",
     "Choose your assigned position in": "{{rowName}} හි ඔබට නියමිත ස්ථානය තෝරන්න.",
     "Available": "ලබාගත හැකිය",
