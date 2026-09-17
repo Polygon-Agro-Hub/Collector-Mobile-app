@@ -25,8 +25,12 @@
     "Go Back": "ආපසු යන්න",
     "GoBack": "ආපසු යන්න",
     "Cancel": "අවලංගු කරන්න",
-    "Confirm": "තහවුරු කරන්න",
-    "Submitting": "යොමු කරමින්..."
+    "Submitting": "යොමු කරමින්...",
+    "kg": "කි.ග්රෑ.",
+    "At": "කාලය :",
+    "Crates": "පෙට්ටි",
+    "Set": "කාණ්ඩය",
+    "Grade": "ශ්රේණිය"
   },
   "Main": {
     "No Internet Connection": "අන්තර්ජාල සම්බන්ධතාවයක් නැත",
@@ -52,8 +56,8 @@
     "Search": "NIC මගින් සොයන්න",
     "LoadingTargetStatus": "ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී...",
     "Collection": "එකතු කිරීම්",
-    "Transport": "ප්‍රවාහනය",
-    "ReadyToTransport": "ප්‍රවාහනයට සූදානම්"
+    "Transport": "ප්රවාහනය",
+    "ReadyToTransport": "ප්රවාහනය කිරීම්"
   },
   "Error": {
     "error": "සමාවෙන්න",
@@ -639,8 +643,8 @@
     "CenterTarget": "මධ්‍යස්ථාන ඉලක්කය",
     "MyCollection": "මගේ එකතුව",
     "Collection": "එකතු කිරීම්",
-    "Transport": "ප්‍රවාහනය",
-    "ReadyToTransport": "ප්‍රවාහනයට සූදානම්"
+    "Transport": "ප්රවාහනය",
+    "ReadyToTransport": "ප්රවාහනය කිරීම්"
   },
   "AddOfficerBasicDetails": {
     "LNG": "si",
@@ -1034,11 +1038,15 @@
   "ReceivedProductsToday": {
     "Title": "අද ලැබුණු නිෂ්පාදන",
     "NoProductsReceivedToday": "- අද නිෂ්පාදන ලැබී නැත -",
-    "Crates": "කූඩ"
+    "Crates": "පෙට්ටි"
   },
   "ReceivedProductsSummary": {
     "Title": "සාරාංශය",
-    "StartUnloading": "බෑම අරඹන්න"
+    "UnloadedSummary": "බාන ලද සාරාංශය",
+    "StartUnloading": "බෑම අරඹන්න",
+    "Crates": "පෙට්ටි",
+    "Set": "කාණ්ඩය",
+    "Grade": "ශ්රේණිය"
   },
   "UnloadingProducts": {
     "Title": "නිෂ්පාදන බෑම",
@@ -1056,20 +1064,23 @@
   "WeighTheLoad": {
     "Title": "බර කිරන්න",
     "TotalWeight": "මුළු බර",
-    "TotalCrates": "මුළු කූඩ ගණන",
+    "TotalCrates": "පෙට්ටි",
     "LoadedWeight": "පටවන ලද බර",
-    "LoadedCrates": "පටවන ලද කූඩ",
+    "LoadedCrates": "පෙට්ටි",
     "UnloadedWeight": "බාන ලද බර",
-    "UnloadedCrates": "බාන ලද කූඩ",
+    "UnloadedCrates": "පෙට්ටි",
+    "Grade": "ශ්රේණිය",
     "MarkAsUnloaded": "බාන ලද බව සලකුණු කරන්න",
     "SuccessTitle": "සාර්ථකව බාන ලදී!"
   },
   "WeighGrade": {
     "Title": "බර කිරන්න",
     "LoadedWeight": "පටවන ලද බර",
-    "TotalCrates": "මුළු කූඩ ගණන",
+    "TotalCrates": "පෙට්ටි",
+    "Set": "කාණ්ඩය",
+    "Grade": "ශ්රේණිය",
     "Continue": "ඉදිරියට යන්න",
-    "MaxCratesReached": "උපරිම කූඩ ප්‍රමාණයට ළඟා වී ඇත"
+    "MaxCratesReached": "උපරිම පෙට්ටි ප්‍රමාණයට ළඟා වී ඇත"
   },
   "OpenedOrderScreen": {
     "INV No": "INV අංකය :",
@@ -1757,26 +1768,37 @@
     "TransportComingSoon": "ප්‍රවාහන මොඩියුලය ළඟදීම පැමිණේ."
   },
   "SentProductsToday": {
-    "Title": "අද යවන ලද නිෂ්පාදන",
-    "NoLoadsToday": "- අද භාණ්ඩ යවා නැත -",
-    "Crates": "ක්‍රේට්",
+    "Title": "අද යවන ලද තොග",
+    "NoLoadsToday": "අද තොග ප්රවාහනයන් කර නොමැත",
+    "Crates": "පෙට්ටි",
     "AddLoadTitle": "නව පැටවීමක් එක් කරන්න",
     "AddLoadMessage": "ප්‍රවාහනය සඳහා නිෂ්පාදන සූදානම් කර යවන්න."
   },
+  "ScanDriverQR": {
+    "Title": "QR ස්කෑන් කරන්න",
+    "QRIdentified": "QR කේතය සාර්ථකව හඳුනා ගන්නා ලදී.",
+    "Driver": "රියදුරු",
+    "InvalidQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු රියදුරු QR කේතයක් ස්කෑන් කරන්න.",
+    "Unauthorized": "අවසර නැත!",
+    "UnauthorizedMessage": "රියදුරු ප්රවේශය ප්රතික්ෂේප කර ඇත.\nඋදව් සඳහා කරුණාකර සමාගම හා සම්බන්ධ වන්න."
+  },
   "SelectDistributionCentre": {
-    "Title": "බෙදාහැරීමේ මධ්‍යස්ථානය තෝරන්න",
+    "Title": "මධ්යස්ථානය තෝරන්න",
     "NoCentresFound": "- බෙදාහැරීමේ මධ්‍යස්ථාන හමු නොවීය -",
-    "SelectAndContinue": "තෝරා ඉදිරියට යන්න",
+    "SelectAndContinue": "ඉදිරියට යන්න",
     "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී"
   },
   "LoadingToVehicle": {
-    "Variety": "ප්‍රභේදය",
-    "CropName": "බෝග නාමය",
-    "VarietyLabel": "ප්‍රභේදය",
-    "SelectCrop": "බෝගය තෝරන්න",
-    "SelectVariety": "ප්‍රභේදය තෝරන්න",
-    "FinishLoading": "පැටවීම අවසන් කරන්න",
-    "AddMoreItems": "තවත් ද්‍රව්‍ය එක් කරන්න",
+    "Variety": "ප්රභේදය",
+    "CropName": "බෝගයේ නම",
+    "VarietyLabel": "ප්රභේදය",
+    "SelectCrop": "--බෝගය තෝරන්න--",
+    "SelectVariety": "--ප්රභේදය තෝරන්න--",
+    "Grade": "ශ්රේණිය",
+    "FinishLoading": "අවසන් කරන්න",
+    "AddMoreItems": "එකතු කරන්න",
+    "Set": "කාණ්ඩය",
+    "EnterTotalCrates": "පෙට්ටි ගණන ඇතුළත් කරන්න",
     "ItemSavedTitle": "ද්‍රව්‍යය එක් කරන ලදී!",
     "ItemSavedMessage": "ප්‍රභේදය {{num}} සුරැකිණි. ඔබට දැන් ඊළඟ ප්‍රභේදය පැටවිය හැක.",
     "FinishLoadingTitle": "පැටවීම සම්පූර්ණයි",
@@ -1787,8 +1809,10 @@
     "Title": "සාරාංශය",
     "ConfirmAndContinue": "තහවුරු කර ඉදිරියට යන්න",
     "TotalWeight": "මුළු බර",
-    "TotalCrates": "මුළු කූඩ ගණන",
-    "Crates": "කූඩ",
+    "TotalCrates": "පෙට්ටි",
+    "Crates": "පෙට්ටි",
+    "Set": "කාණ්ඩය",
+    "Grade": "ශ්රේණිය",
     "Weight": "බර"
   },
   "LoadQR": {

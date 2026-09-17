@@ -11,7 +11,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import { MaterialCommunityIcons, Ionicons, FontAwesome5, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons, FontAwesome5, MaterialIcons, AntDesign, FontAwesome6 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { AlertModal } from "@/component/components/popup/AlertModal";
@@ -284,7 +284,11 @@ export default function WeighTheLoad({
         })
       );
     }
-    setShowSuccessModal(true);
+    const currentUnloadState = store.getState().unload;
+    navigation.navigate("UnloadingProducts", {
+      transportId: currentUnloadState.transportId || route.params?.loadCode,
+      loadCode: currentUnloadState.loadCode || route.params?.loadCode,
+    });
   };
 
   const handleCloseSuccessModal = () => {
@@ -485,7 +489,7 @@ export default function WeighTheLoad({
         className="flex-1 px-6"
         contentContainerStyle={{
           paddingTop: 8,
-          paddingBottom: insets.bottom + 40,
+          paddingBottom: 24,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -516,8 +520,8 @@ export default function WeighTheLoad({
         >
           {/* Total Weight */}
           <View className="flex-1 pl-2">
-            <MaterialCommunityIcons
-              name="scale"
+            <FontAwesome6
+              name="weight-scale"
               size={22}
               color="#FFFFFF"
             />
@@ -525,7 +529,7 @@ export default function WeighTheLoad({
               {t("WeighTheLoad.TotalWeight", "Total Weight")}
             </Text>
             <Text className="text-white font-extrabold text-lg mt-0.5">
-              {cropData.totalWeightKg.toFixed(2)} kg
+              {cropData.totalWeightKg.toFixed(2)} {t("Common.kg", "kg")}
             </Text>
           </View>
 
@@ -561,7 +565,7 @@ export default function WeighTheLoad({
               {/* Grade Header */}
               <View className="flex-row items-center justify-between p-4 bg-white">
                 <Text className="font-extrabold text-base text-[#17262C]">
-                  {grade.gradeTitle}
+                  {t("WeighTheLoad.Grade", "Grade")} {grade.gradeTitle.replace(/Grade\s*/i, "")}
                 </Text>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -591,8 +595,8 @@ export default function WeighTheLoad({
                 <View className="flex-row items-center justify-between">
                   {/* Loaded Weight */}
                   <View className="flex-1">
-                    <MaterialCommunityIcons
-                      name="scale"
+                    <FontAwesome6
+                      name="weight-scale"
                       size={18}
                       color="#17262C"
                     />
@@ -600,7 +604,7 @@ export default function WeighTheLoad({
                       {t("WeighTheLoad.LoadedWeight", "Loaded Weight")}
                     </Text>
                     <Text className="font-bold text-base text-[#17262C] mt-0.5">
-                      {grade.loadedWeightKg.toFixed(2)} kg
+                      {grade.loadedWeightKg.toFixed(2)} {t("Common.kg", "kg")}
                     </Text>
                   </View>
 
@@ -626,8 +630,8 @@ export default function WeighTheLoad({
                 <View className="flex-row items-center justify-between">
                   {/* Unloaded Weight */}
                   <View className="flex-1">
-                    <MaterialCommunityIcons
-                      name="scale"
+                    <FontAwesome6
+                      name="weight-scale"
                       size={18}
                       color="#79747E"
                     />
@@ -650,8 +654,8 @@ export default function WeighTheLoad({
                       }`}
                     >
                       {grade.unloadedWeightKg !== null
-                        ? `${grade.unloadedWeightKg.toFixed(2)} kg`
-                        : "---- kg"}
+                        ? `${grade.unloadedWeightKg.toFixed(2)} ${t("Common.kg", "kg")}`
+                        : `---- ${t("Common.kg", "kg")}`}
                     </Text>
                   </View>
 
@@ -756,30 +760,33 @@ export default function WeighTheLoad({
             ))}
           </View>
         )}
-
-        {/* Bottom Button */}
-        <View className="pt-6 pb-2">
-          <TouchableOpacity
-            onPress={handleMarkAsUnloaded}
-            disabled={!isAllUnloaded}
-            activeOpacity={0.8}
-            className={`w-full h-[50px] rounded-full items-center justify-center ${
-              isAllUnloaded ? "bg-[#000000]" : "bg-[#A0A4A8]"
-            }`}
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: isAllUnloaded ? 0.2 : 0,
-              shadowRadius: 5,
-              elevation: isAllUnloaded ? 4 : 0,
-            }}
-          >
-            <Text className="text-white font-extrabold text-base">
-              {t("WeighTheLoad.MarkAsUnloaded", "Mark as Unloaded")}
-            </Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      {/* Fixed Bottom Button: Mark as Unloaded */}
+      <View
+        className="px-6 pt-3 bg-white border-t border-[#E5E7EB]"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      >
+        <TouchableOpacity
+          onPress={handleMarkAsUnloaded}
+          disabled={!isAllUnloaded}
+          activeOpacity={0.8}
+          className={`w-full h-[52px] rounded-full items-center justify-center ${
+            isAllUnloaded ? "bg-[#000000]" : "bg-[#A0A4A8]"
+          }`}
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: isAllUnloaded ? 0.2 : 0,
+            shadowRadius: 5,
+            elevation: isAllUnloaded ? 4 : 0,
+          }}
+        >
+          <Text className="text-white font-extrabold text-base">
+            {t("WeighTheLoad.MarkAsUnloaded", "Mark as Unloaded")}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Warning Confirmation Modal for Delete Grade Unloaded Weight */}
       <WarningConfirmation
@@ -790,21 +797,6 @@ export default function WeighTheLoad({
         confirmText="Delete"
         cancelText="Cancel"
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
-      />
-
-      {/* AlertModal for Unloaded Success */}
-      <AlertModal
-        visible={showSuccessModal}
-        title={t("WeighTheLoad.SuccessTitle", "Unloaded Successfully!")}
-        message={t(
-          "WeighTheLoad.SuccessMessage",
-          "{{cropName}} has been marked as unloaded.",
-          { cropName: cropData.name }
-        )}
-        type="success"
-        onClose={handleCloseSuccessModal}
-        duration={2500}
-        autoClose={true}
       />
 
       {/* Wi-Fi Scale Selection Modal */}

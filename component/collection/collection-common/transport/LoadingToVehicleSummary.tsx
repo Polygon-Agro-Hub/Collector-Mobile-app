@@ -15,7 +15,7 @@ import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
-import { MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
+import { MaterialCommunityIcons, FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
@@ -222,7 +222,7 @@ export default function LoadingToVehicleSummary({
 
       {/* Header */}
       <CustomHeader
-        title={t("LoadingToVehicleSummary.Title", "Summary")}
+        title={t("LoadingToVehicleSummary.Title", "Summery")}
         navigation={navigation}
       />
 
@@ -284,8 +284,8 @@ export default function LoadingToVehicleSummary({
                 >
                   {/* Total Weight */}
                   <View className="flex-1 items-center">
-                    <MaterialCommunityIcons
-                      name="scale"
+                    <FontAwesome6
+                      name="weight-scale"
                       size={24}
                       color="#FFFFFF"
                       style={{ marginBottom: 4 }}
@@ -294,7 +294,7 @@ export default function LoadingToVehicleSummary({
                       Total{"\n"}Weight
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
-                      {Number(crop.totalWeightKg || 0).toFixed(2)} kg
+                      {Number(crop.totalWeightKg || 0).toFixed(2)} {t("Common.kg", "kg")}
                     </Text>
                   </View>
 
@@ -310,7 +310,7 @@ export default function LoadingToVehicleSummary({
                       style={{ marginBottom: 4 }}
                     />
                     <Text className="text-gray-300 text-xs text-center">
-                      Total{"\n"}Crates
+                      {t("LoadingToVehicleSummary.TotalCrates", "Total Crates")}
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
                       {crop.totalCrates || 0}
@@ -335,7 +335,7 @@ export default function LoadingToVehicleSummary({
                       >
                         <View className="bg-[#FFF6AD] px-4 py-0.5 rounded-full">
                           <Text className="text-[11px] font-bold text-gray-800">
-                            {gs.grade}  |  Set : {gs.set}
+                            {gs.grade}  |  {t("LoadingToVehicleSummary.Set", "Set")} : {gs.set}
                           </Text>
                         </View>
                       </View>
@@ -355,7 +355,7 @@ export default function LoadingToVehicleSummary({
                           </View>
                           <View>
                             <Text className="text-[10px] text-black font-medium">
-                              Crates
+                              {t("LoadingToVehicleSummary.Crates", "Crates")}
                             </Text>
                             <Text className="text-sm font-bold text-black">
                               {gs.crates}
@@ -366,18 +366,18 @@ export default function LoadingToVehicleSummary({
                         {/* Weight Column */}
                         <View className="flex-row items-center gap-x-2">
                           <View className="w-8 h-8 rounded-full bg-[#E5E7EB] items-center justify-center">
-                            <MaterialCommunityIcons
-                              name="scale"
+                            <FontAwesome6
+                              name="weight-scale"
                               size={16}
                               color="#000000"
                             />
                           </View>
                           <View>
                             <Text className="text-[10px] text-black font-medium">
-                              Weight
+                              {t("LoadingToVehicleSummary.Weight", "Weight")}
                             </Text>
                             <Text className="text-sm font-bold text-black">
-                              {Number(gs.weightKg || 0).toFixed(2)} kg
+                              {Number(gs.weightKg || 0).toFixed(2)} {t("Common.kg", "kg")}
                             </Text>
                           </View>
                         </View>

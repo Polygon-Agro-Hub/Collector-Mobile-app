@@ -273,9 +273,14 @@ export default function UnloadingProducts({
     return mismatches;
   }, [weighedProducts]);
 
-  // Report mismatch button clicked: per user request, do nothing for now
+  // Track if mismatch has been reported
+  const [mismatchReported, setMismatchReported] = useState(false);
+  const [showMismatchSuccessModal, setShowMismatchSuccessModal] = useState(false);
+
+  // Report mismatch button clicked
   const handleReportMismatch = () => {
-    // No-op for now as requested
+    setMismatchReported(true);
+    setShowMismatchSuccessModal(true);
   };
 
   const handleProductPress = (item: UnloadVarietyItem) => {
@@ -312,17 +317,32 @@ export default function UnloadingProducts({
     return products.length > 0 && products.every((p) => p.weighed);
   }, [products]);
 
+  // Finish Unloading is enabled only when all weighed AND (no mismatches OR mismatch already reported)
+  const canFinish = useMemo(() => {
+    return allWeighed && (activeMismatches.length === 0 || mismatchReported);
+  }, [allWeighed, activeMismatches.length, mismatchReported]);
+
   const handleFinishUnloading = async () => {
     if (submitting) return;
 
-    if (!allWeighed) {
-      Alert.alert(
-        t("Warning", "Warning"),
-        t(
-          "UnloadingProducts.PleaseWeighAllProducts",
-          "Please weigh all products before finishing unloading."
-        )
-      );
+    if (!canFinish) {
+      if (!allWeighed) {
+        Alert.alert(
+          t("Warning", "Warning"),
+          t(
+            "UnloadingProducts.PleaseWeighAllProducts",
+            "Please weigh all products before finishing unloading."
+          )
+        );
+      } else {
+        Alert.alert(
+          t("Warning", "Warning"),
+          t(
+            "UnloadingProducts.PleaseReportMismatch",
+            "Please report the mismatch before finishing unloading."
+          )
+        );
+      }
       return;
     }
 
@@ -649,48 +669,51 @@ export default function UnloadingProducts({
                 ))}
               </View>
             )}
-
-            {/* Mismatch Action Button (if mismatches exist) */}
-            {activeMismatches.length > 0 && (
-              <View className="pt-2 pb-2">
-                <TouchableOpacity
-                  onPress={handleReportMismatch}
-                  activeOpacity={0.8}
-                  className="w-full h-[48px] rounded-full items-center justify-center bg-[#FF3B30]"
-                  style={{
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.15,
-                    shadowRadius: 3,
-                    elevation: 3,
-                  }}
-                >
-                  <Text className="font-bold text-sm text-white">
-                    {t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </ScrollView>
 
-          {/* Fixed Bottom Container for Finish Unloading */}
+          {/* Fixed Bottom Container: Report Mismatch + Finish Unloading */}
           <View
-            className="px-6 pt-3 bg-white border-t border-gray-100"
+            className="px-6 pt-3 bg-white border-t border-[#E5E7EB]"
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}
           >
+            {/* Report Mismatch button — shown directly above Finish Unloading when mismatches exist */}
+            {activeMismatches.length > 0 && (
+              <TouchableOpacity
+                onPress={handleReportMismatch}
+                disabled={mismatchReported}
+                activeOpacity={0.8}
+                className={`w-full h-[52px] rounded-full items-center justify-center mb-3 ${
+                  mismatchReported ? "bg-[#A0A4A8]" : "bg-[#FF3B30]"
+                }`}
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: mismatchReported ? 0.05 : 0.15,
+                  shadowRadius: 3,
+                  elevation: mismatchReported ? 1 : 3,
+                }}
+              >
+                <Text className="font-bold text-sm text-white">
+                  {mismatchReported
+                    ? t("UnloadingProducts.ReportedMismatch", "Mismatch Reported")
+                    : t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               onPress={handleFinishUnloading}
-              disabled={!allWeighed || submitting}
+              disabled={!canFinish || submitting}
               activeOpacity={0.8}
               className={`w-full h-[52px] rounded-full items-center justify-center ${
-                !allWeighed || submitting ? "bg-[#A0A4A8]" : "bg-[#000000]"
+                !canFinish || submitting ? "bg-[#A0A4A8]" : "bg-[#000000]"
               }`}
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: !allWeighed || submitting ? 0.05 : 0.2,
+                shadowOpacity: !canFinish || submitting ? 0.05 : 0.2,
                 shadowRadius: 5,
-                elevation: !allWeighed || submitting ? 1 : 4,
+                elevation: !canFinish || submitting ? 1 : 4,
               }}
             >
               {submitting ? (
@@ -704,6 +727,20 @@ export default function UnloadingProducts({
           </View>
         </View>
       )}
+
+      {/* AlertModal for Mismatch Reported Success */}
+      <AlertModal
+        visible={showMismatchSuccessModal}
+        title={t("UnloadingProducts.MismatchReportedTitle", "Mismatch Reported!")}
+        message={t(
+          "UnloadingProducts.MismatchReportedMessage",
+          "Load mismatch has been successfully reported."
+        )}
+        type="success"
+        onClose={() => setShowMismatchSuccessModal(false)}
+        duration={3000}
+        autoClose={true}
+      />
 
       {/* AlertModal for Unload Success */}
       <AlertModal
