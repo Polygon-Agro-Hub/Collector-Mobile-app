@@ -222,10 +222,27 @@ export default function PurchaseProduct({
         uploadedFile.type === "pdf" ||
         uploadedFile.name?.toLowerCase().endsWith(".pdf");
 
-      const fileExt = uploadedFile.name.split(".").pop()?.toLowerCase() || (isPdf ? "pdf" : "jpg");
-      let fileMime = isPdf
-        ? "application/pdf"
-        : `image/${fileExt === "png" ? "png" : "jpeg"}`;
+      // Determine the correct extension and MIME type
+      const fileMime = isPdf ? "application/pdf" : (() => {
+        const ext = uploadedFile.name?.split(".").pop()?.toLowerCase();
+        if (ext === "png") return "image/png";
+        if (ext === "webp") return "image/webp";
+        if (ext === "heic") return "image/heic";
+        if (ext === "heif") return "image/heif";
+        return "image/jpeg";
+      })();
+
+      // Build correct file name with proper extension (critical for multer fileFilter)
+      const correctExt = isPdf ? "pdf"
+        : fileMime === "image/png" ? "png"
+        : fileMime === "image/webp" ? "webp"
+        : fileMime === "image/heic" ? "heic"
+        : fileMime === "image/heif" ? "heif"
+        : "jpg";
+
+      const baseName = (uploadedFile.name || `Transfer_Slip_${Date.now()}`)
+        .replace(/\.[^/.]+$/, ""); // strip existing extension
+      const safeFileName = `${baseName}.${correctExt}`;
 
       const formData = new FormData();
       formData.append("srtAssignId", String(srtAssignId || 1));
@@ -235,7 +252,7 @@ export default function PurchaseProduct({
 
       formData.append("slip", {
         uri: uploadedFile.uri,
-        name: uploadedFile.name || `Transfer_Slip_${Date.now()}.${fileExt}`,
+        name: safeFileName,
         type: fileMime,
       } as any);
 
