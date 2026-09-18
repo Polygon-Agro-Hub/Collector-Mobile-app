@@ -15,11 +15,12 @@ import { RootStackParamList } from "@/types/types";
 import { Ionicons, MaterialCommunityIcons, Feather, FontAwesome5 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
-import { getSocket } from "@/services/socket";
+import socketService from "@/services/socket/socket.service";
 import * as Notifications from "expo-notifications";
 
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -94,7 +95,16 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
   // Fetch notifications from backend API
   const fetchNotifications = useCallback(async () => {
     try {
-      const token = store.getState().auth.token;
+      let token = store.getState().auth.token;
+      if (!token) {
+        try {
+          const stored = await AsyncStorage.getItem("@auth_state");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            token = parsed?.token || null;
+          }
+        } catch (_) {}
+      }
       if (!token) return;
 
       const response = await axios.get(
@@ -106,7 +116,7 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
         }
       );
 
-      if (response.data.success && Array.isArray(response.data.data)) {
+      if (response.data?.success && Array.isArray(response.data?.data)) {
         setNotifications(response.data.data);
       }
     } catch (error) {
@@ -117,64 +127,28 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
     }
   }, []);
 
-  useEffect(() => {
-    loadReadIds();
-    fetchNotifications();
-  }, [loadReadIds, fetchNotifications]);
+  useFocusEffect(
+    useCallback(() => {
+      loadReadIds();
+      fetchNotifications();
+    }, [loadReadIds, fetchNotifications])
+  );
 
-  // Request system notification permissions & Socket setup
   useEffect(() => {
-    const requestNotificationPermission = async () => {
-      try {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== "granted") {
-          const { status } = await Notifications.requestPermissionsAsync();
-          finalStatus = status;
-        }
-      } catch (err) {
-        console.warn("Could not request notification permissions:", err);
+    socketService.connect();
+
+    const unsubscribe = socketService.onNewNotification((data) => {
+      console.log("⚡ Real-time notification received in MyNotifications:", data);
+      if (data?.id) {
+        setNotifications((prev) => [data as any, ...prev.filter((n) => n.id !== data.id)]);
       }
+      fetchNotifications();
+    });
+
+    return () => {
+      unsubscribe();
     };
-    requestNotificationPermission();
-
-    const socket = getSocket();
-    if (socket && currentUserId) {
-      socket.emit("join_user", currentUserId);
-      socket.emit("join_officer", currentUserId);
-
-      const handleRealtimeNotification = async (data: any) => {
-        console.log("⚡ Real-time notification received in DCM:", data);
-        fetchNotifications();
-
-        // Trigger system notification
-        try {
-          const invoiceNumber = data?.invNo || data?.invoiceNo || "N/A";
-          const otp = data?.otpCode || data?.otp || "";
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: t("MyNotifications.ReturnOrderOTP", "Return Order OTP"),
-              body: `Order #${invoiceNumber}: Please use the following OTP code, “${otp}”, to receive the order from the driver at the centre.`,
-              data: { otp, invoiceNumber },
-            },
-            trigger: null,
-          });
-        } catch (notifErr) {
-          console.warn("Error presenting local system notification:", notifErr);
-        }
-      };
-
-      socket.on("new_notification", handleRealtimeNotification);
-      socket.on("new_return_otp", handleRealtimeNotification);
-      socket.on("handover_return_otp", handleRealtimeNotification);
-
-      return () => {
-        socket.off("new_notification", handleRealtimeNotification);
-        socket.off("new_return_otp", handleRealtimeNotification);
-        socket.off("handover_return_otp", handleRealtimeNotification);
-      };
-    }
-  }, [currentUserId, fetchNotifications, t]);
+  }, [fetchNotifications]);
 
   const onRefresh = () => {
     setRefreshing(true);

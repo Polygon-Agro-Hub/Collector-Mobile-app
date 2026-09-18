@@ -61,18 +61,27 @@ function AppContent() {
   });
 
   useEffect(() => {
-    // Initialize push notification service (creates Android channel, registers tap handler)
+    // Initialize push notification service (requests permissions on iOS/Android, creates Android channel)
     pushNotificationService.init();
 
-    // Connect socket with auth token and subscribe to DCM real-time events
-    socketService.connect();
+    // Auto-connect socket whenever token is available (on startup or after login/loadPersistedAuth)
+    const checkAndConnect = () => {
+      const token = store.getState().auth.token;
+      if (token) {
+        socketService.connect();
+      }
+    };
+    checkAndConnect();
+    const unsubscribeStore = store.subscribe(checkAndConnect);
 
     // When a new notification arrives (via socket OR polling), show a system notification
-    const jobRole = store.getState().auth.jobRole;
-    const isDCM = jobRole === ROLES.DISTRIBUTION_MANAGER;
+    const unsubscribeNotif = socketService.onNewNotification((item) => {
+      console.log("📲 [App.tsx] onNewNotification received:", item?.id, item?.invNo, item?.otpCode);
+      const currentRole = store.getState().auth.jobRole;
+      const isDCM = currentRole === ROLES.DISTRIBUTION_MANAGER;
+      // Allow if DCM or if role is still loading
+      if (currentRole && !isDCM) return;
 
-    const unsubscribe = socketService.onNewNotification((item) => {
-      if (!isDCM) return;
       const invoiceNumber = item?.invNo || item?.invoiceNo || "";
       const otp = item?.otpCode || item?.otp || "";
       const bodyText = invoiceNumber
@@ -83,7 +92,8 @@ function AppContent() {
     });
 
     return () => {
-      unsubscribe();
+      unsubscribeStore();
+      unsubscribeNotif();
     };
   }, []);
 
