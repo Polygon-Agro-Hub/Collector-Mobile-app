@@ -1,4 +1,4 @@
-﻿import * as Notifications from "expo-notifications";
+import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
@@ -13,6 +13,7 @@ const CHANNEL_ID = "dcm-otp-notifications";
 try {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
+      shouldShowAlert: true,
       shouldPlaySound: true,
       shouldSetBadge: true,
       shouldShowBanner: true,
@@ -32,6 +33,25 @@ class PushNotificationService {
     this.isInitialized = true;
 
     try {
+      // Request / verify notification permission (Crucial for iOS and Android 13+)
+      try {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== "granted") {
+          const { status } = await Notifications.requestPermissionsAsync({
+            ios: {
+              allowAlert: true,
+              allowBadge: true,
+              allowSound: true,
+            },
+          });
+          finalStatus = status;
+        }
+        console.log("📱 [PushNotificationService] Notification permission status:", finalStatus);
+      } catch (permErr) {
+        console.warn("[PushNotificationService] Permission check error:", permErr);
+      }
+
       // Create the Android notification channel
       if (Platform.OS === "android") {
         try {
@@ -95,12 +115,15 @@ class PushNotificationService {
 
       const title = "Return Order OTP";
       const invoiceNumber = item?.invNo || item?.invoiceNo || "";
+      const displayBody = invoiceNumber ? `Order #${invoiceNumber}: ${bodyText}` : bodyText;
+
+      console.log("🔔 [PushNotificationService] Scheduling local notification:", title, displayBody);
 
       try {
-        await Notifications.scheduleNotificationAsync({
+        const notifId = await Notifications.scheduleNotificationAsync({
           content: {
             title,
-            body: invoiceNumber ? `Order #${invoiceNumber}: ${bodyText}` : bodyText,
+            body: displayBody,
             data: { ...item },
             sound: "default",
             priority: Notifications.AndroidNotificationPriority.MAX,
@@ -111,17 +134,20 @@ class PushNotificationService {
               ? ({ channelId: CHANNEL_ID } as any)
               : null,
         });
-      } catch (_) {
+        console.log("✅ [PushNotificationService] Notification scheduled successfully with ID:", notifId);
+      } catch (err) {
+        console.warn("⚠️ [PushNotificationService] Failed with channelId, attempting fallback trigger: null:", err);
         // Fallback without channelId trigger
-        await Notifications.scheduleNotificationAsync({
+        const notifId = await Notifications.scheduleNotificationAsync({
           content: {
             title,
-            body: invoiceNumber ? `Order #${invoiceNumber}: ${bodyText}` : bodyText,
+            body: displayBody,
             data: { ...item },
             sound: "default",
           },
           trigger: null,
         });
+        console.log("✅ [PushNotificationService] Fallback notification scheduled with ID:", notifId);
       }
     } catch (error) {
       console.warn(

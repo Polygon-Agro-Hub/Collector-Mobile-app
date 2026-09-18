@@ -65,9 +65,23 @@ const authSlice = createSlice({
         try {
           const parts = action.payload.token.split(".");
           if (parts.length >= 2) {
-            const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-            const decoded = atob(base64);
-            const parsed = JSON.parse(decoded);
+            let b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            while (b64.length % 4 !== 0) b64 += "=";
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            let str = "";
+            for (let i = 0; i < b64.length; i += 4) {
+              const b0 = chars.indexOf(b64.charAt(i));
+              const b1 = chars.indexOf(b64.charAt(i + 1));
+              const b2 = chars.indexOf(b64.charAt(i + 2));
+              const b3 = chars.indexOf(b64.charAt(i + 3));
+              const c0 = (b0 << 2) | (b1 >> 4);
+              const c1 = ((b1 & 15) << 4) | (b2 >> 2);
+              const c2 = ((b2 & 3) << 6) | b3;
+              str += String.fromCharCode(c0);
+              if (b2 !== 64 && b2 !== -1) str += String.fromCharCode(c1);
+              if (b3 !== 64 && b3 !== -1) str += String.fromCharCode(c2);
+            }
+            const parsed = JSON.parse(str);
             userId = parsed.id || parsed.officerId || parsed.userId || null;
           }
         } catch (err) {

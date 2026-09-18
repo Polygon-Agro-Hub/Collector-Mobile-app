@@ -39,6 +39,7 @@ store.subscribe(async () => {
         token: state.auth.token,
         jobRole: state.auth.jobRole,
         empId: state.auth.empId,
+        id: state.auth.id,
         companyNameEnglish: state.auth.companyNameEnglish,
         companyNameSinhala: state.auth.companyNameSinhala,
         companyNameTamil: state.auth.companyNameTamil,

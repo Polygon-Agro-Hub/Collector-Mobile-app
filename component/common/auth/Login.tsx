@@ -279,6 +279,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           token,
           jobRole,
           empId: empId.toString(),
+          id: data.userId || data.officer?.id || data.id,
           companyNameEnglish,
           companyNameSinhala,
           companyNameTamil,
