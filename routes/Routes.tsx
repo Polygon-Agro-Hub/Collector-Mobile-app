@@ -64,6 +64,13 @@ import otpBankDetailsupdate from "@/component/collection/collection-common/farme
 import GoviPensionForm from "@/component/collection/collection-common/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/collection/collection-common/govi-pension/GoviPensionStatus";
 import NotEligibleScreen from "@/component/collection/collection-common/govi-pension/NotEligibleScreen";
+import SentProductsToday from "@/component/collection/collection-common/transport/SentProductsToday";
+import ScanDriverQR from "@/component/collection/collection-common/transport/ScanDriverQR";
+import SelectDistributionCentre from "@/component/collection/collection-common/transport/SelectDistributionCentre";
+import LoadingToVehicle from "@/component/collection/collection-common/transport/LoadingToVehicle";
+import LoadingToVehicleSummary from "@/component/collection/collection-common/transport/LoadingToVehicleSummary";
+import LoadQR from "@/component/collection/collection-common/transport/LoadQR";
+import LoadAssigned from "@/component/collection/collection-common/transport/LoadAssigned";
 
 // --- Distribution Screens ---
 import DistributionDashboard from "@/component/distribution/distribution-common/dashboard/DistributionDashboard";
@@ -94,6 +101,12 @@ import SelectRowToAssign from "@/component/distribution/distribution-center-mana
 import ConfirmRowAssign from "@/component/distribution/distribution-center-manager/assign-groups/ConfirmRowAssign";
 import DistributionCenterTarget from "@/component/distribution/distribution-common/center-target/DistributionCenterTarget";
 import OrderDetails from "@/component/distribution/distribution-common/center-target/OrderDetails";
+import ReceivedProductsToday from "@/component/distribution/distribution-common/receive-products/received-products-today/ReceivedProductsToday";
+import ScanLoadQR from "@/component/distribution/distribution-common/receive-products/scan-load-qr/ScanLoadQR";
+import ReceivedProductsSummary from "@/component/distribution/distribution-common/receive-products/received-products-summary/ReceivedProductsSummary";
+import UnloadingProducts from "@/component/distribution/distribution-common/receive-products/unloading-products/UnloadingProducts";
+import WeighTheLoad from "@/component/distribution/distribution-common/receive-products/weigh-the-load/WeighTheLoad";
+import WeighGrade from "@/component/distribution/distribution-common/receive-products/weigh-grade/WeighGrade";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -430,6 +443,41 @@ const COLLECTION_STACK_SCREENS: StackRouteConfig[] = [
     component: NotEligibleScreen as any,
     allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
   },
+  {
+    name: "SentProductsToday",
+    component: SentProductsToday as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "ScanDriverQR",
+    component: ScanDriverQR as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "SelectDistributionCentre",
+    component: SelectDistributionCentre as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadingToVehicle",
+    component: LoadingToVehicle as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadingToVehicleSummary",
+    component: LoadingToVehicleSummary as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadQR",
+    component: LoadQR as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
+  {
+    name: "LoadAssigned",
+    component: LoadAssigned as any,
+    allowedRoles: [ROLES.COLLECTION_MANAGER, ROLES.COLLECTION_OFFICER],
+  },
 ];
 
 // ============================================================================
@@ -582,6 +630,41 @@ const DISTRIBUTION_STACK_SCREENS: StackRouteConfig[] = [
   {
     name: "ReceivedCashTransfer",
     component: ReceivedCashTransfer as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReceivedProductsToday",
+    component: ReceivedProductsToday as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ScanLoadQR",
+    component: ScanLoadQR as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "DistributionScanDriverQR",
+    component: ScanLoadQR as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "ReceivedProductsSummary",
+    component: ReceivedProductsSummary as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "UnloadingProducts",
+    component: UnloadingProducts as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "WeighTheLoad",
+    component: WeighTheLoad as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "WeighGrade",
+    component: WeighGrade as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
   },
 ];

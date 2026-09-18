@@ -12,7 +12,11 @@ import { Feather } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
-import { formatTimeSlot } from "@/constants/packing/time-slots";
+import {
+  formatTimeSlot,
+  formatOrderCategory,
+  formatOrderType,
+} from "@/constants/packing/time-slots";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 
@@ -38,8 +42,6 @@ export default function ReadyToPrint({
   const insets = useSafeAreaInsets();
   const [endShiftModalVisible, setEndShiftModalVisible] = React.useState<boolean>(false);
 
-
-
   useEffect(() => {
     const onBackPress = () => {
       navigation.navigate("QRHandling");
@@ -53,9 +55,17 @@ export default function ReadyToPrint({
   }, [navigation]);
 
   const rawType = String(route.params?.type || "").toUpperCase();
-  const isWholesale = rawType === "W" || rawType === "WHOLESALE" || String(orderNumber).includes("(W)") || String(orderNumber).includes("(Wholesale)") || String(orderNumber).includes("Wholesale");
+  const isWholesale =
+    rawType === "W" ||
+    rawType === "WHOLESALE" ||
+    String(orderNumber).includes("(W)") ||
+    String(orderNumber).includes("(Wholesale)") ||
+    String(orderNumber).includes("Wholesale") ||
+    String(orderNumber).includes("(තොග)") ||
+    String(orderNumber).includes("(மொத்தம்)");
   const cleanInvoiceNumber = invoiceNumber || (orderNumber ? orderNumber.replace(/\s*\([^\)]*\)/g, "").trim() : "");
-  const displayOrderNumber = isWholesale ? `${cleanInvoiceNumber} (W)` : `${cleanInvoiceNumber} (R)`;
+  const typeLabel = formatOrderType(isWholesale ? "W" : "R", t);
+  const displayOrderNumber = `${cleanInvoiceNumber} (${typeLabel})`;
   const qrValue = cleanInvoiceNumber;
 
   const actualPackagesCount =
@@ -110,7 +120,7 @@ export default function ReadyToPrint({
             {displayOrderNumber}
           </Text>
           <Text className="text-gray-400 text-xs mt-1 text-center font-medium">
-            {category}
+            {formatOrderCategory(category, t)}
           </Text>
         </View>
 
@@ -128,10 +138,10 @@ export default function ReadyToPrint({
                 {displayOrderNumber}
               </Text>
               <Text className="text-sm font-bold text-slate-900 mt-0.5">
-                {formatTimeSlot(timeSlot)}
+                {formatTimeSlot(timeSlot, t)}
               </Text>
               <Text className="text-xs text-[#54617D] mt-0.5">
-                {category}
+                {formatOrderCategory(category, t)}
               </Text>
             </View>
           </View>
@@ -176,6 +186,11 @@ export default function ReadyToPrint({
       <View className="px-6 pt-4 bg-white" style={{ paddingBottom: insets.bottom + 16 }}>
         <TouchableOpacity
           onPress={() => {
+            const isReprint = Boolean(route.params?.isReprint);
+            const startButtonText = isReprint
+              ? t("QRHandling.Start Again", "Start Again")
+              : t("QRHandling.Start", "Start");
+
             navigation.navigate("PrintingConfirmation", {
               ...route.params,
               orderNumber: displayOrderNumber,
@@ -186,8 +201,8 @@ export default function ReadyToPrint({
               alacarteCount: alacarteCount,
               trackingRows: route.params?.trackingRows || [],
               rowId: route.params?.rowId ?? store.getState().auth.activeAssignment?.rowId ?? null,
-              isReprint: route.params?.isReprint || false,
-              buttonLabel: route.params?.buttonLabel || "Start",
+              isReprint: isReprint,
+              buttonLabel: startButtonText,
               date: route.params?.date,
             });
           }}
@@ -211,7 +226,9 @@ export default function ReadyToPrint({
               textAlign: "center",
             }}
           >
-            {route.params?.buttonLabel || "Start"}
+            {route.params?.isReprint
+              ? t("QRHandling.Start Again", "Start Again")
+              : t("QRHandling.Start", "Start")}
           </Text>
         </TouchableOpacity>
       </View>

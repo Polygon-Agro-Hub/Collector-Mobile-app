@@ -14,6 +14,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { formatTimeSlot, formatOrderCategory } from "@/constants/packing/time-slots";
 
 interface OrderItem {
   id: string;
@@ -143,20 +144,34 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
     });
   };
 
+  const formatOrderSubtitle = (item: OrderItem) => {
+    if (!item.subtitle) return "";
+    if (item.type === "pickup") {
+      return t("AssignGroups.Pickup Orders", "රැගෙන යාමේ ඇණවුම්");
+    }
+    return formatOrderCategory(item.subtitle, t);
+  };
+
   return (
     <View className="flex-1 bg-white">
       {/* Custom Header with absolutely centered titles */}
       <CustomHeader
-        title={group.timeSlot}
+        title={formatTimeSlot(group.timeSlot, t)}
         navigation={navigation}
         onBackPress={handleBack}
       />
 
       {/* Order count positioned after custom header */}
       <View className="items-center -mt-6 pb-2 bg-white">
-        <Text className="text-md text-[#980775]">
-          <Text className="font-bold">{isRetail ? t("AssignGroups.Retail", "Retail") : t("AssignGroups.Wholesale", "Wholesale")} {totalCount} </Text>
-          <Text className="font-normal">{totalCount === 1 ? t("AssignGroups.Order", "Order") : t("AssignGroups.Orders", "Orders")}</Text>
+        <Text className="text-md text-[#980775] font-bold">
+          {t("AssignGroups.OrderCountHeader", {
+            type: isRetail ? t("AssignGroups.Retail", "Retail") : t("AssignGroups.Wholesale", "Wholesale"),
+            count: totalCount,
+            orders: totalCount === 1 ? t("AssignGroups.Order", "Order") : t("AssignGroups.Orders", "Orders"),
+            defaultValue: `${isRetail ? "Retail" : "Wholesale"} ${totalCount} ${
+              totalCount === 1 ? "Order" : "Orders"
+            }`,
+          })}
         </Text>
       </View>
 
@@ -171,124 +186,119 @@ export default function SelectOrder({ route, navigation }: { route: any; navigat
           className="flex-1 bg-white"
           showsVerticalScrollIndicator={false}
         >
-        {/* Master Checkbox Section */}
-        <TouchableOpacity
-          onPress={handleToggleAll}
-          activeOpacity={0.8}
-          className="flex-row items-center px-6 py-3"
-        >
-          <View
-            className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
-              allChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
-            }`}
+          {/* Master Checkbox Section */}
+          <TouchableOpacity
+            onPress={handleToggleAll}
+            activeOpacity={0.8}
+            className="flex-row items-center px-6 py-3"
           >
-            {allChecked && <Ionicons name="checkmark" size={16} color="white" />}
-          </View>
-          <Text className="text-[#030E25] font-extrabold text-base">
-            {t("AssignGroups.All Orders", { count: totalCount, defaultValue: `All ${totalCount} Orders` })}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Section 1: Pickup Orders */}
-        {pickupCount > 0 && (
-          <>
-            {/* Full width border line before All Pickup Orders */}
-            <View style={{ height: 1, backgroundColor: allPickupChecked ? "#980775" : "#2868FE" }} />
-
-            <View className="mt-4 px-6">
-              <TouchableOpacity
-                onPress={handleTogglePickupAll}
-                activeOpacity={0.8}
-                className="flex-row items-center py-2 mb-2"
-              >
-                <View
-                  className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
-                    allPickupChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
-                  }`}
-                >
-                  {allPickupChecked && <Ionicons name="checkmark" size={16} color="white" />}
-                </View>
-                <Text className="text-[#030E25] font-bold text-base">
-                  {t("AssignGroups.All Pickup Orders", { count: String(pickupCount).padStart(2, "0"), defaultValue: `All Pickup Orders (${String(pickupCount).padStart(2, "0")})` })}
-                </Text>
-              </TouchableOpacity>
-
-              <View className="gap-3 mt-1">
-                {pickupOrders.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => handleToggleItem(item.id)}
-                    activeOpacity={0.8}
-                    className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
-                  >
-                    <View
-                      className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${
-                        item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
-                      }`}
-                    >
-                      {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
-                    </View>
-                    <View>
-                      <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
-                      <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
+            <View
+              className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${allChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                }`}
+            >
+              {allChecked && <Ionicons name="checkmark" size={16} color="white" />}
             </View>
-          </>
-        )}
+            <Text className="text-[#030E25] font-extrabold text-base">
+              {t("AssignGroups.All Orders", { count: String(totalCount).padStart(2, "0"), defaultValue: `All ${String(totalCount).padStart(2, "0")} Orders` })}
+            </Text>
+          </TouchableOpacity>
 
-        {/* Section 2: Delivery Orders */}
-        {deliveryCount > 0 && (
-          <>
-            {/* Full width border line before All Delivery Orders */}
-            <View className="mt-6 mb-4" style={{ height: 1, backgroundColor: allDeliveryChecked ? "#980775" : "#ACB5BE" }} />
+          {/* Section 1: Pickup Orders */}
+          {pickupCount > 0 && (
+            <>
+              {/* Full width border line before All Pickup Orders */}
+              <View style={{ height: 1, backgroundColor: allPickupChecked ? "#980775" : "#2868FE" }} />
 
-            <View className="px-6">
-              <TouchableOpacity
-                onPress={handleToggleDeliveryAll}
-                activeOpacity={0.8}
-                className="flex-row items-center py-2 mb-2"
-              >
-                <View
-                  className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${
-                    allDeliveryChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
-                  }`}
+              <View className="mt-4 px-6">
+                <TouchableOpacity
+                  onPress={handleTogglePickupAll}
+                  activeOpacity={0.8}
+                  className="flex-row items-center py-2 mb-2"
                 >
-                  {allDeliveryChecked && <Ionicons name="checkmark" size={16} color="white" />}
-                </View>
-                <Text className="text-[#030E25] font-bold text-base">
-                  {t("AssignGroups.All Delivery Orders", { count: String(deliveryCount).padStart(2, "0"), defaultValue: `All Delivery Orders (${String(deliveryCount).padStart(2, "0")})` })}
-                </Text>
-              </TouchableOpacity>
-
-              <View className="gap-3 mt-1">
-                {deliveryOrders.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => handleToggleItem(item.id)}
-                    activeOpacity={0.8}
-                    className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
-                  >
-                    <View
-                      className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${
-                        item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                  <View
+                    className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${allPickupChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
                       }`}
+                  >
+                    {allPickupChecked && <Ionicons name="checkmark" size={16} color="white" />}
+                  </View>
+                  <Text className="text-[#030E25] font-bold text-base">
+                    {t("AssignGroups.All Pickup Orders", { count: String(pickupCount).padStart(2, "0"), defaultValue: `All Pickup Orders (${String(pickupCount).padStart(2, "0")})` })}
+                  </Text>
+                </TouchableOpacity>
+
+                <View className="gap-3 mt-1">
+                  {pickupOrders.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => handleToggleItem(item.id)}
+                      activeOpacity={0.8}
+                      className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
                     >
-                      {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
-                    </View>
-                    <View>
-                      <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
-                      <Text className="text-[#676771] text-xs mt-0.5">{item.subtitle}</Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                      <View
+                        className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                          }`}
+                      >
+                        {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
+                      </View>
+                      <View>
+                        <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
+                        <Text className="text-[#676771] text-xs mt-0.5">{formatOrderSubtitle(item)}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
-          </>
-        )}
-      </ScrollView>
+            </>
+          )}
+
+          {/* Section 2: Delivery Orders */}
+          {deliveryCount > 0 && (
+            <>
+              {/* Full width border line before All Delivery Orders */}
+              <View className="mt-6 mb-4" style={{ height: 1, backgroundColor: allDeliveryChecked ? "#980775" : "#ACB5BE" }} />
+
+              <View className="px-6">
+                <TouchableOpacity
+                  onPress={handleToggleDeliveryAll}
+                  activeOpacity={0.8}
+                  className="flex-row items-center py-2 mb-2"
+                >
+                  <View
+                    className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-3 ${allDeliveryChecked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                      }`}
+                  >
+                    {allDeliveryChecked && <Ionicons name="checkmark" size={16} color="white" />}
+                  </View>
+                  <Text className="text-[#030E25] font-bold text-base">
+                    {t("AssignGroups.All Delivery Orders", { count: String(deliveryCount).padStart(2, "0"), defaultValue: `All Delivery Orders (${String(deliveryCount).padStart(2, "0")})` })}
+                  </Text>
+                </TouchableOpacity>
+
+                <View className="gap-3 mt-1">
+                  {deliveryOrders.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => handleToggleItem(item.id)}
+                      activeOpacity={0.8}
+                      className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 shadow-sm"
+                    >
+                      <View
+                        className={`w-6 h-6 rounded-md items-center justify-center border-2 mr-4 ${item.checked ? "bg-[#980775] border-[#980775]" : "border-[#000000] bg-white"
+                          }`}
+                      >
+                        {item.checked && <Ionicons name="checkmark" size={16} color="white" />}
+                      </View>
+                      <View>
+                        <Text className="text-[#030E25] font-extrabold text-base">{item.orderId}</Text>
+                        <Text className="text-[#676771] text-xs mt-0.5">{formatOrderSubtitle(item)}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </>
+          )}
+        </ScrollView>
       )}
 
       {/* Sticky Bottom Action Bar when any items are checked */}

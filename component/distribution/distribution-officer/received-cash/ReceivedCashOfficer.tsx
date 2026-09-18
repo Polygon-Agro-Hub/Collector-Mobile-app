@@ -41,6 +41,7 @@ interface Transaction {
   orderId: string;
   cash: number;
   receivedTime: string;
+  rawTime?: string;
   date: string;
   pickupOrderId: string;
   invNo: string;
@@ -87,18 +88,76 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
   const [loading, setLoading] = useState(true);
 
   const formatApiDate = (dateString: string) => {
+    if (!dateString) return { date: "", time: "" };
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      const am = t("Time.AM", { defaultValue: "AM" });
+      const currentLang =
+        (t && t("SignIn.LNG")) ||
+        (t && t("LNG")) ||
+        (t && t("DistridutionaDashboard.LNG")) ||
+        (t && t("AddOfficerBasicDetails.LNG")) ||
+        "en";
+      const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
+      const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
+
+      let cleaned = dateString
+        .replace(/පෙ\.ව\.|මුற்பகல்/gi, "AM")
+        .replace(/ප\.ව\.|பிற்பகல்/gi, "PM");
+
+      let timeStr = cleaned;
+      if (isSinhala) {
+        timeStr = cleaned
+          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "පෙ.ව. $1")
+          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "ප.ව. $1")
+          .replace(/\bAM\b/gi, "පෙ.ව.")
+          .replace(/\bPM\b/gi, "ප.ව.");
+      } else if (isTamil) {
+        timeStr = cleaned
+          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "முற்பகல் $1")
+          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பிற்பகல் $1")
+          .replace(/\bAM\b/gi, "முற்பகல்")
+          .replace(/\bPM\b/gi, "பிற்பகல்");
+      }
+      return { date: dateString, time: timeStr };
+    }
+
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    const hours = date.getHours();
+    let hours = date.getHours();
     const minutes = String(date.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12;
+    const isPM = hours >= 12;
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+    const formattedHours = hours;
+
+    const am = t("Time.AM", { defaultValue: "AM" });
+    const currentLang =
+      (t && t("SignIn.LNG")) ||
+      (t && t("LNG")) ||
+      (t && t("DistridutionaDashboard.LNG")) ||
+      (t && t("AddOfficerBasicDetails.LNG")) ||
+      "en";
+
+    const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
+    const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
+
+    let timeStr = "";
+    if (isSinhala) {
+      const period = isPM ? "ප.ව." : "පෙ.ව.";
+      timeStr = `${year}/${month}/${day} ${period} ${formattedHours}:${minutes}`;
+    } else if (isTamil) {
+      const period = isPM ? "பிற்பகல்" : "முற்பகல்";
+      timeStr = `${year}/${month}/${day} ${period} ${formattedHours}:${minutes}`;
+    } else {
+      const ampm = isPM ? "PM" : "AM";
+      timeStr = `${year}/${month}/${day} ${formattedHours}:${minutes} ${ampm}`;
+    }
 
     return {
       date: `${year}-${month}-${day}`,
-      time: `${year}/${month}/${day} ${formattedHours}:${minutes} ${ampm}`,
+      time: timeStr,
     };
   };
 
@@ -120,6 +179,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
           orderId: item.invNo,
           cash: cashAmount,
           receivedTime: time,
+          rawTime: item.pickupCreatedAt,
           date: date,
           pickupOrderId: item.pickupOrderId.toString(),
           invNo: item.invNo,
@@ -298,7 +358,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
                 </Text>
               </View>
               <Text className="text-xs text-[#848484]">
-                {t("ReceivedCash.Received Time")} : {item.receivedTime}
+                {t("ReceivedCash.Received Time")} : {formatApiDate(item.rawTime || item.receivedTime).time}
               </Text>
             </View>
           </View>

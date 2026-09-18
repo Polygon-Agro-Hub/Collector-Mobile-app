@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, ActivityIndicator, Text, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import * as FileSystem from "expo-file-system/legacy";
+import { useTranslation } from "react-i18next";
 
 interface PdfViewerProps {
   uri: string;
@@ -106,6 +107,7 @@ const getPdfHtml = (base64Data: string) => `
 `;
 
 const PdfViewer: React.FC<PdfViewerProps> = ({ uri }) => {
+  const { t } = useTranslation();
   const [base64, setBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -154,7 +156,9 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ uri }) => {
     return (
       <View style={{ flex: 1, width: "100%", height: "100%", justifyContent: "center", alignItems: "center", backgroundColor: "#f3f4f6" }}>
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={{ marginTop: 12, color: "#6B7280", fontSize: 13 }}>Loading PDF Preview...</Text>
+        <Text style={{ marginTop: 12, color: "#6B7280", fontSize: 13 }}>
+          {t("Loading PDF Preview...", "PDF පෙරදසුන පූරණය වෙමින්...")}
+        </Text>
       </View>
     );
   }

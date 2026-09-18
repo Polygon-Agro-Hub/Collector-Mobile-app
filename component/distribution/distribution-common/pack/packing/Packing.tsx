@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { Ionicons, FontAwesome6 } from "@expo/vector-icons";
+import { Ionicons, FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
 import LottieView from "lottie-react-native";
@@ -28,6 +28,8 @@ import { useTranslation } from "react-i18next";
 import {
   TIME_SLOTS,
   formatTimeSlot,
+  formatPositionDisplayName,
+  formatOrderTitle,
 } from "@/constants/packing/time-slots";
 import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
 import { PackingStatus } from "@/constants/packing/status-types";
@@ -134,7 +136,13 @@ export default function Packing({
           if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
             store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
-            Alert.alert("Position Released", "Your position has been released by the manager.");
+            Alert.alert(
+              t("Packing.Position Released", "Position Released"),
+              t(
+                "Packing.Your position has been released by the manager.",
+                "Your position has been released by the manager."
+              )
+            );
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
           }
         }
@@ -226,7 +234,7 @@ export default function Packing({
                     packName: resolvedPackName,
                     categoryType: isAlacarte ? "alacarte" : "package",
                     checked: false,
-                    image: item.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80",
+                    image: item.image || "",
                   };
                 });
                 mappedItems.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
@@ -287,17 +295,84 @@ export default function Packing({
       );
 
       if (res.data && res.data.success) {
-        setAlertMessage("Packing has been completed successfully. Move to the next position.");
+        if (status === "no_items" || status === "main_container") {
+          setAlertMessage(
+            t(
+              "Packing.Packing has been moved to the next position.",
+              "Packing has been moved to the next position."
+            )
+          );
+        } else {
+          setAlertMessage(
+            t(
+              "Packing.Packing has been completed successfully. Move to the next position.",
+              "Packing has been completed successfully. Move to the next position."
+            )
+          );
+        }
         setAlertVisible(true);
       } else if (res.data && !res.data.success) {
-        Alert.alert("Station Busy", res.data.message || "The next station is currently busy.");
+        const code = res.data.code || res.data.data?.code;
+        const targetPos = res.data.targetPosition || res.data.data?.targetPosition || (currentPIndex ? currentPIndex + 1 : 2);
+        const occupiedInv = res.data.occupiedInvoice || res.data.data?.occupiedInvoice || "";
+
+        if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+          Alert.alert(
+            t("Packing.Position Busy", "Position Busy"),
+            t("Packing.Position Busy Message", {
+              position: targetPos,
+              invoice: occupiedInv,
+              defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+            })
+          );
+        } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+          Alert.alert(
+            t("Packing.Position Not Available", "Position Not Available"),
+            t("Packing.No Officer Assigned Message", {
+              position: targetPos,
+              defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+            })
+          );
+        } else {
+          Alert.alert(
+            t("Packing.Error", "Error"),
+            res.data.message || t("Packing.Failed to advance position index.", "Failed to advance position index.")
+          );
+        }
         setIsAdvancing(false);
       } else {
         setIsAdvancing(false);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error advancing position index:", err);
-      Alert.alert("Error", "Failed to advance position index.");
+      const data = err?.response?.data;
+      const code = data?.code || data?.data?.code;
+      const targetPos = data?.targetPosition || data?.data?.targetPosition || (currentPIndex ? currentPIndex + 1 : 2);
+      const occupiedInv = data?.occupiedInvoice || data?.data?.occupiedInvoice || "";
+
+      if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+        Alert.alert(
+          t("Packing.Position Busy", "Position Busy"),
+          t("Packing.Position Busy Message", {
+            position: targetPos,
+            invoice: occupiedInv,
+            defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+          })
+        );
+      } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+        Alert.alert(
+          t("Packing.Position Not Available", "Position Not Available"),
+          t("Packing.No Officer Assigned Message", {
+            position: targetPos,
+            defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+          })
+        );
+      } else {
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          data?.message || t("Packing.Failed to advance position index.", "Failed to advance position index.")
+        );
+      }
       setIsAdvancing(false);
     }
   };
@@ -305,7 +380,7 @@ export default function Packing({
   return (
     <View className="flex-1 bg-white">
       <CustomHeader
-        title={status !== "no_target" ? displayOrderTitle : ""}
+        title={status !== "no_target" ? formatOrderTitle(displayOrderTitle, t) : ""}
         navigation={navigation}
         onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
         rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
@@ -313,7 +388,7 @@ export default function Packing({
 
       {loading ? (
         <View className="flex-1 bg-white">
-          <LoadingPage />
+          <LoadingPage message={t("Packing.Loading", t("ManagerTransactions.Loading", "Loading..."))} />
         </View>
       ) : (
         <>
@@ -338,10 +413,10 @@ export default function Packing({
                 </View>
                 <View>
                   <Text className="text-[#54617D] text-xs font-semibold mb-0.5">
-                    Scheduled Time :
+                    {t("Packing.Delivery Time", "Delivery Time")}
                   </Text>
                   <Text className="text-[#030E25] font-extrabold text-base">
-                    {scheduledTime}
+                    {formatTimeSlot(scheduledTime, t)}
                   </Text>
                 </View>
               </View>
@@ -352,7 +427,10 @@ export default function Packing({
               <View className="flex-1">
                 <View className="items-center mt-4 mb-2">
                   <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
-                    {t("Packing.Welcome to", { positionName: positionName || "Packing Position 1", defaultValue: `Welcome to ${positionName || "Packing Position 1"}` })}
+                    {t("Packing.Welcome to", {
+                      positionName: formatPositionDisplayName(positionName || "Packing Position 1", t),
+                      defaultValue: `Welcome to ${formatPositionDisplayName(positionName || "Packing Position 1", t)}`,
+                    })}
                   </Text>
                   <Text className="text-[#54617D] text-sm text-center px-4 font-medium leading-5">
                     {t("Packing.No daily target for row", "Please wait and check again.\nThis row doesn't have a daily target yet.")}
@@ -435,12 +513,20 @@ export default function Packing({
                         elevation: 1,
                       }}
                     >
-                      <View className="w-16 h-16 rounded-xl items-center justify-center mr-3.5 overflow-hidden">
-                        <Image
-                          source={{ uri: item.image }}
-                          className="w-full h-full"
-                          resizeMode="contain"
-                        />
+                      <View className="w-16 h-16 rounded-xl items-center justify-center mr-3.5 overflow-hidden bg-gray-100">
+                        {item.image ? (
+                          <Image
+                            source={{ uri: item.image }}
+                            className="w-full h-full"
+                            resizeMode="contain"
+                          />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="sprout"
+                            size={28}
+                            color="#54617D"
+                          />
+                        )}
                       </View>
                       <View className="flex-1 mr-2">
                         <Text className="text-[#030E25] font-semibold text-base leading-5">
@@ -527,13 +613,13 @@ export default function Packing({
         visible={endShiftModalVisible}
         onClose={() => setEndShiftModalVisible(false)}
         navigation={navigation}
-        positionText={positionName}
+        positionText={formatPositionDisplayName(positionName, t)}
       />
 
       <AlertModal
         visible={alertVisible}
         type="success"
-        title="Success"
+        title={t("Packing.Success", "Success")}
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);

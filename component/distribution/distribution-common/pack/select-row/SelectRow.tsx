@@ -11,7 +11,7 @@ import {
   BackHandler,
   RefreshControl,
 } from "react-native";
-import { Entypo, Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
@@ -19,6 +19,7 @@ import { useDispatch } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { setActiveAssignment as setActiveAssignmentAction } from "../../../../../store/authSlice";
 import LoadingPage from "@/component/components/loading/LoadingPage";
+import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 import { useTranslation } from "react-i18next";
 
 // Define TypeScript interfaces for our sample data
@@ -27,6 +28,13 @@ interface RowData {
   name: string;
   positionsCount: number;
   rowIndex?: number;
+  allocatedCount?: number;
+  orderCount?: number;
+  ordersCount?: number;
+  targetCount?: number;
+  ordersAssigned?: number;
+  totalOrders?: number;
+  hasOrders?: boolean;
 }
 
 interface PositionData {
@@ -44,6 +52,8 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [noOrdersModalVisible, setNoOrdersModalVisible] = useState(false);
+  const [noOrdersRowNumber, setNoOrdersRowNumber] = useState("");
 
   const [rows, setRows] = useState<RowData[]>([]);
   const [positions, setPositions] = useState<PositionData[]>([]);
@@ -51,6 +61,55 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [activeAssignment, setActiveAssignment] = useState<any | null>(null);
+
+  const getRowNumber = (row: RowData | null | undefined) => {
+    if (!row) return "";
+    if (row.rowIndex !== undefined && row.rowIndex !== null) {
+      return String(row.rowIndex);
+    }
+    const match = row.name?.match(/\d+/);
+    return match ? match[0] : row.name;
+  };
+
+  const formatRowTitle = (row: RowData | null | undefined) => {
+    if (!row) return "";
+    const num = getRowNumber(row);
+    if (num) {
+      return t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` });
+    }
+    return row.name;
+  };
+
+  const getPositionNumber = (position: PositionData | any | null | undefined) => {
+    if (!position) return "";
+    if (position.pIndex !== undefined && position.pIndex !== null) {
+      return String(position.pIndex);
+    }
+    const match = position.name?.match(/\d+/);
+    if (match) return match[0];
+    if (position.leftLabel && !isNaN(Number(position.leftLabel))) {
+      return String(Number(position.leftLabel));
+    }
+    return "";
+  };
+
+  const formatPositionName = (position: PositionData | any | null | undefined) => {
+    if (!position) return "";
+    if (position.type === "QR" || position.pType === "QR" || position.name === "QR Handling Position") {
+      return t("Packing.QR Handling Position", "QR Handling Position");
+    }
+    if (position.type === "QC" || position.pType === "QC" || position.name === "QC Position") {
+      return t("Packing.QC Position", "QC Position");
+    }
+    const posNum = getPositionNumber(position);
+    if (!posNum) {
+      return t("Packing.Packing Position", "Packing Position");
+    }
+    return t("Packing.Packing Position {{number}}", {
+      number: posNum,
+      defaultValue: `Packing Position ${posNum}`,
+    });
+  };
 
   const fetchPositionsSilently = async (rowId: number) => {
     try {
@@ -214,12 +273,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         } else if (assignment.type === "NOR") {
           navigation.replace("WelcomeToPacking", {
             positionId: assignment.positionId,
-            positionName: assignment.name,
+            positionName: formatPositionName(assignment),
             rowId: assignment.rowId,
           });
         } else if (assignment.type === "QC") {
           navigation.replace("WelcomeToQC", {
-            positionName: assignment.name,
+            positionName: formatPositionName(assignment),
             rowId: assignment.rowId,
           });
         }
@@ -269,7 +328,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     try {
       const token = store.getState().auth.token;
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
+        );
         return;
       }
 
@@ -280,24 +342,46 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       if (response.data && response.data.success) {
         setRows(response.data.data);
       } else {
-        Alert.alert("Error", response.data.message || "Failed to fetch rows.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          response.data.message || t("Packing.Failed to fetch rows.", "Failed to fetch rows.")
+        );
       }
     } catch (error: any) {
       console.error("Error fetching rows:", error);
-      const errMsg = error.response?.data?.message || "An error occurred while fetching rows.";
-      Alert.alert("Error", errMsg);
+      const errMsg = error.response?.data?.message || t("Packing.Failed to fetch rows.", "An error occurred while fetching rows.");
+      Alert.alert(t("Packing.Error", "Error"), errMsg);
     } finally {
       setLoading(false);
     }
   };
 
   const handleRowSelect = async (row: RowData) => {
+    const rowNum = getRowNumber(row);
+
+    // If row data already indicates no orders
+    if (
+      row.hasOrders === false ||
+      (row.ordersCount !== undefined && row.ordersCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.allocatedCount !== undefined && row.allocatedCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.orderCount !== undefined && row.orderCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.totalOrders !== undefined && row.totalOrders === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.ordersAssigned !== undefined && row.ordersAssigned === 0 && (!row.targetCount || row.targetCount === 0))
+    ) {
+      setNoOrdersRowNumber(rowNum);
+      setNoOrdersModalVisible(true);
+      return;
+    }
+
     setSelectedRow(row);
     try {
       setLoading(true);
       const token = store.getState().auth.token;
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
+        );
         return;
       }
 
@@ -306,15 +390,53 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       });
 
       if (response.data && response.data.success) {
+        const resData = response.data;
+        if (
+          resData.hasOrders === false ||
+          (resData.ordersCount !== undefined && resData.ordersCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.allocatedCount !== undefined && resData.allocatedCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.orderCount !== undefined && resData.orderCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.totalOrders !== undefined && resData.totalOrders === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.ordersAssigned !== undefined && resData.ordersAssigned === 0 && (!resData.targetCount || resData.targetCount === 0))
+        ) {
+          setNoOrdersRowNumber(rowNum);
+          setNoOrdersModalVisible(true);
+          return;
+        }
+
         setPositions(response.data.data);
         setStep(2);
       } else {
-        Alert.alert("Error", response.data.message || "Failed to fetch positions.");
+        const msg = (response.data?.message || "").toLowerCase();
+        if (
+          response.data?.hasOrders === false ||
+          msg.includes("no order") ||
+          (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
+        ) {
+          setNoOrdersRowNumber(rowNum);
+          setNoOrdersModalVisible(true);
+        } else {
+          Alert.alert(
+            t("Packing.Error", "Error"),
+            response.data?.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
+          );
+        }
       }
     } catch (error: any) {
       console.error("Error fetching positions:", error);
-      const errMsg = error.response?.data?.message || "An error occurred while fetching positions.";
-      Alert.alert("Error", errMsg);
+      const errMsg = error.response?.data?.message || "";
+      const msg = errMsg.toLowerCase();
+      if (
+        error.response?.data?.hasOrders === false ||
+        msg.includes("no order") ||
+        (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
+      ) {
+        setNoOrdersRowNumber(rowNum);
+        setNoOrdersModalVisible(true);
+      } else {
+        const displayMsg = errMsg || t("Packing.Failed to fetch positions.", "An error occurred while fetching positions.");
+        Alert.alert(t("Packing.Error", "Error"), displayMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -323,8 +445,12 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const handlePositionSelect = (position: PositionData) => {
     if (position.status === "Occupied") {
       Alert.alert(
-        "Position Occupied",
-        `Position "${position.name}" is currently occupied by another officer. Please select an available position.`
+        t("Packing.Position Occupied", "Position Occupied"),
+        t(
+          "Packing.Position occupied alert",
+          `Position "${formatPositionName(position)}" is currently occupied by another officer. Please select an available position.`,
+          { name: formatPositionName(position) }
+        )
       );
       return;
     }
@@ -338,7 +464,10 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       setSubmitting(true);
       const token = store.getState().auth.token;
       if (!token) {
-        Alert.alert("Error", "Authentication token not found. Please log in again.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
+        );
         return;
       }
 
@@ -362,23 +491,23 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         dispatch(setActiveAssignmentAction(assignmentData));
 
         Alert.alert(
-          "Confirmation Success",
-          "You have been successfully assigned to this position",
+          t("Packing.Confirmation Success", "Confirmation Success"),
+          t("Packing.You have been successfully assigned to this position", "You have been successfully assigned to this position"),
           [
             {
-              text: "OK",
+              text: t("AlertModal.OK", "OK"),
               onPress: () => {
                 if (selectedPosition.type === "QR") {
                   navigation.navigate("QRHandling");
                 } else if (selectedPosition.type === "NOR") {
                   navigation.navigate("WelcomeToPacking", { 
                     positionId: selectedPosition.id,
-                    positionName: selectedPosition.name,
+                    positionName: formatPositionName(selectedPosition),
                     rowId: selectedRow?.id,
                   });
                 } else if (selectedPosition.type === "QC") {
                   navigation.navigate("WelcomeToQC", { 
-                    positionName: selectedPosition.name,
+                    positionName: formatPositionName(selectedPosition),
                     rowId: selectedRow?.id,
                   });
                 }
@@ -387,12 +516,15 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           ]
         );
       } else {
-        Alert.alert("Error", response.data.message || "Failed to assign position.");
+        Alert.alert(
+          t("Packing.Error", "Error"),
+          response.data.message || t("Packing.Failed to assign position.", "Failed to assign position.")
+        );
       }
     } catch (error: any) {
       console.error("Error assigning position:", error);
-      const errMsg = error.response?.data?.message || "An error occurred while confirming assignment.";
-      Alert.alert("Error", errMsg);
+      const errMsg = error.response?.data?.message || t("Packing.An error occurred while confirming assignment.", "An error occurred while confirming assignment.");
+      Alert.alert(t("Packing.Error", "Error"), errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -441,8 +573,24 @@ export default function SelectRow({ navigation }: { navigation: any }) {
 
       {loading ? (
         <View className="flex-1 justify-center items-center bg-white">
-          <LoadingPage message={t("ManagerTransactions.Loading")} fullScreen />
+          <LoadingPage message={t("Packing.Loading", t("ManagerTransactions.Loading", "Loading..."))} fullScreen />
         </View>
+      ) : step === 1 && rows.length === 0 ? (
+        <ScrollView
+          className="flex-1 bg-white"
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <NoDataScreen
+            message={t(
+              "Packing.Rows are not available. Please wait until rows are available to obtain a position.",
+              "Rows are not available. Please wait until rows are available to obtain a position."
+            )}
+          />
+        </ScrollView>
       ) : (
         <ScrollView
           className="flex-1 bg-white"
@@ -456,7 +604,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           <>
             {/* Step 1 Title */}
             <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
-              {t("Packing.Choose the packing row you will be working at.", "Select the row you work with")}
+              {t("Packing.Select the row you work with", "Select the row you work with")}
             </Text>
 
             {/* Step 1 list of rows */}
@@ -488,12 +636,17 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                     {/* Content */}
                     <View className="flex-1">
                       <Text className="font-bold text-slate-950 text-base">
-                        {row.name}
+                        {formatRowTitle(row)}
                       </Text>
                       <Text className="text-xs text-[#54617D] mt-0.5">
-                        {row.positionsCount}{" "}
-                        {row.positionsCount === 1 ? t("Packing.Position", "Position") : t("Packing.Positions", "Positions")}{" "}
-                        {t("Packing.Available", "Available")}
+                        {t("Packing.PositionsAvailableCount", {
+                          count: row.positionsCount,
+                          defaultValue: `${row.positionsCount} ${
+                            row.positionsCount === 1
+                              ? t("Packing.Position", "Position")
+                              : t("Packing.Positions", "Positions")
+                          } ${t("Packing.Available", "Available")}`,
+                        })}
                       </Text>
                     </View>
 
@@ -508,9 +661,9 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           <>
             {/* Step 2 Title */}
             <Text className="text-lg text-center text-slate-600 mb-6 mt-2">
-              {t("Packing.Selected :", "Selected :")}{" "}
+              {t("Packing.Selected: Row", "Selected: Row")}{" "}
               <Text className="font-extrabold text-slate-950">
-                {selectedRow?.name}
+                {getRowNumber(selectedRow)}
               </Text>
             </Text>
 
@@ -578,7 +731,7 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                           isOccupied ? "text-[#54617D]" : "text-slate-950"
                         }`}
                       >
-                        {position.name}
+                        {formatPositionName(position)}
                       </Text>
                       {/* Badge status */}
                       <View className="flex-row mt-1">
@@ -642,9 +795,9 @@ export default function SelectRow({ navigation }: { navigation: any }) {
             {/* Modal Description */}
             <Text className="text-[#54617D] text-sm text-center leading-relaxed px-2 mb-6">
               {t("Packing.You are selecting position in row", {
-                posName: selectedPosition?.name,
-                rowName: selectedRow?.name,
-                defaultValue: `If you confirm, from now upon you will be assigned to ${selectedPosition?.name} of ${selectedRow?.name}.`
+                posName: formatPositionName(selectedPosition),
+                rowName: formatRowTitle(selectedRow),
+                defaultValue: `If you confirm, from now upon you will be assigned to ${formatPositionName(selectedPosition)} of ${formatRowTitle(selectedRow)}.`
               })}
             </Text>
 
@@ -691,6 +844,67 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* No Orders Assigned Modal matching screenshot */}
+      <Modal
+        visible={noOrdersModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setNoOrdersModalVisible(false)}
+      >
+        <View
+          className="flex-1 justify-center items-center px-6"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+        >
+          <View
+            className="bg-white rounded-3xl p-6 w-full max-w-sm items-center shadow-2xl"
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 8,
+            }}
+          >
+            {/* Exclamation badge in black circle */}
+            <View className="w-12 h-12 rounded-full bg-black items-center justify-center mb-4">
+              <FontAwesome5 name="exclamation" size={22} color="white" />
+            </View>
+
+            {/* Modal Title */}
+            <Text className="text-lg font-bold text-slate-950 text-center mb-3">
+              {t("Packing.No Orders Assigned!", "No Orders Assigned!")}
+            </Text>
+
+            {/* Modal Description */}
+            <Text className="text-[#64748B] text-sm text-center leading-relaxed px-2 mb-6">
+              {t("Packing.No orders assigned message", {
+                number: noOrdersRowNumber,
+                defaultValue: `There are still no orders assigned to Row ${noOrdersRowNumber}. Please wait and re-check once orders have been assigned.`,
+              })}
+            </Text>
+
+            {/* Close Button */}
+            <TouchableOpacity
+              onPress={() => setNoOrdersModalVisible(false)}
+              className="w-full py-4 rounded-full items-center justify-center"
+              style={{
+                backgroundColor: "#D9D9D9",
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+              activeOpacity={0.8}
+            >
+              <Text className="text-slate-800 font-bold text-base">
+                {t("Packing.Close", t("Close", "Close"))}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

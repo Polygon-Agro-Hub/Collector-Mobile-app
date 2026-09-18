@@ -12,6 +12,7 @@ import {
   RefreshControl,
 } from "react-native";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -20,6 +21,7 @@ import axios from "axios";
 import environment from "@/environment/environment";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { formatPositionDisplayName } from "@/constants/packing/time-slots";
 
 interface Product {
   id: number;
@@ -63,7 +65,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
           const mappedCrops = fetchedCrops.map((c: any) => ({
             id: c.id,
             name: c.name,
-            image: c.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80"
+            image: c.image || ""
           }));
           // Sort A to Z (ascending alphabetical order by product name)
           mappedCrops.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
@@ -126,14 +128,17 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
         {/* Page Title */}
         <View className="items-center mb-4 mt-4">
           <Text className="text-xl font-extrabold text-[#030E25] text-center">
-            {t("Packing.Welcome to", { positionName: positionName, defaultValue: `Welcome to ${positionName}` })}
+            {t("Packing.Welcome to", {
+              positionName: formatPositionDisplayName(positionName, t),
+              defaultValue: `Welcome to ${formatPositionDisplayName(positionName, t)}`,
+            })}
           </Text>
         </View>
 
         {loading ? (
           <View className="flex-grow justify-center items-center py-20" style={{ flex: 1 }}>
             <ActivityIndicator size="large" color="#030E25" />
-            <Text className="text-[#54617D] text-sm mt-3 font-semibold">{t("Packing.Loading products...", "Loading products...")}</Text>
+            <Text className="text-[#54617D] text-sm mt-3 font-semibold">{t("Packing.Loading products...", t("Packing.Loading", "Loading products..."))}</Text>
           </View>
         ) : (
           <View className="flex-grow" style={{ flex: 1, justifyContent: hasData ? "flex-start" : "center" }}>
@@ -167,12 +172,20 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
                     }}
                   >
                     {/* Crop image with clean border wrapper */}
-                    <View className="w-20 h-20 mb-4 items-center justify-center rounded-full overflow-hidden">
-                      <Image
-                        source={{ uri: product.image }}
-                        className="w-full h-full"
-                        resizeMode="contain"
-                      />
+                    <View className="w-20 h-20 mb-4 items-center justify-center rounded-full overflow-hidden bg-gray-100">
+                      {product.image ? (
+                        <Image
+                          source={{ uri: product.image }}
+                          className="w-full h-full"
+                          resizeMode="contain"
+                        />
+                      ) : (
+                        <MaterialCommunityIcons
+                          name="sprout"
+                          size={32}
+                          color="#54617D"
+                        />
+                      )}
                     </View>
                     {/* Crop label */}
                     <Text className="text-[#030E25] font-bold text-center text-sm leading-4">
@@ -232,7 +245,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
         visible={endShiftModalVisible}
         onClose={() => setEndShiftModalVisible(false)}
         navigation={navigation}
-        positionText={positionName}
+        positionText={formatPositionDisplayName(positionName, t)}
       />
     </View>
   );

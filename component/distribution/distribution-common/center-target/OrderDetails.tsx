@@ -14,6 +14,13 @@ import environment from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import {
+  formatTimeSlot,
+  formatOrderCategory,
+  formatOrderType,
+  formatRowTitle,
+  formatOrderTitle,
+} from "@/constants/packing/time-slots";
 
 interface PackagedItem {
   id: number;
@@ -159,20 +166,58 @@ export default function OrderDetails({
           >
             <View className="w-full max-w-[600px] mx-auto">
               {/* Header Summary Card */}
-              <View className="bg-white rounded-2xl p-4 mb-5 border border-[#000000] items-center shadow-sm">
-                <Text className="font-extrabold text-slate-950 text-base text-center">
-                  {details.formattedOrderNumber}
-                </Text>
-                <Text className="font-bold text-slate-900 text-sm mt-0.5 text-center">
-                  {details.timeSlotLabel}
-                </Text>
-                <Text className="text-xs text-[#54617D] mt-0.5 font-medium text-center">
-                  {details.category}
-                </Text>
-                <Text className="text-xs font-extrabold mt-0.5 text-[#980775] text-center">
-                  {details.statusLabel}
-                </Text>
-              </View>
+              {(() => {
+                const rowName = (details as any)?.rowName || params.rowName || "";
+                let rawStatus = (details as any)?.status || details.statusLabel || params.statusLabel || "";
+                let statusDisplay = t("DistributionCenterTarget.OutStatus", "නිම කරන ලද");
+                if (rawStatus) {
+                  const matchRow = rawStatus.match(/^\(([^)]+)\)\s*(.*)$/);
+                  if (matchRow) {
+                    const rName = matchRow[1];
+                    const sName = matchRow[2];
+                    const sTranslated =
+                      sName.toLowerCase().includes("out") ||
+                      sName.includes("පිටත්") ||
+                      sName.toLowerCase().includes("completed")
+                        ? t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")
+                        : sName;
+                    statusDisplay = `(${formatRowTitle(rName, t)}) ${sTranslated}`;
+                  } else {
+                    const sTranslated =
+                      rawStatus.toLowerCase().includes("out") ||
+                      rawStatus.includes("පිටත්") ||
+                      rawStatus.toLowerCase().includes("completed")
+                        ? t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")
+                        : rawStatus;
+                    statusDisplay = rowName
+                      ? `(${formatRowTitle(rowName, t)}) ${sTranslated}`
+                      : sTranslated;
+                  }
+                } else if (rowName) {
+                  statusDisplay = `(${formatRowTitle(rowName, t)}) ${t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")}`;
+                }
+
+                return (
+                  <View className="bg-white rounded-2xl p-4 mb-5 border border-[#000000] items-center shadow-sm">
+                    <Text className="font-extrabold text-slate-950 text-base text-center">
+                      {formatOrderTitle(
+                        details.formattedOrderNumber || details.orderNumber,
+                        (details as any)?.type || params.type,
+                        t
+                      )}
+                    </Text>
+                    <Text className="font-bold text-slate-900 text-sm mt-0.5 text-center">
+                      {formatTimeSlot(details.timeSlotLabel || params.timeSlotLabel, t)}
+                    </Text>
+                    <Text className="text-xs text-[#54617D] mt-0.5 font-medium text-center">
+                      {formatOrderCategory(details.category || params.category, t)}
+                    </Text>
+                    <Text className="text-xs font-extrabold mt-0.5 text-[#980775] text-center">
+                      {statusDisplay}
+                    </Text>
+                  </View>
+                );
+              })()}
 
               {/* Step 1: QR Printed By Card */}
               <View className="bg-white rounded-2xl p-4 mb-6 border border-[#F5C400] flex-row justify-between items-center shadow-sm">
@@ -201,7 +246,12 @@ export default function OrderDetails({
                     <Text
                       className={`font-extrabold text-sm mb-2.5 ${groupTitleColor}`}
                     >
-                      {group.title}
+                      {group.type === "alacarte"
+                        ? group.title
+                        : group.title?.replace(
+                            /^Package\s*(\d+)/i,
+                            `${t("DistributionCenterTarget.Package", "පැකේජය")} $1`
+                          ) || group.title}
                     </Text>
 
                     <View className="gap-2.5">

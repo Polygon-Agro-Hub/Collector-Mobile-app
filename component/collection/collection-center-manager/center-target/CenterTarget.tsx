@@ -1,6 +1,6 @@
 import store from "@/services/reducxStore";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { Animated } from "react-native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useFocusEffect } from "@react-navigation/native";
+import { LanguageContext } from "@/context/LanguageContext";
 
 type CenterTargetNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -46,17 +47,24 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
   const fetchSelectedLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
+      if (lang) {
+        setSelectedLanguage(lang);
+      }
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
   };
+
+  const getActiveLang = useCallback(() => {
+    return (language || selectedLanguage || i18n.language || "en").toLowerCase();
+  }, [language, selectedLanguage, i18n.language]);
 
   const getGradePriority = (grade: string): number => {
     switch (grade) {
@@ -71,18 +79,19 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
     }
   };
 
-  const getVarietyNameForSort = (item: TargetData) => {
-    switch (selectedLanguage) {
-      case "si":
-        return item.varietyNameSinhala || "";
-      case "ta":
-        return item.varietyNameTamil || "";
-      default:
-        return item.varietyNameEnglish || "";
+  const getVarietyNameForSort = useCallback((item: TargetData) => {
+    if (!item) return "";
+    const lang = getActiveLang();
+    if (lang.startsWith("si")) {
+      return item.varietyNameSinhala || item.varietyNameEnglish || "";
     }
-  };
+    if (lang.startsWith("ta")) {
+      return item.varietyNameTamil || item.varietyNameEnglish || "";
+    }
+    return item.varietyNameEnglish || item.varietyNameSinhala || "";
+  }, [getActiveLang]);
 
-  const sortByVarietyAndGrade = (data: TargetData[]) => {
+  const sortByVarietyAndGrade = useCallback((data: TargetData[]) => {
     return [...data].sort((a, b) => {
       const nameA = getVarietyNameForSort(a);
       const nameB = getVarietyNameForSort(b);
@@ -95,6 +104,23 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
       return nameComparison;
     });
+  }, [getVarietyNameForSort]);
+
+  const getvarietyName = (item: TargetData) => {
+    if (!item) return "";
+    const lang = getActiveLang();
+    if (lang.startsWith("si") && item.varietyNameSinhala) {
+      return item.varietyNameSinhala;
+    }
+    if (lang.startsWith("ta") && item.varietyNameTamil) {
+      return item.varietyNameTamil;
+    }
+    return (
+      item.varietyNameEnglish ||
+      item.varietyNameSinhala ||
+      item.varietyNameTamil ||
+      ""
+    );
   };
 
   const fetchTargets = async () => {
@@ -140,6 +166,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      await fetchSelectedLanguage();
       await fetchTargets();
       const centerCode = await AsyncStorage.getItem("centerCode");
       setcenterCode(centerCode);
@@ -149,6 +176,7 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
+    await fetchSelectedLanguage();
     await fetchTargets();
     setRefreshing(false);
   };
@@ -156,14 +184,13 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
   const displayedData = selectedToggle === "ToDo" ? todoData : completedData;
 
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchSelectedLanguage();
-    };
-    fetchData();
-  }, []);
+    setTodoData((prev) => (prev.length > 0 ? sortByVarietyAndGrade(prev) : prev));
+    setCompletedData((prev) => (prev.length > 0 ? sortByVarietyAndGrade(prev) : prev));
+  }, [language, selectedLanguage, i18n.language, sortByVarietyAndGrade]);
 
   useFocusEffect(
     useCallback(() => {
+      fetchSelectedLanguage();
       const onBackPress = () => {
         navigation.navigate("CollectionDashboard" as any);
         return true;
@@ -177,17 +204,6 @@ const CenterTarget: React.FC<CenterTargetProps> = ({ navigation }) => {
       return () => subscription.remove();
     }, [navigation]),
   );
-
-  const getvarietyName = (TargetData: TargetData) => {
-    switch (selectedLanguage) {
-      case "si":
-        return TargetData.varietyNameSinhala;
-      case "ta":
-        return TargetData.varietyNameTamil;
-      default:
-        return TargetData.varietyNameEnglish;
-    }
-  };
 
   return (
     <View className="flex-1 bg-[#282828] ">

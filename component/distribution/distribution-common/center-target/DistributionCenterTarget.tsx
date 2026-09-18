@@ -17,6 +17,13 @@ import environment from "@/environment/environment";
 import { getSocket } from "@/services/socket";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { useTranslation } from "react-i18next";
+import {
+  formatTimeSlot,
+  formatOrderCategory,
+  formatOrderType,
+  formatRowTitle,
+  formatOrderTitle,
+} from "@/constants/packing/time-slots";
 
 interface TargetOrder {
   id: number;
@@ -292,7 +299,7 @@ export default function DistributionCenterTarget({
 
                     {/* Time Slot Section Header */}
                     <Text className="text-base font-extrabold text-slate-950 mb-3 tracking-tight">
-                      {slotHeader} ({formatCount(ordersGroup.length)})
+                      {formatTimeSlot(slotHeader, t)} ({formatCount(ordersGroup.length)})
                     </Text>
 
                     {/* Order Cards */}
@@ -312,13 +319,15 @@ export default function DistributionCenterTarget({
                           ? "text-[#F59E0B]"
                           : "text-[#FF5B5B]";
 
-                        const displayStatus = `(${order.rowName}) ${
+                        const rowTranslated = formatRowTitle(order.rowName, t);
+                        const statusTranslated =
                           order.status === "Out"
-                            ? t("DistributionCenterTarget.OutStatus", "Out")
+                            ? t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")
                             : order.status === "Opened"
-                            ? t("DistributionCenterTarget.Opened", "Opened")
-                            : t("DistributionCenterTarget.Pending", "Pending")
-                        }`;
+                            ? t("DistributionCenterTarget.Opened", "සකස් කරමින්")
+                            : t("DistributionCenterTarget.Pending", "අසම්පූර්ණයි");
+
+                        const displayStatus = `(${rowTranslated}) ${statusTranslated}`;
 
                         return (
                           <TouchableOpacity
@@ -328,10 +337,13 @@ export default function DistributionCenterTarget({
                                 navigation.navigate("OrderDetails", {
                                   orderId: order.id,
                                   orderNumber: order.orderNumber,
+                                  type: order.type,
                                   formattedOrderNumber: order.formattedOrderNumber,
+                                  timeSlot: order.timeSlot,
                                   timeSlotLabel: order.timeSlotLabel,
                                   category: order.category,
                                   statusLabel: order.statusLabel,
+                                  rowName: order.rowName,
                                 });
                               }
                             }}
@@ -362,13 +374,13 @@ export default function DistributionCenterTarget({
                             {/* Order Details */}
                             <View className="flex-1">
                               <Text className="font-extrabold text-slate-950 text-base">
-                                {order.formattedOrderNumber}
+                                {formatOrderTitle(order.formattedOrderNumber || `${order.orderNumber} (${order.type})`, order.type, t)}
                               </Text>
                               <Text className="text-sm font-bold text-slate-900 mt-0.5">
-                                {order.timeSlotLabel}
+                                {formatTimeSlot(order.timeSlotLabel || order.timeSlot, t)}
                               </Text>
                               <Text className="text-xs text-[#54617D] mt-0.5 font-medium">
-                                {order.category}
+                                {formatOrderCategory(order.category, t)}
                               </Text>
                               <Text
                                 className={`text-xs font-extrabold mt-0.5 ${statusTextColor}`}

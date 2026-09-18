@@ -16,7 +16,7 @@ const net  = require("net");
 const http = require("http");
 const os   = require("os");
 
-const SCALE_IP        = "192.168.1.23";
+const SCALE_IP        = "192.168.1.30";
 const SCALE_PORT      = 33581;
 const BRIDGE_PORT     = 3001;
 const RECONNECT_MS    = 3000;

@@ -18,6 +18,7 @@ import environment from "@/environment/environment";
 import { useIsFocused } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { formatTimeSlot } from "@/constants/packing/time-slots";
 
 const CircularClockTimer = ({
   seconds,
@@ -125,7 +126,34 @@ export default function ConfirmRowAssign({
     String(group?.title || "").includes("(W)") ||
     !!route.params?.isWholesale;
 
-  const orderTypeTag = isWholesale ? "(W)" : "(R)";
+  const getRowNumber = (rowName?: string) => {
+    if (!rowName) return "";
+    const match = rowName.match(/\d+/);
+    return match ? match[0] : "";
+  };
+
+  const formatRowTitle = (rowName?: string) => {
+    if (!rowName) return "";
+    const num = getRowNumber(rowName);
+    if (num) {
+      return t("AssignGroups.Row {{number}}", {
+        number: num,
+        defaultValue: t("Packing.Row {{number}}", { number: num, defaultValue: `Row ${num}` }),
+      });
+    }
+    const clean = rowName.trim().toLowerCase();
+    if (clean === "rows") {
+      return t("AssignGroups.Rows", t("Packing.Rows", t("Rows", "පේළි")));
+    }
+    if (clean === "row") {
+      return t("AssignGroups.Row", t("Packing.Row", t("Row", "පේළිය")));
+    }
+    return t(rowName, rowName);
+  };
+
+  const orderTypeTag = isWholesale
+    ? `(${t("AssignGroups.Wholesale", "Wholesale")})`
+    : `(${t("AssignGroups.Retail", "Retail")})`;
   const orderText = selectedOrdersCount === 1 ? t("AssignGroups.Order", "Order") : t("AssignGroups.Orders", "Orders");
   const orderTextLower = selectedOrdersCount === 1 ? "order" : "orders";
 
@@ -157,17 +185,11 @@ export default function ConfirmRowAssign({
 
       if (response.data && response.data.success) {
         Alert.alert(
-          "Success",
-          t("AssignGroups.Successfully assigned orders", {
-            count: selectedOrdersCount,
-            orderText: orderTextLower,
-            rowName: selectedRow.name,
-            timeSlot: group.timeSlot,
-            defaultValue: `Successfully assigned ${selectedOrdersCount} ${orderTextLower} to ${selectedRow.name} for the ${group.timeSlot} slot.`,
-          }),
+          t("AssignGroups.Success!", "Success!"),
+          t("AssignGroups.Target assigned Successfully!", "Target assigned Successfully!"),
           [
             {
-              text: "OK",
+              text: t("AlertModal.OK", "OK"),
               onPress: () => {
                 navigation.navigate("Group", { assignedGroupId: group.id });
               },
@@ -176,14 +198,17 @@ export default function ConfirmRowAssign({
         );
       } else {
         Alert.alert(
-          "Error",
+          t("Packing.Error", "Error"),
           response.data.message || t("AssignGroups.Failed to assign orders.", "Failed to assign orders."),
         );
         setTimerRunning(true);
       }
     } catch (error) {
       console.error("Error assigning orders to packing row:", error);
-      Alert.alert("Error", t("AssignGroups.An error occurred while assigning orders.", "An error occurred while assigning orders."));
+      Alert.alert(
+        t("Packing.Error", "Error"),
+        t("AssignGroups.An error occurred while assigning orders.", "An error occurred while assigning orders.")
+      );
       setTimerRunning(true);
     } finally {
       setSubmitting(false);
@@ -291,10 +316,13 @@ export default function ConfirmRowAssign({
                   {t("AssignGroups.Selected Section", "Selected Section")}
                 </Text>
                 <Text className="text-sm font-extrabold text-[#030E25] mt-1">
-                  {group.timeSlot} {orderTypeTag}
+                  {formatTimeSlot(group.timeSlot, t)} {orderTypeTag}
                 </Text>
                 <Text className="text-xl font-extrabold text-[#030E25] mt-1">
-                  {selectedOrdersCount} {orderText}
+                  {t("AssignGroups.SelectedOrdersCount", {
+                    count: selectedOrdersCount,
+                    defaultValue: `${selectedOrdersCount} ${orderText}`,
+                  })}
                 </Text>
               </View>
             </View>
@@ -314,7 +342,7 @@ export default function ConfirmRowAssign({
                   {t("AssignGroups.Assigning to Row", "Assigning to Row")}
                 </Text>
                 <Text className="text-base font-extrabold text-[#030E25] mt-1">
-                  {selectedRow.name}
+                  {formatRowTitle(selectedRow?.name)}
                 </Text>
               </View>
             </View>

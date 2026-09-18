@@ -65,7 +65,7 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [activeTab, setActiveTab] = useState<ActiveTab>("Officers");
   const [filteredOfficers, setFilteredOfficers] = useState<Officer[]>([]);
@@ -248,14 +248,19 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
   }, []);
 
   const getOfficerName = (officer: Officer) => {
-    switch (selectedLanguage) {
-      case "si":
-        return officer.fullNameSinhala;
-      case "ta":
-        return officer.fullNameTamil;
-      default:
-        return officer.fullNameEnglish;
+    const lang = i18n.language || selectedLanguage || "en";
+    if (lang.startsWith("si") && officer.fullNameSinhala) {
+      return officer.fullNameSinhala;
     }
+    if (lang.startsWith("ta") && officer.fullNameTamil) {
+      return officer.fullNameTamil;
+    }
+    return (
+      officer.fullNameEnglish ||
+      officer.fullNameSinhala ||
+      officer.fullNameTamil ||
+      ""
+    );
   };
 
   const officersList = officers.filter(
