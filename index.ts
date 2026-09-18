@@ -1,4 +1,5 @@
 import './global.css';
+import '@/services/apiInterceptor';
 import { registerRootComponent } from 'expo';
 import * as SplashScreen from 'expo-splash-screen';
 

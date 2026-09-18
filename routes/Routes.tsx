@@ -9,6 +9,7 @@ import { navigationRef } from "../navigationRef";
 import store from "@/services/reducxStore";
 import { logoutUser } from "../store/authSlice";
 import BottomNav from "@/component/components/navigations/BottomNav";
+import { verifyOfficerStatus } from "@/services/apiInterceptor";
 
 // --- Public / Common Screens ---
 import Login from "@/component/common/auth/Login";
@@ -157,6 +158,9 @@ export function withRoleGuard<P extends object>(
 
     useEffect(() => {
       if (isAllowed) {
+        if (allowedRoles !== "PUBLIC") {
+          verifyOfficerStatus();
+        }
         return;
       }
 

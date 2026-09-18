@@ -76,8 +76,10 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         const cropName = isSinhala
           ? crop.cropNameSinhala || crop.cropNameEnglish
           : isTamil
-          ? crop.cropNameTamil || crop.cropNameEnglish
-          : crop.cropNameEnglish || crop.cropNameSinhala || crop.cropNameTamil;
+            ? crop.cropNameTamil || crop.cropNameEnglish
+            : crop.cropNameEnglish ||
+              crop.cropNameSinhala ||
+              crop.cropNameTamil;
 
         return {
           label: cropName,
@@ -99,8 +101,10 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         const varietyName = isSinhala
           ? variety.varietySinhala || variety.varietyEnglish
           : isTamil
-          ? variety.varietyTamil || variety.varietyEnglish
-          : variety.varietyEnglish || variety.varietySinhala || variety.varietyTamil;
+            ? variety.varietyTamil || variety.varietyEnglish
+            : variety.varietyEnglish ||
+              variety.varietySinhala ||
+              variety.varietyTamil;
 
         return {
           label: varietyName,
@@ -342,7 +346,10 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
         showsVerticalScrollIndicator={false}
       >
         <CustomHeader
-          title={t("SearchPrice.SearchPrice")}
+          title={t(
+            "SearchPrice.SearchPrice",
+            t("Common.Search Price", "Search Price"),
+          )}
           showBackButton={false}
         />
 
@@ -365,12 +372,24 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
               </Text>
               <TouchableOpacity
                 onPress={() => setCropModalVisible(true)}
-                className="w-full flex-row items-center justify-between px-4 rounded-3xl"
-                style={{ backgroundColor: "#F4F4F4", height: 50 }}
+                className="w-full flex-row items-center justify-between px-4"
+                style={{
+                  backgroundColor: "#F4F4F4",
+                  minHeight: 50,
+                  borderRadius: 25,
+                  paddingVertical: 10,
+                }}
               >
                 <Text
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
                   className={`${selectedCropLabel ? "text-black" : "text-gray-400"}`}
-                  style={{ fontSize: 16 }}
+                  style={{
+                    fontSize: 16,
+                    flex: 1,
+                    marginRight: 8,
+                    lineHeight: 20,
+                  }}
                 >
                   {selectedCropLabel || t("SearchPrice.SelectCrop")}
                 </Text>
@@ -378,6 +397,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                   name="arrow-drop-down"
                   size={24}
                   color="#9CA3AF"
+                  style={{ alignSelf: "center" }}
                 />
               </TouchableOpacity>
             </View>
@@ -392,20 +412,36 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
               </Text>
               {loadingVarieties ? (
                 <View
-                  className="w-full flex-row items-center justify-center px-4 rounded-3xl"
-                  style={{ backgroundColor: "#F4F4F4", height: 50 }}
+                  className="w-full flex-row items-center justify-center px-4"
+                  style={{
+                    backgroundColor: "#F4F4F4",
+                    height: 50,
+                    borderRadius: 25,
+                  }}
                 >
                   <ActivityIndicator size="small" color="#2AAD7A" />
                 </View>
               ) : (
                 <TouchableOpacity
                   onPress={handleVarietyModalOpen}
-                  className="w-full flex-row items-center justify-between px-4 rounded-3xl"
-                  style={{ backgroundColor: "#F4F4F4", height: 50 }}
+                  className="w-full flex-row items-center justify-between px-4"
+                  style={{
+                    backgroundColor: "#F4F4F4",
+                    minHeight: 50,
+                    borderRadius: 25,
+                    paddingVertical: 10,
+                  }}
                 >
                   <Text
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
                     className={`${selectedVarietyLabel ? "text-black" : "text-gray-400"}`}
-                    style={{ fontSize: 16 }}
+                    style={{
+                      fontSize: 16,
+                      flex: 1,
+                      marginRight: 8,
+                      lineHeight: 20,
+                    }}
                   >
                     {selectedVarietyLabel || t("SearchPrice.SelectVariety")}
                   </Text>
@@ -413,6 +449,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                     name="arrow-drop-down"
                     size={24}
                     color="#9CA3AF"
+                    style={{ alignSelf: "center" }}
                   />
                 </TouchableOpacity>
               )}
@@ -429,7 +466,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                 shadowRadius: 10,
                 elevation: 6,
                 height: 50,
-                borderRadius:30
+                borderRadius: 30,
               }}
             >
               {loading ? (

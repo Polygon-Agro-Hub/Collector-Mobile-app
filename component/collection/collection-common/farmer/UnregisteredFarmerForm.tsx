@@ -206,11 +206,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         setLoading(false);
         return;
       } else if (checkResponse.data.message === "This NIC already exists.") {
-        Alert.alert(
-          t("Error.error"),
-          t("Error.This NIC already exists."),
-          [{ text: t("AlertModal.OK", "OK") }],
-        );
+        Alert.alert(t("Error.error"), t("Error.This NIC already exists."), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
         setLoading(false);
         return;
       } else if (
@@ -241,22 +239,16 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         lang === "si" ||
         lang === "sinhalese" ||
         lang === "සිංහල";
-      const isTamil =
-        lang === "tamil" ||
-        lang === "ta" ||
-        lang === "தமிழ்";
+      const isTamil = lang === "tamil" || lang === "ta" || lang === "தமிழ்";
 
       if (isSinhala) {
-        companyName =
-          (store.getState().auth.companyNameSinhala) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameSinhala || "PolygonAgro";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (isTamil) {
-        companyName =
-          (store.getState().auth.companyNameTamil) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameTamil || "PolygonAgro";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
-        companyName =
-          (store.getState().auth.companyNameEnglish) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameEnglish || "PolygonAgro";
         otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
@@ -397,20 +389,26 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     <TouchableOpacity
       onPress={onPress}
       style={{
-        height: 50,
+        minHeight: 50,
         backgroundColor: "#F4F4F4",
-        borderRadius: 50,
+        borderRadius: 25,
         borderWidth: 1,
         borderColor: hasError ? "#ef4444" : "#F4F4F4",
         paddingHorizontal: 14,
+        paddingVertical: 12,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
       }}
     >
       <Text
-        style={{ color: value ? "#000" : "#9CA3AF", fontSize: 14, flex: 1 }}
-        numberOfLines={1}
+        style={{
+          color: value ? "#000" : "#9CA3AF",
+          fontSize: 14,
+          flex: 1,
+          flexWrap: "wrap",
+          marginRight: 8,
+        }}
       >
         {value || placeholder}
       </Text>
@@ -572,10 +570,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.Phone")}
             </Text>
             <View
-              className={`flex-row items-center border ${fieldErrors.phone || phoneError
+              className={`flex-row items-center border ${
+                fieldErrors.phone || phoneError
                   ? "border-red-500"
                   : "border-[#F4F4F4] bg-[#F4F4F4]"
-                } px-4 rounded-full h-[50px]`}
+              } px-4 rounded-full h-[50px]`}
             >
               <TextInput
                 placeholder="7XXXXXXXX"
@@ -616,7 +615,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                   }
                 }}
                 className="flex-1 h-full"
-                style={{ fontSize: 14, height: 50, paddingVertical: 0, color: "#000000" }}
+                style={{
+                  fontSize: 14,
+                  height: 50,
+                  paddingVertical: 0,
+                  color: "#000000",
+                }}
                 maxLength={9}
               />
             </View>
