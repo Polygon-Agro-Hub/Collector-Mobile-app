@@ -562,7 +562,14 @@
     "UploadingPhotos": "Uploading photos...",
     "SubmittingDetails": "Submitting details...",
     "CropDetailsSubmitted": "Crop details submitted successfully!",
-    "KG": "KG"
+    "KG": "KG",
+    "Crop":"Crop",
+    "CropName":"CropName",
+    "Variety": "Variety",
+     "Select Crop": "--Select Crop--",
+    "Select Variety": "--Select Variety--",
+    "UnitGrades": "Unit Grades",
+    "Done":"Done"
   },
   "GoodsReceivedNote": {
     "LNG": "en",
