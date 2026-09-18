@@ -25,19 +25,8 @@ import { LanguageContext } from "@/context/LanguageContext";
 import { useContext } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { ROLES } from "@/constants/user-roles";
-import { getSocket } from "@/services/socket";
-import * as Notifications from "expo-notifications";
+import socketService from "@/services/socket/socket.service";
 
-// Configure local system notifications presentation
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
 
 type DistributionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -185,48 +174,17 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     fetchSelectedLanguage();
     fetchUnreadNotifications();
 
-    const socket = getSocket();
-    if (socket && currentUserId && isDCM) {
-      socket.emit("join_user", currentUserId);
-      socket.emit("join_officer", currentUserId);
+    if (isDCM) {
+      // Ensure socket is connected (service handles duplicate calls safely)
+      socketService.connect();
 
-      const handleRealtimeNotif = async (data: any) => {
+      // Listen for incoming notifications → refresh badge count
+      const unsubscribe = socketService.onNewNotification(() => {
         fetchUnreadNotifications();
-        try {
-          const invoiceNumber = data?.invNo || data?.invoiceNo || "";
-          const otp = data?.otpCode || data?.otp || "";
-          const bodyText = invoiceNumber
-            ? t(
-                "MyNotifications.PleaseUseTheFollowingOTPCode",
-                "Please use the following OTP code, “{{otp}}”, to receive the order from the driver at the centre.",
-                { otp }
-              )
-            : t(
-                "MyNotifications.NewNotificationReceived",
-                "New handover return order OTP notification received."
-              );
-
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: t("MyNotifications.ReturnOrderOTP", "Return Order OTP"),
-              body: invoiceNumber ? `Order #${invoiceNumber}: ${bodyText}` : bodyText,
-              data: { otp, invoiceNumber },
-            },
-            trigger: null,
-          });
-        } catch (notifErr) {
-          console.warn("Error presenting local notification in dashboard:", notifErr);
-        }
-      };
-
-      socket.on("new_notification", handleRealtimeNotif);
-      socket.on("new_return_otp", handleRealtimeNotif);
-      socket.on("handover_return_otp", handleRealtimeNotif);
+      });
 
       return () => {
-        socket.off("new_notification", handleRealtimeNotif);
-        socket.off("new_return_otp", handleRealtimeNotif);
-        socket.off("handover_return_otp", handleRealtimeNotif);
+        unsubscribe();
       };
     }
   }, [currentUserId, isDCM]);
@@ -490,24 +448,6 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
             </TouchableOpacity>
           )}
         </View>
-
-        {/* Temporary button to view NotificationAccess permission screen */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("NotificationAccess" as any)}
-          className="w-full bg-[#980775]/10 border border-[#980775]/30 rounded-2xl py-2.5 px-4 mb-2 flex-row items-center justify-center"
-          activeOpacity={0.8}
-        >
-          <Ionicons
-            name="notifications-circle-outline"
-            size={20}
-            color="#980775"
-            style={{ marginRight: 6 }}
-          />
-          <Text className="text-[#980775] font-bold text-xs">
-            {t("NotificationAccess.NotificationAccess", "Notification Access")}{" "}
-            (Test Permission Screen)
-          </Text>
-        </TouchableOpacity>
 
         <View className="flex-row flex-wrap justify-between pb-12 mt-4">
           {getDashboardItems().map((item) => (

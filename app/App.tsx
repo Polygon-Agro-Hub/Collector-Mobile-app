@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Alert, AppState, StatusBar, Platform } from "react-native";
+import { Alert, AppState, StatusBar, Platform, LogBox } from "react-native";
+
+LogBox.ignoreLogs([
+  "InteractionManager has been deprecated",
+  "setBackgroundColorAsync is not supported with edge-to-edge enabled",
+  "`expo-notifications` functionality is not fully supported in Expo Go",
+  "expo-notifications: Android Push notifications",
+]);
 import { NavigationContainer } from "@react-navigation/native";
 import { Provider } from "react-redux";
 import environment from "../environment/environment";
@@ -19,17 +26,25 @@ import * as SplashScreen from "expo-splash-screen";
 import store from "@/services/reducxStore";
 import RootStackNavigator from "../routes/Routes";
 import * as Notifications from "expo-notifications";
+import socketService from "@/services/socket/socket.service";
+import pushNotificationService from "@/services/notification/pushNotification.service";
+import { ROLES } from "@/constants/user-roles";
 
-// Global notifications handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+
+// Global notifications handler (guarded for Expo Go & standalone)
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} catch (handlerErr) {
+  console.warn("Notifications.setNotificationHandler skipped in Expo Go:", handlerErr);
+}
 
 function AppContent() {
   const { t } = useTranslation();
@@ -46,18 +61,30 @@ function AppContent() {
   });
 
   useEffect(() => {
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "Default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#980775",
-        enableVibrate: true,
-        showBadge: true,
-      }).catch((err) => {
-        console.warn("Could not set Android notification channel:", err);
-      });
-    }
+    // Initialize push notification service (creates Android channel, registers tap handler)
+    pushNotificationService.init();
+
+    // Connect socket with auth token and subscribe to DCM real-time events
+    socketService.connect();
+
+    // When a new notification arrives (via socket OR polling), show a system notification
+    const jobRole = store.getState().auth.jobRole;
+    const isDCM = jobRole === ROLES.DISTRIBUTION_MANAGER;
+
+    const unsubscribe = socketService.onNewNotification((item) => {
+      if (!isDCM) return;
+      const invoiceNumber = item?.invNo || item?.invoiceNo || "";
+      const otp = item?.otpCode || item?.otp || "";
+      const bodyText = invoiceNumber
+        ? `Please use the following OTP code, "${otp}", to receive the order from the driver at the centre.`
+        : "New handover return order OTP notification received.";
+
+      pushNotificationService.displayLocalNotification(item, bodyText);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -149,6 +176,7 @@ function AppContent() {
       // Genuine Token Expiration: Clear auth state and redirect to Login
       try {
         store.dispatch(logoutUser());
+        socketService.disconnect();
       } catch (e) {
         console.error("Error dispatching logout:", e);
       }

@@ -23,7 +23,8 @@
         "android.permission.ACCESS_WIFI_STATE",
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.POST_NOTIFICATIONS",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
       ],
       "blockedPermissions": [
         "com.google.android.gms.permission.AD_ID",
@@ -39,8 +40,6 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.CALL_PHONE",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_SCAN",
@@ -144,7 +143,9 @@
         "expo-notifications",
         {
           "icon": "./assets/images/app/favicon.png",
-          "color": "#980775"
+          "color": "#980775",
+          "defaultChannel": "dcm-otp-notifications",
+          "enableBackgroundRemoteNotifications": true
         }
       ],
       "./plugins/withCustomAndroidPermissions"

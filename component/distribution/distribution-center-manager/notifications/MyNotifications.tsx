@@ -25,17 +25,6 @@ import * as Notifications from "expo-notifications";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
 
-// Configure in-app notifications presentation
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
 type MyNotificationsNavigationProp = StackNavigationProp<
   RootStackParamList,
   "MyNotifications"
