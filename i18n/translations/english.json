@@ -62,6 +62,7 @@
   "Error": {
     "error": "Sorry",
     "Error": "Error",
+    "FailedToFinishUnloading": "Failed to finish unloading.",
     "Failed to fetch empid.": "Failed to fetch Employee ID.",
     "You cannot transfer the maximum amount of": "You cannot transfer the maximum amount of",
     "This EMP ID is not approved.": "This EMP ID is not approved.",
@@ -1109,8 +1110,15 @@
   },
   "ReceivedProductsSummary": {
     "Title": "Summary",
-    "UnloadedSummary": "Unloaded Summery",
-    "StartUnloading": "Start Unloading"
+    "UnloadedSummary": "Unloaded Summary",
+    "StartUnloading": "Start Unloading",
+    "TotalCrates": "Total Crates",
+    "Grade": "Grade",
+    "Set": "Set",
+    "Crates": "Crates",
+    "Weight": "Weight",
+    "Loading": "Loading load details...",
+    "NoItems": "No items found in this load."
   },
   "UnloadingProducts": {
     "Title": "Unloading Products",
@@ -1122,8 +1130,24 @@
     "ReportedMismatch": "Mismatch Reported",
     "FinishUnloading": "Finish Unloading",
     "PleaseWeighAllProducts": "Please weigh all products before finishing unloading.",
+    "PleaseReportMismatch": "Please report the mismatch before finishing unloading.",
+    "MismatchReportedTitle": "Mismatch Reported!",
+    "MismatchReportedMessage": "Load mismatch has been successfully reported.",
     "SuccessTitle": "Success!",
-    "SuccessMessage": "Products unloaded successfully"
+    "SuccessMessage": "Products unloaded successfully",
+    "NoItems": "- No items found for this transfer -"
+  },
+  "Mismatch": {
+    "Product": "Product",
+    "Quality": "Quality",
+    "Point1": "1.",
+    "Expected": "Expected",
+    "ButMeasured": ", but measured",
+    "DifferenceIs": ". Difference is",
+    "Point2": "2.",
+    "ExpectedCratesCountIs": "Expected crates count is",
+    "ButReceivedCrateCountIs": ", but received crate count is",
+    "Kg": "kg"
   },
   "WeighTheLoad": {
     "Title": "Weigh the load",
@@ -1133,15 +1157,20 @@
     "LoadedCrates": "Loaded Crates",
     "UnloadedWeight": "Unloaded Weight",
     "UnloadedCrates": "Unloaded Crates",
+    "Grade": "Grade",
     "MarkAsUnloaded": "Mark as Unloaded",
-    "SuccessTitle": "Unloaded Successfully!"
+    "SuccessTitle": "Unloaded Successfully!",
+    "MismatchDetected": "Mismatch Detected"
   },
   "WeighGrade": {
     "Title": "Weigh the load",
     "LoadedWeight": "Loaded Weight",
     "TotalCrates": "Total Crates",
+    "Set": "Set",
+    "Grade": "Grade",
     "Continue": "Continue",
-    "MaxCratesReached": "Maximum Crates Reached"
+    "MaxCratesReached": "Maximum Crates Reached",
+    "NoOfCrates": "--No. of Crates--"
   },
   "OpenedOrderScreen": {
     "INV No": "INV No :",
@@ -1253,7 +1282,9 @@
     "Rs": "Rs",
     "has been successfully handed over to": "has been successfully handed over to",
     "Scan Timeout": "Scan Timeout",
+    "ScanTimeout": "Scan Timeout",
     "Scan timeout message": "The QR code could not be detected within the time limit. Please check and try again.",
+    "ScanTimeoutMessage": "The QR code could not be detected within the time limit. Please check and try again.",
     "Scan Again": "Scan Again",
     "QR not identified": "The QR code is not identified.\nPlease check and try again.",
     "Invalid QR format": "Invalid officer code format.\nMust be DCM followed by 5 digits (e.g., DCM00001).",
@@ -1271,7 +1302,8 @@
      "ScanLoadQR": "Scan Load QR",
     "AlignLoadQR": "Align the Load QR code within the frame to scan",
     "InvalidLoadQR": "Invalid QR code.\nPlease scan a valid Load QR code.",
-    "CenterMismatch": "This load is assigned to a different distribution center.",
+    "CenterMismatch": "This load is not assigned to your distribution center.",
+    "JourneyNotEnded": "This load's journey has not ended yet.\nPlease wait until the driver marks the journey as completed.",
     "LoadCode": "Load",
     "Vehicle": "Vehicle",
     "Verifying": "Verifying...",
@@ -1760,11 +1792,15 @@
     "Go Back": "Go Back"
   },
   "AlertModal": {
+    "Error": "Error!",
+    "Successful": "Successful!",
     "Cannot Proceed!": "Cannot Proceed!",
     "Re-Scan": "Re-Scan",
     "Re-scan": "Re-Scan",
     "Rescan": "Re-Scan",
     "Open Ongoing Activity": "Open Ongoing Activity",
+    "ScanTimeout": "Scan Timeout",
+    "ScanTimeoutMessage": "The QR code could not be detected within the time limit. Please check and try again.",
     "OK": "OK"
   },
   "CameraAccess": {
@@ -1831,6 +1867,10 @@
     "ScaleConnected": "Scale Connected",
     "TransportComingSoon": "Ready to Transport feature is ready."
   },
+  "ScaleWeightModal": {
+    "RealTimeScaleWeight": "Real - Time Scale Weight",
+    "Continue": "Continue"
+  },
   "SentProductsToday": {
     "Title": "Sent Products Today",
     "NoLoadsToday": "No loads today",
@@ -1839,12 +1879,17 @@
     "AddLoadMessage": "Create and dispatch products for transport."
   },
   "ScanDriverQR": {
+    "Error": "Error!",
+    "Successful": "Successful!",
     "Title": "Scan Driver QR",
     "QRIdentified": "QR code identified successfully.",
     "Driver": "Driver",
     "InvalidQR": "Invalid QR code.\nPlease scan a valid driver QR code.",
     "Unauthorized": "Unauthorized!",
-    "UnauthorizedMessage": "Driver access has been rejected.\nPlease contact the company\nfor assistance."
+    "UnauthorizedMessage": "Driver access has been rejected.\nPlease contact the company\nfor assistance.",
+    "ScanTimeout": "Scan Timeout",
+    "ScanTimeoutMessage": "The QR code could not be detected within the time limit. Please check and try again.",
+    "AlignDriverQR": "Align the Driver QR code within the frame to scan"
   },
   "SelectDistributionCentre": {
     "Title": "Select Distribution Centre",
@@ -1870,14 +1915,18 @@
     "OK": "OK"
   },
   "LoadingToVehicleSummary": {
-    "Title": "Summery",
+    "Title": "Summary",
     "ConfirmAndContinue": "Confirm & Continue",
     "TotalWeight": "Total Weight",
     "TotalCrates": "Total Crates",
     "Crates": "Crates",
     "Set": "Set",
     "Grade": "Grade",
-    "Weight": "Weight"
+    "Weight": "Weight",
+    "Loading": "Loading load details...",
+    "NoItems": "No items found in this load.",
+    "ViewQRCode": "View QR Code",
+    "SaveFailed": "Failed to save transport load."
   },
   "LoadQR": {
     "Title": "Generated QR",

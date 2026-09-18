@@ -709,6 +709,9 @@ export default function LoadingToVehicle({
       driverId: route.params?.driverId ?? store.getState().transport.driverId ?? undefined,
       driverEmpId: route.params?.driverEmpId ?? store.getState().transport.driverEmpId ?? undefined,
       driverName: route.params?.driverName ?? store.getState().transport.driverName ?? undefined,
+      driverNameEnglish: route.params?.driverNameEnglish ?? store.getState().transport.driverNameEnglish ?? undefined,
+      driverNameSinhala: route.params?.driverNameSinhala ?? store.getState().transport.driverNameSinhala ?? undefined,
+      driverNameTamil: route.params?.driverNameTamil ?? store.getState().transport.driverNameTamil ?? undefined,
       vehicleId: route.params?.vehicleId ?? store.getState().transport.vehicleId ?? undefined,
       items: summaryList.length > 0 ? summaryList : undefined,
     });
@@ -964,9 +967,7 @@ export default function LoadingToVehicle({
                 }`}
               >
                 {selectedVariety?.label ||
-                  (selectedCrop
-                    ? t("LoadingToVehicle.SelectVariety", "--Select Variety--")
-                    : t("LoadingToVehicle.SelectCropFirst", "--Select Crop First--"))}
+                  t("LoadingToVehicle.SelectVariety", "--Select Variety--")}
               </Text>
               <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
             </TouchableOpacity>

@@ -19,6 +19,8 @@ import LoadingPage from "@/component/components/loading/LoadingPage";
 import { MaterialIcons } from "@expo/vector-icons";
 import environment from "@/environment/environment";
 
+import { getLocalizedDriverName } from "@/utils/driverLocalization";
+
 type SentProductsTodayNavigationProps = StackNavigationProp<
   RootStackParamList,
   "SentProductsToday"
@@ -34,6 +36,9 @@ export interface SentProductItem {
   vehicleNo?: string;
   driverEmpId?: string;
   driverName?: string;
+  driverNameEnglish?: string;
+  driverNameSinhala?: string;
+  driverNameTamil?: string;
   crates: number;
   weight: string;
   destination: string;
@@ -41,8 +46,10 @@ export interface SentProductItem {
   conformDriverId?: number | null;
 }
 
-export default function SentProductsToday({ navigation }: SentProductsTodayProps) {
-  const { t } = useTranslation();
+export default function SentProductsToday({
+  navigation,
+}: SentProductsTodayProps) {
+  const { t, i18n } = useTranslation();
 
   const [products, setProducts] = useState<SentProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -101,6 +108,22 @@ export default function SentProductsToday({ navigation }: SentProductsTodayProps
     return String(index + 1).padStart(2, "0");
   };
 
+  const formatDisplayTime = (timeStr?: string) => {
+    if (!timeStr) return "";
+    let str = timeStr.replace(/^At\s*/i, `${t("Common.At", "At")} `);
+    const lang = (i18n.language || "").toLowerCase();
+    if (lang.startsWith("si")) {
+      str = str
+        .replace(/A\.?M\.?/gi, "පෙ.ව.")
+        .replace(/P\.?M\.?/gi, "ප.ව.");
+    } else if (lang.startsWith("ta")) {
+      str = str
+        .replace(/A\.?M\.?/gi, "முற்பகல்")
+        .replace(/P\.?M\.?/gi, "பிற்பகல்");
+    }
+    return str;
+  };
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -140,13 +163,17 @@ export default function SentProductsToday({ navigation }: SentProductsTodayProps
                 key={item.id}
                 activeOpacity={0.75}
                 onPress={() => {
+                  const locDriverName = getLocalizedDriverName(item, i18n.language) || item.driverName;
                   if (item.conformDriverId) {
                     navigation.navigate("LoadAssigned", {
                       transportId: item.id,
                       loadCode: item.transferCode,
                       vehicleNo: item.vehicleNo,
-                      driverId: item.driverEmpId || item.driverName,
-                      driverName: item.driverName,
+                      driverId: item.driverEmpId || locDriverName,
+                      driverName: locDriverName,
+                      driverNameEnglish: item.driverNameEnglish,
+                      driverNameSinhala: item.driverNameSinhala,
+                      driverNameTamil: item.driverNameTamil,
                     });
                   } else {
                     navigation.navigate("LoadingToVehicleSummary", {
@@ -154,7 +181,10 @@ export default function SentProductsToday({ navigation }: SentProductsTodayProps
                       loadCode: item.transferCode,
                       vehicleNo: item.vehicleNo,
                       driverEmpId: item.driverEmpId,
-                      driverName: item.driverName,
+                      driverName: locDriverName,
+                      driverNameEnglish: item.driverNameEnglish,
+                      driverNameSinhala: item.driverNameSinhala,
+                      driverNameTamil: item.driverNameTamil,
                       centreName: item.destination,
                       isViewOnly: true,
                     });
@@ -186,7 +216,7 @@ export default function SentProductsToday({ navigation }: SentProductsTodayProps
                     {item.destination}
                   </Text>
                   <Text className="text-xs text-[#54617D] mt-0.5 font-medium">
-                    {item.time ? item.time.replace(/^At\s*/i, `${t("Common.At", "At")} `) : ""}
+                    {formatDisplayTime(item.time)}
                   </Text>
                 </View>
 

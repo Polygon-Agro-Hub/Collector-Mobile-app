@@ -20,6 +20,8 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
+import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
+import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type ReceivedProductsSummaryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -45,6 +47,12 @@ export interface GradeSetItem {
 
 export interface CropLoadData {
   id: string;
+  varietyNameEnglish?: string;
+  varietyNameSinhala?: string;
+  varietyNameTamil?: string;
+  cropNameEnglish?: string;
+  cropNameSinhala?: string;
+  cropNameTamil?: string;
   cropName: string;
   imageUri: string;
   totalWeightKg: number;
@@ -56,7 +64,7 @@ export default function ReceivedProductsSummary({
   navigation,
   route,
 }: ReceivedProductsSummaryProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const transportId = route.params?.transportId;
   const isUnloadedParam = route.params?.isUnloaded ?? false;
@@ -75,6 +83,7 @@ export default function ReceivedProductsSummary({
   const [driverName, setDriverName] = useState<string>(
     route.params?.driverName || ""
   );
+  const [driverData, setDriverData] = useState<any>(route.params || null);
 
   const passedItems = route.params?.items;
   const [items, setItems] = useState<CropLoadData[]>(
@@ -105,6 +114,7 @@ export default function ReceivedProductsSummary({
         if (data.vehicleNo && data.vehicleNo !== "N/A") setVehicleNo(data.vehicleNo);
         if (data.driverEmpId) setDriverEmpId(data.driverEmpId);
         if (data.driverName) setDriverName(data.driverName);
+        setDriverData(data);
         if (data.isUnloaded !== undefined) {
           setIsUnloaded(data.isUnloaded || isUnloadedParam);
         }
@@ -157,9 +167,9 @@ export default function ReceivedProductsSummary({
       />
 
       {loading ? (
-        <LoadingPage message={t("Loading", "Loading...")} />
+        <LoadingPage message={t("ReceivedProductsSummary.Loading", "Loading load details...")} />
       ) : items.length === 0 ? (
-        <NoDataScreen message={t("NoData", "No products available")} />
+        <NoDataScreen message={t("ReceivedProductsSummary.NoItems", "- No items found in this load -")} />
       ) : (
         <ScrollView
           className="flex-1"
@@ -213,7 +223,10 @@ export default function ReceivedProductsSummary({
                     {t("LoadAssigned.Driver", "Driver")}
                   </Text>
                   <Text className="text-white text-base font-bold mt-0.5">
-                    {driverName || driverEmpId || "—"}
+                    {getLocalizedDriverName(driverData, i18n.language) ||
+                      driverName ||
+                      driverEmpId ||
+                      "—"}
                   </Text>
                 </View>
               </View>
@@ -267,7 +280,7 @@ export default function ReceivedProductsSummary({
                     </View>
                   )}
                   <Text className="text-base font-bold text-black">
-                    {crop.cropName}
+                    {getLocalizedProductName(crop, i18n.language) || crop.cropName}
                   </Text>
                 </View>
 
@@ -285,7 +298,7 @@ export default function ReceivedProductsSummary({
                       style={{ marginBottom: 4 }}
                     />
                     <Text className="text-gray-300 text-xs text-center">
-                      Total{"\n"}Weight
+                      {t("LoadingToVehicleSummary.TotalWeight", "Total Weight")}
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
                       {crop.totalWeightKg.toFixed(2)} {t("Common.kg", "kg")}
@@ -329,7 +342,7 @@ export default function ReceivedProductsSummary({
                     >
                       <View className="bg-[#FFF6AD] px-4 py-0.5 rounded-full">
                         <Text className="text-[11px] font-bold text-gray-800">
-                          {gs.grade}  |  {t("ReceivedProductsSummary.Set", "Set")} : {gs.set}
+                          {t("ReceivedProductsSummary.Grade", "Grade")} {gs.grade.replace(/^Grade\s*/i, "")}  |  {t("ReceivedProductsSummary.Set", "Set")} : {gs.set}
                         </Text>
                       </View>
                     </View>

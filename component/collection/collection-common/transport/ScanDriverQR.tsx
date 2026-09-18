@@ -4,6 +4,7 @@ import {
   Text,
   Animated,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -19,6 +20,7 @@ import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
 import { DRIVER_ROLES } from "@/constants/user-roles";
+import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type ScanDriverQRNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -29,8 +31,10 @@ interface ScanDriverQRProps {
   navigation: ScanDriverQRNavigationProp;
 }
 
+const PRIMARY_OUTLINE_COLOR = "#980775";
+
 const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
@@ -49,6 +53,12 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
     driverId: number;
     empId: string;
     fullName: string;
+    firstNameEnglish?: string;
+    firstNameSinhala?: string;
+    firstNameTamil?: string;
+    lastNameEnglish?: string;
+    lastNameSinhala?: string;
+    lastNameTamil?: string;
     jobRole: string;
     vehicleId?: number | null;
     vehicleNo?: string | null;
@@ -190,7 +200,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
     }
 
     if (!isFormatValid) {
-      setModalTitle(t("ScanDriverQR.Error", "Error!"));
+      setModalTitle(t("ScanDriverQR.Error", t("qrcode.Error", "Error!")));
       setModalMessage(
         t(
           "ScanDriverQR.InvalidQR",
@@ -242,6 +252,8 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
         verifiedDriverRef.current = driver;
 
+        const localizedDriverName = getLocalizedDriverName(driver, i18n.language);
+
         setModalTitle(t("ScanDriverQR.Successful", "Successful!"));
         setModalMessage(
           <View className="items-center">
@@ -249,7 +261,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
               {t("ScanDriverQR.QRIdentified", "QR code identified successfully.")}
             </Text>
             <Text className="text-center font-bold text-[#000000]">
-              {t("ScanDriverQR.Driver", "Driver")} : {driver.empId}, {driver.fullName}
+              {t("ScanDriverQR.Driver", "Driver")} : {driver.empId}{localizedDriverName ? `, ${localizedDriverName}` : ""}
             </Text>
           </View>,
         );
@@ -277,7 +289,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       }
 
       if (code === "INVALID_QR") {
-        setModalTitle(t("ScanDriverQR.Error", "Error!"));
+        setModalTitle(t("ScanDriverQR.Error", t("qrcode.Error", "Error!")));
         setModalMessage(
           t("ScanDriverQR.InvalidQR", "Invalid QR code.\nPlease scan a valid driver QR code."),
         );
@@ -289,7 +301,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
       // Generic / network / server error
       console.error("Error verifying driver QR:", err);
-      setModalTitle(t("qrcode.Error", "Error!"));
+      setModalTitle(t("ScanDriverQR.Error", t("qrcode.Error", "Error!")));
       setModalMessage(
         t("qrcode.VerifyFailed", "Something went wrong. Please try again."),
       );
@@ -312,6 +324,16 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
     verifiedDriverRef.current = null;
 
     if (driver) {
+      const localizedDriverName = getLocalizedDriverName(driver, i18n.language);
+
+      // Build composite names from individual DB fields for downstream screens
+      const clean = (v?: string | null) => (typeof v === "string" ? v.trim() : "");
+      const fnEn = clean(driver.firstNameEnglish);
+      const lnEn = clean(driver.lastNameEnglish);
+      const nameEn = `${fnEn} ${lnEn}`.trim() || clean(driver.fullName);
+      const nameSi = (`${clean(driver.firstNameSinhala) || fnEn} ${clean(driver.lastNameSinhala) || lnEn}`).trim() || nameEn;
+      const nameTa = (`${clean(driver.firstNameTamil) || fnEn} ${clean(driver.lastNameTamil) || lnEn}`).trim() || nameEn;
+
       store.dispatch({
         type: "transport/clearTransportLoad",
       });
@@ -320,24 +342,30 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
         payload: {
           driverId: driver.driverId,
           driverEmpId: driver.empId,
-          driverName: driver.fullName,
+          driverName: localizedDriverName,
+          driverNameEnglish: nameEn,
+          driverNameSinhala: nameSi,
+          driverNameTamil: nameTa,
           vehicleId: driver.vehicleId ?? null,
           vehicleNo: (driver.vRegNo || driver.vehicleNo) ?? null,
           vType: driver.vType ?? null,
           vCapacity: driver.vCapacity ?? null,
         },
       });
-    }
 
-    navigation.navigate("SelectDistributionCentre", {
-      driverId: driver?.driverId,
-      driverEmpId: driver?.empId,
-      driverName: driver?.fullName,
-      vehicleId: driver?.vehicleId ?? undefined,
-      vehicleNo: (driver?.vRegNo || driver?.vehicleNo) ?? undefined,
-      vType: driver?.vType ?? undefined,
-      vCapacity: driver?.vCapacity ?? undefined,
-    });
+      navigation.navigate("SelectDistributionCentre", {
+        driverId: driver.driverId,
+        driverEmpId: driver.empId,
+        driverName: localizedDriverName,
+        driverNameEnglish: nameEn,
+        driverNameSinhala: nameSi,
+        driverNameTamil: nameTa,
+        vehicleId: driver.vehicleId ?? undefined,
+        vehicleNo: (driver.vRegNo || driver.vehicleNo) ?? undefined,
+        vType: driver.vType ?? undefined,
+        vCapacity: driver.vCapacity ?? undefined,
+      });
+    }
   };
 
   const handleTimeoutModalClose = () => {
@@ -354,7 +382,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
     return (
       <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
         <View className="bg-black/50 p-8 rounded-full">
-          <ActivityIndicator size="large" color="#F7CA21" />
+          <ActivityIndicator size="large" color={PRIMARY_OUTLINE_COLOR} />
         </View>
         <Text className="text-white text-lg mt-4">
           {t("qrcode.Loading camera", "කැමරාව පූරණය වෙමින්...")}
@@ -384,7 +412,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       {loading && (
         <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/70 z-50 justify-center items-center">
           <View className="bg-black/80 p-6 rounded-xl items-center">
-            <ActivityIndicator size="large" color="#F7CA21" />
+            <ActivityIndicator size="large" color={PRIMARY_OUTLINE_COLOR} />
             <Text className="text-white text-lg font-semibold mt-4">
               {t("qrcode.IdentifyingDriver", "Identifying Driver...")}
             </Text>
@@ -433,83 +461,85 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
         autoClose={true}
       />
 
-      <View className="flex-1">
-        {/* Semi-transparent overlay */}
-        <View className="flex-1 bg-black/50">
-          {/* Custom Header with no title */}
-          <View>
-            <CustomHeader
-              title={t("ScanDriverQR.Title", "Scan Driver QR")}
-              navigation={navigation}
-              transparent={true}
-              iconBgColor="#F7FAFF"
+      {/* Full-Screen Camera View */}
+      <CameraView
+        style={StyleSheet.absoluteFill}
+        facing="back"
+        barcodeScannerSettings={{
+          barcodeTypes: ["qr"],
+        }}
+        onBarcodeScanned={
+          scanned || loading ? undefined : handleBarCodeScanned
+        }
+      />
+
+      {/* Dark overlay with clear scan frame in center */}
+      <View className="flex-1 bg-black/35">
+        {/* Custom Header */}
+        <CustomHeader
+          title={t("ScanDriverQR.Title")}
+          navigation={navigation}
+          iconBgColor="#F7FAFF"
+          bgColor="#FFFFFF"
+        />
+
+        {/* Scan Frame Container */}
+        <View className="flex-1 justify-center items-center">
+          <View
+            style={{
+              width: wp(80),
+              height: wp(80),
+              borderRadius: 24,
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            {/* Animated Purple Scan Line */}
+            <Animated.View
+              style={{
+                width: "100%",
+                height: 3,
+                backgroundColor: PRIMARY_OUTLINE_COLOR,
+                transform: [{ translateY: scanLineTranslateY }],
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 10,
+                opacity: scanned || loading ? 0 : 1,
+              }}
             />
+
+            {/* Corner Markers - Top Left */}
+            <View style={{ position: "absolute", top: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20 }} />
+            </View>
+
+            {/* Corner Markers - Top Right */}
+            <View style={{ position: "absolute", top: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomRightRadius: 20, alignSelf: "flex-end" }} />
+            </View>
+
+            {/* Corner Markers - Bottom Left */}
+            <View style={{ position: "absolute", bottom: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopLeftRadius: 20 }} />
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20 }} />
+            </View>
+
+            {/* Corner Markers - Bottom Right */}
+            <View style={{ position: "absolute", bottom: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
+              <View style={{ width: 12, height: 38, backgroundColor: PRIMARY_OUTLINE_COLOR, borderTopRightRadius: 20, alignSelf: "flex-end" }} />
+              <View style={{ width: 50, height: 12, backgroundColor: PRIMARY_OUTLINE_COLOR, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} />
+            </View>
           </View>
 
-          {/* Scan Frame Container */}
-          <View className="flex-1 justify-center items-center">
-            <View
-              style={{
-                width: wp(80),
-                height: wp(80),
-                borderRadius: 24,
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              <CameraView
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                }}
-                facing="back"
-                barcodeScannerSettings={{
-                  barcodeTypes: ["qr"],
-                }}
-                onBarcodeScanned={
-                  scanned || loading ? undefined : handleBarCodeScanned
-                }
-              />
-
-              <Animated.View
-                style={{
-                  width: "100%",
-                  height: 3,
-                  backgroundColor: "#F7CA21",
-                  transform: [{ translateY: scanLineTranslateY }],
-                  position: "relative",
-                  zIndex: 10,
-                  opacity: scanned || loading ? 0 : 1,
-                }}
-              />
-
-              {/* Corner Markers - Top Left */}
-              <View style={{ position: "absolute", top: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
-                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderBottomLeftRadius: 20 }} />
-              </View>
-
-              {/* Corner Markers - Top Right */}
-              <View style={{ position: "absolute", top: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderTopLeftRadius: 20, borderTopRightRadius: 20 }} />
-                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderBottomRightRadius: 20, alignSelf: "flex-end" }} />
-              </View>
-
-              {/* Corner Markers - Bottom Left */}
-              <View style={{ position: "absolute", bottom: -3, left: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderTopLeftRadius: 20 }} />
-                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderBottomLeftRadius: 20 }} />
-              </View>
-
-              {/* Corner Markers - Bottom Right */}
-              <View style={{ position: "absolute", bottom: -3, right: -3, width: 50, height: 50, zIndex: 20 }}>
-                <View style={{ width: 12, height: 38, backgroundColor: "#F7CA21", borderTopRightRadius: 20, alignSelf: "flex-end" }} />
-                <View style={{ width: 50, height: 12, backgroundColor: "#F7CA21", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} />
-              </View>
-            </View>
+          {/* Subtitle helper badge */}
+          <View className="mt-8 bg-black/60 px-5 py-2.5 rounded-full">
+            <Text className="text-white text-xs font-semibold text-center">
+              {t("ScanDriverQR.AlignDriverQR", "Align the Driver QR code within the frame to scan")}
+            </Text>
           </View>
         </View>
       </View>
