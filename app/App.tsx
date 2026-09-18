@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, AppState, StatusBar } from "react-native";
+import { Alert, AppState, StatusBar, Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { Provider } from "react-redux";
 import environment from "../environment/environment";
@@ -18,6 +18,18 @@ import NetInfo from "@react-native-community/netinfo";
 import * as SplashScreen from "expo-splash-screen";
 import store from "@/services/reducxStore";
 import RootStackNavigator from "../routes/Routes";
+import * as Notifications from "expo-notifications";
+
+// Global notifications handler
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 function AppContent() {
   const { t } = useTranslation();
@@ -32,6 +44,21 @@ function AppContent() {
     autoClose: true,
     showOkButton: undefined as boolean | undefined,
   });
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "Default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#980775",
+        enableVibrate: true,
+        showBadge: true,
+      }).catch((err) => {
+        console.warn("Could not set Android notification channel:", err);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     setGlobalAlertListener((title, message, type, onClose, autoClose, showOkButton) => {

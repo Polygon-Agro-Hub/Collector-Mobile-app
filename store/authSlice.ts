@@ -15,6 +15,7 @@ interface AuthState {
   token: string | null;
   jobRole: string | null;
   empId: string | null;
+  id?: number | string | null;
   companyNameEnglish: string | null;
   companyNameSinhala: string | null;
   companyNameTamil: string | null;
@@ -27,6 +28,7 @@ const initialState: AuthState = {
   token: null,
   jobRole: null,
   empId: null,
+  id: null,
   companyNameEnglish: null,
   companyNameSinhala: null,
   companyNameTamil: null,
@@ -45,6 +47,7 @@ const authSlice = createSlice({
         token: string;
         jobRole: string;
         empId: string;
+        id?: number | string | null;
         companyNameEnglish?: string | null;
         companyNameSinhala?: string | null;
         companyNameTamil?: string | null;
@@ -56,6 +59,22 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.jobRole = action.payload.jobRole;
       state.empId = action.payload.empId;
+
+      let userId = action.payload.id ?? null;
+      if (!userId && action.payload.token) {
+        try {
+          const parts = action.payload.token.split(".");
+          if (parts.length >= 2) {
+            const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+            const decoded = atob(base64);
+            const parsed = JSON.parse(decoded);
+            userId = parsed.id || parsed.officerId || parsed.userId || null;
+          }
+        } catch (err) {
+          console.warn("Could not decode user id from JWT:", err);
+        }
+      }
+      state.id = userId;
       state.companyNameEnglish = action.payload.companyNameEnglish ?? null;
       state.companyNameSinhala = action.payload.companyNameSinhala ?? null;
       state.companyNameTamil = action.payload.companyNameTamil ?? null;

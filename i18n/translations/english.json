@@ -1172,6 +1172,21 @@
     "MaxCratesReached": "Maximum Crates Reached",
     "NoOfCrates": "--No. of Crates--"
   },
+  "MyNotifications": {
+    "Title": "My Notifications",
+    "MarkAllAsRead": "Mark all as read",
+    "Today": "Today",
+    "Yesterday": "Yesterday",
+    "Earlier": "Earlier",
+    "ReturnOrderOTP": "Return Order OTP",
+    "Order": "Order",
+    "PleaseUseTheFollowingOTPCode": "Please use the following OTP code, “{{otp}}”, to receive the order from the driver at the centre.",
+    "UseThisOTPCode": "Use this OTP Code",
+    "Close": "Close",
+    "NoNotifications": "No notifications yet",
+    "AllMarkedAsRead": "All notifications marked as read",
+    "NewNotificationReceived": "New handover return order OTP notification received."
+  },
   "OpenedOrderScreen": {
     "INV No": "INV No :",
     "Pending": "Pending",
@@ -1839,6 +1854,22 @@
     "EnableLocationAccessToAccessLocationInformation": "Enable location access to connect Bluetooth printers and verify collection routes.",
     "UnableToRequestLocationPermissionPleaseTryAgain": "Unable to request location permission. Please try again.",
     "LocationAccessIsRequiredPleaseEnableItInSettings": "Location access is required for Bluetooth printer and collection features. Please enable it in settings."
+  },
+  "NotificationAccess": {
+    "Allow": "Allow",
+    "AgreeAndContinue": "Agree & Continue",
+    "NotNow": "Not Now",
+    "OpenSettings": "Open Settings",
+    "Requesting...": "Requesting...",
+    "NotificationAccess": "Notification Access",
+    "ProminentDisclosureTitle": "Why CoDi-Net Uses Notifications",
+    "ProminentDisclosureIntro": "CoDi-Net sends notifications to ensure you receive essential time-sensitive operational alerts:",
+    "FeatureOTPTitle": "Return Order OTP Alerts",
+    "FeatureOTPDesc": "Instantly receive OTP codes and verification details when drivers return orders to your distribution centre.",
+    "DisclosureFooter": "Notification access is only used for operational alerts and security OTPs. We never send promotional messages or spam.",
+    "PermissionDenied": "Permission Denied",
+    "NotificationAccessIsRequiredPleaseEnableItInSettings": "Notification access is required to receive OTP and operational alerts. Please enable it in settings.",
+    "UnableToRequestNotificationPermissionPleaseTryAgain": "Unable to request notification permission. Please try again."
   },
   "ScaleSelectModal": {
     "SelectWifiScale": "Select Wi-Fi Scale",

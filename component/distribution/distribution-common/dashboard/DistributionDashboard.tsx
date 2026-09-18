@@ -23,6 +23,21 @@ import DashboardSkeleton from "@/component/components/skeletons/DashboardSkeleto
 
 import { LanguageContext } from "@/context/LanguageContext";
 import { useContext } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { ROLES } from "@/constants/user-roles";
+import { getSocket } from "@/services/socket";
+import * as Notifications from "expo-notifications";
+
+// Configure local system notifications presentation
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 type DistributionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -49,6 +64,8 @@ interface ProfileData {
   centerId: number;
 }
 
+const READ_NOTIFS_STORAGE_KEY = "@dcm_read_notifications";
+
 const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   navigation,
 }) => {
@@ -56,12 +73,41 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   const [jobRole, setJobeRole] = useState<string | null>(null);
   const [centerId, setCenterId] = useState<string | null>(null);
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t, i18n } = useTranslation();
   const { language } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+  const currentUserId = store.getState().auth.id;
+  const currentUserRole = store.getState().auth.jobRole;
+  const isDCM = currentUserRole === ROLES.DISTRIBUTION_MANAGER;
+
+  const fetchUnreadNotifications = async () => {
+    if (!isDCM) return;
+    try {
+      const token = store.getState().auth.token;
+      if (!token) return;
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/distribution-manager/notifications`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success && Array.isArray(response.data.data)) {
+        const notifs = response.data.data;
+        const storageKey = `${READ_NOTIFS_STORAGE_KEY}_${currentUserId || "default"}`;
+        const stored = await AsyncStorage.getItem(storageKey);
+        const readSet = new Set(stored ? JSON.parse(stored) : []);
+        const unread = notifs.filter((n: any) => !readSet.has(n.id)).length;
+        setUnreadNotificationsCount(unread);
+      }
+    } catch (e) {
+      console.error("Error fetching unread notification count:", e);
+    }
+  };
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -137,19 +183,67 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     fetchUserProfile();
     fetchTargetPercentage();
     fetchSelectedLanguage();
-  }, []);
+    fetchUnreadNotifications();
+
+    const socket = getSocket();
+    if (socket && currentUserId && isDCM) {
+      socket.emit("join_user", currentUserId);
+      socket.emit("join_officer", currentUserId);
+
+      const handleRealtimeNotif = async (data: any) => {
+        fetchUnreadNotifications();
+        try {
+          const invoiceNumber = data?.invNo || data?.invoiceNo || "";
+          const otp = data?.otpCode || data?.otp || "";
+          const bodyText = invoiceNumber
+            ? t(
+                "MyNotifications.PleaseUseTheFollowingOTPCode",
+                "Please use the following OTP code, “{{otp}}”, to receive the order from the driver at the centre.",
+                { otp }
+              )
+            : t(
+                "MyNotifications.NewNotificationReceived",
+                "New handover return order OTP notification received."
+              );
+
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: t("MyNotifications.ReturnOrderOTP", "Return Order OTP"),
+              body: invoiceNumber ? `Order #${invoiceNumber}: ${bodyText}` : bodyText,
+              data: { otp, invoiceNumber },
+            },
+            trigger: null,
+          });
+        } catch (notifErr) {
+          console.warn("Error presenting local notification in dashboard:", notifErr);
+        }
+      };
+
+      socket.on("new_notification", handleRealtimeNotif);
+      socket.on("new_return_otp", handleRealtimeNotif);
+      socket.on("handover_return_otp", handleRealtimeNotif);
+
+      return () => {
+        socket.off("new_notification", handleRealtimeNotif);
+        socket.off("new_return_otp", handleRealtimeNotif);
+        socket.off("handover_return_otp", handleRealtimeNotif);
+      };
+    }
+  }, [currentUserId, isDCM]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchUserProfile();
     await fetchTargetPercentage();
     await fetchSelectedLanguage();
+    await fetchUnreadNotifications();
     setRefreshing(false);
   };
 
   useFocusEffect(
     useCallback(() => {
       fetchSelectedLanguage();
+      fetchUnreadNotifications();
       const onBackPress = () => true;
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
@@ -340,38 +434,79 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       }
     >
       <View className="w-full max-w-[600px] mx-auto flex-1">
+        <View className="flex-row items-center justify-between py-4">
+          <TouchableOpacity
+            className="flex-row items-center flex-1 mr-3"
+            onPress={() => navigation.navigate("SideMenu")}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={
+                profile?.image
+                  ? { uri: profile.image }
+                  : require("../../../../assets/images/auth/my-profile.webp")
+              }
+              style={{ width: 64, height: 64, borderRadius: 32 }}
+              className="w-16 h-16 rounded-full mr-3"
+              resizeMode="cover"
+            />
+
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                className="text-lg font-bold"
+              >
+                {getFullName()}
+              </Text>
+
+              <Text
+                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                className="text-gray-500"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {getcompanyName()}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Notification Button (Right side of profile section for DCM) */}
+          {isDCM && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("MyNotifications")}
+              className="relative w-12 h-12 rounded-full bg-[#F1F3F6] items-center justify-center"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="notifications" size={24} color="#000000" />
+              {unreadNotificationsCount > 0 && (
+                <View
+                  className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-[#980775]"
+                  style={{
+                    borderWidth: 2,
+                    borderColor: "#FFFFFF",
+                  }}
+                />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Temporary button to view NotificationAccess permission screen */}
         <TouchableOpacity
-          className="flex-row items-center py-4"
-          onPress={() => navigation.navigate("SideMenu")}
+          onPress={() => navigation.navigate("NotificationAccess" as any)}
+          className="w-full bg-[#980775]/10 border border-[#980775]/30 rounded-2xl py-2.5 px-4 mb-2 flex-row items-center justify-center"
+          activeOpacity={0.8}
         >
-          <Image
-            source={
-              profile?.image
-                ? { uri: profile.image }
-                : require("../../../../assets/images/auth/my-profile.webp")
-            }
-            style={{ width: 64, height: 64, borderRadius: 32 }}
-            className="w-16 h-16 rounded-full mr-3"
-            resizeMode="cover"
+          <Ionicons
+            name="notifications-circle-outline"
+            size={20}
+            color="#980775"
+            style={{ marginRight: 6 }}
           />
-
-          <View style={{ flex: 1 }}>
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-lg font-bold"
-            >
-              {getFullName()}
-            </Text>
-
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {getcompanyName()}
-            </Text>
-          </View>
+          <Text className="text-[#980775] font-bold text-xs">
+            {t("NotificationAccess.NotificationAccess", "Notification Access")}{" "}
+            (Test Permission Screen)
+          </Text>
         </TouchableOpacity>
 
         <View className="flex-row flex-wrap justify-between pb-12 mt-4">
