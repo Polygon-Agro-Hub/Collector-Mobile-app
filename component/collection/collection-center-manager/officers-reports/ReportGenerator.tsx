@@ -155,10 +155,18 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
       const isSinhala = (i18n.language || "en").toLowerCase().startsWith("si");
       const isTamil = (i18n.language || "en").toLowerCase().startsWith("ta");
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "Report";
       const fmtForFileName = (d: Date) =>
         `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      const fileName = `${prefix}_${officerId}_From_${fmtForFileName(startDate!)}_To_${fmtForFileName(endDate!)}.pdf`;
+
+      let fileName: string;
+
+      if (isSinhala) {
+        fileName = `වාර්තාව_${officerId}_${fmtForFileName(startDate!)}_සිට_${fmtForFileName(endDate!)}_දක්වා.pdf`;
+      } else if (isTamil) {
+        fileName = `அறிக்கை_${officerId}_${fmtForFileName(startDate!)}_இருந்து_${fmtForFileName(endDate!)}_வரை.pdf`;
+      } else {
+        fileName = `Report_${officerId}_From_${fmtForFileName(startDate!)}_To_${fmtForFileName(endDate!)}.pdf`;
+      }
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");

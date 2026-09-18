@@ -65,8 +65,8 @@
     "FailedToFinishUnloading": "බෑම අවසන් කිරීමට නොහැකි විය.",
     "Failed to fetch empid.": "සේවක හැඳුනුම්පත සොයා ගැනීමට අසමත් විය.",
     "You cannot transfer the maximum amount of": "ඔබට උපරිම මුදල මාරු කළ නොහැක",
-    "This EMP ID is not approved.": "මෙම EMP ID අනුමත කර නැත.",
-    "This EMP ID is Rejected": "මෙම EMP ID ප්‍රතික්ෂේප කර ඇත.",
+    "This EMP ID is not approved.": "මෙම වැරදි සේවක අනුමත කර නැත.",
+    "This EMP ID is Rejected": "මෙම වැරදි සේවක ප්‍රතික්ෂේප කර ඇත.",
     "New password and confirm password do not match.": "නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය එකිනෙකට නොගැලපේ.",
     "New password must be at least 6 characters long.": "නව මුරපදයට අවම වශයෙන් අක්ෂර 6 ක් තිබිය යුතුය.",
     "Failed to update password.": "මුරපදය යාවත්කාලීන කිරීම අසාර්ථකයි.",
@@ -794,6 +794,8 @@
     "Num2": "අංකය 2",
     "Collection": "එකතුව",
     "Report": "වාර්තාව",
+    "To":"වෙත",
+    "From":"සිට",
     "Today": "අද",
     "Target Coverage": "ආවරණය කරන ලද ඉලක්කය",
     "OpenTarget": "ඉලක්ක පුවරුව විවෘත කරන්න"
@@ -1104,6 +1106,21 @@
     "Continue": "ඉදිරියට යන්න",
     "MaxCratesReached": "උපරිම පෙට්ටි ප්‍රමාණයට ළඟා වී ඇත",
     "NoOfCrates": "--පෙට්ටි ගණන--"
+  },
+  "MyNotifications": {
+    "Title": "මගේ දැනුම්දීම්",
+    "MarkAllAsRead": "සියල්ල කියවූ බව සලකුණු කරන්න",
+    "Today": "අද",
+    "Yesterday": "ඊයේ",
+    "Earlier": "පෙර",
+    "ReturnOrderOTP": "ආපසු ඇණවුම් OTP",
+    "Order": "ඇණවුම",
+    "PleaseUseTheFollowingOTPCode": "මධ්‍යස්ථානයේදී රියදුරුගෙන් ඇණවුම භාරගැනීම සඳහා කරුණාකර පහත OTP අංකය, “{{otp}}” භාවිතා කරන්න.",
+    "UseThisOTPCode": "මෙම OTP අංකය භාවිතා කරන්න",
+    "Close": "වසන්න",
+    "NoNotifications": "තවමත් දැනුම්දීම් නොමැත",
+    "AllMarkedAsRead": "සියලුම දැනුම්දීම් කියවූ බව සලකුණු කරන ලදී",
+    "NewNotificationReceived": "නව ආපසු ඇණවුම් OTP දැනුම්දීමක් ලැබී ඇත."
   },
   "OpenedOrderScreen": {
     "INV No": "INV අංකය :",
@@ -1769,6 +1786,22 @@
     "EnableLocationAccessToAccessLocationInformation": "බ්ලූටූත් මුද්‍රණ යන්ත්‍ර සම්බන්ධ කිරීමට සහ එකතු කිරීමේ මාර්ග තහවුරු කිරීමට ස්ථාන ප්‍රවේශය සක්‍රිය කරන්න.",
     "UnableToRequestLocationPermissionPleaseTryAgain": "ස්ථාන අවසරය ඉල්ලීමට නොහැක. කරුණාකර නැවත උත්සාහ කරන්න.",
     "LocationAccessIsRequiredPleaseEnableItInSettings": "බ්ලූටූත් මුද්‍රණ යන්ත්‍ර සහ එකතු කිරීමේ විශේෂාංග සඳහා ස්ථාන ප්‍රවේශය අවශ්‍ය වේ. කරුණාකර එය සැකසුම් තුළ සක්‍රිය කරන්න."
+  },
+  "NotificationAccess": {
+    "Allow": "ඉඩ දෙන්න",
+    "AgreeAndContinue": "එකඟ වී ඉදිරියට යන්න",
+    "NotNow": "දැන් නොවේ",
+    "OpenSettings": "සැකසුම් විවෘත කරන්න",
+    "Requesting...": "ඉල්ලමින් පවතී...",
+    "NotificationAccess": "දැනුම්දීම් ප්‍රවේශය",
+    "ProminentDisclosureTitle": "CoDi-Net දැනුම්දීම් භාවිතා කරන්නේ ඇයි",
+    "ProminentDisclosureIntro": "වැදගත් කාලෝචිත මෙහෙයුම් ඇඟවීම් ඔබට ලැබෙන බව සහතික කිරීමට CoDi-Net දැනුම්දීම් යවයි:",
+    "FeatureOTPTitle": "ආපසු ඇණවුම් OTP ඇඟවීම්",
+    "FeatureOTPDesc": "රියදුරන් ඔබේ බෙදාහැරීමේ මධ්‍යස්ථානයට ඇණවුම් ආපසු ලබා දෙන විට OTP කේත සහ සත්‍යාපන විස්තර ක්ෂණිකව ලබා ගන්න.",
+    "DisclosureFooter": "දැනුම්දීම් ප්‍රවේශය භාවිතා කරනුයේ මෙහෙයුම් ඇඟවීම් සහ ආරක්ෂක OTP සඳහා පමණි. අපි කිසි විටෙකත් ප්‍රවර්ධන පණිවිඩ හෝ අයාචිත තැපැල් නොයවන්නෙමු.",
+    "PermissionDenied": "අවසරය ප්‍රතික්ෂේප විය",
+    "NotificationAccessIsRequiredPleaseEnableItInSettings": "OTP සහ මෙහෙයුම් ඇඟවීම් ලබා ගැනීමට දැනුම්දීම් ප්‍රවේශය අවශ්‍ය වේ. කරුණාකර එය සැකසුම් තුළ සක්‍රිය කරන්න.",
+    "UnableToRequestNotificationPermissionPleaseTryAgain": "දැනුම්දීම් අවසරය ඉල්ලා සිටීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."
   },
   "ScaleSelectModal": {
     "SelectWifiScale": "Wi-Fi තරාදිය තෝරන්න",

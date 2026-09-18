@@ -26,6 +26,7 @@ import ComplainPage from "@/component/common/complain/ComplainPage";
 import ComplainHistory from "@/component/common/complain/ComplainHistory";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import LocationAccess from "@/component/common/permission/LocationAccess";
+import NotificationAccess from "@/component/common/permission/NotificationAccess";
 
 // --- Collection Screens ---
 import Registeredfarmer from "@/component/collection/collection-common/farmer/Registeredfarmer";
@@ -107,6 +108,7 @@ import ReceivedProductsSummary from "@/component/distribution/distribution-commo
 import UnloadingProducts from "@/component/distribution/distribution-common/receive-products/unloading-products/UnloadingProducts";
 import WeighTheLoad from "@/component/distribution/distribution-common/receive-products/weigh-the-load/WeighTheLoad";
 import WeighGrade from "@/component/distribution/distribution-common/receive-products/weigh-grade/WeighGrade";
+import MyNotifications from "@/component/distribution/distribution-center-manager/notifications/MyNotifications";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -258,6 +260,7 @@ const PUBLIC_STACK_SCREENS: StackRouteConfig[] = [
   },
   { name: "CameraAccess", component: CameraAccess as any, allowedRoles: "PUBLIC" },
   { name: "LocationAccess", component: LocationAccess as any, allowedRoles: "PUBLIC" },
+  { name: "NotificationAccess", component: NotificationAccess as any, allowedRoles: "PUBLIC" },
 ];
 
 // ============================================================================
@@ -666,6 +669,11 @@ const DISTRIBUTION_STACK_SCREENS: StackRouteConfig[] = [
     name: "WeighGrade",
     component: WeighGrade as any,
     allowedRoles: [ROLES.DISTRIBUTION_MANAGER, ROLES.DISTRIBUTION_OFFICER],
+  },
+  {
+    name: "MyNotifications",
+    component: MyNotifications as any,
+    allowedRoles: [ROLES.DISTRIBUTION_MANAGER],
   },
 ];
 
