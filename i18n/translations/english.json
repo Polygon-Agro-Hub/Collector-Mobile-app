@@ -858,6 +858,8 @@
     "Num2": "Num 2",
     "Collection": "Collection",
     "Report": "Report",
+    "To":"To",
+    "From":"From",
     "Today": "Today",
     "Target Coverage": "Target Coverage",
     "OpenTarget": "Open Target Board"

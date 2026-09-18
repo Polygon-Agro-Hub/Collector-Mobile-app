@@ -575,9 +575,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const handleSubmit = async () => {
     if (hasUnsavedCropDetails()) {
       Alert.alert(
-        t("UnregisteredCropDetails.Unsaved Changes"),
+        t("Error.Unsaved Crop Details"),
         t(
-          "UnregisteredCropDetails.You have entered crop details that haven't been added yet. Please click 'Add' to include them, or clear the form to proceed.",
+          "Error.You have entered crop details but",
         ),
       );
       return;

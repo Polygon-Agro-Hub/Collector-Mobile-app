@@ -80,8 +80,7 @@ export const handleGeneratePDF = async (
   language?: string,
 ) => {
   try {
-    const t = getPdfTranslator(language as ReportLanguage || "en");
-
+    const t = getPdfTranslator((language as ReportLanguage) || "en");
 
     const formattedFromDate = validateAndFormatDate(fromDate);
     const formattedToDate = validateAndFormatDate(toDate);
@@ -95,6 +94,7 @@ export const handleGeneratePDF = async (
 
     const officerResponse = await axios.get(
       `${environment.API_BASE_URL}api/collection-manager/employee/${officerId}`,
+      { params: { language: language || "en" } },
     );
     if (officerResponse.data.status !== "success") {
       console.error(
@@ -147,8 +147,8 @@ export const handleGeneratePDF = async (
 
     const tableRows = formattedData.length
       ? formattedData
-        .map(
-          (item) => `
+          .map(
+            (item) => `
               <tr>
                 <td>${item.date}</td>
                 <td>${item.total > 0 ? `${item.total}kg` : `<em>${t("noData")}</em>`}</td>
@@ -164,7 +164,7 @@ export const handleGeneratePDF = async (
     const generatedDate = new Date().toLocaleDateString();
     const generatedTime = formatDisplayTime(
       new Date().toLocaleTimeString(),
-      language! as ReportLanguage || "en",
+      (language! as ReportLanguage) || "en",
     );
 
     const htmlContent = `
@@ -308,9 +308,19 @@ export const handleGeneratePDF = async (
 
     const isSinhala = (language || "en").toLowerCase().startsWith("si");
     const isTamil = (language || "en").toLowerCase().startsWith("ta");
-    const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "Report";
-    const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
 
+    let fileUri: string;
+
+    if (isSinhala) {
+      const prefix = "වාර්තාව";
+      fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_${formattedFromDate}_සිට_${formattedToDate}_දක්වා.pdf`;
+    } else if (isTamil) {
+      const prefix = "அறிக்கை";
+      fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_${formattedFromDate}_இருந்து_${formattedToDate}_வரை.pdf`;
+    } else {
+      const prefix = "Report";
+      fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
+    }
     if (base64) {
       try {
         await FileSystem.writeAsStringAsync(fileUri, base64, {
