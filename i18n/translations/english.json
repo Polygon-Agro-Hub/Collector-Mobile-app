@@ -30,7 +30,8 @@
     "At": "At",
     "Crates": "Crates",
     "Set": "Set",
-    "Grade": "Grade"
+    "Grade": "Grade",
+    "Search Price":"Search Price"
   },
   "Main": {
     "No Internet Connection": "No Internet Connection",
@@ -562,7 +563,14 @@
     "UploadingPhotos": "Uploading photos...",
     "SubmittingDetails": "Submitting details...",
     "CropDetailsSubmitted": "Crop details submitted successfully!",
-    "KG": "KG"
+    "KG": "KG",
+    "Crop":"Crop",
+    "CropName":"CropName",
+    "Variety": "Variety",
+     "Select Crop": "--Select Crop--",
+    "Select Variety": "--Select Variety--",
+    "UnitGrades": "Unit Grades",
+    "Done":"Done"
   },
   "GoodsReceivedNote": {
     "LNG": "en",

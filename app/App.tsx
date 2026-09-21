@@ -14,6 +14,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import axios from "axios";
 import { logoutUser } from "../store/authSlice";
 import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
+import { verifyOfficerStatus, setupGlobalApiInterceptors } from "@/services/apiInterceptor";
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -122,149 +123,18 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    let alertShown = false;
+    setupGlobalApiInterceptors();
 
-    const handleAuthError = (status: number, data: any): boolean => {
-      let currentRouteName = "";
-      if (navigationRef.isReady()) {
-        const route = navigationRef.getCurrentRoute() as any;
-        currentRouteName = route?.name || "";
+    // Periodically verify officer status (every 10 seconds) when app is active and user is logged in
+    const interval = setInterval(() => {
+      const token = store.getState().auth?.token;
+      if (token && AppState.currentState === "active") {
+        verifyOfficerStatus();
       }
-
-      const userToken = store.getState().auth.token;
-      if (
-        !userToken ||
-        currentRouteName === "Login" ||
-        currentRouteName === "Lanuage" ||
-        currentRouteName === "Splash" ||
-        currentRouteName === "BannedScreen" ||
-        currentRouteName === "Logout"
-      ) {
-        return false;
-      }
-
-      const msg = (data?.message || "").toLowerCase();
-      const code = (data?.code || data?.reason || "").toUpperCase();
-      const accStatus = (data?.accountStatus || "").toLowerCase();
-
-      // Check if this HTTP 401/403 is a domain validation error (e.g. scanning officer from another center,
-      // officer pending approval / rejected, station occupied, or assignment error)
-      const isDomainValidationError =
-        code === "CENTER_MISMATCH" ||
-        code === "NO_OFFICER_ASSIGNED" ||
-        code === "STATION_OCCUPIED" ||
-        code === "MAIN_CONTAINER_PENDING" ||
-        code === "NOT_APPROVED" ||
-        code === "OFFICER_REJECTED" ||
-        code === "ROLE_NOT_ALLOWED" ||
-        msg.includes("center") ||
-        msg.includes("centre") ||
-        msg.includes("assigned") ||
-        msg.includes("occupied") ||
-        msg.includes("busy") ||
-        msg.includes("not approved") ||
-        msg.includes("rejected") ||
-        msg.includes("pending approval") ||
-        accStatus === "not approved" ||
-        accStatus === "rejected";
-
-      if (isDomainValidationError) {
-        // Let the screen component handle displaying its own validation modal / popup!
-        // DO NOT log out the user or show "Session Expired"!
-        return false;
-      }
-
-      // Check if it's explicitly a token expiration
-      const isTokenExpired =
-        code === "TOKEN_EXPIRED" ||
-        code === "INVALID_TOKEN" ||
-        msg.includes("jwt expired") ||
-        msg.includes("token expired") ||
-        msg.includes("invalid token") ||
-        msg.includes("token not found") ||
-        status === 401;
-
-      if (!isTokenExpired) {
-        return false;
-      }
-
-      // Genuine Token Expiration: Clear auth state and redirect to Login
-      try {
-        store.dispatch(logoutUser());
-        socketService.disconnect();
-      } catch (e) {
-        console.error("Error dispatching logout:", e);
-      }
-
-      if (!alertShown) {
-        alertShown = true;
-        Alert.alert(
-          "Session Expired",
-          "Your token has expired. Please log in again.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                alertShown = false;
-                if (navigationRef.isReady()) {
-                  navigationRef.reset({
-                    index: 0,
-                    routes: [{ name: "Login" }],
-                  });
-                }
-              },
-            },
-          ],
-          { cancelable: false }
-        );
-      } else {
-        if (navigationRef.isReady()) {
-          navigationRef.reset({
-            index: 0,
-            routes: [{ name: "Login" }],
-          });
-        }
-      }
-
-      return true;
-    };
-
-    // Axios response interceptor
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const errorResponse = error.response;
-        if (errorResponse && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          const isHandledByAuth = handleAuthError(errorResponse.status, errorResponse.data);
-          if (isHandledByAuth) {
-            return new Promise(() => {});
-          }
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    // Global fetch interceptor (monkeypatch)
-    const originalFetch = (globalThis as any).fetch;
-    (globalThis as any).fetch = async (...args: any[]) => {
-      const response = await originalFetch(...args);
-
-      if (response.status === 401 || response.status === 403) {
-        try {
-          const clonedResponse = response.clone();
-          const data = await clonedResponse.json();
-          handleAuthError(response.status, data);
-        } catch (e) {
-          handleAuthError(response.status, {});
-        }
-      }
-
-      return response;
-    };
+    }, 10000);
 
     return () => {
-      axios.interceptors.response.eject(interceptor);
-      (globalThis as any).fetch = originalFetch;
+      clearInterval(interval);
     };
   }, []);
 
@@ -308,6 +178,7 @@ function AppContent() {
         if (storedEmpId) {
           await status(storedEmpId, true);
         }
+        await verifyOfficerStatus(true);
       } else if (nextAppState === "background") {
         if (storedEmpId) {
           await status(storedEmpId, false);
@@ -365,9 +236,13 @@ function AppContent() {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
             if (routeName) setCurrentRoute(routeName);
           }}
-          onStateChange={() => {
+          onStateChange={async () => {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
             if (routeName) setCurrentRoute(routeName);
+            const token = store.getState().auth?.token;
+            if (token) {
+              await verifyOfficerStatus();
+            }
           }}
         >
           <RootStackNavigator />

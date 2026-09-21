@@ -73,15 +73,41 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     return "en";
   };
 
+  // Returns "today" as it currently is in Asia/Colombo, expressed as a
+  // *local* Date object set to the end of that day (23:59:59.999).
+  //
+  // Why not just `new Date()` or the old getTimezoneOffset() math?
+  // - CustomCalendar builds each day cell with `new Date(year, month, d)`,
+  //   which uses the DEVICE's local timezone getters/setters.
+  // - The previous implementation tried to shift `now` by
+  //   `(colomboOffset - utcOffset)` minutes, but `now.getTime()` is already
+  //   an absolute UTC timestamp — it doesn't need the device's local offset
+  //   subtracted from it again. On a device already running in Colombo time
+  //   (UTC+5:30, so getTimezoneOffset() === -330), that math computed
+  //   `330 - (-330) = 660`, shifting "today" forward by 11 extra hours.
+  //   Depending on the time of day, that silently rolled "today" into
+  //   "tomorrow", which is why tomorrow was still selectable as a start date.
+  // - Using Intl.DateTimeFormat reads Colombo's actual calendar date
+  //   directly (independent of the device's own timezone), and then we
+  //   build a local Date from those Y/M/D parts so it compares correctly
+  //   against the local Date objects the calendar grid produces.
   const getTodayInColombo = () => {
     const now = new Date();
-    const colomboOffset = 330;
-    const utcOffset = now.getTimezoneOffset();
-    const colomboTime = new Date(
-      now.getTime() + (colomboOffset - utcOffset) * 60 * 1000,
-    );
-    colomboTime.setHours(0, 0, 0, 0);
-    return colomboTime;
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Colombo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(now);
+
+    const year = Number(parts.find((p) => p.type === "year")?.value);
+    const month = Number(parts.find((p) => p.type === "month")?.value);
+    const day = Number(parts.find((p) => p.type === "day")?.value);
+
+    // End of "today" (Colombo) so today itself stays selectable while
+    // tomorrow (and any later date) is disabled by CustomCalendar's
+    // `date > maximumDate` check.
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
   };
 
   const handleGenerate = async () => {
@@ -335,6 +361,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     }, [handleBackPress]),
   );
 
+  const isNonLatin = ["si", "ta"].includes(getCurrentReportLanguage());
+
   return (
     <ScrollView className="flex-1 bg-white">
       <CustomHeader
@@ -424,20 +452,21 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         <View className="flex-row justify-center gap-2 items-center">
           <TouchableOpacity
             onPress={handleReset}
-            className="border border-[#6B6B6B] bg-[white] py-3 rounded-full items-center h-[45px] justify-center"
+            className="border border-[#6B6B6B] bg-[white] py-3 rounded-full items-center justify-center px-4"
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.25,
               shadowRadius: 10,
               elevation: 6,
-              width: 120,
+              minWidth: 120,
+              height: 45,
             }}
           >
             <Text
-              className="text-gray-700 text-center text-lg"
+              className="text-gray-700 text-center"
+              style={{ fontSize: isNonLatin ? 14 : 16 }}
               numberOfLines={1}
-              ellipsizeMode="tail"
             >
               {t("ReportGenerator.Reset")}
             </Text>
@@ -446,7 +475,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           <TouchableOpacity
             onPress={handleGenerate}
             disabled={!startDate || !endDate}
-            className="bg-[#980775] py-3 rounded-full w-40 h-[45px] justify-center items-center"
+            className="py-3 rounded-full justify-center items-center px-4"
             style={{
               backgroundColor: startDate && endDate ? "#980775" : "#D3A0C5",
               shadowColor: "#000000",
@@ -454,13 +483,14 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               shadowOpacity: startDate && endDate ? 0.25 : 0,
               shadowRadius: 10,
               elevation: startDate && endDate ? 6 : 0,
-              width: 120,
+              minWidth: 120,
+              height: 45,
             }}
           >
             <Text
-              className="text-white font-semibold text-center text-lg"
+              className="text-white font-semibold text-center"
+              style={{ fontSize: isNonLatin ? 14 : 16 }}
               numberOfLines={1}
-              ellipsizeMode="tail"
             >
               {t("ReportGenerator.Generate")}
             </Text>

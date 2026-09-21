@@ -168,7 +168,7 @@ const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
                       textAlign: "center",
                       color: "#ffffff",
                       fontWeight: "bold",
-                      fontSize: 18,
+                      fontSize: 14,
                     }}
                   >
                     {t("BannedScreen.Back to Login", "Back to Login")}
