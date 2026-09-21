@@ -466,7 +466,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
         </View>
 
         {/* Temporary buttons to test permission screens */}
-        <View className="w-full mb-3 p-3 bg-gray-50 border border-gray-200 rounded-2xl">
+        {/* <View className="w-full mb-3 p-3 bg-gray-50 border border-gray-200 rounded-2xl">
           <Text className="text-gray-500 font-bold text-[11px] uppercase tracking-wider mb-2 text-center">
             Test Permission Screens
           </Text>
@@ -504,7 +504,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
         <View className="flex-row flex-wrap justify-between pb-12 mt-4">
           {getDashboardItems().map((item) => (
