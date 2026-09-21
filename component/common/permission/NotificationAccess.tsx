@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Image,
   TouchableOpacity,
   Alert,
   BackHandler,
@@ -24,6 +25,7 @@ type NotificationAccessNavigationProp = StackNavigationProp<
 
 interface NotificationAccessProps {
   navigation?: NotificationAccessNavigationProp;
+  route?: any;
   onPermissionGranted?: () => void;
   onClose?: () => void;
   onNotNow?: () => void;
@@ -34,6 +36,7 @@ interface NotificationAccessProps {
 
 const NotificationAccess: React.FC<NotificationAccessProps> = ({
   navigation,
+  route,
   onPermissionGranted,
   onClose,
   onNotNow,
@@ -41,6 +44,10 @@ const NotificationAccess: React.FC<NotificationAccessProps> = ({
   onBackPress,
   blockBackNavigation = false,
 }) => {
+  const effectiveReturnScreen =
+    route?.params?.returnScreen || returnScreen || "Main";
+  const effectiveBlockBack =
+    route?.params?.blockBackNavigation ?? blockBackNavigation;
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
@@ -59,7 +66,7 @@ const NotificationAccess: React.FC<NotificationAccessProps> = ({
     } else if (navigation?.canGoBack && navigation.canGoBack()) {
       navigation.goBack();
     } else if (navigation) {
-      navigation.navigate(returnScreen as any);
+      navigation.navigate(effectiveReturnScreen as any);
     }
   };
 
@@ -73,7 +80,7 @@ const NotificationAccess: React.FC<NotificationAccessProps> = ({
 
   useEffect(() => {
     const handleHardwareBackPress = () => {
-      if (blockBackNavigation) {
+      if (effectiveBlockBack) {
         return true;
       }
       handleDenyOrClose();
@@ -84,7 +91,7 @@ const NotificationAccess: React.FC<NotificationAccessProps> = ({
       handleHardwareBackPress
     );
     return () => subscription.remove();
-  }, [blockBackNavigation, navigation, onClose, onBackPress, returnScreen]);
+  }, [effectiveBlockBack, navigation, onClose, onBackPress, effectiveReturnScreen]);
 
   const requestNotificationPermission = async () => {
     setIsLoading(true);
@@ -94,17 +101,23 @@ const NotificationAccess: React.FC<NotificationAccessProps> = ({
       let finalStatus = existingStatus;
 
       if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
+        const { status } = await Notifications.requestPermissionsAsync({
+          ios: {
+            allowAlert: true,
+            allowBadge: true,
+            allowSound: true,
+          },
+        });
         finalStatus = status;
       }
 
       if (finalStatus === "granted") {
         if (onPermissionGranted) {
           onPermissionGranted();
+        } else if (effectiveReturnScreen) {
+          navigation?.navigate(effectiveReturnScreen as any);
         } else if (navigation?.canGoBack && navigation.canGoBack()) {
           navigation.goBack();
-        } else if (navigation) {
-          navigation.navigate(returnScreen as any);
         }
       } else {
         Alert.alert(
@@ -174,20 +187,11 @@ const NotificationAccess: React.FC<NotificationAccessProps> = ({
         >
           {/* Header Icon / Visual */}
           <View className="items-center justify-center mt-4 mb-5">
-            <View
-              className="w-28 h-28 rounded-full items-center justify-center"
-              style={{
-                backgroundColor: "rgba(152, 7, 117, 0.15)",
-                borderColor: "rgba(152, 7, 117, 0.4)",
-                borderWidth: 2,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="bell-ring"
-                size={54}
-                color="#E879F9"
-              />
-            </View>
+            <Image
+              source={require("@/assets/images/permission/notification.webp")}
+              style={{ width: 110, height: 110 }}
+              resizeMode="contain"
+            />
           </View>
 
           {/* Title */}
