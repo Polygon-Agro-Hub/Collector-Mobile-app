@@ -1,0 +1,528 @@
+export type RootStackParamList = {
+  BottomNav: undefined;
+  Splash: undefined;
+  Login: undefined;
+  BannedScreen:
+    | {
+        statusType: string;
+        message?: string;
+      }
+    | undefined;
+  ChangePassword: undefined;
+  Logout: undefined;
+  Registeredfarmer: undefined;
+  Ufarmercropdetails: undefined;
+  CollectionOfficerDashboard: undefined;
+  CollectionDashboard: undefined;
+  SentProductsToday: undefined;
+  ScanDriverQR: undefined;
+  SelectDistributionCentre:
+    | {
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        vehicleId?: number;
+        vehicleNo?: string;
+        vType?: string;
+        vCapacity?: string;
+      }
+    | undefined;
+  LoadingToVehicle:
+    | {
+        vehicleNo?: string;
+        centreId?: string;
+        disComCenId?: string;
+        centreName?: string;
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        vehicleId?: number;
+        vType?: string;
+        vCapacity?: string;
+      }
+    | undefined;
+  LoadingToVehicleSummary:
+    | {
+        transportId?: string | number;
+        vehicleNo?: string;
+        centreId?: string;
+        disComCenId?: string;
+        centreName?: string;
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        vehicleId?: number;
+        loadCode?: string;
+        items?: any[];
+        isViewOnly?: boolean;
+      }
+    | undefined;
+  LoadQR:
+    | {
+        transportId?: string | number;
+        loadCode?: string;
+        vehicleNo?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        driverId?: string;
+        centreName?: string;
+      }
+    | undefined;
+  LoadAssigned:
+    | {
+        transportId?: string | number;
+        loadCode?: string;
+        vehicleNo?: string;
+        driverId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+      }
+    | undefined;
+  ReceivedProductsToday: undefined;
+  ScanLoadQR: undefined;
+  DistributionScanDriverQR: undefined;
+  ReceivedProductsSummary:
+    | {
+        transportId?: string | number;
+        loadCode?: string;
+        vehicleNo?: string;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        origin?: string;
+        items?: any[];
+        isUnloaded?: boolean;
+        title?: string;
+      }
+    | undefined;
+  UnloadingProducts:
+    | {
+        transportId?: string | number | null;
+        loadCode?: string | null;
+        vehicleNo?: string | null;
+        items?: any[];
+      }
+    | undefined;
+  WeighTheLoad:
+    | {
+        transportId?: string | number | null;
+        varietyId?: string;
+        productId?: string;
+        loadCode?: string | null;
+        product?: any;
+        updatedGrade?: {
+          varietyId?: string;
+          gradeId: string;
+          unloadedWeightKg: number;
+          unloadedCrates: number;
+          sets?: {
+            setIndex: number;
+            crates: number;
+            weightKg: number;
+          }[];
+        };
+      }
+    | undefined;
+  WeighGrade:
+    | {
+        varietyId?: string;
+        productId?: string;
+        product?: any;
+        productName?: string;
+        productImage?: string;
+        gradeTitle?: string;
+        gradeId?: string;
+        loadedWeightKg?: number;
+        loadedCrates?: number;
+      }
+    | undefined;
+  MyNotifications: undefined;
+  SideMenu: undefined;
+  ReadytoPickupOrders: undefined;
+  SinChangePassword: undefined;
+  SinLogin: undefined;
+  Lanuage: undefined;
+  PdfViewer: {
+  uri: string;
+};
+  SinDashboard: undefined;
+  SinUfarmercropdetails: undefined;
+  SinRegisteredfarmer: undefined;
+  TamChangePassword: undefined;
+  TamLogin: undefined;
+  TamDashboard: undefined;
+  TamRegisteredfarmer: undefined;
+  TamUfarmercropdetails: undefined;
+  TransportComponent: undefined;
+  SinProfile: undefined;
+  OfficerQr: undefined;
+  TamProfile: undefined;
+  SearchPriceScreen: undefined;
+  PrivacyPolicy: undefined;
+  CollectionOfficersList: undefined;
+  RegisterDriver: undefined;
+  DailyTargetList: undefined;
+  ComplainHistory: undefined;
+  ClaimOfficer: undefined;
+  ClaimDistribution: { activeTab?: "Officers" | "Drivers" };
+  TransactionList: {
+    empId: string;
+  };
+  DailyTarget: undefined;
+  TargetValidPeriod: undefined;
+  NoCollectionCenterScreen: undefined;
+  EditTargetScreen: undefined;
+  PassTargetScreen: undefined;
+  RecieveTargetScreen: undefined;
+  EditTargetManager: undefined;
+  PassTargetBetweenOfficers: undefined;
+  RecieveTargetBetweenOfficers: undefined;
+  ManagerDashboard: undefined;
+  CenterTarget: undefined;
+  ManagerTransactions: undefined;
+  SearchFarmerScreen: undefined;
+  DistridutionaDashboard: undefined;
+  PurchaseShortage: { products?: any[] } | undefined;
+  PurchaseProduct: { product?: any } | undefined;
+  DistributionOfficersList: undefined;
+  ReceivedCash: undefined;
+  ReceivedCashOfficer: undefined;
+  ReceivedCashTransfer: {
+  totalCash: number;
+  selectedDate: string;
+  pickupOrderIds: (string | undefined)[];
+};
+  CameraAccess: undefined;
+  LocationAccess: undefined;
+  NotificationAccess:
+    | {
+        returnScreen?: keyof RootStackParamList;
+        blockBackNavigation?: boolean;
+      }
+    | undefined;
+  QRScanner: {
+    userId: any;
+  };
+  UnregisteredFarmerDetails: {
+    cropCount: 1;
+    userId: number;
+  };
+  UnregisteredCropDetails: {
+    userId: number;
+    cropCount: number;
+    farmerPhone: number;
+    farmerLanguage: string;
+  };
+  SinUnregisteredCropDetails: {
+    cropCount: number;
+  };
+  TamUnregisteredCropDetails: {
+    cropCount: number;
+    userId: any;
+  };
+  SearchFarmer: {
+    NICnumber: string;
+    userId: any;
+  };
+  FarmerQr: {
+    cropCount?: number;
+    userId: any;
+    NICnumber?: string;
+  };
+  ComplainPage: {
+    farmerName: any;
+    farmerPhone: any;
+    userId: number;
+    farmerLanguage: string;
+  };
+  Profile: {
+    jobRole: string;
+  };
+  ReportPage: {
+    userId: string;
+    registeredFarmerId: Number;
+  };
+  PriceChart: {
+    varietyId: string;
+    cropName: string;
+    varietyName: string;
+  };
+  PriceChartManager: {
+    varietyId: string;
+    cropName: string;
+    varietyName: string;
+  };
+  Main: {
+    screen: keyof RootStackParamList;
+    params?: any;
+  };
+  AddVehicleDetails: {
+    basicDetails: OfficerBasicDetailsFormData;
+    jobRole: string;
+    empType: string;
+    preferredLanguages: string[];
+    addressDetails: FormData;
+    type: "Permanent" | "Temporary";
+  };
+  AddDriverAddressDetails: {
+    formData: {
+      [key: string]: any;
+    };
+    type: string;
+    preferredLanguages: string[];
+    jobRole: string;
+  };
+  OfficerSummary: {
+    officerId: string;
+    officerName: string;
+    phoneNumber1: string;
+    phoneNumber2: string;
+    collectionOfficerId: number;
+    image: string;
+  };
+  ReportGenerator: {
+    officerId: string;
+    collectionOfficerId: number;
+    phoneNumber2: number;
+    officerName: string;
+    phoneNumber1: number;
+  };
+  AddOfficer: {
+    jobRolle: string;
+  };
+  DistributionAddOfficer: {
+    jobRolle: string;
+  };
+  SetTargetScreen: {
+    fromDate: string;
+    toDate: string;
+    fromTime: string;
+    toTime: string;
+  };
+  OTPE: {
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    NICnumber: string;
+    district: string;
+    accNumber: string;
+    accHolderName: string;
+    bankName: string;
+    branchName: string;
+    PreferdLanguage: string;
+  };
+  NewReport: {
+    userId: any;
+    registeredFarmerId: number;
+  };
+  TransactionReport: {
+    registeredFarmerId: number;
+    userId: number;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    address: string;
+    NICnumber: string;
+    totalAmount: number;
+    bankAddress: string | null;
+    accountNumber: string | null;
+    accountHolderName: string | null;
+    bankName: string | null;
+    branchName: string | null;
+    selectedDate: string;
+    selectedTime: string;
+    empId: string;
+  };
+  DailyTargetListForOfficers: {
+    officerId: string;
+    collectionOfficerId: number;
+    officerName: string;
+    phoneNumber1: string;
+    phoneNumber2: string;
+    image: string;
+  };
+
+  RegisterFarmer: {
+    NIC: string;
+  };
+  OTPverification: {
+    firstName: string;
+    lastName: string;
+    NICnumber: string;
+    accNumber: string;
+    accHolderName: string;
+    bankName: string;
+    branchName: string;
+    phoneNumber: string;
+    district: string;
+    PreferdLanguage: string;
+  };
+  CollectionRequestForm: {
+    NICnumber: string;
+    id: number;
+  };
+  CollectionRequests: {
+    requestId: number;
+    crops: string;
+  };
+  ViewScreen: {
+    requestId: number;
+    crops: string;
+  };
+  Cancelreson: {
+    requestId: number;
+    status: string;
+  };
+  UpdateFarmerBankDetails: {
+    id: number;
+    NICnumber: string;
+  };
+  ReviewCollectionRequests: {
+    cropsList: any[];
+    address: {
+      buildingNo: string;
+      streetName: string;
+      city: string;
+      routeNumber: string;
+    };
+    scheduleDate: string;
+    farmerId: number;
+  };
+  otpBankDetailsupdate: {
+    accNumber: string;
+    accHolderName: string;
+    bankName: string;
+    branchName: string;
+    phoneNumber: string;
+    PreferdLanguage: string;
+    farmerId: number;
+    officerRole: string;
+  };
+
+  CompletedOrderScreen: {
+    item: string;
+    centerCode: string;
+  };
+  ReceivedCashQrCode: {
+    selectedTransactions?: Array<{
+      id: string;
+      orderId: string;
+      cash: number;
+    }>;
+    fromScreen?: string;
+  };
+
+  DigitalSignature: {
+    orderId: Number;
+    fromScreen: string;
+  };
+  qrcode: {
+    expectedOrderId?: string;
+    fromScreen?: string;
+  };
+  ViewPickupOrders: {
+    order: Order;
+    orderId: string;
+  };
+  GoviPensionForm: {
+    farmerNIC: string;
+    farmerPhone: string;
+    userId: any;
+  };
+  GoviPensionStatus: {
+    status: string;
+    creatAt: string;
+  };
+  NotEligibleScreen: undefined;
+  ThermalPrinterTestScreen: undefined;
+};
+
+export interface OrderItem {
+  invoiceNo: string;
+  varietyNameEnglish: string;
+  grade: string;
+  target: number;
+  complete: number;
+  todo: number;
+  status: string;
+  completedTime?: string | null;
+}
+
+export interface Order {
+  orderId: string;
+  userId: number;
+  orderApp: string;
+  createdAt: string;
+  delivaryMethod: string;
+  fullTotal: number;
+  total: number;
+  buildingType: string;
+  sheduleDate: string;
+  sheduleTime: string;
+  processOrderId: number;
+  invNo: string;
+  transactionId: string;
+  paymentMethod: string;
+  remainingAmount: number;
+  isFullyPaid: number;
+  isPaid: boolean;
+  amount: number;
+  packTime: string;
+  status: string;
+  cusId: string;
+  title: string;
+  firstName: string;
+  lastName: string;
+  phoneCode: string;
+  phoneNumber: string;
+  phoneCode2: string;
+  phoneNumber2: string;
+  email: string;
+  buyerType: string;
+  companyName: string;
+  companyPhoneCode: string;
+  companyPhone: string;
+  customerCity: string;
+  houseNo: string;
+  streetName: string;
+  distributionDistrict: string;
+  centerName: string;
+  regCode: string;
+  officerFirstName: string;
+  officerLastName: string;
+  fullName: string;
+  outDlvrDate: string;
+}
+
+export type OfficerBasicDetailsFormData = {
+  userId: string;
+  firstNameEnglish: string;
+  lastNameEnglish: string;
+  firstNameSinhala?: string;
+  lastNameSinhala?: string;
+  firstNameTamil?: string;
+  lastNameTamil?: string;
+  nicNumber: string;
+  email: string;
+  jobRole: string;
+  phoneCode1: string;
+  phoneNumber1: string;
+  phoneCode2?: string;
+  phoneNumber2?: string;
+  profileImage?: string;
+};

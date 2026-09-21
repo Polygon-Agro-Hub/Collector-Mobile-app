@@ -1,285 +1,58 @@
-import { useEffect, useState, useCallback } from "react";
-import { Alert, Text, TextInput, StatusBar } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, AppState, StatusBar, Platform, LogBox } from "react-native";
+
+LogBox.ignoreLogs([
+  "InteractionManager has been deprecated",
+  "setBackgroundColorAsync is not supported with edge-to-edge enabled",
+  "`expo-notifications` functionality is not fully supported in Expo Go",
+  "expo-notifications: Android Push notifications",
+]);
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { AppState } from "react-native";
-import { useSelector } from "react-redux";
-import { RootState } from "../services/reducxStore";
 import { Provider } from "react-redux";
-import { environment } from "../environment/environment";
+import environment from "../environment/environment";
 import { LanguageProvider } from "@/context/LanguageContext";
-import { LogBox } from "react-native";
 import axios from "axios";
 import { logoutUser } from "../store/authSlice";
-import { AlertModal, setGlobalAlertListener } from "@/component/commons/AlertModal";
+import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
+import { verifyOfficerStatus, setupGlobalApiInterceptors } from "@/services/apiInterceptor";
 import {
   SafeAreaProvider,
   SafeAreaView,
-  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useTranslation } from "react-i18next";
 import { navigationRef } from "../navigationRef";
 import NetInfo from "@react-native-community/netinfo";
 import * as SplashScreen from "expo-splash-screen";
-import Login from "@/component/auth/Login";
-import BannedScreen from "@/component/auth/BannedScreen";
-import ChangePassword from "@/component/auth/ChangePassword";
-import Registeredfarmer from "@/component/collection-common/Registeredfarmer";
-import Ufarmercropdetails from "@/component/collection-common/Ufarmercropdetails";
-import CollectionOfficerDashboard from "@/component/collection-officer/CollectionOfficerDashboard";
-import QRScanner from "@/component/collection-common/QRScanner";
-import FormScreen from "@/component/collection-common/FormScreen";
-import UnregisteredFarmerDetails from "@/component/farmer/UnregisteredFarmerForm";
-import UnregisteredCropDetails from "@/component/collection-common/UnregisteredCropDetails";
-import SearchFarmer from "@/component/farmer/SearchFarmer";
-import FarmerQr from "@/component/farmer/FarmerQr";
-import ComplainPage from "@/component/complain/ComplainPage";
-import Profile from "@/component/auth/Profile";
-import ReportPage from "@/component/collection-common/ReportPage";
-import SearchPriceScreen from "@/component/collection-common/SearchPriceScreen";
-import PriceChart from "@/component/collection-common/PriceChart";
-import PriceChartManager from "@/component/collection-manager/PriceChartManager";
-import CollectionOfficersList from "@/component/collection-manager/CollectionOfficersList";
-import OfficerSummary from "@/component/collection-manager/OfficerSummary";
-import ReportGenerator from "@/component/collection-manager/ReportGenerator";
-import ComplainHistory from "@/component/complain/ComplainHistory";
-import DailyTargetList from "@/component/collection-common/DailyTargetList";
-import AddOfficer from "@/component/collection-manager/AddOfficer";
-import ClaimOfficer from "@/component/collection-manager/ClaimOfficer";
-import TransactionList from "@/component/collection-manager/TransactionList";
-import FarmerReport from "@/component/collection-manager/FarmerReport";
-import DailyTarget from "@/component/collection-manager/DailyTarget";
-import NoCollectionCenterScreen from "@/component/collection-common/NoCollectionCenterScreen";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import EditTargetScreen from "@/component/collection-manager/EditTargetScreen";
-import PassTargetScreen from "@/component/collection-manager/PassTargetScreen";
-import RecieveTargetScreen from "@/component/collection-manager/RecieveTargetScreen";
-import DailyTargetListForOfficers from "@/component/collection-manager/DailyTargetListForOfficers";
-import EditTargetManager from "@/component/collection-manager/EditTargetManager";
-import RecieveTargetBetweenOfficers from "@/component/collection-manager/RecieveTargetBetweenOfficers";
-import PassTargetBetweenOfficers from "@/component/collection-manager/PassTargetBetweenOfficers";
-import OTPE from "@/component/farmer/FarmerOTPVerification";
-import ManagerDashboard from "@/component/collection-manager/ManagerDashboard";
-import CenterTarget from "@/component/collection-manager/CenterTarget";
-import ManagerTransactions from "@/component/collection-manager/ManagerTransactions";
-import NewReport from "@/component/collection-common/NewReport";
-import TransactionReport from "@/component/collection-manager/TransactionReport";
-import UpdateFarmerBankDetails from "@/component/collection-common/UpdateFarmerBankDetails";
-import otpBankDetailsupdate from "@/component/collection-common/otpBankDetailsupdate";
-import DistridutionaDashboard from "@/component/distribution-common/DistridutionaDashboard";
-import TargetOrderScreen from "@/component/distribution-common/TargetOrderScreen";
-import PendingOrderScreen from "@/component/distribution-common/PendingOrderScreen";
-import Timer from "@/component/distribution-common/TimerContainer";
-import TimerContainer from "@/component/distribution-common/TimerContainer";
-import CenterTargetScreen from "@/component/disribution-manger/CenterTargetScreen";
-import DistributionOfficersList from "@/component/disribution-manger/DistributionOfficersList";
-import ClaimDistribution from "@/component/disribution-manger/ClaimDistribution";
-import DistributionOfficerSummary from "@/component/disribution-manger/DistributionOfficerSummary";
-import ReplaceRequestsScreen from "@/component/disribution-manger/ReplaceRequestsScreen";
-import DailyTargetListOfficerDistribution from "@/component/disribution-manger/DailyTargetListOfficerDistribution";
-import PassTarget from "@/component/disribution-manger/PassTarget";
 import store from "@/services/reducxStore";
-import ReplaceRequestsApprove from "@/component/disribution-manger/ReplaceRequestsApprove";
-import DistributionOfficerReport from "@/component/disribution-manger/DistributionOfficerReport";
-import ReadytoPickupOrders from "@/component/distribution-common/ReadytoPickupOrders";
-import ViewPickupOrders from "@/component/distribution-common/ViewPickupOrders";
-import Qrcode from "@/component/disribution-manger/qrcode";
-import DigitalSignature from "@/component/disribution-manger/DigitalSignature";
-import ReceivedCash from "@/component/disribution-manger/ReceivedCash";
-import ReceivedCashOfficer from "@/component/distribution-officer/ReceivedCashOfficer";
-import ReceivedCashQrCode from "@/component/distribution-officer/ReceivedCashQrCode";
-import GoviPensionForm from "@/component/govi-pension/GoviPensionForm";
-import GoviPensionStatus from "@/component/govi-pension/GoviPensionStatus";
-import NotEligibleScreen from "@/component/govi-pension/NotEligibleScreen";
-import Splash from "@/component/auth/Splash";
-import Lanuage from "@/component/commons/Lanuage";
-import OfficerQr from "@/component/auth/OfficerQrCode";
-import SideMenu from "@/component/navigations/SideMenu";
-import PrivacyPolicy from "@/component/commons/PrivacyPolicy";
-import BottomNav from "@/component/navigations/BottomNav";
-import LoadingPage from "@/component/commons/LoadingPage";
-import DistributionAddOfficer from "@/component/disribution-manger/DistributionAddOfficer";
-import SelectRow from "@/component/pack/SelectRow";
-import QRHandling from "@/component/pack/qr-handling/QRHandling";
-import ReadyToPrint from "@/component/pack/qr-handling/ReadyToPrint";
-import PrintingConfirmation from "@/component/pack/qr-handling/PrintingConfirmation";
-import WelcomeToPacking from "@/component/pack/packing/WelcomeToPacking";
-import Packing from "@/component/pack/packing/Packing";
-import WelcomeToQC from "@/component/pack/qc-position/WelcomeToQC";
-import Group from "@/component/disribution/dcm/assign-groups/Group";
-import SelectOrder from "@/component/disribution/dcm/assign-groups/SelectOrder";
-import SelectRowToAssign from "@/component/disribution/dcm/assign-groups/SelectRowToAssign";
-import ConfirmRowAssign from "@/component/disribution/dcm/assign-groups/ConfirmRowAssign";
+import RootStackNavigator from "../routes/Routes";
+import * as Notifications from "expo-notifications";
+import socketService from "@/services/socket/socket.service";
+import pushNotificationService from "@/services/notification/pushNotification.service";
+import { ROLES } from "@/constants/user-roles";
+import {
+  isBleedScreen,
+  getScreenBackgroundColor,
+  getScreenStatusBarStyle,
+} from "@/constants/bleedScreens";
 
-const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
 
-function MainTabNavigator() {
-  const [initialTab, setInitialTab] = useState("CollectionOfficerDashboard");
-  const jobRole = useSelector((state: RootState) => state.auth.jobRole);
-
-  useEffect(() => {
-    if (
-      jobRole === "Distribution Officer" ||
-      jobRole === "Distribution Centre Manager"
-    ) {
-      setInitialTab("DistridutionaDashboard");
-    } else if (jobRole === "Collection Officer") {
-      setInitialTab("CollectionOfficerDashboard");
-    } else {
-      setInitialTab("ManagerDashboard");
-    }
-  }, [jobRole]);
-
-  return (
-    <Tab.Navigator
-      initialRouteName={initialTab}
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarHideOnKeyboard: false,
-        tabBarStyle: { position: "absolute", backgroundColor: "#ffffff" },
-      })}
-      tabBar={(props) => <BottomNav {...props} />}
-    >
-      <Tab.Screen name="ManagerDashboard" component={ManagerDashboard as any} />
-      <Tab.Screen name="SearchPriceScreen" component={SearchPriceScreen} />
-
-      <Tab.Screen name="PriceChart" component={PriceChart as any} />
-      <Tab.Screen name="SearchFarmer" component={SearchFarmer} />
-      <Tab.Screen name="DailyTargetList" component={DailyTargetList} />
-      <Tab.Screen name="DailyTarget" component={DailyTarget as any} />
-      <Tab.Screen name="PassTargetScreen" component={PassTargetScreen as any} />
-      <Tab.Screen name="ComplainHistory" component={ComplainHistory} />
-      <Tab.Screen name="TransactionList" component={TransactionList as any} />
-      <Tab.Screen name="OfficerSummary" component={OfficerSummary as any} />
-      <Tab.Screen name="ViewPickupOrders" component={ViewPickupOrders as any} />
-      <Tab.Screen name="ReceivedCash" component={ReceivedCash as any} />
-      <Tab.Screen name="ReportGenerator" component={ReportGenerator as any} />
-      <Tab.Screen name="PassTarget" component={PassTarget as any} />
-      <Tab.Screen
-        name="CollectionOfficerDashboard"
-        component={CollectionOfficerDashboard}
-      />
-      <Tab.Screen
-        name="UpdateFarmerBankDetails"
-        component={UpdateFarmerBankDetails as any}
-      />
-      <Tab.Screen
-        name="DistridutionaDashboard"
-        component={DistridutionaDashboard as any}
-      />
-      <Tab.Screen
-        name="PriceChartManager"
-        component={PriceChartManager as any}
-      />
-      <Tab.Screen
-        name="UnregisteredCropDetails"
-        component={UnregisteredCropDetails as any}
-      />
-      <Tab.Screen
-        name="otpBankDetailsupdate"
-        component={otpBankDetailsupdate as any}
-      />
-      <Tab.Screen
-        name="CollectionOfficersList"
-        component={CollectionOfficersList}
-      />
-      <Tab.Screen
-        name="RecieveTargetScreen"
-        component={RecieveTargetScreen as any}
-      />
-      <Tab.Screen
-        name="EditTargetManager"
-        component={EditTargetManager as any}
-      />
-      <Tab.Screen
-        name="ReadytoPickupOrders"
-        component={ReadytoPickupOrders as any}
-      />
-      <Tab.Screen
-        name="ReceivedCashOfficer"
-        component={ReceivedCashOfficer as any}
-      />
-      <Tab.Screen
-        name="TargetOrderScreen"
-        component={TargetOrderScreen as any}
-      />
-      <Tab.Screen
-        name="UnregisteredFarmerDetails"
-        component={UnregisteredFarmerDetails}
-      />
-      <Tab.Screen
-        name="ManagerTransactions"
-        component={ManagerTransactions as any}
-      />
-      <Tab.Screen
-        name="DailyTargetListForOfficers"
-        component={DailyTargetListForOfficers as any}
-      />
-      <Tab.Screen
-        name="DistributionOfficersList"
-        component={DistributionOfficersList}
-      />
-      <Tab.Screen name="ClaimOfficer" component={ClaimOfficer} />
-      <Tab.Screen
-        name="ClaimDistribution"
-        component={ClaimDistribution as any}
-      />
-      <Tab.Screen
-        name="DistributionOfficerSummary"
-        component={DistributionOfficerSummary as any}
-      />
-      <Tab.Screen name="OTPE" component={OTPE} />
-      <Tab.Screen
-        name="ReplaceRequestsScreen"
-        component={ReplaceRequestsScreen as any}
-      />
-      <Tab.Screen
-        name="DailyTargetListOfficerDistribution"
-        component={DailyTargetListOfficerDistribution as any}
-      />
-      <Tab.Screen
-        name="ReplaceRequestsApprove"
-        component={ReplaceRequestsApprove as any}
-      />
-      <Tab.Screen
-        name="DistributionAddOfficer"
-        component={DistributionAddOfficer as any}
-      />
-      <Tab.Screen name="EditTargetScreen" component={EditTargetScreen as any} />
-      <Tab.Screen
-        name="PassTargetBetweenOfficers"
-        component={PassTargetBetweenOfficers as any}
-      />
-      <Tab.Screen name="SideMenu" component={SideMenu} />
-      <Tab.Screen name="OfficerQr" component={OfficerQr} />
-      <Tab.Screen
-        name="AddOfficer"
-        component={AddOfficer as any}
-      />
-      <Tab.Screen
-        name="CenterTargetScreen"
-        component={CenterTargetScreen as any}
-      />
-      <Tab.Screen name="FarmerQr" component={FarmerQr} />
-      <Tab.Screen name="CenterTarget" component={CenterTarget as any} />
-      <Tab.Screen
-        name="DistributionOfficerReport"
-        component={DistributionOfficerReport as any}
-      />
-      <Tab.Screen name="ComplainPage" component={ComplainPage} />
-      <Tab.Screen
-        name="RecieveTargetBetweenOfficers"
-        component={RecieveTargetBetweenOfficers as any}
-      />
-    </Tab.Navigator>
-  );
+// Global notifications handler (guarded for Expo Go & standalone)
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} catch (handlerErr) {
+  console.warn("Notifications.setNotificationHandler skipped in Expo Go:", handlerErr);
 }
 
 function AppContent() {
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
   const [isOfflineAlertShown, setIsOfflineAlertShown] = useState(false);
@@ -292,6 +65,43 @@ function AppContent() {
     autoClose: true,
     showOkButton: undefined as boolean | undefined,
   });
+
+  useEffect(() => {
+    // Initialize push notification service (requests permissions on iOS/Android, creates Android channel)
+    pushNotificationService.init();
+
+    // Auto-connect socket whenever token is available (on startup or after login/loadPersistedAuth)
+    const checkAndConnect = () => {
+      const token = store.getState().auth.token;
+      if (token) {
+        socketService.connect();
+      }
+    };
+    checkAndConnect();
+    const unsubscribeStore = store.subscribe(checkAndConnect);
+
+    // When a new notification arrives (via socket OR polling), show a system notification
+    const unsubscribeNotif = socketService.onNewNotification((item) => {
+      console.log("📲 [App.tsx] onNewNotification received:", item?.id, item?.invNo, item?.otpCode);
+      const currentRole = store.getState().auth.jobRole;
+      const isDCM = currentRole === ROLES.DISTRIBUTION_MANAGER;
+      // Allow if DCM or if role is still loading
+      if (currentRole && !isDCM) return;
+
+      const invoiceNumber = item?.invNo || item?.invoiceNo || "";
+      const otp = item?.otpCode || item?.otp || "";
+      const bodyText = invoiceNumber
+        ? `Please use the following OTP code, "${otp}", to receive the order from the driver at the centre.`
+        : "New handover return order OTP notification received.";
+
+      pushNotificationService.displayLocalNotification(item, bodyText);
+    });
+
+    return () => {
+      unsubscribeStore();
+      unsubscribeNotif();
+    };
+  }, []);
 
   useEffect(() => {
     setGlobalAlertListener((title, message, type, onClose, autoClose, showOkButton) => {
@@ -313,158 +123,18 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    // Axios response interceptor
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const errorResponse = error.response;
-        if (
-          errorResponse &&
-          (errorResponse.status === 401 || errorResponse.status === 403) &&
-          (errorResponse.data?.accountStatus === "Not Approved" ||
-            errorResponse.data?.accountStatus === "Rejected" ||
-            errorResponse.data?.message === "This EMP ID is not approved." ||
-            errorResponse.data?.message === "This EMP ID is Rejected" ||
-            errorResponse.data?.message === "This account is not approved or has been rejected." ||
-            (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("not approved")) ||
-            (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("rejected")))
-        ) {
-          let currentRouteName = "";
-          if (navigationRef.isReady()) {
-            const route = navigationRef.getCurrentRoute() as any;
-            currentRouteName = route?.name || "";
-          }
+    setupGlobalApiInterceptors();
 
-          if (
-            currentRouteName !== "Login" &&
-            currentRouteName !== "Splash" &&
-            currentRouteName !== "BannedScreen"
-          ) {
-            try {
-              // Clear stored credentials
-              await AsyncStorage.multiRemove([
-                "token",
-                "tokenStoredTime",
-                "tokenExpirationTime",
-                "jobRole",
-                "empid",
-                "companyNameEnglish",
-                "companyNameSinhala",
-                "companyNameTamil",
-              ]);
-
-              // Dispatch logout
-              store.dispatch(logoutUser());
-
-              if (navigationRef.isReady()) {
-                const statusType =
-                  errorResponse.data?.accountStatus === "Rejected" ||
-                  (errorResponse.data?.message && errorResponse.data?.message.toLowerCase().includes("rejected"))
-                    ? "rejected"
-                    : "not_approved";
-
-                navigationRef.reset({
-                  index: 0,
-                  routes: [
-                    {
-                      name: "BannedScreen",
-                      params: {
-                        statusType,
-                        message: errorResponse.data?.message,
-                      },
-                    },
-                  ],
-                });
-              }
-            } catch (e) {
-              console.error("Failed to perform force logout in Axios interceptor:", e);
-            }
-
-            return new Promise(() => {});
-          }
-        }
-        return Promise.reject(error);
+    // Periodically verify officer status (every 10 seconds) when app is active and user is logged in
+    const interval = setInterval(() => {
+      const token = store.getState().auth?.token;
+      if (token && AppState.currentState === "active") {
+        verifyOfficerStatus();
       }
-    );
-
-    // Global fetch interceptor (monkeypatch)
-    const originalFetch = (globalThis as any).fetch;
-    (globalThis as any).fetch = async (...args: any[]) => {
-      const response = await originalFetch(...args);
-
-      if (response.status === 401 || response.status === 403) {
-        try {
-          const clonedResponse = response.clone();
-          const data = await clonedResponse.json();
-
-          if (
-            data.accountStatus === "Not Approved" ||
-            data.accountStatus === "Rejected" ||
-            data.message === "This EMP ID is not approved." ||
-            data.message === "This EMP ID is Rejected" ||
-            data.message === "This account is not approved or has been rejected." ||
-            (data.message && data.message.toLowerCase().includes("not approved")) ||
-            (data.message && data.message.toLowerCase().includes("rejected"))
-          ) {
-            let currentRouteName = "";
-            if (navigationRef.isReady()) {
-              const route = navigationRef.getCurrentRoute() as any;
-              currentRouteName = route?.name || "";
-            }
-
-            if (
-              currentRouteName !== "Login" &&
-              currentRouteName !== "Splash" &&
-              currentRouteName !== "BannedScreen"
-            ) {
-              // Clear stored credentials
-              await AsyncStorage.multiRemove([
-                "token",
-                "tokenStoredTime",
-                "tokenExpirationTime",
-                "jobRole",
-                "empid",
-                "companyNameEnglish",
-                "companyNameSinhala",
-                "companyNameTamil",
-              ]);
-
-              // Dispatch logout
-              store.dispatch(logoutUser());
-
-              if (navigationRef.isReady()) {
-                const statusType =
-                  data.accountStatus === "Rejected" ||
-                  (data.message && data.message.toLowerCase().includes("rejected"))
-                    ? "rejected"
-                    : "not_approved";
-
-                navigationRef.reset({
-                  index: 0,
-                  routes: [
-                    {
-                      name: "BannedScreen",
-                      params: {
-                        statusType,
-                        message: data.message,
-                      },
-                    },
-                  ],
-                });
-              }
-            }
-          }
-        } catch (e) {
-          // Ignore json parsing / handling error
-        }
-      }
-
-      return response;
-    };
+    }, 10000);
 
     return () => {
-      axios.interceptors.response.eject(interceptor);
-      (globalThis as any).fetch = originalFetch;
+      clearInterval(interval);
     };
   }, []);
 
@@ -499,14 +169,16 @@ function AppContent() {
     };
   }, [isOfflineAlertShown]);
 
+  // Handle online/offline status updates
   const onlineStatus = async () => {
     AppState.addEventListener("change", async (nextAppState) => {
-      const storedEmpId = await AsyncStorage.getItem("empid");
+      const storedEmpId = store.getState().auth.empId;
 
       if (nextAppState === "active") {
         if (storedEmpId) {
           await status(storedEmpId, true);
         }
+        await verifyOfficerStatus(true);
       } else if (nextAppState === "background") {
         if (storedEmpId) {
           await status(storedEmpId, false);
@@ -517,7 +189,7 @@ function AppContent() {
 
   const status = async (empId: string, status: boolean) => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = store.getState().auth.token;
       if (!token) {
         console.error("Token not found");
         return;
@@ -542,166 +214,38 @@ function AppContent() {
     }
   };
 
+  const [currentRoute, setCurrentRoute] = useState<string>("Splash");
+
+  const isBleed = isBleedScreen(currentRoute);
+  const screenBg = getScreenBackgroundColor(currentRoute);
+  const statusBarStyle = getScreenStatusBarStyle(currentRoute);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView
         style={{
           flex: 1,
-          backgroundColor: "#ffffff",
+          backgroundColor: screenBg,
         }}
-        edges={["top", "right", "left"]}
+        edges={isBleed ? [] : ["top", "right", "left"]}
       >
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        <NavigationContainer ref={navigationRef}>
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false,
-              gestureEnabled: false,
-            }}
-          >
-            <Stack.Screen name="Splash" component={Splash} />
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="BannedScreen" component={BannedScreen as any} />
-            <Stack.Screen name="FormScreen" component={FormScreen} />
-            <Stack.Screen name="Lanuage" component={Lanuage} />
-
-            <Stack.Screen name="Profile" component={Profile} />
-            <Stack.Screen name="ReportPage" component={ReportPage} />
-
-            <Stack.Screen name="FarmerReport" component={FarmerReport as any} />
-
-            <Stack.Screen name="NewReport" component={NewReport as any} />
-            <Stack.Screen name="qrcode" component={Qrcode as any} />
-            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-            <Stack.Screen name="Timer" component={Timer as any} />
-
-            <Stack.Screen name="QRScanner" component={QRScanner} />
-            <Stack.Screen
-              name="ChangePassword"
-              component={ChangePassword as any}
-            />
-            <Stack.Screen
-              name="Registeredfarmer"
-              component={Registeredfarmer}
-            />
-            <Stack.Screen
-              name="Ufarmercropdetails"
-              component={Ufarmercropdetails}
-            />
-
-            <Stack.Screen
-              name="ReceivedCashQrCode"
-              component={ReceivedCashQrCode as any}
-            />
-
-            <Stack.Screen
-              name="NoCollectionCenterScreen"
-              component={NoCollectionCenterScreen}
-            />
-
-            <Stack.Screen
-              name="Main"
-              component={MainTabNavigator}
-              options={{ headerShown: false }}
-            />
-
-            <Stack.Screen
-              name="TransactionReport"
-              component={TransactionReport as any}
-            />
-
-            <Stack.Screen
-              name="SelectRow"
-              component={SelectRow as any}
-            />
-
-            <Stack.Screen
-              name="QRHandling"
-              component={QRHandling as any}
-            />
-
-            <Stack.Screen
-              name="ReadyToPrint"
-              component={ReadyToPrint as any}
-            />
-
-            <Stack.Screen
-              name="PrintingConfirmation"
-              component={PrintingConfirmation as any}
-            />
-
-            <Stack.Screen
-              name="WelcomeToPacking"
-              component={WelcomeToPacking as any}
-            />
-
-            <Stack.Screen
-              name="Packing"
-              component={Packing as any}
-            />
-
-            <Stack.Screen
-              name="WelcomeToQC"
-              component={WelcomeToQC as any}
-            />
-
-            <Stack.Screen
-              name="Group"
-              component={Group as any}
-            />
-
-            <Stack.Screen
-              name="SelectOrder"
-              component={SelectOrder as any}
-            />
-
-            <Stack.Screen
-              name="SelectRowToAssign"
-              component={SelectRowToAssign as any}
-            />
-
-            <Stack.Screen
-              name="ConfirmRowAssign"
-              component={ConfirmRowAssign as any}
-            />
-
-            <Stack.Screen
-              name="DigitalSignature"
-              component={DigitalSignature as any}
-            />
-
-            <Stack.Screen
-              name="PendingOrderScreen"
-              component={PendingOrderScreen as any}
-            />
-            <Stack.Screen
-              name="TimerContainer"
-              component={TimerContainer as any}
-            />
-
-            <Stack.Screen
-              name="ReplaceRequestsApprove"
-              component={ReplaceRequestsApprove as any}
-            />
-            <Stack.Screen
-              name="DailyTargetListOfficerDistribution"
-              component={DailyTargetListOfficerDistribution as any}
-            />
-
-            <Stack.Screen
-              name="GoviPensionForm"
-              component={GoviPensionForm as any}
-            />
-            <Stack.Screen
-              name="GoviPensionStatus"
-              component={GoviPensionStatus as any}
-            />
-            <Stack.Screen
-              name="NotEligibleScreen"
-              component={NotEligibleScreen as any}
-            />
-            <Stack.Screen name="LoadingPage" component={LoadingPage as any} />
-          </Stack.Navigator>
+        <StatusBar barStyle={statusBarStyle} backgroundColor={screenBg} />
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={() => {
+            const routeName = (navigationRef.getCurrentRoute() as any)?.name;
+            if (routeName) setCurrentRoute(routeName);
+          }}
+          onStateChange={async () => {
+            const routeName = (navigationRef.getCurrentRoute() as any)?.name;
+            if (routeName) setCurrentRoute(routeName);
+            const token = store.getState().auth?.token;
+            if (token) {
+              await verifyOfficerStatus();
+            }
+          }}
+        >
+          <RootStackNavigator />
         </NavigationContainer>
         <AlertModal
           visible={alertState.visible}
@@ -716,6 +260,7 @@ function AppContent() {
     </GestureHandlerRootView>
   );
 }
+
 export default function App() {
   return (
     <SafeAreaProvider>
