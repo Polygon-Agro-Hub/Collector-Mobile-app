@@ -26,6 +26,7 @@ import { useContext } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { ROLES } from "@/constants/user-roles";
 import socketService from "@/services/socket/socket.service";
+import * as Notifications from "expo-notifications";
 
 
 type DistributionDashboardNavigationProps = StackNavigationProp<
@@ -90,7 +91,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
         const storageKey = `${READ_NOTIFS_STORAGE_KEY}_${currentUserId || "default"}`;
         const stored = await AsyncStorage.getItem(storageKey);
         const readSet = new Set(stored ? JSON.parse(stored) : []);
-        const unread = notifs.filter((n: any) => !readSet.has(n.id)).length;
+        const unread = notifs.filter((n: any) => !readSet.has(n.id) && n.isRead !== 1 && n.isRead !== true).length;
         setUnreadNotificationsCount(unread);
       }
     } catch (e) {
@@ -210,6 +211,21 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       return () => subscription.remove();
     }, []),
   );
+
+  const handleNotificationButtonPress = async () => {
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== "granted") {
+        navigation.navigate("NotificationAccess" as any, {
+          returnScreen: "MyNotifications",
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn("Error checking notification permissions:", e);
+    }
+    navigation.navigate("MyNotifications");
+  };
 
   const getCurrentLanguage = (): string => {
     return (i18n.language || language || selectedLanguage || "en")
@@ -431,7 +447,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
           {/* Notification Button (Right side of profile section for DCM) */}
           {isDCM && (
             <TouchableOpacity
-              onPress={() => navigation.navigate("MyNotifications")}
+              onPress={handleNotificationButtonPress}
               className="relative w-12 h-12 rounded-full bg-[#F1F3F6] items-center justify-center"
               activeOpacity={0.8}
             >
@@ -447,6 +463,47 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
               )}
             </TouchableOpacity>
           )}
+        </View>
+
+        {/* Temporary buttons to test permission screens */}
+        <View className="w-full mb-3 p-3 bg-gray-50 border border-gray-200 rounded-2xl">
+          <Text className="text-gray-500 font-bold text-[11px] uppercase tracking-wider mb-2 text-center">
+            Test Permission Screens
+          </Text>
+          <View className="flex-row justify-between" style={{ gap: 8 }}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("NotificationAccess" as any)}
+              className="flex-1 bg-[#980775]/10 border border-[#980775]/30 rounded-xl py-2 px-1 items-center justify-center"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="notifications-outline" size={18} color="#980775" />
+              <Text className="text-[#980775] font-bold text-[10px] mt-1 text-center" numberOfLines={1}>
+                Notification
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CameraAccess" as any)}
+              className="flex-1 bg-[#0284C7]/10 border border-[#0284C7]/30 rounded-xl py-2 px-1 items-center justify-center"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="camera-outline" size={18} color="#0284C7" />
+              <Text className="text-[#0284C7] font-bold text-[10px] mt-1 text-center" numberOfLines={1}>
+                Camera
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("LocationAccess" as any)}
+              className="flex-1 bg-[#16A34A]/10 border border-[#16A34A]/30 rounded-xl py-2 px-1 items-center justify-center"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="location-outline" size={18} color="#16A34A" />
+              <Text className="text-[#16A34A] font-bold text-[10px] mt-1 text-center" numberOfLines={1}>
+                Location
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View className="flex-row flex-wrap justify-between pb-12 mt-4">

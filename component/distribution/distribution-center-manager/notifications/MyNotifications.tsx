@@ -40,6 +40,7 @@ export interface ReturnOrderNotification {
   drvOrderId?: number;
   handOverOfficerId?: number;
   otpCode: number | string;
+  isRead?: number | boolean;
   expireTime?: string;
   createdAt: string;
   processOrderId?: number;
@@ -156,24 +157,76 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
   };
 
   // Mark a single notification as read
-  const handleNotificationPress = (item: ReturnOrderNotification) => {
+  const handleNotificationPress = async (item: ReturnOrderNotification) => {
+    // 1. Optimistic UI update
     if (!readIds.has(item.id)) {
       const updated = new Set(readIds);
       updated.add(item.id);
       setReadIds(updated);
       persistReadIds(updated);
     }
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === item.id ? { ...n, isRead: 1 } : n))
+    );
+
+    // 2. Open OTP modal immediately
     setSelectedOtp(item.otpCode);
     setIsOtpModalVisible(true);
+
+    // 3. Persist isRead = 1 to backend
+    if (item.isRead !== 1 && item.isRead !== true) {
+      try {
+        let token = store.getState().auth.token;
+        if (!token) {
+          const stored = await AsyncStorage.getItem("@auth_state");
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            token = parsed?.token || null;
+          }
+        }
+        if (token) {
+          await axios.patch(
+            `${environment.API_BASE_URL}api/distribution-manager/notifications/${item.id}/read`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        }
+      } catch (err) {
+        console.warn("Failed to mark notification as read on server:", err);
+      }
+    }
   };
 
   // Mark all notifications as read
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
+    // 1. Optimistic UI update
     const updated = new Set(readIds);
     notifications.forEach((n) => updated.add(n.id));
     setReadIds(updated);
     persistReadIds(updated);
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: 1 })));
     setShowMenu(false);
+
+    // 2. Persist to backend
+    try {
+      let token = store.getState().auth.token;
+      if (!token) {
+        const stored = await AsyncStorage.getItem("@auth_state");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          token = parsed?.token || null;
+        }
+      }
+      if (token) {
+        await axios.patch(
+          `${environment.API_BASE_URL}api/distribution-manager/notifications/mark-all-read`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    } catch (err) {
+      console.warn("Failed to mark all notifications as read on server:", err);
+    }
   };
 
   // Helper to format time (e.g., "07:00 PM", "10:00 AM")
@@ -232,7 +285,7 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
   }, [selectedOtp]);
 
   const renderNotificationCard = (item: ReturnOrderNotification) => {
-    const isUnread = !readIds.has(item.id);
+    const isUnread = item.isRead !== 1 && item.isRead !== true && !readIds.has(item.id);
     const invoiceNumber = item.invNo || (item.processOrderId ? String(item.processOrderId) : "N/A");
 
     return (
@@ -309,8 +362,9 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
               {/* Dropdown Menu for 3-dots */}
               {showMenu && (
                 <View
-                  className="absolute right-0 top-11 bg-white rounded-2xl py-2 px-4 z-50 border border-[#E5E7EB]"
+                  className="absolute right-0 top-11 bg-white rounded-2xl py-3 px-5 z-50 border border-[#E5E7EB]"
                   style={{
+                    minWidth: 195,
                     shadowColor: "#000000",
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.15,
@@ -321,9 +375,15 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
                   <TouchableOpacity
                     onPress={handleMarkAllAsRead}
                     activeOpacity={0.8}
-                    className="py-1.5 items-center justify-center"
+                    className="py-1 flex-row items-center justify-center"
                   >
-                    <Text className="text-sm font-semibold text-[#17262C]">
+                    <Ionicons
+                      name="checkmark-done-outline"
+                      size={18}
+                      color="#980775"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text className="text-sm font-semibold text-[#17262C] text-center">
                       {t("MyNotifications.MarkAllAsRead", "Mark all as read")}
                     </Text>
                   </TouchableOpacity>

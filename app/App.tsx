@@ -29,6 +29,11 @@ import * as Notifications from "expo-notifications";
 import socketService from "@/services/socket/socket.service";
 import pushNotificationService from "@/services/notification/pushNotification.service";
 import { ROLES } from "@/constants/user-roles";
+import {
+  isBleedScreen,
+  getScreenBackgroundColor,
+  getScreenStatusBarStyle,
+} from "@/constants/bleedScreens";
 
 
 // Global notifications handler (guarded for Expo Go & standalone)
@@ -338,17 +343,33 @@ function AppContent() {
     }
   };
 
+  const [currentRoute, setCurrentRoute] = useState<string>("Splash");
+
+  const isBleed = isBleedScreen(currentRoute);
+  const screenBg = getScreenBackgroundColor(currentRoute);
+  const statusBarStyle = getScreenStatusBarStyle(currentRoute);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView
         style={{
           flex: 1,
-          backgroundColor: "#ffffff",
+          backgroundColor: screenBg,
         }}
-        edges={["top", "right", "left"]}
+        edges={isBleed ? [] : ["top", "right", "left"]}
       >
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        <NavigationContainer ref={navigationRef}>
+        <StatusBar barStyle={statusBarStyle} backgroundColor={screenBg} />
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={() => {
+            const routeName = (navigationRef.getCurrentRoute() as any)?.name;
+            if (routeName) setCurrentRoute(routeName);
+          }}
+          onStateChange={() => {
+            const routeName = (navigationRef.getCurrentRoute() as any)?.name;
+            if (routeName) setCurrentRoute(routeName);
+          }}
+        >
           <RootStackNavigator />
         </NavigationContainer>
         <AlertModal
