@@ -23,6 +23,11 @@ import DashboardSkeleton from "@/component/components/skeletons/DashboardSkeleto
 
 import { LanguageContext } from "@/context/LanguageContext";
 import { useContext } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { ROLES } from "@/constants/user-roles";
+import socketService from "@/services/socket/socket.service";
+import * as Notifications from "expo-notifications";
+
 
 type DistributionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -49,6 +54,8 @@ interface ProfileData {
   centerId: number;
 }
 
+const READ_NOTIFS_STORAGE_KEY = "@dcm_read_notifications";
+
 const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   navigation,
 }) => {
@@ -56,12 +63,41 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   const [jobRole, setJobeRole] = useState<string | null>(null);
   const [centerId, setCenterId] = useState<string | null>(null);
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { t, i18n } = useTranslation();
   const { language } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+  const currentUserId = store.getState().auth.id;
+  const currentUserRole = store.getState().auth.jobRole;
+  const isDCM = currentUserRole === ROLES.DISTRIBUTION_MANAGER;
+
+  const fetchUnreadNotifications = async () => {
+    if (!isDCM) return;
+    try {
+      const token = store.getState().auth.token;
+      if (!token) return;
+
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/distribution-manager/notifications`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.success && Array.isArray(response.data.data)) {
+        const notifs = response.data.data;
+        const storageKey = `${READ_NOTIFS_STORAGE_KEY}_${currentUserId || "default"}`;
+        const stored = await AsyncStorage.getItem(storageKey);
+        const readSet = new Set(stored ? JSON.parse(stored) : []);
+        const unread = notifs.filter((n: any) => !readSet.has(n.id) && n.isRead !== 1 && n.isRead !== true).length;
+        setUnreadNotificationsCount(unread);
+      }
+    } catch (e) {
+      console.error("Error fetching unread notification count:", e);
+    }
+  };
 
   const fetchSelectedLanguage = async () => {
     try {
@@ -137,19 +173,36 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
     fetchUserProfile();
     fetchTargetPercentage();
     fetchSelectedLanguage();
-  }, []);
+    fetchUnreadNotifications();
+
+    if (isDCM) {
+      // Ensure socket is connected (service handles duplicate calls safely)
+      socketService.connect();
+
+      // Listen for incoming notifications → refresh badge count
+      const unsubscribe = socketService.onNewNotification(() => {
+        fetchUnreadNotifications();
+      });
+
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [currentUserId, isDCM]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchUserProfile();
     await fetchTargetPercentage();
     await fetchSelectedLanguage();
+    await fetchUnreadNotifications();
     setRefreshing(false);
   };
 
   useFocusEffect(
     useCallback(() => {
       fetchSelectedLanguage();
+      fetchUnreadNotifications();
       const onBackPress = () => true;
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
@@ -158,6 +211,21 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       return () => subscription.remove();
     }, []),
   );
+
+  const handleNotificationButtonPress = async () => {
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== "granted") {
+        navigation.navigate("NotificationAccess" as any, {
+          returnScreen: "MyNotifications",
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn("Error checking notification permissions:", e);
+    }
+    navigation.navigate("MyNotifications");
+  };
 
   const getCurrentLanguage = (): string => {
     return (i18n.language || language || selectedLanguage || "en")
@@ -340,39 +408,103 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       }
     >
       <View className="w-full max-w-[600px] mx-auto flex-1">
-        <TouchableOpacity
-          className="flex-row items-center py-4"
-          onPress={() => navigation.navigate("SideMenu")}
-        >
-          <Image
-            source={
-              profile?.image
-                ? { uri: profile.image }
-                : require("../../../../assets/images/auth/my-profile.webp")
-            }
-            style={{ width: 64, height: 64, borderRadius: 32 }}
-            className="w-16 h-16 rounded-full mr-3"
-            resizeMode="cover"
-          />
+        <View className="flex-row items-center justify-between py-4">
+          <TouchableOpacity
+            className="flex-row items-center flex-1 mr-3"
+            onPress={() => navigation.navigate("SideMenu")}
+            activeOpacity={0.8}
+          >
+            <Image
+              source={
+                profile?.image
+                  ? { uri: profile.image }
+                  : require("../../../../assets/images/auth/my-profile.webp")
+              }
+              style={{ width: 64, height: 64, borderRadius: 32 }}
+              className="w-16 h-16 rounded-full mr-3"
+              resizeMode="cover"
+            />
 
-          <View style={{ flex: 1 }}>
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-lg font-bold"
-            >
-              {getFullName()}
-            </Text>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                className="text-lg font-bold"
+              >
+                {getFullName()}
+              </Text>
 
-            <Text
-              style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-              className="text-gray-500"
-              numberOfLines={1}
-              ellipsizeMode="tail"
+              <Text
+                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                className="text-gray-500"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {getcompanyName()}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Notification Button (Right side of profile section for DCM) */}
+          {isDCM && (
+            <TouchableOpacity
+              onPress={handleNotificationButtonPress}
+              className="relative w-12 h-12 rounded-full bg-[#F1F3F6] items-center justify-center"
+              activeOpacity={0.8}
             >
-              {getcompanyName()}
-            </Text>
+              <Ionicons name="notifications" size={24} color="#000000" />
+              {unreadNotificationsCount > 0 && (
+                <View
+                  className="absolute top-1.5 right-1.5 w-3.5 h-3.5 rounded-full bg-[#980775]"
+                  style={{
+                    borderWidth: 2,
+                    borderColor: "#FFFFFF",
+                  }}
+                />
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Temporary buttons to test permission screens */}
+        {/* <View className="w-full mb-3 p-3 bg-gray-50 border border-gray-200 rounded-2xl">
+          <Text className="text-gray-500 font-bold text-[11px] uppercase tracking-wider mb-2 text-center">
+            Test Permission Screens
+          </Text>
+          <View className="flex-row justify-between" style={{ gap: 8 }}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("NotificationAccess" as any)}
+              className="flex-1 bg-[#980775]/10 border border-[#980775]/30 rounded-xl py-2 px-1 items-center justify-center"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="notifications-outline" size={18} color="#980775" />
+              <Text className="text-[#980775] font-bold text-[10px] mt-1 text-center" numberOfLines={1}>
+                Notification
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CameraAccess" as any)}
+              className="flex-1 bg-[#0284C7]/10 border border-[#0284C7]/30 rounded-xl py-2 px-1 items-center justify-center"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="camera-outline" size={18} color="#0284C7" />
+              <Text className="text-[#0284C7] font-bold text-[10px] mt-1 text-center" numberOfLines={1}>
+                Camera
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("LocationAccess" as any)}
+              className="flex-1 bg-[#16A34A]/10 border border-[#16A34A]/30 rounded-xl py-2 px-1 items-center justify-center"
+              activeOpacity={0.8}
+            >
+              <Ionicons name="location-outline" size={18} color="#16A34A" />
+              <Text className="text-[#16A34A] font-bold text-[10px] mt-1 text-center" numberOfLines={1}>
+                Location
+              </Text>
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
+        </View> */}
 
         <View className="flex-row flex-wrap justify-between pb-12 mt-4">
           {getDashboardItems().map((item) => (

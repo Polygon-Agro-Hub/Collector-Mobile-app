@@ -136,7 +136,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   navigation,
 }) => {
   const { width: screenWidth } = useWindowDimensions();
-  const cardWidth = screenWidth - 134; 
+  const cardWidth = screenWidth - 134;
   const itemWidth = cardWidth + 10;
   const [cropCount, setCropCount] = useState(1);
   const [cropNames, setCropNames] = useState<Crop[]>([]);
@@ -575,10 +575,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const handleSubmit = async () => {
     if (hasUnsavedCropDetails()) {
       Alert.alert(
-        t("UnregisteredCropDetails.Unsaved Changes"),
-        t(
-          "UnregisteredCropDetails.You have entered crop details that haven't been added yet. Please click 'Add' to include them, or clear the form to proceed.",
-        ),
+        t("Error.Unsaved Crop Details"),
+        t("Error.You have entered crop details but"),
       );
       return;
     }
@@ -1144,7 +1142,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                       textAlign: "center",
                                     }}
                                   >
-                                    {crop[`grade${grade}quan`]}{t("PassTargetBetweenOfficers.kg")}
+                                    {crop[`grade${grade}quan`]}
+                                    {t("PassTargetBetweenOfficers.kg")}
                                   </Text>
 
                                   {/* Delete-grade button / spinner */}
@@ -1230,9 +1229,14 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 }}
               >
                 <Text
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
                   style={{
                     color: selectedCropLabel ? "#000" : "#9CA3AF",
                     fontSize: 14,
+                    flex: 1,
+                    marginRight: 8,
+                    lineHeight: 18,
                   }}
                 >
                   {selectedCropLabel ||
@@ -1261,10 +1265,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   setVarietyModalVisible(true);
                 }}
                 style={{
-                  height: 50,
+                  minHeight: 50,
                   backgroundColor: "#F4F4F4",
-                  borderRadius: 50,
+                  borderRadius: 25,
                   paddingHorizontal: 14,
+                  paddingVertical: 10,
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -1275,9 +1280,14 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   <ActivityIndicator size="small" color="#2AAD7A" />
                 ) : (
                   <Text
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
                     style={{
                       color: selectedVarietyLabel ? "#000" : "#9CA3AF",
                       fontSize: 14,
+                      flex: 1,
+                      marginRight: 8,
+                      lineHeight: 18,
                     }}
                   >
                     {selectedVarietyLabel ||
@@ -1288,6 +1298,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   name="keyboard-arrow-down"
                   size={22}
                   color="#9CA3AF"
+                  style={{ alignSelf: "center" }}
                 />
               </TouchableOpacity>
 

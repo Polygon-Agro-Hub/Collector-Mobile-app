@@ -71,6 +71,27 @@ interface Crop {
   invoiceNumber: string;
 }
 
+// NEW: localizes the AM/PM marker since toLocaleTimeString() always
+// returns the English marker regardless of i18n.language.
+const getLocalizedTime = (date: Date, lang: "en" | "si" | "ta"): string => {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  const minuteStr = minutes.toString().padStart(2, "0");
+  const isPM = hours >= 12;
+
+  let period: string;
+  if (lang === "si") {
+    period = isPM ? "ප.ව." : "පෙ.ව.";
+  } else if (lang === "ta") {
+    period = isPM ? "பிற்பகல்" : "முற்பகல்";
+  } else {
+    period = isPM ? "PM" : "AM";
+  }
+
+  return `${hour12}:${minuteStr} ${period}`;
+};
+
 const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
@@ -101,6 +122,15 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   useEffect(() => {
     fetchSelectedLanguage();
   }, []);
+
+  // NEW: single source of truth for the active language, used to pick
+  // the AM/PM marker consistently in both the JSX header and the PDF.
+  const activeLang: "en" | "si" | "ta" = (() => {
+    const lang = (i18n.language || selectedLanguage || "en").toLowerCase();
+    if (lang.startsWith("si")) return "si";
+    if (lang.startsWith("ta")) return "ta";
+    return "en";
+  })();
 
   const getCompanyName = () => {
     const authState = store.getState().auth;
@@ -291,8 +321,8 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       return "";
     }
 
-    const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-    const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+    const isSinhala = activeLang === "si";
+    const isTamil = activeLang === "ta";
     const currencyPrefix = isSinhala ? "රු." : isTamil ? "ரூ." : "Rs.";
 
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
@@ -432,13 +462,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               .toLocaleDateString("en-GB")
               .split("/")
               .reverse()
-              .join("/")} ${new Date()
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })
-              .toUpperCase()}
+              .join("/")} ${getLocalizedTime(new Date(), activeLang)}
           </div>
         </div>
         
@@ -509,8 +533,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     `;
     try {
       const { uri, base64 } = await Print.printToFileAsync({ html, base64: true });
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
       const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
       const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
@@ -547,8 +569,8 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         return;
       }
 
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const isSinhala = activeLang === "si";
+      const isTamil = activeLang === "ta";
       const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
       const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
@@ -658,8 +680,8 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const isSinhala = activeLang === "si";
+      const isTamil = activeLang === "ta";
       const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
       const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
@@ -720,13 +742,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
                 .split("/")
                 .reverse()
                 .join("/")}{" "}
-              {new Date()
-                .toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })
-                .toUpperCase()}
+              {getLocalizedTime(new Date(), activeLang)}
             </Text>
           </View>
 

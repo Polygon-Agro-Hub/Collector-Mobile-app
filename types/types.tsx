@@ -151,6 +151,7 @@ export type RootStackParamList = {
         loadedCrates?: number;
       }
     | undefined;
+  MyNotifications: undefined;
   SideMenu: undefined;
   ReadytoPickupOrders: undefined;
   SinChangePassword: undefined;
@@ -208,6 +209,12 @@ export type RootStackParamList = {
 };
   CameraAccess: undefined;
   LocationAccess: undefined;
+  NotificationAccess:
+    | {
+        returnScreen?: keyof RootStackParamList;
+        blockBackNavigation?: boolean;
+      }
+    | undefined;
   QRScanner: {
     userId: any;
   };

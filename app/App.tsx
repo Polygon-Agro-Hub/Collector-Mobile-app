@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Alert, AppState, StatusBar } from "react-native";
+import { Alert, AppState, StatusBar, Platform, LogBox } from "react-native";
+
+LogBox.ignoreLogs([
+  "InteractionManager has been deprecated",
+  "setBackgroundColorAsync is not supported with edge-to-edge enabled",
+  "`expo-notifications` functionality is not fully supported in Expo Go",
+  "expo-notifications: Android Push notifications",
+]);
 import { NavigationContainer } from "@react-navigation/native";
 import { Provider } from "react-redux";
 import environment from "../environment/environment";
@@ -7,6 +14,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import axios from "axios";
 import { logoutUser } from "../store/authSlice";
 import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
+import { verifyOfficerStatus, setupGlobalApiInterceptors } from "@/services/apiInterceptor";
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -18,6 +26,31 @@ import NetInfo from "@react-native-community/netinfo";
 import * as SplashScreen from "expo-splash-screen";
 import store from "@/services/reducxStore";
 import RootStackNavigator from "../routes/Routes";
+import * as Notifications from "expo-notifications";
+import socketService from "@/services/socket/socket.service";
+import pushNotificationService from "@/services/notification/pushNotification.service";
+import { ROLES } from "@/constants/user-roles";
+import {
+  isBleedScreen,
+  getScreenBackgroundColor,
+  getScreenStatusBarStyle,
+} from "@/constants/bleedScreens";
+
+
+// Global notifications handler (guarded for Expo Go & standalone)
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} catch (handlerErr) {
+  console.warn("Notifications.setNotificationHandler skipped in Expo Go:", handlerErr);
+}
 
 function AppContent() {
   const { t } = useTranslation();
@@ -32,6 +65,43 @@ function AppContent() {
     autoClose: true,
     showOkButton: undefined as boolean | undefined,
   });
+
+  useEffect(() => {
+    // Initialize push notification service (requests permissions on iOS/Android, creates Android channel)
+    pushNotificationService.init();
+
+    // Auto-connect socket whenever token is available (on startup or after login/loadPersistedAuth)
+    const checkAndConnect = () => {
+      const token = store.getState().auth.token;
+      if (token) {
+        socketService.connect();
+      }
+    };
+    checkAndConnect();
+    const unsubscribeStore = store.subscribe(checkAndConnect);
+
+    // When a new notification arrives (via socket OR polling), show a system notification
+    const unsubscribeNotif = socketService.onNewNotification((item) => {
+      console.log("📲 [App.tsx] onNewNotification received:", item?.id, item?.invNo, item?.otpCode);
+      const currentRole = store.getState().auth.jobRole;
+      const isDCM = currentRole === ROLES.DISTRIBUTION_MANAGER;
+      // Allow if DCM or if role is still loading
+      if (currentRole && !isDCM) return;
+
+      const invoiceNumber = item?.invNo || item?.invoiceNo || "";
+      const otp = item?.otpCode || item?.otp || "";
+      const bodyText = invoiceNumber
+        ? `Please use the following OTP code, "${otp}", to receive the order from the driver at the centre.`
+        : "New handover return order OTP notification received.";
+
+      pushNotificationService.displayLocalNotification(item, bodyText);
+    });
+
+    return () => {
+      unsubscribeStore();
+      unsubscribeNotif();
+    };
+  }, []);
 
   useEffect(() => {
     setGlobalAlertListener((title, message, type, onClose, autoClose, showOkButton) => {
@@ -53,148 +123,18 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    let alertShown = false;
+    setupGlobalApiInterceptors();
 
-    const handleAuthError = (status: number, data: any): boolean => {
-      let currentRouteName = "";
-      if (navigationRef.isReady()) {
-        const route = navigationRef.getCurrentRoute() as any;
-        currentRouteName = route?.name || "";
+    // Periodically verify officer status (every 10 seconds) when app is active and user is logged in
+    const interval = setInterval(() => {
+      const token = store.getState().auth?.token;
+      if (token && AppState.currentState === "active") {
+        verifyOfficerStatus();
       }
-
-      const userToken = store.getState().auth.token;
-      if (
-        !userToken ||
-        currentRouteName === "Login" ||
-        currentRouteName === "Lanuage" ||
-        currentRouteName === "Splash" ||
-        currentRouteName === "BannedScreen" ||
-        currentRouteName === "Logout"
-      ) {
-        return false;
-      }
-
-      const msg = (data?.message || "").toLowerCase();
-      const code = (data?.code || data?.reason || "").toUpperCase();
-      const accStatus = (data?.accountStatus || "").toLowerCase();
-
-      // Check if this HTTP 401/403 is a domain validation error (e.g. scanning officer from another center,
-      // officer pending approval / rejected, station occupied, or assignment error)
-      const isDomainValidationError =
-        code === "CENTER_MISMATCH" ||
-        code === "NO_OFFICER_ASSIGNED" ||
-        code === "STATION_OCCUPIED" ||
-        code === "MAIN_CONTAINER_PENDING" ||
-        code === "NOT_APPROVED" ||
-        code === "OFFICER_REJECTED" ||
-        code === "ROLE_NOT_ALLOWED" ||
-        msg.includes("center") ||
-        msg.includes("centre") ||
-        msg.includes("assigned") ||
-        msg.includes("occupied") ||
-        msg.includes("busy") ||
-        msg.includes("not approved") ||
-        msg.includes("rejected") ||
-        msg.includes("pending approval") ||
-        accStatus === "not approved" ||
-        accStatus === "rejected";
-
-      if (isDomainValidationError) {
-        // Let the screen component handle displaying its own validation modal / popup!
-        // DO NOT log out the user or show "Session Expired"!
-        return false;
-      }
-
-      // Check if it's explicitly a token expiration
-      const isTokenExpired =
-        code === "TOKEN_EXPIRED" ||
-        code === "INVALID_TOKEN" ||
-        msg.includes("jwt expired") ||
-        msg.includes("token expired") ||
-        msg.includes("invalid token") ||
-        msg.includes("token not found") ||
-        status === 401;
-
-      if (!isTokenExpired) {
-        return false;
-      }
-
-      // Genuine Token Expiration: Clear auth state and redirect to Login
-      try {
-        store.dispatch(logoutUser());
-      } catch (e) {
-        console.error("Error dispatching logout:", e);
-      }
-
-      if (!alertShown) {
-        alertShown = true;
-        Alert.alert(
-          "Session Expired",
-          "Your token has expired. Please log in again.",
-          [
-            {
-              text: "OK",
-              onPress: () => {
-                alertShown = false;
-                if (navigationRef.isReady()) {
-                  navigationRef.reset({
-                    index: 0,
-                    routes: [{ name: "Login" }],
-                  });
-                }
-              },
-            },
-          ],
-          { cancelable: false }
-        );
-      } else {
-        if (navigationRef.isReady()) {
-          navigationRef.reset({
-            index: 0,
-            routes: [{ name: "Login" }],
-          });
-        }
-      }
-
-      return true;
-    };
-
-    // Axios response interceptor
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const errorResponse = error.response;
-        if (errorResponse && (errorResponse.status === 401 || errorResponse.status === 403)) {
-          const isHandledByAuth = handleAuthError(errorResponse.status, errorResponse.data);
-          if (isHandledByAuth) {
-            return new Promise(() => {});
-          }
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    // Global fetch interceptor (monkeypatch)
-    const originalFetch = (globalThis as any).fetch;
-    (globalThis as any).fetch = async (...args: any[]) => {
-      const response = await originalFetch(...args);
-
-      if (response.status === 401 || response.status === 403) {
-        try {
-          const clonedResponse = response.clone();
-          const data = await clonedResponse.json();
-          handleAuthError(response.status, data);
-        } catch (e) {
-          handleAuthError(response.status, {});
-        }
-      }
-
-      return response;
-    };
+    }, 10000);
 
     return () => {
-      axios.interceptors.response.eject(interceptor);
-      (globalThis as any).fetch = originalFetch;
+      clearInterval(interval);
     };
   }, []);
 
@@ -238,6 +178,7 @@ function AppContent() {
         if (storedEmpId) {
           await status(storedEmpId, true);
         }
+        await verifyOfficerStatus(true);
       } else if (nextAppState === "background") {
         if (storedEmpId) {
           await status(storedEmpId, false);
@@ -273,17 +214,37 @@ function AppContent() {
     }
   };
 
+  const [currentRoute, setCurrentRoute] = useState<string>("Splash");
+
+  const isBleed = isBleedScreen(currentRoute);
+  const screenBg = getScreenBackgroundColor(currentRoute);
+  const statusBarStyle = getScreenStatusBarStyle(currentRoute);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView
         style={{
           flex: 1,
-          backgroundColor: "#ffffff",
+          backgroundColor: screenBg,
         }}
-        edges={["top", "right", "left"]}
+        edges={isBleed ? [] : ["top", "right", "left"]}
       >
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        <NavigationContainer ref={navigationRef}>
+        <StatusBar barStyle={statusBarStyle} backgroundColor={screenBg} />
+        <NavigationContainer
+          ref={navigationRef}
+          onReady={() => {
+            const routeName = (navigationRef.getCurrentRoute() as any)?.name;
+            if (routeName) setCurrentRoute(routeName);
+          }}
+          onStateChange={async () => {
+            const routeName = (navigationRef.getCurrentRoute() as any)?.name;
+            if (routeName) setCurrentRoute(routeName);
+            const token = store.getState().auth?.token;
+            if (token) {
+              await verifyOfficerStatus();
+            }
+          }}
+        >
           <RootStackNavigator />
         </NavigationContainer>
         <AlertModal

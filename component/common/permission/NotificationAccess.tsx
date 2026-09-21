@@ -9,38 +9,45 @@ import {
   Linking,
   ScrollView,
   Platform,
-  StatusBar,
   LayoutChangeEvent,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import { LinearGradient } from "expo-linear-gradient";
-import { Camera } from "expo-camera";
+import * as Notifications from "expo-notifications";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
-type CameraAccessNavigationProp = StackNavigationProp<
+type NotificationAccessNavigationProp = StackNavigationProp<
   RootStackParamList,
   any
 >;
 
-interface CameraAccessProps {
-  navigation?: CameraAccessNavigationProp;
+interface NotificationAccessProps {
+  navigation?: NotificationAccessNavigationProp;
+  route?: any;
   onPermissionGranted?: () => void;
   onClose?: () => void;
+  onNotNow?: () => void;
   returnScreen?: keyof RootStackParamList;
   onBackPress?: () => void;
+  blockBackNavigation?: boolean;
 }
 
-const cameraImage = require("@/assets/images/permission/camera.webp");
-
-const CameraAccess: React.FC<CameraAccessProps> = ({
+const NotificationAccess: React.FC<NotificationAccessProps> = ({
   navigation,
+  route,
   onPermissionGranted,
   onClose,
+  onNotNow,
   returnScreen = "Main",
   onBackPress,
+  blockBackNavigation = false,
 }) => {
+  const effectiveReturnScreen =
+    route?.params?.returnScreen || returnScreen || "Main";
+  const effectiveBlockBack =
+    route?.params?.blockBackNavigation ?? blockBackNavigation;
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
@@ -59,12 +66,23 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
     } else if (navigation?.canGoBack && navigation.canGoBack()) {
       navigation.goBack();
     } else if (navigation) {
-      navigation.navigate(returnScreen as any);
+      navigation.navigate(effectiveReturnScreen as any);
+    }
+  };
+
+  const handleNotNowPress = () => {
+    if (onNotNow) {
+      onNotNow();
+    } else {
+      handleDenyOrClose();
     }
   };
 
   useEffect(() => {
     const handleHardwareBackPress = () => {
+      if (effectiveBlockBack) {
+        return true;
+      }
       handleDenyOrClose();
       return true;
     };
@@ -73,51 +91,68 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
       handleHardwareBackPress
     );
     return () => subscription.remove();
-  }, [navigation, onClose, onBackPress, returnScreen]);
+  }, [effectiveBlockBack, navigation, onClose, onBackPress, effectiveReturnScreen]);
 
-  const requestCameraPermission = async () => {
+  const requestNotificationPermission = async () => {
     setIsLoading(true);
     try {
-      const current = await Camera.getCameraPermissionsAsync();
-      let status = current.status;
-      if (status !== "granted") {
-        const response = await Camera.requestCameraPermissionsAsync();
-        status = response.status;
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync({
+          ios: {
+            allowAlert: true,
+            allowBadge: true,
+            allowSound: true,
+          },
+        });
+        finalStatus = status;
       }
 
-      if (status === "granted") {
+      if (finalStatus === "granted") {
         if (onPermissionGranted) {
           onPermissionGranted();
+        } else if (effectiveReturnScreen) {
+          navigation?.navigate(effectiveReturnScreen as any);
         } else if (navigation?.canGoBack && navigation.canGoBack()) {
           navigation.goBack();
-        } else if (navigation) {
-          navigation.navigate(returnScreen as any);
         }
-      } else if (status === "denied") {
+      } else {
         Alert.alert(
-          t("CameraAccess.PermissionDenied") || "Permission Denied",
-          t("CameraAccess.CameraAccessIsRequiredPleaseEnableItInSettings") ||
-            "Camera access is required. Please enable it in settings.",
+          t("NotificationAccess.PermissionDenied") || "Permission Denied",
+          t(
+            "NotificationAccess.NotificationAccessIsRequiredPleaseEnableItInSettings"
+          ) ||
+            "Notification access is required to receive OTP and operational alerts. Please enable it in settings.",
           [
             {
-              text: t("CameraAccess.NotNow") || "Not Now",
+              text: t("NotificationAccess.NotNow") || "Not Now",
               style: "cancel",
-              onPress: handleDenyOrClose,
+              onPress: handleNotNowPress,
             },
             {
-              text: t("CameraAccess.OpenSettings") || "Open Settings",
+              text: t("NotificationAccess.OpenSettings") || "Open Settings",
               onPress: () => Linking.openSettings(),
             },
           ]
         );
       }
     } catch (error) {
-      console.error("Error requesting camera permission:", error);
+      console.error("Error requesting notification permission:", error);
       Alert.alert(
         t("Error.error") || "Error",
-        t("CameraAccess.UnableToRequestCameraPermissionPleaseTryAgain") ||
-          "Unable to request camera permission. Please try again.",
-        [{ text: t("Main.OK") || "OK" }]
+        t(
+          "NotificationAccess.UnableToRequestNotificationPermissionPleaseTryAgain"
+        ) || "Unable to request notification permission. Please try again.",
+        [
+          {
+            text: t("NotificationAccess.NotNow") || "Not Now",
+            onPress: handleNotNowPress,
+          },
+          { text: t("Main.OK") || "OK" },
+        ]
       );
     } finally {
       setIsLoading(false);
@@ -126,7 +161,6 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
 
   return (
     <View style={{ flex: 1, backgroundColor: "#121212" }}>
-      <StatusBar barStyle="light-content" backgroundColor="#121212" />
       <ScrollView
         className="flex-1 px-5"
         onLayout={(e: LayoutChangeEvent) =>
@@ -151,44 +185,44 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
           }
           className="w-full"
         >
-          {/* Header Image */}
-          <View className="items-center justify-center mt-2 mb-4">
+          {/* Header Icon / Visual */}
+          <View className="items-center justify-center mt-4 mb-5">
             <Image
-              source={cameraImage}
-              className="w-32 h-32"
+              source={require("@/assets/images/permission/notification.webp")}
+              style={{ width: 110, height: 110 }}
               resizeMode="contain"
             />
           </View>
 
           {/* Title */}
           <Text className="text-white text-2xl font-bold text-center mb-2">
-            {t("CameraAccess.ProminentDisclosureTitle") ||
-              "Why CoDi-Net Uses Camera"}
+            {t("NotificationAccess.ProminentDisclosureTitle") ||
+              "Why CoDi-Net Uses Notifications"}
           </Text>
 
           {/* Intro */}
           <Text className="text-gray-300 text-sm text-center mb-5 leading-5">
-            {t("CameraAccess.ProminentDisclosureIntro") ||
-              "CoDi-Net requires camera access to enable the following operational features:"}
+            {t("NotificationAccess.ProminentDisclosureIntro") ||
+              "CoDi-Net sends notifications to ensure you receive essential time-sensitive operational alerts:"}
           </Text>
 
-          {/* Feature 1: QR Scanning */}
+          {/* Feature: Return Order OTP Alerts */}
           <View className="bg-[#1E1E1E] p-4 rounded-xl mb-4 border border-gray-800 flex-row items-start">
             <View className="bg-[#980775]/20 p-2.5 rounded-lg mr-3 mt-0.5 border border-[#980775]/40">
               <MaterialCommunityIcons
-                name="qrcode-scan"
+                name="ticket-confirmation-outline"
                 size={24}
                 color="#E879F9"
               />
             </View>
             <View className="flex-1">
               <Text className="text-white font-semibold text-base mb-1">
-                {t("CameraAccess.FeatureQRTitle") ||
-                  "Instant QR Code Scanning"}
+                {t("NotificationAccess.FeatureOTPTitle") ||
+                  "Return Order OTP Alerts"}
               </Text>
               <Text className="text-gray-400 text-xs leading-4">
-                {t("CameraAccess.FeatureQRDesc") ||
-                  "Scan driver QR codes, farmer IDs, pickup orders, and cash handover QR codes for quick identification, verification, and secure transport & collection operations."}
+                {t("NotificationAccess.FeatureOTPDesc") ||
+                  "Instantly receive OTP codes and verification details when drivers return orders to your distribution centre."}
               </Text>
             </View>
           </View>
@@ -202,8 +236,8 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
               style={{ marginTop: 2, marginRight: 8 }}
             />
             <Text className="text-gray-300 text-xs flex-1 leading-4">
-              {t("CameraAccess.DisclosureFooter") ||
-                "Camera access is only active while scanning QR codes. No photos or videos are recorded without your explicit action."}
+              {t("NotificationAccess.DisclosureFooter") ||
+                "Notification access is only used for operational alerts and security OTPs. We never send promotional messages or spam."}
             </Text>
           </View>
 
@@ -214,7 +248,7 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
             }`}
           >
             <TouchableOpacity
-              onPress={requestCameraPermission}
+              onPress={requestNotificationPermission}
               activeOpacity={0.8}
               disabled={isLoading}
               className="w-full mb-3"
@@ -234,15 +268,15 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
               >
                 <View className="flex-row items-center justify-center">
                   <Ionicons
-                    name="camera-outline"
+                    name="notifications-outline"
                     size={20}
                     color="#FFFFFF"
                     style={{ marginRight: 8 }}
                   />
                   <Text className="text-white font-extrabold text-base tracking-wide">
                     {isLoading
-                      ? t("CameraAccess.Requesting...") || "Requesting..."
-                      : t("CameraAccess.AgreeAndContinue") ||
+                      ? t("NotificationAccess.Requesting...") || "Requesting..."
+                      : t("NotificationAccess.AgreeAndContinue") ||
                         "Agree & Continue"}
                   </Text>
                 </View>
@@ -250,12 +284,12 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={handleDenyOrClose}
+              onPress={handleNotNowPress}
               activeOpacity={0.7}
               className="py-3 px-6 items-center justify-center"
             >
               <Text className="text-gray-400 font-semibold text-sm">
-                {t("CameraAccess.NotNow") || "Not Now"}
+                {t("NotificationAccess.NotNow") || "Not Now"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -265,4 +299,4 @@ const CameraAccess: React.FC<CameraAccessProps> = ({
   );
 };
 
-export default CameraAccess;
+export default NotificationAccess;

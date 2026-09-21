@@ -21,7 +21,10 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_WIFI_STATE",
-        "android.permission.ACCESS_NETWORK_STATE"
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
       ],
       "blockedPermissions": [
         "com.google.android.gms.permission.AD_ID",
@@ -37,16 +40,10 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.CALL_PHONE",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
-        "android.permission.POST_NOTIFICATIONS",
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.BLUETOOTH_CONNECT",
-        "android.permission.VIBRATE",
-        "android.permission.WAKE_LOCK",
-        "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.CHANGE_WIFI_STATE",
         "android.permission.CHANGE_NETWORK_STATE"
       ]
@@ -142,11 +139,20 @@
           "bluetoothAlwaysPermission": "Allow CoDi-Net to connect to your Bluetooth label printer"
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/app/favicon.png",
+          "color": "#980775",
+          "defaultChannel": "dcm-otp-notifications",
+          "enableBackgroundRemoteNotifications": true
+        }
+      ],
       "./plugins/withCustomAndroidPermissions"
     ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "0b5b66c1-793c-4b38-8bc6-1d678a94cd06"
       }
     }
   }
