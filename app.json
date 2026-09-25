@@ -103,8 +103,6 @@
         }
       ],
       "expo-font",
-      "expo-video",
-      "expo-audio",
       "expo-web-browser",
       "@react-native-community/datetimepicker",
       "expo-asset",
@@ -113,15 +111,6 @@
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
           "recordAudioAndroid": false
-        }
-      ],
-      [
-        "expo-media-library",
-        {
-          "photosPermission": "Photo library access is required to upload related images.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save the QR code to your device.",
-          "isAccessMediaLocationEnabled": false,
-          "granularPermissions": []
         }
       ],
       [
@@ -146,7 +135,8 @@
           "modes": [
             "central"
           ],
-          "bluetoothAlwaysPermission": "Allow CoDi-Net to connect to your Bluetooth label printer"
+          "bluetoothAlwaysPermission": "Allow CoDi-Net to connect to your Bluetooth label printer",
+          "neverForLocation": true
         }
       ],
       [
