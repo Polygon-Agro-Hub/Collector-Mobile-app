@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,8 @@ import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal"
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
 import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
+import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
+import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
 
 type WeighGradeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -48,10 +50,18 @@ export default function WeighGrade({
   navigation,
   route,
 }: WeighGradeProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
-  const productName = route.params?.productName || "";
+  const productObj = route.params?.product;
+  const productName = productObj
+    ? getLocalizedProductName(productObj, i18n.language)
+    : (i18n.language.startsWith("si") && (route.params as any)?.varietyNameSinhala)
+    ? (route.params as any).varietyNameSinhala
+    : (i18n.language.startsWith("ta") && (route.params as any)?.varietyNameTamil)
+    ? (route.params as any).varietyNameTamil
+    : (route.params?.productName || "Carrot");
+
   const productImage = route.params?.productImage || "";
   const gradeTitle = route.params?.gradeTitle || "Grade A";
   const gradeId = route.params?.gradeId || "g-1";
@@ -59,16 +69,49 @@ export default function WeighGrade({
   const loadedWeightKg = typeof route.params?.loadedWeightKg === "number" ? route.params.loadedWeightKg : 0;
   const loadedCrates = typeof route.params?.loadedCrates === "number" ? route.params.loadedCrates : 0;
 
-  // Initialize with 1 set defaulted to loadedCrates count
-  const [sets, setSets] = useState<SetWeighItem[]>([
-    {
-      id: `set-1`,
-      setNumber: 1,
-      crates: loadedCrates > 0 ? String(loadedCrates) : "",
-      weight: null,
-      isExpanded: true,
-    },
-  ]);
+  // Initialize sets from Redux or route params if already weighed, otherwise 1 default set
+  const [sets, setSets] = useState<SetWeighItem[]>(() => {
+    try {
+      const reduxVarieties = store.getState().unload.varieties;
+      const currentVariety = reduxVarieties.find((v) => String(v.id) === String(varietyId));
+      const currentGrade = currentVariety?.grades.find((g) => g.id === gradeId);
+      if (currentGrade?.sets && currentGrade.sets.length > 0) {
+        return currentGrade.sets.map((s, idx) => ({
+          id: `set-${s.setIndex || idx + 1}`,
+          setNumber: s.setIndex || idx + 1,
+          crates: String(s.crates ?? ""),
+          weight: typeof s.weightKg === "number" ? s.weightKg : null,
+          isExpanded: true,
+        }));
+      }
+      if (currentGrade?.unloadedWeightKg !== null && currentGrade?.unloadedWeightKg !== undefined) {
+        return [
+          {
+            id: `set-1`,
+            setNumber: 1,
+            crates:
+              currentGrade.unloadedCrates !== null && currentGrade.unloadedCrates !== undefined
+                ? String(currentGrade.unloadedCrates)
+                : loadedCrates > 0
+                ? String(loadedCrates)
+                : "",
+            weight: currentGrade.unloadedWeightKg,
+            isExpanded: true,
+          },
+        ];
+      }
+    } catch (_) {}
+
+    return [
+      {
+        id: `set-1`,
+        setNumber: 1,
+        crates: loadedCrates > 0 ? String(loadedCrates) : "",
+        weight: null,
+        isExpanded: true,
+      },
+    ];
+  });
 
   const [activeSetIdForScale, setActiveSetIdForScale] = useState<string | null>(
     null
@@ -171,15 +214,52 @@ export default function WeighGrade({
     setIsScaleModalVisible(true);
   };
 
+  const syncSetsToRedux = (currentSets: SetWeighItem[]) => {
+    if (!varietyId) return;
+    try {
+      const currentVariety = store
+        .getState()
+        .unload.varieties.find((v) => String(v.id) === String(varietyId));
+      if (currentVariety) {
+        const totalW = currentSets.reduce((acc, s) => acc + (s.weight || 0), 0);
+        const totalC = currentSets.reduce((acc, s) => acc + (parseInt(s.crates, 10) || 0), 0);
+        const formattedSets = currentSets.map((s, idx) => ({
+          setIndex: s.setNumber || idx + 1,
+          crates: parseInt(s.crates, 10) || 0,
+          weightKg: s.weight || 0,
+        }));
+
+        const updatedGrades = currentVariety.grades.map((g) =>
+          g.id === gradeId
+            ? {
+                ...g,
+                unloadedWeightKg: totalW > 0 ? totalW : g.unloadedWeightKg,
+                unloadedCrates: totalC > 0 ? totalC : g.unloadedCrates,
+                sets: formattedSets,
+              }
+            : g
+        );
+        store.dispatch(
+          updateVarietyGrades({
+            varietyId: String(varietyId),
+            grades: updatedGrades,
+          })
+        );
+      }
+    } catch (e) {
+      console.warn("Could not sync sets to Redux:", e);
+    }
+  };
+
   // Receive weight from ScaleWeightModal
   const handleScaleContinue = (measuredWeight: number) => {
     if (!activeSetIdForScale) return;
     const finalWeight = measuredWeight >= 0 ? measuredWeight : 0;
-    setSets((prev) =>
-      prev.map((s) =>
-        s.id === activeSetIdForScale ? { ...s, weight: finalWeight } : s
-      )
+    const updated = sets.map((s) =>
+      s.id === activeSetIdForScale ? { ...s, weight: finalWeight } : s
     );
+    setSets(updated);
+    syncSetsToRedux(updated);
     setActiveSetIdForScale(null);
   };
 
@@ -277,7 +357,7 @@ export default function WeighGrade({
           </Text>
           <View className="bg-[#E9ECF1] rounded-full px-5 py-1.5">
             <Text className="font-bold text-xs text-[#17262C]">
-              {t("WeighGrade.Grade", "Grade")} {(gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"}
+              {t("WeighGrade.Grade", "Grade")} {extractGradeLetter(gradeTitle)}
             </Text>
           </View>
         </View>
@@ -453,14 +533,14 @@ export default function WeighGrade({
 
       {/* Fixed Bottom Button: Continue */}
       <View
-        className="px-6 pt-3 bg-white border-t border-[#E5E7EB]"
-        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+        className="px-6 pt-4 bg-white"
+        style={{ paddingBottom: insets.bottom + 16 }}
       >
         <TouchableOpacity
           onPress={handleContinue}
           disabled={!isFormComplete}
           activeOpacity={0.8}
-          className={`w-full h-[52px] rounded-full items-center justify-center ${
+          className={`w-full h-[50px] rounded-full items-center justify-center ${
             isFormComplete ? "bg-[#000000]" : "bg-[#A0A4A8]"
           }`}
           style={{
@@ -480,7 +560,18 @@ export default function WeighGrade({
       {/* Warning Confirmation Modal for Delete Set */}
       <WarningConfirmation
         visible={setToDelete !== null}
-        message={`Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${(gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`}
+        message={t(
+          "WeighGrade.DeleteConfirmation",
+          "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
+          {
+            productName: productName,
+            gradeLabel: t("WeighGrade.Grade", "Grade"),
+            grade: extractGradeLetter(gradeTitle),
+            setLabel: t("WeighGrade.Set", "Set"),
+            setNumber: setToDelete?.setNumber || 1,
+            defaultValue: `Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`,
+          }
+        )}
         onConfirm={() => {
           if (setToDelete) {
             handleDeleteSet(setToDelete.id);
@@ -488,18 +579,27 @@ export default function WeighGrade({
           }
         }}
         onCancel={() => setSetToDelete(null)}
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t("WeighGrade.Delete", "Delete")}
+        cancelText={t("WeighGrade.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
       />
 
       {/* ScaleWeightModal component */}
       <ScaleWeightModal
         visible={isScaleModalVisible}
-        onClose={() => setIsScaleModalVisible(false)}
+        onClose={() => {
+          setIsScaleModalVisible(false);
+          setActiveSetIdForScale(null);
+        }}
         onContinue={handleScaleContinue}
         scaleName="Budry MFD - 300"
-        initialWeight={30.0}
+        initialWeight={
+          (() => {
+            if (!activeSetIdForScale) return 0;
+            const target = sets.find((s) => s.id === activeSetIdForScale);
+            return target?.weight ?? 0;
+          })()
+        }
       />
     </View>
   );

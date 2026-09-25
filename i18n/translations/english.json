@@ -31,7 +31,7 @@
     "Crates": "Crates",
     "Set": "Set",
     "Grade": "Grade",
-    "Search Price":"Search Price"
+    "Search Price": "Search Price"
   },
   "Main": {
     "No Internet Connection": "No Internet Connection",
@@ -564,13 +564,13 @@
     "SubmittingDetails": "Submitting details...",
     "CropDetailsSubmitted": "Crop details submitted successfully!",
     "KG": "KG",
-    "Crop":"Crop",
-    "CropName":"CropName",
+    "Crop": "Crop",
+    "CropName": "CropName",
     "Variety": "Variety",
-     "Select Crop": "--Select Crop--",
+    "Select Crop": "--Select Crop--",
     "Select Variety": "--Select Variety--",
     "UnitGrades": "Unit Grades",
-    "Done":"Done"
+    "Done": "Done"
   },
   "GoodsReceivedNote": {
     "LNG": "en",
@@ -867,8 +867,8 @@
     "Num2": "Num 2",
     "Collection": "Collection",
     "Report": "Report",
-    "To":"To",
-    "From":"From",
+    "To": "To",
+    "From": "From",
     "Today": "Today",
     "Target Coverage": "Target Coverage",
     "OpenTarget": "Open Target Board"
@@ -963,7 +963,23 @@
     "Trincomalee": "Trincomalee",
     "Vavuniya": "Vavuniya",
     "Monaragala": "Monaragala",
-    "Nuwara Eliya": "Nuwara Eliya"
+    "Nuwara Eliya": "Nuwara Eliya",
+    "Bambalapitiya": "Bambalapitiya",
+    "Dehiwala": "Dehiwala",
+    "Moratuwa": "Moratuwa",
+    "Negombo": "Negombo",
+    "Kelaniya": "Kelaniya",
+    "Beruwala": "Beruwala",
+    "Aluthgama": "Aluthgama",
+    "Peradeniya": "Peradeniya",
+    "Gampola": "Gampola",
+    "Moragahahena": "Moragahahena",
+    "Horana": "Horana",
+    "Homagama": "Homagama",
+    "Maharagama": "Maharagama",
+    "Kottawa": "Kottawa",
+    "Piliyandala": "Piliyandala",
+    "Kaduwela": "Kaduwela"
   },
   "ReportComplaint": {
     "LNG": "en",
@@ -1178,7 +1194,10 @@
     "Grade": "Grade",
     "Continue": "Continue",
     "MaxCratesReached": "Maximum Crates Reached",
-    "NoOfCrates": "--No. of Crates--"
+    "NoOfCrates": "--No. of Crates--",
+    "DeleteConfirmation": "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
+    "Delete": "Delete",
+    "Cancel": "Cancel"
   },
   "MyNotifications": {
     "Title": "My Notifications",
@@ -1322,7 +1341,7 @@
     "Error": "Error!",
     "QRIdentified": "QR code identified successfully.",
     "Driver": "Driver",
-     "ScanLoadQR": "Scan Load QR",
+    "ScanLoadQR": "Scan Load QR",
     "AlignLoadQR": "Align the Load QR code within the frame to scan",
     "InvalidLoadQR": "Invalid QR code.\nPlease scan a valid Load QR code.",
     "CenterMismatch": "This load is not assigned to your distribution center.",
@@ -1556,7 +1575,7 @@
     "Continue": "Continue ({{count}})",
     "Select a Row to Assign": "Select a Row to Assign",
     "Choose the packing row where the selected orders will be assigned.": "Choose the packing row where the selected orders will be assigned.",
-    "Select the row you work with":"Select the row you work with",
+    "Select the row you work with": "Select the row you work with",
     "Orders Count": "Orders Count",
     "Loading rows...": "Loading rows...",
     "No rows found": "- No rows found. -",
@@ -1588,18 +1607,19 @@
     "Loading targets...": "Loading targets...",
     "No daily target yet": "Please wait and check again.\nYour centre doesn't have a daily target yet.",
     "To Do": "To Do ({{count}})",
-    "Out": "Completed ({{count}})",
+    "Out": "Out ({{count}})",
     "No targets in To Do list.": "No targets in To Do list.",
-    "No targets in Out list yet.": "No targets in Completed list yet.",
+    "No targets in Out list yet.": "No targets in Out list yet.",
     "Pending": "Pending",
     "Opened": "Opened",
-    "OutStatus": "Completed",
+    "OutStatus": "Out",
     "Order Details": "Order Details",
     "Loading order details...": "Loading order details...",
     "QR Printed By": "QR Printed By",
     "Packed By": "Packed By",
     "QC Done By": "QC Done By",
     "Package": "Package",
+    "ALaCarte": "A La Carte",
     "Close": "Close"
   },
   "Packing": {
@@ -2070,20 +2090,20 @@
     "Back to Login": "Back to Login"
   },
   "PDFReport": {
-  "title": "Collection Officer Report",
-  "from": "From",
-  "to": "To",
-  "empId": "EMP ID",
-  "role": "Role",
-  "firstName": "First Name",
-  "lastName": "Last Name",
-  "weight": "Weight",
-  "collections": "Collections",
-  "date": "Date",
-  "totalWeight": "Total Weight",
-  "totalCollections": "Total Collections",
-  "noData": "-No Data-",
-  "noTransactions": "No transactions occurred between {{from}} and {{to}}",
-  "generatedOn": "This report is generated on {{date}} at {{time}}"
-}
+    "title": "Collection Officer Report",
+    "from": "From",
+    "to": "To",
+    "empId": "EMP ID",
+    "role": "Role",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "weight": "Weight",
+    "collections": "Collections",
+    "date": "Date",
+    "totalWeight": "Total Weight",
+    "totalCollections": "Total Collections",
+    "noData": "-No Data-",
+    "noTransactions": "No transactions occurred between {{from}} and {{to}}",
+    "generatedOn": "This report is generated on {{date}} at {{time}}"
+  }
 }

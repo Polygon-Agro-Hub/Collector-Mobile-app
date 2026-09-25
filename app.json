@@ -29,7 +29,14 @@
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_SCAN",
-        "android.permission.BLUETOOTH_CONNECT"
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
       ],
       "blockedPermissions": [
         "com.google.android.gms.permission.AD_ID",
@@ -135,8 +142,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/public/codi-icon.png",
-          "color": "#FFFFFF",
+          "icon": "./assets/images/public/codi-notification-icon.png",
+          "color": "#FAE432",
           "defaultChannel": "dcm-otp-notifications",
           "enableBackgroundRemoteNotifications": true
         }
@@ -145,7 +152,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "932223cd-7af9-43ad-9097-36c16023431f"
+        "projectId": "bd38e419-89d3-4177-bb2d-d556fa74b723"
       }
     }
   }
