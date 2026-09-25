@@ -41,11 +41,15 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
     setScaleStatus(current);
     if (current.currentWeight > 0) {
       setDisplayWeight(current.currentWeight);
+    } else if (initialWeight > 0) {
+      setDisplayWeight(initialWeight);
+    } else {
+      setDisplayWeight(0);
     }
 
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
-      if (status.currentWeight !== undefined) {
+      if (status.currentWeight !== undefined && status.currentWeight > 0) {
         setDisplayWeight(status.currentWeight);
       }
     });
@@ -53,7 +57,7 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
     return () => {
       unsubscribe();
     };
-  }, [visible]);
+  }, [visible, initialWeight]);
 
   const handleContinue = () => {
     onContinue(displayWeight);

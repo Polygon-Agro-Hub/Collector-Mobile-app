@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
-import { Ionicons, MaterialCommunityIcons, Feather, FontAwesome5 } from "@expo/vector-icons";
+import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
@@ -375,14 +375,8 @@ export default function MyNotifications({ navigation }: MyNotificationsProps) {
                   <TouchableOpacity
                     onPress={handleMarkAllAsRead}
                     activeOpacity={0.8}
-                    className="py-1 flex-row items-center justify-center"
+                    className="py-1 items-center justify-center"
                   >
-                    <Ionicons
-                      name="checkmark-done-outline"
-                      size={18}
-                      color="#980775"
-                      style={{ marginRight: 8 }}
-                    />
                     <Text className="text-sm font-semibold text-[#17262C] text-center">
                       {t("MyNotifications.MarkAllAsRead", "Mark all as read")}
                     </Text>

@@ -131,7 +131,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     } else if (complaint === t("SideMenu.View Complaint History")) {
       navigation.navigate("Main", {
         screen: "ComplainHistory",
-        params: { fullname: getFullName },
+        params: {
+          fullname: profile
+            ? `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim()
+            : "",
+          fullnameSi: profile
+            ? `${profile.firstNameSinhala || ""} ${profile.lastNameSinhala || ""}`.trim()
+            : "",
+          fullnameTa: profile
+            ? `${profile.firstNameTamil || ""} ${profile.lastNameTamil || ""}`.trim()
+            : "",
+        },
       });
     }
   };
@@ -140,15 +150,28 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     const fetchUserProfile = async () => {
       try {
         const token = store.getState().auth.token;
+        const role = store.getState().auth.jobRole;
         if (token) {
-          const response = await api.get(
-            "api/collection-officer/user-profile",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            },
-          );
+          const endpoint =
+            role === ROLES.DISTRIBUTION_OFFICER ||
+            role === ROLES.DISTRIBUTION_MANAGER ||
+            role === "Distribution Officer" ||
+            role === "Distribution Centre Manager"
+              ? "api/distribution-manager/user-profile"
+              : "api/collection-officer/user-profile";
+
+          const response = await api.get(endpoint, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           if (response.data && response.data.data) {
-            setProfile(response.data.data);
+            const data = response.data.data;
+            setProfile(data);
+            const fnEn = `${data.firstNameEnglish || ""} ${data.lastNameEnglish || ""}`.trim();
+            const fnSi = `${data.firstNameSinhala || ""} ${data.lastNameSinhala || ""}`.trim();
+            const fnTa = `${data.firstNameTamil || ""} ${data.lastNameTamil || ""}`.trim();
+            if (fnEn) AsyncStorage.setItem("fullname", fnEn);
+            if (fnSi) AsyncStorage.setItem("fullnameSi", fnSi);
+            if (fnTa) AsyncStorage.setItem("fullnameTa", fnTa);
           }
         }
       } catch (error: any) {

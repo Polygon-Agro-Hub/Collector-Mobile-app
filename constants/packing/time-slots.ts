@@ -25,13 +25,15 @@ export const SRI_LANKA_DISTRICTS = [
   "Matale", "Matara", "Moneragala", "Monaragala", "Mullaitivu",
   "Nuwara Eliya", "NuwaraEliya", "Polonnaruwa", "Puttalam",
   "Ratnapura", "Rathnapura", "Trincomalee", "Vavuniya",
-  "Moragahahena", "Horana", "Homagama", "Maharagama", "Kottawa", "Piliyandala", "Kaduwela"
+  "Moragahahena", "Horana", "Homagama", "Maharagama", "Kottawa", "Piliyandala", "Kaduwela",
+  "Bambalapitiya", "Dehiwala", "Moratuwa", "Negombo", "Kelaniya", "Beruwala", "Aluthgama",
+  "Peradeniya", "Gampola"
 ];
 
 /**
- * Formats raw timeSlot key into standard human-readable time string
- * and translates AM / PM tokens with prefix format (e.g. පෙ.ව. 08:00 - ප.ව. 12:00) according to active language.
- * @param timeSlot raw timeSlot string
+ * Formats raw timeSlot or single time string (e.g. "08:00 AM - 12:00 PM" or "08:30 AM")
+ * and translates AM / PM tokens with prefix format (e.g. පෙ.ව. 08:00 - ප.ව. 12:00 or පෙ.ව. 08:30) according to active language.
+ * @param timeSlot raw timeSlot string or timestamp
  * @param t optional translation function
  * @returns formatted string
  */
@@ -40,7 +42,29 @@ export const formatTimeSlot = (
   t?: any
 ): string => {
   if (!timeSlot) return "";
-  let standard = TIME_SLOT_MAP[timeSlot] || timeSlot;
+  let standard = String(TIME_SLOT_MAP[timeSlot] || timeSlot).trim();
+  if (standard === "-" || standard === "–") return "-";
+
+  // If standard is an ISO timestamp or date-time like "2026-09-25 08:30:00" or "2026-09-25T08:30:00"
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(standard)) {
+    const d = new Date(standard.replace(" ", "T"));
+    if (!isNaN(d.getTime())) {
+      let h = d.getHours();
+      const m = String(d.getMinutes()).padStart(2, "0");
+      const p = h >= 12 ? "PM" : "AM";
+      h = h % 12;
+      if (h === 0) h = 12;
+      standard = `${String(h).padStart(2, "0")}:${m} ${p}`;
+    }
+  } else if (/^\d{1,2}:\d{2}:\d{2}$/.test(standard)) {
+    // 24-hour time without AM/PM like "14:30:00"
+    const [hStr, mStr] = standard.split(":");
+    let h = parseInt(hStr, 10);
+    const p = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    standard = `${String(h).padStart(2, "0")}:${mStr} ${p}`;
+  }
 
   // Clean "within" prefix and trim
   standard = standard.replace(/within\s*/i, "").trim();
@@ -56,6 +80,9 @@ export const formatTimeSlot = (
     .replace(/(\d{1,2}(?:[:.]\d{2})?)\s*(?:ප\.ව\.|பிற்பகல்)/gi, "$1 PM")
     .replace(/පෙ\.ව\.|මුற்பகல்/g, "AM")
     .replace(/ප\.ව\.|பிற்பகல்/g, "PM");
+
+  // Strip seconds if present e.g. "08:30:00 AM" -> "08:30 AM"
+  standard = standard.replace(/(\d{1,2}:\d{2}):\d{2}\s*(AM|PM)/gi, "$1 $2");
 
   // Handle shorthand patterns like 8AM, 8 AM, 8.00 AM -> 08:00 AM
   standard = standard.replace(/(\d{1,2})(?:[:.](\d{2}))?\s*(AM|PM)/gi, (match, h, m, p) => {
