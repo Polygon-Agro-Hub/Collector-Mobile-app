@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import WarningConfirmation from "@/component/components/popup/WarningConfirmatio
 import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
 import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
+import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
 
 type WeighGradeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -49,10 +50,18 @@ export default function WeighGrade({
   navigation,
   route,
 }: WeighGradeProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
-  const productName = route.params?.productName || "";
+  const productObj = route.params?.product;
+  const productName = productObj
+    ? getLocalizedProductName(productObj, i18n.language)
+    : (i18n.language.startsWith("si") && (route.params as any)?.varietyNameSinhala)
+    ? (route.params as any).varietyNameSinhala
+    : (i18n.language.startsWith("ta") && (route.params as any)?.varietyNameTamil)
+    ? (route.params as any).varietyNameTamil
+    : (route.params?.productName || "Carrot");
+
   const productImage = route.params?.productImage || "";
   const gradeTitle = route.params?.gradeTitle || "Grade A";
   const gradeId = route.params?.gradeId || "g-1";
@@ -481,7 +490,18 @@ export default function WeighGrade({
       {/* Warning Confirmation Modal for Delete Set */}
       <WarningConfirmation
         visible={setToDelete !== null}
-        message={`Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`}
+        message={t(
+          "WeighGrade.DeleteConfirmation",
+          "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
+          {
+            productName: productName,
+            gradeLabel: t("WeighGrade.Grade", "Grade"),
+            grade: extractGradeLetter(gradeTitle),
+            setLabel: t("WeighGrade.Set", "Set"),
+            setNumber: setToDelete?.setNumber || 1,
+            defaultValue: `Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`,
+          }
+        )}
         onConfirm={() => {
           if (setToDelete) {
             handleDeleteSet(setToDelete.id);
@@ -489,8 +509,8 @@ export default function WeighGrade({
           }
         }}
         onCancel={() => setSetToDelete(null)}
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t("WeighGrade.Delete", "Delete")}
+        cancelText={t("WeighGrade.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
       />
 

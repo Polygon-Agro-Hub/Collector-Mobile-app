@@ -1122,7 +1122,10 @@
     "Grade": "தரம்",
     "Continue": "தொடருங்கள்",
     "MaxCratesReached": "அதிகபட்ச பெட்டி வரம்பை அடைந்தது",
-    "NoOfCrates": "--பெட்டிகளின் எண்ணிக்கை--"
+    "NoOfCrates": "--பெட்டிகளின் எண்ணிக்கை--",
+    "DeleteConfirmation": "சேர்க்கப்பட்ட\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ஐ நீக்க விரும்புகிறீர்களா?",
+    "Delete": "நீக்கு",
+    "Cancel": "ரத்துசெய்"
   },
   "MyNotifications": {
     "Title": "எனது அறிவிப்புகள்",

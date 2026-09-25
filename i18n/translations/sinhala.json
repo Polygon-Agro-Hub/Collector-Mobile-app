@@ -1063,7 +1063,7 @@
   "ReceivedProductsSummary": {
     "Title": "සාරාංශය",
     "UnloadedSummary": "බාන ලද සාරාංශය",
-    "StartUnloading": "බෑම අරඹන්න",
+    "StartUnloading": "තොගය බෑම අරඹන්න",
     "TotalCrates": "පෙට්ටි",
     "Crates": "පෙට්ටි",
     "Set": "කාණ්ඩය",
@@ -1122,7 +1122,10 @@
     "Grade": "ශ්‍රේණිය",
     "Continue": "ඉදිරියට යන්න",
     "MaxCratesReached": "උපරිම පෙට්ටි ප්‍රමාණයට ළඟා වී ඇත",
-    "NoOfCrates": "--පෙට්ටි ගණන--"
+    "NoOfCrates": "--පෙට්ටි ගණන--",
+    "DeleteConfirmation": "එකතු කරන ලද\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ඉවත් කිරීමට ඔබට විශ්වාසද?",
+    "Delete": "මකන්න",
+    "Cancel": "අවලංගු කරන්න"
   },
   "MyNotifications": {
     "Title": "මගේ දැනුම්දීම්",
@@ -1267,8 +1270,8 @@
     "Error": "දෝෂයකි!",
     "QRIdentified": "QR කේතය සාර්ථකව හඳුනා ගන්නා ලදී.",
     "Driver": "රියදුරු",
-    "ScanLoadQR": "පැටවුම් QR ස්කෑන් කරන්න",
-    "AlignLoadQR": "ස්කෑන් කිරීමට පැටවුම් QR කේතය රාමුව තුළ තබන්න",
+    "ScanLoadQR": "තොගය QR ස්කෑන් කරන්න",
+    "AlignLoadQR": "ස්කෑන් කිරීමට තොගය QR කේතය රාමුව තුළ තබන්න",
     "InvalidLoadQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු පැටවුම් QR කේතයක් ස්කෑන් කරන්න.",
     "CenterMismatch": "මෙම තොගය ඔබේ බෙදාහැරීමේ මධ්‍යස්ථානයට පවරා නොමැත.",
     "JourneyNotEnded": "මෙම පැටවුමේ ගමන තවමත් අවසන් වී නොමැත.\nරියදුරු විසින් ගමන සම්පූර්ණ කරන තුරු කරුණාකර රැඳී සිටින්න.",
