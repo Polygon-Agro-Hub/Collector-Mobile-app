@@ -8,6 +8,7 @@
     "userInterfaceStyle": "automatic",
     "android": {
       "package": "com.polygonagro.Collector",
+      "googleServicesFile": "./google-services.json",
       "versionCode": 10,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
@@ -144,8 +145,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/app/favicon.png",
-          "color": "#980775",
+          "icon": "./assets/images/public/codi-icon.png",
+          "color": "#FFFFFF",
           "defaultChannel": "dcm-otp-notifications",
           "enableBackgroundRemoteNotifications": true
         }

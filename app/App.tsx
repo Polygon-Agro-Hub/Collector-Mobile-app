@@ -75,6 +75,7 @@ function AppContent() {
       const token = store.getState().auth.token;
       if (token) {
         socketService.connect();
+        pushNotificationService.registerPushToken();
       }
     };
     checkAndConnect();
