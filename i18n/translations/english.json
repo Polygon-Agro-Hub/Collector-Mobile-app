@@ -1194,7 +1194,10 @@
     "Grade": "Grade",
     "Continue": "Continue",
     "MaxCratesReached": "Maximum Crates Reached",
-    "NoOfCrates": "--No. of Crates--"
+    "NoOfCrates": "--No. of Crates--",
+    "DeleteConfirmation": "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
+    "Delete": "Delete",
+    "Cancel": "Cancel"
   },
   "MyNotifications": {
     "Title": "My Notifications",
