@@ -540,11 +540,10 @@ export default function Packing({
                         </Text>
                       </View>
                       <View
-                        className={`w-6 h-6 rounded-md items-center justify-center border-2 ${
-                          item.checked
+                        className={`w-6 h-6 rounded-md items-center justify-center border-2 ${item.checked
                             ? "bg-[#980775] border-[#980775]"
                             : "border-[#030E25] bg-white"
-                        }`}
+                          }`}
                       >
                         {item.checked && (
                           <Ionicons name="checkmark" size={16} color="white" />

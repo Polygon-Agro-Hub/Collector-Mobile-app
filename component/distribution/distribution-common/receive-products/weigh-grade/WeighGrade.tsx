@@ -20,6 +20,7 @@ import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal"
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
 import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
+import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
 
 type WeighGradeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -277,7 +278,7 @@ export default function WeighGrade({
           </Text>
           <View className="bg-[#E9ECF1] rounded-full px-5 py-1.5">
             <Text className="font-bold text-xs text-[#17262C]">
-              {t("WeighGrade.Grade", "Grade")} {(gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"}
+              {t("WeighGrade.Grade", "Grade")} {extractGradeLetter(gradeTitle)}
             </Text>
           </View>
         </View>
@@ -480,7 +481,7 @@ export default function WeighGrade({
       {/* Warning Confirmation Modal for Delete Set */}
       <WarningConfirmation
         visible={setToDelete !== null}
-        message={`Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${(gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`}
+        message={`Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`}
         onConfirm={() => {
           if (setToDelete) {
             handleDeleteSet(setToDelete.id);

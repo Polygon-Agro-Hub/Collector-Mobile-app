@@ -891,7 +891,23 @@
     "Trincomalee": "திருகோணமலை",
     "Vavuniya": "வவுனியா",
     "Monaragala": "மொனராகலை",
-    "Nuwara Eliya": "நுவரெலியா"
+    "Nuwara Eliya": "நுவரெலியா",
+    "Bambalapitiya": "பம்பலப்பிட்டி",
+    "Dehiwala": "தேவிவளை",
+    "Moratuwa": "மோரட்டுவ",
+    "Negombo": "நெகொம்போ",
+    "Kelaniya": "கெளலாணிய",
+    "Beruwala": "பெருவளை",
+    "Aluthgama": "அலுத்த்கம",
+    "Peradeniya": "பேரடினியா",
+    "Gampola": "கம்போலா",
+    "Moragahahena": "மொரகஹஹேன",
+    "Horana": "ஹொரண",
+    "Homagama": "ஹோமாகம",
+    "Maharagama": "மஹரகம",
+    "Kottawa": "கொட்டாவ",
+    "Piliyandala": "பிலியந்தல",
+    "Kaduwela": "கடுவெல"
   },
   "ReportComplaint": {
     "LNG": "ta",
@@ -1527,6 +1543,7 @@
     "Packed By": "பேக் செய்தவர்",
     "QC Done By": "QC செய்தவர்",
     "Package": "தொகுப்பு",
+    "ALaCarte": "A La Carte",
     "Close": "மூடு"
   },
   "Packing": {
@@ -1596,7 +1613,7 @@
     "Your position has been released by the manager.": "உங்கள் நிலை மேலாளரால் விடுவிக்கப்பட்டது.",
     "Position Busy": "நிலை பிஸியாக உள்ளது",
     "Position Busy Message": "நிலை {{position}} தற்போது {{invoice}} விலைப்பட்டியலுடன் பிஸியாக உள்ளது. அடுத்த பெட்டியை அனுப்புவதற்கு முன், நிலை {{position}} காலியாகும் வரை தயவுசெய்து காத்திருக்கவும்.",
-    "Position Not Available": "நிலையம் பிஸியாக உள்ளது",
+    "Position Not Available": "பயனர் யாரும் நியமிக்கப்படவில்லை.",
     "No Officer Assigned Message": "பேக்கிங் நிலை {{position}} -க்கு எந்தப் பயனரும் ஒதுக்கப்படவில்லை. முதலில் இந்த நிலைக்கு ஒரு அதிகாரியை ஒதுக்கவும்.",
     "Packing has been moved to the next position.": "பேக்கிங் அடுத்த நிலைக்கு மாற்றப்பட்டுள்ளது.",
     "Main Container has been received.": "பிரதான கொள்கலன் பெறப்பட்டது",

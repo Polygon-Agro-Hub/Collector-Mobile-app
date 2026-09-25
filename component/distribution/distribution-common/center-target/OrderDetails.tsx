@@ -105,11 +105,11 @@ export default function OrderDetails({
     timeSlotLabel: p.timeSlotLabel || "",
     category: p.category || "",
     statusLabel: p.statusLabel || "",
-    qrPrintedByEmpId: "-",
-    qrPrintedTime: "-",
-    packageGroups: [],
-    qcDoneByEmpId: "-",
-    qcDoneTime: "-",
+    qrPrintedByEmpId: p.qrPrintedByEmpId || "-",
+    qrPrintedTime: p.qrPrintedTime || "-",
+    packageGroups: p.packageGroups || [],
+    qcDoneByEmpId: p.qcDoneByEmpId || "-",
+    qcDoneTime: p.qcDoneTime || "-",
   });
 
   const fetchOrderDetails = async () => {
@@ -118,7 +118,7 @@ export default function OrderDetails({
       const token = store.getState().auth.token;
       const orderId = params.orderId;
 
-      if (!token || !orderId) {
+      if (params.isTestData || !token || !orderId) {
         setDetails(buildMinimalDetails(params));
         setLoading(false);
         return;
@@ -167,35 +167,32 @@ export default function OrderDetails({
             <View className="w-full max-w-[600px] mx-auto">
               {/* Header Summary Card */}
               {(() => {
-                const rowName = (details as any)?.rowName || params.rowName || "";
-                let rawStatus = (details as any)?.status || details.statusLabel || params.statusLabel || "";
-                let statusDisplay = t("DistributionCenterTarget.OutStatus", "නිම කරන ලද");
-                if (rawStatus) {
-                  const matchRow = rawStatus.match(/^\(([^)]+)\)\s*(.*)$/);
-                  if (matchRow) {
-                    const rName = matchRow[1];
-                    const sName = matchRow[2];
-                    const sTranslated =
-                      sName.toLowerCase().includes("out") ||
-                      sName.includes("පිටත්") ||
-                      sName.toLowerCase().includes("completed")
-                        ? t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")
-                        : sName;
-                    statusDisplay = `(${formatRowTitle(rName, t)}) ${sTranslated}`;
-                  } else {
-                    const sTranslated =
-                      rawStatus.toLowerCase().includes("out") ||
-                      rawStatus.includes("පිටත්") ||
-                      rawStatus.toLowerCase().includes("completed")
-                        ? t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")
-                        : rawStatus;
-                    statusDisplay = rowName
-                      ? `(${formatRowTitle(rowName, t)}) ${sTranslated}`
-                      : sTranslated;
-                  }
-                } else if (rowName) {
-                  statusDisplay = `(${formatRowTitle(rowName, t)}) ${t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")}`;
+                const rowName = (details as any)?.rowName || params.rowName || "Row 1";
+                let rawStatus = (details as any)?.status || details.statusLabel || params.statusLabel || "Out";
+
+                let rName = rowName;
+                let sName = rawStatus;
+
+                const matchRow = rawStatus.match(/^\(([^)]+)\)\s*(.*)$/);
+                if (matchRow) {
+                  rName = matchRow[1];
+                  sName = matchRow[2];
                 }
+
+                const sTranslated =
+                  sName.toLowerCase().includes("out") ||
+                  sName.includes("පිටත්") ||
+                  sName.includes("නිම") ||
+                  sName.includes("முடி") ||
+                  sName.toLowerCase().includes("completed")
+                    ? t("DistributionCenterTarget.OutStatus", "නිම කරන ලද")
+                    : sName.toLowerCase().includes("open") || sName.includes("සකස්") || sName.includes("திற")
+                    ? t("DistributionCenterTarget.Opened", "සකස් කරමින්")
+                    : sName.toLowerCase().includes("pend") || sName.includes("අසම්පූර්ණ") || sName.includes("நிலு")
+                    ? t("DistributionCenterTarget.Pending", "අසම්පූර්ණයි")
+                    : sName;
+
+                const statusDisplay = `(${formatRowTitle(rName, t)}) ${sTranslated}`;
 
                 return (
                   <View className="bg-white rounded-2xl p-4 mb-5 border border-[#000000] items-center shadow-sm">
@@ -230,28 +227,38 @@ export default function OrderDetails({
                   </Text>
                 </View>
                 <Text className="text-[#54617D] text-xs font-semibold">
-                  {details.qrPrintedTime}
+                  {formatTimeSlot(details.qrPrintedTime, t)}
                 </Text>
               </View>
 
               {/* Step 2: Package Groups & Item List */}
               {details.packageGroups.map((group) => {
-                const isAlacarte = group.type === "alacarte";
+                const isAlacarte =
+                  group.type === "alacarte" ||
+                  (group.title && /alacarte|a\s*la\s*carte/i.test(group.title));
                 const groupTitleColor = isAlacarte
                   ? "text-[#AC7F5E]"
                   : "text-[#980775]";
+
+                let translatedGroupTitle = group.title || "";
+                if (isAlacarte) {
+                  translatedGroupTitle = translatedGroupTitle.replace(
+                    /A\s*La\s*Carte|Alacarte/gi,
+                    t("DistributionCenterTarget.ALaCarte", "A La Carte")
+                  );
+                } else {
+                  translatedGroupTitle = translatedGroupTitle.replace(
+                    /Package/gi,
+                    t("DistributionCenterTarget.Package", "පැකේජය")
+                  );
+                }
 
                 return (
                   <View key={String(group.id)} className="mb-6">
                     <Text
                       className={`font-extrabold text-sm mb-2.5 ${groupTitleColor}`}
                     >
-                      {group.type === "alacarte"
-                        ? group.title
-                        : group.title?.replace(
-                            /^Package\s*(\d+)/i,
-                            `${t("DistributionCenterTarget.Package", "පැකේජය")} $1`
-                          ) || group.title}
+                      {translatedGroupTitle}
                     </Text>
 
                     <View className="gap-2.5">
@@ -297,7 +304,7 @@ export default function OrderDetails({
                           </View>
 
                           <Text className="text-[#54617D] text-xs font-medium">
-                            {item.packedTime}
+                            {formatTimeSlot(item.packedTime, t)}
                           </Text>
                         </View>
                       ))}
@@ -317,7 +324,7 @@ export default function OrderDetails({
                   </Text>
                 </View>
                 <Text className="text-[#54617D] text-xs font-semibold">
-                  {details.qcDoneTime}
+                  {formatTimeSlot(details.qcDoneTime, t)}
                 </Text>
               </View>
             </View>
