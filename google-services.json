@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "57464915118",
+    "project_id": "polygon-4c924",
+    "storage_bucket": "polygon-4c924.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57464915118:android:9985cd1fb755d225f8593f",
+        "android_client_info": {
+          "package_name": "com.polygonagro.Collector"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDX6lpwgjP5y6dsXxZjFDg854qPacErUmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
