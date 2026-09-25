@@ -95,8 +95,6 @@
         }
       ],
       "expo-font",
-      "expo-video",
-      "expo-audio",
       "expo-web-browser",
       "@react-native-community/datetimepicker",
       "expo-asset",
@@ -146,7 +144,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "932223cd-7af9-43ad-9097-36c16023431f"
       }
     }
   }
