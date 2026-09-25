@@ -153,7 +153,7 @@
         "expo-notifications",
         {
           "icon": "./assets/images/public/codi-notification-icon.png",
-          "color": "#980775",
+          "color": "#FAE432",
           "defaultChannel": "dcm-otp-notifications",
           "enableBackgroundRemoteNotifications": true
         }
