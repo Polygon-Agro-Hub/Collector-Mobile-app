@@ -802,15 +802,16 @@ export default function WeighTheLoad({
 
       {/* Fixed Bottom Button: Mark as Unloaded */}
       <View
-        className="px-6 bg-white"
-        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+        className="px-6 pt-4 bg-white"
+        style={{ paddingBottom: insets.bottom + 16 }}
       >
         <TouchableOpacity
           onPress={handleMarkAsUnloaded}
           disabled={!isAllUnloaded}
           activeOpacity={0.8}
-          className={`w-full h-[52px] rounded-full items-center justify-center ${isAllUnloaded ? "bg-[#000000]" : "bg-[#A0A4A8]"
-            }`}
+          className={`w-full h-[50px] rounded-full items-center justify-center ${
+            isAllUnloaded ? "bg-[#000000]" : "bg-[#A0A4A8]"
+          }`}
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },

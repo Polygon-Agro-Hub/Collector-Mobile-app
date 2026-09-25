@@ -541,7 +541,11 @@ export default function UnloadingProducts({
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    navigation.navigate("ReceivedProductsToday");
+    if ((navigation as any).replace) {
+      (navigation as any).replace("ReceivedProductsToday");
+    } else {
+      navigation.navigate("ReceivedProductsToday");
+    }
   };
 
   const renderProductCard = (item: UnloadVarietyItem, isWeighed: boolean) => (
@@ -740,8 +744,8 @@ export default function UnloadingProducts({
 
           {/* Fixed Bottom Container: Report Mismatch + Finish Unloading */}
           <View
-            className="px-6 pt-3 bg-white"
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            className="px-6 pt-4 bg-white"
+            style={{ paddingBottom: insets.bottom + 16 }}
           >
             {/* Report Mismatch button — shown directly above Finish Unloading when mismatches exist */}
             {activeMismatches.length > 0 && (
@@ -749,7 +753,7 @@ export default function UnloadingProducts({
                 onPress={handleReportMismatch}
                 disabled={mismatchReported}
                 activeOpacity={0.8}
-                className={`w-full h-[52px] rounded-full items-center justify-center mb-3 ${
+                className={`w-full h-[50px] rounded-full items-center justify-center mb-3 ${
                   mismatchReported
                     ? "bg-white border-2 border-[#FF3B30]"
                     : "bg-[#FF3B30]"
@@ -776,7 +780,7 @@ export default function UnloadingProducts({
               onPress={handleFinishUnloading}
               disabled={!canFinish || submitting}
               activeOpacity={0.8}
-              className={`w-full h-[52px] rounded-full items-center justify-center ${
+              className={`w-full h-[50px] rounded-full items-center justify-center ${
                 !canFinish || submitting ? "bg-[#A0A4A8]" : "bg-[#000000]"
               }`}
               style={{
