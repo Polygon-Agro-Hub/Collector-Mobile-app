@@ -7,6 +7,7 @@ import {
   StatusBar,
   RefreshControl,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -114,10 +115,26 @@ export default function ReceivedProductsToday({
     }
   }, [t]);
 
+  const handleBackToHome = useCallback(() => {
+    navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+  }, [navigation]);
+
   useFocusEffect(
     useCallback(() => {
       fetchReceivedProducts();
-    }, [fetchReceivedProducts])
+
+      const onBackPress = () => {
+        handleBackToHome();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [fetchReceivedProducts, handleBackToHome])
   );
 
   const handleAdd = () => {
@@ -173,6 +190,7 @@ export default function ReceivedProductsToday({
       <CustomHeader
         title={t("ReceivedProductsToday.Title", "Received Products Today")}
         navigation={navigation}
+        onBackPress={handleBackToHome}
       />
 
       <View className="flex-1 relative">

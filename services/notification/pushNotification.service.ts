@@ -265,6 +265,7 @@ class PushNotificationService {
             sound: "default",
             priority: Notifications.AndroidNotificationPriority.MAX,
             vibrate: [0, 250, 250, 250],
+            color: "#980775",
           },
           trigger:
             Platform.OS === "android"
@@ -281,6 +282,7 @@ class PushNotificationService {
             body: displayBody,
             data: { ...item },
             sound: "default",
+            color: "#980775",
           },
           trigger: null,
         });

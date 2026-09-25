@@ -319,7 +319,7 @@ export default function WelcomeToQC({
           `${environment.API_BASE_URL}api/packing/qc-completed`,
           { orderId: targetOrderId, rowId: rowId },
           { headers: { Authorization: `Bearer ${token}` } }
-        ).catch(() => {});
+        ).catch(() => { });
 
         if (status === "no_items") {
           const isMainFromTracking = trackingRows.some(
@@ -534,9 +534,8 @@ export default function WelcomeToQC({
                   return (
                     <View key={s.id} className="flex-1 items-center">
                       <View
-                        className={`w-full h-1.5 rounded-full mb-1 ${
-                          isFilled ? "bg-[#030E25]" : "bg-gray-200"
-                        }`}
+                        className={`w-full h-1.5 rounded-full mb-1 ${isFilled ? "bg-[#030E25]" : "bg-gray-200"
+                          }`}
                       />
                     </View>
                   );
@@ -613,11 +612,10 @@ export default function WelcomeToQC({
             {status === "qc_checklist" && qcItems.length > 0 && (
               <View className="flex-1">
                 <Text
-                  className={`font-extrabold text-sm mb-4 ${
-                    currentPackName === "À la carte"
+                  className={`font-extrabold text-sm mb-4 ${currentPackName === "À la carte"
                       ? "text-[#AC7F5E]"
                       : "text-[#980775]"
-                  }`}
+                    }`}
                 >
                   {currentPackName} ({String(qcItems.length).padStart(2, "0")})
                 </Text>
@@ -658,11 +656,10 @@ export default function WelcomeToQC({
                       </View>
 
                       <View
-                        className={`w-6 h-6 rounded-md items-center justify-center border-2 ${
-                          item.checked
+                        className={`w-6 h-6 rounded-md items-center justify-center border-2 ${item.checked
                             ? "bg-[#980775] border-[#980775]"
                             : "border-[#030E25] bg-white"
-                        }`}
+                          }`}
                       >
                         {item.checked && (
                           <Ionicons name="checkmark" size={16} color="white" />

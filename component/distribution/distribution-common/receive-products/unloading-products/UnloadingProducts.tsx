@@ -28,6 +28,7 @@ import {
   UnloadVarietyItem,
   UnloadedGradeItem,
 } from "@/store/unloadSlice";
+import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
 
 type UnloadingProductsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -317,7 +318,7 @@ export default function UnloadingProducts({
           (Math.abs(g.unloadedWeightKg - g.loadedWeightKg) > 0.01 ||
             g.unloadedCrates !== g.loadedCrates)
         ) {
-          const gradeLetter = (g.gradeKey || g.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A";
+          const gradeLetter = g.gradeKey || extractGradeLetter(g.gradeTitle);
           mismatches.push({
             id: `${p.id}-${g.id}`,
             productName: getLocalizedProductName(p, i18n.language) || p.name,
@@ -436,7 +437,7 @@ export default function UnloadingProducts({
       grades: (prod.grades || []).flatMap((g) => {
         const gradeLetter = (
           g.gradeKey ||
-          g.gradeTitle.replace(/^Grade\s*/i, "") ||
+          extractGradeLetter(g.gradeTitle) ||
           "A"
         )
           .trim()
@@ -540,7 +541,11 @@ export default function UnloadingProducts({
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    navigation.navigate("ReceivedProductsToday");
+    if ((navigation as any).replace) {
+      (navigation as any).replace("ReceivedProductsToday");
+    } else {
+      navigation.navigate("ReceivedProductsToday");
+    }
   };
 
   const renderProductCard = (item: UnloadVarietyItem, isWeighed: boolean) => (
@@ -739,8 +744,8 @@ export default function UnloadingProducts({
 
           {/* Fixed Bottom Container: Report Mismatch + Finish Unloading */}
           <View
-            className="px-6 pt-3 bg-white"
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+            className="px-6 pt-4 bg-white"
+            style={{ paddingBottom: insets.bottom + 16 }}
           >
             {/* Report Mismatch button — shown directly above Finish Unloading when mismatches exist */}
             {activeMismatches.length > 0 && (
@@ -748,7 +753,7 @@ export default function UnloadingProducts({
                 onPress={handleReportMismatch}
                 disabled={mismatchReported}
                 activeOpacity={0.8}
-                className={`w-full h-[52px] rounded-full items-center justify-center mb-3 ${
+                className={`w-full h-[50px] rounded-full items-center justify-center mb-3 ${
                   mismatchReported
                     ? "bg-white border-2 border-[#FF3B30]"
                     : "bg-[#FF3B30]"
@@ -775,7 +780,7 @@ export default function UnloadingProducts({
               onPress={handleFinishUnloading}
               disabled={!canFinish || submitting}
               activeOpacity={0.8}
-              className={`w-full h-[52px] rounded-full items-center justify-center ${
+              className={`w-full h-[50px] rounded-full items-center justify-center ${
                 !canFinish || submitting ? "bg-[#A0A4A8]" : "bg-[#000000]"
               }`}
               style={{

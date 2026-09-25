@@ -130,16 +130,15 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         }}
         pointerEvents="none"
       >
-        <View className="px-24 w-full items-center">
+        <View className="px-14 w-full items-center">
           {title ? (
             <Text
-              className={`text-xl font-semibold text-center ${
+              className={`text-lg font-semibold text-center ${
                 textColor ? "" : dark ? "text-white" : "text-black"
               }`}
               style={[titleStyle, textColor ? { color: textColor } : undefined]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
+              numberOfLines={2}
+              ellipsizeMode="tail"
             >
               {title}
             </Text>

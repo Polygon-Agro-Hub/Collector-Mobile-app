@@ -79,7 +79,12 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
   route,
   navigation,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = (i18n.language?.startsWith("si")
+    ? "si"
+    : i18n.language?.startsWith("ta")
+    ? "ta"
+    : "en") as "en" | "si" | "ta";
   const scrollRef = useRef<ScrollView>(null);
 
   // Unified step navigation state
@@ -1099,7 +1104,10 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
     clearFieldErrorAddress("district");
 
     const selectedProvince = (provincesData.provinces as Province[]).find(
-      (p) => p.name.en === provinceName,
+      (p) =>
+        p.name.en === provinceName ||
+        p.name.si === provinceName ||
+        p.name.ta === provinceName,
     );
 
     if (selectedProvince) {
@@ -1131,7 +1139,16 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
     if (!districtName) return;
 
     clearFieldErrorAddress("district");
-    const updatedData = { ...formDataAddress, district: districtName };
+    const foundDistrict = districts.find(
+      (d) =>
+        d.en === districtName ||
+        d.si === districtName ||
+        d.ta === districtName,
+    );
+    const updatedData = {
+      ...formDataAddress,
+      district: foundDistrict ? foundDistrict.en : districtName,
+    };
     setFormDataAddress(updatedData);
     saveToStorage(
       step,
@@ -1337,14 +1354,14 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
 
   const provinceModalData = (provincesData.provinces as Province[])
     .map((p) => ({
-      label: p.name[selectedLanguage as keyof typeof p.name] || p.name.en,
+      label: p.name[currentLang] || p.name.en,
       value: p.name.en,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const districtModalData = districts
     .map((d) => ({
-      label: (d[selectedLanguage as keyof typeof d] as string) || d.en,
+      label: (d[currentLang] as string) || d.en,
       value: d.en,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
@@ -2032,8 +2049,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                               (pr) => pr.name.en === formDataAddress.province,
                             );
                             return p
-                              ? p.name[selectedLanguage as keyof typeof p.name] ||
-                                  p.name.en
+                              ? p.name[currentLang] || p.name.en
                               : formDataAddress.province;
                           })()
                         : ""
@@ -2063,9 +2079,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
                                   (dis) => dis.en === formDataAddress.district,
                                 );
                                 return d
-                                  ? (d[
-                                      selectedLanguage as keyof typeof d
-                                    ] as string) || d.en
+                                  ? (d[currentLang] as string) || d.en
                                   : formDataAddress.district;
                               })()
                             : ""
@@ -2372,6 +2386,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
           setActiveModal(null);
         }}
         searchPlaceholder={t("AddOfficerAddressDetails.Select Province")}
+        searchKeys={["label", "value"]}
         multiSelect={false}
       />
 
@@ -2387,6 +2402,7 @@ const DistributionAddOfficer: React.FC<AddOfficerProp> = ({
           setActiveModal(null);
         }}
         searchPlaceholder={t("AddOfficerAddressDetails.Select District")}
+        searchKeys={["label", "value"]}
         multiSelect={false}
       />
 
