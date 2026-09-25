@@ -112,6 +112,12 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
         );
         const data = response.data.data;
         setProfile(data);
+        const fnEn = `${data.firstNameEnglish || ""} ${data.lastNameEnglish || ""}`.trim();
+        const fnSi = `${data.firstNameSinhala || ""} ${data.lastNameSinhala || ""}`.trim();
+        const fnTa = `${data.firstNameTamil || ""} ${data.lastNameTamil || ""}`.trim();
+        if (fnEn) AsyncStorage.setItem("fullname", fnEn);
+        if (fnSi) AsyncStorage.setItem("fullnameSi", fnSi);
+        if (fnTa) AsyncStorage.setItem("fullnameTa", fnTa);
         if (data.empId) {
           setEmpId(data.empId);
         }
@@ -222,13 +228,22 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   };
 
   const getTextStyle = (lang?: string) => {
-    const activeLang = lang || getCurrentLanguage();
-    if (activeLang === "si") {
+    const activeLang = (lang || getCurrentLanguage()).toLowerCase();
+    if (activeLang.startsWith("si")) {
       return {
         fontSize: 14,
-        lineHeight: 20,
+        lineHeight: 18,
+      };
+    } else if (activeLang.startsWith("ta")) {
+      return {
+        fontSize: 13,
+        lineHeight: 18,
       };
     }
+    return {
+      fontSize: 15,
+      lineHeight: 20,
+    };
   };
 
   const getTranslationPrefix = () => {
@@ -756,12 +771,17 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
                   }}
                 >
                   {item.icon}
-                  <Text
-                    style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                    className="text-gray-700 text-lg absolute bottom-2 left-4"
-                  >
-                    {item.title}
-                  </Text>
+                  <View className="absolute bottom-3 left-4 right-4">
+                    <Text
+                      numberOfLines={2}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}
+                      style={getTextStyle()}
+                      className="text-gray-700 font-semibold"
+                    >
+                      {item.title}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -792,12 +812,17 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
                   className="w-10 h-10 absolute top-2 right-2"
                   resizeMode="contain"
                 />
-                <Text
-                  style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                  className="text-gray-700 text-lg absolute bottom-2 left-4"
-                >
-                  {t(`${getTranslationPrefix()}.ReadyToTransport`)}
-                </Text>
+                <View className="absolute bottom-3 left-4 right-4">
+                  <Text
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                    style={getTextStyle()}
+                    className="text-gray-700 font-semibold"
+                  >
+                    {t(`${getTranslationPrefix()}.ReadyToTransport`)}
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
           </>

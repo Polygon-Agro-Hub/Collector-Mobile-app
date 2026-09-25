@@ -62,6 +62,18 @@ export interface CropWeighData {
   grades: GradeWeighItem[];
 }
 
+export const extractGradeLetter = (title?: string): string => {
+  if (!title) return "A";
+  return (
+    title
+      .replace(/Grade/gi, "")
+      .replace(/ශ්‍රේණිය/g, "")
+      .replace(/ශ්රේණිය/g, "")
+      .replace(/தரம்/g, "")
+      .trim() || "A"
+  );
+};
+
 const EMPTY_CROP_DATA: CropWeighData = {
   id: "",
   name: "",
@@ -243,7 +255,7 @@ export default function WeighTheLoad({
           g.unloadedCrates !== g.loadedCrates)
     )
     .map((g) => {
-      const gradeLetter = (g.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A";
+      const gradeLetter = extractGradeLetter(g.gradeTitle);
       return {
         id: g.id,
         productName: getLocalizedProductName(cropData, i18n.language) || cropData.name,
@@ -257,13 +269,13 @@ export default function WeighTheLoad({
     });
 
   const handleGradePress = (grade: GradeWeighItem) => {
-    const gradeLetter = (grade.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A";
+    const gradeLetter = extractGradeLetter(grade.gradeTitle);
     navigation.navigate("WeighGrade", {
       varietyId: cropData.id,
       productId: cropData.id,
       productName: getLocalizedProductName(cropData, i18n.language) || cropData.name,
       productImage: cropData.image,
-      gradeTitle: `${t("WeighTheLoad.Grade", "Grade")} ${gradeLetter}`,
+      gradeTitle: `Grade ${gradeLetter}`,
       gradeId: grade.id,
       loadedWeightKg: grade.loadedWeightKg,
       loadedCrates: grade.loadedCrates,
@@ -594,7 +606,7 @@ export default function WeighTheLoad({
               {/* Grade Header */}
               <View className="flex-row items-center justify-between p-4 bg-white">
                 <Text className="font-extrabold text-base text-[#17262C]">
-                  {t("WeighTheLoad.Grade", "Grade")} {(grade.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A"}
+                  {t("WeighTheLoad.Grade", "Grade")} {extractGradeLetter(grade.gradeTitle)}
                 </Text>
                 <TouchableOpacity
                   activeOpacity={0.8}
@@ -820,7 +832,7 @@ export default function WeighTheLoad({
       {/* Warning Confirmation Modal for Delete Grade Unloaded Weight */}
       <WarningConfirmation
         visible={gradeToDelete !== null}
-        message={`Are you sure you want to delete added\n${getLocalizedProductName(cropData, i18n.language) || cropData.name} - ${t("WeighTheLoad.Grade", "Grade")} ${(gradeToDelete?.gradeTitle?.replace(/^Grade\s*/i, "")?.replace(/\s*Grade$/i, ""))?.trim() || "A"} ?`}
+        message={`Are you sure you want to delete added\n${getLocalizedProductName(cropData, i18n.language) || cropData.name} - ${t("WeighTheLoad.Grade", "Grade")} ${extractGradeLetter(gradeToDelete?.gradeTitle)} ?`}
         onConfirm={handleConfirmDeleteGrade}
         onCancel={() => setGradeToDelete(null)}
         confirmText="Delete"

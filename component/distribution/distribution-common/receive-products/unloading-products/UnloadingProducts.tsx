@@ -28,6 +28,7 @@ import {
   UnloadVarietyItem,
   UnloadedGradeItem,
 } from "@/store/unloadSlice";
+import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
 
 type UnloadingProductsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -317,7 +318,7 @@ export default function UnloadingProducts({
           (Math.abs(g.unloadedWeightKg - g.loadedWeightKg) > 0.01 ||
             g.unloadedCrates !== g.loadedCrates)
         ) {
-          const gradeLetter = (g.gradeKey || g.gradeTitle.replace(/^Grade\s*/i, "").replace(/\s*Grade$/i, "")).trim() || "A";
+          const gradeLetter = g.gradeKey || extractGradeLetter(g.gradeTitle);
           mismatches.push({
             id: `${p.id}-${g.id}`,
             productName: getLocalizedProductName(p, i18n.language) || p.name,
@@ -436,7 +437,7 @@ export default function UnloadingProducts({
       grades: (prod.grades || []).flatMap((g) => {
         const gradeLetter = (
           g.gradeKey ||
-          g.gradeTitle.replace(/^Grade\s*/i, "") ||
+          extractGradeLetter(g.gradeTitle) ||
           "A"
         )
           .trim()
