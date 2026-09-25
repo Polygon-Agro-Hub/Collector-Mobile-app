@@ -36,7 +36,7 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
           alignItems: "center",
         }}
       >
-        <View className="bg-white items-center rounded-2xl w-80 p-6 shadow-2xl">
+        <View className="bg-white items-center rounded-2xl w-[88%] max-w-[340px] px-5 py-6 shadow-2xl">
           <View className="flex items-center justify-center mb-4 rounded-xl bg-[#F6F7F9] p-3 w-14 h-14">
             <Ionicons name="warning" size={32} color="#6c7e8c" />
           </View>
@@ -44,10 +44,10 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
             {message}
           </Text>
 
-          <View className="flex-row items-center justify-center gap-4 w-full">
+          <View className="flex-row items-center justify-center gap-3 w-full">
             <TouchableOpacity
               onPress={onCancel}
-              className="flex-1 py-3 bg-[#F6F7F9] border border-[#D1D5DB] rounded-full items-center justify-center active:bg-gray-100"
+              className="flex-1 py-3 px-2 bg-[#F6F7F9] border border-[#D1D5DB] rounded-full items-center justify-center active:bg-gray-100"
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 2 },
@@ -56,14 +56,18 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
                 elevation: 3,
               }}
             >
-              <Text className="text-sm font-bold text-gray-700">
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                className="text-sm font-bold text-gray-700 text-center"
+              >
                 {cancelText}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={onConfirm}
-              className={`flex-1 py-3 rounded-full items-center justify-center ${confirmButtonBgClass}`}
+              className={`flex-1 py-3 px-2 rounded-full items-center justify-center ${confirmButtonBgClass}`}
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 2 },
@@ -72,7 +76,11 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
                 elevation: 3,
               }}
             >
-              <Text className="text-sm font-bold text-white">
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                className="text-sm font-bold text-white text-center"
+              >
                 {confirmText}
               </Text>
             </TouchableOpacity>
