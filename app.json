@@ -110,7 +110,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Photo library access is required to upload related images."
+          "photosPermission": "Photo library access is required to upload related images.",
+          "microphonePermission": false
         }
       ],
       "expo-location",
