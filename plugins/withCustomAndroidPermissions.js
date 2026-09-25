@@ -68,6 +68,24 @@ function withCustomAndroidPermissions(config) {
       }
     }
 
+    // 3. Explicitly remove android:requestLegacyExternalStorage from <application>
+    if (Array.isArray(androidManifest.application)) {
+      androidManifest.application.forEach((app) => {
+        if (app && app.$) {
+          delete app.$["android:requestLegacyExternalStorage"];
+        }
+      });
+    }
+
+    // 4. Ensure BLUETOOTH_SCAN has neverForLocation flag
+    const btScan = androidManifest["uses-permission"].find(
+      (p) => p?.$?.["android:name"] === "android.permission.BLUETOOTH_SCAN"
+    );
+    if (btScan && btScan.$) {
+      btScan.$["android:usesPermissionFlags"] = "neverForLocation";
+      btScan.$["tools:targetApi"] = "31";
+    }
+
     return config;
   });
 }

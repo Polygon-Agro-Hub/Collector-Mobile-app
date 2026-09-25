@@ -8,7 +8,7 @@
     "userInterfaceStyle": "automatic",
     "android": {
       "package": "com.polygonagro.Collector",
-      "versionCode": 10,
+      "versionCode": 15,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
@@ -108,15 +108,6 @@
         }
       ],
       [
-        "expo-media-library",
-        {
-          "photosPermission": "Photo library access is required to upload related images.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save the QR code to your device.",
-          "isAccessMediaLocationEnabled": false,
-          "granularPermissions": []
-        }
-      ],
-      [
         "expo-image-picker",
         {
           "photosPermission": "Photo library access is required to upload related images."
@@ -138,7 +129,8 @@
           "modes": [
             "central"
           ],
-          "bluetoothAlwaysPermission": "Allow CoDi-Net to connect to your Bluetooth label printer"
+          "bluetoothAlwaysPermission": "Allow CoDi-Net to connect to your Bluetooth label printer",
+          "neverForLocation": true
         }
       ],
       [
@@ -154,7 +146,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "3442e95c-e8f6-4c43-a09e-29bbad96faff"
+        "projectId": ""
       }
     }
   }
