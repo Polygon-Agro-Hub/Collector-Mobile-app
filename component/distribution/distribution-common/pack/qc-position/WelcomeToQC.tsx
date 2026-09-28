@@ -356,29 +356,52 @@ export default function WelcomeToQC({
       } else if (advanceRes.data && !advanceRes.data.success) {
         const code = advanceRes.data.code || advanceRes.data.data?.code;
         const targetPos = advanceRes.data.targetPosition || advanceRes.data.data?.targetPosition || (officerPosIndex ? officerPosIndex + 1 : 2);
+        const targetStationName = advanceRes.data.targetStationName || advanceRes.data.data?.targetStationName || "";
         const occupiedInv = advanceRes.data.occupiedInvoice || advanceRes.data.data?.occupiedInvoice || "";
+        const msg = advanceRes.data.message || advanceRes.data.data?.message || "";
 
-        if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+        const isBusy =
+          code === PACKING_ERROR_CODES.STATION_OCCUPIED ||
+          code === PACKING_ERROR_CODES.POSITION_BUSY ||
+          code === PACKING_ERROR_CODES.POSITION_1_BUSY ||
+          code === "STATION_OCCUPIED" ||
+          code === "POSITION_BUSY" ||
+          code === "POSITION_1_BUSY" ||
+          Boolean(advanceRes.data.isOccupied) ||
+          String(msg).toLowerCase().includes("busy");
+
+        const isNoOfficer =
+          code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
+          code === "NO_OFFICER_ASSIGNED" ||
+          String(msg).toLowerCase().includes("no packing position user assigned") ||
+          String(msg).toLowerCase().includes("no officer assigned");
+
+        const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+        const posLabel = isQc
+          ? t("Packing.QC Position", "QC Station")
+          : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+
+        if (isBusy) {
           Alert.alert(
             t("Packing.Position Busy", "Position Busy"),
             t("Packing.Position Busy Message", {
-              position: targetPos,
+              position: isQc ? "QC" : targetPos,
               invoice: occupiedInv,
-              defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+              defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
             })
           );
-        } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+        } else if (isNoOfficer) {
           Alert.alert(
             t("Packing.Position Not Available", "Position Not Available"),
             t("Packing.No Officer Assigned Message", {
-              position: targetPos,
-              defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+              position: isQc ? "QC" : targetPos,
+              defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
             })
           );
         } else {
           Alert.alert(
             t("Packing.Error", "Error"),
-            advanceRes.data.message || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
+            msg || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
           );
         }
         setIsAdvancing(false);
@@ -390,29 +413,52 @@ export default function WelcomeToQC({
       const data = err?.response?.data;
       const code = data?.code || data?.data?.code;
       const targetPos = data?.targetPosition || data?.data?.targetPosition || (officerPosIndex ? officerPosIndex + 1 : 2);
+      const targetStationName = data?.targetStationName || data?.data?.targetStationName || "";
       const occupiedInv = data?.occupiedInvoice || data?.data?.occupiedInvoice || "";
+      const msg = data?.message || data?.data?.message || err?.message || "";
 
-      if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
+      const isBusy =
+        code === PACKING_ERROR_CODES.STATION_OCCUPIED ||
+        code === PACKING_ERROR_CODES.POSITION_BUSY ||
+        code === PACKING_ERROR_CODES.POSITION_1_BUSY ||
+        code === "STATION_OCCUPIED" ||
+        code === "POSITION_BUSY" ||
+        code === "POSITION_1_BUSY" ||
+        Boolean(data?.isOccupied) ||
+        String(msg).toLowerCase().includes("busy");
+
+      const isNoOfficer =
+        code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
+        code === "NO_OFFICER_ASSIGNED" ||
+        String(msg).toLowerCase().includes("no packing position user assigned") ||
+        String(msg).toLowerCase().includes("no officer assigned");
+
+      const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+      const posLabel = isQc
+        ? t("Packing.QC Position", "QC Station")
+        : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+
+      if (isBusy) {
         Alert.alert(
           t("Packing.Position Busy", "Position Busy"),
           t("Packing.Position Busy Message", {
-            position: targetPos,
+            position: isQc ? "QC" : targetPos,
             invoice: occupiedInv,
-            defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+            defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
           })
         );
-      } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
+      } else if (isNoOfficer) {
         Alert.alert(
           t("Packing.Position Not Available", "Position Not Available"),
           t("Packing.No Officer Assigned Message", {
-            position: targetPos,
-            defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+            position: isQc ? "QC" : targetPos,
+            defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
           })
         );
       } else {
         Alert.alert(
           t("Packing.Error", "Error"),
-          data?.message || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
+          msg || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
         );
       }
       setIsAdvancing(false);

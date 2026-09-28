@@ -1,18 +1,21 @@
-﻿import { io, Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import environment from "@/environment/environment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { AppState, AppStateStatus } from "react-native";
 import { DCMNotificationItem } from "@/services/notification/notification.types";
+import store from "@/services/reducxStore";
 
 // The key Collector uses to persist auth state
 const AUTH_STORAGE_KEY = "@auth_state";
 
 type NotificationCallback = (notification: DCMNotificationItem) => void;
+type OfficerStatusCallback = (data: any) => void;
 
 class SocketService {
   private socket: Socket | null = null;
   private notificationListeners: Set<NotificationCallback> = new Set();
+  private officerStatusListeners: Set<OfficerStatusCallback> = new Set();
   private isConnecting: boolean = false;
   private currentUserId: number | null = null;
 
@@ -74,6 +77,16 @@ class SocketService {
           }
         } catch (_) {}
 
+        // Resolve user ID from Redux if available
+        if (!this.currentUserId) {
+          try {
+            const authState = store.getState()?.auth;
+            if (authState?.id) {
+              this.currentUserId = Number(authState.id);
+            }
+          } catch (_) {}
+        }
+
         // Fallback: fetch from API
         if (!this.currentUserId) {
           try {
@@ -110,10 +123,19 @@ class SocketService {
         this.hasLoggedConnectionNotice = false;
         this.stopFallbackPolling();
         console.log(`[SocketService] Connected: ${this.socket?.id}, userId: ${this.currentUserId}`);
-        if (this.currentUserId) {
-          this.socket?.emit("join_user", this.currentUserId);
-          this.socket?.emit("join_officer", this.currentUserId);
-          this.socket?.emit("register_user", this.currentUserId);
+
+        const authState = store?.getState?.()?.auth;
+        const resolvedId = this.currentUserId || (authState?.id ? Number(authState.id) : null);
+        const resolvedEmpId = authState?.empId;
+
+        if (resolvedId) {
+          this.socket?.emit("join_user", resolvedId);
+          this.socket?.emit("join_officer", resolvedId);
+          this.socket?.emit("register_user", resolvedId);
+        }
+        if (resolvedEmpId) {
+          this.socket?.emit("join_user", resolvedEmpId);
+          this.socket?.emit("join_officer", resolvedEmpId);
         }
         // Still start polling even when socket works - catches any race conditions
         this.startFallbackPolling(token);
@@ -132,6 +154,20 @@ class SocketService {
       this.socket.on("new_return_otp", handleSocketNotification);
       this.socket.on("handover_return_otp", handleSocketNotification);
       this.socket.on("newNotification", handleSocketNotification);
+
+      // Real-time officer and account status listeners
+      const handleOfficerStatusChange = (data: any) => {
+        console.log("[SocketService] Real-time officer status event received:", JSON.stringify(data));
+        this.dispatchOfficerStatusToListeners(data);
+      };
+
+      this.socket.on("officer_status_changed", handleOfficerStatusChange);
+      this.socket.on("account_status_changed", handleOfficerStatusChange);
+      this.socket.on("user_status_changed", handleOfficerStatusChange);
+      this.socket.on("force_logout", handleOfficerStatusChange);
+      this.socket.on("session_expired", handleOfficerStatusChange);
+      this.socket.on("officer_banned", handleOfficerStatusChange);
+      this.socket.on("officer_rejected", handleOfficerStatusChange);
 
       this.socket.on("connect_error", (err) => {
         this.isConnecting = false;
@@ -239,6 +275,23 @@ class SocketService {
       clearInterval(this.fallbackPollingTimer);
       this.fallbackPollingTimer = null;
     }
+  }
+
+  private dispatchOfficerStatusToListeners(data: any) {
+    this.officerStatusListeners.forEach((listener) => {
+      try {
+        listener(data);
+      } catch (e) {
+        console.error("[SocketService] Error in officer status listener:", e);
+      }
+    });
+  }
+
+  onOfficerStatusChanged(callback: OfficerStatusCallback): () => void {
+    this.officerStatusListeners.add(callback);
+    return () => {
+      this.officerStatusListeners.delete(callback);
+    };
   }
 
   onNewNotification(callback: NotificationCallback): () => void {

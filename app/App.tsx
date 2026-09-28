@@ -11,10 +11,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Provider } from "react-redux";
 import environment from "../environment/environment";
 import { LanguageProvider } from "@/context/LanguageContext";
-import axios from "axios";
-import { logoutUser } from "../store/authSlice";
 import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
-import { verifyOfficerStatus, setupGlobalApiInterceptors } from "@/services/apiInterceptor";
+import {
+  verifyOfficerStatus,
+  setupGlobalApiInterceptors,
+  handleAuthError,
+} from "@/services/apiInterceptor";
 import {
   SafeAreaProvider,
   SafeAreaView,
@@ -98,9 +100,33 @@ function AppContent() {
       pushNotificationService.displayLocalNotification(item, bodyText);
     });
 
+    // When officer/account status changes via socket, handle immediately (push-based, no polling)
+    const unsubscribeOfficerStatus = socketService.onOfficerStatusChanged(async (data: any) => {
+      console.log("🔒 [App.tsx] Officer status changed via socket:", data);
+      const accStatus = (
+        data?.accountStatus ||
+        (typeof data?.status === "string" ? data.status : "")
+      ).toLowerCase();
+      const isRejected =
+        accStatus === "rejected" ||
+        accStatus === "banned" ||
+        accStatus === "not approved";
+      const isForceLogout =
+        data?.type === "force_logout" ||
+        data?.code === "FORCE_LOGOUT" ||
+        data?.action === "logout";
+
+      if (isRejected || isForceLogout) {
+        handleAuthError(isRejected ? 403 : 401, data);
+      } else {
+        await verifyOfficerStatus(true);
+      }
+    });
+
     return () => {
       unsubscribeStore();
       unsubscribeNotif();
+      unsubscribeOfficerStatus();
     };
   }, []);
 
@@ -125,18 +151,6 @@ function AppContent() {
 
   useEffect(() => {
     setupGlobalApiInterceptors();
-
-    // Periodically verify officer status (every 10 seconds) when app is active and user is logged in
-    const interval = setInterval(() => {
-      const token = store.getState().auth?.token;
-      if (token && AppState.currentState === "active") {
-        verifyOfficerStatus();
-      }
-    }, 10000);
-
-    return () => {
-      clearInterval(interval);
-    };
   }, []);
 
   useEffect(() => {
@@ -179,7 +193,6 @@ function AppContent() {
         if (storedEmpId) {
           await status(storedEmpId, true);
         }
-        await verifyOfficerStatus(true);
       } else if (nextAppState === "background") {
         if (storedEmpId) {
           await status(storedEmpId, false);
@@ -237,13 +250,9 @@ function AppContent() {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
             if (routeName) setCurrentRoute(routeName);
           }}
-          onStateChange={async () => {
+          onStateChange={() => {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
             if (routeName) setCurrentRoute(routeName);
-            const token = store.getState().auth?.token;
-            if (token) {
-              await verifyOfficerStatus();
-            }
           }}
         >
           <RootStackNavigator />
