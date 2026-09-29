@@ -48,8 +48,8 @@ export const getDevServerHostIp = (): string => {
     console.warn("Failed to auto-detect dev server host IP:", err);
   }
 
-  // Fallback default IP
-  return "192.168.8.102";
+  // Fallback default IP (matched to local development Wi-Fi IP)
+  return "192.168.8.100";
 };
 
 export default getDevServerHostIp;

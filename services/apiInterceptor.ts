@@ -23,9 +23,8 @@ export const handleAuthError = (status: number, data: any): boolean => {
     currentRouteName = route?.name || "";
   }
 
-  const userToken = store.getState().auth.token;
+  // If already on auth/banned screens, ignore duplicate triggers
   if (
-    !userToken ||
     currentRouteName === "Login" ||
     currentRouteName === "Lanuage" ||
     currentRouteName === "Splash" ||
@@ -39,21 +38,24 @@ export const handleAuthError = (status: number, data: any): boolean => {
   const code = (data?.code || data?.reason || "").toUpperCase();
   const accStatus = (
     data?.accountStatus ||
-    (typeof data?.status === "string" ? data?.status : "")
+    (typeof data?.status === "string" ? data.status : "")
   ).toLowerCase();
+  const statusTypeLower = (data?.statusType || "").toLowerCase();
 
   // 1. Account Rejection / Not Approved check
   const isAccountRejected =
     accStatus === "rejected" ||
     accStatus === "banned" ||
-    msg.includes("this account is rejected") ||
-    msg.includes("account is rejected") ||
+    statusTypeLower === "rejected" ||
+    statusTypeLower === "banned" ||
+    msg.includes("rejected") ||
     msg.includes("banned");
 
   const isAccountNotApproved =
     accStatus === "not approved" ||
-    msg.includes("this account is not approved") ||
-    msg.includes("account is not approved");
+    statusTypeLower === "not_approved" ||
+    statusTypeLower === "not approved" ||
+    msg.includes("not approved");
 
   if (isAccountRejected || isAccountNotApproved) {
     try {
@@ -68,21 +70,31 @@ export const handleAuthError = (status: number, data: any): boolean => {
       ? data?.message || "This EMP ID is Rejected"
       : data?.message || "This EMP ID is not approved.";
 
-    if (navigationRef.isReady()) {
-      navigationRef.reset({
-        index: 0,
-        routes: [
-          {
-            name: "BannedScreen",
-            params: {
-              statusType,
-              message,
+    const navigateToBanned = (attemptsLeft = 10) => {
+      if (navigationRef.isReady()) {
+        navigationRef.reset({
+          index: 0,
+          routes: [
+            {
+              name: "BannedScreen",
+              params: {
+                statusType,
+                message,
+              },
             },
-          },
-        ],
-      });
-    }
+          ],
+        });
+      } else if (attemptsLeft > 0) {
+        setTimeout(() => navigateToBanned(attemptsLeft - 1), 100);
+      }
+    };
+    navigateToBanned();
     return true;
+  }
+
+  const userToken = store.getState().auth.token;
+  if (!userToken) {
+    return false;
   }
 
   // 2. Operational / Domain validation errors (e.g. scanning driver, center mismatch, etc.)

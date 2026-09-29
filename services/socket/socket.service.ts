@@ -19,12 +19,13 @@ class SocketService {
   private isConnecting: boolean = false;
   private currentUserId: number | null = null;
 
+  private currentEmpId: string | null = null;
+
   // Track the latest ID we have already alerted on this session.
   // -1 = first poll (baseline sync, don't alert on pre-existing items)
   // 0+ = highest ID we have shown a banner for
   private lastSeenId: number = -1;
 
-  private fallbackPollingTimer: any = null;
   private hasLoggedConnectionNotice: boolean = false;
   private appStateSubscription: any = null;
   private isPollingActive: boolean = false;
@@ -45,14 +46,40 @@ class SocketService {
     );
   }
 
-  /** Read token from AsyncStorage (works even before Redux rehydrates) */
+  /** Safe base64 payload decode from JWT token */
+  private decodeTokenPayload(token: string): any {
+    try {
+      const parts = token.split(".");
+      if (parts.length === 3) {
+        let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+        while (base64.length % 4) {
+          base64 += "=";
+        }
+        if (typeof atob === "function") {
+          return JSON.parse(atob(base64));
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /** Read token from Redux, @auth_state, or direct 'token' key in AsyncStorage */
   private async getToken(): Promise<string | null> {
     try {
+      // 1. Check Redux store directly
+      const reduxToken = store.getState()?.auth?.token;
+      if (reduxToken) return reduxToken;
+
+      // 2. Check @auth_state in AsyncStorage
       const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed?.token) return parsed.token;
       }
+
+      // 3. Fallback to direct 'token' key
+      const directToken = await AsyncStorage.getItem("token");
+      if (directToken) return directToken;
     } catch (_) {}
     return null;
   }
@@ -65,26 +92,39 @@ class SocketService {
 
     this.isConnecting = true;
     try {
-      // Resolve user ID from stored auth state
-      if (!this.currentUserId) {
+      // Resolve user ID & empId from Redux, AsyncStorage, or JWT
+      if (!this.currentUserId || !this.currentEmpId) {
         try {
-          const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-          if (stored) {
-            const parsed = JSON.parse(stored);
-            if (parsed?.id) {
-              this.currentUserId = Number(parsed.id);
-            }
-          }
+          const authState = store.getState()?.auth;
+          if (authState?.id) this.currentUserId = Number(authState.id);
+          if (authState?.empId) this.currentEmpId = authState.empId;
         } catch (_) {}
 
-        // Resolve user ID from Redux if available
-        if (!this.currentUserId) {
+        if (!this.currentUserId || !this.currentEmpId) {
           try {
-            const authState = store.getState()?.auth;
-            if (authState?.id) {
-              this.currentUserId = Number(authState.id);
+            const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              if (parsed?.id && !this.currentUserId) this.currentUserId = Number(parsed.id);
+              if (parsed?.empId && !this.currentEmpId) this.currentEmpId = parsed.empId;
             }
           } catch (_) {}
+        }
+
+        if (!this.currentEmpId) {
+          try {
+            const directEmp = await AsyncStorage.getItem("empid");
+            if (directEmp) this.currentEmpId = directEmp;
+          } catch (_) {}
+        }
+
+        // Try decoding JWT payload directly
+        if (!this.currentUserId || !this.currentEmpId) {
+          const decoded = this.decodeTokenPayload(token);
+          if (decoded) {
+            if (decoded.id && !this.currentUserId) this.currentUserId = Number(decoded.id);
+            if (decoded.empId && !this.currentEmpId) this.currentEmpId = decoded.empId;
+          }
         }
 
         // Fallback: fetch from API
@@ -105,7 +145,7 @@ class SocketService {
       const urlMatch = baseUrl.match(/^(https?:\/\/[^/]+)/);
       const socketUrl = urlMatch ? urlMatch[1] : baseUrl;
 
-      console.log(`[SocketService] Connecting to: ${socketUrl}`);
+      console.log(`[SocketService] Connecting to: ${socketUrl} (userId: ${this.currentUserId}, empId: ${this.currentEmpId})`);
 
       this.socket = io(socketUrl, {
         path: "/socket.io",
@@ -113,32 +153,36 @@ class SocketService {
         extraHeaders: { Authorization: `Bearer ${token}` },
         auth: { token },
         reconnection: true,
-        reconnectionAttempts: 3,
-        reconnectionDelay: 5000,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 3000,
         timeout: 5000,
       });
 
       this.socket.on("connect", () => {
         this.isConnecting = false;
         this.hasLoggedConnectionNotice = false;
-        this.stopFallbackPolling();
-        console.log(`[SocketService] Connected: ${this.socket?.id}, userId: ${this.currentUserId}`);
+        console.log(`[SocketService] Connected: ${this.socket?.id}, userId: ${this.currentUserId}, empId: ${this.currentEmpId}`);
 
-        const authState = store?.getState?.()?.auth;
-        const resolvedId = this.currentUserId || (authState?.id ? Number(authState.id) : null);
-        const resolvedEmpId = authState?.empId;
+        const resolvedId = this.currentUserId;
+        const resolvedEmpId = this.currentEmpId;
 
         if (resolvedId) {
           this.socket?.emit("join_user", resolvedId);
           this.socket?.emit("join_officer", resolvedId);
-          this.socket?.emit("register_user", resolvedId);
         }
         if (resolvedEmpId) {
           this.socket?.emit("join_user", resolvedEmpId);
           this.socket?.emit("join_officer", resolvedEmpId);
         }
-        // Still start polling even when socket works - catches any race conditions
-        this.startFallbackPolling(token);
+        // Send registration payload matching Govi Transport architecture
+        this.socket?.emit("register_user", {
+          userId: resolvedId,
+          empId: resolvedEmpId,
+          token,
+        });
+
+        // One-time baseline sync upon connection (Zero polling)
+        this.syncBaseline(token);
       });
 
       const handleSocketNotification = (data: DCMNotificationItem) => {
@@ -173,20 +217,13 @@ class SocketService {
         this.isConnecting = false;
         if (!this.hasLoggedConnectionNotice) {
           this.hasLoggedConnectionNotice = true;
-          console.log("[SocketService] Socket not reachable, using REST polling. Error:", err?.message);
+          console.log("[SocketService] Socket connection error:", err?.message);
         }
-        this.startFallbackPolling(token);
       });
 
       this.socket.on("disconnect", (reason) => {
         this.isConnecting = false;
-        if (reason !== "io client disconnect") {
-          this.startFallbackPolling(token);
-        }
       });
-
-      // Always start polling immediately as a safety net
-      this.startFallbackPolling(token);
 
     } catch (e) {
       this.isConnecting = false;
@@ -202,78 +239,58 @@ class SocketService {
   public async checkNewNotifications() {
     const token = await this.getToken();
     if (!token) return;
-    try { await this.pollNotifications(token); } catch (_) {}
+    try { await this.syncBaseline(token); } catch (_) {}
   }
 
-  private async pollNotifications(token: string) {
+  /**
+   * One-time baseline sync on connect or foreground to align existing notification high-water mark.
+   * All subsequent notifications are delivered in pure real-time over WebSocket (Zero polling).
+   */
+  private async syncBaseline(token?: string) {
     if (this.isPollingActive) return;
     this.isPollingActive = true;
 
     try {
+      const resolvedToken = token || (await this.getToken());
+      if (!resolvedToken) return;
+
       const response = await axios.get(
         `${environment.API_BASE_URL}api/distribution-manager/notifications`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${resolvedToken}`,
             "Content-Type": "application/json",
             Accept: "application/json",
           },
+          timeout: 8000,
         }
       );
 
       const notifications: DCMNotificationItem[] = response.data?.data || [];
 
       if (!Array.isArray(notifications) || notifications.length === 0) {
-        // No notifications at all - just initialize baseline
         if (this.lastSeenId === -1) this.lastSeenId = 0;
         return;
       }
 
-      // Sort by id descending to find the latest
       const sorted = [...notifications].sort((a, b) => (b.id || 0) - (a.id || 0));
       const latestId = sorted[0]?.id || 0;
 
-      console.log(`[SocketService] Poll: total=${notifications.length}, latestId=${latestId}, lastSeenId=${this.lastSeenId}`);
-
-      // ── BASELINE SYNC (first poll this session) ──────────────────────────
-      // Don't alert on pre-existing notifications when app opens
       if (this.lastSeenId === -1) {
         this.lastSeenId = latestId;
         console.log("[SocketService] Baseline synced. lastSeenId:", this.lastSeenId);
         return;
       }
 
-      // ── DETECT NEW ITEMS (id > lastSeenId) ───────────────────────────────
       const newItems = notifications.filter((n) => (n.id || 0) > this.lastSeenId);
       if (newItems.length > 0) {
-        console.log(`[SocketService] ${newItems.length} new notification(s) detected via poll`);
-        newItems.forEach((item) => {
-          this.dispatchToListeners(item);
-        });
+        newItems.forEach((item) => this.dispatchToListeners(item));
         this.lastSeenId = latestId;
       }
-
     } catch (err: any) {
-      console.warn("[SocketService] Poll error:", err?.message);
+      console.warn("[SocketService] Baseline sync error:", err?.message);
     } finally {
       this.isPollingActive = false;
-    }
-  }
-
-  private startFallbackPolling(token: string) {
-    if (this.fallbackPollingTimer) return;
-    // Poll immediately
-    this.pollNotifications(token);
-    // Then every 8 seconds
-    this.fallbackPollingTimer = setInterval(() => {
-      this.pollNotifications(token);
-    }, 8000);
-  }
-
-  private stopFallbackPolling() {
-    if (this.fallbackPollingTimer) {
-      clearInterval(this.fallbackPollingTimer);
-      this.fallbackPollingTimer = null;
     }
   }
 
@@ -300,7 +317,6 @@ class SocketService {
   }
 
   disconnect() {
-    this.stopFallbackPolling();
     if (this.socket) { this.socket.disconnect(); this.socket = null; }
     this.isConnecting = false;
     this.hasLoggedConnectionNotice = false;
