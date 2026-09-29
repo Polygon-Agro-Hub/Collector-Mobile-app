@@ -521,12 +521,17 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
               }}
             >
               {item.icon}
-              <Text
-                style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                className="text-[#555464] text-lg absolute bottom-2 left-4"
-              >
-                {item.title}
-              </Text>
+              <View className="absolute bottom-3 left-4 right-4">
+                <Text
+                  numberOfLines={2}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                  style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                  className="text-[#555464] font-semibold"
+                >
+                  {item.title}
+                </Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>

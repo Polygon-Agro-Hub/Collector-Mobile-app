@@ -39,7 +39,12 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
 
     const current = wifiScaleService.getStatus();
     setScaleStatus(current);
-    if (current.currentWeight > 0) {
+
+    // If initialWeight is provided (> 0) and scale is disconnected or reading 0,
+    // display the previously recorded initialWeight
+    if (initialWeight > 0 && (!current.connected || current.currentWeight <= 0)) {
+      setDisplayWeight(initialWeight);
+    } else if (current.connected && current.currentWeight > 0) {
       setDisplayWeight(current.currentWeight);
     } else if (initialWeight > 0) {
       setDisplayWeight(initialWeight);
@@ -49,7 +54,7 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
 
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
-      if (status.currentWeight !== undefined && status.currentWeight > 0) {
+      if (status.connected && status.currentWeight !== undefined && status.currentWeight > 0) {
         setDisplayWeight(status.currentWeight);
       }
     });
