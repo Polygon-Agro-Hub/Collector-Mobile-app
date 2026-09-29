@@ -13,7 +13,6 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import Constants from "expo-constants";
 import NetInfo from "@react-native-community/netinfo";
 import { useTranslation } from "react-i18next";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
@@ -23,17 +22,15 @@ interface ScaleSelectModalProps {
   onClose: () => void;
 }
 
-const isExpoGo = Constants.appOwnership === "expo";
-
 // Device config is data, not translated text — keep the model name out of the
 // translation files and only translate the descriptive suffix around it.
 const DEFAULT_DEVICE = {
   name: "BUDRY MFD-300",
   ip: "192.168.1.30",
-  port: isExpoGo ? "3001" : "33581",
+  port: "33581",
 };
 const DEFAULT_IP = "192.168.1.30";
-const DEFAULT_PORT = DEFAULT_DEVICE.port;
+const DEFAULT_PORT = "33581";
 
 export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   visible,
@@ -46,21 +43,74 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
 
+  const fetchCurrentNetworkIp = async () => {
+    try {
+      const state = await NetInfo.fetch();
+      const isOnline = state.isConnected !== false && state.type !== "none";
+      setIsWifiEnabled(isOnline);
+
+      if (
+        state.details &&
+        "ipAddress" in state.details &&
+        typeof (state.details as any).ipAddress === "string" &&
+        (state.details as any).ipAddress.trim() !== ""
+      ) {
+        const ip = (state.details as any).ipAddress.trim();
+        setIpAddress(ip);
+        return ip;
+      }
+      return null;
+    } catch (err) {
+      console.warn("Failed to fetch current network IP:", err);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (visible) {
+      const status = wifiScaleService.getStatus();
+      if (status.scale?.ip) {
+        setIpAddress(status.scale.ip);
+        if (status.scale?.port) {
+          setPort(status.scale.port.toString());
+        }
+      } else {
+        fetchCurrentNetworkIp();
+      }
+    }
+  }, [visible]);
+
   useEffect(() => {
     const unsubscribeScale = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
       if (status.scale?.ip) {
-        setIpAddress(status.scale.ip || "192.168.1.30");
+        setIpAddress(status.scale.ip || DEFAULT_IP);
         if (status.scale?.port) {
           setPort(status.scale.port.toString());
         }
       }
     });
+
     const unsubscribeNet = NetInfo.addEventListener((state) => {
       // Do not use state.isWifiEnabled alone because on Android it returns false if location permission is denied ("Don't Allow")
       const isOnline = state.isConnected !== false && state.type !== "none";
       setIsWifiEnabled(isOnline);
+      if (
+        state.details &&
+        "ipAddress" in state.details &&
+        typeof (state.details as any).ipAddress === "string" &&
+        (state.details as any).ipAddress.trim() !== ""
+      ) {
+        const liveIp = (state.details as any).ipAddress.trim();
+        const current = wifiScaleService.getStatus();
+        if (!current.connected) {
+          setIpAddress(liveIp);
+        }
+      }
     });
+
+    fetchCurrentNetworkIp();
+
     return () => {
       unsubscribeScale();
       unsubscribeNet();
@@ -275,7 +325,6 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 <View>
                   <Text style={{ fontSize: 14, fontWeight: "bold", color: "#0f172a" }}>
                     {DEFAULT_DEVICE.name}
-                    {isExpoGo ? ` (${t("ScaleSelectModal.PcBridgeSuffix")})` : ""}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#64748b" }}>
                     {t("ScaleSelectModal.IpLabel")}: {DEFAULT_DEVICE.ip} | {t("ScaleSelectModal.PortLabel")}: {DEFAULT_DEVICE.port}
