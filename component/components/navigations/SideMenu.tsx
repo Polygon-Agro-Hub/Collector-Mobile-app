@@ -96,15 +96,13 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     React.useCallback(() => {
       setComplaintDropdownOpen(false);
       setLanguageDropdownOpen(false);
-      if (i18n.language === "en") {
-        LanguageSelect("en");
-        setSelectedLanguage("ENGLISH");
-      } else if (i18n.language === "si") {
-        LanguageSelect("si");
+      const curLang = (i18n.language || "").toLowerCase();
+      if (curLang.startsWith("si")) {
         setSelectedLanguage("SINHALA");
-      } else if (i18n.language === "ta") {
-        LanguageSelect("ta");
+      } else if (curLang.startsWith("ta")) {
         setSelectedLanguage("TAMIL");
+      } else {
+        setSelectedLanguage("ENGLISH");
       }
     }, [i18n.language]),
   );
@@ -200,17 +198,11 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
     setLanguageDropdownOpen(false);
+    const code = language === "SINHALA" ? "si" : language === "TAMIL" ? "ta" : "en";
     try {
-      if (language === "ENGLISH") {
-        LanguageSelect("en");
-        HanldeAsynStorage("en");
-      } else if (language === "TAMIL") {
-        LanguageSelect("ta");
-        HanldeAsynStorage("ta");
-      } else if (language === "SINHALA") {
-        LanguageSelect("si");
-        HanldeAsynStorage("si");
-      }
+      AsyncStorage.setItem("@user_language", code);
+      changeLanguage(code);
+      i18n.changeLanguage(code);
     } catch (error) {}
   };
 
@@ -223,7 +215,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   };
 
   const getTextStyle = (language: string) => {
-    if (language === "si") {
+    if (language === "si" || language === "SINHALA" || i18n.language?.startsWith("si")) {
       return {
         fontSize: 14,
         lineHeight: 20,
@@ -237,14 +229,19 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
 
   const getFullName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
-      case "si":
-        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
-      case "ta":
-        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
-      default:
-        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+    const lang = (i18n.language || "").toLowerCase();
+    const isSinhala = selectedLanguage === "SINHALA" || selectedLanguage === "si" || lang.startsWith("si");
+    const isTamil = selectedLanguage === "TAMIL" || selectedLanguage === "ta" || lang.startsWith("ta");
+
+    if (isSinhala) {
+      const siName = `${profile.firstNameSinhala || ""} ${profile.lastNameSinhala || ""}`.trim();
+      if (siName) return siName;
     }
+    if (isTamil) {
+      const taName = `${profile.firstNameTamil || ""} ${profile.lastNameTamil || ""}`.trim();
+      if (taName) return taName;
+    }
+    return `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim() || t("SideMenu.Officer");
   };
 
   const handleBackPress = () => {

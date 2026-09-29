@@ -89,7 +89,9 @@ export default function WelcomeToQC({
 
   const [status, setStatus] = useState<QCStatus>("no_target");
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
+  const [alertTitle, setAlertTitle] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [isAdvancing, setIsAdvancing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -321,6 +323,8 @@ export default function WelcomeToQC({
           { headers: { Authorization: `Bearer ${token}` } }
         ).catch(() => { });
 
+        setAlertType("success");
+        setAlertTitle(t("Packing.Success", "Success"));
         if (status === "no_items") {
           const isMainFromTracking = trackingRows.some(
             (r: any) =>
@@ -381,9 +385,10 @@ export default function WelcomeToQC({
           ? t("Packing.QC Position", "QC Station")
           : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
 
+        setAlertType("error");
         if (isBusy) {
-          Alert.alert(
-            t("Packing.Position Busy", "Position Busy"),
+          setAlertTitle(t("Packing.Position Busy", "Position Busy"));
+          setAlertMessage(
             t("Packing.Position Busy Message", {
               position: isQc ? "QC" : targetPos,
               invoice: occupiedInv,
@@ -391,19 +396,20 @@ export default function WelcomeToQC({
             })
           );
         } else if (isNoOfficer) {
-          Alert.alert(
-            t("Packing.Position Not Available", "Position Not Available"),
+          setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+          setAlertMessage(
             t("Packing.No Officer Assigned Message", {
               position: isQc ? "QC" : targetPos,
               defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
             })
           );
         } else {
-          Alert.alert(
-            t("Packing.Error", "Error"),
+          setAlertTitle(t("Packing.Error", "Error"));
+          setAlertMessage(
             msg || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
           );
         }
+        setAlertVisible(true);
         setIsAdvancing(false);
       } else {
         setIsAdvancing(false);
@@ -438,9 +444,10 @@ export default function WelcomeToQC({
         ? t("Packing.QC Position", "QC Station")
         : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
 
+      setAlertType("error");
       if (isBusy) {
-        Alert.alert(
-          t("Packing.Position Busy", "Position Busy"),
+        setAlertTitle(t("Packing.Position Busy", "Position Busy"));
+        setAlertMessage(
           t("Packing.Position Busy Message", {
             position: isQc ? "QC" : targetPos,
             invoice: occupiedInv,
@@ -448,19 +455,20 @@ export default function WelcomeToQC({
           })
         );
       } else if (isNoOfficer) {
-        Alert.alert(
-          t("Packing.Position Not Available", "Position Not Available"),
+        setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+        setAlertMessage(
           t("Packing.No Officer Assigned Message", {
             position: isQc ? "QC" : targetPos,
             defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
           })
         );
       } else {
-        Alert.alert(
-          t("Packing.Error", "Error"),
+        setAlertTitle(t("Packing.Error", "Error"));
+        setAlertMessage(
           msg || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
         );
       }
+      setAlertVisible(true);
       setIsAdvancing(false);
     }
   };
@@ -779,14 +787,16 @@ export default function WelcomeToQC({
 
       <AlertModal
         visible={alertVisible}
-        type="success"
-        title={t("Packing.Success", "Success")}
+        type={alertType}
+        title={alertTitle}
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);
           setIsAdvancing(false);
-          setQcItems([]);
-          fetchActiveOrderAndStatus(true);
+          if (alertType === "success") {
+            setQcItems([]);
+            fetchActiveOrderAndStatus(true);
+          }
         }}
       />
     </View>

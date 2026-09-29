@@ -478,7 +478,7 @@ ${signature}${replyTime}`,
        <ScrollView
           className=" flex-1  w-full mx-auto"
           contentContainerStyle={{
-            paddingBottom: jobRole === "Distribution Officer" ? hp(4) : hp(12),
+            paddingBottom: Math.max(hp(18), insets.bottom + hp(14)),
             paddingHorizontal: wp(4),
           }}
         >

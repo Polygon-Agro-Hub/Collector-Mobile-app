@@ -1155,7 +1155,8 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
       (p) =>
         p.name.en === provinceName ||
         p.name.si === provinceName ||
-        p.name.ta === provinceName,
+        p.name.ta === provinceName ||
+        (p.name.en === "Uva" && (provinceName === "උව" || provinceName === "ඌව")),
     );
 
     if (selectedProvince) {
