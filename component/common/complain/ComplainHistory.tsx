@@ -26,6 +26,7 @@ import LottieView from "lottie-react-native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { AntDesign } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ROLES } from "@/constants/user-roles";
 
 interface complainItem {
   id: number;
@@ -92,9 +93,16 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
   const [userFullNameTa, setUserFullNameTa] = useState<string>("");
   const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  const [jobRole, setJobRole] = useState<string | null>(null);
+  const reduxJobRole = store.getState().auth.jobRole;
+  const [jobRole, setJobRole] = useState<string | null>(reduxJobRole || null);
 
   const insets = useSafeAreaInsets();
+
+  const isDistributionOfficer =
+    jobRole === ROLES.DISTRIBUTION_OFFICER ||
+    jobRole === "Distribution Officer" ||
+    reduxJobRole === ROLES.DISTRIBUTION_OFFICER ||
+    reduxJobRole === "Distribution Officer";
 
   const fetchUserProfileNames = async () => {
     try {
@@ -467,10 +475,10 @@ ${signature}${replyTime}`,
           </Text>
         </View>
       ) : (
-        <ScrollView
+       <ScrollView
           className=" flex-1  w-full mx-auto"
           contentContainerStyle={{
-            paddingBottom: jobRole === "Distribution Officer" ? hp(4) : hp(12),
+            paddingBottom: Math.max(hp(18), insets.bottom + hp(14)),
             paddingHorizontal: wp(4),
           }}
         >

@@ -10,9 +10,8 @@ import {
   Platform,
   ActivityIndicator,
   BackHandler,
-  KeyboardAvoidingView,
-  ScrollView,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
@@ -224,10 +223,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
       {loading ? (
         <LoadingPage fullScreen />
       ) : (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={{ flex: 1, backgroundColor: "white" }}
-        >
+        <View style={{ flex: 1, backgroundColor: "white" }}>
           <CustomHeader
             title=""
             showBackButton={true}
@@ -236,16 +232,20 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
             transparent
           />
 
-          <ScrollView
+          <KeyboardAwareScrollView
             style={{ flex: 1, backgroundColor: "white" }}
             contentContainerStyle={{
               flexGrow: 1,
               paddingBottom: 40,
               backgroundColor: "white",
             }}
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            extraScrollHeight={Platform.OS === "ios" ? 20 : 80}
+            extraHeight={Platform.OS === "ios" ? 20 : 80}
             keyboardShouldPersistTaps="handled"
+            bounces={false}
             showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
           >
             <View className="px-4 max-w-[500px] w-full mx-auto bg-white">
               <Image
@@ -309,6 +309,7 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     placeholder={t("ReportComplaint.Kindlysubmit")}
                     placeholderTextColor="#434343"
                     multiline
+                    scrollEnabled={false}
                     value={complain}
                     onChangeText={(text) => setComplain(text.trimStart())}
                   />
@@ -336,8 +337,8 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 </View>
               </View>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </KeyboardAwareScrollView>
+        </View>
       )}
 
       {/* Category Modal */}

@@ -23,9 +23,8 @@ export const handleAuthError = (status: number, data: any): boolean => {
     currentRouteName = route?.name || "";
   }
 
-  const userToken = store.getState().auth.token;
+  // If already on auth/banned screens, ignore duplicate triggers
   if (
-    !userToken ||
     currentRouteName === "Login" ||
     currentRouteName === "Lanuage" ||
     currentRouteName === "Splash" ||
@@ -37,18 +36,26 @@ export const handleAuthError = (status: number, data: any): boolean => {
 
   const msg = (data?.message || "").toLowerCase();
   const code = (data?.code || data?.reason || "").toUpperCase();
-  const accStatus = (data?.accountStatus || "").toLowerCase();
+  const accStatus = (
+    data?.accountStatus ||
+    (typeof data?.status === "string" ? data.status : "")
+  ).toLowerCase();
+  const statusTypeLower = (data?.statusType || "").toLowerCase();
 
   // 1. Account Rejection / Not Approved check
   const isAccountRejected =
     accStatus === "rejected" ||
-    msg.includes("this account is rejected") ||
-    msg.includes("account is rejected");
+    accStatus === "banned" ||
+    statusTypeLower === "rejected" ||
+    statusTypeLower === "banned" ||
+    msg.includes("rejected") ||
+    msg.includes("banned");
 
   const isAccountNotApproved =
     accStatus === "not approved" ||
-    msg.includes("this account is not approved") ||
-    msg.includes("account is not approved");
+    statusTypeLower === "not_approved" ||
+    statusTypeLower === "not approved" ||
+    msg.includes("not approved");
 
   if (isAccountRejected || isAccountNotApproved) {
     try {
@@ -63,21 +70,31 @@ export const handleAuthError = (status: number, data: any): boolean => {
       ? data?.message || "This EMP ID is Rejected"
       : data?.message || "This EMP ID is not approved.";
 
-    if (navigationRef.isReady()) {
-      navigationRef.reset({
-        index: 0,
-        routes: [
-          {
-            name: "BannedScreen",
-            params: {
-              statusType,
-              message,
+    const navigateToBanned = (attemptsLeft = 10) => {
+      if (navigationRef.isReady()) {
+        navigationRef.reset({
+          index: 0,
+          routes: [
+            {
+              name: "BannedScreen",
+              params: {
+                statusType,
+                message,
+              },
             },
-          },
-        ],
-      });
-    }
+          ],
+        });
+      } else if (attemptsLeft > 0) {
+        setTimeout(() => navigateToBanned(attemptsLeft - 1), 100);
+      }
+    };
+    navigateToBanned();
     return true;
+  }
+
+  const userToken = store.getState().auth.token;
+  if (!userToken) {
+    return false;
   }
 
   // 2. Operational / Domain validation errors (e.g. scanning driver, center mismatch, etc.)
@@ -85,6 +102,8 @@ export const handleAuthError = (status: number, data: any): boolean => {
     code === "CENTER_MISMATCH" ||
     code === "NO_OFFICER_ASSIGNED" ||
     code === "STATION_OCCUPIED" ||
+    code === "POSITION_BUSY" ||
+    code === "POSITION_1_BUSY" ||
     code === "MAIN_CONTAINER_PENDING" ||
     code === "OFFICER_REJECTED" ||
     code === "ROLE_NOT_ALLOWED" ||
@@ -102,15 +121,42 @@ export const handleAuthError = (status: number, data: any): boolean => {
     return false;
   }
 
-  // 3. Token expiration / invalid token
-  const isTokenExpired =
+  // 2b. Password validation errors (e.g. incorrect current password on Change Password)
+  const isPasswordValidationError =
+    msg.includes("password") ||
+    msg.includes("incorrect") ||
+    code === "INVALID_PASSWORD" ||
+    code === "INCORRECT_PASSWORD";
+
+  if (isPasswordValidationError) {
+    return false;
+  }
+
+  // 3. Token expiration / invalid token / force logout
+  const isExplicitTokenError =
     code === "TOKEN_EXPIRED" ||
     code === "INVALID_TOKEN" ||
-    msg.includes("jwt expired") ||
+    code === "FORCE_LOGOUT" ||
+    code === "SESSION_EXPIRED" ||
+    data?.type === "force_logout" ||
+    msg.includes("jwt") ||
     msg.includes("token expired") ||
     msg.includes("invalid token") ||
     msg.includes("token not found") ||
-    status === 401;
+    msg.includes("force logout") ||
+    msg.includes("session expired") ||
+    msg.includes("no token provided") ||
+    msg.includes("authorization token is missing");
+
+  const isTokenExpired =
+    isExplicitTokenError ||
+    (status === 401 &&
+      (msg.includes("token") || msg.includes("jwt") || !msg) &&
+      !msg.includes("password") &&
+      !msg.includes("incorrect") &&
+      !msg.includes("not found") &&
+      !msg.includes("user not found") &&
+      !msg.includes("officer id"));
 
   if (!isTokenExpired) {
     return false;
@@ -187,7 +233,7 @@ export const attachAuthInterceptor = (instance: AxiosInstance) => {
  */
 export const verifyOfficerStatus = async (force: boolean = false): Promise<boolean> => {
   const now = Date.now();
-  if (isCheckingStatus || (!force && now - lastStatusCheckTime < 3000)) {
+  if (isCheckingStatus || (!force && now - lastStatusCheckTime < 25000)) {
     return false;
   }
 
@@ -231,7 +277,17 @@ export const verifyOfficerStatus = async (force: boolean = false): Promise<boole
       return handleAuthError(403, data);
     } else if (response.status === 401) {
       const data = await response.json().catch(() => ({}));
-      return handleAuthError(401, data);
+      const msg = (data?.message || "").toString().toLowerCase();
+      // Only treat 401 as expired if it explicitly says token expired / invalid token
+      if (
+        msg.includes("token") ||
+        msg.includes("jwt expired") ||
+        data?.code === "TOKEN_EXPIRED" ||
+        data?.code === "INVALID_TOKEN"
+      ) {
+        return handleAuthError(401, data);
+      }
+      return false;
     }
 
     return false;
