@@ -458,77 +458,113 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     setShowConfirmModal(true);
   };
 
-  const handleConfirm = async () => {
-    if (!selectedPosition) return;
-    try {
-      setSubmitting(true);
-      const token = store.getState().auth.token;
-      if (!token) {
-        Alert.alert(
-          t("Packing.Error", "Error"),
-          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
-        );
-        return;
-      }
-
-      const response = await axios.post(
-        `${environment.API_BASE_URL}api/packing/positions/assign`,
-        { positionId: selectedPosition.id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+const handleConfirm = async () => {
+  if (!selectedPosition) return;
+  try {
+    setSubmitting(true);
+    const token = store.getState().auth.token;
+    if (!token) {
       setShowConfirmModal(false);
-
-      if (response.data && response.data.success) {
-        const assignmentData = {
-          rowId: selectedRow?.id || 0,
-          rowIndex: selectedRow?.rowIndex,
-          rowName: selectedRow?.name || (selectedRow?.rowIndex ? `Row ${selectedRow.rowIndex}` : undefined),
-          positionId: selectedPosition.id,
-          positionName: selectedPosition.name,
-          pType: selectedPosition.type,
-        };
-        dispatch(setActiveAssignmentAction(assignmentData));
-
-        Alert.alert(
-          t("Packing.Confirmation Success", "Confirmation Success"),
-          t("Packing.You have been successfully assigned to this position", "You have been successfully assigned to this position"),
-          [
-            {
-              text: t("AlertModal.OK", "OK"),
-              onPress: () => {
-                if (selectedPosition.type === "QR") {
-                  navigation.navigate("QRHandling");
-                } else if (selectedPosition.type === "NOR") {
-                  navigation.navigate("WelcomeToPacking", {
-                    positionId: selectedPosition.id,
-                    positionName: formatPositionName(selectedPosition),
-                    rowId: selectedRow?.id,
-                  });
-                } else if (selectedPosition.type === "QC") {
-                  navigation.navigate("WelcomeToQC", {
-                    positionName: formatPositionName(selectedPosition),
-                    rowId: selectedRow?.id,
-                  });
-                }
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert(
-          t("Packing.Error", "Error"),
-          response.data.message || t("Packing.Failed to assign position.", "Failed to assign position.")
-        );
-      }
-    } catch (error: any) {
-      console.error("Error assigning position:", error);
-      const errMsg = error.response?.data?.message || t("Packing.An error occurred while confirming assignment.", "An error occurred while confirming assignment.");
-      Alert.alert(t("Packing.Error", "Error"), errMsg);
-    } finally {
-      setSubmitting(false);
+      Alert.alert(
+        t("Packing.Error", "Error"),
+        t(
+          "Packing.Authentication token not found. Please log in again.",
+          "Authentication token not found. Please log in again."
+        )
+      );
+      return;
     }
-  };
+
+    const response = await axios.post(
+      `${environment.API_BASE_URL}api/packing/positions/assign`,
+      { positionId: selectedPosition.id },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setShowConfirmModal(false);
+
+    if (response.data && response.data.success) {
+      const assignmentData = {
+        rowId: selectedRow?.id || 0,
+        rowIndex: selectedRow?.rowIndex,
+        rowName:
+          selectedRow?.name ||
+          (selectedRow?.rowIndex ? `Row ${selectedRow.rowIndex}` : undefined),
+        positionId: selectedPosition.id,
+        positionName: selectedPosition.name,
+        pType: selectedPosition.type,
+      };
+      dispatch(setActiveAssignmentAction(assignmentData));
+
+      Alert.alert(
+        t("Packing.Confirmation Success", "Confirmation Success"),
+        t(
+          "Packing.You have been successfully assigned to this position",
+          "You have been successfully assigned to this position"
+        ),
+        [
+          {
+            text: t("AlertModal.OK", "OK"),
+            onPress: () => {
+              if (selectedPosition.type === "QR") {
+                navigation.navigate("QRHandling");
+              } else if (selectedPosition.type === "NOR") {
+                navigation.navigate("WelcomeToPacking", {
+                  positionId: selectedPosition.id,
+                  positionName: formatPositionName(selectedPosition),
+                  rowId: selectedRow?.id,
+                });
+              } else if (selectedPosition.type === "QC") {
+                navigation.navigate("WelcomeToQC", {
+                  positionName: formatPositionName(selectedPosition),
+                  rowId: selectedRow?.id,
+                });
+              }
+            },
+          },
+        ]
+      );
+    } else {
+      Alert.alert(
+        t("Packing.Error", "Error"),
+        response.data.message ||
+          t("Packing.Failed to assign position.", "Failed to assign position.")
+      );
+    }
+  } catch (error: any) {
+    console.error("Error assigning position:", error);
+
+    const code = error.response?.data?.code;
+    const serverMsg = error.response?.data?.message;
+
+    let errMsg: string;
+    if (code === "POSITION_OCCUPIED") {
+      errMsg = t(
+        "Packing.Position already occupied today",
+        "This position is already occupied by another officer today."
+      );
+      // refresh so the card shows as Occupied
+      if (selectedRow) fetchPositionsSilently(selectedRow.id);
+    } else if (code === "POSITION_NOT_FOUND") {
+      errMsg = t(
+        "Packing.Selected position not found",
+        "Selected packing position not found."
+      );
+    } else {
+      errMsg =
+        serverMsg ||
+        t(
+          "Packing.An error occurred while confirming assignment.",
+          "An error occurred while confirming assignment."
+        );
+    }
+
+    setShowConfirmModal(false);
+    Alert.alert(t("Packing.Error", "Error"), errMsg);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <View className="flex-1 bg-white">

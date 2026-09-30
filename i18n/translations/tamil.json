@@ -1631,7 +1631,9 @@
     "Items to QC": "QC செய்ய வேண்டிய பொருட்கள் ({{count}})",
     "Pass QC": "QC தேர்ச்சி",
     "End Shift Confirmation": "{{row}} இல் உள்ள {{pos}} க்கான ஷிப்டை முடிக்க விரும்புகிறீர்களா?",
-    "End": "முடி"
+    "End": "முடி",
+    "Position already occupied today": "இந்த நிலையை இன்று ஏற்கனவே மற்றொரு அதிகாரி எடுத்துள்ளார்.",
+"Selected position not found": "தேர்ந்தெடுக்கப்பட்ட பேக்கிங் நிலை கிடைக்கவில்லை."
   },
   "QRHandling": {
     "QR Handling": "QR கையாளுதல்",

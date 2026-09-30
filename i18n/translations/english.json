@@ -1706,7 +1706,9 @@
     "Items to QC": "Items to QC ({{count}})",
     "Pass QC": "Pass QC",
     "End Shift Confirmation": "Are you sure you want to end the shift for {{pos}} in {{row}}?",
-    "End": "End"
+    "End": "End",
+    "Position already occupied today": "This position is already occupied by another officer today.",
+    "Selected position not found": "Selected packing position not found."
   },
   "QRHandling": {
     "QR Handling": "QR Handling",

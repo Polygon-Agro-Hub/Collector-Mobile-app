@@ -1494,7 +1494,7 @@
     "Orders": "ඇණවුම්",
     "OrderCountHeader": "{{type}} ඇණවුම් {{count}} ක්",
     "Loading orders...": "ඇණවුම් පූරණය වෙමින්...",
-    "All Orders": "සියලුම රැගෙන යාමේ ඇණවුම් ({{count}}) ක්",
+    "All Orders": "සියලුම ඇණවුම් ({{count}}) ක්",
     "All Pickup Orders": "සියලු රැගෙන යාමේ ඇණවුම් ({{count}})",
     "Pickup Orders": "රැගෙන යාමේ ඇණවුම්",
     "Pickup Order": "රැගෙන යාමේ ඇණවුම",
@@ -1631,7 +1631,9 @@
     "Items to QC": "තත්ත්ව පරීක්ෂාවට ඇති ද්‍රව්‍ය ({{count}})",
     "Pass QC": "තත්ත්ව පරීක්ෂාව සමත්",
     "End Shift Confirmation": "{{row}} හි {{pos}} සඳහා සේවා මුරය අවසන් කිරීමට ඔබට විශ්වාසද?",
-    "End": "අවසන් කරන්න"
+    "End": "අවසන් කරන්න",
+    "Position already occupied today": "මෙම ස්ථානය අද දින වෙනත් නිලධාරියෙකු විසින් දැනටමත් භාවිත කරමින් සිටී.",
+"Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය."
   },
   "QRHandling": {
     "QR Handling": "QR හැසිරවීම",
