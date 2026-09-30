@@ -31,6 +31,8 @@
     "Crates": "Crates",
     "Set": "Set",
     "Grade": "Grade",
+    "Transport": "Transport",
+    "Centre": "Centre",
     "Search Price": "Search Price"
   },
   "Main": {
@@ -1960,6 +1962,7 @@
   },
   "LoadingToVehicle": {
     "Variety": "Variety",
+    "Crop": "Crop",
     "CropName": "Crop Name",
     "VarietyLabel": "Variety",
     "SelectCrop": "--Select Crop--",
@@ -1973,6 +1976,11 @@
     "ItemSavedMessage": "Variety {{num}} saved. You can now load the next variety.",
     "FinishLoadingTitle": "Loading Complete",
     "FinishLoadingMessage": "Vehicle {{vehicleNo}} loaded successfully.",
+    "DeleteConfirmation": "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+    "DeleteVarietyConfirmation": "Are you sure you want to delete previously added {{varietyName}}?",
+    "DeleteSetConfirmation": "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+    "Delete": "Delete",
+    "Cancel": "Cancel",
     "OK": "OK"
   },
   "LoadingToVehicleSummary": {

@@ -261,8 +261,13 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
               {t("ScanDriverQR.QRIdentified", "QR code identified successfully.")}
             </Text>
             <Text className="text-center font-bold text-[#000000]">
-              {t("ScanDriverQR.Driver", "Driver")} : {driver.empId}{localizedDriverName ? `, ${localizedDriverName}` : ""}
+              {t("ScanDriverQR.Driver", "Driver")} : {driver.empId}
             </Text>
+            {localizedDriverName ? (
+              <Text className="text-center font-bold text-[#000000] mt-0.5">
+                {localizedDriverName}
+              </Text>
+            ) : null}
           </View>,
         );
         setModalType("success");

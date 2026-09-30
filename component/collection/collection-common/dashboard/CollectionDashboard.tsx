@@ -653,7 +653,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
                 getTextStyle(selectedLanguage),
               ]}
             >
-              {t(`${getTranslationPrefix()}.Transport`)}
+              {t(`${getTranslationPrefix()}.Transport`, t("Common.Transport", "Transport"))}
             </Text>
             {activeTab === "transport" && (
               <View

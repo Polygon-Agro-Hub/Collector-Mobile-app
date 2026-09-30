@@ -31,6 +31,8 @@
     "Crates": "පෙට්ටි",
     "Set": "කාණ්ඩය",
     "Grade": "ශ්‍රේණිය",
+    "Transport": "ප්‍රවාහනය",
+    "Centre": "මධ්‍යස්ථානය",
     "Search Price": "මිල සෙවීම"
   },
   "Main": {
@@ -57,8 +59,8 @@
     "Search": "NIC මගින් සොයන්න",
     "LoadingTargetStatus": "ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී...",
     "Collection": "එකතු කිරීම්",
-    "Transport": "ප්රවාහනය",
-    "ReadyToTransport": "ප්රවාහනය කිරීම්"
+    "Transport": "ප්‍රවාහනය",
+    "ReadyToTransport": "ප්‍රවාහනය කිරීම්"
   },
   "Error": {
     "error": "සමාවෙන්න",
@@ -151,7 +153,7 @@
     "Sharing is not available on this device.": "මෙම උපාංගෙන් බෙදාගැනීම සිදු කල නොහැක.",
     "File saved to app's directory:": "ගොනුව යෙදුමේ නාමාවලියට සුරකින ලදී:",
     "Failed to fetch crop names.": "බෝග නාම ලබා ගැනීමට අපොහොසත් විය.",
-    "Failed to fetch varieties.": "ප්රභේදය තෝරා ගැනීමට අපොහොසත් විය.",
+    "Failed to fetch varieties.": "ප්‍රභේදය තෝරා ගැනීමට අපොහොසත් විය.",
     "Please fill in all fields.": "කරැණාකර සියලු ක්ෂේත්‍ර පුරවන්න.",
     "No targets to save.": "සුරකීම සදහා ඉලක්ක නොමැත.",
     "Invalid date or time values provided.": "අවලංගු දිනයක් හෝ වේලාවක් සපයා ඇත.",
@@ -645,8 +647,8 @@
     "CenterTarget": "මධ්‍යස්ථාන ඉලක්කය",
     "MyCollection": "මගේ එකතුව",
     "Collection": "එකතු කිරීම්",
-    "Transport": "ප්රවාහනය",
-    "ReadyToTransport": "ප්රවාහනය කිරීම්"
+    "Transport": "ප්‍රවාහනය",
+    "ReadyToTransport": "ප්‍රවාහනය කිරීම්"
   },
   "AddOfficerBasicDetails": {
     "LNG": "si",
@@ -1210,7 +1212,7 @@
   "ReceivedCashQrCode": {
     "Not Valid!": "වලංගු නොවේ!",
     "This Manager's ID is not approved or not valid.": "මෙම කළමනාකරුගේ හැඳුනුම්පත අනුමත කර නොමැත හෝ වලංගු නොවේ.",
-    "This DCM officer is not in the same centre.": "මෙම DCM නිලධාරියා එකම මධ්යස්ථානයේ නොමැත.",
+    "This DCM officer is not in the same centre.": "මෙම DCM නිලධාරියා එකම මධ්‍යස්ථානයේ නොමැත.",
     "cashHandoverSuccess": "රු. {{amount}} ක් {{officerCode}} වෙත සාර්ථකව භාර දී ඇත.",
     "Scan Timeout": "ස්කෑන් කාල සීමාව ඉකුත් විය",
     "Scan timeout message": "නියමිත කාල සීමාව තුළ QR කේතය හඳුනාගත නොහැකි විය. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
@@ -1859,7 +1861,7 @@
   },
   "SentProductsToday": {
     "Title": "අද යවන ලද තොග",
-    "NoLoadsToday": "අද තොග ප්රවාහනයන් කර නොමැත",
+    "NoLoadsToday": "අද තොග ප්‍රවාහනයන් කර නොමැත",
     "Crates": "පෙට්ටි",
     "AddLoadTitle": "නව පැටවීමක් එක් කරන්න",
     "AddLoadMessage": "ප්‍රවාහනය සඳහා නිෂ්පාදන සූදානම් කර යවන්න."
@@ -1878,17 +1880,19 @@
     "AlignDriverQR": "ස්කෑන් කිරීමට රියදුරු QR කේතය රාමුව තුළ තබන්න"
   },
   "SelectDistributionCentre": {
-    "Title": "මධ්යස්ථානය තෝරන්න",
-    "NoCentresFound": "- බෙදාහැරීමේ මධ්‍යස්ථාන හමු නොවීය -",
+    "Title": "බෙදාහැරීමේ මධ්‍යස්ථානය තෝරන්න",
+    "NoCentresFound": "- බෙදාහැරීමේ මධ්යස්ථාන හමු නොවීය -",
     "SelectAndContinue": "ඉදිරියට යන්න",
-    "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී"
+    "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී",
+    "Centre": "මධ්‍යස්ථානය"
   },
   "LoadingToVehicle": {
-    "Variety": "ප්රභේදය",
+    "Variety": "ප්‍රභේදය",
+    "Crop": "බෝගය",
     "CropName": "බෝගයේ නම",
-    "VarietyLabel": "ප්රභේදය",
+    "VarietyLabel": "ප්‍රභේදය",
     "SelectCrop": "--බෝගය තෝරන්න--",
-    "SelectVariety": "--ප්රභේදය තෝරන්න--",
+    "SelectVariety": "--ප්‍රභේදය තෝරන්න--",
     "Grade": "ශ්‍රේණිය",
     "FinishLoading": "අවසන් කරන්න",
     "AddMoreItems": "එකතු කරන්න",
@@ -1898,6 +1902,11 @@
     "ItemSavedMessage": "ප්‍රභේදය {{num}} සුරැකිණි. ඔබට දැන් ඊළඟ ප්‍රභේදය පැටවිය හැක.",
     "FinishLoadingTitle": "පැටවීම සම්පූර්ණයි",
     "FinishLoadingMessage": "{{vehicleNo}} රථයට සාර්ථකව පටවන ලදී.",
+    "DeleteConfirmation": "එක් කරන ලද පහත අයිතමය ඉවත් කිරීමට ඔබට අවශ්‍ය බව සහතිකද?\n{{item}} - {{grade}} - {{set}}",
+    "DeleteVarietyConfirmation": "පෙර එක් කළ {{varietyName}} ඉවත් කිරීමට ඔබට අවශ්‍ය බව සහතිකද?",
+    "DeleteSetConfirmation": "එක් කරන ලද පහත අයිතමය ඉවත් කිරීමට ඔබට අවශ්‍ය බව සහතිකද?\n{{item}} - {{grade}} - {{set}}",
+    "Delete": "ඉවත් කරන්න",
+    "Cancel": "අවලංගු කරන්න",
     "OK": "හරි"
   },
   "LoadingToVehicleSummary": {

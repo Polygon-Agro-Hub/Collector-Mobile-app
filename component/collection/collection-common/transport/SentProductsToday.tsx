@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   RefreshControl,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
@@ -43,6 +44,7 @@ export interface SentProductItem {
   weight: string;
   destination: string;
   time: string;
+  createdAt?: string;
   conformDriverId?: number | null;
 }
 
@@ -54,6 +56,24 @@ export default function SentProductsToday({
   const [products, setProducts] = useState<SentProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const handleBack = () => {
+    navigation.navigate("Main", { screen: "CollectionDashboard" });
+  };
+
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("Main", { screen: "CollectionDashboard" });
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const fetchSentProducts = useCallback(async (isRefresh = false) => {
     try {
@@ -110,7 +130,20 @@ export default function SentProductsToday({
 
   const formatDisplayTime = (timeStr?: string) => {
     if (!timeStr) return "";
-    let str = timeStr.replace(/^At\s*/i, `${t("Common.At", "At")} `);
+    let str = timeStr;
+    if (timeStr.includes("T") || (timeStr.includes("-") && timeStr.includes(":"))) {
+      const d = new Date(timeStr);
+      if (!isNaN(d.getTime())) {
+        const slDate = new Date(d.getTime() + (5 * 60 + 30) * 60 * 1000);
+        let hours = slDate.getUTCHours();
+        const minutes = slDate.getUTCMinutes();
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        const mm = minutes < 10 ? `0${minutes}` : minutes;
+        str = `At ${hours}:${mm} ${ampm}`;
+      }
+    }
+    str = str.replace(/^At\s*/i, `${t("Common.At", "At")} `);
     const lang = (i18n.language || "").toLowerCase();
     if (lang.startsWith("si")) {
       str = str
@@ -130,6 +163,7 @@ export default function SentProductsToday({
       <CustomHeader
         title={t("SentProductsToday.Title", "Sent Products Today")}
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       <View className="flex-1 relative">

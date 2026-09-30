@@ -169,10 +169,27 @@ export default function SelectDistributionCentre({
                 >
                   {/* Building Icon Badge */}
                   <View
-                    className="w-12 h-12 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: "#E9ECF1" }}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 24,
+                      backgroundColor: "#E9ECF1",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
                   >
-                    <FontAwesome6 name="building-circle-arrow-right" size={18} color="black" />
+                    <FontAwesome6
+                      name="building-circle-arrow-right"
+                      size={18}
+                      color="black"
+                      style={{
+                        textAlign: "center",
+                        textAlignVertical: "center",
+                        includeFontPadding: false,
+                        paddingLeft: 3,
+                      }}
+                    />
                   </View>
 
                   {/* Centre Info */}

@@ -31,6 +31,8 @@
     "Crates": "பெட்டிகள்",
     "Set": "வகை",
     "Grade": "தரம்",
+    "Transport": "போக்குவரத்து",
+    "Centre": "மையம்",
     "Search Price":"விலை தேடல்"
   },
   "Main": {
@@ -1878,13 +1880,15 @@
     "AlignDriverQR": "ஸ்கேன் செய்ய ஓட்டுநர் QR குறியீட்டை சட்டத்திற்குள் சீரமைக்கவும்"
   },
   "SelectDistributionCentre": {
-    "Title": "தேர்ந்தெடுக்கப்பட்ட மையம்",
+    "Title": "விநியோக மையத்தைத் தேர்ந்தெடுக்கவும்",
     "NoCentresFound": "- விநியோக மையங்கள் எதுவும் கிடைக்கவில்லை -",
     "SelectAndContinue": "தொடருங்கள்",
-    "CentreSelectedTitle": "மையம் தேர்ந்தெடுக்கப்பட்டது"
+    "CentreSelectedTitle": "மையம் தேர்ந்தெடுக்கப்பட்டது",
+    "Centre": "மையம்"
   },
   "LoadingToVehicle": {
     "Variety": "வகை",
+    "Crop": "பயிர்",
     "CropName": "பயிர் பெயர்",
     "VarietyLabel": "வகை",
     "SelectCrop": "--பயிரைத் தேர்ந்தெடுக்கவும்--",
@@ -1898,6 +1902,11 @@
     "ItemSavedMessage": "வகை {{num}} சேமிக்கப்பட்டது. இப்போது அடுத்த வகையை ஏற்றலாம்.",
     "FinishLoadingTitle": "ஏற்றுதல் முடிந்தது",
     "FinishLoadingMessage": "{{vehicleNo}} வாகனத்தில் வெற்றிகரமாக ஏற்றப்பட்டது.",
+    "DeleteConfirmation": "சேர்க்கப்பட்டதை நீக்க விரும்புகிறீர்களா?\n{{item}} - {{grade}} - {{set}}",
+    "DeleteVarietyConfirmation": "ஏற்கனவே சேர்க்கப்பட்ட {{varietyName}} ஐ நீக்க விரும்புகிறீர்களா?",
+    "DeleteSetConfirmation": "சேர்க்கப்பட்டதை நீக்க விரும்புகிறீர்களா?\n{{item}} - {{grade}} - {{set}}",
+    "Delete": "நீக்கு",
+    "Cancel": "ரத்துசெய்",
     "OK": "சரி"
   },
   "LoadingToVehicleSummary": {
