@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -107,7 +107,8 @@ export default function ConfirmRowAssign({
   const insets = useSafeAreaInsets();
   const [timerRunning, setTimerRunning] = useState(true);
   const [seconds, setSeconds] = useState(30);
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false); // UI state only
+  const isSubmittingRef = useRef(false); // synchronous guard — prevents timer+button race
   const timerRef = useRef<any>(null);
 
   // Check if type is Retail or Wholesale from group details or context
@@ -157,13 +158,19 @@ export default function ConfirmRowAssign({
   const orderText = selectedOrdersCount === 1 ? t("AssignGroups.Order", "Order") : t("AssignGroups.Orders", "Orders");
   const orderTextLower = selectedOrdersCount === 1 ? "order" : "orders";
 
-  const handleConfirm = async () => {
-    if (submitting) return;
+  const handleConfirm = useCallback(async () => {
+    // Synchronous ref guard — prevents timer auto-fire + manual button press race
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     setTimerRunning(false);
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setSubmitting(true);
 
     try {
-      setSubmitting(true);
       const token = store.getState().auth.token;
       if (!token) {
         Alert.alert(
@@ -201,6 +208,11 @@ export default function ConfirmRowAssign({
           t("Packing.Error", "Error"),
           response.data.message || t("AssignGroups.Failed to assign orders.", "Failed to assign orders."),
         );
+        // Clear any stale timer before restarting to prevent dual-timer buildup
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
         setTimerRunning(true);
       }
     } catch (error) {
@@ -209,11 +221,17 @@ export default function ConfirmRowAssign({
         t("Packing.Error", "Error"),
         t("AssignGroups.An error occurred while assigning orders.", "An error occurred while assigning orders.")
       );
+      // Clear any stale timer before restarting to prevent dual-timer buildup
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
       setTimerRunning(true);
     } finally {
       setSubmitting(false);
+      isSubmittingRef.current = false;
     }
-  };
+  }, [group, selectedRow, selectedOrderIds, t, navigation]);
 
   const handleBack = () => {
     setTimerRunning(false);
@@ -244,10 +262,17 @@ export default function ConfirmRowAssign({
 
   useEffect(() => {
     if (timerRunning && isFocused) {
+      // Clear any existing timer before creating a new one (prevents dual timers on error-restart)
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
       timerRef.current = setInterval(() => {
         setSeconds((prev) => {
           if (prev <= 1) {
             if (timerRef.current) clearInterval(timerRef.current);
+            timerRef.current = null;
+            // isSubmittingRef guards against racing with manual button press
             handleConfirm();
             return 0;
           }
@@ -267,7 +292,7 @@ export default function ConfirmRowAssign({
         timerRef.current = null;
       }
     };
-  }, [timerRunning, isFocused]);
+  }, [timerRunning, isFocused, handleConfirm]);
 
   useEffect(() => {
     const onBackPress = () => {
