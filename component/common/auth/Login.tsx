@@ -22,6 +22,7 @@ import environment from "@/environment/environment";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import { setUser } from "@/store/authSlice";
+import { saveAuthData } from "@/services/authStorage";
 import { useDispatch } from "react-redux";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -206,16 +207,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           return;
         }
 
-        let errorMessage = t("Error.This EMP ID is not approved.");
-        let statusType = "not_approved";
-
-        if (data.accountStatus === "Rejected") {
-          errorMessage = t("Error.This EMP ID is Rejected");
-          statusType = "rejected";
-        } else if (data.accountStatus === "Not Approved") {
-          errorMessage = t("Error.This EMP ID is not approved.");
-          statusType = "not_approved";
-        }
+        const rawStatus = (data.accountStatus || "").toLowerCase();
+        const isRejected = rawStatus === "rejected" || rawStatus === "banned";
+        const statusType = isRejected ? "rejected" : "not_approved";
+        const errorMessage = isRejected
+          ? (data.message || t("Error.This EMP ID is Rejected", "This EMP ID is Rejected"))
+          : (data.message || t("Error.This EMP ID is not approved.", "This EMP ID is not approved."));
 
         navigation.navigate("BannedScreen", {
           statusType,
@@ -234,7 +231,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             t("Error.Invalid Password. Please try again."),
           );
         } else if (data.status === "error") {
-          Alert.alert(t("Error.error"), t("Error.Invalid EMP ID"));
+          Alert.alert(t("Error.error"), data.message || t("Error.Invalid EMP ID"));
         } else {
           Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
         }
@@ -251,64 +248,54 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         companyNameTamil,
       } = data;
 
-      if (!ALLOWED_ROLES.includes(jobRole.toLowerCase())) {
+      if (!jobRole || !ALLOWED_ROLES.includes(jobRole.toLowerCase())) {
         setLoading(false);
         Alert.alert(t("Error.error"), t("Error.Access Denied"));
         return;
       }
 
       const timestamp = new Date();
-      const expirationTime = new Date(timestamp.getTime() + 8 * 60 * 60 * 1000);
+      const expirationTime = new Date(timestamp.getTime() + 10 * 60 * 60 * 1000);
 
-      await AsyncStorage.setItem("token", token);
-      await AsyncStorage.setItem("jobRole", jobRole);
-      await AsyncStorage.setItem("companyNameEnglish", companyNameEnglish);
-      await AsyncStorage.setItem("companyNameSinhala", companyNameSinhala);
-      await AsyncStorage.setItem("companyNameTamil", companyNameTamil);
-      await AsyncStorage.setItem("empid", empId.toString());
+      const authPayload = {
+        token,
+        jobRole,
+        empId: empId.toString(),
+        id: data.userId || data.officer?.id || data.id,
+        companyNameEnglish: companyNameEnglish || null,
+        companyNameSinhala: companyNameSinhala || null,
+        companyNameTamil: companyNameTamil || null,
+        tokenStoredTime: timestamp.toISOString(),
+        tokenExpirationTime: expirationTime.toISOString(),
+      };
 
-      if (token) {
-        await AsyncStorage.multiSet([
-          ["tokenStoredTime", timestamp.toISOString()],
-          ["tokenExpirationTime", expirationTime.toISOString()],
-        ]);
-      }
+      // 1. Centralized persistent token & auth storage
+      await saveAuthData(authPayload);
 
-      dispatch(
-        setUser({
-          token,
-          jobRole,
-          empId: empId.toString(),
-          id: data.userId || data.officer?.id || data.id,
-          companyNameEnglish,
-          companyNameSinhala,
-          companyNameTamil,
-          tokenStoredTime: timestamp.toISOString(),
-          tokenExpirationTime: expirationTime.toISOString(),
-        }),
-      );
+      // 2. Redux state update
+      dispatch(setUser(authPayload));
 
-      await status(empId, true);
+      // 3. Mark user online (fire and forget)
+      status(empId, true);
 
-      setTimeout(() => {
-        setLoading(false);
+      // 4. Navigate to next screen without delay
+      setLoading(false);
 
-        if (passwordUpdateRequired) {
-          navigation.navigate("ChangePassword");
-        } else {
-          if (
-            jobRole === "Distribution Officer" ||
-            jobRole === "Distribution Centre Manager"
-          ) {
-            navigation.navigate("Main", { screen: "DistridutionaDashboard" });
-          } else if (
-            jobRole === "Collection Officer" ||
-            jobRole === "Collection Centre Manager"
-          ) {
-            navigation.navigate("Main", { screen: "CollectionDashboard" });
-          }
+      if (passwordUpdateRequired) {
+        navigation.navigate("ChangePassword");
+      } else {
+        if (
+          jobRole === "Distribution Officer" ||
+          jobRole === "Distribution Centre Manager"
+        ) {
+          navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+        } else if (
+          jobRole === "Collection Officer" ||
+          jobRole === "Collection Centre Manager"
+        ) {
+          navigation.navigate("Main", { screen: "CollectionDashboard" });
         }
-      }, 4000);
+      }
     } catch (error) {
       setLoading(false);
       console.error("Login error:", error);
