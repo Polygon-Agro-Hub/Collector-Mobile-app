@@ -285,7 +285,7 @@ export default function WeighGrade({
       weight: null,
       isExpanded: true,
     };
-    setSets((prev) => [...prev, newSet]);
+    setSets((prev) => [...prev.map((s) => ({ ...s, isExpanded: false })), newSet]);
   };
 
   // Delete a set from grade
@@ -299,13 +299,16 @@ export default function WeighGrade({
     });
   };
 
-  // Toggle set expansion
+  // Toggle set expansion (only 1 box open at a time)
   const handleToggleExpand = (setId: string) => {
-    setSets((prev) =>
-      prev.map((s) =>
-        s.id === setId ? { ...s, isExpanded: !s.isExpanded } : s
-      )
-    );
+    setSets((prev) => {
+      const target = prev.find((s) => s.id === setId);
+      const isExpanding = !target?.isExpanded;
+      return prev.map((s) => ({
+        ...s,
+        isExpanded: s.id === setId ? isExpanding : false,
+      }));
+    });
   };
 
   // Open Scale Modal for a set
@@ -587,11 +590,13 @@ export default function WeighGrade({
                         backgroundColor: "#EEF2F6",
                         borderRadius: 9999,
                         padding: 4,
+                        overflow: "hidden",
                       }}
                     >
                       <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
+                        style={{ borderRadius: 9999, overflow: "hidden" }}
                         contentContainerStyle={{
                           flexDirection: "row",
                           alignItems: "center",

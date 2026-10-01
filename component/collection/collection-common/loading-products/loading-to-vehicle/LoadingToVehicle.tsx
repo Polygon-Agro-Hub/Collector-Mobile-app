@@ -429,37 +429,49 @@ export default function LoadingToVehicle({
 
   // Toggle grade checkbox / row
   const handleToggleGrade = (gradeKey: "A" | "B" | "C") => {
-    setGrades((prev) =>
-      prev.map((g) => {
+    setGrades((prev) => {
+      const targetGrade = prev.find((g) => g.gradeKey === gradeKey);
+      const willBeSelected = !targetGrade?.isSelected;
+
+      return prev.map((g) => {
         if (g.gradeKey === gradeKey) {
-          const newSelected = !g.isSelected;
           const defaultC = containerTypes.length > 0 ? containerTypes[0] : undefined;
+          const newSets =
+            g.sets.length === 0
+              ? [
+                  {
+                    id: `set-${gradeKey.toLowerCase()}-1`,
+                    setNumber: 1,
+                    containerTypeId: defaultC?.id,
+                    containerTypeName: defaultC?.labelName,
+                    containerTypeWeight: defaultC?.weight,
+                    crates: "",
+                    weight: null,
+                    isExpanded: true,
+                  },
+                ]
+              : g.sets;
+
           return {
             ...g,
-            isSelected: newSelected,
-            sets:
-              g.sets.length === 0
-                ? [
-                    {
-                      id: `set-${gradeKey.toLowerCase()}-1`,
-                      setNumber: 1,
-                      containerTypeId: defaultC?.id,
-                      containerTypeName: defaultC?.labelName,
-                      containerTypeWeight: defaultC?.weight,
-                      crates: "",
-                      weight: null,
-                      isExpanded: true,
-                    },
-                  ]
-                : g.sets,
+            isSelected: willBeSelected,
+            sets: willBeSelected
+              ? newSets.map((s, idx) => ({ ...s, isExpanded: idx === 0 }))
+              : g.sets.map((s) => ({ ...s, isExpanded: false })),
           };
+        } else {
+          return willBeSelected
+            ? {
+                ...g,
+                sets: g.sets.map((s) => ({ ...s, isExpanded: false })),
+              }
+            : g;
         }
-        return g;
-      })
-    );
+      });
+    });
   };
 
-  // Add new set to a grade (collapses previously added sets)
+  // Add new set to a grade (collapses all other sets across all grades)
   const handleAddSet = (gradeKey: "A" | "B" | "C") => {
     setGrades((prev) =>
       prev.map((g) => {
@@ -476,7 +488,6 @@ export default function LoadingToVehicle({
             weight: null,
             isExpanded: true,
           };
-          // Collapse all previously added sets
           const collapsedPrevSets = g.sets.map((s) => ({
             ...s,
             isExpanded: false,
@@ -485,8 +496,15 @@ export default function LoadingToVehicle({
             ...g,
             sets: [...collapsedPrevSets, newSet],
           };
+        } else {
+          return {
+            ...g,
+            sets: g.sets.map((s) => ({
+              ...s,
+              isExpanded: false,
+            })),
+          };
         }
-        return g;
       })
     );
   };
@@ -540,21 +558,22 @@ export default function LoadingToVehicle({
     );
   };
 
-  // Toggle set expansion
+  // Toggle set expansion (only 1 box open at a time across all grades)
   const handleToggleSetExpand = (gradeKey: "A" | "B" | "C", setId: string) => {
-    setGrades((prev) =>
-      prev.map((g) => {
-        if (g.gradeKey === gradeKey) {
-          return {
-            ...g,
-            sets: g.sets.map((s) =>
-              s.id === setId ? { ...s, isExpanded: !s.isExpanded } : s
-            ),
-          };
-        }
-        return g;
-      })
-    );
+    setGrades((prev) => {
+      const currentGrade = prev.find((g) => g.gradeKey === gradeKey);
+      const currentSet = currentGrade?.sets.find((s) => s.id === setId);
+      const isExpanding = !currentSet?.isExpanded;
+
+      return prev.map((g) => ({
+        ...g,
+        sets: g.sets.map((s) => ({
+          ...s,
+          isExpanded:
+            g.gradeKey === gradeKey && s.id === setId ? isExpanding : false,
+        })),
+      }));
+    });
   };
 
   // Update crates value for a set (prevent typing 0 and remove leading zeros)
@@ -1303,11 +1322,13 @@ export default function LoadingToVehicle({
                                       backgroundColor: "#EEF2F6",
                                       borderRadius: 9999,
                                       padding: 4,
+                                      overflow: "hidden",
                                     }}
                                   >
                                     <ScrollView
                                       horizontal
                                       showsHorizontalScrollIndicator={false}
+                                      style={{ borderRadius: 9999, overflow: "hidden" }}
                                       contentContainerStyle={{
                                         flexDirection: "row",
                                         alignItems: "center",
