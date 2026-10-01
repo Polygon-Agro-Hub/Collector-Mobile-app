@@ -39,23 +39,29 @@ interface OfficerQrProps {
 
 const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
   const [QR, setQR] = useState<string>("");
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [language, setLanguage] = useState<string>("en");
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchLanguage = async () => {
+  // Read the saved language (called every time the screen gains focus)
+  const fetchLanguage = useCallback(async () => {
+    try {
       const storedLanguage = await AsyncStorage.getItem("@user_language");
-      if (storedLanguage) {
-        setLanguage(storedLanguage);
-      }
-    };
+      setLanguage(storedLanguage || i18n.language || "en");
+    } catch (error) {
+      console.error("Error fetching language preference:", error);
+    }
+  }, [i18n.language]);
 
-    fetchLanguage();
-  }, []);
+  // Also react when i18n itself changes language
+  useEffect(() => {
+    if (i18n.language) {
+      setLanguage(i18n.language);
+    }
+  }, [i18n.language]);
 
-  const fetchRegistrationDetails = async () => {
+  const fetchRegistrationDetails = useCallback(async () => {
     setIsLoading(true);
     try {
       const token = store.getState().auth.token;
@@ -85,17 +91,37 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
+  // Reload language + profile every time this screen is navigated to
+  useFocusEffect(
+    useCallback(() => {
+      fetchLanguage();
+      fetchRegistrationDetails();
+    }, [fetchLanguage, fetchRegistrationDetails]),
+  );
+
+  // Names are derived from the stored profile at render time, so a language
+  // change is reflected immediately.
   const getFullName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
+
+    const english =
+      `${profile.firstNameEnglish ?? ""} ${profile.lastNameEnglish ?? ""}`.trim();
+
     switch (language) {
-      case "si":
-        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
-      case "ta":
-        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
+      case "si": {
+        const name =
+          `${profile.firstNameSinhala ?? ""} ${profile.lastNameSinhala ?? ""}`.trim();
+        return name || english;
+      }
+      case "ta": {
+        const name =
+          `${profile.firstNameTamil ?? ""} ${profile.lastNameTamil ?? ""}`.trim();
+        return name || english;
+      }
       default:
-        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+        return english;
     }
   };
 
@@ -103,25 +129,24 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
     if (!profile) return t("ManagerTransactions.Loading");
     switch (language) {
       case "si":
-        return profile.companyNameSinhala;
+        return profile.companyNameSinhala || profile.companyNameEnglish;
       case "ta":
-        return profile.companyNameTamil;
+        return profile.companyNameTamil || profile.companyNameEnglish;
       default:
         return profile.companyNameEnglish;
     }
   };
-
-  useEffect(() => {
-    fetchRegistrationDetails();
-  }, []);
 
   const downloadQRCode = async () => {
     try {
       if (!QR) {
         Alert.alert(
           t("Error.error", "Error"),
-          t("OfficerQr.NoQrAvailable", t("Error.No QR Code available.", "No QR Code available.")),
-          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+          t(
+            "OfficerQr.NoQrAvailable",
+            t("Error.No QR Code available.", "No QR Code available."),
+          ),
+          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }],
         );
         return;
       }
@@ -130,15 +155,24 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       if (success) {
         Alert.alert(
           t("OfficerQr.Success", t("Error.Success", "Success")),
-          t("OfficerQr.SuccessMessage", t("Error.AttachmentHasBeenSavedToYourSelectedFolder", "Attachment has been saved to your selected folder"))
+          t(
+            "OfficerQr.SuccessMessage",
+            t(
+              "Error.AttachmentHasBeenSavedToYourSelectedFolder",
+              "Attachment has been saved to your selected folder",
+            ),
+          ),
         );
       }
     } catch (error) {
       console.error("Download error:", error);
       Alert.alert(
         t("Error.error", "Error"),
-        t("OfficerQr.FailedSave", t("Error.failedSaveQRCode", "Failed to save QR Code.")),
-        [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+        t(
+          "OfficerQr.FailedSave",
+          t("Error.failedSaveQRCode", "Failed to save QR Code."),
+        ),
+        [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }],
       );
     }
   };
@@ -148,8 +182,11 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       if (!QR) {
         Alert.alert(
           t("Error.error", "Error"),
-          t("OfficerQr.NoQrAvailable", t("Error.No QR Code available.", "No QR Code available.")),
-          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+          t(
+            "OfficerQr.NoQrAvailable",
+            t("Error.No QR Code available.", "No QR Code available."),
+          ),
+          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }],
         );
         return;
       }
@@ -165,20 +202,27 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       } else {
         Alert.alert(
           t("OfficerQr.SharingUnavailableTitle", "Sharing Unavailable"),
-          t("OfficerQr.SharingUnavailable", "Sharing is not available on this device."),
-          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+          t(
+            "OfficerQr.SharingUnavailable",
+            "Sharing is not available on this device.",
+          ),
+          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }],
         );
       }
     } catch (error) {
       console.error("Share error:", error);
       Alert.alert(
         t("Error.error", "Error"),
-        t("OfficerQr.FailedShare", t("Error.Failed to share QR Code.", "Failed to share QR Code.")),
-        [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }]
+        t(
+          "OfficerQr.FailedShare",
+          t("Error.Failed to share QR Code.", "Failed to share QR Code."),
+        ),
+        [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }],
       );
     }
   };
 
+  // Hardware back button
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
