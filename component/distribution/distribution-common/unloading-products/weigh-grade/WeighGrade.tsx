@@ -597,7 +597,11 @@ export default function WeighGrade({
           (() => {
             if (!activeSetIdForScale) return 0;
             const target = sets.find((s) => s.id === activeSetIdForScale);
-            return target?.weight ?? 0;
+            return target && typeof target.weight === "number"
+              ? target.weight
+              : target?.weight
+              ? parseFloat(target.weight as any) || 0
+              : 0;
           })()
         }
       />

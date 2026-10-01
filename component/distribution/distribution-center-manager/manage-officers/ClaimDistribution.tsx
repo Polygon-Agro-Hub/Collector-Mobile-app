@@ -378,7 +378,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
           )}
 
           <TouchableOpacity
-            className="mt-6 mb-10 bg-[#000000] py-4 rounded-full"
+            className="mt-6 mb-10 bg-[#000000] py-4 rounded-full mx-6"
             onPress={() => setModalVisible(true)}
             style={{
               shadowColor: "#000000",

@@ -87,9 +87,14 @@ export default function Packing({
   const [currentPIndex, setCurrentPIndex] = useState<number | null>(null);
   const [activeTrackingId, setActiveTrackingId] = useState<number | null>(null);
 
+  const initialOfficerPos = parseInt(positionName?.match(/\d+/)?.[0] || "1", 10);
+  const [officerPosIndex, setOfficerPosIndex] = useState<number>(initialOfficerPos);
+
   const [status, setStatus] = useState<PackingStatus>("no_target");
   const [alertVisible, setAlertVisible] = useState<boolean>(false);
+  const [alertTitle, setAlertTitle] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
   const [isAdvancing, setIsAdvancing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [items, setItems] = useState<PackingItem[]>([]);
@@ -208,7 +213,8 @@ export default function Packing({
           const pIndex = activeData.pIndex !== undefined ? Number(activeData.pIndex) : 0;
           setCurrentPIndex(pIndex);
 
-          const officerPosIndex = activeData.officerPosIndex !== undefined ? Number(activeData.officerPosIndex) : 1;
+          const officerPosIndexVal = activeData.officerPosIndex !== undefined ? Number(activeData.officerPosIndex) : 1;
+          setOfficerPosIndex(officerPosIndexVal);
 
           if (orderStatus === "Pending") {
             setStatus("waiting");
@@ -280,10 +286,11 @@ export default function Packing({
     try {
       const token = store.getState().auth.token;
       const targetOrderId = activeProcessOrderId || initialProcessOrderId || 3221;
+      const effectiveCurrentPIndex = (currentPIndex && currentPIndex > 0) ? currentPIndex : (officerPosIndex || 1);
       const payload = {
         orderId: targetOrderId,
         orderpackageId: activeOrderPackageId || null,
-        currentPIndex: currentPIndex || 1,
+        currentPIndex: effectiveCurrentPIndex,
         rowId: rowId,
         trackingId: activeTrackingId || null,
       };
@@ -295,6 +302,8 @@ export default function Packing({
       );
 
       if (res.data && res.data.success) {
+        setAlertType("success");
+        setAlertTitle(t("Packing.Success", "Success"));
         if (status === "no_items" || status === "main_container") {
           setAlertMessage(
             t(
@@ -313,32 +322,57 @@ export default function Packing({
         setAlertVisible(true);
       } else if (res.data && !res.data.success) {
         const code = res.data.code || res.data.data?.code;
-        const targetPos = res.data.targetPosition || res.data.data?.targetPosition || (currentPIndex ? currentPIndex + 1 : 2);
+        const targetPos = res.data.targetPosition || res.data.data?.targetPosition || (effectiveCurrentPIndex + 1);
+        const targetStationName = res.data.targetStationName || res.data.data?.targetStationName || "";
         const occupiedInv = res.data.occupiedInvoice || res.data.data?.occupiedInvoice || "";
+        const msg = res.data.message || res.data.data?.message || "";
 
-        if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
-          Alert.alert(
-            t("Packing.Position Busy", "Position Busy"),
+        const isBusy =
+          code === PACKING_ERROR_CODES.STATION_OCCUPIED ||
+          code === PACKING_ERROR_CODES.POSITION_BUSY ||
+          code === PACKING_ERROR_CODES.POSITION_1_BUSY ||
+          code === "STATION_OCCUPIED" ||
+          code === "POSITION_BUSY" ||
+          code === "POSITION_1_BUSY" ||
+          Boolean(res.data.isOccupied) ||
+          String(msg).toLowerCase().includes("busy");
+
+        const isNoOfficer =
+          code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
+          code === "NO_OFFICER_ASSIGNED" ||
+          String(msg).toLowerCase().includes("no packing position user assigned") ||
+          String(msg).toLowerCase().includes("no officer assigned");
+
+        const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+        const posLabel = isQc
+          ? t("Packing.QC Position", "QC Station")
+          : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+
+        setAlertType("error");
+        if (isBusy) {
+          setAlertTitle(t("Packing.Position Busy", "Position Busy"));
+          setAlertMessage(
             t("Packing.Position Busy Message", {
-              position: targetPos,
+              position: isQc ? "QC" : targetPos,
               invoice: occupiedInv,
-              defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+              defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
             })
           );
-        } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
-          Alert.alert(
-            t("Packing.Position Not Available", "Position Not Available"),
+        } else if (isNoOfficer) {
+          setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+          setAlertMessage(
             t("Packing.No Officer Assigned Message", {
-              position: targetPos,
-              defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+              position: isQc ? "QC" : targetPos,
+              defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
             })
           );
         } else {
-          Alert.alert(
-            t("Packing.Error", "Error"),
-            res.data.message || t("Packing.Failed to advance position index.", "Failed to advance position index.")
+          setAlertTitle(t("Packing.Error", "Error"));
+          setAlertMessage(
+            msg || t("Packing.Failed to advance position index.", "Failed to advance position index.")
           );
         }
+        setAlertVisible(true);
         setIsAdvancing(false);
       } else {
         setIsAdvancing(false);
@@ -347,32 +381,58 @@ export default function Packing({
       console.error("Error advancing position index:", err);
       const data = err?.response?.data;
       const code = data?.code || data?.data?.code;
-      const targetPos = data?.targetPosition || data?.data?.targetPosition || (currentPIndex ? currentPIndex + 1 : 2);
+      const effectiveFallbackIndex = (currentPIndex && currentPIndex > 0) ? currentPIndex : (officerPosIndex || 1);
+      const targetPos = data?.targetPosition || data?.data?.targetPosition || (effectiveFallbackIndex + 1);
+      const targetStationName = data?.targetStationName || data?.data?.targetStationName || "";
       const occupiedInv = data?.occupiedInvoice || data?.data?.occupiedInvoice || "";
+      const msg = data?.message || data?.data?.message || err?.message || "";
 
-      if (code === PACKING_ERROR_CODES.STATION_OCCUPIED || code === PACKING_ERROR_CODES.POSITION_1_BUSY || code === "STATION_OCCUPIED") {
-        Alert.alert(
-          t("Packing.Position Busy", "Position Busy"),
+      const isBusy =
+        code === PACKING_ERROR_CODES.STATION_OCCUPIED ||
+        code === PACKING_ERROR_CODES.POSITION_BUSY ||
+        code === PACKING_ERROR_CODES.POSITION_1_BUSY ||
+        code === "STATION_OCCUPIED" ||
+        code === "POSITION_BUSY" ||
+        code === "POSITION_1_BUSY" ||
+        Boolean(data?.isOccupied) ||
+        String(msg).toLowerCase().includes("busy");
+
+      const isNoOfficer =
+        code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
+        code === "NO_OFFICER_ASSIGNED" ||
+        String(msg).toLowerCase().includes("no packing position user assigned") ||
+        String(msg).toLowerCase().includes("no officer assigned");
+
+      const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+      const posLabel = isQc
+        ? t("Packing.QC Position", "QC Station")
+        : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+
+      setAlertType("error");
+      if (isBusy) {
+        setAlertTitle(t("Packing.Position Busy", "Position Busy"));
+        setAlertMessage(
           t("Packing.Position Busy Message", {
-            position: targetPos,
+            position: isQc ? "QC" : targetPos,
             invoice: occupiedInv,
-            defaultValue: `Position ${targetPos} is currently busy with Invoice ${occupiedInv}. Please wait until Position ${targetPos} clears before passing the next box.`
+            defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
           })
         );
-      } else if (code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED || code === "NO_OFFICER_ASSIGNED") {
-        Alert.alert(
-          t("Packing.Position Not Available", "Position Not Available"),
+      } else if (isNoOfficer) {
+        setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+        setAlertMessage(
           t("Packing.No Officer Assigned Message", {
-            position: targetPos,
-            defaultValue: `No packing position user assigned for Packing Position ${targetPos}. Please assign an officer to this position first.`
+            position: isQc ? "QC" : targetPos,
+            defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
           })
         );
       } else {
-        Alert.alert(
-          t("Packing.Error", "Error"),
-          data?.message || t("Packing.Failed to advance position index.", "Failed to advance position index.")
+        setAlertTitle(t("Packing.Error", "Error"));
+        setAlertMessage(
+          msg || t("Packing.Failed to advance position index.", "Failed to advance position index.")
         );
       }
+      setAlertVisible(true);
       setIsAdvancing(false);
     }
   };
@@ -617,14 +677,16 @@ export default function Packing({
 
       <AlertModal
         visible={alertVisible}
-        type="success"
-        title={t("Packing.Success", "Success")}
+        type={alertType}
+        title={alertTitle}
         message={alertMessage}
         onClose={() => {
           setAlertVisible(false);
           setIsAdvancing(false);
-          setItems([]);
-          fetchActiveOrderAndStatus(true);
+          if (alertType === "success") {
+            setItems([]);
+            fetchActiveOrderAndStatus(true);
+          }
         }}
       />
     </View>
