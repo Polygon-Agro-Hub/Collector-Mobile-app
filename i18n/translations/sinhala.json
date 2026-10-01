@@ -226,6 +226,8 @@
     "Please select at least one pending item": "කරුණාකර අවම වශයෙන් එක් අපරිපූර්ණ අයිතමයක් හෝ තෝරන්න.",
     "Replace request approved successfully": "ප්‍රතිස්ථාපන ඉල්ලීම සාර්ථකව අනුමත කරන ලදී",
     "Please select a product and enter quantity": "කරුණාකර නිෂ්පාදනයක් තෝරා එහි ප්‍රමාණය ඇතුළත් කරන්න.",
+    "Session Expired": "ඇතුල්වීම කල් ඉකුත් විය",
+    "Your token has expired. Please log in again.":"ඔබේ ටෝකනයේ වලංගු කාලය අවසන් වී ඇත. කරුණාකර නැවත පිවිසෙන්න.",
     "Session expired": "ඇතුල්වීම කල් ඉකුත් විය. කරුණාකර නැවත පුරනය වන්න.",
     "Failed to complete order": "ඇණවුම සම්පූර්ණ කිරීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
     "Info": "තොරතුරු",

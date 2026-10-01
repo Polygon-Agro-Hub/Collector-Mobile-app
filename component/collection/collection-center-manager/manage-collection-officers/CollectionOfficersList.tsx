@@ -288,7 +288,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
                 right: 14,
               },
               selectedLanguage === "si"
-                ? { fontSize: 12 }
+                ? { fontSize: 10 }
                 : selectedLanguage === "ta"
                   ? { fontSize: 9 }
                   : { fontSize: 12 },

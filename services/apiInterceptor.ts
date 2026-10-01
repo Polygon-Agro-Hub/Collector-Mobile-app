@@ -5,6 +5,7 @@ import { logoutUser } from "@/store/authSlice";
 import { navigationRef } from "@/navigationRef";
 import socketService from "@/services/socket/socket.service";
 import environment from "@/environment/environment";
+import { useTranslation } from "react-i18next";
 
 let isSessionAlertShown = false;
 let isCheckingStatus = false;
@@ -33,6 +34,8 @@ export const handleAuthError = (status: number, data: any): boolean => {
   ) {
     return false;
   }
+
+  const { t } = useTranslation();
 
   const msg = (data?.message || "").toLowerCase();
   const code = (data?.code || data?.reason || "").toUpperCase();
@@ -172,8 +175,8 @@ export const handleAuthError = (status: number, data: any): boolean => {
   if (!isSessionAlertShown) {
     isSessionAlertShown = true;
     Alert.alert(
-      "Session Expired",
-      "Your token has expired. Please log in again.",
+      t("Error.Session Expired", "Session Expired"),
+       t("Error.Your token has expired. Please log in again.", "Your token has expired. Please log in again."),
       [
         {
           text: "OK",

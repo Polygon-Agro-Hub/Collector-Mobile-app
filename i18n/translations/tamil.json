@@ -226,6 +226,8 @@
     "Please select at least one pending item": "தயவுசெய்து குறைந்தபட்சம் ஒரு நிலுவையில் உள்ள பொருளைத் தேர்ந்தெடுக்கவும்",
     "Replace request approved successfully": "மாற்றீடு கோரிக்கை வெற்றிகரமாக அங்கீகரிக்கப்பட்டது",
     "Please select a product and enter quantity": "தயவுசெய்து ஒரு பொருளைத் தேர்ந்தெடுத்து அளவை உள்ளிடவும்.",
+     "Session Expired": "அமர்வு காலாவதியானது",
+    "Your token has expired. Please log in again.":"உங்கள் டோக்கனின் செல்லுபடியாகும் காலம் முடிந்துவிட்டது. தயவுசெய்து மீண்டும் உள்நுழையவும்.",
     "Session expired": "அமர்வு காலாவதியானது. மீண்டும் உள்நுழையவும்.",
     "Failed to complete order": "பதிவை முடிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
     "Info": "தகவல்",

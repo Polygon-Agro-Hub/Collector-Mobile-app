@@ -227,6 +227,8 @@
     "Please select at least one pending item": "Please select at least one pending item.",
     "Replace request approved successfully": "Replace request approved successfully",
     "Please select a product and enter quantity": "Please select a product and enter quantity",
+    "Session Expired": "Session expired",
+    "Your token has expired. Please log in again.":"Your token has expired. Please log in again.",
     "Session expired": "Session expired. Please login again.",
     "Failed to complete order": "Failed to complete order. Please try again.",
     "Info": "Info",
