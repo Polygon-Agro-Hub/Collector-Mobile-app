@@ -1859,6 +1859,13 @@
   },
   "ScaleWeightModal": {
     "RealTimeScaleWeight": "நிகழ்நேர அளவீட்டு எடை",
+    "LiveScaleReading": "நேரலை அளவீடு",
+    "GrossWeightOnPlatform": "மேடையில் உள்ள மொத்த எடை",
+    "WeightBreakdown": "எடை விவரம்",
+    "Gross": "மொத்தம்",
+    "Tare": "டேர்",
+    "MinusTare": "− டேர்",
+    "NetTotal": "நிகர மொத்தம்",
     "Continue": "தொடரவும்"
   },
   "SentProductsToday": {
@@ -1899,6 +1906,9 @@
     "FinishLoading": "முடித்து வைக்கவும்",
     "AddMoreItems": "சேர்",
     "Set": "வகை",
+    "ContainerType": "கொள்கலன் வகை",
+    "SelectSize": "அளவைத் தேர்ந்தெடுக்கவும்",
+    "EnterTotalContainers": "மொத்த கொள்கலன்களின் எண்ணிக்கையை உள்ளிடவும்",
     "EnterTotalCrates": "பெட்டிகளின் எண்ணிக்கையை உள்ளிடவும்.",
     "ItemSavedTitle": "பொருள் சேர்க்கப்பட்டது!",
     "ItemSavedMessage": "வகை {{num}} சேமிக்கப்பட்டது. இப்போது அடுத்த வகையை ஏற்றலாம்.",
