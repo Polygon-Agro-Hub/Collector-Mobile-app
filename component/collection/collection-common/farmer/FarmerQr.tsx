@@ -247,13 +247,14 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
+      const fileUri = `${(FileSystem as any).cacheDirectory}Farmer_QRCode_${Date.now()}.png`;
       const response = await FileSystem.downloadAsync(farmerQRCode, fileUri);
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(response.uri, {
           mimeType: "image/png",
           dialogTitle: "Share QR Code",
+          UTI: "public.png",
         });
       } else {
         Alert.alert(

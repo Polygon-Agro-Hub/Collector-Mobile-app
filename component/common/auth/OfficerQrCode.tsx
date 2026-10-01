@@ -191,13 +191,14 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
+      const fileUri = `${(FileSystem as any).cacheDirectory}Officer_QRCode_${Date.now()}.png`;
       const response = await FileSystem.downloadAsync(QR, fileUri);
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(response.uri, {
           mimeType: "image/png",
           dialogTitle: t("OfficerQr.Share", "Share QR Code"),
+          UTI: "public.png",
         });
       } else {
         Alert.alert(
