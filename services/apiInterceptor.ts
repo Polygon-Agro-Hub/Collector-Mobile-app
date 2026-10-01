@@ -5,7 +5,7 @@ import { logoutUser } from "@/store/authSlice";
 import { navigationRef } from "@/navigationRef";
 import socketService from "@/services/socket/socket.service";
 import environment from "@/environment/environment";
-import { useTranslation } from "react-i18next";
+import i18n from "@/i18n/i18n";
 
 let isSessionAlertShown = false;
 let isCheckingStatus = false;
@@ -35,7 +35,7 @@ export const handleAuthError = (status: number, data: any): boolean => {
     return false;
   }
 
-  const { t } = useTranslation();
+  const t = i18n.t.bind(i18n);
 
   const msg = (data?.message || "").toLowerCase();
   const code = (data?.code || data?.reason || "").toUpperCase();
@@ -154,7 +154,7 @@ export const handleAuthError = (status: number, data: any): boolean => {
   const isTokenExpired =
     isExplicitTokenError ||
     (status === 401 &&
-      (msg.includes("token") || msg.includes("jwt") || !msg) &&
+      (msg.includes("token") || msg.includes("jwt")) &&
       !msg.includes("password") &&
       !msg.includes("incorrect") &&
       !msg.includes("not found") &&
@@ -322,16 +322,28 @@ export const setupGlobalApiInterceptors = () => {
 
   // 3. Monkeypatch global fetch
   const originalFetch = (globalThis as any).fetch;
+
+  // Paths that should NOT trigger session-expiry logout — they handle their own errors
+  const SKIP_AUTH_INTERCEPT_PATHS = [
+    "api/collection-officer/online-status",
+    "api/collection-officer/password-update",
+  ];
+
   (globalThis as any).fetch = async (...args: any[]) => {
     const response = await originalFetch(...args);
 
     if (response.status === 401 || response.status === 403) {
-      try {
-        const cloned = response.clone();
-        const data = await cloned.json();
-        handleAuthError(response.status, data);
-      } catch (e) {
-        handleAuthError(response.status, {});
+      // Do not intercept internal status/health endpoints
+      const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url || "";
+      const shouldSkip = SKIP_AUTH_INTERCEPT_PATHS.some((path) => url.includes(path));
+      if (!shouldSkip) {
+        try {
+          const cloned = response.clone();
+          const data = await cloned.json();
+          handleAuthError(response.status, data);
+        } catch (e) {
+          handleAuthError(response.status, {});
+        }
       }
     }
 
