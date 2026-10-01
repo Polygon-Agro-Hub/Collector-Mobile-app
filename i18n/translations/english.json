@@ -2117,5 +2117,19 @@
     "noData": "-No Data-",
     "noTransactions": "No transactions occurred between {{from}} and {{to}}",
     "generatedOn": "This report is generated on {{date}} at {{time}}"
+  },
+  "AppUpdate": {
+    "NewRelease": "NEW RELEASE",
+    "Current": "Current",
+    "Latest": "Latest",
+    "SoftTitle": "New Version Available!",
+    "SoftMessage": "A new version of CoDi-Net is ready with improved features, faster performance, and bug fixes.",
+    "ForceTitle": "Update Required",
+    "ForceMessage": "Your current app version is out of date and no longer supported. Please update to continue using CoDi-Net.",
+    "UpdateButton": "Update Now",
+    "UpdateNowForce": "Update Now to Continue",
+    "LaterButton": "Update Later",
+    "Feature1": "Enhanced delivery workflow & speed",
+    "Feature2": "Important bug fixes & system improvements"
   }
 }
