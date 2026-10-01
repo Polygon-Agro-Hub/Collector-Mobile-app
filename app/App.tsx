@@ -111,7 +111,8 @@ function AppContent() {
       const isRejected =
         accStatus === "rejected" ||
         accStatus === "banned" ||
-        accStatus === "not approved";
+        accStatus === "not approved" ||
+        accStatus === "not_approved";
       const isForceLogout =
         data?.type === "force_logout" ||
         data?.code === "FORCE_LOGOUT" ||
