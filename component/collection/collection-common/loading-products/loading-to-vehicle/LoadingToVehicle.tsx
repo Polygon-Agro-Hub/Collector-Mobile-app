@@ -1099,7 +1099,7 @@ export default function LoadingToVehicle({
                                   placeholder={
                                     focusedSetId === set.id
                                       ? ""
-                                      : `--${t("LoadingToVehicle.EnterTotalCrates", "Enter Total Crates Count Here")}--`
+                                      : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
                                   }
                                   placeholderTextColor="#94A3B8"
                                   value={set.crates}

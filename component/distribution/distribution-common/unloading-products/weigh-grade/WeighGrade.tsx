@@ -143,10 +143,10 @@ export default function WeighGrade({
     if (num > maxAllowedForThisSet) {
       num = maxAllowedForThisSet;
       Alert.alert(
-        t("WeighGrade.MaxCratesReached", "Maximum Crates Reached"),
+        t("WeighGrade.MaxContainersReached", "Maximum Containers Reached"),
         t(
-          "WeighGrade.MaxCratesMessage",
-          "Cannot exceed the total loaded crates of {{max}} for this grade.",
+          "WeighGrade.MaxContainersMessage",
+          "Cannot exceed the total loaded containers of {{max}} for this grade.",
           { max: loadedCrates }
         )
       );
@@ -379,7 +379,7 @@ export default function WeighGrade({
           <View className="flex-1 bg-[#E9ECF1] rounded-2xl p-3.5 items-center justify-center">
             <FontAwesome5 name="boxes" size={17} color="#17262C" />
             <Text className="text-[#4E5273] text-xs mt-1">
-              {t("WeighGrade.TotalCrates", "Total Crates")}
+              {t("WeighGrade.TotalContainers", "Total Containers")}
             </Text>
             <Text className="font-extrabold text-sm text-[#17262C] mt-0.5">
               {loadedCrates}
@@ -425,10 +425,10 @@ export default function WeighGrade({
               {/* Set Body */}
               {item.isExpanded && (
                 <View className="p-4 pt-3 pb-8">
-                  {/* Number of Crates Label & Delete Button (for 2nd card onward) */}
+                  {/* Number of Containers Label & Delete Button (for 2nd card onward) */}
                   <View className="flex-row items-center justify-center relative mb-1.5 min-h-[28px]">
                     <Text className="text-center text-[#79747E] text-xs font-medium">
-                      {t("WeighGrade.NoOfCrates", "--No. of Crates--")}
+                      {t("WeighGrade.NoOfContainers", "--No. of Containers--")}
                     </Text>
                     {item.setNumber > 1 && (
                       <TouchableOpacity
