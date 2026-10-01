@@ -1932,6 +1932,13 @@
   },
   "ScaleWeightModal": {
     "RealTimeScaleWeight": "Real - Time Scale Weight",
+    "LiveScaleReading": "Live Scale Reading",
+    "GrossWeightOnPlatform": "Gross weight on platform",
+    "WeightBreakdown": "Weight Breakdown",
+    "Gross": "Gross",
+    "Tare": "Tare",
+    "MinusTare": "− Tare",
+    "NetTotal": "Net Total",
     "Continue": "Continue"
   },
   "SentProductsToday": {
@@ -1971,6 +1978,9 @@
     "FinishLoading": "Finish Loading",
     "AddMoreItems": "Add More Items",
     "Set": "Set",
+    "ContainerType": "Container Type",
+    "SelectSize": "Select size",
+    "EnterTotalContainers": "Enter Total Containers Here",
     "EnterTotalCrates": "Enter Total Crates Count Here",
     "ItemSavedTitle": "Item Added!",
     "ItemSavedMessage": "Variety {{num}} saved. You can now load the next variety.",

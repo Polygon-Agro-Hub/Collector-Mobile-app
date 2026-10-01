@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
@@ -48,9 +49,18 @@ interface LoadingToVehicleProps {
   route: LoadingToVehicleRouteProps;
 }
 
+export interface ContainerTypeItem {
+  id: number;
+  labelName: string;
+  weight: number;
+}
+
 interface CrateSet {
   id: string;
   setNumber: number;
+  containerTypeId?: number;
+  containerTypeName?: string;
+  containerTypeWeight?: number;
   crates: string;
   weight: number | null;
   isExpanded: boolean;
@@ -67,6 +77,9 @@ interface SavedSet {
   id: string;
   gradeKey: "A" | "B" | "C";
   setNumber: number;
+  containerTypeId?: number;
+  containerTypeName?: string;
+  containerTypeWeight?: number;
   crates: string;
   weight: number;
 }
@@ -89,7 +102,7 @@ interface OptionItem {
   bgColor?: string;
 }
 
-const createInitialGrades = (): GradeData[] => [
+const createInitialGrades = (defaultContainer?: ContainerTypeItem | null): GradeData[] => [
   {
     gradeKey: "A",
     title: "Grade A",
@@ -98,6 +111,9 @@ const createInitialGrades = (): GradeData[] => [
       {
         id: `set-a-${Date.now()}-1`,
         setNumber: 1,
+        containerTypeId: defaultContainer?.id,
+        containerTypeName: defaultContainer?.labelName,
+        containerTypeWeight: defaultContainer?.weight,
         crates: "",
         weight: null,
         isExpanded: true,
@@ -112,6 +128,9 @@ const createInitialGrades = (): GradeData[] => [
       {
         id: `set-b-${Date.now()}-1`,
         setNumber: 1,
+        containerTypeId: defaultContainer?.id,
+        containerTypeName: defaultContainer?.labelName,
+        containerTypeWeight: defaultContainer?.weight,
         crates: "",
         weight: null,
         isExpanded: true,
@@ -126,6 +145,9 @@ const createInitialGrades = (): GradeData[] => [
       {
         id: `set-c-${Date.now()}-1`,
         setNumber: 1,
+        containerTypeId: defaultContainer?.id,
+        containerTypeName: defaultContainer?.labelName,
+        containerTypeWeight: defaultContainer?.weight,
         crates: "",
         weight: null,
         isExpanded: true,
@@ -183,6 +205,12 @@ export default function LoadingToVehicle({
       : createInitialGrades()
   );
 
+  // Container types state from collection_officer.creates (backend only)
+  const [containerTypes, setContainerTypes] = useState<ContainerTypeItem[]>([]);
+  const [containerSectionWidth, setContainerSectionWidth] = useState<number>(
+    Dimensions.get("window").width - 80
+  );
+
   // Synchronize saved varieties with Redux store
   useEffect(() => {
     store.dispatch({
@@ -203,6 +231,49 @@ export default function LoadingToVehicle({
       },
     });
   }, [varietyIndex, selectedCrop, selectedVariety, grades]);
+
+  // Fetch container types from API (collection_officer.creates)
+  const fetchContainerTypes = useCallback(async () => {
+    try {
+      const authToken = store.getState().auth.token;
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/transport/container-types`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      if (
+        response.data.success &&
+        Array.isArray(response.data.data)
+      ) {
+        const types: ContainerTypeItem[] = response.data.data;
+        setContainerTypes(types);
+
+        if (types.length > 0) {
+          // Populate initial container type on any existing grades that lack containerTypeId
+          setGrades((prev) =>
+            prev.map((g) => ({
+              ...g,
+              sets: g.sets.map((s) => ({
+                ...s,
+                containerTypeId: s.containerTypeId || types[0].id,
+                containerTypeName: s.containerTypeName || types[0].labelName,
+                containerTypeWeight: s.containerTypeWeight ?? types[0].weight,
+              })),
+            }))
+          );
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch container types from backend:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchContainerTypes();
+  }, [fetchContainerTypes]);
 
   // Helper for localized naming
   const formatCropOption = useCallback(
@@ -362,6 +433,7 @@ export default function LoadingToVehicle({
       prev.map((g) => {
         if (g.gradeKey === gradeKey) {
           const newSelected = !g.isSelected;
+          const defaultC = containerTypes.length > 0 ? containerTypes[0] : undefined;
           return {
             ...g,
             isSelected: newSelected,
@@ -371,6 +443,9 @@ export default function LoadingToVehicle({
                     {
                       id: `set-${gradeKey.toLowerCase()}-1`,
                       setNumber: 1,
+                      containerTypeId: defaultC?.id,
+                      containerTypeName: defaultC?.labelName,
+                      containerTypeWeight: defaultC?.weight,
                       crates: "",
                       weight: null,
                       isExpanded: true,
@@ -390,9 +465,13 @@ export default function LoadingToVehicle({
       prev.map((g) => {
         if (g.gradeKey === gradeKey) {
           const nextSetNumber = g.sets.length + 1;
+          const defaultC = containerTypes.length > 0 ? containerTypes[0] : undefined;
           const newSet: CrateSet = {
             id: `set-${gradeKey.toLowerCase()}-${Date.now()}`,
             setNumber: nextSetNumber,
+            containerTypeId: defaultC?.id,
+            containerTypeName: defaultC?.labelName,
+            containerTypeWeight: defaultC?.weight,
             crates: "",
             weight: null,
             isExpanded: true,
@@ -426,6 +505,34 @@ export default function LoadingToVehicle({
             ...g,
             sets: renumbered,
             isSelected: renumbered.length > 0 ? g.isSelected : false,
+          };
+        }
+        return g;
+      })
+    );
+  };
+
+  // Select container type for a specific set
+  const handleSelectContainerType = (
+    gradeKey: "A" | "B" | "C",
+    setId: string,
+    cType: ContainerTypeItem
+  ) => {
+    setGrades((prev) =>
+      prev.map((g) => {
+        if (g.gradeKey === gradeKey) {
+          return {
+            ...g,
+            sets: g.sets.map((s) =>
+              s.id === setId
+                ? {
+                    ...s,
+                    containerTypeId: cType.id,
+                    containerTypeName: cType.labelName,
+                    containerTypeWeight: cType.weight,
+                  }
+                : s
+            ),
           };
         }
         return g;
@@ -562,6 +669,9 @@ export default function LoadingToVehicle({
               id: s.id,
               gradeKey: g.gradeKey,
               setNumber: s.setNumber,
+              containerTypeId: s.containerTypeId,
+              containerTypeName: s.containerTypeName,
+              containerTypeWeight: s.containerTypeWeight,
               crates: s.crates,
               weight: s.weight,
             });
@@ -598,7 +708,7 @@ export default function LoadingToVehicle({
     setVarietyIndex((prev) => prev + 1);
     setSelectedCrop(null);
     setSelectedVariety(null);
-    setGrades(createInitialGrades());
+    setGrades(createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null));
   };
 
   // Delete an entire saved variety from carousel
@@ -681,6 +791,9 @@ export default function LoadingToVehicle({
           set: s.setNumber,
           crates: cratesNum,
           weightKg: weightVal,
+          crateWeight: s.containerTypeWeight ?? null,
+          containerTypeId: s.containerTypeId,
+          containerTypeName: s.containerTypeName,
         };
       });
 
@@ -720,6 +833,9 @@ export default function LoadingToVehicle({
               set: s.setNumber,
               crates: cratesNum,
               weightKg: weightVal,
+              crateWeight: s.containerTypeWeight ?? null,
+              containerTypeId: s.containerTypeId,
+              containerTypeName: s.containerTypeName,
             });
           }
         });
@@ -1154,12 +1270,115 @@ export default function LoadingToVehicle({
                                     </TouchableOpacity>
                                   </View>
                                 )}
+
+                                {/* Container Type Section (only shown when container types data exists) */}
+                                {containerTypes.length > 0 && (
+                                <View
+                                  className="mb-4"
+                                  onLayout={(e) => {
+                                    const w = e.nativeEvent.layout.width;
+                                    if (w > 0) setContainerSectionWidth(w);
+                                  }}
+                                >
+                                  {/* Header Row */}
+                                  <View className="flex-row items-center justify-between mb-2 px-1">
+                                    <View className="flex-row items-center gap-1.5">
+                                      <MaterialCommunityIcons
+                                        name="view-column-outline"
+                                        size={18}
+                                        color="#475569"
+                                      />
+                                      <Text className="text-sm font-semibold text-[#334155]">
+                                        {t("LoadingToVehicle.ContainerType", "Container Type")}
+                                      </Text>
+                                    </View>
+                                    <Text className="text-xs text-[#64748B]">
+                                      {t("LoadingToVehicle.SelectSize", "Select size")}
+                                    </Text>
+                                  </View>
+
+                                  {/* Pill Selector Box (max 3 visible, horizontally scrollable if > 3) */}
+                                  <View
+                                    style={{
+                                      backgroundColor: "#EEF2F6",
+                                      borderRadius: 9999,
+                                      padding: 4,
+                                    }}
+                                  >
+                                    <ScrollView
+                                      horizontal
+                                      showsHorizontalScrollIndicator={false}
+                                      contentContainerStyle={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                      }}
+                                    >
+                                      {containerTypes.map((cType) => {
+                                        const isSelected =
+                                          set.containerTypeId === cType.id ||
+                                          (!set.containerTypeId && cType.id === containerTypes[0]?.id);
+
+                                        // Width of section minus 8px padding divided by 3 so max 3 are visible at once
+                                        const itemWidth = Math.max(
+                                          80,
+                                          Math.floor((containerSectionWidth - 8) / 3)
+                                        );
+
+                                        return (
+                                          <TouchableOpacity
+                                            key={cType.id}
+                                            activeOpacity={0.75}
+                                            onPress={() =>
+                                              handleSelectContainerType(grade.gradeKey, set.id, cType)
+                                            }
+                                            style={{
+                                              width: itemWidth,
+                                              height: 52,
+                                              borderRadius: 9999,
+                                              backgroundColor: isSelected ? "#FFFFFF" : "transparent",
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                              shadowColor: isSelected ? "#000000" : "transparent",
+                                              shadowOffset: { width: 0, height: 1 },
+                                              shadowOpacity: isSelected ? 0.08 : 0,
+                                              shadowRadius: 2,
+                                              elevation: isSelected ? 2 : 0,
+                                            }}
+                                          >
+                                            <Text
+                                              style={{
+                                                fontSize: 14,
+                                                fontWeight: "700",
+                                                color: "#0F172A",
+                                              }}
+                                              numberOfLines={1}
+                                            >
+                                              {cType.labelName}
+                                            </Text>
+                                            <Text
+                                              style={{
+                                                fontSize: 11,
+                                                color: "#64748B",
+                                                marginTop: 2,
+                                              }}
+                                              numberOfLines={1}
+                                            >
+                                              {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                                            </Text>
+                                          </TouchableOpacity>
+                                        );
+                                      })}
+                                    </ScrollView>
+                                  </View>
+                                </View>
+                              )}
+
                                 {/* Crates Count Input (50px height, rounded-full, center text, placeholder clears on focus) */}
                                 <TextInput
                                   placeholder={
                                     focusedSetId === set.id
                                       ? ""
-                                      : `--${t("LoadingToVehicle.EnterTotalCrates", "Enter Total Crates Count Here")}--`
+                                      : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
                                   }
                                   placeholderTextColor="#94A3B8"
                                   value={set.crates}
@@ -1174,7 +1393,7 @@ export default function LoadingToVehicle({
                                   onBlur={() => setFocusedSetId(null)}
                                   keyboardType="numeric"
                                   textAlign="center"
-                                  className="bg-[#F4F6F9] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
+                                  className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
                                 />
 
                                  {/* Weight Row */}
@@ -1194,7 +1413,7 @@ export default function LoadingToVehicle({
                                             setId: set.id,
                                           })
                                         }
-                                        className="flex-1 bg-[#F4F6F9] rounded-full h-[50px] items-center justify-center"
+                                        className="flex-1 bg-[#EEF2F6] rounded-full h-[50px] items-center justify-center"
                                       >
                                         <Text
                                           className={`font-bold text-base ${
@@ -1413,6 +1632,20 @@ export default function LoadingToVehicle({
         onClose={() => setScaleTarget(null)}
         onContinue={handleScaleContinue}
         scaleName={scaleStatus.scale?.name || "Budry MFD - 300"}
+        tareWeight={
+          (() => {
+            if (!scaleTarget) return 0;
+            const targetGrade = grades.find(
+              (g) => g.gradeKey === scaleTarget.gradeKey
+            );
+            const targetSet = targetGrade?.sets.find(
+              (s) => s.id === scaleTarget.setId
+            );
+            const crateCount = parseInt(targetSet?.crates || "0", 10) || 0;
+            const crateWeight = targetSet?.containerTypeWeight ?? 0;
+            return crateCount * crateWeight;
+          })()
+        }
         initialWeight={
           (() => {
             if (!scaleTarget) return 0;

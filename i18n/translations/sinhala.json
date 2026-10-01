@@ -1857,6 +1857,13 @@
   },
   "ScaleWeightModal": {
     "RealTimeScaleWeight": "තත්‍ය කාලීන තරාදි බර",
+    "LiveScaleReading": "සජීවී පරිමාණ කියවීම",
+    "GrossWeightOnPlatform": "වේදිකාවේ ඇති දළ බර",
+    "WeightBreakdown": "බර විස්තරය",
+    "Gross": "දළ",
+    "Tare": "ටෙයාර්",
+    "MinusTare": "− ටෙයාර්",
+    "NetTotal": "ශුද්ධ එකතුව",
     "Continue": "ඉදිරියට යන්න"
   },
   "SentProductsToday": {
@@ -1897,6 +1904,9 @@
     "FinishLoading": "අවසන් කරන්න",
     "AddMoreItems": "එකතු කරන්න",
     "Set": "කාණ්ඩය",
+    "ContainerType": "බහාලුම් වර්ගය",
+    "SelectSize": "ප්‍රමාණය තෝරන්න",
+    "EnterTotalContainers": "මුළු බහාලුම් ගණන මෙහි ඇතුළත් කරන්න",
     "EnterTotalCrates": "පෙට්ටි ගණන ඇතුළත් කරන්න",
     "ItemSavedTitle": "ද්‍රව්‍යය එක් කරන ලදී!",
     "ItemSavedMessage": "ප්‍රභේදය {{num}} සුරැකිණි. ඔබට දැන් ඊළඟ ප්‍රභේදය පැටවිය හැක.",
