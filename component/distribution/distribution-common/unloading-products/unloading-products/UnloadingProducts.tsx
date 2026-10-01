@@ -725,11 +725,11 @@ export default function UnloadingProducts({
                     {mismatch.expectedCrates !== undefined &&
                       mismatch.receivedCrates !== undefined && (
                         <Text className="text-xs text-[#17262C] leading-5 mt-1">
-                          {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedCratesCountIs", "Expected crates count is")}{" "}
+                          {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedContainersCountIs", "Expected containers count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.expectedCrates}
                           </Text>
-                          {t("Mismatch.ButReceivedCrateCountIs", ", but received crate count is")}{" "}
+                          {t("Mismatch.ButReceivedContainerCountIs", ", but received container count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.receivedCrates}
                           </Text>

@@ -210,7 +210,7 @@ export default function SentProductsToday({
                 {/* Load Information */}
                 <View className="flex-1">
                   <Text className="font-extrabold text-[#030E25] text-base">
-                    {t("SentProductsToday.Crates", "Crates")} : {item.crates} | {item.weight ? item.weight.replace(/kg/i, t("Common.kg", "kg")) : ""}
+                    {t("SentProductsToday.Containers", "Containers")} : {item.crates} | {item.weight ? item.weight.replace(/kg/i, t("Common.kg", "kg")) : ""}
                   </Text>
                   <Text className="text-xs text-[#030E25] mt-1 font-medium">
                     {item.destination}
