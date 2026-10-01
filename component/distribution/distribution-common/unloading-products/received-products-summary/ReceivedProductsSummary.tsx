@@ -317,7 +317,7 @@ export default function ReceivedProductsSummary({
                       style={{ marginBottom: 4 }}
                     />
                     <Text className="text-gray-300 text-xs text-center">
-                      {t("ReceivedProductsSummary.TotalCrates", "Total Crates")}
+                      {t("ReceivedProductsSummary.TotalContainers", "Total Containers")}
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
                       {crop.totalCrates}
@@ -355,14 +355,14 @@ export default function ReceivedProductsSummary({
                         borderLeftColor: "#19282F",
                       }}
                     >
-                      {/* Crates Column */}
+                      {/* Containers Column */}
                       <View className="flex-row items-center gap-x-2">
                         <View className="w-8 h-8 rounded-full bg-[#E5E7EB] items-center justify-center">
                           <FontAwesome5 name="boxes" size={14} color="#000000" />
                         </View>
                         <View>
                           <Text className="text-[10px] text-black font-medium">
-                            {t("ReceivedProductsSummary.Crates", "Crates")}
+                            {t("ReceivedProductsSummary.Containers", "Containers")}
                           </Text>
                           <Text className="text-sm font-bold text-black">
                             {gs.crates}

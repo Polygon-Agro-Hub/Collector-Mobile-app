@@ -22,7 +22,7 @@ import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
 import { clearTransportLoad } from "@/store/transportSlice";
-import { getLocalizedProductName } from "@/component/distribution/distribution-common/receive-products/unloading-products/UnloadingProducts";
+import { getLocalizedProductName } from "@/component/distribution/distribution-common/unloading-products/unloading-products/UnloadingProducts";
 import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type LoadingToVehicleSummaryNavigationProp = StackNavigationProp<
@@ -324,7 +324,7 @@ export default function LoadingToVehicleSummary({
                       style={{ marginBottom: 4 }}
                     />
                     <Text className="text-gray-300 text-xs text-center">
-                      {t("LoadingToVehicleSummary.TotalCrates", "Total Crates")}
+                      {t("LoadingToVehicleSummary.TotalContainers", "Total Containers")}
                     </Text>
                     <Text className="text-white text-base font-bold mt-1">
                       {crop.totalCrates || 0}
@@ -362,14 +362,14 @@ export default function LoadingToVehicleSummary({
                           borderLeftColor: "#19282F",
                         }}
                       >
-                        {/* Crates Column */}
+                        {/* Containers Column */}
                         <View className="flex-row items-center gap-x-2">
                           <View className="w-8 h-8 rounded-full bg-[#E5E7EB] items-center justify-center">
                             <FontAwesome5 name="boxes" size={14} color="#000000" />
                           </View>
                           <View>
                             <Text className="text-[10px] text-black font-medium">
-                              {t("LoadingToVehicleSummary.Crates", "Crates")}
+                              {t("LoadingToVehicleSummary.Containers", "Containers")}
                             </Text>
                             <Text className="text-sm font-bold text-black">
                               {gs.crates}
