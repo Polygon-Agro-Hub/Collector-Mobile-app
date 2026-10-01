@@ -4,34 +4,36 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
+  StatusBar,
   RefreshControl,
+  Alert,
   BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
+import environment from "@/environment/environment";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import NoDataScreen from "@/component/components/no-data/NoDataScreen";
-import AddButton from "@/component/components/buttons/AddButton";
 import LoadingPage from "@/component/components/loading/LoadingPage";
+import AddButton from "@/component/components/buttons/AddButton";
 import { MaterialIcons } from "@expo/vector-icons";
-import environment from "@/environment/environment";
 
 import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
-type SentProductsTodayNavigationProps = StackNavigationProp<
+type ReceivedProductsTodayNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "SentProductsToday"
+  "ReceivedProductsToday"
 >;
 
-interface SentProductsTodayProps {
-  navigation: SentProductsTodayNavigationProps;
+interface ReceivedProductsTodayProps {
+  navigation: ReceivedProductsTodayNavigationProp;
 }
 
-export interface SentProductItem {
+export interface ReceivedProductItem {
   id: string;
   transferCode?: string;
   vehicleNo?: string;
@@ -42,40 +44,19 @@ export interface SentProductItem {
   driverNameTamil?: string;
   crates: number;
   weight: string;
-  destination: string;
+  origin: string;
   time: string;
-  createdAt?: string;
-  conformDriverId?: number | null;
 }
 
-export default function SentProductsToday({
+export default function ReceivedProductsToday({
   navigation,
-}: SentProductsTodayProps) {
+}: ReceivedProductsTodayProps) {
   const { t, i18n } = useTranslation();
-
-  const [products, setProducts] = useState<SentProductItem[]>([]);
+  const [products, setProducts] = useState<ReceivedProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  const handleBack = () => {
-    navigation.navigate("Main", { screen: "CollectionDashboard" });
-  };
-
-  useEffect(() => {
-    const backAction = () => {
-      navigation.navigate("Main", { screen: "CollectionDashboard" });
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, [navigation]);
-
-  const fetchSentProducts = useCallback(async (isRefresh = false) => {
+  const fetchReceivedProducts = useCallback(async (isRefresh = false) => {
     try {
       if (isRefresh) {
         setRefreshing(true);
@@ -85,25 +66,47 @@ export default function SentProductsToday({
 
       const authToken = store.getState().auth.token;
 
-      const response = await axios.get(
-        `${environment.API_BASE_URL}api/transport/sent-today`,
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        },
-      );
+      let resData = null;
+      try {
+        const response = await axios.get(
+          `${environment.API_BASE_URL}api/distribution/received-today`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+        if (response.data?.success) {
+          resData = response.data.data;
+        }
+      } catch (distErr) {
+        // Fallback to transport route if needed
+        const response = await axios.get(
+          `${environment.API_BASE_URL}api/transport/received-today`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+        if (response.data?.success) {
+          resData = response.data.data;
+        }
+      }
 
-      if (response.data.success) {
-        setProducts(response.data.data);
+      if (resData) {
+        setProducts(resData);
       } else {
         setProducts([]);
       }
     } catch (err) {
-      console.error("Error fetching sent products:", err);
+      console.error("Error fetching received products:", err);
       Alert.alert(
         t("Error.error", "Error"),
-        t("Error.Failed to fetch sent products.", "Failed to fetch sent products."),
+        t(
+          "Error.Failed to fetch received products.",
+          "Failed to fetch received products."
+        )
       );
       setProducts([]);
     } finally {
@@ -112,16 +115,51 @@ export default function SentProductsToday({
     }
   }, [t]);
 
-  useEffect(() => {
-    fetchSentProducts();
-  }, [fetchSentProducts]);
+  const handleBackToHome = useCallback(() => {
+    navigation.navigate("Main", { screen: "DistridutionaDashboard" });
+  }, [navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchReceivedProducts();
+
+      const onBackPress = () => {
+        handleBackToHome();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [fetchReceivedProducts, handleBackToHome])
+  );
 
   const handleAdd = () => {
-    navigation.navigate("ScanDriverQR");
+    navigation.navigate("ScanLoadQR");
   };
 
   const handleRefresh = () => {
-    fetchSentProducts(true);
+    fetchReceivedProducts(true);
+  };
+
+  const handleCardPress = (item: ReceivedProductItem) => {
+    const locDriverName = getLocalizedDriverName(item, i18n.language) || item.driverName;
+    navigation.navigate("ReceivedProductsSummary", {
+      transportId: item.id,
+      loadCode: item.transferCode,
+      vehicleNo: item.vehicleNo,
+      driverEmpId: item.driverEmpId,
+      driverName: locDriverName,
+      driverNameEnglish: item.driverNameEnglish,
+      driverNameSinhala: item.driverNameSinhala,
+      driverNameTamil: item.driverNameTamil,
+      origin: item.origin,
+      isUnloaded: true,
+      title: "Unloaded Summery",
+    });
   };
 
   const formatIndex = (index: number) => {
@@ -130,20 +168,7 @@ export default function SentProductsToday({
 
   const formatDisplayTime = (timeStr?: string) => {
     if (!timeStr) return "";
-    let str = timeStr;
-    if (timeStr.includes("T") || (timeStr.includes("-") && timeStr.includes(":"))) {
-      const d = new Date(timeStr);
-      if (!isNaN(d.getTime())) {
-        const slDate = new Date(d.getTime() + (5 * 60 + 30) * 60 * 1000);
-        let hours = slDate.getUTCHours();
-        const minutes = slDate.getUTCMinutes();
-        const ampm = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12 || 12;
-        const mm = minutes < 10 ? `0${minutes}` : minutes;
-        str = `At ${hours}:${mm} ${ampm}`;
-      }
-    }
-    str = str.replace(/^At\s*/i, `${t("Common.At", "At")} `);
+    let str = timeStr.replace(/^At\s*/i, `${t("Common.At", "At")} `);
     const lang = (i18n.language || "").toLowerCase();
     if (lang.startsWith("si")) {
       str = str
@@ -159,26 +184,30 @@ export default function SentProductsToday({
 
   return (
     <View className="flex-1 bg-white">
+      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
+
       {/* Header */}
       <CustomHeader
-        title={t("SentProductsToday.Title", "Sent Products Today")}
+        title={t("ReceivedProductsToday.Title", "Received Products Today")}
         navigation={navigation}
-        onBackPress={handleBack}
+        onBackPress={handleBackToHome}
       />
 
       <View className="flex-1 relative">
         {loading ? (
-          /* Loading State */
           <LoadingPage
-            message={t("SentProductsToday.Loading", "Loading...")}
+            message={t("ReceivedProductsToday.Loading", "Loading...")}
           />
         ) : products.length === 0 ? (
           /* Empty State */
           <NoDataScreen
-            message={t("SentProductsToday.NoLoadsToday", "No loads today")}
+            message={t(
+              "ReceivedProductsToday.NoProductsReceivedToday",
+              "- No products were received today -"
+            )}
           />
         ) : (
-          /* List of Sent Products Cards */
+          /* List of Received Products Cards */
           <ScrollView
             className="flex-1 px-6 pt-4"
             contentContainerStyle={{ paddingBottom: 100 }}
@@ -196,34 +225,7 @@ export default function SentProductsToday({
               <TouchableOpacity
                 key={item.id}
                 activeOpacity={0.75}
-                onPress={() => {
-                  const locDriverName = getLocalizedDriverName(item, i18n.language) || item.driverName;
-                  if (item.conformDriverId) {
-                    navigation.navigate("LoadAssigned", {
-                      transportId: item.id,
-                      loadCode: item.transferCode,
-                      vehicleNo: item.vehicleNo,
-                      driverId: item.driverEmpId || locDriverName,
-                      driverName: locDriverName,
-                      driverNameEnglish: item.driverNameEnglish,
-                      driverNameSinhala: item.driverNameSinhala,
-                      driverNameTamil: item.driverNameTamil,
-                    });
-                  } else {
-                    navigation.navigate("LoadingToVehicleSummary", {
-                      transportId: item.id,
-                      loadCode: item.transferCode,
-                      vehicleNo: item.vehicleNo,
-                      driverEmpId: item.driverEmpId,
-                      driverName: locDriverName,
-                      driverNameEnglish: item.driverNameEnglish,
-                      driverNameSinhala: item.driverNameSinhala,
-                      driverNameTamil: item.driverNameTamil,
-                      centreName: item.destination,
-                      isViewOnly: true,
-                    });
-                  }
-                }}
+                onPress={() => handleCardPress(item)}
                 className="flex-row items-center bg-white border border-[#E1E7EE] rounded-2xl p-4 my-2"
                 style={{
                   backgroundColor: "#ffffff",
@@ -244,10 +246,10 @@ export default function SentProductsToday({
                 {/* Load Information */}
                 <View className="flex-1">
                   <Text className="font-extrabold text-[#030E25] text-base">
-                    {t("SentProductsToday.Crates", "Crates")} : {item.crates} | {item.weight ? item.weight.replace(/kg/i, t("Common.kg", "kg")) : ""}
+                    {t("ReceivedProductsToday.Containers", "Containers")} : {item.crates} | {item.weight ? item.weight.replace(/kg/i, t("Common.kg", "kg")) : ""}
                   </Text>
                   <Text className="text-xs text-[#030E25] mt-1 font-medium">
-                    {item.destination}
+                    {item.origin}
                   </Text>
                   <Text className="text-xs text-[#54617D] mt-0.5 font-medium">
                     {formatDisplayTime(item.time)}

@@ -577,11 +577,11 @@ export default function WeighTheLoad({
           {/* Vertical Divider */}
           <View className="w-[1px] h-12 bg-gray-600 mx-2" />
 
-          {/* Total Crates */}
+          {/* Total Containers */}
           <View className="flex-1 pl-4">
             <FontAwesome5 name="boxes" size={18} color="#FFFFFF" />
             <Text className="text-gray-300 text-xs mt-2 font-medium">
-              {t("WeighTheLoad.TotalCrates", "Total Crates")}
+              {t("WeighTheLoad.TotalContainers", "Total Containers")}
             </Text>
             <Text className="text-white font-extrabold text-lg mt-0.5">
               {cropData.totalCrates}
@@ -651,11 +651,11 @@ export default function WeighTheLoad({
                   {/* Vertical Divider Line */}
                   <View className="w-[1px] h-12 bg-gray-300 mx-2" />
 
-                  {/* Loaded Crates */}
+                  {/* Loaded Containers */}
                   <View className="flex-1 pl-2">
                     <FontAwesome5 name="boxes" size={16} color="#17262C" />
                     <Text className="text-[#4E5273] text-xs mt-1.5">
-                      {t("WeighTheLoad.LoadedCrates", "Loaded Crates")}
+                      {t("WeighTheLoad.LoadedContainers", "Loaded Containers")}
                     </Text>
                     <Text className="font-bold text-base text-[#17262C] mt-0.5">
                       {grade.loadedCrates}
@@ -701,11 +701,11 @@ export default function WeighTheLoad({
                   {/* Vertical Divider Line */}
                   <View className="w-[1px] h-12 bg-gray-300 mx-2" />
 
-                  {/* Unloaded Crates */}
+                  {/* Unloaded Containers */}
                   <View className="flex-1 pl-2">
                     <FontAwesome5 name="boxes" size={16} color="#79747E" />
                     <Text className="text-[#79747E] text-xs mt-1.5">
-                      {t("WeighTheLoad.UnloadedCrates", "Unloaded Crates")}
+                      {t("WeighTheLoad.UnloadedContainers", "Unloaded Containers")}
                     </Text>
                     <Text
                       style={{
@@ -783,11 +783,11 @@ export default function WeighTheLoad({
                 {mismatch.expectedCrates !== undefined &&
                   mismatch.receivedCrates !== undefined && (
                     <Text className="text-xs text-[#17262C] leading-5 mt-1">
-                      {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedCratesCountIs", "Expected crates count is")}{" "}
+                      {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedContainersCountIs", "Expected containers count is")}{" "}
                       <Text className="font-bold">
                         {mismatch.expectedCrates}
                       </Text>
-                      {t("Mismatch.ButReceivedCrateCountIs", ", but received crate count is")}{" "}
+                      {t("Mismatch.ButReceivedContainerCountIs", ", but received container count is")}{" "}
                       <Text className="font-bold">
                         {mismatch.receivedCrates}
                       </Text>

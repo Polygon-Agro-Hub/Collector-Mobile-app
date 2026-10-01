@@ -65,13 +65,13 @@ import otpBankDetailsupdate from "@/component/collection/collection-common/farme
 import GoviPensionForm from "@/component/collection/collection-common/govi-pension/GoviPensionForm";
 import GoviPensionStatus from "@/component/collection/collection-common/govi-pension/GoviPensionStatus";
 import NotEligibleScreen from "@/component/collection/collection-common/govi-pension/NotEligibleScreen";
-import SentProductsToday from "@/component/collection/collection-common/transport/SentProductsToday";
-import ScanDriverQR from "@/component/collection/collection-common/transport/ScanDriverQR";
-import SelectDistributionCentre from "@/component/collection/collection-common/transport/SelectDistributionCentre";
-import LoadingToVehicle from "@/component/collection/collection-common/transport/LoadingToVehicle";
-import LoadingToVehicleSummary from "@/component/collection/collection-common/transport/LoadingToVehicleSummary";
-import LoadQR from "@/component/collection/collection-common/transport/LoadQR";
-import LoadAssigned from "@/component/collection/collection-common/transport/LoadAssigned";
+import SentProductsToday from "@/component/collection/collection-common/loading-products/sent-products-today/SentProductsToday";
+import ScanDriverQR from "@/component/collection/collection-common/loading-products/scan-driver-qr/ScanDriverQR";
+import SelectDistributionCentre from "@/component/collection/collection-common/loading-products/select-distribution-centre/SelectDistributionCentre";
+import LoadingToVehicle from "@/component/collection/collection-common/loading-products/loading-to-vehicle/LoadingToVehicle";
+import LoadingToVehicleSummary from "@/component/collection/collection-common/loading-products/loading-to-vehicle-summary/LoadingToVehicleSummary";
+import LoadQR from "@/component/collection/collection-common/loading-products/load-qr/LoadQR";
+import LoadAssigned from "@/component/collection/collection-common/loading-products/load-assigned/LoadAssigned";
 
 // --- Distribution Screens ---
 import DistributionDashboard from "@/component/distribution/distribution-common/dashboard/DistributionDashboard";
@@ -102,12 +102,12 @@ import SelectRowToAssign from "@/component/distribution/distribution-center-mana
 import ConfirmRowAssign from "@/component/distribution/distribution-center-manager/assign-groups/ConfirmRowAssign";
 import DistributionCenterTarget from "@/component/distribution/distribution-common/center-target/DistributionCenterTarget";
 import OrderDetails from "@/component/distribution/distribution-common/center-target/OrderDetails";
-import ReceivedProductsToday from "@/component/distribution/distribution-common/receive-products/received-products-today/ReceivedProductsToday";
-import ScanLoadQR from "@/component/distribution/distribution-common/receive-products/scan-load-qr/ScanLoadQR";
-import ReceivedProductsSummary from "@/component/distribution/distribution-common/receive-products/received-products-summary/ReceivedProductsSummary";
-import UnloadingProducts from "@/component/distribution/distribution-common/receive-products/unloading-products/UnloadingProducts";
-import WeighTheLoad from "@/component/distribution/distribution-common/receive-products/weigh-the-load/WeighTheLoad";
-import WeighGrade from "@/component/distribution/distribution-common/receive-products/weigh-grade/WeighGrade";
+import ReceivedProductsToday from "@/component/distribution/distribution-common/unloading-products/received-products-today/ReceivedProductsToday";
+import ScanLoadQR from "@/component/distribution/distribution-common/unloading-products/scan-load-qr/ScanLoadQR";
+import ReceivedProductsSummary from "@/component/distribution/distribution-common/unloading-products/received-products-summary/ReceivedProductsSummary";
+import UnloadingProducts from "@/component/distribution/distribution-common/unloading-products/unloading-products/UnloadingProducts";
+import WeighTheLoad from "@/component/distribution/distribution-common/unloading-products/weigh-the-load/WeighTheLoad";
+import WeighGrade from "@/component/distribution/distribution-common/unloading-products/weigh-grade/WeighGrade";
 import MyNotifications from "@/component/distribution/distribution-center-manager/notifications/MyNotifications";
 
 const Stack = createStackNavigator();
