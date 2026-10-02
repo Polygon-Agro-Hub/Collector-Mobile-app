@@ -273,7 +273,9 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
               )}
             </View>
 
-            <View className="flex-row items-center justify-center mb-8 px-4">
+            <View className="flex-row items-center justify-center mb-8 px-14 "
+           
+            >
               {profile && profile.image ? (
                 <Image
                   source={{ uri: profile.image }}

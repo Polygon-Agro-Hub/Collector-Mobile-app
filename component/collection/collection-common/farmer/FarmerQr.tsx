@@ -432,17 +432,19 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
 
-              {/* Download and Share buttons - Centered */}
-              <DownloadShareButtons
-                onDownload={downloadQRCode}
-                onShare={shareQRCode}
-                disabled={checkingPensionStatus}
-                downloadLabel={t("FarmerQr.Download")}
-                shareLabel={t("FarmerQr.Share")}
-              />
+           
             </View>
           )}
+          
         </View>
+          <View className="flex-1 justify-center">
+
+                 {/* Download and Share buttons - Centered */}
+                <DownloadShareButtons
+              onDownload={downloadQRCode}
+              onShare={shareQRCode}
+            />
+            </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

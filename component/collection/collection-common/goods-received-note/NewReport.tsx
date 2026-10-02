@@ -876,7 +876,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* Action Buttons */}
+         
+        </View>
+         {/* Action Buttons */}
           <View
             className="w-full mt-4"
             style={{ paddingBottom: insets.bottom || 20 }}
@@ -888,7 +890,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               shareLabel={t("NewReport.Share")}
             />
           </View>
-        </View>
       </ScrollView>
     </View>
   );
