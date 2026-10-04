@@ -1178,7 +1178,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       }
 
       const body = {
-        source: "PolygonAgro",
+        source: "Polygon",
         destinations: [farmerPhone],
         content: { sms: Message },
         transports: ["sms"],

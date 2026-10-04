@@ -313,7 +313,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       }
 
       const body = {
-        source: "PolygonAgro",
+        source: "Polygon",
         transport: "sms",
         content: { sms: otpMessage },
         destination: `${phoneNumber}`,
