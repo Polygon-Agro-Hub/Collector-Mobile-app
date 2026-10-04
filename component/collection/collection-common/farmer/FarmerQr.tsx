@@ -247,13 +247,14 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const fileUri = `${(FileSystem as any).documentDirectory}QRCode_${Date.now()}.png`;
+      const fileUri = `${(FileSystem as any).cacheDirectory}Farmer_QRCode_${Date.now()}.png`;
       const response = await FileSystem.downloadAsync(farmerQRCode, fileUri);
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(response.uri, {
           mimeType: "image/png",
           dialogTitle: "Share QR Code",
+          UTI: "public.png",
         });
       } else {
         Alert.alert(
@@ -431,17 +432,19 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
 
-              {/* Download and Share buttons - Centered */}
-              <DownloadShareButtons
-                onDownload={downloadQRCode}
-                onShare={shareQRCode}
-                disabled={checkingPensionStatus}
-                downloadLabel={t("FarmerQr.Download")}
-                shareLabel={t("FarmerQr.Share")}
-              />
+           
             </View>
           )}
+          
         </View>
+          <View className="flex-1 justify-center">
+
+                 {/* Download and Share buttons - Centered */}
+                <DownloadShareButtons
+              onDownload={downloadQRCode}
+              onShare={shareQRCode}
+            />
+            </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

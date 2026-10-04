@@ -55,7 +55,7 @@ const ClaimOfficer: React.FC = () => {
   );
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
@@ -172,7 +172,10 @@ const ClaimOfficer: React.FC = () => {
           t("Error.Failed to claim the officer. Please try again later."),
         );
       } else {
-        Alert.alert(t("Error.Success"), t("Error.Employee successfully claimed."));
+        Alert.alert(
+          t("Error.Success"),
+          t("Error.Employee successfully claimed."),
+        );
         setOfficerFound(false);
         setOfficerDetails(null);
         setEmpID("");
@@ -217,8 +220,6 @@ const ClaimOfficer: React.FC = () => {
 
     return () => backHandler.remove();
   }, [navigation]);
-
-
 
   return (
     <ScrollView className="flex-1 bg-white" keyboardShouldPersistTaps="handled">
@@ -272,7 +273,17 @@ const ClaimOfficer: React.FC = () => {
           {searchLoading ? (
             <ActivityIndicator size="small" color="#ffffff" />
           ) : (
-            <Text className="text-white text-lg text-center font-semibold">
+            <Text
+              className="text-white text-lg text-center font-semibold"
+              style={{
+                fontSize:
+                  selectedLanguage === "si"
+                    ? 10
+                    : selectedLanguage === "ta"
+                      ? 9
+                      : 12,
+              }}
+            >
               {t("ClaimOfficer.Search")}
             </Text>
           )}
@@ -367,31 +378,39 @@ const ClaimOfficer: React.FC = () => {
           )}
 
           {/* Claim Officer Button */}
-          <TouchableOpacity
-            className="mt-6 mb-10 bg-[#313131]    py-4 rounded-full"
-            onPress={() => setModalVisible(true)}
-            style={{
-              shadowColor: "#0b0a0a",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 10,
-              elevation: 6,
-            }}
-          >
-            <Text
-              className={`text-white text-lg ${
-                i18n.language === "en" ? "px-28" : "px-24"
-              } font-semibold text-center`}
-              style={[{ fontSize: 16 }]}
+          <View className="px-8 w-full mt-6 mb-10">
+            <TouchableOpacity
+              className="bg-[#313131] h-[50px] rounded-full items-center justify-center"
+              onPress={() => setModalVisible(true)}
+              style={{
+                shadowColor: "#0b0a0a",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
+                elevation: 6,
+              }}
             >
-              {t("ClaimOfficer.Claim Officer")}
-            </Text>
-          </TouchableOpacity>
+              <Text
+                className="text-white font-semibold text-center"
+                style={[
+                  selectedLanguage === "si"
+                    ? { fontSize: 10 }
+                    : selectedLanguage === "ta"
+                      ? { fontSize: 9 }
+                      : { fontSize: 12 },
+                ]}
+              >
+                {t("ClaimOfficer.Claim Officer")}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
       <WarningConfirmation
         visible={modalVisible}
-        message={t("ClaimOfficer.Are you sure you want to claim this employee?")}
+        message={t(
+          "ClaimOfficer.Are you sure you want to claim this employee?",
+        )}
         onConfirm={handleClaimOfficer}
         onCancel={handleCancel}
         confirmText={t("ClaimOfficer.Claim")}

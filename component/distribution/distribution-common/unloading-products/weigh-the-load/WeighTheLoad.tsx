@@ -68,7 +68,7 @@ export const extractGradeLetter = (title?: string): string => {
     title
       .replace(/Grade/gi, "")
       .replace(/ශ්‍රේණිය/g, "")
-      .replace(/ශ්රේණිය/g, "")
+      .replace(/ශ්‍රේණිය/g, "")
       .replace(/தரம்/g, "")
       .trim() || "A"
   );

@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer, { setUser, setActiveAssignment } from "../store/authSlice";
 import transportReducer from "../store/transportSlice";
 import unloadReducer from "../store/unloadSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAuthData, saveAuthData, clearAuthData } from "./authStorage";
 
 const store = configureStore({
   reducer: {
@@ -14,14 +14,11 @@ const store = configureStore({
 
 export const loadPersistedAuth = async () => {
   try {
-    const authStateStr = await AsyncStorage.getItem("@auth_state");
-    if (authStateStr) {
-      const authState = JSON.parse(authStateStr);
-      if (authState && authState.token) {
-        store.dispatch(setUser(authState));
-        if (authState.activeAssignment) {
-          store.dispatch(setActiveAssignment(authState.activeAssignment));
-        }
+    const authState = await getAuthData();
+    if (authState && authState.token) {
+      store.dispatch(setUser(authState as any));
+      if (authState.activeAssignment) {
+        store.dispatch(setActiveAssignment(authState.activeAssignment));
       }
     }
   } catch (error) {
@@ -29,12 +26,20 @@ export const loadPersistedAuth = async () => {
   }
 };
 
+let previousToken: string | null = null;
+
 store.subscribe(async () => {
   try {
     const state = store.getState();
-    if (!state.auth.token) {
-      await AsyncStorage.removeItem("@auth_state");
-    } else {
+    const currentToken = state.auth.token;
+
+    if (!currentToken && previousToken) {
+      // User logged out
+      previousToken = null;
+      await clearAuthData();
+    } else if (currentToken && currentToken !== previousToken) {
+      // User logged in or token updated
+      previousToken = currentToken;
       const authState = {
         token: state.auth.token,
         jobRole: state.auth.jobRole,
@@ -47,7 +52,7 @@ store.subscribe(async () => {
         tokenExpirationTime: state.auth.tokenExpirationTime,
         activeAssignment: state.auth.activeAssignment,
       };
-      await AsyncStorage.setItem("@auth_state", JSON.stringify(authState));
+      await saveAuthData(authState);
     }
   } catch (error) {
     console.error("Failed to persist auth state:", error);
@@ -56,4 +61,3 @@ store.subscribe(async () => {
 
 export default store;
 export type RootState = ReturnType<typeof store.getState>;
-

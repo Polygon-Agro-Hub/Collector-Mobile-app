@@ -216,7 +216,7 @@ const EditTargetScreen: React.FC<EditTargetScreenProps> = ({
 
           {/* Buttons in Edit Mode */}
           {isEditing && (
-            <View className="flex-row justify-center gap-4 mt-4 p-5">
+            <View className="flex-row justify-center gap-2 mt-4 p-3">
               <TouchableOpacity
                 className="flex-1 bg-[#FF0700] px-6 py-2 rounded-full items-center h-[50px] justify-center"
                 onPress={() =>

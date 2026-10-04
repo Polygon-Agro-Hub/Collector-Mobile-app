@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
 import {
   useFocusEffect,
-  useIsFocused,
   useRoute,
   RouteProp,
 } from "@react-navigation/native";
@@ -69,24 +68,33 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     phoneNumber2,
     image,
   } = route.params;
-  const [todoData, setTodoData] = useState<TargetData[]>([]);
-  const [completedData, setCompletedData] = useState<TargetData[]>([]);
+
+  // Raw API data. Filtering and sorting are derived below so a language
+  // change is applied immediately without another API call.
+  const [allData, setAllData] = useState<TargetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
   const [refreshing, setRefreshing] = useState(false);
-  const { t } = useTranslation();
-  const isFocused = useIsFocused();
+  const { t, i18n } = useTranslation();
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
-  const fetchSelectedLanguage = async () => {
+  // Read the saved language (called every time the screen gains focus)
+  const fetchSelectedLanguage = useCallback(async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
+      setSelectedLanguage(lang || i18n.language || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
-  };
+  }, [i18n.language]);
+
+  // Also react when i18n itself changes language
+  useEffect(() => {
+    if (i18n.language) {
+      setSelectedLanguage(i18n.language);
+    }
+  }, [i18n.language]);
 
   const getGradePriority = (grade: string): number => {
     switch (grade) {
@@ -101,32 +109,38 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
     }
   };
 
-  const sortByVarietyAndGrade = (data: TargetData[]) => {
-    return [...data].sort((a, b) => {
-      const nameA = getVarietyNameForSort(a);
-      const nameB = getVarietyNameForSort(b);
-
-      const nameComparison = nameA.localeCompare(nameB);
-
-      if (nameComparison === 0) {
-        return getGradePriority(a.grade) - getGradePriority(b.grade);
+  const getVarietyNameForSort = useCallback(
+    (item: TargetData) => {
+      switch (selectedLanguage) {
+        case "si":
+          return item.varietyNameSinhala || item.varietyNameEnglish || "";
+        case "ta":
+          return item.varietyNameTamil || item.varietyNameEnglish || "";
+        default:
+          return item.varietyNameEnglish || "";
       }
+    },
+    [selectedLanguage],
+  );
 
-      return nameComparison;
-    });
-  };
+  const sortByVarietyAndGrade = useCallback(
+    (data: TargetData[]) => {
+      return [...data].sort((a, b) => {
+        const nameComparison = getVarietyNameForSort(a).localeCompare(
+          getVarietyNameForSort(b),
+        );
 
-  const getVarietyNameForSort = (item: TargetData) => {
-    switch (selectedLanguage) {
-      case "si":
-        return item.varietyNameSinhala || "";
-      case "ta":
-        return item.varietyNameTamil || "";
-      default:
-        return item.varietyNameEnglish || "";
-    }
-  };
+        if (nameComparison === 0) {
+          return getGradePriority(a.grade) - getGradePriority(b.grade);
+        }
 
+        return nameComparison;
+      });
+    },
+    [getVarietyNameForSort],
+  );
+
+  // Fetch raw data only (no language dependency, no sorting)
   const fetchTargets = useCallback(async () => {
     setLoading(true);
     const startTime = Date.now();
@@ -141,15 +155,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         },
       );
 
-      const allData = response.data.data;
-
-      const todoItems = allData.filter((item: TargetData) => item.todo > 0);
-      const completedItems = allData.filter(
-        (item: TargetData) => item.todo === 0 && item.complete !== 0,
-      );
-
-      setTodoData(sortByVarietyAndGrade(todoItems));
-      setCompletedData(sortByVarietyAndGrade(completedItems));
+      setAllData(response.data.data || []);
     } catch (err) {
       console.log(t("Error.Failed to fetch data."));
     } finally {
@@ -160,13 +166,31 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         remainingTime > 0 ? remainingTime : 0,
       );
     }
-  }, [collectionOfficerId, selectedLanguage, t]);
+  }, [collectionOfficerId]);
 
-  useEffect(() => {
-    if (!isFocused) return;
-    fetchTargets();
-  }, [isFocused, collectionOfficerId]);
+  // Derived, sorted lists – recomputed when data or language changes
+  const todoData = useMemo(
+    () => sortByVarietyAndGrade(allData.filter((item) => item.todo > 0)),
+    [allData, sortByVarietyAndGrade],
+  );
 
+  const completedData = useMemo(
+    () =>
+      sortByVarietyAndGrade(
+        allData.filter((item) => item.todo === 0 && item.complete !== 0),
+      ),
+    [allData, sortByVarietyAndGrade],
+  );
+
+  // Reload language + data every time this screen is navigated to
+  useFocusEffect(
+    useCallback(() => {
+      fetchSelectedLanguage();
+      fetchTargets();
+    }, [fetchSelectedLanguage, fetchTargets]),
+  );
+
+  // Hardware back button
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -199,26 +223,20 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
+    fetchSelectedLanguage();
     fetchTargets().finally(() => setRefreshing(false));
-  }, [fetchTargets]);
+  }, [fetchSelectedLanguage, fetchTargets]);
 
   const displayedData = selectedToggle === "ToDo" ? todoData : completedData;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchSelectedLanguage();
-    };
-    fetchData();
-  }, []);
-
-  const getvarietyName = (TargetData: TargetData) => {
+  const getvarietyName = (item: TargetData) => {
     switch (selectedLanguage) {
       case "si":
-        return TargetData.varietyNameSinhala;
+        return item.varietyNameSinhala || item.varietyNameEnglish;
       case "ta":
-        return TargetData.varietyNameTamil;
+        return item.varietyNameTamil || item.varietyNameEnglish;
       default:
-        return TargetData.varietyNameEnglish;
+        return item.varietyNameEnglish;
     }
   };
 
@@ -295,7 +313,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Scrollable Table - FIXED STRUCTURE */}
+      {/* Scrollable Table */}
       <View className="flex-1 bg-white">
         {loading ? (
           <View className="flex-1 justify-center items-center">
@@ -375,7 +393,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                   >
                     {selectedToggle === "Completed"
                       ? t("DailyTarget.Completedkg")
-                      : t("DailyTarget.Todo()")}
+                      : t("DailyTarget.Todo")}
                   </Text>
                 </View>
               </View>
@@ -473,7 +491,6 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                         </Text>
                       </View>
 
-                      {/* Todo / Completed */}
                       {/* Todo / Completed */}
                       <View
                         style={{ width: 100 }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,20 @@ import {
   Image,
   StatusBar,
   Alert,
+  Dimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import { MaterialCommunityIcons, Ionicons, FontAwesome5, MaterialIcons, AntDesign, FontAwesome6 } from "@expo/vector-icons";
+import {
+  MaterialCommunityIcons,
+  Ionicons,
+  FontAwesome5,
+  MaterialIcons,
+  AntDesign,
+  FontAwesome6,
+} from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
@@ -22,6 +30,8 @@ import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
 import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
 import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
+import axios from "axios";
+import environment from "@/environment/environment";
 
 type WeighGradeNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -38,9 +48,18 @@ interface WeighGradeProps {
   route: WeighGradeRouteProp;
 }
 
+export interface ContainerTypeItem {
+  id: number;
+  labelName: string;
+  weight: number;
+}
+
 export interface SetWeighItem {
   id: string;
   setNumber: number;
+  containerTypeId?: number;
+  containerTypeName?: string;
+  containerTypeWeight?: number;
   crates: string;
   weight: number | null;
   isExpanded: boolean;
@@ -69,6 +88,13 @@ export default function WeighGrade({
   const loadedWeightKg = typeof route.params?.loadedWeightKg === "number" ? route.params.loadedWeightKg : 0;
   const loadedCrates = typeof route.params?.loadedCrates === "number" ? route.params.loadedCrates : 0;
 
+  // Container types state from collection_officer.creates (backend only)
+  const [containerTypes, setContainerTypes] = useState<ContainerTypeItem[]>([]);
+  const [containerSectionWidth, setContainerSectionWidth] = useState<number>(
+    Dimensions.get("window").width - 80
+  );
+  const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
+
   // Initialize sets from Redux or route params if already weighed, otherwise 1 default set
   const [sets, setSets] = useState<SetWeighItem[]>(() => {
     try {
@@ -79,6 +105,9 @@ export default function WeighGrade({
         return currentGrade.sets.map((s, idx) => ({
           id: `set-${s.setIndex || idx + 1}`,
           setNumber: s.setIndex || idx + 1,
+          containerTypeId: (s as any).containerTypeId,
+          containerTypeName: (s as any).containerTypeName,
+          containerTypeWeight: (s as any).containerTypeWeight ?? (s as any).crateWeight,
           crates: String(s.crates ?? ""),
           weight: typeof s.weightKg === "number" ? s.weightKg : null,
           isExpanded: true,
@@ -89,6 +118,9 @@ export default function WeighGrade({
           {
             id: `set-1`,
             setNumber: 1,
+            containerTypeId: undefined,
+            containerTypeName: undefined,
+            containerTypeWeight: undefined,
             crates:
               currentGrade.unloadedCrates !== null && currentGrade.unloadedCrates !== undefined
                 ? String(currentGrade.unloadedCrates)
@@ -106,6 +138,9 @@ export default function WeighGrade({
       {
         id: `set-1`,
         setNumber: 1,
+        containerTypeId: undefined,
+        containerTypeName: undefined,
+        containerTypeWeight: undefined,
         crates: loadedCrates > 0 ? String(loadedCrates) : "",
         weight: null,
         isExpanded: true,
@@ -119,6 +154,60 @@ export default function WeighGrade({
   const [isScaleModalVisible, setIsScaleModalVisible] = useState<boolean>(false);
   const [setToDelete, setSetToDelete] = useState<SetWeighItem | null>(null);
 
+  // Fetch container types from API (collection_officer.creates)
+  const fetchContainerTypes = useCallback(async () => {
+    try {
+      const authToken = store.getState().auth.token;
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/transport/container-types`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      if (
+        response.data.success &&
+        Array.isArray(response.data.data) &&
+        response.data.data.length > 0
+      ) {
+        const types: ContainerTypeItem[] = response.data.data;
+        setContainerTypes(types);
+
+        setSets((prev) =>
+          prev.map((s) => ({
+            ...s,
+            containerTypeId: s.containerTypeId || types[0].id,
+            containerTypeName: s.containerTypeName || types[0].labelName,
+            containerTypeWeight: s.containerTypeWeight ?? types[0].weight,
+          }))
+        );
+      }
+    } catch (err) {
+      console.warn("Failed to fetch container types, using defaults:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchContainerTypes();
+  }, [fetchContainerTypes]);
+
+  // Select container type for a set
+  const handleSelectContainerType = (setId: string, cType: ContainerTypeItem) => {
+    setSets((prev) =>
+      prev.map((s) =>
+        s.id === setId
+          ? {
+              ...s,
+              containerTypeId: cType.id,
+              containerTypeName: cType.labelName,
+              containerTypeWeight: cType.weight,
+            }
+          : s
+      )
+    );
+  };
+
   // Calculate allocated crates across other sets
   const getAllocatedCrates = (currentSetId: string) => {
     return sets
@@ -126,14 +215,21 @@ export default function WeighGrade({
       .reduce((acc, s) => acc + (parseInt(s.crates, 10) || 0), 0);
   };
 
-  // Handle crates change with max cap
+  // Handle crates change with max cap and prevent 0
   const handleCratesChange = (setId: string, text: string) => {
-    const cleanText = text.replace(/[^0-9]/g, "");
+    const cleanText = text.replace(/[^0-9]/g, "").replace(/^0+/, "");
     const otherAllocated = getAllocatedCrates(setId);
     const maxAllowedForThisSet = Math.max(0, loadedCrates - otherAllocated);
 
+    if (!cleanText) {
+      setSets((prev) =>
+        prev.map((s) => (s.id === setId ? { ...s, crates: "" } : s))
+      );
+      return;
+    }
+
     let num = parseInt(cleanText, 10);
-    if (isNaN(num)) {
+    if (isNaN(num) || num <= 0) {
       setSets((prev) =>
         prev.map((s) => (s.id === setId ? { ...s, crates: "" } : s))
       );
@@ -177,15 +273,19 @@ export default function WeighGrade({
     if (!canAddMoreSets) return;
     const remaining = Math.max(0, loadedCrates - totalAllocatedCrates);
 
+    const defaultC = containerTypes.length > 0 ? containerTypes[0] : undefined;
     const nextSetNumber = sets.length + 1;
     const newSet: SetWeighItem = {
       id: `set-${Date.now()}`,
       setNumber: nextSetNumber,
+      containerTypeId: defaultC?.id,
+      containerTypeName: defaultC?.labelName,
+      containerTypeWeight: defaultC?.weight,
       crates: remaining > 0 ? String(remaining) : "",
       weight: null,
       isExpanded: true,
     };
-    setSets((prev) => [...prev, newSet]);
+    setSets((prev) => [...prev.map((s) => ({ ...s, isExpanded: false })), newSet]);
   };
 
   // Delete a set from grade
@@ -199,13 +299,16 @@ export default function WeighGrade({
     });
   };
 
-  // Toggle set expansion
+  // Toggle set expansion (only 1 box open at a time)
   const handleToggleExpand = (setId: string) => {
-    setSets((prev) =>
-      prev.map((s) =>
-        s.id === setId ? { ...s, isExpanded: !s.isExpanded } : s
-      )
-    );
+    setSets((prev) => {
+      const target = prev.find((s) => s.id === setId);
+      const isExpanding = !target?.isExpanded;
+      return prev.map((s) => ({
+        ...s,
+        isExpanded: s.id === setId ? isExpanding : false,
+      }));
+    });
   };
 
   // Open Scale Modal for a set
@@ -227,6 +330,9 @@ export default function WeighGrade({
           setIndex: s.setNumber || idx + 1,
           crates: parseInt(s.crates, 10) || 0,
           weightKg: s.weight || 0,
+          crateWeight: s.containerTypeWeight ?? null,
+          containerTypeId: s.containerTypeId,
+          containerTypeName: s.containerTypeName,
         }));
 
         const updatedGrades = currentVariety.grades.map((g) =>
@@ -251,7 +357,7 @@ export default function WeighGrade({
     }
   };
 
-  // Receive weight from ScaleWeightModal
+  // Receive weight from ScaleWeightModal (receives Net Total)
   const handleScaleContinue = (measuredWeight: number) => {
     if (!activeSetIdForScale) return;
     const finalWeight = measuredWeight >= 0 ? measuredWeight : 0;
@@ -287,6 +393,9 @@ export default function WeighGrade({
       setIndex: s.setNumber || idx + 1,
       crates: parseInt(s.crates, 10) || 0,
       weightKg: s.weight || 0,
+      crateWeight: s.containerTypeWeight ?? null,
+      containerTypeId: s.containerTypeId,
+      containerTypeName: s.containerTypeName,
     }));
 
     if (varietyId) {
@@ -407,7 +516,7 @@ export default function WeighGrade({
                 onPress={() => handleToggleExpand(item.id)}
                 className="flex-row items-center justify-between px-4 h-[50px] bg-[#E9ECF1] rounded-t-2xl border-b border-[#E5E7EB]"
               >
-                <View className="bg-[#FAE432] rounded-full px-4 py-1">
+                <View className="bg-[#FEF08A] rounded-full px-4 py-1">
                   <Text className="font-bold text-xs text-[#000000]">
                     {t("WeighGrade.Set", "Set")} : {item.setNumber}
                   </Text>
@@ -448,62 +557,182 @@ export default function WeighGrade({
                       </TouchableOpacity>
                     )}
                   </View>
+
+                  {/* Container Type Section (only shown when container types data exists) */}
+                  {containerTypes.length > 0 && (
+                  <View
+                    className="mb-4"
+                    onLayout={(e) => {
+                      const w = e.nativeEvent.layout.width;
+                      if (w > 0) setContainerSectionWidth(w);
+                    }}
+                  >
+                    {/* Header Row */}
+                    <View className="flex-row items-center justify-between mb-2 px-1">
+                      <View className="flex-row items-center gap-1.5">
+                        <MaterialCommunityIcons
+                          name="view-column-outline"
+                          size={18}
+                          color="#475569"
+                        />
+                        <Text className="text-sm font-semibold text-[#334155]">
+                          {t("LoadingToVehicle.ContainerType", "Container Type")}
+                        </Text>
+                      </View>
+                      <Text className="text-xs text-[#64748B]">
+                        {t("LoadingToVehicle.SelectSize", "Select size")}
+                      </Text>
+                    </View>
+
+                    {/* Pill Selector Box (max 3 visible, horizontally scrollable if > 3) */}
+                    <View
+                      style={{
+                        backgroundColor: "#EEF2F6",
+                        borderRadius: 9999,
+                        padding: 4,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        style={{ borderRadius: 9999, overflow: "hidden" }}
+                        contentContainerStyle={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+                        {containerTypes.map((cType) => {
+                          const isSelected =
+                            item.containerTypeId === cType.id ||
+                            (!item.containerTypeId && cType.id === containerTypes[0]?.id);
+
+                          const itemWidth = Math.max(
+                            80,
+                            Math.floor((containerSectionWidth - 8) / 3)
+                          );
+
+                          return (
+                            <TouchableOpacity
+                              key={cType.id}
+                              activeOpacity={0.75}
+                              onPress={() => handleSelectContainerType(item.id, cType)}
+                              style={{
+                                width: itemWidth,
+                                height: 52,
+                                borderRadius: 9999,
+                                backgroundColor: isSelected ? "#FFFFFF" : "transparent",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                shadowColor: isSelected ? "#000000" : "transparent",
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: isSelected ? 0.08 : 0,
+                                shadowRadius: 2,
+                                elevation: isSelected ? 2 : 0,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: "700",
+                                  color: "#0F172A",
+                                }}
+                                numberOfLines={1}
+                              >
+                                {cType.labelName}
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 11,
+                                  color: "#64748B",
+                                  marginTop: 2,
+                                }}
+                                numberOfLines={1}
+                              >
+                                {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
+                  </View>
+                  )}
+
+                  {/* Containers Count Input */}
                   <TextInput
                     value={item.crates}
                     onChangeText={(val) => handleCratesChange(item.id, val)}
-                    placeholder="0"
-                    placeholderTextColor="#79747E"
+                    placeholder={
+                      focusedSetId === item.id
+                        ? ""
+                        : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
+                    }
+                    placeholderTextColor="#94A3B8"
+                    onFocus={() => setFocusedSetId(item.id)}
+                    onBlur={() => setFocusedSetId(null)}
                     keyboardType="number-pad"
                     textAlign="center"
-                    className="bg-[#F3F4F6] rounded-full h-[50px] px-4 font-bold text-base text-[#17262C] mb-3 border border-[#E5E7EB]"
+                    className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
                     style={{ textAlign: "center", textAlignVertical: "center", includeFontPadding: false }}
                   />
 
                   {/* Weight Row with Scale Arrow / Reload Button */}
-                  <View className="flex-row items-center gap-3">
-                    {/* Weight Display Box (Clickable to open scale modal) */}
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => handleOpenScaleModal(item.id)}
-                      className="flex-1 bg-[#F3F4F6] rounded-full h-[50px] justify-center items-center px-4 border border-[#E5E7EB]"
-                    >
-                      <Text
-                        className={`font-bold text-base ${
-                          item.weight !== null
-                            ? "text-[#17262C]"
-                            : "text-[#79747E]"
-                        }`}
-                      >
-                        {item.weight !== null
-                          ? `${item.weight.toFixed(2)} ${t("Common.kg", "kg")}`
-                          : t("Common.kg", "kg")}
-                      </Text>
-                    </TouchableOpacity>
+                  {(() => {
+                    const cratesNum = parseInt(item.crates, 10);
+                    const isCratesValid = !isNaN(cratesNum) && cratesNum > 0;
 
-                    {/* Scale Weight Button */}
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => handleOpenScaleModal(item.id)}
-                      className="w-[50px] h-[50px] rounded-full bg-black items-center justify-center"
-                      style={{
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.2,
-                        shadowRadius: 2,
-                        elevation: 3,
-                      }}
-                    >
-                      {item.weight !== null ? (
-                        <AntDesign name="reload" size={18} color="#FFFFFF" />
-                      ) : (
-                        <Ionicons
-                          name="arrow-forward"
-                          size={18}
-                          color="#FFFFFF"
-                        />
-                      )}
-                    </TouchableOpacity>
-                  </View>
+                    return (
+                      <View className="flex-row items-center gap-3">
+                        {/* Weight Display Box (Clickable to open scale modal) */}
+                        <TouchableOpacity
+                          disabled={!isCratesValid}
+                          activeOpacity={0.8}
+                          onPress={() => handleOpenScaleModal(item.id)}
+                          className="flex-1 bg-[#EEF2F6] rounded-full h-[50px] justify-center items-center px-4"
+                        >
+                          <Text
+                            className={`font-bold text-base ${
+                              item.weight !== null
+                                ? "text-[#0F172A]"
+                                : "text-[#94A3B8]"
+                            }`}
+                          >
+                            {item.weight !== null
+                              ? `${item.weight.toFixed(2)} ${t("Common.kg", "kg")}`
+                              : t("Common.kg", "kg")}
+                          </Text>
+                        </TouchableOpacity>
+
+                        {/* Scale Weight Button */}
+                        <TouchableOpacity
+                          disabled={!isCratesValid}
+                          activeOpacity={0.8}
+                          onPress={() => handleOpenScaleModal(item.id)}
+                          className={`w-[50px] h-[50px] rounded-full items-center justify-center ${
+                            isCratesValid ? "bg-black" : "bg-[#A0A4A8]"
+                          }`}
+                          style={{
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: isCratesValid ? 0.2 : 0,
+                            shadowRadius: 2,
+                            elevation: isCratesValid ? 3 : 0,
+                          }}
+                        >
+                          {item.weight !== null ? (
+                            <AntDesign name="reload" size={18} color="#FFFFFF" />
+                          ) : (
+                            <Ionicons
+                              name="arrow-forward"
+                              size={18}
+                              color="#FFFFFF"
+                            />
+                          )}
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })()}
                 </View>
               )}
 
@@ -529,19 +758,13 @@ export default function WeighGrade({
           ))}
         </View>
 
-      </ScrollView>
-
-      {/* Fixed Bottom Button: Continue */}
-      <View
-        className="px-6 pt-4 bg-white"
-        style={{ paddingBottom: insets.bottom + 16 }}
-      >
+        {/* Continue Button */}
         <TouchableOpacity
           onPress={handleContinue}
           disabled={!isFormComplete}
           activeOpacity={0.8}
-          className={`w-full h-[50px] rounded-full items-center justify-center ${
-            isFormComplete ? "bg-[#000000]" : "bg-[#A0A4A8]"
+          className={`w-full h-[50px] rounded-full items-center justify-center mt-6 ${
+            isFormComplete ? "bg-black" : "bg-[#A0A4A8]"
           }`}
           style={{
             shadowColor: "#000",
@@ -551,22 +774,21 @@ export default function WeighGrade({
             elevation: isFormComplete ? 4 : 0,
           }}
         >
-          <Text className="text-white font-extrabold text-base">
+          <Text className="text-white font-bold text-base">
             {t("WeighGrade.Continue", "Continue")}
           </Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
 
-      {/* Warning Confirmation Modal for Delete Set */}
+      {/* Delete Set Warning Confirmation Modal */}
       <WarningConfirmation
         visible={setToDelete !== null}
         message={t(
           "WeighGrade.DeleteConfirmation",
-          "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
+          "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}}?",
           {
-            productName: productName,
-            gradeLabel: t("WeighGrade.Grade", "Grade"),
-            grade: extractGradeLetter(gradeTitle),
+            productName,
+            gradeLabel: `${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)}`,
             setLabel: t("WeighGrade.Set", "Set"),
             setNumber: setToDelete?.setNumber || 1,
             defaultValue: `Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`,
@@ -593,6 +815,15 @@ export default function WeighGrade({
         }}
         onContinue={handleScaleContinue}
         scaleName="Budry MFD - 300"
+        tareWeight={
+          (() => {
+            if (!activeSetIdForScale) return 0;
+            const target = sets.find((s) => s.id === activeSetIdForScale);
+            const crateCount = parseInt(target?.crates || "0", 10) || 0;
+            const crateWeight = target?.containerTypeWeight ?? 0;
+            return crateCount * crateWeight;
+          })()
+        }
         initialWeight={
           (() => {
             if (!activeSetIdForScale) return 0;

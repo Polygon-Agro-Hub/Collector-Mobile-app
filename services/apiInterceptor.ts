@@ -1,139 +1,170 @@
-import axios, { AxiosInstance } from "axios";
+/**
+ * apiInterceptor.ts
+ *
+ * Auth error handling utilities. No monkey patching, no global side effects.
+ *
+ * Exports:
+ *   handleAuthError(status, data)  — call from axios response interceptors or socket events
+ *   verifyOfficerStatus(force?)    — call from App.tsx socket listener to re-check account status
+ *   setupAxiosInterceptors(axios)  — call ONCE in App.tsx to attach auth interceptor to default axios
+ */
+
 import { Alert } from "react-native";
 import store from "@/services/reducxStore";
 import { logoutUser } from "@/store/authSlice";
 import { navigationRef } from "@/navigationRef";
 import socketService from "@/services/socket/socket.service";
 import environment from "@/environment/environment";
+import i18n from "@/i18n/i18n";
+import axios, { AxiosInstance } from "axios";
 
+// ─── Module-level flags ───────────────────────────────────────────────────────
 let isSessionAlertShown = false;
 let isCheckingStatus = false;
 let lastStatusCheckTime = 0;
-let isInterceptorsSetup = false;
+
+// ─── Auth screen names — errors on these screens are silently ignored ─────────
+const AUTH_SCREENS = ["Login", "Lanuage", "Splash", "BannedScreen", "Logout"];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const isOnAuthScreen = (): boolean => {
+  if (!navigationRef.isReady()) return true;
+  const name = (navigationRef.getCurrentRoute() as any)?.name || "";
+  return AUTH_SCREENS.includes(name);
+};
+
+const doLogout = (): void => {
+  try {
+    store.dispatch(logoutUser());
+    socketService.disconnect();
+  } catch (e) {
+    console.error("[Auth] Logout error:", e);
+  }
+};
+
+const navigateToBannedScreen = (statusType: string, message: string): void => {
+  const attempt = (attemptsLeft = 10) => {
+    if (navigationRef.isReady()) {
+      navigationRef.reset({
+        index: 0,
+        routes: [{ name: "BannedScreen", params: { statusType, message } }],
+      });
+    } else if (attemptsLeft > 0) {
+      setTimeout(() => attempt(attemptsLeft - 1), 100);
+    }
+  };
+  attempt();
+};
+
+const navigateToLogin = (): void => {
+  if (navigationRef.isReady()) {
+    navigationRef.reset({ index: 0, routes: [{ name: "Login" }] });
+  }
+};
+
+// ─── Main auth error handler ──────────────────────────────────────────────────
 
 /**
- * Handles HTTP 401 and 403 responses globally.
- * Returns true if the error was handled (e.g. account banned or session expired),
- * or false if it is a domain validation error or unhandled.
+ * Processes a 401 or 403 API response and takes the appropriate action:
+ *   - Rejected / banned account   → logout + BannedScreen
+ *   - Not-approved account        → logout + BannedScreen
+ *   - Domain / role 403           → ignored (returns false)
+ *   - Wrong password 401          → ignored (returns false)
+ *   - Token expired / force logout → logout + "Session Expired" alert + Login screen
+ *
+ * Returns true if handled (caller should swallow the error),
+ * returns false if the caller should re-throw.
  */
 export const handleAuthError = (status: number, data: any): boolean => {
-  let currentRouteName = "";
-  if (navigationRef.isReady()) {
-    const route = navigationRef.getCurrentRoute() as any;
-    currentRouteName = route?.name || "";
-  }
+  if (isOnAuthScreen()) return false;
 
-  // If already on auth/banned screens, ignore duplicate triggers
-  if (
-    currentRouteName === "Login" ||
-    currentRouteName === "Lanuage" ||
-    currentRouteName === "Splash" ||
-    currentRouteName === "BannedScreen" ||
-    currentRouteName === "Logout"
-  ) {
-    return false;
-  }
-
+  const t = i18n.t.bind(i18n);
   const msg = (data?.message || "").toLowerCase();
   const code = (data?.code || data?.reason || "").toUpperCase();
+
+  // Resolve account status from various response shapes
   const accStatus = (
     data?.accountStatus ||
     (typeof data?.status === "string" ? data.status : "")
   ).toLowerCase();
   const statusTypeLower = (data?.statusType || "").toLowerCase();
 
-  // 1. Account Rejection / Not Approved check
-  const isAccountRejected =
+  // ── 1. Rejected / banned ──────────────────────────────────────────────────
+  const isRejected =
     accStatus === "rejected" ||
     accStatus === "banned" ||
     statusTypeLower === "rejected" ||
     statusTypeLower === "banned" ||
-    msg.includes("rejected") ||
-    msg.includes("banned");
+    code === "OFFICER_REJECTED" ||
+    msg === "rejected" ||
+    msg === "banned";
 
-  const isAccountNotApproved =
-    accStatus === "not approved" ||
-    statusTypeLower === "not_approved" ||
-    statusTypeLower === "not approved" ||
-    msg.includes("not approved");
-
-  if (isAccountRejected || isAccountNotApproved) {
-    try {
-      store.dispatch(logoutUser());
-      socketService.disconnect();
-    } catch (e) {
-      console.error("Error logging out rejected officer:", e);
-    }
-
-    const statusType = isAccountRejected ? "rejected" : "not_approved";
-    const message = isAccountRejected
-      ? data?.message || "This EMP ID is Rejected"
-      : data?.message || "This EMP ID is not approved.";
-
-    const navigateToBanned = (attemptsLeft = 10) => {
-      if (navigationRef.isReady()) {
-        navigationRef.reset({
-          index: 0,
-          routes: [
-            {
-              name: "BannedScreen",
-              params: {
-                statusType,
-                message,
-              },
-            },
-          ],
-        });
-      } else if (attemptsLeft > 0) {
-        setTimeout(() => navigateToBanned(attemptsLeft - 1), 100);
-      }
-    };
-    navigateToBanned();
+  if (isRejected) {
+    doLogout();
+    navigateToBannedScreen(
+      "rejected",
+      data?.message || t("Error.This EMP ID is Rejected", "This EMP ID is Rejected")
+    );
     return true;
   }
 
-  const userToken = store.getState().auth.token;
-  if (!userToken) {
-    return false;
+  // ── 2. Not approved ───────────────────────────────────────────────────────
+  // Only match exact account-status values, NOT substring of arbitrary messages.
+  const isNotApproved =
+    accStatus === "not approved" ||
+    accStatus === "not_approved" ||
+    statusTypeLower === "not_approved" ||
+    statusTypeLower === "not approved" ||
+    code === "NOT_APPROVED";
+
+  if (isNotApproved) {
+    doLogout();
+    navigateToBannedScreen(
+      "not_approved",
+      data?.message || t("Error.This EMP ID is not approved.", "This EMP ID is not approved.")
+    );
+    return true;
   }
 
-  // 2. Operational / Domain validation errors (e.g. scanning driver, center mismatch, etc.)
-  const isDomainValidationError =
+  // ── 3. Domain / role / operational errors — NOT a session issue ───────────
+  //    These are business-logic 401/403s that the screen handles itself.
+  const isDomainError =
     code === "CENTER_MISMATCH" ||
     code === "NO_OFFICER_ASSIGNED" ||
     code === "STATION_OCCUPIED" ||
     code === "POSITION_BUSY" ||
     code === "POSITION_1_BUSY" ||
     code === "MAIN_CONTAINER_PENDING" ||
-    code === "OFFICER_REJECTED" ||
     code === "ROLE_NOT_ALLOWED" ||
     code === "UNAUTHORIZED_STATUS" ||
     code === "UNAUTHORIZED_ROLE" ||
+    msg.includes("access denied") ||
+    msg.includes("not authorized") ||
+    msg.includes("role") ||
     msg.includes("center") ||
     msg.includes("centre") ||
     msg.includes("assigned") ||
     msg.includes("occupied") ||
     msg.includes("busy") ||
-    msg.includes("driver access has been rejected") ||
     msg.includes("driver");
 
-  if (isDomainValidationError) {
-    return false;
-  }
+  if (isDomainError) return false;
 
-  // 2b. Password validation errors (e.g. incorrect current password on Change Password)
-  const isPasswordValidationError =
+  // ── 4. Wrong password — NOT a session issue ───────────────────────────────
+  const isPasswordError =
     msg.includes("password") ||
     msg.includes("incorrect") ||
     code === "INVALID_PASSWORD" ||
     code === "INCORRECT_PASSWORD";
 
-  if (isPasswordValidationError) {
-    return false;
-  }
+  if (isPasswordError) return false;
 
-  // 3. Token expiration / invalid token / force logout
-  const isExplicitTokenError =
+  // ── 5. No token in store → not logged in, nothing to do ──────────────────
+  if (!store.getState().auth.token) return false;
+
+  // ── 6. Token expired / session expired / force logout ────────────────────
+  const isTokenExpired =
     code === "TOKEN_EXPIRED" ||
     code === "INVALID_TOKEN" ||
     code === "FORCE_LOGOUT" ||
@@ -146,121 +177,122 @@ export const handleAuthError = (status: number, data: any): boolean => {
     msg.includes("force logout") ||
     msg.includes("session expired") ||
     msg.includes("no token provided") ||
-    msg.includes("authorization token is missing");
-
-  const isTokenExpired =
-    isExplicitTokenError ||
+    msg.includes("authorization token is missing") ||
+    // 401 where the message explicitly mentions token/jwt (empty body NOT included)
     (status === 401 &&
-      (msg.includes("token") || msg.includes("jwt") || !msg) &&
+      (msg.includes("token") || msg.includes("jwt")) &&
       !msg.includes("password") &&
       !msg.includes("incorrect") &&
       !msg.includes("not found") &&
-      !msg.includes("user not found") &&
       !msg.includes("officer id"));
 
-  if (!isTokenExpired) {
-    return false;
-  }
+  if (!isTokenExpired) return false;
 
-  try {
-    store.dispatch(logoutUser());
-    socketService.disconnect();
-  } catch (e) {
-    console.error("Error dispatching logout on token expiration:", e);
-  }
+  // Session expired — log out and redirect to Login
+  doLogout();
 
   if (!isSessionAlertShown) {
     isSessionAlertShown = true;
     Alert.alert(
-      "Session Expired",
-      "Your token has expired. Please log in again.",
+      t("Error.Session Expired", "Session Expired"),
+      t(
+        "Error.Your token has expired. Please log in again.",
+        "Your token has expired. Please log in again."
+      ),
       [
         {
           text: "OK",
           onPress: () => {
             isSessionAlertShown = false;
-            if (navigationRef.isReady()) {
-              navigationRef.reset({
-                index: 0,
-                routes: [{ name: "Login" }],
-              });
-            }
+            navigateToLogin();
           },
         },
       ],
       { cancelable: false }
     );
   } else {
-    if (navigationRef.isReady()) {
-      navigationRef.reset({
-        index: 0,
-        routes: [{ name: "Login" }],
-      });
-    }
+    navigateToLogin();
   }
 
   return true;
 };
 
+// ─── Axios interceptor setup ──────────────────────────────────────────────────
+
 /**
- * Attaches the auth response interceptor to any Axios instance.
+ * Attaches the auth response interceptor to the given axios instance.
+ * Call this ONCE in App.tsx on the default axios instance:
+ *
+ *   import axios from "axios";
+ *   import { setupAxiosInterceptors } from "@/services/apiInterceptor";
+ *   setupAxiosInterceptors(axios);
+ *
+ * Screens that need to bypass the interceptor (e.g. ChangePassword)
+ * should create their own isolated instance:
+ *   const plainAxios = axios.create();   // created AFTER setup — has no interceptors
+ *
+ * Note: setupAxiosInterceptors() does NOT patch axios.create or globalThis.fetch.
+ * Only the specific instance passed in gets the interceptor.
  */
-export const attachAuthInterceptor = (instance: AxiosInstance) => {
+export const setupAxiosInterceptors = (instance: AxiosInstance): void => {
+  // Auto-inject Bearer token on every request
+  instance.interceptors.request.use(
+    (config) => {
+      const token = store.getState().auth.token;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  // Handle 401 / 403 responses globally
   instance.interceptors.response.use(
     (response) => response,
-    async (error) => {
-      const errorResponse = error.response;
-      if (
-        errorResponse &&
-        (errorResponse.status === 401 || errorResponse.status === 403)
-      ) {
-        const isHandled = handleAuthError(
-          errorResponse.status,
-          errorResponse.data
-        );
+    (error) => {
+      const res = error.response;
+      if (res && (res.status === 401 || res.status === 403)) {
+        const isHandled = handleAuthError(res.status, res.data);
         if (isHandled) {
+          // Swallow — navigation already triggered
           return new Promise(() => {});
         }
       }
-      return Promise.reject(error);
     }
   );
 };
 
+export const setupGlobalApiInterceptors = (instance: AxiosInstance = axios): void => {
+  setupAxiosInterceptors(instance);
+};
+
+// Auto-attach to default axios instance
+setupAxiosInterceptors(axios);
+
+// ─── Officer status verification (for socket events) ─────────────────────────
+
 /**
- * Proactively verifies if the current logged-in officer is still approved in the database.
- * If rejected or banned, automatically logs them out and redirects to BannedScreen.
+ * Proactively checks if the current officer's account is still active.
+ * Called from App.tsx when the socket emits an officer-status-changed event.
+ *
+ * Uses a raw fetch (bypasses axios interceptors) with its own 401/403 handling
+ * to avoid double-processing. Throttled to once per 25 seconds unless forced.
  */
-export const verifyOfficerStatus = async (force: boolean = false): Promise<boolean> => {
+export const verifyOfficerStatus = async (force = false): Promise<boolean> => {
   const now = Date.now();
   if (isCheckingStatus || (!force && now - lastStatusCheckTime < 25000)) {
     return false;
   }
 
   const token = store.getState().auth.token;
-  if (!token) {
-    return false;
-  }
-
-  let currentRouteName = "";
-  if (navigationRef.isReady()) {
-    const route = navigationRef.getCurrentRoute() as any;
-    currentRouteName = route?.name || "";
-  }
-  if (
-    currentRouteName === "Login" ||
-    currentRouteName === "Lanuage" ||
-    currentRouteName === "Splash" ||
-    currentRouteName === "BannedScreen" ||
-    currentRouteName === "Logout"
-  ) {
-    return false;
-  }
+  if (!token || isOnAuthScreen()) return false;
 
   isCheckingStatus = true;
   lastStatusCheckTime = now;
 
   try {
+    // Use raw fetch — we handle the response manually below
     const response = await fetch(
       `${environment.API_BASE_URL}api/collection-officer/password-update`,
       {
@@ -275,10 +307,12 @@ export const verifyOfficerStatus = async (force: boolean = false): Promise<boole
     if (response.status === 403) {
       const data = await response.json().catch(() => ({}));
       return handleAuthError(403, data);
-    } else if (response.status === 401) {
+    }
+
+    if (response.status === 401) {
       const data = await response.json().catch(() => ({}));
-      const msg = (data?.message || "").toString().toLowerCase();
-      // Only treat 401 as expired if it explicitly says token expired / invalid token
+      const msg = (data?.message || "").toLowerCase();
+      // Only treat 401 as expired if message explicitly says token/jwt
       if (
         msg.includes("token") ||
         msg.includes("jwt expired") ||
@@ -287,54 +321,13 @@ export const verifyOfficerStatus = async (force: boolean = false): Promise<boole
       ) {
         return handleAuthError(401, data);
       }
-      return false;
     }
 
     return false;
-  } catch (err) {
-    // Network or offline error: do not force logout on temporary network loss
+  } catch {
+    // Network error — do not log out on temporary connectivity loss
     return false;
   } finally {
     isCheckingStatus = false;
   }
 };
-
-/**
- * Initializes global interceptors for default axios, patched axios.create, and fetch.
- */
-export const setupGlobalApiInterceptors = () => {
-  if (isInterceptorsSetup) return;
-  isInterceptorsSetup = true;
-
-  // 1. Intercept default axios
-  attachAuthInterceptor(axios);
-
-  // 2. Monkeypatch axios.create so all screen modules get the interceptor
-  const originalAxiosCreate = axios.create;
-  axios.create = function (config?: any) {
-    const instance = originalAxiosCreate.call(this, config);
-    attachAuthInterceptor(instance);
-    return instance;
-  };
-
-  // 3. Monkeypatch global fetch
-  const originalFetch = (globalThis as any).fetch;
-  (globalThis as any).fetch = async (...args: any[]) => {
-    const response = await originalFetch(...args);
-
-    if (response.status === 401 || response.status === 403) {
-      try {
-        const cloned = response.clone();
-        const data = await cloned.json();
-        handleAuthError(response.status, data);
-      } catch (e) {
-        handleAuthError(response.status, {});
-      }
-    }
-
-    return response;
-  };
-};
-
-// Auto-run interceptor setup when this module is loaded
-setupGlobalApiInterceptors();

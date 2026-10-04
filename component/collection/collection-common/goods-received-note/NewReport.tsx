@@ -680,12 +680,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const isSinhala = activeLang === "si";
-      const isTamil = activeLang === "ta";
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
-      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const cleanGrn = (crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA").replace(/[^a-zA-Z0-9_-]/g, "_");
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
+      const fileName = `GRN_${cleanGrn}_${date}.pdf`;
 
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
@@ -879,7 +876,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* Action Buttons */}
+         
+        </View>
+         {/* Action Buttons */}
           <View
             className="w-full mt-4"
             style={{ paddingBottom: insets.bottom || 20 }}
@@ -891,7 +890,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               shareLabel={t("NewReport.Share")}
             />
           </View>
-        </View>
       </ScrollView>
     </View>
   );

@@ -309,18 +309,10 @@ export const handleGeneratePDF = async (
     const isSinhala = (language || "en").toLowerCase().startsWith("si");
     const isTamil = (language || "en").toLowerCase().startsWith("ta");
 
-    let fileUri: string;
-
-    if (isSinhala) {
-      const prefix = "වාර්තාව";
-      fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_${formattedFromDate}_සිට_${formattedToDate}_දක්වා.pdf`;
-    } else if (isTamil) {
-      const prefix = "அறிக்கை";
-      fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_${formattedFromDate}_இருந்து_${formattedToDate}_வரை.pdf`;
-    } else {
-      const prefix = "Report";
-      fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${officerId}_From_${formattedFromDate}_To_${formattedToDate}.pdf`;
-    }
+    const cleanOfficerId = (officerId || "all").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const cleanFromDate = (formattedFromDate || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const cleanToDate = (formattedToDate || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const fileUri = `${(FileSystem as any).cacheDirectory}Report_${cleanOfficerId}_${cleanFromDate}_to_${cleanToDate}.pdf`;
     if (base64) {
       try {
         await FileSystem.writeAsStringAsync(fileUri, base64, {
