@@ -1932,13 +1932,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                             {price !== null && price !== undefined ? (
                               <Text
                                 style={{
-                                  fontSize: 14,
+                                  fontSize: 12,
                                   color: "#475569",
                                   fontWeight: "normal",
                                   marginLeft: 4,
                                 }}
                               >
-                                ({t("ReceivedCash.Rs", "Rs.")}{" "}
+                                ({t("ReceivedCash.Rs", "Rs.")}
                                 {Number(price).toFixed(2)}/
                                 {t("PassTargetBetweenOfficers.kg", "kg")})
                               </Text>
