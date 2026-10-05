@@ -511,6 +511,8 @@
     "CropDetails": "Crop Details",
     "varietyName": "Variety Name",
     "VarietyPlaceholder": "Enter variety name",
+    "SubTotal": "Sub Total",
+    "ClearAndDelete":"Clear & Delete",
     "Quantity": "Quantity (Kg)",
     "FillDetails": "Fill Details",
     "Select": "Select Crop",
@@ -576,7 +578,16 @@
     "Select Crop": "--Select Crop--",
     "Select Variety": "--Select Variety--",
     "UnitGrades": "Unit Grades",
-    "Done": "Done"
+    "Done": "Done",
+    "DeleteGradeConfirmation": "Are you sure you want to delete {{grade}} of {{varietyName}}?",
+    "DeleteVarietyConfirmation": "Are you sure you want to delete {{varietyName}} form data?",
+    "GradeA_Rs":"Grade A (Rs.)",
+    "GradeB_Rs":"Grade B (Rs.)",
+    "GradeC_Rs":"Grade C (Rs.)",
+    "GrandTotal_Rs":"Grand Total (Rs.)",
+    "Auto Fill":"--Auto Fill--",
+    "AddMore":"Add More",
+    "FinishCollection":"Finish Collection"
   },
   "GoodsReceivedNote": {
     "LNG": "en",
@@ -1590,6 +1601,8 @@
     "Pickup Order": "Pickup Order",
     "District": "District",
     "All Delivery Orders": "All Delivery Orders ({{count}})",
+    "Delivery Orders": "Delivery",
+    "Delivery": "Delivery",
     "Deselect All": "Deselect All",
     "Continue": "Continue ({{count}})",
     "Select a Row to Assign": "Select a Row to Assign",
@@ -1639,6 +1652,9 @@
     "QC Done By": "QC Done By",
     "Package": "Package",
     "ALaCarte": "A La Carte",
+    "Delivery": "Delivery",
+    "Delivery Orders": "Delivery",
+    "Pickup Orders": "Pickup Orders",
     "Close": "Close"
   },
   "Packing": {
@@ -1816,7 +1832,8 @@
     "Cancel": "Cancel",
     "Yes, Save": "Yes, Save",
     "Done": "Done",
-    "Failed to save signature": "Failed to save signature. Please try again."
+    "Failed to save signature": "Failed to save signature. Please try again.",
+    "Preparing signature pad":"Preparing signature pad..."
   },
   "PurchaseShortage": {
     "Assigned Products": "Assigned Products",

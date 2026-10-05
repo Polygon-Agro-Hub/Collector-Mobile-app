@@ -247,54 +247,89 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     </View>
   );
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <View className="px-4 py-12 items-center justify-center">
-          <ActivityIndicator size="large" color="#6839CF" />
-          <Text className="text-sm mt-3 text-[#6839CF]">
-            {t("GlobalSearchModal.Loading")}
-          </Text>
-        </View>
-      );
-    }
+ const renderContent = () => {
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          paddingHorizontal: 16,
+          paddingVertical: 48,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color="#6839CF" />
+        <Text style={{ fontSize: 14, marginTop: 12, color: "#6839CF" }}>
+          {t("GlobalSearchModal.Loading")}
+        </Text>
+      </View>
+    );
+  }
 
-    if (filteredData.length === 0) {
-      return (
-        <View className="px-4 py-8 items-center justify-center">
-          <Text className="text-gray-500 text-base text-center font-medium">
+  if (filteredData.length === 0) {
+    return (
+      <View
+        style={{
+          paddingHorizontal: 16,
+          paddingVertical: 32,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            color: "#6B7280",
+            fontSize: 16,
+            textAlign: "center",
+            fontWeight: "500",
+          }}
+        >
+          {effectiveNoResultsText}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={filteredData}
+      keyExtractor={(item) => item.value}
+      style={{ maxHeight: 256 }}
+      ListEmptyComponent={
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 32,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: "#6B7280",
+              fontSize: 16,
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
             {effectiveNoResultsText}
           </Text>
         </View>
-      );
-    }
+      }
+      renderItem={({ item, index }) => {
+        const isSelected = selectedValues.includes(item.value);
+        const isLast = index === filteredData.length - 1;
 
-    return (
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.value}
-        ListEmptyComponent={
-          <View className="px-4 py-8 items-center justify-center">
-            <Text className="text-gray-500 text-base text-center font-medium">
-              {effectiveNoResultsText}
-            </Text>
-          </View>
+        if (renderItem) {
+          return renderItem(item, isSelected) as React.ReactElement | null;
         }
-        renderItem={({ item, index }) => {
-          const isSelected = selectedValues.includes(item.value);
-          const isLast = index === filteredData.length - 1;
 
-          if (renderItem) {
-            return renderItem(item, isSelected) as React.ReactElement | null;
-          }
-
-          return renderDefaultItem(item, isSelected, isLast);
-        }}
-        showsVerticalScrollIndicator={false}
-        className="max-h-64"
-      />
-    );
-  };
+        return renderDefaultItem(item, isSelected, isLast);
+      }}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+};
 
   return (
     <Modal

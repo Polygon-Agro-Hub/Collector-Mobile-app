@@ -414,6 +414,8 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
                         fontWeight: "700",
                         color: "#0F172A",
                         marginBottom: 8,
+                        textAlign: "center",
+                        alignSelf: "stretch",
                       }}
                     >
                       {t("ScaleWeightModal.NetTotal", "Net Total")}

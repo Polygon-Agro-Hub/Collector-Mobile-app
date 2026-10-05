@@ -235,30 +235,39 @@ export const handleAuthError = (status: number, data: any): boolean => {
  * Only the specific instance passed in gets the interceptor.
  */
 export const setupAxiosInterceptors = (instance: AxiosInstance): void => {
-  // Auto-inject Bearer token on every request
+  // Auto-inject Bearer token on internal requests
   instance.interceptors.request.use(
     (config) => {
-      const token = store.getState().auth.token;
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      const isExternal =
+        config.url?.startsWith("http") && !config.url?.includes(environment.API_BASE_URL);
+
+      if (!isExternal && !config.headers.Authorization) {
+        const token = store.getState().auth.token;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
       return config;
     },
     (error) => Promise.reject(error)
   );
 
-  // Handle 401 / 403 responses globally
+  // Handle 401 / 403 responses globally (skip external APIs)
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
       const res = error.response;
-      if (res && (res.status === 401 || res.status === 403)) {
+      const isExternal =
+        error.config?.url?.startsWith("http") && !error.config?.url?.includes(environment.API_BASE_URL);
+
+      if (!isExternal && res && (res.status === 401 || res.status === 403)) {
         const isHandled = handleAuthError(res.status, res.data);
         if (isHandled) {
           // Swallow — navigation already triggered
           return new Promise(() => {});
         }
       }
+      return Promise.reject(error);
     }
   );
 };

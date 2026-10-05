@@ -224,12 +224,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         return;
       }
 
-      const apiUrl = "https://api.getshoutout.com/otpservice/send";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let otpMessage = "";
       let companyName = "";
 
@@ -252,35 +246,37 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
-      const body = {
-        source: "Polygon",
-        transport: "sms",
-        content: { sms: otpMessage },
-        destination: `${callingCode}${phoneNumber}`,
-      };
-
-      const response = await axios.post(apiUrl, body, { headers });
-      await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/farmer/send-otp`,
+        {
+          phoneNumber: `${callingCode}${phoneNumber}`,
+          message: otpMessage,
+        },
+      );
+      if (response.data?.referenceId) {
+        await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      }
 
       cameFromOTP.current = true;
 
-      navigation.navigate("Main" as any, {
-        screen: "OTPE",
-        params: {
-          firstName,
-          lastName,
-          NICnumber,
-          phoneNumber: `${callingCode}${phoneNumber}`,
-          district,
-          accNumber,
-          accHolderName,
-          bankName,
-          branchName,
-          PreferdLanguage,
-        },
+      navigation.navigate("OTPE" as any, {
+        firstName,
+        lastName,
+        NICnumber,
+        phoneNumber: `${callingCode}${phoneNumber}`,
+        district,
+        accNumber,
+        accHolderName,
+        bankName,
+        branchName,
+        PreferdLanguage,
       });
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      console.error(
+        "Error sending OTP in UnregisteredFarmerForm:",
+        error?.response?.data || error?.message || error,
+      );
       Alert.alert(t("Error.error"), t("Error.otpSendFailed"), [
         { text: t("AlertModal.OK", "OK") },
       ]);

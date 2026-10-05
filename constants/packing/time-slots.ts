@@ -180,6 +180,20 @@ export const formatOrderCategory = (category?: string | null, t?: any): string =
     return i18n.t(key, { defaultValue: defVal });
   };
 
+  const currentLang =
+    (t && t("SignIn.LNG")) ||
+    (t && t("LNG")) ||
+    (t && t("AddOfficerBasicDetails.LNG")) ||
+    i18n.language ||
+    "en";
+
+  const isSinhala =
+    currentLang.toLowerCase().startsWith("si") ||
+    (t && t("DistributionCenterTarget.Close") === "වසා දමන්න");
+  const isTamil =
+    currentLang.toLowerCase().startsWith("ta") ||
+    (t && t("DistributionCenterTarget.Close") === "மூடு");
+
   const trimmed = category.trim();
 
   // 1. Check if it is a Pickup Order
@@ -187,14 +201,54 @@ export const formatOrderCategory = (category?: string | null, t?: any): string =
     trimmed.toLowerCase() === "pickup order" ||
     trimmed.toLowerCase() === "pickup orders" ||
     trimmed.toLowerCase() === "pickup" ||
-    trimmed.toLowerCase().includes("pickup")
+    trimmed.toLowerCase().includes("pickup") ||
+    trimmed.includes("රැගෙන යාමේ") ||
+    trimmed.includes("பிக்அப்")
   ) {
-    return translate("QRHandling.Pickup Orders", translate("AssignGroups.Pickup Orders", "රැගෙන යාමේ ඇණවුම්"));
+    const defaultPickup = isSinhala
+      ? "රැගෙන යාමේ ඇණවුම්"
+      : isTamil
+      ? "பிக்அப் ஆர்டர்கள்"
+      : "Pickup Orders";
+
+    return translate(
+      "DistributionCenterTarget.Pickup Orders",
+      translate(
+        "QRHandling.Pickup Orders",
+        translate("AssignGroups.Pickup Orders", defaultPickup)
+      )
+    );
+  }
+
+  // 2. Check if it is a Delivery Order
+  if (
+    trimmed.toLowerCase() === "delivery" ||
+    trimmed.toLowerCase() === "delivery order" ||
+    trimmed.toLowerCase() === "delivery orders" ||
+    trimmed.toLowerCase().includes("delivery") ||
+    trimmed.includes("බෙදා හැරීමේ") ||
+    trimmed.includes("බෙදාහැරීම්") ||
+    trimmed.includes("බෙදාහැරීමේ") ||
+    trimmed.includes("விநியோக")
+  ) {
+    const defaultDelivery = isSinhala
+      ? "බෙදා හැරීමේ ඇණවුම්"
+      : isTamil
+      ? "விநியோக ஆர்டர்கள்"
+      : "Delivery";
+
+    return translate(
+      "DistributionCenterTarget.Delivery",
+      translate(
+        "AssignGroups.Delivery Orders",
+        translate("DistributionCenterTarget.Delivery Orders", defaultDelivery)
+      )
+    );
   }
 
   let text = trimmed;
 
-  // 2. Check and translate any district names found within the text
+  // 3. Check and translate any district names found within the text
   for (const dist of SRI_LANKA_DISTRICTS) {
     const regex = new RegExp(`\\b${dist}\\b`, "i");
     if (regex.test(text)) {
@@ -204,7 +258,7 @@ export const formatOrderCategory = (category?: string | null, t?: any): string =
     }
   }
 
-  // 3. Translate the word "District" if present (e.g. "Colombo District" -> "කොළඹ දිස්ත්‍රික්කය")
+  // 4. Translate the word "District" if present (e.g. "Colombo District" -> "කොළඹ දිස්ත්‍රික්කය")
   const districtWord = translate("AssignGroups.District", translate("District", "දිස්ත්‍රික්කය"));
   text = text.replace(/\bDistrict\b/gi, districtWord);
 
