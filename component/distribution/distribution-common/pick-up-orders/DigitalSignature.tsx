@@ -458,7 +458,7 @@ export default function DigitalSignature({
       >
         <ActivityIndicator size="large" color="#2D7BFF" />
         <Text style={{ marginTop: 16, color: "#6B7280" }}>
-          Preparing signature pad...
+          {t("DigitalSignature.Preparing signature pad")}
         </Text>
       </View>
     );

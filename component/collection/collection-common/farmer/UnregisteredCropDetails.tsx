@@ -20,7 +20,12 @@ import { RouteProp, useFocusEffect, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import Entypo from "react-native-vector-icons/Entypo";
 import MdIcons from "react-native-vector-icons/MaterialIcons";
-import { MaterialIcons, MaterialCommunityIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  MaterialCommunityIcons,
+  FontAwesome,
+  Ionicons,
+} from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import environment from "../../../../environment/environment";
@@ -271,8 +276,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   );
   const [isWifiOff, setIsWifiOff] = useState(false);
 
-  const [containerTypes, setContainerTypes] =
-    useState<ContainerTypeItem[]>([]);
+  const [containerTypes, setContainerTypes] = useState<ContainerTypeItem[]>([]);
   const [containerSectionWidth, setContainerSectionWidth] = useState(300);
   const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
   const [setToDelete, setSetToDelete] = useState<{
@@ -312,7 +316,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   containerTypeName: s.containerTypeName ?? types[0].labelName,
                   containerTypeWeight: s.containerTypeWeight ?? types[0].weight,
                 })),
-              }))
+              })),
             );
           }
         }
@@ -506,12 +510,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     });
 
     setSelectedVariety(null);
+    setSelectedVarietyName(null);
     setUnitPrices({ A: null, B: null, C: null });
     setQuantities({ A: "", B: "", C: "" });
     setGrades(
-      createInitialGrades(
-        containerTypes.length > 0 ? containerTypes[0] : null,
-      ),
+      createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null),
     );
     setLoadingVarieties(true);
 
@@ -557,9 +560,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setSelectedVariety(varietyId);
     setQuantities({ A: "", B: "", C: "" });
     setGrades(
-      createInitialGrades(
-        containerTypes.length > 0 ? containerTypes[0] : null,
-      ),
+      createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null),
     );
     const found = varieties.find((variety) => variety.id === varietyId);
     if (found) {
@@ -578,7 +579,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           t("Error.No Prices Available"),
           t("Error.Prices for the selected variety were not found."),
         );
-        setUnitPrices({});
+        setUnitPrices({ A: null, B: null, C: null });
         return;
       }
 
@@ -587,14 +588,19 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
           t("Error.No Prices Available"),
           t("Error.No prices are available for the selected variety."),
         );
-        setUnitPrices({});
+        setUnitPrices({ A: null, B: null, C: null });
         return;
       }
 
-      const prices = pricesResponse.data.reduce((acc: any, curr: any) => {
-        acc[curr.grade] = curr.price;
-        return acc;
-      }, {});
+      // Normalize grade keys (e.g. "b", "B ") and prices so they always match A/B/C
+      const prices = pricesResponse.data.reduce(
+        (acc: any, curr: any) => {
+          const key = String(curr.grade).trim().toUpperCase();
+          acc[key] = curr.price != null ? Number(curr.price) : null;
+          return acc;
+        },
+        { A: null, B: null, C: null },
+      );
 
       setUnitPrices(prices);
       setShowCameraModels(true);
@@ -625,8 +631,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
       const updated = prev.map((g) => {
         if (g.gradeKey === gradeKey) {
-          const defaultC =
-            containerTypes.length > 0 ? containerTypes[0] : null;
+          const defaultC = containerTypes.length > 0 ? containerTypes[0] : null;
           const newSets =
             g.sets.length === 0
               ? [createInitialSet(gradeKey, 1, defaultC)]
@@ -656,8 +661,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   // Add new set to a grade (collapses all other sets across all grades)
   const handleAddSet = (gradeKey: "A" | "B" | "C") => {
     setGrades((prev) => {
-      const defaultC =
-        containerTypes.length > 0 ? containerTypes[0] : null;
+      const defaultC = containerTypes.length > 0 ? containerTypes[0] : null;
 
       return prev.map((g) => {
         if (g.gradeKey === gradeKey) {
@@ -884,9 +888,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       }
       const restoredTotal =
         lastCrop.totalVal ??
-        ((lastCrop.gradeAprice || 0) * (lastCrop.gradeAquan || 0) +
+        (lastCrop.gradeAprice || 0) * (lastCrop.gradeAquan || 0) +
           (lastCrop.gradeBprice || 0) * (lastCrop.gradeBquan || 0) +
-          (lastCrop.gradeCprice || 0) * (lastCrop.gradeCquan || 0));
+          (lastCrop.gradeCprice || 0) * (lastCrop.gradeCquan || 0);
       setTotal(restoredTotal);
       setCropCount(crops.length);
       setIsPendingVarietyOpen(true);
@@ -920,7 +924,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     if (total === 0) {
       Alert.alert(
         t("Error.error", "Error"),
-        t("UnregisteredCropDetails.EnterQuantity", "Please enter quantity for at least one grade"),
+        t(
+          "UnregisteredCropDetails.EnterQuantity",
+          "Please enter quantity for at least one grade",
+        ),
       );
       return;
     }
@@ -958,12 +965,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const resetCropEntry = () => {
     setSelectedCrop(null);
     setSelectedVariety(null);
+    setSelectedVarietyName(null);
     setUnitPrices({ A: null, B: null, C: null });
     setQuantities({ A: "", B: "", C: "" });
     setGrades(
-      createInitialGrades(
-        containerTypes.length > 0 ? containerTypes[0] : null,
-      ),
+      createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null),
     );
     setTotal(0);
     setShowCameraModels(false);
@@ -980,12 +986,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const refreshCropForms = () => {
     setSelectedCrop(null);
     setSelectedVariety(null);
+    setSelectedVarietyName(null);
     setUnitPrices({ A: null, B: null, C: null });
     setQuantities({ A: "", B: "", C: "" });
     setGrades(
-      createInitialGrades(
-        containerTypes.length > 0 ? containerTypes[0] : null,
-      ),
+      createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null),
     );
     setTotal(0);
     setCrops([]);
@@ -999,7 +1004,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const handleSubmit = async () => {
     try {
       let finalCrops = [...crops];
-      const isCurrentValid = Boolean(selectedCrop && selectedVariety && total > 0);
+      const isCurrentValid = Boolean(
+        selectedCrop && selectedVariety && total > 0,
+      );
 
       if (isPendingVarietyOpen && isCurrentValid) {
         const newCrop = {
@@ -1119,7 +1126,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       console.error("Error submitting crop data:", error);
       Alert.alert(
         t("Error.error", "Error"),
-        t("Error.Failed to submit crop details", "Failed to submit crop details"),
+        t(
+          "Error.Failed to submit crop details",
+          "Failed to submit crop details",
+        ),
       );
       setLoading(false);
     }
@@ -1330,12 +1340,20 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     ? varieties.find((v) => v.id === selectedVariety)?.variety || null
     : null;
 
-  const isCurrentVarietyValid = Boolean(selectedCrop && selectedVariety && total > 0);
-  const isAddMoreDisabled = loading || (isPendingVarietyOpen && !isCurrentVarietyValid);
+  // Grades stay disabled until BOTH a crop and a variety are selected
+  const areGradesEnabled = Boolean(selectedCrop && selectedVariety);
+
+  const isCurrentVarietyValid = Boolean(
+    selectedCrop && selectedVariety && total > 0,
+  );
+  const hasAddedCrops = crops.length > 0;
+
+  // Once at least one crop is added, both buttons stay enabled.
+  // Before that, they need a valid current entry.
+  const isAddMoreDisabled =
+    loading || (!hasAddedCrops && !isCurrentVarietyValid);
   const isFinishDisabled =
-    loading ||
-    (crops.length === 0 && !isCurrentVarietyValid) ||
-    (isPendingVarietyOpen && !isCurrentVarietyValid);
+    loading || (!hasAddedCrops && !isCurrentVarietyValid);
 
   return (
     <KeyboardAvoidingView
@@ -1620,7 +1638,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                   </Text>
 
                                   {/* Quantity */}
-                                  {/* Quantity */}
                                   <Text
                                     style={{
                                       fontWeight: "bold",
@@ -1628,7 +1645,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                       textAlign: "center",
                                     }}
                                   >
-                                    {crop[`grade${grade}quan`]}
+                                    {crop[`grade${grade}quan`]}{" "}
                                     {t("PassTargetBetweenOfficers.kg")}
                                   </Text>
 
@@ -1685,7 +1702,13 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 </View>
 
                 {/* Dashed separator below the carousel */}
-                <View style={{ marginTop: 8, marginBottom: 4, marginHorizontal: -24 }}>
+                <View
+                  style={{
+                    marginTop: 8,
+                    marginBottom: 4,
+                    marginHorizontal: -24,
+                  }}
+                >
                   <DashedLine dashLength={5} dashGap={4} dashColor="#980775" />
                 </View>
               </View>
@@ -1720,7 +1743,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                         fontSize: 14,
                       }}
                     >
-                      {t("UnregisteredCropDetails.ClearAndDelete", "Clear & Delete")}
+                      {t(
+                        "UnregisteredCropDetails.ClearAndDelete",
+                        "Clear & Delete",
+                      )}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -1731,587 +1757,854 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               {isPendingVarietyOpen && (
                 <>
                   {/* Crop Name Selector */}
-              <Text className="text-gray-600 mt-4">
-                {t("UnregisteredCropDetails.CropName")}
-              </Text>
-              <TouchableOpacity
-                onPress={() => setCropModalVisible(true)}
-                style={{
-                  height: 50,
-                  backgroundColor: "#F4F4F4",
-                  borderRadius: 50,
-                  paddingHorizontal: 14,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginTop: 8,
-                }}
-              >
-                <Text
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                  style={{
-                    color: selectedCropLabel ? "#000" : "#9CA3AF",
-                    fontSize: 14,
-                    flex: 1,
-                    marginRight: 8,
-                    lineHeight: 18,
-                  }}
-                >
-                  {selectedCropLabel ||
-                    t("UnregisteredCropDetails.Select Crop")}
-                </Text>
-                <MaterialIcons
-                  name="keyboard-arrow-down"
-                  size={22}
-                  color="#9CA3AF"
-                />
-              </TouchableOpacity>
-
-              {/* Variety Selector */}
-              <Text className="text-gray-600 mt-4">
-                {t("UnregisteredCropDetails.Variety")}
-              </Text>
-              <TouchableOpacity
-                disabled={loadingVarieties}
-                onPress={() => {
-                  if (!selectedCrop) {
-                    Alert.alert(
-                      t("Error.error"),
-                      t("UnregisteredCropDetails.Select Crop"),
-                    );
-                    return;
-                  }
-                  setVarietyModalVisible(true);
-                }}
-                style={{
-                  minHeight: 50,
-                  backgroundColor: "#F4F4F4",
-                  borderRadius: 25,
-                  paddingHorizontal: 14,
-                  paddingVertical: 10,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: loadingVarieties ? "center" : "space-between",
-                  marginTop: 8,
-                }}
-              >
-                {loadingVarieties ? (
-                  <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                    <ActivityIndicator size="small" color="#980775" />
-                  </View>
-                ) : (
-                  <>
+                  <Text className="text-gray-600 mt-4">
+                    {t("UnregisteredCropDetails.CropName")}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setCropModalVisible(true)}
+                    style={{
+                      height: 50,
+                      backgroundColor: "#F4F4F4",
+                      borderRadius: 50,
+                      paddingHorizontal: 14,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginTop: 8,
+                    }}
+                  >
                     <Text
                       numberOfLines={2}
                       ellipsizeMode="tail"
                       style={{
-                        color: selectedVarietyLabel ? "#000" : "#9CA3AF",
+                        color: selectedCropLabel ? "#000" : "#9CA3AF",
                         fontSize: 14,
                         flex: 1,
                         marginRight: 8,
                         lineHeight: 18,
                       }}
                     >
-                      {selectedVarietyLabel ||
-                        t("UnregisteredCropDetails.Select Variety")}
+                      {selectedCropLabel ||
+                        t("UnregisteredCropDetails.Select Crop")}
                     </Text>
                     <MaterialIcons
                       name="keyboard-arrow-down"
                       size={22}
                       color="#9CA3AF"
-                      style={{ alignSelf: "center" }}
                     />
-                  </>
-                )}
-              </TouchableOpacity>
+                  </TouchableOpacity>
 
-              {/* HR line before Grade A */}
-              <View style={{ height: 1, backgroundColor: "#747474", marginHorizontal: -32, marginTop: 20 }} />
-
-              {/* Unit Grades */}
-              {grades.map((grade) => {
-                const price = unitPrices[grade.gradeKey];
-                return (
-                  <View key={grade.gradeKey}>
-                    {/* Grade Header Row (Whole row touchable to toggle) */}
-                    <TouchableOpacity
-                      activeOpacity={0.75}
-                      onPress={() => handleToggleGrade(grade.gradeKey)}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingVertical: 14,
-                      }}
-                    >
-                      <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                        {/* Checkbox */}
-                        <View
+                  {/* Variety Selector */}
+                  <Text className="text-gray-600 mt-4">
+                    {t("UnregisteredCropDetails.Variety")}
+                  </Text>
+                  <TouchableOpacity
+                    disabled={loadingVarieties}
+                    onPress={() => {
+                      if (!selectedCrop) {
+                        Alert.alert(
+                          t("Error.error"),
+                          t("UnregisteredCropDetails.Select Crop"),
+                        );
+                        return;
+                      }
+                      setVarietyModalVisible(true);
+                    }}
+                    style={{
+                      minHeight: 50,
+                      backgroundColor: "#F4F4F4",
+                      borderRadius: 25,
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: loadingVarieties
+                        ? "center"
+                        : "space-between",
+                      marginTop: 8,
+                    }}
+                  >
+                    {loadingVarieties ? (
+                      <View
+                        style={{
+                          flex: 1,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ActivityIndicator size="small" color="#980775" />
+                      </View>
+                    ) : (
+                      <>
+                        <Text
+                          numberOfLines={2}
+                          ellipsizeMode="tail"
                           style={{
-                            width: 20,
-                            height: 20,
-                            borderRadius: 4,
-                            borderWidth: 1.5,
-                            borderColor: "#000000",
-                            backgroundColor: grade.isSelected
-                              ? "#000000"
-                              : "#FFFFFF",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginRight: 12,
+                            color: selectedVarietyLabel ? "#000" : "#9CA3AF",
+                            fontSize: 14,
+                            flex: 1,
+                            marginRight: 8,
+                            lineHeight: 18,
                           }}
                         >
-                          {grade.isSelected && (
-                            <FontAwesome
-                              name="check"
-                              size={12}
-                              color="#FFFFFF"
-                            />
-                          )}
-                        </View>
-                        <Text style={{ fontWeight: "bold", color: "#0F172A", fontSize: 15 }}>
-                          {t("LoadingToVehicle.Grade", "Grade")} {grade.gradeKey}
+                          {selectedVarietyLabel ||
+                            t("UnregisteredCropDetails.Select Variety")}
                         </Text>
-                        {price !== null && price !== undefined ? (
-                          <Text style={{ fontSize: 14, color: "#475569", fontWeight: "normal", marginLeft: 4 }}>
-                            ({t("ReceivedCash.Rs", "Rs.")} {Number(price).toFixed(2)}/{t("PassTargetBetweenOfficers.kg", "kg")})
-                          </Text>
-                        ) : null}
-                      </View>
+                        <MaterialIcons
+                          name="keyboard-arrow-down"
+                          size={22}
+                          color="#9CA3AF"
+                          style={{ alignSelf: "center" }}
+                        />
+                      </>
+                    )}
+                  </TouchableOpacity>
 
-                      {quantities[grade.gradeKey] ? (
-                        <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
-                          <Text className="text-xs font-bold text-[#000000]">
-                            {quantities[grade.gradeKey]} {t("PassTargetBetweenOfficers.kg", "kg")}
-                          </Text>
-                        </View>
-                      ) : null}
-                    </TouchableOpacity>
+                  {/* HR line before Grade A */}
+                  <View
+                    style={{
+                      height: 1,
+                      backgroundColor: "#747474",
+                      marginHorizontal: -32,
+                      marginTop: 20,
+                    }}
+                  />
 
-                    {/* Expanded Grade Crate Sets: Separate Boxes */}
-                    {grade.isSelected && (
-                      <View className="mt-2 mb-3">
-                        {grade.sets.map((set, sIdx) => {
-                          const isLastSet = sIdx === grade.sets.length - 1;
-                          const showAddButton =
-                            isLastSet && grade.sets.some((s) => s.isExpanded);
-
-                          return (
+                  {/* Unit Grades */}
+                  {grades.map((grade) => {
+                    const price = unitPrices[grade.gradeKey];
+                    return (
+                      <View key={grade.gradeKey}>
+                        {/* Grade Header Row (Whole row touchable to toggle) */}
+                        <TouchableOpacity
+                          activeOpacity={0.75}
+                          disabled={!areGradesEnabled}
+                          onPress={() => handleToggleGrade(grade.gradeKey)}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            paddingVertical: 14,
+                            opacity: areGradesEnabled ? 1 : 0.4,
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              flex: 1,
+                            }}
+                          >
+                            {/* Checkbox */}
                             <View
-                              key={set.id}
-                              className={`relative ${
-                                showAddButton ? "mb-6" : "mb-3"
-                              }`}
+                              style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: 4,
+                                borderWidth: 1.5,
+                                borderColor: "#000000",
+                                backgroundColor: grade.isSelected
+                                  ? "#000000"
+                                  : "#FFFFFF",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginRight: 12,
+                              }}
                             >
-                              <View className="border border-[#000000] rounded-2xl overflow-hidden bg-white">
-                                {/* Set Header Bar */}
-                                <TouchableOpacity
-                                  activeOpacity={0.8}
-                                  onPress={() =>
-                                    handleToggleSetExpand(grade.gradeKey, set.id)
-                                  }
-                                  className="bg-[#E9ECF1] px-4 h-[50px] flex-row items-center justify-between"
+                              {grade.isSelected && (
+                                <FontAwesome
+                                  name="check"
+                                  size={12}
+                                  color="#FFFFFF"
+                                />
+                              )}
+                            </View>
+                            <Text
+                              style={{
+                                fontWeight: "bold",
+                                color: "#0F172A",
+                                fontSize: 15,
+                              }}
+                            >
+                              {t("LoadingToVehicle.Grade", "Grade")}{" "}
+                              {grade.gradeKey}
+                            </Text>
+                            {price !== null && price !== undefined ? (
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color: "#475569",
+                                  fontWeight: "normal",
+                                  marginLeft: 4,
+                                }}
+                              >
+                                ({t("ReceivedCash.Rs", "Rs.")}{" "}
+                                {Number(price).toFixed(2)}/
+                                {t("PassTargetBetweenOfficers.kg", "kg")})
+                              </Text>
+                            ) : null}
+                          </View>
+
+                          {quantities[grade.gradeKey] ? (
+                            <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
+                              <Text className="text-xs font-bold text-[#000000]">
+                                {quantities[grade.gradeKey]}{" "}
+                                {t("PassTargetBetweenOfficers.kg", "kg")}
+                              </Text>
+                            </View>
+                          ) : null}
+                        </TouchableOpacity>
+
+                        {/* Expanded Grade Crate Sets: Separate Boxes */}
+                        {areGradesEnabled && grade.isSelected && (
+                          <View className="mt-2 mb-3">
+                            {grade.sets.map((set, sIdx) => {
+                              const isLastSet = sIdx === grade.sets.length - 1;
+                              const showAddButton =
+                                isLastSet &&
+                                grade.sets.some((s) => s.isExpanded);
+
+                              return (
+                                <View
+                                  key={set.id}
+                                  className={`relative ${
+                                    showAddButton ? "mb-6" : "mb-3"
+                                  }`}
                                 >
-                                  {/* Yellow Set Badge */}
-                                  <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
-                                    <Text className="text-xs font-bold text-[#000000]">
-                                      {t("LoadingToVehicle.Set", "Set")} : {set.setNumber}
-                                    </Text>
-                                  </View>
-
-                                  <View className="flex-row items-center gap-3">
-                                    {/* Chevron Up/Down */}
-                                    <MaterialIcons
-                                      name={
-                                        set.isExpanded
-                                          ? "keyboard-arrow-up"
-                                          : "keyboard-arrow-down"
+                                  <View className="border border-[#000000] rounded-2xl overflow-hidden bg-white">
+                                    {/* Set Header Bar */}
+                                    <TouchableOpacity
+                                      activeOpacity={0.8}
+                                      onPress={() =>
+                                        handleToggleSetExpand(
+                                          grade.gradeKey,
+                                          set.id,
+                                        )
                                       }
-                                      size={24}
-                                      color="#000000"
-                                    />
-                                  </View>
-                                </TouchableOpacity>
-
-                                {/* Set Body (only rendered when expanded) */}
-                                {set.isExpanded && (
-                                  <View className="pt-3 px-4 pb-7 bg-white">
-                                    {/* Red Circular Delete Button at top right (only for set > 1) */}
-                                    {set.setNumber > 1 && (
-                                      <View className="flex-row justify-end mb-2">
-                                        <TouchableOpacity
-                                          activeOpacity={0.8}
-                                          onPress={() =>
-                                            setSetToDelete({
-                                              id: set.id,
-                                              gradeKey: grade.gradeKey,
-                                              gradeTitle: grade.title,
-                                              setNumber: set.setNumber,
-                                            })
-                                          }
-                                          className="w-8 h-8 rounded-full bg-[#EF4444] items-center justify-center shadow-sm"
-                                          style={{
-                                            shadowColor: "#EF4444",
-                                            shadowOffset: { width: 0, height: 1 },
-                                            shadowOpacity: 0.2,
-                                            shadowRadius: 2,
-                                            elevation: 2,
-                                          }}
-                                          hitSlop={{
-                                            top: 8,
-                                            bottom: 8,
-                                            left: 8,
-                                            right: 8,
-                                          }}
-                                        >
-                                          <MaterialIcons
-                                            name="delete"
-                                            size={18}
-                                            color="#FFFFFF"
-                                          />
-                                        </TouchableOpacity>
-                                      </View>
-                                    )}
-
-                                    {/* Container Type Section (only shown when container types data exists) */}
-                                    {containerTypes.length > 0 && (
-                                    <View
-                                      className="mb-4"
-                                      onLayout={(e) => {
-                                        const w = e.nativeEvent.layout.width;
-                                        if (w > 0) setContainerSectionWidth(w);
-                                      }}
+                                      className="bg-[#E9ECF1] px-4 h-[50px] flex-row items-center justify-between"
                                     >
-                                      {/* Header Row */}
-                                      <View className="flex-row items-center justify-between mb-2 px-1">
-                                        <View className="flex-row items-center gap-1.5">
-                                          <MaterialCommunityIcons
-                                            name="view-column-outline"
-                                            size={18}
-                                            color="#475569"
-                                          />
-                                          <Text className="text-sm font-semibold text-[#334155]">
-                                            {t("LoadingToVehicle.ContainerType", "Container Type")}
-                                          </Text>
-                                        </View>
-                                        <Text className="text-xs text-[#64748B]">
-                                          {t("LoadingToVehicle.SelectSize", "Select size")}
+                                      {/* Yellow Set Badge */}
+                                      <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
+                                        <Text className="text-xs font-bold text-[#000000]">
+                                          {t("LoadingToVehicle.Set", "Set")} :{" "}
+                                          {set.setNumber}
                                         </Text>
                                       </View>
 
-                                      {/* Pill Selector Box (max 3 visible, horizontally scrollable if > 3) */}
-                                      <View
-                                        style={{
-                                          backgroundColor: "#EEF2F6",
-                                          borderRadius: 9999,
-                                          padding: 4,
-                                          overflow: "hidden",
-                                        }}
-                                      >
-                                        <ScrollView
-                                          horizontal
-                                          showsHorizontalScrollIndicator={false}
-                                          style={{ borderRadius: 9999, overflow: "hidden" }}
-                                          contentContainerStyle={{
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                          }}
-                                        >
-                                          {containerTypes.map((cType) => {
-                                            const isSelected =
-                                              set.containerTypeId === cType.id ||
-                                              (!set.containerTypeId && cType.id === containerTypes[0]?.id);
+                                      <View className="flex-row items-center gap-3">
+                                        {/* Chevron Up/Down */}
+                                        <MaterialIcons
+                                          name={
+                                            set.isExpanded
+                                              ? "keyboard-arrow-up"
+                                              : "keyboard-arrow-down"
+                                          }
+                                          size={24}
+                                          color="#000000"
+                                        />
+                                      </View>
+                                    </TouchableOpacity>
 
-                                            const itemWidth = Math.max(
-                                              80,
-                                              Math.floor((containerSectionWidth - 8) / 3),
-                                            );
+                                    {/* Set Body (only rendered when expanded) */}
+                                    {set.isExpanded && (
+                                      <View className="pt-3 px-4 pb-7 bg-white">
+                                        {/* Red Circular Delete Button at top right (only for set > 1) */}
+                                        {set.setNumber > 1 && (
+                                          <View className="flex-row justify-end mb-2">
+                                            <TouchableOpacity
+                                              activeOpacity={0.8}
+                                              onPress={() =>
+                                                setSetToDelete({
+                                                  id: set.id,
+                                                  gradeKey: grade.gradeKey,
+                                                  gradeTitle: grade.title,
+                                                  setNumber: set.setNumber,
+                                                })
+                                              }
+                                              className="w-8 h-8 rounded-full bg-[#EF4444] items-center justify-center shadow-sm"
+                                              style={{
+                                                shadowColor: "#EF4444",
+                                                shadowOffset: {
+                                                  width: 0,
+                                                  height: 1,
+                                                },
+                                                shadowOpacity: 0.2,
+                                                shadowRadius: 2,
+                                                elevation: 2,
+                                              }}
+                                              hitSlop={{
+                                                top: 8,
+                                                bottom: 8,
+                                                left: 8,
+                                                right: 8,
+                                              }}
+                                            >
+                                              <MaterialIcons
+                                                name="delete"
+                                                size={18}
+                                                color="#FFFFFF"
+                                              />
+                                            </TouchableOpacity>
+                                          </View>
+                                        )}
 
-                                            return (
-                                              <TouchableOpacity
-                                                key={cType.id}
-                                                activeOpacity={0.75}
-                                                onPress={() =>
-                                                  handleSelectContainerType(grade.gradeKey, set.id, cType)
+                                        {/* Container Type Section (only shown when container types data exists) */}
+                                        {containerTypes.length > 0 && (
+                                          <View
+                                            className="mb-4"
+                                            onLayout={(e) => {
+                                              const w =
+                                                e.nativeEvent.layout.width;
+                                              if (w > 0)
+                                                setContainerSectionWidth(w);
+                                            }}
+                                          >
+                                            {/* Header Row */}
+                                            <View className="flex-row items-center justify-between mb-2 px-1">
+                                              <View className="flex-row items-center gap-1.5">
+                                                <MaterialCommunityIcons
+                                                  name="view-column-outline"
+                                                  size={18}
+                                                  color="#475569"
+                                                />
+                                                <Text className="text-sm font-semibold text-[#334155]">
+                                                  {t(
+                                                    "LoadingToVehicle.ContainerType",
+                                                    "Container Type",
+                                                  )}
+                                                </Text>
+                                              </View>
+                                              <Text className="text-xs text-[#64748B]">
+                                                {t(
+                                                  "LoadingToVehicle.SelectSize",
+                                                  "Select size",
+                                                )}
+                                              </Text>
+                                            </View>
+
+                                            {/* Pill Selector Box (max 3 visible, horizontally scrollable if > 3) */}
+                                            <View
+                                              style={{
+                                                backgroundColor: "#EEF2F6",
+                                                borderRadius: 9999,
+                                                padding: 4,
+                                                overflow: "hidden",
+                                              }}
+                                            >
+                                              <ScrollView
+                                                horizontal
+                                                showsHorizontalScrollIndicator={
+                                                  false
                                                 }
                                                 style={{
-                                                  width: itemWidth,
-                                                  height: 52,
                                                   borderRadius: 9999,
-                                                  backgroundColor: isSelected ? "#FFFFFF" : "transparent",
-                                                  justifyContent: "center",
+                                                  overflow: "hidden",
+                                                }}
+                                                contentContainerStyle={{
+                                                  flexDirection: "row",
                                                   alignItems: "center",
-                                                  shadowColor: isSelected ? "#000000" : "transparent",
-                                                  shadowOffset: { width: 0, height: 1 },
-                                                  shadowOpacity: isSelected ? 0.08 : 0,
-                                                  shadowRadius: 2,
-                                                  elevation: isSelected ? 2 : 0,
                                                 }}
                                               >
+                                                {containerTypes.map((cType) => {
+                                                  const isSelected =
+                                                    set.containerTypeId ===
+                                                      cType.id ||
+                                                    (!set.containerTypeId &&
+                                                      cType.id ===
+                                                        containerTypes[0]?.id);
+
+                                                  const pillWidth = Math.max(
+                                                    80,
+                                                    Math.floor(
+                                                      (containerSectionWidth -
+                                                        8) /
+                                                        3,
+                                                    ),
+                                                  );
+
+                                                  return (
+                                                    <TouchableOpacity
+                                                      key={cType.id}
+                                                      activeOpacity={0.75}
+                                                      onPress={() =>
+                                                        handleSelectContainerType(
+                                                          grade.gradeKey,
+                                                          set.id,
+                                                          cType,
+                                                        )
+                                                      }
+                                                      style={{
+                                                        width: pillWidth,
+                                                        height: 52,
+                                                        borderRadius: 9999,
+                                                        backgroundColor:
+                                                          isSelected
+                                                            ? "#FFFFFF"
+                                                            : "transparent",
+                                                        justifyContent:
+                                                          "center",
+                                                        alignItems: "center",
+                                                        shadowColor: isSelected
+                                                          ? "#000000"
+                                                          : "transparent",
+                                                        shadowOffset: {
+                                                          width: 0,
+                                                          height: 1,
+                                                        },
+                                                        shadowOpacity:
+                                                          isSelected ? 0.08 : 0,
+                                                        shadowRadius: 2,
+                                                        elevation: isSelected
+                                                          ? 2
+                                                          : 0,
+                                                      }}
+                                                    >
+                                                      <Text
+                                                        style={{
+                                                          fontSize: 14,
+                                                          fontWeight: "700",
+                                                          color: "#0F172A",
+                                                        }}
+                                                        numberOfLines={1}
+                                                      >
+                                                        {cType.labelName}
+                                                      </Text>
+                                                      <Text
+                                                        style={{
+                                                          fontSize: 11,
+                                                          color: "#64748B",
+                                                          marginTop: 2,
+                                                        }}
+                                                        numberOfLines={1}
+                                                      >
+                                                        {cType.weight != null
+                                                          ? `${cType.weight} ${t("Common.kg", "kg")}`
+                                                          : ""}
+                                                      </Text>
+                                                    </TouchableOpacity>
+                                                  );
+                                                })}
+                                              </ScrollView>
+                                            </View>
+                                          </View>
+                                        )}
+
+                                        {/* Crates Count Input */}
+                                        <TextInput
+                                          placeholder={
+                                            focusedSetId === set.id
+                                              ? ""
+                                              : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
+                                          }
+                                          placeholderTextColor="#000000"
+                                          value={set.crates}
+                                          onChangeText={(val) =>
+                                            handleCratesChange(
+                                              grade.gradeKey,
+                                              set.id,
+                                              val,
+                                            )
+                                          }
+                                          onFocus={() =>
+                                            setFocusedSetId(set.id)
+                                          }
+                                          onBlur={() => setFocusedSetId(null)}
+                                          keyboardType="numeric"
+                                          textAlign="center"
+                                          className="bg-[#EEF2F6] rounded-full h-[50px] px-4 text-base text-[#000000] mb-3"
+                                          style={{
+                                            textAlign: "center",
+                                            textAlignVertical: "center",
+                                            includeFontPadding: false,
+                                            fontWeight: set.crates
+                                              ? "bold"
+                                              : "normal",
+                                          }}
+                                        />
+
+                                        {/* Weight Row */}
+                                        {(() => {
+                                          const cratesNum = parseInt(
+                                            set.crates,
+                                            10,
+                                          );
+                                          const isCratesValid =
+                                            !isNaN(cratesNum) && cratesNum > 0;
+
+                                          return (
+                                            <View className="flex-row items-center gap-3">
+                                              {/* Weight Display Box */}
+                                              <TouchableOpacity
+                                                disabled={!isCratesValid}
+                                                activeOpacity={0.8}
+                                                onPress={() =>
+                                                  setScaleTarget({
+                                                    gradeKey: grade.gradeKey,
+                                                    setId: set.id,
+                                                  })
+                                                }
+                                                className="flex-1 bg-[#EEF2F6] rounded-full h-[50px] items-center justify-center px-4"
+                                              >
                                                 <Text
-                                                  style={{
-                                                    fontSize: 14,
-                                                    fontWeight: "700",
-                                                    color: "#0F172A",
-                                                  }}
-                                                  numberOfLines={1}
+                                                  className={`font-bold text-base ${
+                                                    set.weight !== null
+                                                      ? "text-[#0F172A]"
+                                                      : "text-[#94A3B8]"
+                                                  }`}
                                                 >
-                                                  {cType.labelName}
-                                                </Text>
-                                                <Text
-                                                  style={{
-                                                    fontSize: 11,
-                                                    color: "#64748B",
-                                                    marginTop: 2,
-                                                  }}
-                                                  numberOfLines={1}
-                                                >
-                                                  {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                                                  {set.weight !== null
+                                                    ? `${set.weight.toFixed(2)} ${t("PassTargetBetweenOfficers.kg", "kg")}`
+                                                    : t(
+                                                        "PassTargetBetweenOfficers.kg",
+                                                        "kg",
+                                                      )}
                                                 </Text>
                                               </TouchableOpacity>
-                                            );
-                                          })}
-                                        </ScrollView>
-                                      </View>
-                                    </View>
-                                    )}
 
-                                    {/* Crates Count Input */}
-                                    <TextInput
-                                      placeholder={
-                                        focusedSetId === set.id
-                                          ? ""
-                                          : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
-                                      }
-                                      placeholderTextColor="#000000"
-                                      value={set.crates}
-                                      onChangeText={(val) =>
-                                        handleCratesChange(
-                                          grade.gradeKey,
-                                          set.id,
-                                          val,
-                                        )
-                                      }
-                                      onFocus={() => setFocusedSetId(set.id)}
-                                      onBlur={() => setFocusedSetId(null)}
-                                      keyboardType="numeric"
-                                      textAlign="center"
-                                      className="bg-[#EEF2F6] rounded-full h-[50px] px-4 text-base text-[#000000] mb-3"
-                                      style={{
-                                        textAlign: "center",
-                                        textAlignVertical: "center",
-                                        includeFontPadding: false,
-                                        fontWeight: set.crates ? "bold" : "normal",
-                                      }}
-                                    />
+                                              {/* Scale Button */}
+                                              <TouchableOpacity
+                                                disabled={!isCratesValid}
+                                                activeOpacity={0.8}
+                                                onPress={() =>
+                                                  setScaleTarget({
+                                                    gradeKey: grade.gradeKey,
+                                                    setId: set.id,
+                                                  })
+                                                }
+                                                className={`w-[50px] h-[50px] rounded-full items-center justify-center ${
+                                                  isCratesValid
+                                                    ? "bg-black"
+                                                    : "bg-[#A0A4A8]"
+                                                }`}
+                                                style={{
+                                                  shadowColor: "#000",
+                                                  shadowOffset: {
+                                                    width: 0,
+                                                    height: 2,
+                                                  },
+                                                  shadowOpacity: isCratesValid
+                                                    ? 0.2
+                                                    : 0,
+                                                  shadowRadius: 2,
+                                                  elevation: isCratesValid
+                                                    ? 3
+                                                    : 0,
+                                                }}
+                                              >
+                                                {set.weight !== null ? (
+                                                  <MaterialIcons
+                                                    name="refresh"
+                                                    size={20}
+                                                    color="#FFFFFF"
+                                                  />
+                                                ) : (
+                                                  <MaterialIcons
+                                                    name="arrow-forward"
+                                                    size={20}
+                                                    color="#FFFFFF"
+                                                  />
+                                                )}
+                                              </TouchableOpacity>
+                                            </View>
+                                          );
+                                        })()}
 
-                                    {/* Weight Row */}
-                                    {(() => {
-                                      const cratesNum = parseInt(set.crates, 10);
-                                      const isCratesValid = !isNaN(cratesNum) && cratesNum > 0;
+                                        {/* Sub Total Box */}
+                                        {(() => {
+                                          const setWeight = set.weight;
+                                          const gradePrice =
+                                            price !== null &&
+                                            price !== undefined
+                                              ? Number(price)
+                                              : null;
+                                          const hasSubTotal =
+                                            setWeight !== null &&
+                                            gradePrice !== null &&
+                                            !isNaN(setWeight) &&
+                                            !isNaN(gradePrice);
+                                          const subTotalAmount = hasSubTotal
+                                            ? setWeight * gradePrice
+                                            : null;
 
-                                      return (
-                                        <View className="flex-row items-center gap-3">
-                                          {/* Weight Display Box */}
-                                          <TouchableOpacity
-                                            disabled={!isCratesValid}
-                                            activeOpacity={0.8}
-                                            onPress={() =>
-                                              setScaleTarget({
-                                                gradeKey: grade.gradeKey,
-                                                setId: set.id,
-                                              })
-                                            }
-                                            className="flex-1 bg-[#EEF2F6] rounded-full h-[50px] items-center justify-center px-4"
-                                          >
-                                            <Text
-                                              className={`font-bold text-base ${
-                                                set.weight !== null
-                                                  ? "text-[#0F172A]"
-                                                  : "text-[#94A3B8]"
-                                              }`}
+                                          return (
+                                            <View
+                                              style={{
+                                                backgroundColor: "#EEF2F6",
+                                                borderRadius: 9999,
+                                                height: 50,
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                marginTop: 12,
+                                                paddingHorizontal: 16,
+                                              }}
                                             >
-                                              {set.weight !== null
-                                                ? `${set.weight.toFixed(2)} ${t("PassTargetBetweenOfficers.kg", "kg")}`
-                                                : t("PassTargetBetweenOfficers.kg", "kg")}
-                                            </Text>
-                                          </TouchableOpacity>
-
-                                          {/* Scale Button */}
-                                          <TouchableOpacity
-                                            disabled={!isCratesValid}
-                                            activeOpacity={0.8}
-                                            onPress={() =>
-                                              setScaleTarget({
-                                                gradeKey: grade.gradeKey,
-                                                setId: set.id,
-                                              })
-                                            }
-                                            className={`w-[50px] h-[50px] rounded-full items-center justify-center ${
-                                              isCratesValid ? "bg-black" : "bg-[#A0A4A8]"
-                                            }`}
-                                            style={{
-                                              shadowColor: "#000",
-                                              shadowOffset: { width: 0, height: 2 },
-                                              shadowOpacity: isCratesValid ? 0.2 : 0,
-                                              shadowRadius: 2,
-                                              elevation: isCratesValid ? 3 : 0,
-                                            }}
-                                          >
-                                            {set.weight !== null ? (
-                                              <MaterialIcons
-                                                name="refresh"
-                                                size={20}
-                                                color="#FFFFFF"
-                                              />
-                                            ) : (
-                                              <MaterialIcons
-                                                name="arrow-forward"
-                                                size={20}
-                                                color="#FFFFFF"
-                                              />
-                                            )}
-                                          </TouchableOpacity>
-                                        </View>
-                                      );
-                                    })()}
-
-                                    {/* Sub Total Box */}
-                                    {(() => {
-                                      const setWeight = set.weight;
-                                      const gradePrice = price !== null && price !== undefined ? Number(price) : null;
-                                      const hasSubTotal = setWeight !== null && gradePrice !== null && !isNaN(setWeight) && !isNaN(gradePrice);
-                                      const subTotalAmount = hasSubTotal ? (setWeight * gradePrice) : null;
-
-                                      return (
-                                        <View
-                                          style={{
-                                            backgroundColor: "#EEF2F6",
-                                            borderRadius: 9999,
-                                            height: 50,
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            marginTop: 12,
-                                            paddingHorizontal: 16,
-                                          }}
-                                        >
-                                          <Text
-                                            style={{
-                                              fontSize: 16,
-                                              fontWeight: hasSubTotal ? "bold" : "normal",
-                                              color: hasSubTotal ? "#0F172A" : "#94A3B8",
-                                            }}
-                                          >
-                                            {hasSubTotal
-                                              ? `Rs. ${subTotalAmount!.toLocaleString("en-IN", {
-                                                  minimumFractionDigits: 2,
-                                                  maximumFractionDigits: 2,
-                                                })}`
-                                              : `--${t("UnregisteredCropDetails.SubTotal", "Sub Total")}--`}
-                                          </Text>
-                                        </View>
-                                      );
-                                    })()}
+                                              <Text
+                                                style={{
+                                                  fontSize: 16,
+                                                  fontWeight: hasSubTotal
+                                                    ? "bold"
+                                                    : "normal",
+                                                  color: hasSubTotal
+                                                    ? "#0F172A"
+                                                    : "#94A3B8",
+                                                }}
+                                              >
+                                                {hasSubTotal
+                                                  ? `Rs. ${subTotalAmount!.toLocaleString(
+                                                      "en-IN",
+                                                      {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                      },
+                                                    )}`
+                                                  : `--${t("UnregisteredCropDetails.SubTotal", "Sub Total")}--`}
+                                              </Text>
+                                            </View>
+                                          );
+                                        })()}
+                                      </View>
+                                    )}
                                   </View>
-                                )}
-                              </View>
 
-                              {/* Floating Add Button overlapping bottom border */}
-                              {showAddButton && (
-                                <TouchableOpacity
-                                  activeOpacity={0.8}
-                                  onPress={() => handleAddSet(grade.gradeKey)}
-                                  disabled={
-                                    !set.crates ||
-                                    parseInt(set.crates, 10) <= 0 ||
-                                    set.weight === null
-                                  }
-                                  className={`w-10 h-10 rounded-full items-center justify-center absolute -bottom-5 self-center z-10 ${
-                                    set.crates &&
-                                    parseInt(set.crates, 10) > 0 &&
-                                    set.weight !== null
-                                      ? "bg-[#000000]"
-                                      : "bg-[#A0A4A8]"
-                                  }`}
-                                  style={{
-                                    shadowColor: "#000",
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.25,
-                                    shadowRadius: 3,
-                                    elevation: 4,
-                                  }}
-                                >
-                                  <MaterialIcons name="add" size={24} color="#FFFFFF" />
-                                </TouchableOpacity>
-                              )}
-                            </View>
-                          );
-                        })}
+                                  {/* Floating Add Button overlapping bottom border */}
+                                  {showAddButton && (
+                                    <TouchableOpacity
+                                      activeOpacity={0.8}
+                                      onPress={() =>
+                                        handleAddSet(grade.gradeKey)
+                                      }
+                                      disabled={
+                                        !set.crates ||
+                                        parseInt(set.crates, 10) <= 0 ||
+                                        set.weight === null
+                                      }
+                                      className={`w-10 h-10 rounded-full items-center justify-center absolute -bottom-5 self-center z-10 ${
+                                        set.crates &&
+                                        parseInt(set.crates, 10) > 0 &&
+                                        set.weight !== null
+                                          ? "bg-[#000000]"
+                                          : "bg-[#A0A4A8]"
+                                      }`}
+                                      style={{
+                                        shadowColor: "#000",
+                                        shadowOffset: { width: 0, height: 2 },
+                                        shadowOpacity: 0.25,
+                                        shadowRadius: 3,
+                                        elevation: 4,
+                                      }}
+                                    >
+                                      <MaterialIcons
+                                        name="add"
+                                        size={24}
+                                        color="#FFFFFF"
+                                      />
+                                    </TouchableOpacity>
+                                  )}
+                                </View>
+                              );
+                            })}
+                          </View>
+                        )}
+
+                        {/* HR line after each grade */}
+                        <View
+                          style={{
+                            height: 1,
+                            backgroundColor: "#747474",
+                            marginHorizontal: -32,
+                          }}
+                        />
                       </View>
-                    )}
+                    );
+                  })}
 
-                    {/* HR line after each grade */}
-                    <View style={{ height: 1, backgroundColor: "#747474", marginHorizontal: -32 }} />
+                  {/* ── Grade Total Summary (3 Pills: Grade A, Grade B, Grade C) ── */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      marginTop: 24,
+                    }}
+                  >
+                    {/* Grade A */}
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: "#374151",
+                          fontWeight: "600",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {t(
+                          "UnregisteredCropDetails.GradeA_Rs",
+                          "Grade A (Rs.)",
+                        )}
+                      </Text>
+                      <View
+                        style={{
+                          backgroundColor: "#EEF2F6",
+                          height: 46,
+                          borderRadius: 9999,
+                          width: "100%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "600",
+                            color: "#334155",
+                          }}
+                        >
+                          {!selectedVariety
+                            ? "----"
+                            : (
+                                (unitPrices.A || 0) *
+                                (quantities.A ? parseFloat(quantities.A) : 0)
+                              ).toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Grade B */}
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: "#374151",
+                          fontWeight: "600",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {t(
+                          "UnregisteredCropDetails.GradeB_Rs",
+                          "Grade B (Rs.)",
+                        )}
+                      </Text>
+                      <View
+                        style={{
+                          backgroundColor: "#EEF2F6",
+                          height: 46,
+                          borderRadius: 9999,
+                          width: "100%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "600",
+                            color: "#334155",
+                          }}
+                        >
+                          {!selectedVariety
+                            ? "----"
+                            : (
+                                (unitPrices.B || 0) *
+                                (quantities.B ? parseFloat(quantities.B) : 0)
+                              ).toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Grade C */}
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: "#374151",
+                          fontWeight: "600",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {t(
+                          "UnregisteredCropDetails.GradeC_Rs",
+                          "Grade C (Rs.)",
+                        )}
+                      </Text>
+                      <View
+                        style={{
+                          backgroundColor: "#EEF2F6",
+                          height: 46,
+                          borderRadius: 9999,
+                          width: "100%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          paddingHorizontal: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "600",
+                            color: "#334155",
+                          }}
+                        >
+                          {!selectedVariety
+                            ? "----"
+                            : (
+                                (unitPrices.C || 0) *
+                                (quantities.C ? parseFloat(quantities.C) : 0)
+                              ).toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                );
-              })}
 
-              {/* ── Grade Total Summary (3 Pills: Grade A, Grade B, Grade C) ── */}
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 24 }}>
-                {/* Grade A */}
-                <View style={{ flex: 1, alignItems: "center" }}>
-                  <Text style={{ fontSize: 13, color: "#374151", fontWeight: "600", marginBottom: 6 }}>
-                    {t("UnregisteredCropDetails.GradeA_Rs", "Grade A (Rs.)")}
-                  </Text>
-                  <View style={{ backgroundColor: "#EEF2F6", height: 46, borderRadius: 9999, width: "100%", alignItems: "center", justifyContent: "center", paddingHorizontal: 4 }}>
-                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#334155" }}>
-                      {!selectedVariety ? "----" : ((unitPrices.A || 0) * (quantities.A ? parseFloat(quantities.A) : 0)).toFixed(2)}
+                  {/* ── Grand Total Box ── */}
+                  <View style={{ marginTop: 18 }}>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "600",
+                        color: "#374151",
+                        textAlign: "left",
+                        marginBottom: 8,
+                      }}
+                    >
+                      {t(
+                        "UnregisteredCropDetails.GrandTotal_Rs",
+                        "Grand Total (Rs.)",
+                      )}
                     </Text>
+                    <View
+                      style={{
+                        backgroundColor: "#EEF2F6",
+                        height: 50,
+                        borderRadius: 9999,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "bold",
+                          color: !selectedVariety ? "#94A3B8" : "#0F172A",
+                        }}
+                      >
+                        {!selectedVariety
+                          ? t(
+                              "UnregisteredCropDetails.Auto Fill",
+                              "--Auto Fill--",
+                            )
+                          : `${t("ReceivedCash.Rs", "Rs.")} ${total.toLocaleString(
+                              "en-IN",
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              },
+                            )}`}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-
-                {/* Grade B */}
-                <View style={{ flex: 1, alignItems: "center" }}>
-                  <Text style={{ fontSize: 13, color: "#374151", fontWeight: "600", marginBottom: 6 }}>
-                    {t("UnregisteredCropDetails.GradeB_Rs", "Grade B (Rs.)")}
-                  </Text>
-                  <View style={{ backgroundColor: "#EEF2F6", height: 46, borderRadius: 9999, width: "100%", alignItems: "center", justifyContent: "center", paddingHorizontal: 4 }}>
-                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#334155" }}>
-                      {!selectedVariety ? "----" : ((unitPrices.B || 0) * (quantities.B ? parseFloat(quantities.B) : 0)).toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Grade C */}
-                <View style={{ flex: 1, alignItems: "center" }}>
-                  <Text style={{ fontSize: 13, color: "#374151", fontWeight: "600", marginBottom: 6 }}>
-                    {t("UnregisteredCropDetails.GradeC_Rs", "Grade C (Rs.)")}
-                  </Text>
-                  <View style={{ backgroundColor: "#EEF2F6", height: 46, borderRadius: 9999, width: "100%", alignItems: "center", justifyContent: "center", paddingHorizontal: 4 }}>
-                    <Text style={{ fontSize: 14, fontWeight: "600", color: "#334155" }}>
-                      {!selectedVariety ? "----" : ((unitPrices.C || 0) * (quantities.C ? parseFloat(quantities.C) : 0)).toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* ── Grand Total Box ── */}
-              <View style={{ marginTop: 18 }}>
-                <Text style={{ fontSize: 14, fontWeight: "600", color: "#374151", textAlign: "left", marginBottom: 8 }}>
-                  {t("UnregisteredCropDetails.GrandTotal_Rs", "Grand Total (Rs.)")}
-                </Text>
-                <View style={{ backgroundColor: "#EEF2F6", height: 50, borderRadius: 9999, alignItems: "center", justifyContent: "center" }}>
-                  <Text style={{ fontSize: 16, fontWeight: "bold", color: !selectedVariety ? "#94A3B8" : "#0F172A" }}>
-                    {!selectedVariety
-                      ? "--Auto Fill--"
-                      : `Rs. ${total.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}`}
-                  </Text>
-                </View>
-              </View>
                 </>
               )}
 
@@ -2333,7 +2626,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   elevation: isAddMoreDisabled ? 0 : 6,
                 }}
               >
-                <Text style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 16 }}>
+                <Text
+                  style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 16 }}
+                >
                   {t("UnregisteredCropDetails.AddMore", "Add More")}
                 </Text>
               </TouchableOpacity>
@@ -2342,7 +2637,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 onPress={handleSubmit}
                 disabled={isFinishDisabled || loading}
                 style={{
-                  backgroundColor: isFinishDisabled || loading ? "#A0A4A8" : "#980775",
+                  backgroundColor:
+                    isFinishDisabled || loading ? "#A0A4A8" : "#980775",
                   borderRadius: 9999,
                   height: 50,
                   alignItems: "center",
@@ -2356,15 +2652,40 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 }}
               >
                 {loading ? (
-                  <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
                     <ActivityIndicator size="small" color="#FFFFFF" />
-                    <Text style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 16, marginLeft: 8 }}>
-                      {t("UnregisteredCropDetails.Processing...", "Processing...")}
+                    <Text
+                      style={{
+                        color: "#FFFFFF",
+                        fontWeight: "600",
+                        fontSize: 16,
+                        marginLeft: 8,
+                      }}
+                    >
+                      {t(
+                        "UnregisteredCropDetails.Processing...",
+                        "Processing...",
+                      )}
                     </Text>
                   </View>
                 ) : (
-                  <Text style={{ color: "#FFFFFF", fontWeight: "600", fontSize: 16 }}>
-                    {t("UnregisteredCropDetails.FinishCollection", "Finish Collection")}
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontWeight: "600",
+                      fontSize: 16,
+                    }}
+                  >
+                    {t(
+                      "UnregisteredCropDetails.FinishCollection",
+                      "Finish Collection",
+                    )}
                   </Text>
                 )}
               </TouchableOpacity>
@@ -2372,11 +2693,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
             <DeleteModal
               visible={deleteVarietyModal.visible}
-              title="Confirm Delete"
-              message={t(
-                "UnregisteredCropDetails.Are you sure you want to delete previously added",
-                { varietyName: deleteVarietyModal.varietyName },
-              )}
+              title={t("UnregisteredCropDetails.ConfirmDelete")}
+              message={t("UnregisteredCropDetails.DeleteVarietyConfirmation", {
+                varietyName: deleteVarietyModal.varietyName,
+              })}
               onCancel={() =>
                 setDeleteVarietyModal({
                   visible: false,
@@ -2390,13 +2710,12 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
             <DeleteModal
               visible={deleteGradeModal.visible}
               title={t("UnregisteredCropDetails.ConfirmDelete")}
-              message={t(
-                "UnregisteredCropDetails.Are you sure you want to delete grade",
-                {
-                  varietyName: deleteGradeModal.varietyName,
-                  grade: deleteGradeModal.grade,
-                },
-              )}
+              message={t("UnregisteredCropDetails.DeleteGradeConfirmation", {
+                varietyName: deleteGradeModal.varietyName,
+                grade: t(
+                  `UnregisteredCropDetails.Grade${deleteGradeModal.grade}`,
+                ),
+              })}
               onCancel={() =>
                 setDeleteGradeModal({
                   visible: false,

@@ -513,6 +513,8 @@
     "CropName": "බෝගයේ නම",
     "Variety": "ප්‍රභේදය",
     "UnitGrades": "ශ්‍රේණි අනුව ඒකකයක මිල",
+    "SubTotal": "මුළු එකතුව",
+    "ClearAndDelete":"මකා දමා ඉවත් කරන්න",
     "Total": "එකතුව (රු.)",
     "Add": "අයිතම එකතු කරන්න",
     "Done": "තහවුරු කරන්න",
@@ -531,7 +533,16 @@
     "Are you sure you want to delete previously added": "කලින් එකතු කළ {{varietyName}} මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
     "Are you sure you want to delete grade": "කලින් එකතු කළ {{varietyName}} - ශ්‍රේණිය {{grade}} මැකීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
     "UnsavedChanges": "සුරැක නොමැති වෙනස්කම්",
-    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න."
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න.",
+    "DeleteGradeConfirmation": "{{varietyName}} හි {{grade}} මකා දැමීමට ඔබට විශ්වාසද?",
+    "DeleteVarietyConfirmation": "එක් කළ {{varietyName}} ශ්‍රේණිය මකා දැමීමට ඔබට විශ්වාසද?",
+     "GradeA_Rs": "A ශ්‍රේණිය (රු.)",
+    "GradeB_Rs": "B ශ්‍රේණිය (රු.)",
+    "GradeC_Rs": "C ශ්‍රේණිය (රු.)",
+    "GrandTotal_Rs": "මුළු එකතුව (රු.)",
+    "Auto Fill": "--ස්වයංක්‍රීයව පුරවන්න--",
+    "AddMore": "තවත් එකතු කරන්න",
+    "FinishCollection": "එකතු කිරීම අවසන් කරන්න"
   },
   "ReportPage": {
     "LNG": "si",
@@ -1053,7 +1064,7 @@
     "Pending": "අපරිපූර්ණ",
     "Opened": "විවෘත කළ",
     "Received Cash": "ලැබුණු මුදල්",
-    "Pickup Order Scan": "රැගෙන යාමේ ඇණවුම් ස්කෑන් කිරීම",
+    "Pickup Order Scan": "පිකප් ඇණවුම්",
     "Start Packing": "ඇසිරීම අරඹන්න",
     "Assign Groups": "කණ්ඩායම් පැවරීම",
     "Purchase Shortage": "හිඟ භෝග මිලදී ගැනීම",
@@ -1739,7 +1750,8 @@
     "Cancel": "අවලංගු කරන්න",
     "Yes, Save": "ඔව්, සුරකින්න",
     "Done": "සම්පූර්ණයි",
-    "Failed to save signature": "අත්සන සුරැකීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න."
+    "Failed to save signature": "අත්සන සුරැකීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "Preparing signature pad":"අත්සන් තැබීමේ පුවරුව සූදානම් කරමින්..."
   },
   "PurchaseShortage": {
     "Assigned Products": "පවරන ලද නිෂ්පාදන",
@@ -1922,7 +1934,7 @@
     "Set": "කාණ්ඩය",
     "ContainerType": "බහාලුම් වර්ගය",
     "SelectSize": "ප්‍රමාණය තෝරන්න",
-    "EnterTotalContainers": "මුළු බහාලුම් ගණන මෙහි ඇතුළත් කරන්න",
+    "EnterTotalContainers": "බහාලුම් ගණන",
     "EnterTotalCrates": "පෙට්ටි ගණන ඇතුළත් කරන්න",
     "ItemSavedTitle": "ද්‍රව්‍යය එක් කරන ලදී!",
     "ItemSavedMessage": "ප්‍රභේදය {{num}} සුරැකිණි. ඔබට දැන් ඊළඟ ප්‍රභේදය පැටවිය හැක.",
