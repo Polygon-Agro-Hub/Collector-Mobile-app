@@ -1168,12 +1168,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         formattedPrice = (totalPrice || 0).toFixed(2);
       }
 
-      const apiUrl = "https://api.getshoutout.com/coreservice/messages";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let Message = "";
       let companyName = "";
       if (language === "Sinhala") {
@@ -1187,14 +1181,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         Message = `Thank you for providing your produce to ${companyName}.\nRs. ${formattedPrice} will be credited to your bank account within 48 hours.\nTID: ${invoiceNumber}`;
       }
 
-      const body = {
-        source: "Polygon",
-        destinations: [farmerPhone],
-        content: { sms: Message },
-        transports: ["sms"],
-      };
-
-      await axios.post(apiUrl, body, { headers });
+      await axios.post(`${environment.API_BASE_URL}api/farmer/send-sms`, {
+        phoneNumber: farmerPhone,
+        message: Message,
+      });
     } catch (error) {
       console.error("Error sending SMS:", error);
     }

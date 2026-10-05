@@ -198,17 +198,9 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     }
 
     try {
-      const refId = referenceId;
-      const url = "https://api.getshoutout.com/otpservice/verify";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       const response = await axios.post(
-        url,
-        { code, referenceId: refId },
-        { headers },
+        `${environment.API_BASE_URL}api/farmer/verify-otp`,
+        { code, referenceId },
       );
 
       const { statusCode, message } = response.data;
@@ -307,12 +299,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     await AsyncStorage.removeItem("referenceId");
 
     try {
-      const apiUrl = "https://api.getshoutout.com/otpservice/send";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let otpMessage = "";
       let companyName = "";
 
@@ -340,14 +326,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
-      const body = {
-        source: "Polygon",
-        transport: "sms",
-        content: { sms: otpMessage },
-        destination: `${phoneNumber}`,
-      };
-
-      const response = await axios.post(apiUrl, body, { headers });
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/farmer/send-otp`,
+        {
+          phoneNumber: `${phoneNumber}`,
+          message: otpMessage,
+        },
+      );
 
       if (response.data.referenceId) {
         await AsyncStorage.setItem("referenceId", response.data.referenceId);

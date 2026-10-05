@@ -128,12 +128,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     if (!netState.isConnected) return;
 
     try {
-      const apiUrl = "https://api.getshoutout.com/otpservice/send";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let otpMessage = "";
       let companyName = "";
 
@@ -150,15 +144,16 @@ if (currentLang === "si") {
   otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
 }
 
-      const body = {
-        source: "Polygon",
-        transport: "sms",
-        content: { sms: otpMessage },
-        destination: `${phoneNumber}`,
-      };
-
-      const response = await axios.post(apiUrl, body, { headers });
-      await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/farmer/send-otp`,
+        {
+          phoneNumber: `${phoneNumber}`,
+          message: otpMessage,
+        },
+      );
+      if (response.data?.referenceId) {
+        await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      }
 
       navigation.navigate("otpBankDetailsupdate", {
         phoneNumber,

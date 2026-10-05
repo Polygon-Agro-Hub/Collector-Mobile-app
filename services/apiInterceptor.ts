@@ -239,8 +239,7 @@ export const setupAxiosInterceptors = (instance: AxiosInstance): void => {
   instance.interceptors.request.use(
     (config) => {
       const isExternal =
-        config.url?.includes("getshoutout.com") ||
-        (config.url?.startsWith("http") && !config.url?.includes(environment.API_BASE_URL));
+        config.url?.startsWith("http") && !config.url?.includes(environment.API_BASE_URL);
 
       if (!isExternal && !config.headers.Authorization) {
         const token = store.getState().auth.token;
@@ -253,14 +252,13 @@ export const setupAxiosInterceptors = (instance: AxiosInstance): void => {
     (error) => Promise.reject(error)
   );
 
-  // Handle 401 / 403 responses globally (skip external APIs like ShoutOUT)
+  // Handle 401 / 403 responses globally (skip external APIs)
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
       const res = error.response;
       const isExternal =
-        error.config?.url?.includes("getshoutout.com") ||
-        (error.config?.url?.startsWith("http") && !error.config?.url?.includes(environment.API_BASE_URL));
+        error.config?.url?.startsWith("http") && !error.config?.url?.includes(environment.API_BASE_URL);
 
       if (!isExternal && res && (res.status === 401 || res.status === 403)) {
         const isHandled = handleAuthError(res.status, res.data);
