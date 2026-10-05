@@ -1601,6 +1601,8 @@
     "Pickup Order": "Pickup Order",
     "District": "District",
     "All Delivery Orders": "All Delivery Orders ({{count}})",
+    "Delivery Orders": "Delivery",
+    "Delivery": "Delivery",
     "Deselect All": "Deselect All",
     "Continue": "Continue ({{count}})",
     "Select a Row to Assign": "Select a Row to Assign",
@@ -1650,6 +1652,9 @@
     "QC Done By": "QC Done By",
     "Package": "Package",
     "ALaCarte": "A La Carte",
+    "Delivery": "Delivery",
+    "Delivery Orders": "Delivery",
+    "Pickup Orders": "Pickup Orders",
     "Close": "Close"
   },
   "Packing": {

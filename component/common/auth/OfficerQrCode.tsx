@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   BackHandler,
+  Share,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system/legacy";
@@ -191,25 +192,28 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const fileUri = `${(FileSystem as any).cacheDirectory}Officer_QRCode_${Date.now()}.png`;
-      const response = await FileSystem.downloadAsync(QR, fileUri);
-
+      // Try expo-sharing first (shares the actual image file)
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(response.uri, {
-          mimeType: "image/png",
-          dialogTitle: t("OfficerQr.Share", "Share QR Code"),
-          UTI: "public.png",
-        });
-      } else {
-        Alert.alert(
-          t("OfficerQr.SharingUnavailableTitle", "Sharing Unavailable"),
-          t(
-            "OfficerQr.SharingUnavailable",
-            "Sharing is not available on this device.",
-          ),
-          [{ text: t("OfficerQr.OK", t("AlertModal.OK", "OK")) }],
-        );
+        try {
+          const fileUri = `${(FileSystem as any).cacheDirectory}Officer_QRCode_${Date.now()}.png`;
+          const downloaded = await FileSystem.downloadAsync(QR, fileUri);
+          await Sharing.shareAsync(downloaded.uri, {
+            mimeType: "image/png",
+            dialogTitle: t("OfficerQr.Share", "Share QR Code"),
+            UTI: "public.png",
+          });
+          return;
+        } catch (sharingError) {
+          console.warn("expo-sharing failed, falling back to Share.share:", sharingError);
+        }
       }
+
+      // Fallback: share the QR code URL as text (works with Google Chat, etc.)
+      await Share.share({
+        message: QR,
+        url: QR, // iOS uses url; Android uses message
+        title: t("OfficerQr.Share", "Share QR Code"),
+      });
     } catch (error) {
       console.error("Share error:", error);
       Alert.alert(
@@ -222,6 +226,7 @@ const OfficerQr: React.FC<OfficerQrProps> = ({ navigation }) => {
       );
     }
   };
+
 
   // Hardware back button
   useFocusEffect(

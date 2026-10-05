@@ -1528,6 +1528,8 @@
     "Pickup Order": "රැගෙන යාමේ ඇණවුම",
     "District": "දිස්ත්‍රික්කය",
     "All Delivery Orders": "සියලු බෙදාහැරීම් ඇණවුම් ({{count}})",
+    "Delivery Orders": "බෙදා හැරීමේ ඇණවුම්",
+    "Delivery": "බෙදා හැරීමේ ඇණවුම්",
     "Deselect All": "සියල්ල ඉවත් කරන්න",
     "Continue": "ඉදිරියට යන්න ({{count}})",
     "Select a Row to Assign": "පැවරීම සඳහා පේළියක් තෝරන්න",
@@ -1575,6 +1577,9 @@
     "QC Done By": "තත්ත්ව පරීක්ෂාව කළේ",
     "Package": "පැකේජය",
     "ALaCarte": "A La Carte",
+    "Delivery": "බෙදා හැරීමේ ඇණවුම්",
+    "Delivery Orders": "බෙදා හැරීමේ ඇණවුම්",
+    "Pickup Orders": "රැගෙන යාමේ ඇණවුම්",
     "Close": "වසා දමන්න"
   },
   "Packing": {

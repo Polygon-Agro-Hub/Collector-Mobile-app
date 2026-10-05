@@ -1528,6 +1528,8 @@
     "Pickup Order": "பிக்அப் ஆர்டர்",
     "District": "மாவட்டம்",
     "All Delivery Orders": "அனைத்து டெலிவரி ஆர்டர்கள் ({{count}})",
+    "Delivery Orders": "விநியோக ஆர்டர்கள்",
+    "Delivery": "விநியோக ஆர்டர்கள்",
     "Deselect All": "அனைத்தையும் தேர்வு நீக்கு",
     "Continue": "தொடரவும் ({{count}})",
     "Select a Row to Assign": "ஒதுக்குவதற்கு ஒரு வரிசையைத் தேர்ந்தெடுக்கவும்",
@@ -1575,6 +1577,9 @@
     "QC Done By": "QC செய்தவர்",
     "Package": "தொகுப்பு",
     "ALaCarte": "A La Carte",
+    "Delivery": "விநியோக ஆர்டர்கள்",
+    "Delivery Orders": "விநியோக ஆர்டர்கள்",
+    "Pickup Orders": "பிக்அப் ஆர்டர்கள்",
     "Close": "மூடு"
   },
   "Packing": {

@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Share,
 } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import axios from "axios";
@@ -247,22 +248,28 @@ const FarmerQr: React.FC<FarmerQrProps> = ({ navigation }) => {
         return;
       }
 
-      const fileUri = `${(FileSystem as any).cacheDirectory}Farmer_QRCode_${Date.now()}.png`;
-      const response = await FileSystem.downloadAsync(farmerQRCode, fileUri);
-
+      // Try expo-sharing first (shares the actual image file)
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(response.uri, {
-          mimeType: "image/png",
-          dialogTitle: "Share QR Code",
-          UTI: "public.png",
-        });
-      } else {
-        Alert.alert(
-          t("QRcode.sharingUnavailableTitle"),
-          t("QRcode.sharingUnavailableMessage"),
-          [{ text: t("AlertModal.OK", "OK") }],
-        );
+        try {
+          const fileUri = `${(FileSystem as any).cacheDirectory}Farmer_QRCode_${Date.now()}.png`;
+          const downloaded = await FileSystem.downloadAsync(farmerQRCode, fileUri);
+          await Sharing.shareAsync(downloaded.uri, {
+            mimeType: "image/png",
+            dialogTitle: "Share QR Code",
+            UTI: "public.png",
+          });
+          return;
+        } catch (sharingError) {
+          console.warn("expo-sharing failed, falling back to Share.share:", sharingError);
+        }
       }
+
+      // Fallback: share the QR code URL as text (works with Google Chat, etc.)
+      await Share.share({
+        message: farmerQRCode,
+        url: farmerQRCode, // iOS uses url; Android uses message
+        title: "Share QR Code",
+      });
     } catch (error) {
       console.error("Share error:", error);
       Alert.alert(t("Error.error"), t("QRcode.failedShareQRCode"), [
