@@ -32,6 +32,8 @@
     "Containers": "Containers",
     "Set": "Set",
     "Grade": "Grade",
+    "Transport": "Transport",
+    "Centre": "Centre",
     "Search Price": "Search Price"
   },
   "Main": {
@@ -226,6 +228,8 @@
     "Please select at least one pending item": "Please select at least one pending item.",
     "Replace request approved successfully": "Replace request approved successfully",
     "Please select a product and enter quantity": "Please select a product and enter quantity",
+    "Session Expired": "Session expired",
+    "Your token has expired. Please log in again.":"Your token has expired. Please log in again.",
     "Session expired": "Session expired. Please login again.",
     "Failed to complete order": "Failed to complete order. Please try again.",
     "Info": "Info",
@@ -507,11 +511,14 @@
     "CropDetails": "Crop Details",
     "varietyName": "Variety Name",
     "VarietyPlaceholder": "Enter variety name",
+    "SubTotal": "Sub Total",
+    "ClearAndDelete":"Clear & Delete",
     "Quantity": "Quantity (Kg)",
     "FillDetails": "Fill Details",
     "Select": "Select Crop",
     "SelectCrop": "--Select Crop--",
     "SelectVariety": "--Select Variety--",
+     "Processing...": "Processing...",
     "SelectCropPlaceholder": "Select Crop",
     "GradeA": "Grade A",
     "GradeB": "Grade B",
@@ -571,7 +578,16 @@
     "Select Crop": "--Select Crop--",
     "Select Variety": "--Select Variety--",
     "UnitGrades": "Unit Grades",
-    "Done": "Done"
+    "Done": "Done",
+    "DeleteGradeConfirmation": "Are you sure you want to delete {{grade}} of {{varietyName}}?",
+    "DeleteVarietyConfirmation": "Are you sure you want to delete {{varietyName}} form data?",
+    "GradeA_Rs":"Grade A (Rs.)",
+    "GradeB_Rs":"Grade B (Rs.)",
+    "GradeC_Rs":"Grade C (Rs.)",
+    "GrandTotal_Rs":"Grand Total (Rs.)",
+    "Auto Fill":"--Auto Fill--",
+    "AddMore":"Add More",
+    "FinishCollection":"Finish Collection"
   },
   "GoodsReceivedNote": {
     "LNG": "en",
@@ -833,7 +849,7 @@
     "Drivers List": "Drivers List",
     "Officers / Drivers List": "Officers List ",
     "Drivers": "Drivers",
-    "Not Approved": "Not Approved yet",
+    "Not Approved": "Unapproved",
     "No officers found": "- No Officers Found -",
     "No drivers found": "- No Drivers Found -",
     "EMPID": "EMP ID :"
@@ -1585,6 +1601,8 @@
     "Pickup Order": "Pickup Order",
     "District": "District",
     "All Delivery Orders": "All Delivery Orders ({{count}})",
+    "Delivery Orders": "Delivery",
+    "Delivery": "Delivery",
     "Deselect All": "Deselect All",
     "Continue": "Continue ({{count}})",
     "Select a Row to Assign": "Select a Row to Assign",
@@ -1634,6 +1652,9 @@
     "QC Done By": "QC Done By",
     "Package": "Package",
     "ALaCarte": "A La Carte",
+    "Delivery": "Delivery",
+    "Delivery Orders": "Delivery",
+    "Pickup Orders": "Pickup Orders",
     "Close": "Close"
   },
   "Packing": {
@@ -1720,7 +1741,9 @@
     "Items to QC": "Items to QC ({{count}})",
     "Pass QC": "Pass QC",
     "End Shift Confirmation": "Are you sure you want to end the shift for {{pos}} in {{row}}?",
-    "End": "End"
+    "End": "End",
+    "Position already occupied today": "This position is already occupied by another officer today.",
+    "Selected position not found": "Selected packing position not found."
   },
   "QRHandling": {
     "QR Handling": "QR Handling",
@@ -1809,7 +1832,8 @@
     "Cancel": "Cancel",
     "Yes, Save": "Yes, Save",
     "Done": "Done",
-    "Failed to save signature": "Failed to save signature. Please try again."
+    "Failed to save signature": "Failed to save signature. Please try again.",
+    "Preparing signature pad":"Preparing signature pad..."
   },
   "PurchaseShortage": {
     "Assigned Products": "Assigned Products",
@@ -1942,6 +1966,13 @@
   },
   "ScaleWeightModal": {
     "RealTimeScaleWeight": "Real - Time Scale Weight",
+    "LiveScaleReading": "Live Scale Reading",
+    "GrossWeightOnPlatform": "Gross weight on platform",
+    "WeightBreakdown": "Weight Breakdown",
+    "Gross": "Gross",
+    "Tare": "Tare",
+    "MinusTare": "− Tare",
+    "NetTotal": "Net Total",
     "Continue": "Continue"
   },
   "SentProductsToday": {
@@ -1973,6 +2004,7 @@
   },
   "LoadingToVehicle": {
     "Variety": "Variety",
+    "Crop": "Crop",
     "CropName": "Crop Name",
     "VarietyLabel": "Variety",
     "SelectCrop": "--Select Crop--",
@@ -1981,12 +2013,19 @@
     "FinishLoading": "Finish Loading",
     "AddMoreItems": "Add More Items",
     "Set": "Set",
+    "ContainerType": "Container Type",
+    "SelectSize": "Select size",
     "EnterTotalCrates": "Enter Total Containers Here",
     "EnterTotalContainers": "Enter Total Containers Here",
     "ItemSavedTitle": "Item Added!",
     "ItemSavedMessage": "Variety {{num}} saved. You can now load the next variety.",
     "FinishLoadingTitle": "Loading Complete",
     "FinishLoadingMessage": "Vehicle {{vehicleNo}} loaded successfully.",
+    "DeleteConfirmation": "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+    "DeleteVarietyConfirmation": "Are you sure you want to delete previously added {{varietyName}}?",
+    "DeleteSetConfirmation": "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+    "Delete": "Delete",
+    "Cancel": "Cancel",
     "OK": "OK"
   },
   "LoadingToVehicleSummary": {
@@ -2123,5 +2162,19 @@
     "noData": "-No Data-",
     "noTransactions": "No transactions occurred between {{from}} and {{to}}",
     "generatedOn": "This report is generated on {{date}} at {{time}}"
+  },
+  "AppUpdate": {
+    "NewRelease": "NEW RELEASE",
+    "Current": "Current",
+    "Latest": "Latest",
+    "SoftTitle": "New Version Available!",
+    "SoftMessage": "A new version of CoDi-Net is ready with improved features, faster performance, and bug fixes.",
+    "ForceTitle": "Update Required",
+    "ForceMessage": "Your current app version is out of date and no longer supported. Please update to continue using CoDi-Net.",
+    "UpdateButton": "Update Now",
+    "UpdateNowForce": "Update Now to Continue",
+    "LaterButton": "Update Later",
+    "Feature1": "Enhanced delivery workflow & speed",
+    "Feature2": "Important bug fixes & system improvements"
   }
 }

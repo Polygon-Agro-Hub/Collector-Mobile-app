@@ -648,6 +648,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   inputWrapperStyle,
                 ]}
               >
+                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <TextInput
                   style={[
                     {
@@ -664,6 +665,7 @@ const Profile: React.FC<ProfileProps> = ({ navigation }) => {
                   )}
                   editable={false}
                 />
+                </ScrollView>
               </View>
             </View>
 

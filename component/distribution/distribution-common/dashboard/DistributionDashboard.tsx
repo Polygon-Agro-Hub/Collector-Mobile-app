@@ -28,7 +28,6 @@ import { ROLES } from "@/constants/user-roles";
 import socketService from "@/services/socket/socket.service";
 import * as Notifications from "expo-notifications";
 
-
 type DistributionDashboardNavigationProps = StackNavigationProp<
   RootStackParamList,
   "DistridutionaDashboard"
@@ -63,7 +62,8 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
   const [jobRole, setJobeRole] = useState<string | null>(null);
   const [centerId, setCenterId] = useState<string | null>(null);
   const [targetPercentage, setTargetPercentage] = useState<number | null>(null);
-  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] =
+    useState<number>(0);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,7 +83,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
 
       const response = await axios.get(
         `${environment.API_BASE_URL}api/distribution-manager/notifications`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (response.data.success && Array.isArray(response.data.data)) {
@@ -91,7 +91,9 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
         const storageKey = `${READ_NOTIFS_STORAGE_KEY}_${currentUserId || "default"}`;
         const stored = await AsyncStorage.getItem(storageKey);
         const readSet = new Set(stored ? JSON.parse(stored) : []);
-        const unread = notifs.filter((n: any) => !readSet.has(n.id) && n.isRead !== 1 && n.isRead !== true).length;
+        const unread = notifs.filter(
+          (n: any) => !readSet.has(n.id) && n.isRead !== 1 && n.isRead !== true,
+        ).length;
         setUnreadNotificationsCount(unread);
       }
     } catch (e) {
@@ -275,11 +277,12 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
       if (token) {
         const response = await axios.get(
           `${environment.API_BASE_URL}api/packing/active-assignment`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (response.data && response.data.success && response.data.data) {
           const assignment = response.data.data;
-          const type = assignment.type || assignment.pType || assignment.positionType;
+          const type =
+            assignment.type || assignment.pType || assignment.positionType;
           if (type === "NOR") {
             navigation.navigate("WelcomeToPacking" as any, {
               positionId: assignment.positionId,
@@ -524,9 +527,7 @@ const DistributionDashboard: React.FC<DistributionDashboardProps> = ({
               <View className="absolute bottom-3 left-4 right-4">
                 <Text
                   numberOfLines={2}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.75}
-                  style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
+                  style={[{ fontSize: 16 }]}
                   className="text-[#555464] font-semibold"
                 >
                   {item.title}

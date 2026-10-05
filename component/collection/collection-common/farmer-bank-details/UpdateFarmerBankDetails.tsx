@@ -128,37 +128,32 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     if (!netState.isConnected) return;
 
     try {
-      const apiUrl = "https://api.getshoutout.com/otpservice/send";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let otpMessage = "";
       let companyName = "";
 
     const currentLang = getCurrentLanguage(); 
 
 if (currentLang === "si") {
-  companyName = store.getState().auth.companyNameSinhala || "PolygonAgro";
+  companyName = store.getState().auth.companyNameSinhala || "Polygon";
   otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
 } else if (currentLang === "ta") {
-  companyName = store.getState().auth.companyNameTamil || "PolygonAgro";
+  companyName = store.getState().auth.companyNameTamil || "Polygon";
   otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
 } else {
-  companyName = store.getState().auth.companyNameEnglish || "PolygonAgro";
+  companyName = store.getState().auth.companyNameEnglish || "Polygon";
   otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
 }
 
-      const body = {
-        source: "PolygonAgro",
-        transport: "sms",
-        content: { sms: otpMessage },
-        destination: `${phoneNumber}`,
-      };
-
-      const response = await axios.post(apiUrl, body, { headers });
-      await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/farmer/send-otp`,
+        {
+          phoneNumber: `${phoneNumber}`,
+          message: otpMessage,
+        },
+      );
+      if (response.data?.referenceId) {
+        await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      }
 
       navigation.navigate("otpBankDetailsupdate", {
         phoneNumber,

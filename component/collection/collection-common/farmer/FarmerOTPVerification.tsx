@@ -6,6 +6,7 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
   Alert,
   Keyboard,
   BackHandler,
@@ -62,6 +63,8 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const pendingNavigation = useRef<(() => void) | null>(null);
+  const isVerifyingRef = useRef(false); // synchronous guard — prevents duplicate farmer registration
+  const [isRegistering, setIsRegistering] = useState(false); // UI loading state
 
   useEffect(() => {
     const selectedLanguage = t("Otpverification.LNG");
@@ -144,6 +147,11 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
       return;
     }
 
+    // Synchronous ref guard — prevents double-tap from creating duplicate farmer records
+    if (isVerifyingRef.current) return;
+    isVerifyingRef.current = true;
+    setIsRegistering(true);
+
     try {
       const refId = referenceId;
 
@@ -160,16 +168,9 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         PreferdLanguage,
       };
 
-      const url = "https://api.getshoutout.com/otpservice/verify";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       const response = await axios.post(
-        url,
+        `${environment.API_BASE_URL}api/farmer/verify-otp`,
         { code, referenceId: refId },
-        { headers },
       );
       const { statusCode, message } = response.data;
 
@@ -177,6 +178,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         case "1000":
           setIsVerified(true);
 
+          // isVerified guards against re-triggering registration if component re-renders
           const response1 = await axios.post(
             `${environment.API_BASE_URL}api/farmer/register-farmer`,
             data,
@@ -256,6 +258,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           { text: t("AlertModal.OK", "OK") },
         ]);
       }
+    } finally {
+      // Only release the lock if registration did NOT succeed
+      // (on success, component navigates away; lock keeps registration from re-firing)
+      if (!isVerified) {
+        isVerifyingRef.current = false;
+      }
+      setIsRegistering(false);
     }
   };
 
@@ -263,12 +272,6 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
     await AsyncStorage.removeItem("referenceId");
 
     try {
-      const apiUrl = "https://api.getshoutout.com/otpservice/send";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let otpMessage = "";
       let companyName = "";
 
@@ -296,14 +299,13 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
         otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
-      const body = {
-        source: "PolygonAgro",
-        transport: "sms",
-        content: { sms: otpMessage },
-        destination: `${phoneNumber}`,
-      };
-
-      const response = await axios.post(apiUrl, body, { headers });
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/farmer/send-otp`,
+        {
+          phoneNumber: `${phoneNumber}`,
+          message: otpMessage,
+        },
+      );
 
       if (response.data.referenceId) {
         await AsyncStorage.setItem("referenceId", response.data.referenceId);
@@ -496,7 +498,7 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
           <View className="w-full items-center" style={{ marginBottom: 8 }}>
             <TouchableOpacity
               className={`w-[281px] h-[50px] rounded-[20px] items-center justify-center mb-20 ${
-                !isOtpValid || isVerified ? "bg-[#9CA3AF]" : "bg-black"
+                !isOtpValid || isVerified || isRegistering ? "bg-[#9CA3AF]" : "bg-black"
               }`}
               style={{
                 shadowColor: "#000000",
@@ -506,12 +508,16 @@ const Otpverification: React.FC = ({ navigation, route }: any) => {
                 elevation: 4,
               }}
               onPress={handleVerify}
-              disabled={!isOtpValid || isVerified}
+              disabled={!isOtpValid || isVerified || isRegistering}
               activeOpacity={0.8}
             >
-              <Text className="text-white font-semibold text-[18px]">
-                {t("Otpverification.Verify")}
-              </Text>
+              {isRegistering ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text className="text-white font-semibold text-[18px]">
+                  {t("Otpverification.Verify")}
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>

@@ -32,6 +32,8 @@
     "Containers": "පෙට්ටි",
     "Set": "කාණ්ඩය",
     "Grade": "ශ්‍රේණිය",
+    "Transport": "ප්‍රවාහනය",
+    "Centre": "මධ්‍යස්ථානය",
     "Search Price": "මිල සෙවීම"
   },
   "Main": {
@@ -58,8 +60,8 @@
     "Search": "NIC මගින් සොයන්න",
     "LoadingTargetStatus": "ඉලක්කගත තත්ත්වය පූරණය වෙමින් පවතී...",
     "Collection": "එකතු කිරීම්",
-    "Transport": "ප්රවාහනය",
-    "ReadyToTransport": "ප්රවාහනය කිරීම්"
+    "Transport": "ප්‍රවාහනය",
+    "ReadyToTransport": "ප්‍රවාහනය කිරීම්"
   },
   "Error": {
     "error": "සමාවෙන්න",
@@ -152,7 +154,7 @@
     "Sharing is not available on this device.": "මෙම උපාංගෙන් බෙදාගැනීම සිදු කල නොහැක.",
     "File saved to app's directory:": "ගොනුව යෙදුමේ නාමාවලියට සුරකින ලදී:",
     "Failed to fetch crop names.": "බෝග නාම ලබා ගැනීමට අපොහොසත් විය.",
-    "Failed to fetch varieties.": "ප්රභේදය තෝරා ගැනීමට අපොහොසත් විය.",
+    "Failed to fetch varieties.": "ප්‍රභේදය තෝරා ගැනීමට අපොහොසත් විය.",
     "Please fill in all fields.": "කරැණාකර සියලු ක්ෂේත්‍ර පුරවන්න.",
     "No targets to save.": "සුරකීම සදහා ඉලක්ක නොමැත.",
     "Invalid date or time values provided.": "අවලංගු දිනයක් හෝ වේලාවක් සපයා ඇත.",
@@ -225,6 +227,8 @@
     "Please select at least one pending item": "කරුණාකර අවම වශයෙන් එක් අපරිපූර්ණ අයිතමයක් හෝ තෝරන්න.",
     "Replace request approved successfully": "ප්‍රතිස්ථාපන ඉල්ලීම සාර්ථකව අනුමත කරන ලදී",
     "Please select a product and enter quantity": "කරුණාකර නිෂ්පාදනයක් තෝරා එහි ප්‍රමාණය ඇතුළත් කරන්න.",
+    "Session Expired": "ඇතුල්වීම කල් ඉකුත් විය",
+    "Your token has expired. Please log in again.":"ඔබේ ටෝකනයේ වලංගු කාලය අවසන් වී ඇත. කරුණාකර නැවත පිවිසෙන්න.",
     "Session expired": "ඇතුල්වීම කල් ඉකුත් විය. කරුණාකර නැවත පුරනය වන්න.",
     "Failed to complete order": "ඇණවුම සම්පූර්ණ කිරීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
     "Info": "තොරතුරු",
@@ -454,9 +458,9 @@
     "Go": "ආපසු යන්න",
     "Cancel": "අවලංගු කරන්න",
     "Grade": "ශ්‍රේණිය",
-    "Request Price Update": "මිල සංශෝධන ඉල්ලන්න",
-    "Submit Request": "ඉල්ලීම ඉදිරිපත් කරන්න",
-    "Edit Price": "මිල සංස්කරණය කරන්න",
+    "Request Price Update": "මිල සංස්කරණය",
+    "Submit Request": "මිල සංස්කරණය",
+    "Edit Price": "මිල සංස්කරණය",
     "Update": "යාවත්කාලීන කරන්න",
     "AllowedRange": "අවසර ඇත රු.{{minPrice}} - රු.{{maxPrice}}",
     "Rs": "රු.",
@@ -495,7 +499,7 @@
     "ReportComplain": "පැමිණිල්ලක් වාර්තා කරන්න",
     "Download": "බාගත කරන්න",
     "Share": "බෙදාගන්න",
-    "Apply For Pension": "විශ්‍රාම වැටුප සඳහා අයදුම් කරන්න",
+    "Apply For Pension": "විශ්‍රාම වැටුප් අයදුම",
     "Checking pension status...": "විශ්‍රාම වැටුප් තත්වය පරීක්ෂා කරමින්...",
     "Authentication token not found": "සත්‍යාපන ටෝකනය හමු නොවීය.",
     "Authentication failed. Please login again.": "සත්‍යාපනය අසමත් විය. කරුණාකර නැවත පුරනය වන්න.",
@@ -509,6 +513,8 @@
     "CropName": "බෝගයේ නම",
     "Variety": "ප්‍රභේදය",
     "UnitGrades": "ශ්‍රේණි අනුව ඒකකයක මිල",
+    "SubTotal": "මුළු එකතුව",
+    "ClearAndDelete":"මකා දමා ඉවත් කරන්න",
     "Total": "එකතුව (රු.)",
     "Add": "අයිතම එකතු කරන්න",
     "Done": "තහවුරු කරන්න",
@@ -527,7 +533,16 @@
     "Are you sure you want to delete previously added": "කලින් එකතු කළ {{varietyName}} මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
     "Are you sure you want to delete grade": "කලින් එකතු කළ {{varietyName}} - ශ්‍රේණිය {{grade}} මැකීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
     "UnsavedChanges": "සුරැක නොමැති වෙනස්කම්",
-    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න."
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න.",
+    "DeleteGradeConfirmation": "{{varietyName}} හි {{grade}} මකා දැමීමට ඔබට විශ්වාසද?",
+    "DeleteVarietyConfirmation": "එක් කළ {{varietyName}} ශ්‍රේණිය මකා දැමීමට ඔබට විශ්වාසද?",
+     "GradeA_Rs": "A ශ්‍රේණිය (රු.)",
+    "GradeB_Rs": "B ශ්‍රේණිය (රු.)",
+    "GradeC_Rs": "C ශ්‍රේණිය (රු.)",
+    "GrandTotal_Rs": "මුළු එකතුව (රු.)",
+    "Auto Fill": "--ස්වයංක්‍රීයව පුරවන්න--",
+    "AddMore": "තවත් එකතු කරන්න",
+    "FinishCollection": "එකතු කිරීම අවසන් කරන්න"
   },
   "ReportPage": {
     "LNG": "si",
@@ -646,8 +661,8 @@
     "CenterTarget": "මධ්‍යස්ථාන ඉලක්කය",
     "MyCollection": "මගේ එකතුව",
     "Collection": "එකතු කිරීම්",
-    "Transport": "ප්රවාහනය",
-    "ReadyToTransport": "ප්රවාහනය කිරීම්"
+    "Transport": "ප්‍රවාහනය",
+    "ReadyToTransport": "ප්‍රවාහනය කිරීම්"
   },
   "AddOfficerBasicDetails": {
     "LNG": "si",
@@ -761,7 +776,7 @@
     "Drivers List": "රියදුරු ලැයිස්තුව",
     "Officers / Drivers List": "නිලධාරීන්ගේ ලැයිස්තුව",
     "Drivers": "රියදුරන්",
-    "Not Approved": "තවම අනුමත කර නැත",
+    "Not Approved": "අනුමත නොකළ",
     "No officers found": "- නිලධාරීන් කිසිවෙකු හමු නොවීය -",
     "No drivers found": "- රියදුරන් කිසිවෙකු හමු නොවීය -",
     "EMPID": "සේවක අංකය :"
@@ -800,7 +815,7 @@
     "From": "සිට",
     "Today": "අද",
     "Target Coverage": "ආවරණය කරන ලද ඉලක්කය",
-    "OpenTarget": "ඉලක්ක පුවරුව විවෘත කරන්න"
+    "OpenTarget": "කාර්ය පුවරුව"
   },
   "PassTargetBetweenOfficers": {
     "LNG": "si",
@@ -936,8 +951,8 @@
     "noData": "පැමිණිලි කිසිවක් හමු නොවීය.",
     "Complaints": "පැමිණිලි ඉතිහාසය",
     "Opened": "විවෘත කළ",
-    "Closed": "අවසන් කර ඇත",
-    "View": "ප්‍රතිචාරය බලන්න",
+    "Closed": "නිමයි",
+    "View": "පිළිතුර",
     "ThankYou": "ප්‍රතිචාරය ලැබෙන තෙක් රැදී සිටියාට ස්තූතියි!",
     "NoReply": "මෙම පැමිණිල්ලට තවමත් ප්‍රතිචාරයක් නොමැත.",
     "RefNo": "යොමු අංකය",
@@ -972,7 +987,7 @@
     "Received By": "ලබාගත් අය :",
     "Company Name": "සමාගමේ නම :",
     "Centre": "මධ්‍යස්ථානය:",
-    "Received Items": "ලැබුණු අයිතම :",
+    "Received Items": "ලැබුණු අයිතම",
     "Crop Name": "බෝගයේ නම",
     "Variety": "ප්‍රභේදය",
     "Grade": "ශ්‍රේණිය",
@@ -1049,7 +1064,7 @@
     "Pending": "අපරිපූර්ණ",
     "Opened": "විවෘත කළ",
     "Received Cash": "ලැබුණු මුදල්",
-    "Pickup Order Scan": "රැගෙන යාමේ ඇණවුම් ස්කෑන් කිරීම",
+    "Pickup Order Scan": "පිකප් ඇණවුම්",
     "Start Packing": "ඇසිරීම අරඹන්න",
     "Assign Groups": "කණ්ඩායම් පැවරීම",
     "Purchase Shortage": "හිඟ භෝග මිලදී ගැනීම",
@@ -1223,7 +1238,7 @@
   "ReceivedCashQrCode": {
     "Not Valid!": "වලංගු නොවේ!",
     "This Manager's ID is not approved or not valid.": "මෙම කළමනාකරුගේ හැඳුනුම්පත අනුමත කර නොමැත හෝ වලංගු නොවේ.",
-    "This DCM officer is not in the same centre.": "මෙම DCM නිලධාරියා එකම මධ්යස්ථානයේ නොමැත.",
+    "This DCM officer is not in the same centre.": "මෙම DCM නිලධාරියා එකම මධ්‍යස්ථානයේ නොමැත.",
     "cashHandoverSuccess": "රු. {{amount}} ක් {{officerCode}} වෙත සාර්ථකව භාර දී ඇත.",
     "Scan Timeout": "ස්කෑන් කාල සීමාව ඉකුත් විය",
     "Scan timeout message": "නියමිත කාල සීමාව තුළ QR කේතය හඳුනාගත නොහැකි විය. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
@@ -1507,12 +1522,14 @@
     "Orders": "ඇණවුම්",
     "OrderCountHeader": "{{type}} ඇණවුම් {{count}} ක්",
     "Loading orders...": "ඇණවුම් පූරණය වෙමින්...",
-    "All Orders": "සියලුම රැගෙන යාමේ ඇණවුම් ({{count}}) ක්",
+    "All Orders": "සියලුම ඇණවුම් ({{count}}) ක්",
     "All Pickup Orders": "සියලු රැගෙන යාමේ ඇණවුම් ({{count}})",
     "Pickup Orders": "රැගෙන යාමේ ඇණවුම්",
     "Pickup Order": "රැගෙන යාමේ ඇණවුම",
     "District": "දිස්ත්‍රික්කය",
     "All Delivery Orders": "සියලු බෙදාහැරීම් ඇණවුම් ({{count}})",
+    "Delivery Orders": "බෙදා හැරීමේ ඇණවුම්",
+    "Delivery": "බෙදා හැරීමේ ඇණවුම්",
     "Deselect All": "සියල්ල ඉවත් කරන්න",
     "Continue": "ඉදිරියට යන්න ({{count}})",
     "Select a Row to Assign": "පැවරීම සඳහා පේළියක් තෝරන්න",
@@ -1560,6 +1577,9 @@
     "QC Done By": "තත්ත්ව පරීක්ෂාව කළේ",
     "Package": "පැකේජය",
     "ALaCarte": "A La Carte",
+    "Delivery": "බෙදා හැරීමේ ඇණවුම්",
+    "Delivery Orders": "බෙදා හැරීමේ ඇණවුම්",
+    "Pickup Orders": "රැගෙන යාමේ ඇණවුම්",
     "Close": "වසා දමන්න"
   },
   "Packing": {
@@ -1644,7 +1664,9 @@
     "Items to QC": "තත්ත්ව පරීක්ෂාවට ඇති ද්‍රව්‍ය ({{count}})",
     "Pass QC": "තත්ත්ව පරීක්ෂාව සමත්",
     "End Shift Confirmation": "{{row}} හි {{pos}} සඳහා සේවා මුරය අවසන් කිරීමට ඔබට විශ්වාසද?",
-    "End": "අවසන් කරන්න"
+    "End": "අවසන් කරන්න",
+    "Position already occupied today": "මෙම ස්ථානය අද දින වෙනත් නිලධාරියෙකු විසින් දැනටමත් භාවිත කරමින් සිටී.",
+"Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය."
   },
   "QRHandling": {
     "QR Handling": "QR හැසිරවීම",
@@ -1733,7 +1755,8 @@
     "Cancel": "අවලංගු කරන්න",
     "Yes, Save": "ඔව්, සුරකින්න",
     "Done": "සම්පූර්ණයි",
-    "Failed to save signature": "අත්සන සුරැකීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න."
+    "Failed to save signature": "අත්සන සුරැකීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "Preparing signature pad":"අත්සන් තැබීමේ පුවරුව සූදානම් කරමින්..."
   },
   "PurchaseShortage": {
     "Assigned Products": "පවරන ලද නිෂ්පාදන",
@@ -1866,11 +1889,18 @@
   },
   "ScaleWeightModal": {
     "RealTimeScaleWeight": "තත්‍ය කාලීන තරාදි බර",
+    "LiveScaleReading": "සජීවී පරිමාණ කියවීම",
+    "GrossWeightOnPlatform": "වේදිකාවේ ඇති දළ බර",
+    "WeightBreakdown": "බර විස්තරය",
+    "Gross": "දළ",
+    "Tare": "ටෙයාර්",
+    "MinusTare": "− ටෙයාර්",
+    "NetTotal": "ශුද්ධ එකතුව",
     "Continue": "ඉදිරියට යන්න"
   },
   "SentProductsToday": {
     "Title": "අද යවන ලද තොග",
-    "NoLoadsToday": "අද තොග ප්රවාහනයන් කර නොමැත",
+    "NoLoadsToday": "අද තොග ප්‍රවාහනයන් කර නොමැත",
     "Crates": "පෙට්ටි",
     "Containers": "පෙට්ටි",
     "AddLoadTitle": "නව පැටවීමක් එක් කරන්න",
@@ -1890,27 +1920,36 @@
     "AlignDriverQR": "ස්කෑන් කිරීමට රියදුරු QR කේතය රාමුව තුළ තබන්න"
   },
   "SelectDistributionCentre": {
-    "Title": "මධ්යස්ථානය තෝරන්න",
-    "NoCentresFound": "- බෙදාහැරීමේ මධ්‍යස්ථාන හමු නොවීය -",
+    "Title": "බෙදාහැරීමේ මධ්‍යස්ථානය තෝරන්න",
+    "NoCentresFound": "- බෙදාහැරීමේ මධ්යස්ථාන හමු නොවීය -",
     "SelectAndContinue": "ඉදිරියට යන්න",
-    "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී"
+    "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී",
+    "Centre": "මධ්‍යස්ථානය"
   },
   "LoadingToVehicle": {
-    "Variety": "ප්රභේදය",
+    "Variety": "ප්‍රභේදය",
+    "Crop": "බෝගය",
     "CropName": "බෝගයේ නම",
-    "VarietyLabel": "ප්රභේදය",
+    "VarietyLabel": "ප්‍රභේදය",
     "SelectCrop": "--බෝගය තෝරන්න--",
-    "SelectVariety": "--ප්රභේදය තෝරන්න--",
+    "SelectVariety": "--ප්‍රභේදය තෝරන්න--",
     "Grade": "ශ්‍රේණිය",
     "FinishLoading": "අවසන් කරන්න",
     "AddMoreItems": "එකතු කරන්න",
     "Set": "කාණ්ඩය",
+    "ContainerType": "බහාලුම් වර්ගය",
+    "SelectSize": "ප්‍රමාණය තෝරන්න",
+    "EnterTotalContainers": "බහාලුම් ගණන",
     "EnterTotalCrates": "පෙට්ටි ගණන ඇතුළත් කරන්න",
-    "EnterTotalContainers": "පෙට්ටි ගණන ඇතුළත් කරන්න",
     "ItemSavedTitle": "ද්‍රව්‍යය එක් කරන ලදී!",
     "ItemSavedMessage": "ප්‍රභේදය {{num}} සුරැකිණි. ඔබට දැන් ඊළඟ ප්‍රභේදය පැටවිය හැක.",
     "FinishLoadingTitle": "පැටවීම සම්පූර්ණයි",
     "FinishLoadingMessage": "{{vehicleNo}} රථයට සාර්ථකව පටවන ලදී.",
+    "DeleteConfirmation": "එක් කරන ලද පහත අයිතමය ඉවත් කිරීමට ඔබට අවශ්‍ය බව සහතිකද?\n{{item}} - {{grade}} - {{set}}",
+    "DeleteVarietyConfirmation": "පෙර එක් කළ {{varietyName}} ඉවත් කිරීමට ඔබට අවශ්‍ය බව සහතිකද?",
+    "DeleteSetConfirmation": "එක් කරන ලද පහත අයිතමය ඉවත් කිරීමට ඔබට අවශ්‍ය බව සහතිකද?\n{{item}} - {{grade}} - {{set}}",
+    "Delete": "ඉවත් කරන්න",
+    "Cancel": "අවලංගු කරන්න",
     "OK": "හරි"
   },
   "LoadingToVehicleSummary": {
@@ -1930,7 +1969,7 @@
     "SaveFailed": "ප්‍රවාහන පැටවුම සුරැකීමට නොහැකි විය."
   },
   "LoadQR": {
-    "Title": "ජනනය කළ QR කේතය",
+    "Title": "QR කේතය",
     "ScanQRImmediately": "වහාම QR පරිලෝකනය කරන්න",
     "ShowQRToOfficer": "මෙම QR කේතය අදාළ නිලධාරියාට පෙන්වන්න.",
     "Notice": "පැටවුම් පැවරීමේ ප්‍රමාදයන් වළක්වා ගැනීමට කරුණාකර වහාම QR පරිලෝකනය කරන්න.",
@@ -2047,5 +2086,19 @@
     "noData": "-දත්ත නැත-",
     "noTransactions": "{{from}} සහ {{to}} අතර ගනුදෙනු සිදු වී නැත",
     "generatedOn": "මෙම වාර්තාව {{date}} දින {{time}} ට උත්පාදනය කරන ලදී"
+  },
+  "AppUpdate": {
+    "NewRelease": "නව නිකුතුව",
+    "Current": "වත්මන්",
+    "Latest": "නවතම",
+    "SoftTitle": "නව අනුවාදයක් ඇත!",
+    "SoftMessage": "වැඩිදියුණු කළ විශේෂාංග, වේගවත් කාර්යක්ෂමතාව සහ දෝෂ නිවැරදි කිරීම් සමඟ CoDi-Net හි නව අනුවාදයක් සූදානම්.",
+    "ForceTitle": "යාවත්කාලීන කිරීම අවශ්යයි",
+    "ForceMessage": "ඔබගේ වත්මන් යෙදුම් අනුවාදය කල් ඉකුත් වී ඇති අතර තවදුරටත් සහාය නොදක්වයි. කරුණාකර CoDi-Net දිගටම භාවිත කිරීමට යාවත්කාලීන කරන්න.",
+    "UpdateButton": "දැන් යාවත්කාලීන කරන්න",
+    "UpdateNowForce": "දිගටම භාවිත කිරීමට දැන් යාවත්කාලීන කරන්න",
+    "LaterButton": "පසුව යාවත්කාලීන කරන්න",
+    "Feature1": "වැඩිදියුණු කළ බෙදාහැරීමේ කාර්ය ප්රවාහය සහ වේගය",
+    "Feature2": "වැදගත් දෝෂ නිවැරදි කිරීම් සහ පද්ධති වැඩිදියුණු කිරීම්"
   }
 }

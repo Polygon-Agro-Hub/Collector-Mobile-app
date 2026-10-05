@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
@@ -48,9 +49,18 @@ interface LoadingToVehicleProps {
   route: LoadingToVehicleRouteProps;
 }
 
+export interface ContainerTypeItem {
+  id: number;
+  labelName: string;
+  weight: number;
+}
+
 interface CrateSet {
   id: string;
   setNumber: number;
+  containerTypeId?: number;
+  containerTypeName?: string;
+  containerTypeWeight?: number;
   crates: string;
   weight: number | null;
   isExpanded: boolean;
@@ -67,6 +77,9 @@ interface SavedSet {
   id: string;
   gradeKey: "A" | "B" | "C";
   setNumber: number;
+  containerTypeId?: number;
+  containerTypeName?: string;
+  containerTypeWeight?: number;
   crates: string;
   weight: number;
 }
@@ -89,7 +102,7 @@ interface OptionItem {
   bgColor?: string;
 }
 
-const createInitialGrades = (): GradeData[] => [
+const createInitialGrades = (defaultContainer?: ContainerTypeItem | null): GradeData[] => [
   {
     gradeKey: "A",
     title: "Grade A",
@@ -98,6 +111,9 @@ const createInitialGrades = (): GradeData[] => [
       {
         id: `set-a-${Date.now()}-1`,
         setNumber: 1,
+        containerTypeId: defaultContainer?.id,
+        containerTypeName: defaultContainer?.labelName,
+        containerTypeWeight: defaultContainer?.weight,
         crates: "",
         weight: null,
         isExpanded: true,
@@ -112,6 +128,9 @@ const createInitialGrades = (): GradeData[] => [
       {
         id: `set-b-${Date.now()}-1`,
         setNumber: 1,
+        containerTypeId: defaultContainer?.id,
+        containerTypeName: defaultContainer?.labelName,
+        containerTypeWeight: defaultContainer?.weight,
         crates: "",
         weight: null,
         isExpanded: true,
@@ -126,6 +145,9 @@ const createInitialGrades = (): GradeData[] => [
       {
         id: `set-c-${Date.now()}-1`,
         setNumber: 1,
+        containerTypeId: defaultContainer?.id,
+        containerTypeName: defaultContainer?.labelName,
+        containerTypeWeight: defaultContainer?.weight,
         crates: "",
         weight: null,
         isExpanded: true,
@@ -183,6 +205,12 @@ export default function LoadingToVehicle({
       : createInitialGrades()
   );
 
+  // Container types state from collection_officer.creates (backend only)
+  const [containerTypes, setContainerTypes] = useState<ContainerTypeItem[]>([]);
+  const [containerSectionWidth, setContainerSectionWidth] = useState<number>(
+    Dimensions.get("window").width - 80
+  );
+
   // Synchronize saved varieties with Redux store
   useEffect(() => {
     store.dispatch({
@@ -203,6 +231,49 @@ export default function LoadingToVehicle({
       },
     });
   }, [varietyIndex, selectedCrop, selectedVariety, grades]);
+
+  // Fetch container types from API (collection_officer.creates)
+  const fetchContainerTypes = useCallback(async () => {
+    try {
+      const authToken = store.getState().auth.token;
+      const response = await axios.get(
+        `${environment.API_BASE_URL}api/transport/container-types`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+      if (
+        response.data.success &&
+        Array.isArray(response.data.data)
+      ) {
+        const types: ContainerTypeItem[] = response.data.data;
+        setContainerTypes(types);
+
+        if (types.length > 0) {
+          // Populate initial container type on any existing grades that lack containerTypeId
+          setGrades((prev) =>
+            prev.map((g) => ({
+              ...g,
+              sets: g.sets.map((s) => ({
+                ...s,
+                containerTypeId: s.containerTypeId || types[0].id,
+                containerTypeName: s.containerTypeName || types[0].labelName,
+                containerTypeWeight: s.containerTypeWeight ?? types[0].weight,
+              })),
+            }))
+          );
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch container types from backend:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchContainerTypes();
+  }, [fetchContainerTypes]);
 
   // Helper for localized naming
   const formatCropOption = useCallback(
@@ -253,6 +324,18 @@ export default function LoadingToVehicle({
     id: string;
     gradeKey: "A" | "B" | "C";
     gradeTitle: string;
+    setNumber: number;
+  } | null>(null);
+
+  // Delete Variety Confirmation Modal State (from carousel)
+  const [varietyToDelete, setVarietyToDelete] = useState<SavedVariety | null>(null);
+
+  // Delete Saved Set Confirmation Modal State (from carousel)
+  const [savedSetToDelete, setSavedSetToDelete] = useState<{
+    varietyId: string;
+    varietyLabel: string;
+    id: string;
+    gradeKey: string;
     setNumber: number;
   } | null>(null);
 
@@ -346,51 +429,82 @@ export default function LoadingToVehicle({
 
   // Toggle grade checkbox / row
   const handleToggleGrade = (gradeKey: "A" | "B" | "C") => {
-    setGrades((prev) =>
-      prev.map((g) => {
+    setGrades((prev) => {
+      const targetGrade = prev.find((g) => g.gradeKey === gradeKey);
+      const willBeSelected = !targetGrade?.isSelected;
+
+      return prev.map((g) => {
         if (g.gradeKey === gradeKey) {
-          const newSelected = !g.isSelected;
+          const defaultC = containerTypes.length > 0 ? containerTypes[0] : undefined;
+          const newSets =
+            g.sets.length === 0
+              ? [
+                  {
+                    id: `set-${gradeKey.toLowerCase()}-1`,
+                    setNumber: 1,
+                    containerTypeId: defaultC?.id,
+                    containerTypeName: defaultC?.labelName,
+                    containerTypeWeight: defaultC?.weight,
+                    crates: "",
+                    weight: null,
+                    isExpanded: true,
+                  },
+                ]
+              : g.sets;
+
           return {
             ...g,
-            isSelected: newSelected,
-            sets:
-              g.sets.length === 0
-                ? [
-                    {
-                      id: `set-${gradeKey.toLowerCase()}-1`,
-                      setNumber: 1,
-                      crates: "",
-                      weight: null,
-                      isExpanded: true,
-                    },
-                  ]
-                : g.sets,
+            isSelected: willBeSelected,
+            sets: willBeSelected
+              ? newSets.map((s, idx) => ({ ...s, isExpanded: idx === 0 }))
+              : g.sets.map((s) => ({ ...s, isExpanded: false })),
           };
+        } else {
+          return willBeSelected
+            ? {
+                ...g,
+                sets: g.sets.map((s) => ({ ...s, isExpanded: false })),
+              }
+            : g;
         }
-        return g;
-      })
-    );
+      });
+    });
   };
 
-  // Add new set to a grade
+  // Add new set to a grade (collapses all other sets across all grades)
   const handleAddSet = (gradeKey: "A" | "B" | "C") => {
     setGrades((prev) =>
       prev.map((g) => {
         if (g.gradeKey === gradeKey) {
           const nextSetNumber = g.sets.length + 1;
+          const defaultC = containerTypes.length > 0 ? containerTypes[0] : undefined;
           const newSet: CrateSet = {
             id: `set-${gradeKey.toLowerCase()}-${Date.now()}`,
             setNumber: nextSetNumber,
+            containerTypeId: defaultC?.id,
+            containerTypeName: defaultC?.labelName,
+            containerTypeWeight: defaultC?.weight,
             crates: "",
             weight: null,
             isExpanded: true,
           };
+          const collapsedPrevSets = g.sets.map((s) => ({
+            ...s,
+            isExpanded: false,
+          }));
           return {
             ...g,
-            sets: [...g.sets, newSet],
+            sets: [...collapsedPrevSets, newSet],
+          };
+        } else {
+          return {
+            ...g,
+            sets: g.sets.map((s) => ({
+              ...s,
+              isExpanded: false,
+            })),
           };
         }
-        return g;
       })
     );
   };
@@ -416,15 +530,26 @@ export default function LoadingToVehicle({
     );
   };
 
-  // Toggle set expansion
-  const handleToggleSetExpand = (gradeKey: "A" | "B" | "C", setId: string) => {
+  // Select container type for a specific set
+  const handleSelectContainerType = (
+    gradeKey: "A" | "B" | "C",
+    setId: string,
+    cType: ContainerTypeItem
+  ) => {
     setGrades((prev) =>
       prev.map((g) => {
         if (g.gradeKey === gradeKey) {
           return {
             ...g,
             sets: g.sets.map((s) =>
-              s.id === setId ? { ...s, isExpanded: !s.isExpanded } : s
+              s.id === setId
+                ? {
+                    ...s,
+                    containerTypeId: cType.id,
+                    containerTypeName: cType.labelName,
+                    containerTypeWeight: cType.weight,
+                  }
+                : s
             ),
           };
         }
@@ -433,19 +558,38 @@ export default function LoadingToVehicle({
     );
   };
 
-  // Update crates value for a set
+  // Toggle set expansion (only 1 box open at a time across all grades)
+  const handleToggleSetExpand = (gradeKey: "A" | "B" | "C", setId: string) => {
+    setGrades((prev) => {
+      const currentGrade = prev.find((g) => g.gradeKey === gradeKey);
+      const currentSet = currentGrade?.sets.find((s) => s.id === setId);
+      const isExpanding = !currentSet?.isExpanded;
+
+      return prev.map((g) => ({
+        ...g,
+        sets: g.sets.map((s) => ({
+          ...s,
+          isExpanded:
+            g.gradeKey === gradeKey && s.id === setId ? isExpanding : false,
+        })),
+      }));
+    });
+  };
+
+  // Update crates value for a set (prevent typing 0 and remove leading zeros)
   const handleCratesChange = (
     gradeKey: "A" | "B" | "C",
     setId: string,
     crates: string
   ) => {
+    const sanitized = crates.replace(/[^0-9]/g, "").replace(/^0+/, "");
     setGrades((prev) =>
       prev.map((g) => {
         if (g.gradeKey === gradeKey) {
           return {
             ...g,
             sets: g.sets.map((s) =>
-              s.id === setId ? { ...s, crates } : s
+              s.id === setId ? { ...s, crates: sanitized } : s
             ),
           };
         }
@@ -476,22 +620,63 @@ export default function LoadingToVehicle({
     setScaleTarget(null);
   };
 
-  // Check if current variety has completed sets (crates > 0 and weight > 0)
-  const hasCompletedSets = grades.some(
-    (g) =>
-      g.isSelected &&
+  // Selected grades
+  const selectedGrades = grades.filter((g) => g.isSelected);
+  const hasSelectedGrades = selectedGrades.length > 0;
+
+  // Check if every set in every selected grade has valid positive crates and weight
+  const allSelectedSetsComplete =
+    hasSelectedGrades &&
+    selectedGrades.every(
+      (g) =>
+        g.sets.length > 0 &&
+        g.sets.every((s) => {
+          const cratesNum = parseInt(s.crates, 10);
+          return (
+            !isNaN(cratesNum) &&
+            cratesNum > 0 &&
+            s.weight !== null &&
+            s.weight > 0
+          );
+        })
+    );
+
+  // Check if any selected grade has empty or incomplete input fields in any of its sets
+  const hasEmptyFieldsInSets =
+    hasSelectedGrades &&
+    selectedGrades.some((g) =>
       g.sets.some((s) => {
         const cratesNum = parseInt(s.crates, 10);
-        return !isNaN(cratesNum) && cratesNum > 0 && s.weight !== null && s.weight > 0;
+        return (
+          isNaN(cratesNum) ||
+          cratesNum <= 0 ||
+          s.weight === null ||
+          s.weight <= 0
+        );
       })
-  );
+    );
 
-  // Can finish loading if either saved items exist OR current variety is completed
-  const canFinishLoading = savedVarieties.length > 0 || hasCompletedSets;
+  // Has any active selection started in the current form?
+  const hasActiveFormStarted =
+    selectedCrop !== null || selectedVariety !== null || hasSelectedGrades;
+
+  // Add more items is enabled only when a crop and variety are selected, all sets in selected grades are complete, and there are NO empty fields
+  const canAddMoreItems =
+    selectedCrop !== null &&
+    selectedVariety !== null &&
+    allSelectedSetsComplete &&
+    !hasEmptyFieldsInSets;
+
+  // Finish loading:
+  // - If an active form is started: must have all fields filled without any empty sets (i.e. canAddMoreItems is true)
+  // - If NO active form is started: enabled if savedVarieties.length > 0
+  const canFinishLoading =
+    (!hasActiveFormStarted && savedVarieties.length > 0) ||
+    canAddMoreItems;
 
   // Handle Add More Items (save and reset for next variety)
   const handleAddMoreItems = () => {
-    if (!hasCompletedSets) return;
+    if (!canAddMoreItems) return;
 
     const completedSets: SavedSet[] = [];
     grades.forEach((g) => {
@@ -503,6 +688,9 @@ export default function LoadingToVehicle({
               id: s.id,
               gradeKey: g.gradeKey,
               setNumber: s.setNumber,
+              containerTypeId: s.containerTypeId,
+              containerTypeName: s.containerTypeName,
+              containerTypeWeight: s.containerTypeWeight,
               crates: s.crates,
               weight: s.weight,
             });
@@ -539,7 +727,7 @@ export default function LoadingToVehicle({
     setVarietyIndex((prev) => prev + 1);
     setSelectedCrop(null);
     setSelectedVariety(null);
-    setGrades(createInitialGrades());
+    setGrades(createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null));
   };
 
   // Delete an entire saved variety from carousel
@@ -622,6 +810,9 @@ export default function LoadingToVehicle({
           set: s.setNumber,
           crates: cratesNum,
           weightKg: weightVal,
+          crateWeight: s.containerTypeWeight ?? null,
+          containerTypeId: s.containerTypeId,
+          containerTypeName: s.containerTypeName,
         };
       });
 
@@ -661,6 +852,9 @@ export default function LoadingToVehicle({
               set: s.setNumber,
               crates: cratesNum,
               weightKg: weightVal,
+              crateWeight: s.containerTypeWeight ?? null,
+              containerTypeId: s.containerTypeId,
+              containerTypeName: s.containerTypeName,
             });
           }
         });
@@ -832,9 +1026,7 @@ export default function LoadingToVehicle({
                       </Text>
                       <TouchableOpacity
                         onPress={() =>
-                          handleDeleteSavedVariety(
-                            savedVarieties[carouselIndex].id
-                          )
+                          setVarietyToDelete(savedVarieties[carouselIndex])
                         }
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
@@ -866,10 +1058,13 @@ export default function LoadingToVehicle({
                           {/* Delete Set */}
                           <TouchableOpacity
                             onPress={() =>
-                              handleDeleteSavedSet(
-                                savedVarieties[carouselIndex].id,
-                                set.id
-                              )
+                              setSavedSetToDelete({
+                                varietyId: savedVarieties[carouselIndex].id,
+                                varietyLabel: savedVarieties[carouselIndex].varietyLabel,
+                                id: set.id,
+                                gradeKey: set.gradeKey,
+                                setNumber: set.setNumber,
+                              })
                             }
                             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                           >
@@ -1094,6 +1289,111 @@ export default function LoadingToVehicle({
                                     </TouchableOpacity>
                                   </View>
                                 )}
+
+                                {/* Container Type Section (only shown when container types data exists) */}
+                                {containerTypes.length > 0 && (
+                                <View
+                                  className="mb-4"
+                                  onLayout={(e) => {
+                                    const w = e.nativeEvent.layout.width;
+                                    if (w > 0) setContainerSectionWidth(w);
+                                  }}
+                                >
+                                  {/* Header Row */}
+                                  <View className="flex-row items-center justify-between mb-2 px-1">
+                                    <View className="flex-row items-center gap-1.5">
+                                      <MaterialCommunityIcons
+                                        name="view-column-outline"
+                                        size={18}
+                                        color="#475569"
+                                      />
+                                      <Text className="text-sm font-semibold text-[#334155]">
+                                        {t("LoadingToVehicle.ContainerType", "Container Type")}
+                                      </Text>
+                                    </View>
+                                    <Text className="text-xs text-[#64748B]">
+                                      {t("LoadingToVehicle.SelectSize", "Select size")}
+                                    </Text>
+                                  </View>
+
+                                  {/* Pill Selector Box (max 3 visible, horizontally scrollable if > 3) */}
+                                  <View
+                                    style={{
+                                      backgroundColor: "#EEF2F6",
+                                      borderRadius: 9999,
+                                      padding: 4,
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    <ScrollView
+                                      horizontal
+                                      showsHorizontalScrollIndicator={false}
+                                      style={{ borderRadius: 9999, overflow: "hidden" }}
+                                      contentContainerStyle={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                      }}
+                                    >
+                                      {containerTypes.map((cType) => {
+                                        const isSelected =
+                                          set.containerTypeId === cType.id ||
+                                          (!set.containerTypeId && cType.id === containerTypes[0]?.id);
+
+                                        // Width of section minus 8px padding divided by 3 so max 3 are visible at once
+                                        const itemWidth = Math.max(
+                                          80,
+                                          Math.floor((containerSectionWidth - 8) / 3)
+                                        );
+
+                                        return (
+                                          <TouchableOpacity
+                                            key={cType.id}
+                                            activeOpacity={0.75}
+                                            onPress={() =>
+                                              handleSelectContainerType(grade.gradeKey, set.id, cType)
+                                            }
+                                            style={{
+                                              width: itemWidth,
+                                              height: 52,
+                                              borderRadius: 9999,
+                                              backgroundColor: isSelected ? "#FFFFFF" : "transparent",
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                              shadowColor: isSelected ? "#000000" : "transparent",
+                                              shadowOffset: { width: 0, height: 1 },
+                                              shadowOpacity: isSelected ? 0.08 : 0,
+                                              shadowRadius: 2,
+                                              elevation: isSelected ? 2 : 0,
+                                            }}
+                                          >
+                                            <Text
+                                              style={{
+                                                fontSize: 14,
+                                                fontWeight: "700",
+                                                color: "#0F172A",
+                                              }}
+                                              numberOfLines={1}
+                                            >
+                                              {cType.labelName}
+                                            </Text>
+                                            <Text
+                                              style={{
+                                                fontSize: 11,
+                                                color: "#64748B",
+                                                marginTop: 2,
+                                              }}
+                                              numberOfLines={1}
+                                            >
+                                              {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                                            </Text>
+                                          </TouchableOpacity>
+                                        );
+                                      })}
+                                    </ScrollView>
+                                  </View>
+                                </View>
+                              )}
+
                                 {/* Crates Count Input (50px height, rounded-full, center text, placeholder clears on focus) */}
                                 <TextInput
                                   placeholder={
@@ -1114,99 +1414,124 @@ export default function LoadingToVehicle({
                                   onBlur={() => setFocusedSetId(null)}
                                   keyboardType="numeric"
                                   textAlign="center"
-                                  className="bg-[#F4F6F9] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
+                                  className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
                                 />
 
-                                {/* Weight Row */}
-                                <View className="flex-row items-center gap-3">
-                                  {/* Weight Display Box (50px height, rounded-full) */}
-                                  <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    onPress={() =>
-                                      setScaleTarget({
-                                        gradeKey: grade.gradeKey,
-                                        setId: set.id,
-                                      })
-                                    }
-                                    className="flex-1 bg-[#F4F6F9] rounded-full h-[50px] items-center justify-center"
-                                  >
-                                    <Text
-                                      className={`font-bold text-base ${
-                                        set.weight !== null
-                                          ? "text-[#0F172A]"
-                                          : "text-[#94A3B8]"
-                                      }`}
-                                    >
-                                      {set.weight !== null
-                                        ? `${set.weight.toFixed(2)} ${t("Common.kg", "kg")}`
-                                        : t("Common.kg", "kg")}
-                                    </Text>
-                                  </TouchableOpacity>
+                                 {/* Weight Row */}
+                                {(() => {
+                                  const cratesNum = parseInt(set.crates, 10);
+                                  const isCratesValid = !isNaN(cratesNum) && cratesNum > 0;
 
-                                  {/* Scale / Action Button (50px x 50px, rounded-full) */}
-                                  <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    onPress={() =>
-                                      setScaleTarget({
-                                        gradeKey: grade.gradeKey,
-                                        setId: set.id,
-                                      })
-                                    }
-                                    className={`w-[50px] h-[50px] rounded-full items-center justify-center ${
-                                      set.weight !== null
-                                        ? "bg-[#000000]"
-                                        : set.crates.trim() !== ""
-                                        ? "bg-[#000000]"
-                                        : "bg-[#ACB5BE]"
-                                    }`}
-                                  >
-                                    {set.weight !== null ? (
-                                      <AntDesign
-                                        name="reload"
-                                        size={20}
-                                        color="#FFFFFF"
-                                      />
-                                    ) : (
-                                      <MaterialIcons
-                                        name="arrow-forward"
-                                        size={22}
-                                        color="#FFFFFF"
-                                      />
-                                    )}
-                                  </TouchableOpacity>
-                                </View>
+                                  return (
+                                    <View className="flex-row items-center gap-3">
+                                      {/* Weight Display Box (50px height, rounded-full) */}
+                                      <TouchableOpacity
+                                        disabled={!isCratesValid}
+                                        activeOpacity={0.8}
+                                        onPress={() =>
+                                          setScaleTarget({
+                                            gradeKey: grade.gradeKey,
+                                            setId: set.id,
+                                          })
+                                        }
+                                        className="flex-1 bg-[#EEF2F6] rounded-full h-[50px] items-center justify-center"
+                                      >
+                                        <Text
+                                          className={`font-bold text-base ${
+                                            set.weight !== null
+                                              ? "text-[#0F172A]"
+                                              : "text-[#94A3B8]"
+                                          }`}
+                                        >
+                                          {set.weight !== null
+                                            ? `${set.weight.toFixed(2)} ${t("Common.kg", "kg")}`
+                                            : t("Common.kg", "kg")}
+                                        </Text>
+                                      </TouchableOpacity>
+
+                                      {/* Scale / Action Button (50px x 50px, rounded-full) */}
+                                      <TouchableOpacity
+                                        disabled={!isCratesValid}
+                                        activeOpacity={0.8}
+                                        onPress={() =>
+                                          setScaleTarget({
+                                            gradeKey: grade.gradeKey,
+                                            setId: set.id,
+                                          })
+                                        }
+                                        className={`w-[50px] h-[50px] rounded-full items-center justify-center ${
+                                          set.weight !== null && isCratesValid
+                                            ? "bg-[#000000]"
+                                            : isCratesValid
+                                            ? "bg-[#000000]"
+                                            : "bg-[#ACB5BE]"
+                                        }`}
+                                      >
+                                        {set.weight !== null ? (
+                                          <AntDesign
+                                            name="reload"
+                                            size={20}
+                                            color="#FFFFFF"
+                                          />
+                                        ) : (
+                                          <MaterialIcons
+                                            name="arrow-forward"
+                                            size={22}
+                                            color="#FFFFFF"
+                                          />
+                                        )}
+                                      </TouchableOpacity>
+                                    </View>
+                                  );
+                                })()}
                               </View>
                             )}
                           </View>
 
                           {/* Circular Add Set Button (+) vertically centered on bottom border line */}
-                          {showAddButton && (
-                            <View
-                              style={{
-                                position: "absolute",
-                                bottom: -22,
-                                left: 0,
-                                right: 0,
-                                alignItems: "center",
-                                zIndex: 20,
-                              }}
-                            >
-                              <TouchableOpacity
-                                activeOpacity={0.8}
-                                onPress={() => handleAddSet(grade.gradeKey)}
-                                className="w-11 h-11 rounded-full bg-[#000000] items-center justify-center shadow-lg"
+                          {showAddButton && (() => {
+                            const lastSetCratesNum = parseInt(set.crates, 10);
+                            const isLastSetCompleted =
+                              !isNaN(lastSetCratesNum) &&
+                              lastSetCratesNum > 0 &&
+                              set.weight !== null &&
+                              set.weight > 0;
+
+                            return (
+                              <View
                                 style={{
-                                  shadowColor: "#000000",
-                                  shadowOffset: { width: 0, height: 2 },
-                                  shadowOpacity: 0.25,
-                                  shadowRadius: 4,
-                                  elevation: 5,
+                                  position: "absolute",
+                                  bottom: -22,
+                                  left: 0,
+                                  right: 0,
+                                  alignItems: "center",
+                                  zIndex: 20,
                                 }}
                               >
-                                <Ionicons name="add" size={28} color="#FFFFFF" />
-                              </TouchableOpacity>
-                            </View>
-                          )}
+                                <TouchableOpacity
+                                  disabled={!isLastSetCompleted}
+                                  activeOpacity={0.8}
+                                  onPress={isLastSetCompleted ? () => handleAddSet(grade.gradeKey) : undefined}
+                                  className={`w-11 h-11 rounded-full items-center justify-center shadow-lg ${
+                                    isLastSetCompleted ? "bg-[#000000]" : "bg-[#ACB5BE]"
+                                  }`}
+                                  style={
+                                    isLastSetCompleted
+                                      ? {
+                                          shadowColor: "#000000",
+                                          shadowOffset: { width: 0, height: 2 },
+                                          shadowOpacity: 0.25,
+                                          shadowRadius: 4,
+                                          elevation: 5,
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  <Ionicons name="add" size={28} color="#FFFFFF" />
+                                </TouchableOpacity>
+                              </View>
+                            );
+                          })()}
                         </View>
                       );
                     })}
@@ -1256,14 +1581,14 @@ export default function LoadingToVehicle({
 
           {/* Add More Items Button */}
           <TouchableOpacity
-            disabled={!hasCompletedSets}
+            disabled={!canAddMoreItems}
             onPress={handleAddMoreItems}
             activeOpacity={0.8}
             className={`w-full h-[50px] rounded-full items-center justify-center ${
-              hasCompletedSets ? "bg-[#980775]" : "bg-[#ACB5BE]"
+              canAddMoreItems ? "bg-[#980775]" : "bg-[#ACB5BE]"
             }`}
             style={
-              hasCompletedSets
+              canAddMoreItems
                 ? {
                     shadowColor: "#000000",
                     shadowOffset: { width: 0, height: 4 },
@@ -1328,6 +1653,20 @@ export default function LoadingToVehicle({
         onClose={() => setScaleTarget(null)}
         onContinue={handleScaleContinue}
         scaleName={scaleStatus.scale?.name || "Budry MFD - 300"}
+        tareWeight={
+          (() => {
+            if (!scaleTarget) return 0;
+            const targetGrade = grades.find(
+              (g) => g.gradeKey === scaleTarget.gradeKey
+            );
+            const targetSet = targetGrade?.sets.find(
+              (s) => s.id === scaleTarget.setId
+            );
+            const crateCount = parseInt(targetSet?.crates || "0", 10) || 0;
+            const crateWeight = targetSet?.containerTypeWeight ?? 0;
+            return crateCount * crateWeight;
+          })()
+        }
         initialWeight={
           (() => {
             if (!scaleTarget) return 0;
@@ -1342,14 +1681,21 @@ export default function LoadingToVehicle({
         }
       />
 
-      {/* Delete Set Warning Confirmation Modal */}
+      {/* Delete Active Set Warning Confirmation Modal */}
       <WarningConfirmation
         visible={setToDelete !== null}
-        message={`Are you sure you want to delete added\n${
-          selectedVariety?.label ||
-          selectedCrop?.label ||
-          t("LoadingToVehicle.Crop", "Crop")
-        } - ${setToDelete?.gradeTitle} - Set ${setToDelete?.setNumber} ?`}
+        message={t(
+          "LoadingToVehicle.DeleteConfirmation",
+          "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+          {
+            item:
+              selectedVariety?.label ||
+              selectedCrop?.label ||
+              t("LoadingToVehicle.Crop", "Crop"),
+            grade: `${t("LoadingToVehicle.Grade", "Grade")} ${setToDelete?.gradeKey}`,
+            set: `${t("LoadingToVehicle.Set", "Set")} ${setToDelete?.setNumber}`,
+          }
+        )}
         onConfirm={() => {
           if (setToDelete) {
             handleDeleteSet(setToDelete.gradeKey, setToDelete.id);
@@ -1357,8 +1703,57 @@ export default function LoadingToVehicle({
           }
         }}
         onCancel={() => setSetToDelete(null)}
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t("LoadingToVehicle.Delete", "Delete")}
+        cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+      />
+
+      {/* Delete Saved Variety Warning Confirmation Modal */}
+      <WarningConfirmation
+        visible={varietyToDelete !== null}
+        message={t(
+          "LoadingToVehicle.DeleteVarietyConfirmation",
+          "Are you sure you want to delete previously added {{varietyName}}?",
+          {
+            varietyName: varietyToDelete?.varietyLabel || "",
+          }
+        )}
+        onConfirm={() => {
+          if (varietyToDelete) {
+            handleDeleteSavedVariety(varietyToDelete.id);
+            setVarietyToDelete(null);
+          }
+        }}
+        onCancel={() => setVarietyToDelete(null)}
+        confirmText={t("LoadingToVehicle.Delete", "Delete")}
+        cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+      />
+
+      {/* Delete Saved Set Warning Confirmation Modal */}
+      <WarningConfirmation
+        visible={savedSetToDelete !== null}
+        message={t(
+          "LoadingToVehicle.DeleteSetConfirmation",
+          "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+          {
+            item: savedSetToDelete?.varietyLabel || "",
+            grade: `${t("LoadingToVehicle.Grade", "Grade")} ${savedSetToDelete?.gradeKey}`,
+            set: `${t("LoadingToVehicle.Set", "Set")} ${savedSetToDelete?.setNumber}`,
+          }
+        )}
+        onConfirm={() => {
+          if (savedSetToDelete) {
+            handleDeleteSavedSet(
+              savedSetToDelete.varietyId,
+              savedSetToDelete.id
+            );
+            setSavedSetToDelete(null);
+          }
+        }}
+        onCancel={() => setSavedSetToDelete(null)}
+        confirmText={t("LoadingToVehicle.Delete", "Delete")}
+        cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
       />
     </KeyboardAvoidingView>

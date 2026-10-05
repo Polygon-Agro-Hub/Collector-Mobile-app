@@ -32,6 +32,7 @@ import * as Notifications from "expo-notifications";
 import socketService from "@/services/socket/socket.service";
 import pushNotificationService from "@/services/notification/pushNotification.service";
 import { ROLES } from "@/constants/user-roles";
+import { AppUpdateProvider } from "@/features/app-update";
 import {
   isBleedScreen,
   getScreenBackgroundColor,
@@ -110,7 +111,8 @@ function AppContent() {
       const isRejected =
         accStatus === "rejected" ||
         accStatus === "banned" ||
-        accStatus === "not approved";
+        accStatus === "not approved" ||
+        accStatus === "not_approved";
       const isForceLogout =
         data?.type === "force_logout" ||
         data?.code === "FORCE_LOGOUT" ||
@@ -276,7 +278,9 @@ export default function App() {
     <SafeAreaProvider>
       <Provider store={store}>
         <LanguageProvider>
-          <AppContent />
+          <AppUpdateProvider>
+            <AppContent />
+          </AppUpdateProvider>
         </LanguageProvider>
       </Provider>
     </SafeAreaProvider>

@@ -82,7 +82,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
   }, [fetchLoadDetails]);
 
   const handleGoToHome = () => {
-    navigation.navigate("CollectionDashboard");
+    (navigation as any).navigate("Main", { screen: "CollectionDashboard" });
   };
 
   return (
