@@ -264,23 +264,24 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
 
       cameFromOTP.current = true;
 
-      navigation.navigate("Main" as any, {
-        screen: "OTPE",
-        params: {
-          firstName,
-          lastName,
-          NICnumber,
-          phoneNumber: `${callingCode}${phoneNumber}`,
-          district,
-          accNumber,
-          accHolderName,
-          bankName,
-          branchName,
-          PreferdLanguage,
-        },
+      navigation.navigate("OTPE" as any, {
+        firstName,
+        lastName,
+        NICnumber,
+        phoneNumber: `${callingCode}${phoneNumber}`,
+        district,
+        accNumber,
+        accHolderName,
+        bankName,
+        branchName,
+        PreferdLanguage,
       });
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      console.error(
+        "Error sending OTP in UnregisteredFarmerForm:",
+        error?.response?.data || error?.message || error,
+      );
       Alert.alert(t("Error.error"), t("Error.otpSendFailed"), [
         { text: t("AlertModal.OK", "OK") },
       ]);
