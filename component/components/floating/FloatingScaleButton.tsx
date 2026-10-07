@@ -8,17 +8,22 @@ import {
   Dimensions,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
+import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
+import { isQuickAccessScaleEnabled, subscribeQuickAccessScale } from "@/utils/scale/scale-storage";
 import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
 import store from "@/services/reducxStore";
 
+const STORAGE_KEY_X = "@scale_button_pos_x";
 const STORAGE_KEY_Y = "@scale_button_pos_y";
-const BUTTON_HEIGHT = 42;
+const BUTTON_HEIGHT = 46;
+const BUTTON_WIDTH = 96;
 const MIN_Y = 60;
+const MIN_X = 10;
 
 interface FloatingScaleButtonProps {
   currentRoute?: string;
@@ -28,21 +33,54 @@ interface FloatingScaleButtonProps {
 const HIDDEN_ROUTES = ["Splash", "Login", "Lanuage", "BannedScreen", "Logout"];
 
 export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ currentRoute }) => {
-  const { t } = useTranslation();
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
+  const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!store.getState().auth.token);
+  const [isQuickAccessEnabled, setIsQuickAccessEnabled] = useState<boolean>(true);
 
-  const windowHeight = Dimensions.get("window").height;
+  const windowDimensions = Dimensions.get("window");
+  const windowWidth = windowDimensions.width;
+  const windowHeight = windowDimensions.height;
+
+  // Max X is 50% of the screen width minus the button width
+  const maxX = Math.max(MIN_X, Math.round(windowWidth * 0.5) - BUTTON_WIDTH);
   const maxY = windowHeight - BUTTON_HEIGHT - 90;
 
-  // Initial position in upper-middle of left side
+  // Initial position in upper-middle left area (padded from edge)
+  const defaultX = 14;
   const defaultY = Math.round(windowHeight * 0.35);
+
+  const panX = useRef(new Animated.Value(defaultX)).current;
   const panY = useRef(new Animated.Value(defaultY)).current;
+  const currentXRef = useRef(defaultX);
   const currentYRef = useRef(defaultY);
+
+  // Pulse glow animation
+  const glowAnim = useRef(new Animated.Value(0.7)).current;
 
   // Track dragging state to prevent opening modal on drag release
   const isDraggingRef = useRef(false);
+
+  // Glow breathing animation loop
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0.5,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [glowAnim]);
 
   // Watch scale status changes
   useEffect(() => {
@@ -50,6 +88,32 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
       setScaleStatus(status);
     });
     return () => unsubscribe();
+  }, []);
+
+  // Watch NetInfo for Wi-Fi status
+  useEffect(() => {
+    const checkWifi = (state: any) => {
+      // A Wi-Fi scale communicates over local Wi-Fi LAN.
+      // Therefore, Wi-Fi is considered active ONLY if the active network interface is 'wifi',
+      // or if state.isWifiEnabled is explicitly true.
+      // If the user turns off Wi-Fi (e.g. falls back to cellular or has no connection),
+      // isWifi is false -> triggers the red (#E91233) button state.
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
+    };
+
+    NetInfo.fetch().then(checkWifi);
+    const unsubscribeNet = NetInfo.addEventListener(checkWifi);
+
+    // Also poll every 3 seconds so if OS-level toggle doesn't trigger an event immediately, it updates promptly
+    const interval = setInterval(() => {
+      NetInfo.fetch().then(checkWifi);
+    }, 3000);
+
+    return () => {
+      unsubscribeNet();
+      clearInterval(interval);
+    };
   }, []);
 
   // Watch auth state from Redux store
@@ -61,55 +125,94 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
     return () => unsubscribe();
   }, []);
 
-  // Load saved Y position on mount
+  // Watch quick access scale preference (toggle from SideMenu)
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY_Y)
-      .then((saved) => {
-        if (saved !== null) {
-          const parsed = parseFloat(saved);
-          if (!isNaN(parsed) && parsed >= MIN_Y && parsed <= maxY) {
-            currentYRef.current = parsed;
-            panY.setValue(parsed);
+    isQuickAccessScaleEnabled().then((enabled) => {
+      setIsQuickAccessEnabled(enabled);
+    });
+    const unsubscribe = subscribeQuickAccessScale((enabled) => {
+      setIsQuickAccessEnabled(enabled);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Load saved X & Y position on mount
+  useEffect(() => {
+    Promise.all([
+      AsyncStorage.getItem(STORAGE_KEY_X),
+      AsyncStorage.getItem(STORAGE_KEY_Y),
+    ])
+      .then(([savedX, savedY]) => {
+        if (savedX !== null) {
+          const parsedX = parseFloat(savedX);
+          if (!isNaN(parsedX) && parsedX >= MIN_X && parsedX <= maxX) {
+            currentXRef.current = parsedX;
+            panX.setValue(parsedX);
+          }
+        }
+        if (savedY !== null) {
+          const parsedY = parseFloat(savedY);
+          if (!isNaN(parsedY) && parsedY >= MIN_Y && parsedY <= maxY) {
+            currentYRef.current = parsedY;
+            panY.setValue(parsedY);
           }
         }
       })
       .catch(() => {});
-  }, [maxY, panY]);
+  }, [maxX, maxY, panX, panY]);
 
-  // Keep currentYRef in sync with Animated.Value
+  // Keep position refs in sync with Animated.Values
   useEffect(() => {
-    const listenerId = panY.addListener(({ value }) => {
+    const listenerX = panX.addListener(({ value }) => {
+      currentXRef.current = value;
+    });
+    const listenerY = panY.addListener(({ value }) => {
       currentYRef.current = value;
     });
-    return () => panY.removeListener(listenerId);
-  }, [panY]);
+    return () => {
+      panX.removeListener(listenerX);
+      panY.removeListener(listenerY);
+    };
+  }, [panX, panY]);
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, gestureState) => {
-        // Only capture drag if vertical movement exceeds 6px
-        return Math.abs(gestureState.dy) > 6;
+        // Capture drag if movement in any direction exceeds 4px
+        return Math.abs(gestureState.dx) > 4 || Math.abs(gestureState.dy) > 4;
       },
+      onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: () => {
         isDraggingRef.current = true;
+        panX.setOffset(currentXRef.current);
         panY.setOffset(currentYRef.current);
+        panX.setValue(0);
         panY.setValue(0);
       },
       onPanResponderMove: (_, gestureState) => {
-        const target = currentYRef.current + gestureState.dy;
-        // Clamp bounds within screen height
-        if (target >= MIN_Y && target <= maxY) {
-          panY.setValue(gestureState.dy);
-        }
+        // Clamp smoothly to valid bounds so the finger can continue dragging without getting stuck
+        const clampedTargetX = Math.max(MIN_X, Math.min(maxX, currentXRef.current + gestureState.dx));
+        const clampedTargetY = Math.max(MIN_Y, Math.min(maxY, currentYRef.current + gestureState.dy));
+
+        panX.setValue(clampedTargetX - currentXRef.current);
+        panY.setValue(clampedTargetY - currentYRef.current);
       },
       onPanResponderRelease: (_, gestureState) => {
+        const finalX = Math.max(MIN_X, Math.min(maxX, currentXRef.current + gestureState.dx));
+        const finalY = Math.max(MIN_Y, Math.min(maxY, currentYRef.current + gestureState.dy));
+
+        panX.flattenOffset();
         panY.flattenOffset();
-        const finalY = Math.max(MIN_Y, Math.min(maxY, currentYRef.current));
+
+        currentXRef.current = finalX;
         currentYRef.current = finalY;
+
+        panX.setValue(finalX);
         panY.setValue(finalY);
 
         // Save position to AsyncStorage
+        AsyncStorage.setItem(STORAGE_KEY_X, finalX.toString()).catch(() => {});
         AsyncStorage.setItem(STORAGE_KEY_Y, finalY.toString()).catch(() => {});
 
         // Reset dragging flag after a short delay so onPress is ignored if dragged
@@ -117,8 +220,19 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
           isDraggingRef.current = false;
         }, 150);
       },
-      onPanResponderTerminate: () => {
+      onPanResponderTerminate: (_, gestureState) => {
+        const finalX = Math.max(MIN_X, Math.min(maxX, currentXRef.current + gestureState.dx));
+        const finalY = Math.max(MIN_Y, Math.min(maxY, currentYRef.current + gestureState.dy));
+
+        panX.flattenOffset();
         panY.flattenOffset();
+
+        currentXRef.current = finalX;
+        currentYRef.current = finalY;
+
+        panX.setValue(finalX);
+        panY.setValue(finalY);
+
         setTimeout(() => {
           isDraggingRef.current = false;
         }, 150);
@@ -126,15 +240,64 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
     })
   ).current;
 
-  // Hide on auth/splash screens or if not logged in
-  if (!isLoggedIn || (currentRoute && HIDDEN_ROUTES.includes(currentRoute))) {
+  // Hide on auth/splash screens, if not logged in, or if Quick Access toggle is disabled
+  if (!isLoggedIn || !isQuickAccessEnabled || (currentRoute && HIDDEN_ROUTES.includes(currentRoute))) {
     return null;
   }
 
   const isConnected = !!scaleStatus?.connected;
+  // If wifi is off -> red state
+  const isWifiOff = !isWifiEnabled;
+
+  // Determine state colors
+  // 1. Connected -> #FAE432 (Yellow)
+  // 2. Wi-Fi off -> #E91233 (Red)
+  // 3. Not connected (Wi-Fi ON) -> #1266FD (Blue)
+  let backgroundColor = "#1266FD";
+  let glowColor = "#1266FD";
+  let circleBgColor = "#FFFFFF";
+  let wifiIconColor = "#1266FD";
+  let rightIconColor = "#FFFFFF";
+  let dividerColor = "rgba(255, 255, 255, 0.75)";
+
+  if (isConnected) {
+    backgroundColor = "#FAE432";
+    glowColor = "#FAE432";
+    circleBgColor = "#000000";
+    wifiIconColor = "#FFFFFF";
+    rightIconColor = "#000000";
+    dividerColor = "#000000";
+  } else if (isWifiOff) {
+    backgroundColor = "#E91233";
+    glowColor = "#E91233";
+    circleBgColor = "#FFFFFF";
+    wifiIconColor = "#E91233";
+    rightIconColor = "#FFFFFF";
+    dividerColor = "rgba(255, 255, 255, 0.85)";
+  } else {
+    // Not connected, Wi-Fi is ON
+    backgroundColor = "#1266FD";
+    glowColor = "#1266FD";
+    circleBgColor = "#FFFFFF";
+    wifiIconColor = "#1266FD";
+    rightIconColor = "#FFFFFF";
+    dividerColor = "rgba(255, 255, 255, 0.85)";
+  }
 
   const handlePress = () => {
     if (isDraggingRef.current) return;
+
+    if (isWifiOff) {
+      // Trigger global AlertModal popup with error type
+      Alert.alert(
+        "Wi-Fi is not enabled!",
+        "Please enable the Wi-Fi to connect with the Scale.",
+        [{ text: "OK" }],
+        { type: "error", autoClose: false, showOkButton: true } as any
+      );
+      return;
+    }
+
     setIsModalVisible(true);
   };
 
@@ -144,49 +307,70 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
         style={[
           styles.container,
           {
-            transform: [{ translateY: panY }],
+            transform: [{ translateX: panX }, { translateY: panY }],
           },
         ]}
         {...panResponder.panHandlers}
       >
         <TouchableOpacity
-          activeOpacity={0.85}
+          activeOpacity={0.88}
           onPress={handlePress}
-          style={[
-            styles.button,
-            isConnected ? styles.connectedButton : styles.disconnectedButton,
-          ]}
+          style={styles.touchable}
         >
-          {/* Status Indicator Dot */}
-          <View
+          {/* Glowing Aura Outer Effect */}
+          <Animated.View
             style={[
-              styles.dot,
-              isConnected ? styles.connectedDot : styles.disconnectedDot,
+              styles.glowAura,
+              {
+                backgroundColor: glowColor,
+                opacity: glowAnim.interpolate({
+                  inputRange: [0.5, 1],
+                  outputRange: [0.35, 0.75],
+                }),
+                shadowColor: glowColor,
+              },
             ]}
           />
 
-          {/* Scale/Wifi Icon */}
-          <MaterialCommunityIcons
-            name={isConnected ? "scale" : "wifi"}
-            size={16}
-            color="#FFFFFF"
-            style={styles.icon}
-          />
+          {/* Main Free-Floating Pill Capsule Button */}
+          <View style={[styles.capsule, { backgroundColor }]}>
+            {/* Left Circular Badge with Wi-Fi Icon */}
+            <View style={[styles.wifiCircle, { backgroundColor: circleBgColor }]}>
+              <MaterialCommunityIcons
+                name="wifi"
+                size={21}
+                color={wifiIconColor}
+              />
+            </View>
 
-          {/* Button Text */}
-          <Text style={styles.text} numberOfLines={1}>
-            {isConnected
-              ? t("ScaleSelectModal.ScaleConnected", "Scale Connected")
-              : t("ScaleSelectModal.ConnectScale", "Connect Scale")}
-          </Text>
+            {/* Vertical Divider Line */}
+            <View style={[styles.divider, { backgroundColor: dividerColor }]} />
 
-          {/* Drag Handle indicator */}
-          <MaterialCommunityIcons
-            name="drag-vertical"
-            size={14}
-            color="rgba(255, 255, 255, 0.65)"
-            style={styles.dragHandle}
-          />
+            {/* Right Status Icon Section */}
+            <View style={styles.rightSection}>
+              {isConnected ? (
+                // Connected: Bold Checkmark
+                <Feather
+                  name="check"
+                  size={24}
+                  color={rightIconColor}
+                  style={styles.iconStroke}
+                />
+              ) : isWifiOff ? (
+                // Wi-Fi Off: Exclamation Warning in Circle
+                <View style={styles.exclamationCircle}>
+                  <Text style={styles.exclamationText}>!</Text>
+                </View>
+              ) : (
+                // Disconnected: Arrow Right
+                <MaterialCommunityIcons
+                  name="arrow-right"
+                  size={26}
+                  color={rightIconColor}
+                />
+              )}
+            </View>
+          </View>
         </TouchableOpacity>
       </Animated.View>
 
@@ -205,55 +389,84 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     zIndex: 9999,
-    elevation: 10,
+    elevation: 12,
   },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: BUTTON_HEIGHT,
-    paddingLeft: 8,
-    paddingRight: 10,
-    borderTopRightRadius: 21,
-    borderBottomRightRadius: 21,
-    shadowColor: "#000",
-    shadowOffset: { width: 2, height: 3 },
-    shadowOpacity: 0.28,
-    shadowRadius: 4,
+  touchable: {
+    padding: 6,
+  },
+  glowAura: {
+    position: "absolute",
+    left: 2,
+    top: 2,
+    width: BUTTON_WIDTH + 8,
+    height: BUTTON_HEIGHT + 8,
+    borderRadius: (BUTTON_HEIGHT + 8) / 2,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.95,
+    shadowRadius: 16,
     ...Platform.select({
       android: {
-        elevation: 8,
+        elevation: 14,
       },
     }),
   },
-  disconnectedButton: {
-    backgroundColor: "#1266FD",
+  capsule: {
+    width: BUTTON_WIDTH,
+    height: BUTTON_HEIGHT,
+    borderRadius: BUTTON_HEIGHT / 2, // Full pill shape (both sides rounded)
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingLeft: 6,
+    paddingRight: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    ...Platform.select({
+      android: {
+        elevation: 10,
+      },
+    }),
   },
-  connectedButton: {
-    backgroundColor: "#10B981", // Emerald green when connected
+  wifiCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
   },
-  dot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    marginRight: 6,
+  divider: {
+    width: 2.2,
+    height: 28,
+    borderRadius: 1.1,
+    marginHorizontal: 4,
   },
-  disconnectedDot: {
-    backgroundColor: "#FACC15", // Warm yellow dot
+  rightSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  connectedDot: {
+  iconStroke: {
+    fontWeight: "bold",
+  },
+  exclamationCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  icon: {
-    marginRight: 6,
-  },
-  text: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: -0.2,
-    maxWidth: 110,
-  },
-  dragHandle: {
-    marginLeft: 4,
+  exclamationText: {
+    color: "#E91233",
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: -2,
+    textAlign: "center",
   },
 });

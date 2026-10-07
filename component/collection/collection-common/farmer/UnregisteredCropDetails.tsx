@@ -336,15 +336,20 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   useEffect(() => {
     const checkWifi = (state: any) => {
-      const isWifi =
-        state.isWifiEnabled ??
-        (state.type === "wifi" && Boolean(state.isConnected));
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
       setIsWifiOff(!isWifi);
     };
 
     NetInfo.fetch().then(checkWifi);
     const unsubNet = NetInfo.addEventListener(checkWifi);
-    return () => unsubNet();
+    const interval = setInterval(() => {
+      NetInfo.fetch().then(checkWifi);
+    }, 3000);
+
+    return () => {
+      unsubNet();
+      clearInterval(interval);
+    };
   }, []);
 
   const [images, setImages] = useState<{
@@ -388,9 +393,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       const timer = setTimeout(() => setResetImage(false), 100);
 
       NetInfo.fetch().then((state) => {
-        const isWifi =
-          state.isWifiEnabled ??
-          (state.type === "wifi" && Boolean(state.isConnected));
+        const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
         setIsWifiOff(!isWifi);
       });
       setScaleStatus(wifiScaleService.getStatus());
@@ -1378,19 +1381,26 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
             {/* State 1: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */}
             {
               isWifiOff ? (
+                /* State 1: Mobile Wi-Fi Off - #E91233 background, white text/icon */
                 <TouchableOpacity
                   activeOpacity={0.88}
-                  onPress={() => setIsScaleConfigModalVisible(true)}
+                  onPress={() => {
+                    Alert.alert(
+                      "Wi-Fi is not enabled!",
+                      "Please enable the Wi-Fi to connect with the Scale.",
+                      [{ text: "OK" }],
+                      { type: "error", autoClose: false, showOkButton: true } as any
+                    );
+                  }}
                   style={{
                     marginTop: 8,
                     marginBottom: 10,
-                    backgroundColor: "#FDF0F1",
+                    backgroundColor: "#E91233",
                     borderRadius: 28,
                     paddingVertical: 10,
                     paddingHorizontal: 14,
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 12,
                   }}
                 >
                   <View
@@ -1401,6 +1411,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       backgroundColor: "#FFFFFF",
                       alignItems: "center",
                       justifyContent: "center",
+                      marginRight: 12,
                     }}
                   >
                     <MaterialCommunityIcons
@@ -1414,7 +1425,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       style={{
                         fontSize: 16,
                         fontWeight: "bold",
-                        color: "#E91233",
+                        color: "#FFFFFF",
                         letterSpacing: -0.2,
                       }}
                     >
@@ -1427,10 +1438,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                     <Text
                       style={{
                         fontSize: 12,
-                        color: "#0F172A",
+                        color: "#FFFFFF",
                         fontWeight: "500",
                         marginTop: 1,
                         lineHeight: 16,
+                        opacity: 0.9,
                       }}
                     >
                       {selectedLanguage === "si"
@@ -1440,6 +1452,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                           : "Please turn on Wi-Fi on your phone to connect to the scale."}
                     </Text>
                   </View>
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={26}
+                    color="#FFFFFF"
+                  />
                 </TouchableOpacity>
               ) : !scaleStatus.connected ? (
                 /* State 2: WiFi ON but scale not connected — show blue connect card */
@@ -1497,7 +1514,70 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                     color="#FFFFFF"
                   />
                 </TouchableOpacity>
-              ) : null /* State 3: Scale connected — card hidden */
+              ) : scaleStatus.connected && scaleStatus.scale ? (
+                /* State 3: Scale Connected - #FAE432 background, black text/icon */
+                <TouchableOpacity
+                  activeOpacity={0.88}
+                  onPress={() => setIsScaleConfigModalVisible(true)}
+                  style={{
+                    marginTop: 8,
+                    marginBottom: 10,
+                    backgroundColor: "#FAE432",
+                    borderRadius: 28,
+                    paddingVertical: 10,
+                    paddingHorizontal: 14,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      backgroundColor: "#000000",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="wifi"
+                      size={24}
+                      color="#FFFFFF"
+                    />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 17,
+                        fontWeight: "bold",
+                        color: "#000000",
+                        letterSpacing: -0.3,
+                      }}
+                    >
+                      {t("ScaleSelectModal.ScaleConnected", "Scale Connected")}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "500",
+                        color: "#000000",
+                        marginTop: 1,
+                      }}
+                    >
+                      {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
+                    </Text>
+                  </View>
+
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={26}
+                    color="#000000"
+                  />
+                </TouchableOpacity>
+              ) : null
             }
 
             {/* ── Added-crops carousel ── */}

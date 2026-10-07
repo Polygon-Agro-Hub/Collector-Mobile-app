@@ -79,12 +79,21 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
     });
-    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-      setIsWifiEnabled(state.isConnected !== false && state.type !== "none");
-    });
+    const checkWifi = (state: any) => {
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
+    };
+
+    NetInfo.fetch().then(checkWifi);
+    const unsubscribeNetInfo = NetInfo.addEventListener(checkWifi);
+    const interval = setInterval(() => {
+      NetInfo.fetch().then(checkWifi);
+    }, 3000);
+
     return () => {
       unsubscribe();
       unsubscribeNetInfo();
+      clearInterval(interval);
     };
   }, []);
 
@@ -298,19 +307,25 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   const renderScaleSection = () => {
     if (!isWifiEnabled) {
       return (
-        /* State 3: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */
+        /* State 3: Mobile Wi-Fi Off - #E91233 background, white text/icon */
         <TouchableOpacity
           activeOpacity={0.88}
-          onPress={() => setIsScaleModalVisible(true)}
+          onPress={() => {
+            Alert.alert(
+              "Wi-Fi is not enabled!",
+              "Please enable the Wi-Fi to connect with the Scale.",
+              [{ text: "OK" }],
+              { type: "error", autoClose: false, showOkButton: true } as any
+            );
+          }}
           style={{
             marginTop: 10,
-            backgroundColor: "#FDF0F1",
+            backgroundColor: "#E91233",
             borderRadius: 28,
             paddingVertical: 10,
             paddingHorizontal: 14,
             flexDirection: "row",
             alignItems: "center",
-            gap: 12,
           }}
         >
           <View
@@ -321,6 +336,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
               backgroundColor: "#FFFFFF",
               alignItems: "center",
               justifyContent: "center",
+              marginRight: 12,
             }}
           >
             <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
@@ -330,7 +346,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
               style={{
                 fontSize: 16,
                 fontWeight: "bold",
-                color: "#E91233",
+                color: "#FFFFFF",
                 letterSpacing: -0.2,
               }}
             >
@@ -339,15 +355,17 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
             <Text
               style={{
                 fontSize: 12,
-                color: "#0F172A",
+                color: "#FFFFFF",
                 fontWeight: "500",
                 marginTop: 1,
                 lineHeight: 16,
+                opacity: 0.9,
               }}
             >
               {t("ScaleSelectModal.WifiOffMessage")}
             </Text>
           </View>
+          <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
         </TouchableOpacity>
       );
     }
