@@ -397,7 +397,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                   name="arrow-drop-down"
                   size={24}
                   color="#9CA3AF"
-                  style={{ alignSelf: "center" }}
+                  style={{ alignSelf: "center", flexShrink: 0 }}
                 />
               </TouchableOpacity>
             </View>
@@ -449,7 +449,7 @@ const SearchPriceScreen: React.FC<SearchPriceScreenProps> = ({
                     name="arrow-drop-down"
                     size={24}
                     color="#9CA3AF"
-                    style={{ alignSelf: "center" }}
+                    style={{ alignSelf: "center", flexShrink: 0 }}
                   />
                 </TouchableOpacity>
               )}

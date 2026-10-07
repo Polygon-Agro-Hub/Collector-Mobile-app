@@ -223,7 +223,11 @@ export default function WeighGrade({
 
     if (!cleanText) {
       setSets((prev) =>
-        prev.map((s) => (s.id === setId ? { ...s, crates: "" } : s))
+        prev.map((s) =>
+          s.id === setId
+            ? { ...s, crates: "", weight: s.crates !== "" ? null : s.weight }
+            : s
+        )
       );
       return;
     }
@@ -231,7 +235,11 @@ export default function WeighGrade({
     let num = parseInt(cleanText, 10);
     if (isNaN(num) || num <= 0) {
       setSets((prev) =>
-        prev.map((s) => (s.id === setId ? { ...s, crates: "" } : s))
+        prev.map((s) =>
+          s.id === setId
+            ? { ...s, crates: "", weight: s.crates !== "" ? null : s.weight }
+            : s
+        )
       );
       return;
     }
@@ -249,7 +257,17 @@ export default function WeighGrade({
     }
 
     setSets((prev) =>
-      prev.map((s) => (s.id === setId ? { ...s, crates: String(num) } : s))
+      prev.map((s) => {
+        if (s.id === setId) {
+          const newCrates = String(num);
+          return {
+            ...s,
+            crates: newCrates,
+            weight: s.crates !== newCrates ? null : s.weight,
+          };
+        }
+        return s;
+      })
     );
   };
 

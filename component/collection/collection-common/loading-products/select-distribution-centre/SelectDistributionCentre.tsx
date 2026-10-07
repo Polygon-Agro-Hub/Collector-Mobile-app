@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
@@ -17,8 +18,7 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import axios from "axios";
 import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
-
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 
 type SelectDistributionCentreNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -52,6 +52,28 @@ export default function SelectDistributionCentre({
   const [centres, setCentres] = useState<DistributionCentreItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCentreId, setSelectedCentreId] = useState<string | null>(null);
+
+  const handleBack = () => {
+    navigation.navigate("ScanDriverQR");
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("ScanDriverQR");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [navigation]),
+  );
 
   const fetchCentres = useCallback(async () => {
     try {
@@ -125,6 +147,7 @@ export default function SelectDistributionCentre({
       <CustomHeader
         title={t("SelectDistributionCentre.Title", "Select Distribution Centre")}
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       <View className="flex-1">

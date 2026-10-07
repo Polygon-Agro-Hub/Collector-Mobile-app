@@ -5,6 +5,7 @@ import {
   Animated,
   ActivityIndicator,
   StyleSheet,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -48,6 +49,10 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
   const [modalMessage, setModalMessage] = useState<string | React.ReactElement>("");
   const [modalType, setModalType] = useState<"error" | "success">("error");
 
+  const handleBack = () => {
+    navigation.navigate("SentProductsToday");
+  };
+
   // Holds the verified driver payload until navigation happens on modal close
   const verifiedDriverRef = useRef<{
     driverId: number;
@@ -83,6 +88,16 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
         startTimeoutTimer();
       }
 
+      const onBackPress = () => {
+        navigation.navigate("SentProductsToday");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
       return () => {
         isFocusedRef.current = false;
 
@@ -90,8 +105,10 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           clearTimeout(timerRef.current);
           timerRef.current = null;
         }
+
+        subscription.remove();
       };
-    }, [permission?.granted]),
+    }, [permission?.granted, navigation]),
   );
 
   useEffect(() => {
@@ -127,11 +144,14 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
 
     timerRef.current = setTimeout(() => {
       if (!scanned && !loading && isFocusedRef.current) {
-        setModalTitle(t("qrcode.ScanTimeout", "Scan Timeout"));
+        setModalTitle(t("ScanDriverQR.ScanTimeout", t("qrcode.ScanTimeout", "Scan Timeout")));
         setModalMessage(
           t(
-            "qrcode.ScanTimeoutMessage",
-            "The QR code is not identified. Please check and try again.",
+            "ScanDriverQR.ScanTimeoutMessage",
+            t(
+              "qrcode.ScanTimeoutMessage",
+              "The QR code could not be detected within the time limit. Please check and try again.",
+            ),
           ),
         );
         setShowRescanButton(true);
@@ -308,7 +328,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       console.error("Error verifying driver QR:", err);
       setModalTitle(t("ScanDriverQR.Error", t("qrcode.Error", "Error!")));
       setModalMessage(
-        t("qrcode.VerifyFailed", "Something went wrong. Please try again."),
+        t("ScanDriverQR.VerifyFailed", t("qrcode.VerifyFailed", "Something went wrong. Please try again.")),
       );
       setShowRescanButton(true);
       setModalType("error");
@@ -390,7 +410,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           <ActivityIndicator size="large" color={PRIMARY_OUTLINE_COLOR} />
         </View>
         <Text className="text-white text-lg mt-4">
-          {t("qrcode.Loading camera", "කැමරාව පූරණය වෙමින්...")}
+          {t("ScanDriverQR.LoadingCamera", t("qrcode.Loading camera", "Loading camera..."))}
         </Text>
       </SafeAreaView>
     );
@@ -401,7 +421,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       <CameraAccess
         navigation={navigation as any}
         onPermissionGranted={requestPermission}
-        onClose={() => navigation.goBack()}
+        onClose={handleBack}
       />
     );
   }
@@ -419,7 +439,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           <View className="bg-black/80 p-6 rounded-xl items-center">
             <ActivityIndicator size="large" color={PRIMARY_OUTLINE_COLOR} />
             <Text className="text-white text-lg font-semibold mt-4">
-              {t("qrcode.IdentifyingDriver", "Identifying Driver...")}
+              {t("ScanDriverQR.IdentifyingDriver", t("qrcode.IdentifyingDriver", "Identifying Driver..."))}
             </Text>
           </View>
         </View>
@@ -428,10 +448,13 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       {/* Timeout Modal */}
       <AlertModal
         visible={showTimeoutModal}
-        title={t("qrcode.ScanTimeout", "Scan Timeout")}
+        title={t("ScanDriverQR.ScanTimeout", t("qrcode.ScanTimeout", "Scan Timeout"))}
         message={t(
-          "qrcode.ScanTimeoutMessage",
-          "The QR code could not be detected within the time limit. Please check and try again.",
+          "ScanDriverQR.ScanTimeoutMessage",
+          t(
+            "qrcode.ScanTimeoutMessage",
+            "The QR code could not be detected within the time limit. Please check and try again.",
+          ),
         )}
         type="error"
         onClose={handleTimeoutModalClose}
@@ -486,6 +509,7 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
           navigation={navigation}
           iconBgColor="#F7FAFF"
           bgColor="#FFFFFF"
+          onBackPress={handleBack}
         />
 
         {/* Scan Frame Container */}

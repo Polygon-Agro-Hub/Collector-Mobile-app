@@ -8,9 +8,10 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LoadingPage from "@/component/components/loading/LoadingPage";
@@ -230,6 +231,44 @@ export default function LoadingToVehicleSummary({
     }
   };
 
+  const handleBack = () => {
+    if (isViewOnly) {
+      navigation.navigate("SentProductsToday");
+    } else {
+      navigation.navigate("LoadingToVehicle", {
+        vehicleNo: route.params?.vehicleNo || vehicleNo,
+        centreId: route.params?.centreId,
+        disComCenId: route.params?.disComCenId,
+        centreName: route.params?.centreName || centreName,
+        driverId: route.params?.driverId,
+        driverEmpId: route.params?.driverEmpId || driverEmpId,
+        driverName: route.params?.driverName || driverName,
+        driverNameEnglish: route.params?.driverNameEnglish,
+        driverNameSinhala: route.params?.driverNameSinhala,
+        driverNameTamil: route.params?.driverNameTamil,
+        vehicleId: route.params?.vehicleId,
+      });
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        handleBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [isViewOnly, route.params, vehicleNo, centreName, driverEmpId, driverName]),
+  );
+
   return (
     <View className="flex-1 bg-white">
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
@@ -238,6 +277,7 @@ export default function LoadingToVehicleSummary({
       <CustomHeader
         title={t("LoadingToVehicleSummary.Title", "Summery")}
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       {loading ? (
