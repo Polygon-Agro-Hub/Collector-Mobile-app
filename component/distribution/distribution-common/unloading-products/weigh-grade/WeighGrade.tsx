@@ -642,11 +642,6 @@ export default function WeighGrade({
                                 backgroundColor: isSelected ? "#FFFFFF" : "transparent",
                                 justifyContent: "center",
                                 alignItems: "center",
-                                shadowColor: isSelected ? "#000000" : "transparent",
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: isSelected ? 0.08 : 0,
-                                shadowRadius: 2,
-                                elevation: isSelected ? 2 : 0,
                               }}
                             >
                               <Text

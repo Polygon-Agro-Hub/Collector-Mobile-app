@@ -13,6 +13,7 @@ import {
 import { MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 import { isQuickAccessScaleEnabled, subscribeQuickAccessScale } from "@/utils/scale/scale-storage";
 import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
@@ -22,8 +23,7 @@ const STORAGE_KEY_X = "@scale_button_pos_x";
 const STORAGE_KEY_Y = "@scale_button_pos_y";
 const BUTTON_HEIGHT = 46;
 const BUTTON_WIDTH = 96;
-const MIN_Y = 60;
-const MIN_X = 10;
+const MIN_X = 6;
 
 interface FloatingScaleButtonProps {
   currentRoute?: string;
@@ -39,13 +39,31 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!store.getState().auth.token);
   const [isQuickAccessEnabled, setIsQuickAccessEnabled] = useState<boolean>(true);
 
+  const insets = useSafeAreaInsets();
   const windowDimensions = Dimensions.get("window");
   const windowWidth = windowDimensions.width;
   const windowHeight = windowDimensions.height;
 
-  // Max X is 50% of the screen width minus the button width
+  const isTabScreen = [
+    "CollectionDashboard",
+    "DailyTargetList",
+    "CollectionOfficersList",
+    "SearchPriceScreen",
+    "DistridutionaDashboard",
+    "DistributionDashboard",
+    "DistributionOfficersList",
+    "ComplainHistory",
+    "SideMenu",
+    "OfficerQr",
+    "ComplainPage",
+  ].includes(currentRoute || "");
+
+  const bottomInset = Math.max(insets.bottom, 12);
+  const MIN_Y = Math.max(insets.top + 10, 48);
   const maxX = Math.max(MIN_X, Math.round(windowWidth * 0.5) - BUTTON_WIDTH);
-  const maxY = windowHeight - BUTTON_HEIGHT - 90;
+  const maxY = isTabScreen
+    ? windowHeight - BUTTON_HEIGHT - bottomInset - 72
+    : windowHeight - BUTTON_HEIGHT - bottomInset - 16;
 
   // Initial position in upper-middle left area (padded from edge)
   const defaultX = 14;
@@ -334,19 +352,18 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
 
           {/* Main Free-Floating Pill Capsule Button */}
           <View style={[styles.capsule, { backgroundColor }]}>
-            {/* Left Circular Badge with Wi-Fi Icon */}
-            <View style={[styles.wifiCircle, { backgroundColor: circleBgColor }]}>
-              <MaterialCommunityIcons
-                name="wifi"
-                size={21}
-                color={wifiIconColor}
-              />
+            {/* Left Section (50% width) with Wi-Fi Badge */}
+            <View style={styles.leftSection}>
+              <View style={[styles.wifiCircle, { backgroundColor: circleBgColor }]}>
+                <MaterialCommunityIcons
+                  name="wifi"
+                  size={21}
+                  color={wifiIconColor}
+                />
+              </View>
             </View>
 
-            {/* Vertical Divider Line */}
-            <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-
-            {/* Right Status Icon Section */}
+            {/* Right Status Icon Section (50% width) */}
             <View style={styles.rightSection}>
               {isConnected ? (
                 // Connected: Bold Checkmark
@@ -357,7 +374,7 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
                   style={styles.iconStroke}
                 />
               ) : isWifiOff ? (
-                // Wi-Fi Off: Exclamation Warning in Circle
+                // Wi-Fi Off: Exclamation Warning in Circle (same size as Wi-Fi circle)
                 <View style={styles.exclamationCircle}>
                   <Text style={styles.exclamationText}>!</Text>
                 </View>
@@ -370,6 +387,9 @@ export const FloatingScaleButton: React.FC<FloatingScaleButtonProps> = ({ curren
                 />
               )}
             </View>
+
+            {/* Vertical Divider Line (Exact 50% Center) */}
+            <View style={[styles.divider, { backgroundColor: dividerColor }]} />
           </View>
         </TouchableOpacity>
       </Animated.View>
@@ -388,8 +408,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     top: 0,
-    zIndex: 9999,
-    elevation: 12,
+    zIndex: 99999,
+    elevation: 25,
   },
   touchable: {
     padding: 6,
@@ -416,9 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: BUTTON_HEIGHT / 2, // Full pill shape (both sides rounded)
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingLeft: 6,
-    paddingRight: 8,
+    position: "relative",
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 4 },
     shadowOpacity: 0.35,
@@ -428,6 +446,12 @@ const styles = StyleSheet.create({
         elevation: 10,
       },
     }),
+  },
+  leftSection: {
+    width: "50%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   wifiCircle: {
     width: 34,
@@ -441,13 +465,18 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   divider: {
+    position: "absolute",
+    left: "50%",
+    marginLeft: -1.1,
+    top: (BUTTON_HEIGHT - 28) / 2,
     width: 2.2,
     height: 28,
     borderRadius: 1.1,
-    marginHorizontal: 4,
+    zIndex: 10,
   },
   rightSection: {
-    flex: 1,
+    width: "50%",
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -455,16 +484,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   exclamationCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
   },
   exclamationText: {
     color: "#E91233",
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "900",
     marginTop: -2,
     textAlign: "center",

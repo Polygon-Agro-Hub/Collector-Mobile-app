@@ -58,6 +58,7 @@ export interface MismatchItem {
 
 export const getLocalizedProductName = (
   item?: {
+    displayName?: string;
     name?: string;
     cropName?: string;
     varietyLabel?: string;
@@ -72,6 +73,9 @@ export const getLocalizedProductName = (
   lang?: string
 ): string => {
   if (!item) return "";
+  if (item.displayName) {
+    return item.displayName;
+  }
   const currentLang = (lang || "").toLowerCase();
   if (currentLang.startsWith("si")) {
     return (
@@ -152,12 +156,14 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
       id: String(item.varietyId || item.id || `prod-${idx}`),
       loadedItemId: item.loadedItemId || item.id,
       varietyId: item.varietyId ? String(item.varietyId) : undefined,
+      displayName: item.displayName || undefined,
       name:
+        item.displayName ||
         item.cropName ||
         item.varietyLabel ||
         item.cropLabel ||
         "Crop Item",
-      varietyNameEnglish: item.varietyNameEnglish || item.varietyLabel,
+      varietyNameEnglish: item.displayName || item.varietyNameEnglish || item.varietyLabel,
       varietyNameSinhala: item.varietyNameSinhala,
       varietyNameTamil: item.varietyNameTamil,
       cropNameEnglish: item.cropNameEnglish || item.cropLabel,
@@ -448,6 +454,7 @@ export default function UnloadingProducts({
             grade: gradeLetter,
             crateIndex: s.setIndex,
             crateCount: s.crates,
+            crateWeight: s.crateWeight ?? 0,
             qty: s.weightKg,
           }));
         }
@@ -457,6 +464,7 @@ export default function UnloadingProducts({
             grade: gradeLetter,
             crateIndex: 1,
             crateCount: g.unloadedCrates || 0,
+            crateWeight: 0,
             qty: g.unloadedWeightKg || 0,
           },
         ];

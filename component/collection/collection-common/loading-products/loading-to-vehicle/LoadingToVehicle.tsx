@@ -365,13 +365,11 @@ export default function LoadingToVehicle({
   // Delete Variety Confirmation Modal State (from carousel)
   const [varietyToDelete, setVarietyToDelete] = useState<SavedVariety | null>(null);
 
-  // Delete Saved Set Confirmation Modal State (from carousel)
-  const [savedSetToDelete, setSavedSetToDelete] = useState<{
+  // Delete Saved Grade Confirmation Modal State (from carousel)
+  const [savedGradeToDelete, setSavedGradeToDelete] = useState<{
     varietyId: string;
     varietyLabel: string;
-    id: string;
-    gradeKey: string;
-    setNumber: number;
+    gradeKey: "A" | "B" | "C";
   } | null>(null);
 
   // Scale Connection State
@@ -815,18 +813,16 @@ export default function LoadingToVehicle({
     });
   };
 
-  // Delete an individual set from a saved variety
-  const handleDeleteSavedSet = (varietyId: string, setId: string) => {
+  // Delete an individual grade from a saved variety (same as Collection Form)
+  const handleDeleteSavedGrade = (
+    varietyId: string,
+    gradeKey: "A" | "B" | "C"
+  ) => {
     setSavedVarieties((prev) => {
       const updated = prev
         .map((v) => {
           if (v.id === varietyId) {
-            const filteredSets = v.sets
-              .filter((s) => s.id !== setId)
-              .map((s, idx) => ({
-                ...s,
-                setNumber: idx + 1,
-              }));
+            const filteredSets = v.sets.filter((s) => s.gradeKey !== gradeKey);
             return {
               ...v,
               sets: filteredSets,
@@ -850,6 +846,100 @@ export default function LoadingToVehicle({
 
       return updated;
     });
+  };
+
+  // Clear & Delete pending variety and restore previous variety into active form (same as Collection Form)
+  const handleClearAndDeletePending = () => {
+    if (savedVarieties.length === 0) return;
+
+    const lastIndex = savedVarieties.length - 1;
+    const lastVariety = savedVarieties[lastIndex];
+
+    // Remove last variety from savedVarieties list
+    const remaining = savedVarieties.slice(0, lastIndex);
+    setSavedVarieties(remaining);
+    setCarouselIndex(Math.max(0, remaining.length - 1));
+
+    // Restore variety number
+    setVarietyIndex(lastVariety.varietyNumber);
+
+    // Restore crop
+    const cropFound =
+      cropsData.find((c) => c.value === lastVariety.cropId) ||
+      (lastVariety.cropId
+        ? {
+            label: lastVariety.cropLabel,
+            value: lastVariety.cropId,
+            image: lastVariety.imageUri,
+          }
+        : null);
+    setSelectedCrop(cropFound);
+
+    // Restore variety
+    const cropVarieties =
+      (lastVariety.cropId && varietiesData[lastVariety.cropId]) || [];
+    const varietyFound =
+      cropVarieties.find((v) => v.value === lastVariety.varietyId) ||
+      (lastVariety.varietyId
+        ? {
+            label: lastVariety.varietyLabel,
+            value: lastVariety.varietyId,
+            image: lastVariety.imageUri,
+          }
+        : null);
+    setSelectedVariety(varietyFound);
+
+    // Restore grades & sets
+    const setsByGrade: Record<string, CrateSet[]> = {
+      A: [],
+      B: [],
+      C: [],
+    };
+
+    (lastVariety.sets || []).forEach((s) => {
+      if (setsByGrade[s.gradeKey]) {
+        setsByGrade[s.gradeKey].push({
+          id: s.id,
+          setNumber: s.setNumber,
+          containerTypeId: s.containerTypeId,
+          containerTypeName: s.containerTypeName,
+          containerTypeWeight: s.containerTypeWeight,
+          crates: s.crates,
+          weight: s.weight,
+          isExpanded: false,
+        });
+      }
+    });
+
+    const defaultC = containerTypes.length > 0 ? containerTypes[0] : null;
+
+    const restoredGrades: GradeData[] = (["A", "B", "C"] as const).map(
+      (gradeKey) => {
+        const gradeSets = setsByGrade[gradeKey];
+        const isSelected = gradeSets.length > 0;
+        return {
+          gradeKey,
+          title: `Grade ${gradeKey}`,
+          isSelected,
+          sets: isSelected
+            ? gradeSets.map((s, idx) => ({ ...s, isExpanded: idx === 0 }))
+            : [
+                {
+                  id: `set-${gradeKey.toLowerCase()}-${Date.now()}-1`,
+                  setNumber: 1,
+                  containerTypeId: defaultC?.id,
+                  containerTypeName: defaultC?.labelName,
+                  containerTypeWeight: defaultC?.weight,
+                  crates: "",
+                  weight: null,
+                  isExpanded: true,
+                },
+              ],
+        };
+      }
+    );
+
+    setGrades(restoredGrades);
   };
 
   // Helper to resolve DB image for a variety/crop
@@ -995,9 +1085,35 @@ export default function LoadingToVehicle({
     });
   };
 
+  // Used variety IDs that have already been saved to the vehicle
+  const usedVarietyIds = savedVarieties
+    .map((v) => v.varietyId)
+    .filter((id): id is string => Boolean(id));
+
+  // Crops whose varieties are ALL already added -> hide from crop list (same as Collection Form)
+  const fullyUsedCropIds = cropsData.reduce((acc: string[], c) => {
+    const cropVarieties = varietiesData[c.value] || [];
+    if (cropVarieties.length === 0) return acc;
+    const allUsed = cropVarieties.every((v) => usedVarietyIds.includes(v.value));
+    if (allUsed) acc.push(c.value);
+    return acc;
+  }, []);
+
+  const filteredCropsData = cropsData.filter(
+    (crop) => !fullyUsedCropIds.includes(crop.value)
+  );
+
   const varietyOptions = selectedCrop
-    ? varietiesData[selectedCrop.value] || []
+    ? (varietiesData[selectedCrop.value] || []).filter(
+        (v) => !usedVarietyIds.includes(v.value)
+      )
     : [];
+
+  useEffect(() => {
+    if (selectedVariety && usedVarietyIds.includes(selectedVariety.value)) {
+      setSelectedVariety(null);
+    }
+  }, [savedVarieties]);
 
   if (cropsLoading) {
     return (
@@ -1243,48 +1359,71 @@ export default function LoadingToVehicle({
                       </TouchableOpacity>
                     </View>
 
-                    {/* Sets Table */}
+                    {/* Grades Table (same as Collection Form: Left Grade A/B/C, Center Weight in kg, Right Delete icon) */}
                     <View className="border border-[#000000] rounded-2xl overflow-hidden bg-white">
-                      {savedVarieties[carouselIndex].sets.map((set, sIdx) => (
-                        <View
-                          key={set.id}
-                          className={`flex-row items-center justify-between px-4 py-2.5 ${
-                            sIdx !== savedVarieties[carouselIndex].sets.length - 1
-                              ? "border-b border-[#E2E8F0]"
-                              : ""
-                          }`}
-                        >
-                          {/* Grade */}
-                          <Text className="font-bold text-[#000000] text-sm w-8">
-                            {set.gradeKey}
-                          </Text>
+                      {(() => {
+                        const currentVariety = savedVarieties[carouselIndex];
+                        const availableGrades = (["A", "B", "C"] as const).filter((gKey) =>
+                          currentVariety.sets.some(
+                            (s) => s.gradeKey === gKey && s.weight !== null && s.weight > 0
+                          )
+                        );
 
-                          {/* Set Label */}
-                          <Text className="font-bold text-[#000000] text-sm flex-1 ml-4">
-                            {t("LoadingToVehicle.Set", "Set")} {set.setNumber}
-                          </Text>
+                        return availableGrades.map((gradeKey, gIdx) => {
+                          const gradeWeight = currentVariety.sets
+                            .filter((s) => s.gradeKey === gradeKey)
+                            .reduce((sum, s) => sum + (s.weight || 0), 0);
 
-                          {/* Delete Set */}
-                          <TouchableOpacity
-                            onPress={() =>
-                              setSavedSetToDelete({
-                                varietyId: savedVarieties[carouselIndex].id,
-                                varietyLabel: savedVarieties[carouselIndex].varietyLabel,
-                                id: set.id,
-                                gradeKey: set.gradeKey,
-                                setNumber: set.setNumber,
-                              })
-                            }
-                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                          >
-                            <MaterialIcons
-                              name="delete"
-                              size={20}
-                              color="#EF4444"
-                            />
-                          </TouchableOpacity>
-                        </View>
-                      ))}
+                          return (
+                            <View
+                              key={gradeKey}
+                              className={`flex-row items-center justify-between px-4 py-2.5 ${
+                                gIdx !== availableGrades.length - 1
+                                  ? "border-b border-[#E2E8F0]"
+                                  : ""
+                              }`}
+                            >
+                              {/* Left: Grade A, B, or C */}
+                              <Text
+                                className="font-bold text-[#000000] text-sm w-8"
+                                style={{ includeFontPadding: false }}
+                              >
+                                {gradeKey}
+                              </Text>
+
+                              {/* Center: Weight in kg (not grade or set text) */}
+                              <Text
+                                className="font-bold text-[#000000] text-sm flex-1 text-center"
+                                style={{ includeFontPadding: false }}
+                              >
+                                {Number(gradeWeight || 0).toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}{" "}
+                                {t("PassTargetBetweenOfficers.kg", "kg")}
+                              </Text>
+
+                              {/* Right: Delete Icon */}
+                              <TouchableOpacity
+                                onPress={() =>
+                                  setSavedGradeToDelete({
+                                    varietyId: currentVariety.id,
+                                    varietyLabel: currentVariety.varietyLabel,
+                                    gradeKey,
+                                  })
+                                }
+                                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                              >
+                                <MaterialIcons
+                                  name="delete"
+                                  size={20}
+                                  color="#EF4444"
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          );
+                        });
+                      })()}
                     </View>
                   </View>
                 )}
@@ -1327,19 +1466,61 @@ export default function LoadingToVehicle({
           )}
 
           {/* Variety Subtitle */}
-          <Text className="text-center font-bold text-[#0F172A] text-base mb-4">
+          <Text
+            className="text-center font-bold text-[#0F172A] text-base mb-2"
+            style={{ lineHeight: 22, includeFontPadding: false }}
+          >
             {t("LoadingToVehicle.Variety", "Variety")} {varietyIndex}
           </Text>
 
+          {/* Clear & Delete Button (Same as Collection Form) */}
+          {savedVarieties.length > 0 && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={handleClearAndDeletePending}
+              style={{
+                backgroundColor: "#FEE2E2",
+                borderRadius: 9999,
+                paddingVertical: 8,
+                paddingHorizontal: 24,
+                alignSelf: "center",
+                marginTop: 2,
+                marginBottom: 14,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#FF383C",
+                  fontWeight: "600",
+                  fontSize: 14,
+                  lineHeight: 20,
+                  includeFontPadding: false,
+                }}
+              >
+                {t(
+                  "LoadingToVehicle.ClearAndDelete",
+                  t("UnregisteredCropDetails.ClearAndDelete", "Clear & Delete")
+                )}
+              </Text>
+            </TouchableOpacity>
+          )}
+
           {/* Crop Name Selector (50px height, rounded-full) */}
           <View className="mb-4">
-            <Text className="text-xs font-bold text-[#1E293B] mb-1.5">
+            <Text
+              className="text-xs font-bold text-[#1E293B] mb-1.5"
+              style={{
+                lineHeight: 18,
+                paddingVertical: 2,
+                includeFontPadding: true,
+              }}
+            >
               {t("LoadingToVehicle.CropName", "Crop Name")}
             </Text>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => setIsCropModalVisible(true)}
-              className="bg-[#F4F6F9] rounded-full h-[50px] px-4 flex-row items-center justify-between"
+              className="bg-[#F4F6F9] rounded-full min-h-[50px] px-4 py-2 flex-row items-center justify-between"
             >
               <Text
                 numberOfLines={1}
@@ -1347,6 +1528,11 @@ export default function LoadingToVehicle({
                 className={`text-sm font-medium flex-1 mr-2 ${
                   selectedCrop ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
+                style={{
+                  lineHeight: 22,
+                  paddingVertical: 2,
+                  includeFontPadding: true,
+                }}
               >
                 {selectedCrop?.label || t("LoadingToVehicle.SelectCrop", "--Select Crop--")}
               </Text>
@@ -1356,14 +1542,21 @@ export default function LoadingToVehicle({
 
           {/* Variety Selector (50px height, rounded-full) */}
           <View className="mb-4">
-            <Text className="text-xs font-bold text-[#1E293B] mb-1.5">
+            <Text
+              className="text-xs font-bold text-[#1E293B] mb-1.5"
+              style={{
+                lineHeight: 18,
+                paddingVertical: 2,
+                includeFontPadding: true,
+              }}
+            >
               {t("LoadingToVehicle.VarietyLabel", "Variety")}
             </Text>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => selectedCrop && setIsVarietyModalVisible(true)}
               disabled={!selectedCrop}
-              className={`rounded-full h-[50px] px-4 flex-row items-center justify-between ${
+              className={`rounded-full min-h-[50px] px-4 py-2 flex-row items-center justify-between ${
                 selectedCrop ? "bg-[#F4F6F9]" : "bg-[#F4F6F9] opacity-60"
               }`}
             >
@@ -1373,6 +1566,11 @@ export default function LoadingToVehicle({
                 className={`text-sm font-medium flex-1 mr-2 ${
                   selectedVariety ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
+                style={{
+                  lineHeight: 22,
+                  paddingVertical: 2,
+                  includeFontPadding: true,
+                }}
               >
                 {selectedVariety?.label ||
                   t("LoadingToVehicle.SelectVariety", "--Select Variety--")}
@@ -1399,21 +1597,41 @@ export default function LoadingToVehicle({
                 <TouchableOpacity
                   activeOpacity={0.75}
                   onPress={() => handleToggleGrade(grade.gradeKey)}
-                  className="flex-row items-center py-2 gap-3"
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 10,
+                  }}
                 >
                   {/* Checkbox */}
                   <View
-                    className={`w-5 h-5 rounded-[4px] border items-center justify-center ${
-                      grade.isSelected
-                        ? "bg-[#000000] border-[#000000]"
-                        : "border-[#000000] bg-white"
-                    }`}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 4,
+                      borderWidth: 1.5,
+                      borderColor: "#000000",
+                      backgroundColor: grade.isSelected
+                        ? "#000000"
+                        : "#FFFFFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
                   >
                     {grade.isSelected && (
                       <FontAwesome name="check" size={12} color="#FFFFFF" />
                     )}
                   </View>
-                  <Text className="font-bold text-[#0F172A] text-sm">
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: "#0F172A",
+                      fontSize: 15,
+                      lineHeight: 24,
+                      includeFontPadding: false,
+                    }}
+                  >
                     {t("LoadingToVehicle.Grade", "Grade")} {grade.gradeKey}
                   </Text>
                 </TouchableOpacity>
@@ -1572,11 +1790,6 @@ export default function LoadingToVehicle({
                                               backgroundColor: isSelected ? "#FFFFFF" : "transparent",
                                               justifyContent: "center",
                                               alignItems: "center",
-                                              shadowColor: isSelected ? "#000000" : "transparent",
-                                              shadowOffset: { width: 0, height: 1 },
-                                              shadowOpacity: isSelected ? 0.08 : 0,
-                                              shadowRadius: 2,
-                                              elevation: isSelected ? 2 : 0,
                                             }}
                                           >
                                             <Text
@@ -1787,7 +2000,10 @@ export default function LoadingToVehicle({
                 : undefined
             }
           >
-            <Text className="text-white font-extrabold text-base">
+            <Text
+              className="text-white font-extrabold text-base"
+              style={{ includeFontPadding: false }}
+            >
               {t("LoadingToVehicle.FinishLoading", "Finish Loading")}
             </Text>
           </TouchableOpacity>
@@ -1812,7 +2028,10 @@ export default function LoadingToVehicle({
                 : undefined
             }
           >
-            <Text className="text-white font-extrabold text-base">
+            <Text
+              className="text-white font-extrabold text-base"
+              style={{ includeFontPadding: false }}
+            >
               {t("LoadingToVehicle.AddMoreItems", "Add More Items")}
             </Text>
           </TouchableOpacity>
@@ -1824,11 +2043,11 @@ export default function LoadingToVehicle({
         visible={isCropModalVisible}
         onClose={() => setIsCropModalVisible(false)}
         title={t("LoadingToVehicle.SelectCrop", "Select Crop")}
-        data={cropsData}
+        data={filteredCropsData}
         selectedItems={selectedCrop ? [selectedCrop.value] : []}
         onSelect={(selectedValues) => {
           if (selectedValues.length > 0) {
-            const found = cropsData.find((c) => c.value === selectedValues[0]);
+            const found = filteredCropsData.find((c) => c.value === selectedValues[0]);
             if (found) {
               setSelectedCrop(found);
               setSelectedVariety(null);
@@ -1943,28 +2162,27 @@ export default function LoadingToVehicle({
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
       />
 
-      {/* Delete Saved Set Warning Confirmation Modal */}
+      {/* Delete Saved Grade Warning Confirmation Modal (same as Collection Form) */}
       <WarningConfirmation
-        visible={savedSetToDelete !== null}
+        visible={savedGradeToDelete !== null}
         message={t(
-          "LoadingToVehicle.DeleteSetConfirmation",
-          "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+          "UnregisteredCropDetails.DeleteGradeConfirmation",
+          "Are you sure you want to delete Grade {{grade}} of {{varietyName}}?",
           {
-            item: savedSetToDelete?.varietyLabel || "",
-            grade: `${t("LoadingToVehicle.Grade", "Grade")} ${savedSetToDelete?.gradeKey}`,
-            set: `${t("LoadingToVehicle.Set", "Set")} ${savedSetToDelete?.setNumber}`,
+            grade: `${t("LoadingToVehicle.Grade", "Grade")} ${savedGradeToDelete?.gradeKey}`,
+            varietyName: savedGradeToDelete?.varietyLabel || "",
           }
         )}
         onConfirm={() => {
-          if (savedSetToDelete) {
-            handleDeleteSavedSet(
-              savedSetToDelete.varietyId,
-              savedSetToDelete.id
+          if (savedGradeToDelete) {
+            handleDeleteSavedGrade(
+              savedGradeToDelete.varietyId,
+              savedGradeToDelete.gradeKey
             );
-            setSavedSetToDelete(null);
+            setSavedGradeToDelete(null);
           }
         }}
-        onCancel={() => setSavedSetToDelete(null)}
+        onCancel={() => setSavedGradeToDelete(null)}
         confirmText={t("LoadingToVehicle.Delete", "Delete")}
         cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"

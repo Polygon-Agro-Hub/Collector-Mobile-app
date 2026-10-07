@@ -577,7 +577,9 @@ const cropModalData = cropNames
     setGrades(
       createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null),
     );
-    const found = varieties.find((variety) => variety.id === varietyId);
+    const found = varieties.find(
+      (variety) => String(variety.id) === String(varietyId),
+    );
     if (found) {
       setSelectedVarietyName(found.variety);
     }
@@ -961,10 +963,19 @@ const cropModalData = cropNames
     setdonebutton2visibale(true);
     setUsedVarietyIds((prev) => [...prev, selectedVariety]);
 
+    const currentVarietyObj = varieties.find(
+      (v) => String(v.id) === String(selectedVariety),
+    );
+    const resolvedVarietyName =
+      selectedVarietyName ||
+      currentVarietyObj?.variety ||
+      selectedCrop.name ||
+      "";
+
     const newCrop = {
       cropId: selectedCrop.id || "",
       varietyId: selectedVariety || "",
-      varietyName: selectedVarietyName,
+      varietyName: resolvedVarietyName,
       gradeAprice: unitPrices.A || 0,
       gradeAquan: quantities.A ? parseFloat(quantities.A) : 0,
       gradeBprice: unitPrices.B || 0,
@@ -984,6 +995,10 @@ const cropModalData = cropNames
     resetCropEntry();
     setIsPendingVarietyOpen(true);
     setCropCount((prevCount) => prevCount + 1);
+
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 150);
   };
 
   const resetCropEntry = () => {
@@ -1362,10 +1377,8 @@ const cropModalData = cropNames
   );
   const hasAddedCrops = crops.length > 0;
 
-  // Once at least one crop is added, both buttons stay enabled.
-  // Before that, they need a valid current entry.
-  const isAddMoreDisabled =
-    loading || (!hasAddedCrops && !isCurrentVarietyValid);
+  // Add More is disabled whenever loading or when the current variety entry is not complete
+  const isAddMoreDisabled = loading || !isCurrentVarietyValid;
   const isFinishDisabled =
     loading || (!hasAddedCrops && !isCurrentVarietyValid);
 
@@ -1378,7 +1391,11 @@ const cropModalData = cropNames
       <ScrollView
         className="flex-1 bg-white mb-8"
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          alignItems: "center",
+          paddingBottom: 40,
+        }}
       >
         <View className="w-full ">
           <CustomHeader
@@ -1631,6 +1648,8 @@ const cropModalData = cropNames
                       );
                       const isVarietyDeleting = deletingVariety === index;
 
+                      const displayName = crop.varietyName || "Variety";
+
                       return (
                         <View
                           key={index}
@@ -1662,9 +1681,9 @@ const cropModalData = cropNames
                               numberOfLines={1}
                             >
                               ({index + 1}){" "}
-                              {crop.varietyName.length > 20
-                                ? `${crop.varietyName.slice(0, 20)}...`
-                                : crop.varietyName}
+                              {displayName.length > 20
+                                ? `${displayName.slice(0, 20)}...`
+                                : displayName}
                             </Text>
 
                             {isVarietyDeleting ? (
@@ -1736,7 +1755,12 @@ const cropModalData = cropNames
                                       textAlign: "center",
                                     }}
                                   >
-                                    {crop[`grade${grade}quan`]}{" "}
+                                    {Number(
+                                      crop[`grade${grade}quan`] || 0,
+                                    ).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}{" "}
                                     {t("PassTargetBetweenOfficers.kg")}
                                   </Text>
 
@@ -1808,7 +1832,14 @@ const cropModalData = cropNames
             {/* ── Crop entry form ── */}
             {isPendingVarietyOpen && (
               <>
-                <Text className="text-center text-xl font-bold mt-2 text-[#0F172A]">
+                <Text
+                  className="text-center text-xl font-bold mt-2 text-[#0F172A]"
+                  style={{
+                    lineHeight: 28,
+                    paddingVertical: 2,
+                    includeFontPadding: true,
+                  }}
+                >
                   {t("UnregisteredCropDetails.Variety", "Variety")} {cropCount}
                 </Text>
 
@@ -1832,6 +1863,9 @@ const cropModalData = cropNames
                         color: "#FF383C",
                         fontWeight: "600",
                         fontSize: 14,
+                        lineHeight: 20,
+                        paddingVertical: 1,
+                        includeFontPadding: true,
                       }}
                     >
                       {t(
@@ -1848,20 +1882,30 @@ const cropModalData = cropNames
               {isPendingVarietyOpen && (
                 <>
                   {/* Crop Name Selector */}
-                  <Text className="text-gray-600 mt-4">
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#4B5563",
+                      marginTop: 16,
+                      lineHeight: 22,
+                      paddingVertical: 2,
+                      includeFontPadding: true,
+                    }}
+                  >
                     {t("UnregisteredCropDetails.CropName")}
                   </Text>
                   <TouchableOpacity
                     onPress={() => setCropModalVisible(true)}
                     style={{
-                      height: 50,
+                      minHeight: 50,
                       backgroundColor: "#F4F4F4",
-                      borderRadius: 50,
+                      borderRadius: 25,
                       paddingHorizontal: 14,
+                      paddingVertical: 10,
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      marginTop: 8,
+                      marginTop: 6,
                     }}
                   >
                     <Text
@@ -1872,7 +1916,9 @@ const cropModalData = cropNames
                         fontSize: 14,
                         flex: 1,
                         marginRight: 8,
-                        lineHeight: 18,
+                        lineHeight: 22,
+                        paddingVertical: 2,
+                        includeFontPadding: true,
                       }}
                     >
                       {selectedCropLabel ||
@@ -1887,7 +1933,16 @@ const cropModalData = cropNames
                   </TouchableOpacity>
 
                   {/* Variety Selector */}
-                  <Text className="text-gray-600 mt-4">
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#4B5563",
+                      marginTop: 16,
+                      lineHeight: 22,
+                      paddingVertical: 2,
+                      includeFontPadding: true,
+                    }}
+                  >
                     {t("UnregisteredCropDetails.Variety")}
                   </Text>
                   <TouchableOpacity
@@ -1913,7 +1968,7 @@ const cropModalData = cropNames
                       justifyContent: loadingVarieties
                         ? "center"
                         : "space-between",
-                      marginTop: 8,
+                      marginTop: 6,
                     }}
                   >
                     {loadingVarieties ? (
@@ -1936,7 +1991,9 @@ const cropModalData = cropNames
                             fontSize: 14,
                             flex: 1,
                             marginRight: 8,
-                            lineHeight: 18,
+                            lineHeight: 22,
+                            paddingVertical: 2,
+                            includeFontPadding: true,
                           }}
                         >
                           {selectedVarietyLabel ||
@@ -2031,7 +2088,10 @@ const cropModalData = cropNames
                                 }}
                               >
                                 ({t("ReceivedCash.Rs", "Rs.")}
-                                {Number(price).toFixed(2)}/
+                                {Number(price).toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}/
                                 {t("PassTargetBetweenOfficers.kg", "kg")})
                               </Text>
                             ) : null}
@@ -2040,7 +2100,12 @@ const cropModalData = cropNames
                           {quantities[grade.gradeKey] ? (
                             <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
                               <Text className="text-xs font-bold text-[#000000]">
-                                {quantities[grade.gradeKey]}{" "}
+                                {Number(
+                                  quantities[grade.gradeKey] || 0,
+                                ).toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}{" "}
                                 {t("PassTargetBetweenOfficers.kg", "kg")}
                               </Text>
                             </View>
@@ -2236,19 +2301,6 @@ const cropModalData = cropNames
                                                         justifyContent:
                                                           "center",
                                                         alignItems: "center",
-                                                        shadowColor: isSelected
-                                                          ? "#000000"
-                                                          : "transparent",
-                                                        shadowOffset: {
-                                                          width: 0,
-                                                          height: 1,
-                                                        },
-                                                        shadowOpacity:
-                                                          isSelected ? 0.08 : 0,
-                                                        shadowRadius: 2,
-                                                        elevation: isSelected
-                                                          ? 2
-                                                          : 0,
                                                       }}
                                                     >
                                                       <Text
@@ -2546,7 +2598,10 @@ const cropModalData = cropNames
                             : (
                                 (unitPrices.A || 0) *
                                 (quantities.A ? parseFloat(quantities.A) : 0)
-                              ).toFixed(2)}
+                              ).toLocaleString("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                         </Text>
                       </View>
                     </View>
@@ -2589,7 +2644,10 @@ const cropModalData = cropNames
                             : (
                                 (unitPrices.B || 0) *
                                 (quantities.B ? parseFloat(quantities.B) : 0)
-                              ).toFixed(2)}
+                              ).toLocaleString("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                         </Text>
                       </View>
                     </View>
@@ -2632,7 +2690,10 @@ const cropModalData = cropNames
                             : (
                                 (unitPrices.C || 0) *
                                 (quantities.C ? parseFloat(quantities.C) : 0)
-                              ).toFixed(2)}
+                              ).toLocaleString("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                         </Text>
                       </View>
                     </View>

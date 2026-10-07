@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   Image,
   StatusBar,
   BackHandler,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
@@ -51,6 +51,7 @@ export interface GradeWeighItem {
 export interface CropWeighData {
   id: string;
   name: string;
+  displayName?: string;
   varietyNameEnglish?: string;
   varietyNameSinhala?: string;
   varietyNameTamil?: string;
@@ -108,6 +109,7 @@ export default function WeighTheLoad({
         return {
           id: reduxVariety.id,
           name: reduxVariety.name,
+          displayName: reduxVariety.displayName,
           varietyNameEnglish: reduxVariety.varietyNameEnglish,
           varietyNameSinhala: reduxVariety.varietyNameSinhala,
           varietyNameTamil: reduxVariety.varietyNameTamil,
@@ -190,6 +192,7 @@ export default function WeighTheLoad({
         setCropData({
           id: reduxVariety.id,
           name: reduxVariety.name,
+          displayName: reduxVariety.displayName,
           varietyNameEnglish: reduxVariety.varietyNameEnglish,
           varietyNameSinhala: reduxVariety.varietyNameSinhala,
           varietyNameTamil: reduxVariety.varietyNameTamil,
@@ -228,6 +231,7 @@ export default function WeighTheLoad({
           setCropData({
             id: reduxVariety.id,
             name: reduxVariety.name,
+            displayName: reduxVariety.displayName,
             varietyNameEnglish: reduxVariety.varietyNameEnglish,
             varietyNameSinhala: reduxVariety.varietyNameSinhala,
             varietyNameTamil: reduxVariety.varietyNameTamil,
@@ -278,15 +282,23 @@ export default function WeighTheLoad({
     )
     .map((g) => {
       const gradeLetter = extractGradeLetter(g.gradeTitle);
+      const diffKg = Math.abs((g.unloadedWeightKg || 0) - g.loadedWeightKg);
+      const diffCrates = Math.abs((g.unloadedCrates || 0) - g.loadedCrates);
+      const hasWeightMismatch = diffKg > 0.01;
+      const hasCrateMismatch = diffCrates > 0;
+
       return {
         id: g.id,
         productName: getLocalizedProductName(cropData, i18n.language) || cropData.name,
         grade: `${t("WeighTheLoad.Grade", "Grade")} ${gradeLetter}`,
         expectedKg: g.loadedWeightKg,
         measuredKg: g.unloadedWeightKg || 0,
-        differenceKg: Math.abs((g.unloadedWeightKg || 0) - g.loadedWeightKg),
+        differenceKg: diffKg,
+        hasWeightMismatch,
         expectedCrates: g.loadedCrates,
         receivedCrates: g.unloadedCrates || 0,
+        differenceCrates: diffCrates,
+        hasCrateMismatch,
       };
     });
 
@@ -553,10 +565,13 @@ export default function WeighTheLoad({
       <ScrollView
         className="flex-1 px-6"
         contentContainerStyle={{
+          flexGrow: 1,
           paddingTop: 8,
-          paddingBottom: 24,
+          paddingBottom: 40,
         }}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Scale Connection Section (Dashboard style) */}
         {renderScaleSection()}
@@ -827,45 +842,48 @@ export default function WeighTheLoad({
                 </Text>
 
                 {/* Numbered Difference Points */}
-                <Text className="text-xs text-black leading-5">
-                  {t("Mismatch.Point1", "1.")} {t("Mismatch.Expected", "Expected")}{" "}
-                  <Text className="font-bold">
-                    {mismatch.expectedKg.toFixed(2)}{" "}
-                    <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
-                      {t("Common.kg", "kg")}
-                    </Text>
-                  </Text>{" "}
-                  {t("Mismatch.ButMeasured", ", but measured")}{" "}
-                  <Text className="font-bold">
-                    {mismatch.measuredKg.toFixed(2)}{" "}
-                    <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
-                      {t("Common.kg", "kg")}
-                    </Text>
-                  </Text>
-                  {t("Mismatch.DifferenceIs", ". Difference is")}{" "}
-                  <Text className="font-bold">
-                    {mismatch.differenceKg.toFixed(2)}{" "}
-                    <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
-                      {t("Common.kg", "kg")}
-                    </Text>
-                  </Text>
-                  .
-                </Text>
-
-                {mismatch.expectedCrates !== undefined &&
-                  mismatch.receivedCrates !== undefined && (
-                    <Text className="text-xs text-[#17262C] leading-5 mt-1">
-                      {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedContainersCountIs", "Expected containers count is")}{" "}
-                      <Text className="font-bold">
-                        {mismatch.expectedCrates}
-                      </Text>{" "}
-                      {t("Mismatch.ButReceivedContainerCountIs", ", but received container count is")}{" "}
-                      <Text className="font-bold">
-                        {mismatch.receivedCrates}
+                {mismatch.hasWeightMismatch && (
+                  <Text className="text-xs text-black leading-5">
+                    {mismatch.hasCrateMismatch ? `${t("Mismatch.Point1", "1.")} ` : ""}
+                    {t("Mismatch.Expected", "Expected")}{" "}
+                    <Text className="font-bold">
+                      {mismatch.expectedKg.toFixed(2)}{" "}
+                      <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
+                        {t("Common.kg", "kg")}
                       </Text>
-                      .
+                    </Text>{" "}
+                    {t("Mismatch.ButMeasured", ", but measured")}{" "}
+                    <Text className="font-bold">
+                      {mismatch.measuredKg.toFixed(2)}{" "}
+                      <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
+                        {t("Common.kg", "kg")}
+                      </Text>
                     </Text>
-                  )}
+                    {t("Mismatch.DifferenceIs", ". Difference is")}{" "}
+                    <Text className="font-bold">
+                      {mismatch.differenceKg.toFixed(2)}{" "}
+                      <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
+                        {t("Common.kg", "kg")}
+                      </Text>
+                    </Text>
+                    .
+                  </Text>
+                )}
+
+                {mismatch.hasCrateMismatch && (
+                  <Text className={`text-xs text-[#17262C] leading-5 ${mismatch.hasWeightMismatch ? "mt-1" : ""}`}>
+                    {mismatch.hasWeightMismatch ? `${t("Mismatch.Point2", "2.")} ` : ""}
+                    {t("Mismatch.ExpectedContainersCountIs", "Expected containers count is")}{" "}
+                    <Text className="font-bold">
+                      {mismatch.expectedCrates}
+                    </Text>{" "}
+                    {t("Mismatch.ButReceivedContainerCountIs", ", but received container count is")}{" "}
+                    <Text className="font-bold">
+                      {mismatch.receivedCrates}
+                    </Text>
+                    .
+                  </Text>
+                )}
               </View>
             ))}
           </View>

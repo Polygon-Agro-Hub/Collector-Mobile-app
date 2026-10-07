@@ -293,7 +293,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
           {/* Configuration & Preset Section */}
           <ScrollView
             style={{ marginTop: 20 }}
-            contentContainerStyle={{ paddingBottom: 24 }}
+            contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 2 }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
@@ -315,6 +315,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 marginBottom: 16,
                 borderWidth: 1,
                 borderColor: "#9D9D9D",
+                marginHorizontal: 1,
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -339,27 +340,65 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155", marginBottom: 4 }}>
                   {t("ScaleSelectModal.ScaleIpAddress")}
                 </Text>
-                <TextInput
-                  value={ipAddress}
-                  onChangeText={setIpAddress}
-                  placeholder={t("ScaleSelectModal.IpPlaceholder")}
-                  keyboardType="numeric"
-                  style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
-                />
+                <View
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderWidth: 1,
+                    borderColor: "#9D9D9D",
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    height: 48,
+                    justifyContent: "center",
+                    marginHorizontal: 1,
+                  }}
+                >
+                  <TextInput
+                    value={ipAddress}
+                    onChangeText={setIpAddress}
+                    placeholder={t("ScaleSelectModal.IpPlaceholder")}
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="numeric"
+                    style={{
+                      fontSize: 14,
+                      color: "#0f172a",
+                      paddingVertical: 0,
+                      paddingHorizontal: 0,
+                    }}
+                  />
+                </View>
               </View>
 
               <View>
                 <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155", marginBottom: 4 }}>
                   {t("ScaleSelectModal.PortNumber")}
                 </Text>
-                <TextInput
-                  value={port}
-                  onChangeText={(text) => setPort(text.replace(/[^0-9]/g, "").slice(0, 5))}
-                  placeholder="8080"
-                  keyboardType="number-pad"
-                  maxLength={5}
-                  style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
-                />
+                <View
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderWidth: 1,
+                    borderColor: "#9D9D9D",
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    height: 48,
+                    justifyContent: "center",
+                    marginHorizontal: 1,
+                  }}
+                >
+                  <TextInput
+                    value={port}
+                    onChangeText={(text) => setPort(text.replace(/[^0-9]/g, "").slice(0, 5))}
+                    placeholder="8080"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="number-pad"
+                    maxLength={5}
+                    style={{
+                      fontSize: 14,
+                      color: "#0f172a",
+                      paddingVertical: 0,
+                      paddingHorizontal: 0,
+                    }}
+                  />
+                </View>
               </View>
             </View>
 

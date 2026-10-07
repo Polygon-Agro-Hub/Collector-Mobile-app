@@ -210,7 +210,12 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         }`}
       onPress={() => handleItemPress(item.value)}
     >
-      <Text className="text-base text-gray-800">{item.label}</Text>
+      <Text
+        className="text-base text-gray-800"
+        style={{ lineHeight: 24, paddingVertical: 2, includeFontPadding: true }}
+      >
+        {item.label}
+      </Text>
       {isSelected && <MaterialIcons name="check" size={20} color="#21202B" />}
     </TouchableOpacity>
   );
@@ -343,7 +348,12 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>
-              <Text className="text-lg font-semibold">{t(title, title)}</Text>
+              <Text
+                className="text-lg font-semibold"
+                style={{ lineHeight: 26, paddingVertical: 2, includeFontPadding: true }}
+              >
+                {t(title, title)}
+              </Text>
               {multiSelect && selectedValues.length > 0 && (
                 <Text className="text-sm text-gray-500">
                   {t("GlobalSearchModal.SelectedCount", { count: selectedValues.length })}
