@@ -278,7 +278,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const [containerTypes, setContainerTypes] = useState<ContainerTypeItem[]>([]);
   const [containerSectionWidth, setContainerSectionWidth] = useState(300);
-  const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
+ const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
   const [setToDelete, setSetToDelete] = useState<{
     id: string;
     gradeKey: "A" | "B" | "C";
@@ -457,7 +457,19 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }, []),
   );
 
-  const cropModalData = cropNames.map((crop) => ({
+// Crops whose varieties are ALL already added -> hide from crop list
+const fullyUsedCropIds = crops.reduce((acc: string[], c: any) => {
+  if (acc.includes(c.cropId)) return acc;
+  const allVarieties: { id: string }[] = c.varietiesList || [];
+  if (allVarieties.length === 0) return acc;
+  const allUsed = allVarieties.every((v) => usedVarietyIds.includes(v.id));
+  if (allUsed) acc.push(c.cropId);
+  return acc;
+}, []);
+
+const cropModalData = cropNames
+  .filter((crop) => !fullyUsedCropIds.includes(crop.id))
+  .map((crop) => ({
     label:
       selectedLanguage === "si"
         ? crop.cropNameSinhala
@@ -694,6 +706,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       });
     });
   };
+  
 
   // Delete a set from a grade
   const handleDeleteSet = (gradeKey: "A" | "B" | "C", setId: string) => {
@@ -2268,38 +2281,26 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                           </View>
                                         )}
 
-                                        {/* Crates Count Input */}
-                                        <TextInput
-                                          placeholder={
-                                            focusedSetId === set.id
-                                              ? ""
-                                              : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
-                                          }
-                                          placeholderTextColor="#000000"
-                                          value={set.crates}
-                                          onChangeText={(val) =>
-                                            handleCratesChange(
-                                              grade.gradeKey,
-                                              set.id,
-                                              val,
-                                            )
-                                          }
-                                          onFocus={() =>
-                                            setFocusedSetId(set.id)
-                                          }
-                                          onBlur={() => setFocusedSetId(null)}
-                                          keyboardType="numeric"
-                                          textAlign="center"
-                                          className="bg-[#EEF2F6] rounded-full h-[50px] px-4 text-base text-[#000000] mb-3"
-                                          style={{
-                                            textAlign: "center",
-                                            textAlignVertical: "center",
-                                            includeFontPadding: false,
-                                            fontWeight: set.crates
-                                              ? "bold"
-                                              : "normal",
-                                          }}
-                                        />
+                                    
+                                      {/* Crates Count Input */}
+<TextInput
+  placeholder={`--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`}
+  placeholderTextColor="#000000"
+  value={set.crates}
+  onChangeText={(val) =>
+    handleCratesChange(grade.gradeKey, set.id, val)
+  }
+  keyboardType="numeric"
+  textAlign="center"
+  className="bg-[#EEF2F6] rounded-full h-[50px] px-4 text-base text-[#000000] mb-3"
+  style={{
+    textAlign: "center",
+    textAlignVertical: "center",
+    includeFontPadding: false,
+    paddingVertical: 0,
+    fontWeight: "normal",
+  }}
+/>
 
                                         {/* Weight Row */}
                                         {(() => {

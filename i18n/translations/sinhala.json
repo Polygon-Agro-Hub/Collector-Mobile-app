@@ -619,7 +619,7 @@
     "Failed": "අසාර්ථකයි!",
     "SearchNIC": "පරිශීලකයාගේ NIC අංකය අනුව සොයන්න",
     "Requesting for camera permission": "කැමරා අවසරය ඉල්ලා සිටීම",
-    "ScantheQR": "QR කේතය ස්කෑන් කරන්න",
+    "ScantheQR": "QR ස්කෑන් කරන්න",
     "Re-Scan": "නැවත ස්කෑන් කරන්න",
     "Re-scan": "නැවත ස්කෑන් කරන්න",
     "Rescan": "නැවත ස්කෑන් කරන්න"
@@ -1152,7 +1152,7 @@
     "MaxContainersMessage": "මෙම ශ්‍රේණිය සඳහා පටවන ලද මුළු පෙට්ටි {{max}} ඉක්මවිය නොහැක.",
     "NoOfCrates": "--පෙට්ටි ගණන--",
     "NoOfContainers": "--පෙට්ටි ගණන--",
-    "DeleteConfirmation": "එකතු කරන ලද\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ඉවත් කිරීමට ඔබට විශ්වාසද?",
+    "DeleteConfirmation": "එකතු කරන ලද\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ඉවත් කිරීම ගැන ඔබට විශ්වාසද?",
     "Delete": "මකන්න",
     "Cancel": "අවලංගු කරන්න"
   },
@@ -1894,8 +1894,8 @@
     "GrossWeightOnPlatform": "වේදිකාවේ ඇති දළ බර",
     "WeightBreakdown": "බර විස්තරය",
     "Gross": "දළ",
-    "Tare": "ටෙයාර්",
-    "MinusTare": "− ටෙයාර්",
+    "Tare": "කූඩ",
+    "MinusTare": "− කූඩ",
     "NetTotal": "ශුද්ධ එකතුව",
     "Continue": "ඉදිරියට යන්න"
   },
