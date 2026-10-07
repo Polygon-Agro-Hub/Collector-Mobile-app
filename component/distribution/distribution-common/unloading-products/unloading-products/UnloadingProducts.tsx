@@ -645,7 +645,11 @@ export default function UnloadingProducts({
               <View className="mb-4">
                 <View className="flex-row items-center justify-center my-3">
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-                  <Text className="mx-4 font-bold text-sm text-[#17262C]">
+                  <Text
+                    numberOfLines={1}
+                    style={{ flexShrink: 0 }}
+                    className="mx-3 font-bold text-sm text-[#17262C]"
+                  >
                     {t("UnloadingProducts.ToWeigh", "To Weigh")}
                   </Text>
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
@@ -662,7 +666,11 @@ export default function UnloadingProducts({
               <View className="mb-4">
                 <View className="flex-row items-center justify-center my-3">
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-                  <Text className="mx-4 font-bold text-sm text-[#17262C]">
+                  <Text
+                    numberOfLines={1}
+                    style={{ flexShrink: 0 }}
+                    className="mx-3 font-bold text-sm text-[#17262C]"
+                  >
                     {t("UnloadingProducts.Weighed", "Weighed")}
                   </Text>
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
@@ -710,7 +718,7 @@ export default function UnloadingProducts({
                       {t("Mismatch.Point1", "1.")} {t("Mismatch.Expected", "Expected")}{" "}
                       <Text className="font-bold">
                         {mismatch.expectedKg.toFixed(2)} {t("Common.kg", "kg")}
-                      </Text>
+                      </Text>{" "}
                       {t("Mismatch.ButMeasured", ", but measured")}{" "}
                       <Text className="font-bold">
                         {mismatch.measuredKg.toFixed(2)} {t("Common.kg", "kg")}
@@ -728,7 +736,7 @@ export default function UnloadingProducts({
                           {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedContainersCountIs", "Expected containers count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.expectedCrates}
-                          </Text>
+                          </Text>{" "}
                           {t("Mismatch.ButReceivedContainerCountIs", ", but received container count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.receivedCrates}

@@ -1137,7 +1137,10 @@
     "Grade": "தரம்",
     "MarkAsUnloaded": "இறக்கப்பட்டதாகக் குறிக்கவும்",
     "SuccessTitle": "வெற்றிகரமாக இறக்கப்பட்டது!",
-    "MismatchDetected": "முரண்பாடு கண்டறியப்பட்டது"
+    "MismatchDetected": "முரண்பாடு கண்டறியப்பட்டது",
+    "GoBackConfirmation": "நீங்கள் திரும்பிச் செல்ல விரும்புகிறீர்களா?",
+    "GoBack": "திரும்பிச் செல்லவும்",
+    "Cancel": "ரத்துசெய்"
   },
   "WeighGrade": {
     "Title": "எடையை அளவிடவும்",
@@ -1152,7 +1155,7 @@
     "MaxContainersMessage": "இந்த தரத்திற்கான மொத்த ஏற்றப்பட்ட பெட்டிகளை {{max}} தாண்ட முடியாது.",
     "NoOfCrates": "--பெட்டிகளின் எண்ணிக்கை--",
     "NoOfContainers": "--பெட்டிகளின் எண்ணிக்கை--",
-    "DeleteConfirmation": "சேர்க்கப்பட்ட\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ஐ நீக்க விரும்புகிறீர்களா?",
+    "DeleteConfirmation": "சேர்க்கப்பட்ட\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}} ஐ நீக்க விரும்புகிறீர்களா?",
     "Delete": "நீக்கு",
     "Cancel": "ரத்துசெய்"
   },

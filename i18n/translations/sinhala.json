@@ -1096,7 +1096,7 @@
     "Title": "නිෂ්පාදන බෑම",
     "Subtitle": "ඔබට බෑමට අවශ්‍ය නිෂ්පාදනය මත ක්ලික් කරන්න.",
     "ToWeigh": "බර කිරීමට",
-    "Weighed": "බර කිරූ",
+    "Weighed": "බර කිරන ලද",
     "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
     "ReportMismatch": "වෙනස වාර්තා කරන්න",
     "ReportedMismatch": "වෙනස වාර්තා කර ඇත",
@@ -1137,7 +1137,10 @@
     "Grade": "ශ්‍රේණිය",
     "MarkAsUnloaded": "බාන ලද බව සලකුණු කරන්න",
     "SuccessTitle": "සාර්ථකව බාන ලදී!",
-    "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත"
+    "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
+    "GoBackConfirmation": "ඔබට ආපසු යාමට අවශ්‍ය බව සහතිකද?",
+    "GoBack": "ආපසු යන්න",
+    "Cancel": "අවලංගු කරන්න"
   },
   "WeighGrade": {
     "Title": "බර කිරන්න",
@@ -1152,7 +1155,7 @@
     "MaxContainersMessage": "මෙම ශ්‍රේණිය සඳහා පටවන ලද මුළු පෙට්ටි {{max}} ඉක්මවිය නොහැක.",
     "NoOfCrates": "--පෙට්ටි ගණන--",
     "NoOfContainers": "--පෙට්ටි ගණන--",
-    "DeleteConfirmation": "එකතු කරන ලද\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ඉවත් කිරීම ගැන ඔබට විශ්වාසද?",
+    "DeleteConfirmation": "එකතු කරන ලද\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}} ඉවත් කිරීම ගැන ඔබට විශ්වාසද?",
     "Delete": "මකන්න",
     "Cancel": "අවලංගු කරන්න"
   },

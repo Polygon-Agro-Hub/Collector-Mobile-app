@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -126,6 +127,27 @@ export default function WeighTheLoad({
   const [cropData, setCropData] = useState<CropWeighData>(getInitialCropData);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [gradeToDelete, setGradeToDelete] = useState<GradeWeighItem | null>(null);
+  const [showBackConfirmModal, setShowBackConfirmModal] = useState<boolean>(false);
+
+  const handleBackPress = useCallback(() => {
+    setShowBackConfirmModal(true);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        handleBackPress();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [handleBackPress])
+  );
 
   // Sync on route parameter changes (e.g. returning with updatedGrade)
   useEffect(() => {
@@ -524,6 +546,8 @@ export default function WeighTheLoad({
       <CustomHeader
         title={t("WeighTheLoad.Title", "Weigh the load")}
         navigation={navigation}
+        showBackButton={true}
+        onBackPress={handleBackPress}
       />
 
       <ScrollView
@@ -570,7 +594,15 @@ export default function WeighTheLoad({
               {t("WeighTheLoad.TotalWeight", "Total Weight")}
             </Text>
             <Text className="text-white font-extrabold text-lg mt-0.5">
-              {cropData.totalWeightKg.toFixed(2)} {t("Common.kg", "kg")}
+              {cropData.totalWeightKg.toFixed(2)}{" "}
+              <Text
+                style={{
+                  fontSize: i18n.language?.startsWith("si") ? 11 : 12,
+                  fontWeight: "normal",
+                }}
+              >
+                {t("Common.kg", "kg")}
+              </Text>
             </Text>
           </View>
 
@@ -644,7 +676,16 @@ export default function WeighTheLoad({
                       {t("WeighTheLoad.LoadedWeight", "Loaded Weight")}
                     </Text>
                     <Text className="font-bold text-base text-[#17262C] mt-0.5">
-                      {grade.loadedWeightKg.toFixed(2)} {t("Common.kg", "kg")}
+                      {grade.loadedWeightKg.toFixed(2)}{" "}
+                      <Text
+                        style={{
+                          fontSize: i18n.language?.startsWith("si") ? 10.5 : 11.5,
+                          fontWeight: "normal",
+                          color: "#4E5273",
+                        }}
+                      >
+                        {t("Common.kg", "kg")}
+                      </Text>
                     </Text>
                   </View>
 
@@ -692,9 +733,31 @@ export default function WeighTheLoad({
                           : ""
                         }`}
                     >
-                      {grade.unloadedWeightKg !== null
-                        ? `${grade.unloadedWeightKg.toFixed(2)} ${t("Common.kg", "kg")}`
-                        : `---- ${t("Common.kg", "kg")}`}
+                      {grade.unloadedWeightKg !== null ? (
+                        <>
+                          {grade.unloadedWeightKg.toFixed(2)}{" "}
+                          <Text
+                            style={{
+                              fontSize: i18n.language?.startsWith("si") ? 10.5 : 11.5,
+                              fontWeight: "normal",
+                            }}
+                          >
+                            {t("Common.kg", "kg")}
+                          </Text>
+                        </>
+                      ) : (
+                        <>
+                          ----{" "}
+                          <Text
+                            style={{
+                              fontSize: i18n.language?.startsWith("si") ? 10.5 : 11.5,
+                              fontWeight: "normal",
+                            }}
+                          >
+                            {t("Common.kg", "kg")}
+                          </Text>
+                        </>
+                      )}
                     </Text>
                   </View>
 
@@ -767,15 +830,24 @@ export default function WeighTheLoad({
                 <Text className="text-xs text-black leading-5">
                   {t("Mismatch.Point1", "1.")} {t("Mismatch.Expected", "Expected")}{" "}
                   <Text className="font-bold">
-                    {mismatch.expectedKg.toFixed(2)} {t("Common.kg", "kg")}
-                  </Text>
+                    {mismatch.expectedKg.toFixed(2)}{" "}
+                    <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
+                      {t("Common.kg", "kg")}
+                    </Text>
+                  </Text>{" "}
                   {t("Mismatch.ButMeasured", ", but measured")}{" "}
                   <Text className="font-bold">
-                    {mismatch.measuredKg.toFixed(2)} {t("Common.kg", "kg")}
+                    {mismatch.measuredKg.toFixed(2)}{" "}
+                    <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
+                      {t("Common.kg", "kg")}
+                    </Text>
                   </Text>
                   {t("Mismatch.DifferenceIs", ". Difference is")}{" "}
                   <Text className="font-bold">
-                    {mismatch.differenceKg.toFixed(2)} {t("Common.kg", "kg")}
+                    {mismatch.differenceKg.toFixed(2)}{" "}
+                    <Text style={{ fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5, fontWeight: "normal" }}>
+                      {t("Common.kg", "kg")}
+                    </Text>
                   </Text>
                   .
                 </Text>
@@ -786,7 +858,7 @@ export default function WeighTheLoad({
                       {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedContainersCountIs", "Expected containers count is")}{" "}
                       <Text className="font-bold">
                         {mismatch.expectedCrates}
-                      </Text>
+                      </Text>{" "}
                       {t("Mismatch.ButReceivedContainerCountIs", ", but received container count is")}{" "}
                       <Text className="font-bold">
                         {mismatch.receivedCrates}
@@ -832,9 +904,26 @@ export default function WeighTheLoad({
         message={`Are you sure you want to delete added\n${getLocalizedProductName(cropData, i18n.language) || cropData.name} - ${t("WeighTheLoad.Grade", "Grade")} ${extractGradeLetter(gradeToDelete?.gradeTitle)} ?`}
         onConfirm={handleConfirmDeleteGrade}
         onCancel={() => setGradeToDelete(null)}
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t("WeighTheLoad.Delete", "Delete")}
+        cancelText={t("WeighTheLoad.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+      />
+
+      {/* Go Back Warning Confirmation Modal */}
+      <WarningConfirmation
+        visible={showBackConfirmModal}
+        message={t(
+          "WeighTheLoad.GoBackConfirmation",
+          "Are you sure you want to go back?"
+        )}
+        onConfirm={() => {
+          setShowBackConfirmModal(false);
+          navigation.goBack();
+        }}
+        onCancel={() => setShowBackConfirmModal(false)}
+        confirmText={t("WeighTheLoad.GoBack", "Go Back")}
+        cancelText={t("WeighTheLoad.Cancel", "Cancel")}
+        confirmButtonBgClass="bg-[#000000] active:bg-gray-800"
       />
 
       {/* Wi-Fi Scale Selection Modal */}

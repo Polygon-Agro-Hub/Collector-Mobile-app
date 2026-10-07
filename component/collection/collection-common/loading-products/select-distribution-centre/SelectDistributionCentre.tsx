@@ -46,7 +46,7 @@ export default function SelectDistributionCentre({
   navigation,
   route,
 }: SelectDistributionCentreProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const [centres, setCentres] = useState<DistributionCentreItem[]>([]);
@@ -148,6 +148,13 @@ export default function SelectDistributionCentre({
         title={t("SelectDistributionCentre.Title", "Select Distribution Centre")}
         navigation={navigation}
         onBackPress={handleBack}
+        titleStyle={
+          i18n.language?.startsWith("si")
+            ? { fontSize: 13.5, lineHeight: 20 }
+            : i18n.language?.startsWith("ta")
+              ? { fontSize: 14.5, lineHeight: 22 }
+              : undefined
+        }
       />
 
       <View className="flex-1">
