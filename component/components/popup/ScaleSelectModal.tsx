@@ -46,8 +46,8 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   const fetchCurrentNetworkIp = async () => {
     try {
       const state = await NetInfo.fetch();
-      const isOnline = state.isConnected !== false && state.type !== "none";
-      setIsWifiEnabled(isOnline);
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
 
       if (
         state.details &&
@@ -92,9 +92,8 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
     });
 
     const unsubscribeNet = NetInfo.addEventListener((state) => {
-      // Do not use state.isWifiEnabled alone because on Android it returns false if location permission is denied ("Don't Allow")
-      const isOnline = state.isConnected !== false && state.type !== "none";
-      setIsWifiEnabled(isOnline);
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
       if (
         state.details &&
         "ipAddress" in state.details &&

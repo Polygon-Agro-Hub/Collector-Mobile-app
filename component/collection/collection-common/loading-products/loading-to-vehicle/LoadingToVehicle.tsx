@@ -33,6 +33,7 @@ import {
 import axios from "axios";
 import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
+import NetInfo from "@react-native-community/netinfo";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
 type LoadingToVehicleNavigationProps = StackNavigationProp<
@@ -379,13 +380,27 @@ export default function LoadingToVehicle({
   );
   const [isScaleSelectModalVisible, setIsScaleSelectModalVisible] =
     useState<boolean>(false);
+  const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
 
   useEffect(() => {
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
     });
+    const checkWifi = (state: any) => {
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
+    };
+
+    NetInfo.fetch().then(checkWifi);
+    const unsubscribeNetInfo = NetInfo.addEventListener(checkWifi);
+    const interval = setInterval(() => {
+      NetInfo.fetch().then(checkWifi);
+    }, 3000);
+
     return () => {
       unsubscribe();
+      unsubscribeNetInfo();
+      clearInterval(interval);
     };
   }, []);
 
@@ -1025,8 +1040,73 @@ export default function LoadingToVehicle({
         showsVerticalScrollIndicator={false}
       >
         <View>
-          {/* Connect Scale Blue Button - Shown ONLY when scale is NOT connected */}
-          {!scaleStatus.connected && (
+          {/* Scale Status Card: Red (Wi-Fi Off), Blue (Wi-Fi On & Not Connected), Yellow (Connected) */}
+          {!isWifiEnabled ? (
+            /* State 1: Wi-Fi Off - #E91233 background, white text/icon */
+            <TouchableOpacity
+              activeOpacity={0.88}
+              onPress={() => {
+                Alert.alert(
+                  "Wi-Fi is not enabled!",
+                  "Please enable the Wi-Fi to connect with the Scale.",
+                  [{ text: "OK" }],
+                  { type: "error", autoClose: false, showOkButton: true } as any
+                );
+              }}
+              style={{
+                marginTop: 4,
+                marginBottom: 12,
+                backgroundColor: "#E91233",
+                borderRadius: 28,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: "#FFFFFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "#FFFFFF",
+                    letterSpacing: -0.2,
+                  }}
+                >
+                  {t("ScaleSelectModal.WifiOffTitle", "Wi-Fi is Off")}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: "#FFFFFF",
+                    fontWeight: "500",
+                    marginTop: 1,
+                    lineHeight: 16,
+                    opacity: 0.9,
+                  }}
+                >
+                  {t("ScaleSelectModal.WifiOffMessage", "Please turn on Wi-Fi on your phone to connect to the scale.")}
+                </Text>
+              </View>
+
+              <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+            </TouchableOpacity>
+          ) : !scaleStatus.connected ? (
+            /* State 2: Wi-Fi On & Not Connected - #1266FD background, white text/icon */
             <TouchableOpacity
               activeOpacity={0.88}
               onPress={() => setIsScaleSelectModalVisible(true)}
@@ -1069,7 +1149,62 @@ export default function LoadingToVehicle({
 
               <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
             </TouchableOpacity>
-          )}
+          ) : scaleStatus.connected && scaleStatus.scale ? (
+            /* State 3: Scale Connected - #FAE432 background, black text/icon */
+            <TouchableOpacity
+              activeOpacity={0.88}
+              onPress={() => setIsScaleSelectModalVisible(true)}
+              style={{
+                marginTop: 4,
+                marginBottom: 12,
+                backgroundColor: "#FAE432",
+                borderRadius: 28,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: "#000000",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <MaterialCommunityIcons name="wifi" size={24} color="#FFFFFF" />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    fontWeight: "bold",
+                    color: "#000000",
+                    letterSpacing: -0.3,
+                  }}
+                >
+                  {t("ScaleSelectModal.ScaleConnected", "Scale Connected")}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "500",
+                    color: "#000000",
+                    marginTop: 1,
+                  }}
+                >
+                  {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
+                </Text>
+              </View>
+
+              <MaterialIcons name="chevron-right" size={26} color="#000000" />
+            </TouchableOpacity>
+          ) : null}
 
           {/* Top Carousel of Saved Varieties (shown when items exist) */}
           {savedVarieties.length > 0 && (

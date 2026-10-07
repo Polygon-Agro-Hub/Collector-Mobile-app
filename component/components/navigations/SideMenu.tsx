@@ -9,8 +9,9 @@ import {
   Alert,
   BackHandler,
   Modal,
+  Switch,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import axios from "axios";
@@ -25,6 +26,10 @@ import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { ROLES } from "@/constants/user-roles";
+import {
+  isQuickAccessScaleEnabled,
+  setQuickAccessScaleEnabled,
+} from "@/utils/scale/scale-storage";
 
 type SideMenuNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -71,6 +76,18 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const { changeLanguage } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [jobRole, setJobRole] = useState<string | null>(null);
+  const [isQuickAccessEnabled, setIsQuickAccessEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    isQuickAccessScaleEnabled().then((val) => {
+      setIsQuickAccessEnabled(val);
+    });
+  }, []);
+
+  const handleToggleQuickAccess = async (val: boolean) => {
+    setIsQuickAccessEnabled(val);
+    await setQuickAccessScaleEnabled(val);
+  };
 
   useEffect(() => {
     const fetchJobRole = async () => {
@@ -104,6 +121,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
       } else {
         setSelectedLanguage("ENGLISH");
       }
+      isQuickAccessScaleEnabled().then((val) => {
+        setIsQuickAccessEnabled(val);
+      });
     }, [i18n.language]),
   );
   useEffect(() => {
@@ -398,6 +418,25 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
               {t("SideMenu.ChangePassword")}
             </Text>
           </TouchableOpacity>
+
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          {/* Quick Access to Scale */}
+          <View className="flex-row items-center justify-between py-2">
+            <View className="flex-row items-center flex-1 pr-2">
+              <MaterialCommunityIcons name="scale" size={22} color="black" />
+              <Text className="text-lg ml-2 font-normal text-black">
+                {t("SideMenu.Quick Access to Scale", "Quick Access to Scale")}
+              </Text>
+            </View>
+            <Switch
+              value={isQuickAccessEnabled}
+              onValueChange={handleToggleQuickAccess}
+              trackColor={{ false: "#e2e8f0", true: "#007AFF" }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor="#e2e8f0"
+            />
+          </View>
 
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 
