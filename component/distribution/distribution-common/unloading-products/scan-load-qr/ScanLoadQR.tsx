@@ -47,7 +47,7 @@ export interface VerifiedLoadData {
 const PRIMARY_OUTLINE_COLOR = "#980775";
 
 const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
@@ -272,7 +272,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       const code = errData?.code;
 
       if (code === "DISTRIBUTION_CENTER_MISMATCH") {
-        setModalTitle(t("qrcode.Error", "Error!"));
+        setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
         setModalMessage(
           t(
             "qrcode.CenterMismatch",
@@ -470,6 +470,13 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
           navigation={navigation}
           iconBgColor="#F7FAFF"
           bgColor="#FFFFFF"
+          titleStyle={
+            i18n.language?.startsWith("si")
+              ? { fontSize: 16.5, lineHeight: 20 }
+              : i18n.language?.startsWith("ta")
+                ? { fontSize: 14.5, lineHeight: 22 }
+                : undefined
+          }
         />
 
         {/* Scan Frame Container */}

@@ -807,6 +807,7 @@ export default function WeighGrade({
           {
             productName,
             gradeLabel: `${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)}`,
+            grade: extractGradeLetter(gradeTitle),
             setLabel: t("WeighGrade.Set", "Set"),
             setNumber: setToDelete?.setNumber || 1,
             defaultValue: `Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`,

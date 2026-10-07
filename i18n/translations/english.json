@@ -229,7 +229,7 @@
     "Replace request approved successfully": "Replace request approved successfully",
     "Please select a product and enter quantity": "Please select a product and enter quantity",
     "Session Expired": "Session expired",
-    "Your token has expired. Please log in again.":"Your token has expired. Please log in again.",
+    "Your token has expired. Please log in again.": "Your token has expired. Please log in again.",
     "Session expired": "Session expired. Please login again.",
     "Failed to complete order": "Failed to complete order. Please try again.",
     "Info": "Info",
@@ -512,13 +512,13 @@
     "varietyName": "Variety Name",
     "VarietyPlaceholder": "Enter variety name",
     "SubTotal": "Sub Total",
-    "ClearAndDelete":"Clear & Delete",
+    "ClearAndDelete": "Clear & Delete",
     "Quantity": "Quantity (Kg)",
     "FillDetails": "Fill Details",
     "Select": "Select Crop",
     "SelectCrop": "--Select Crop--",
     "SelectVariety": "--Select Variety--",
-     "Processing...": "Processing...",
+    "Processing...": "Processing...",
     "SelectCropPlaceholder": "Select Crop",
     "GradeA": "Grade A",
     "GradeB": "Grade B",
@@ -581,13 +581,13 @@
     "Done": "Done",
     "DeleteGradeConfirmation": "Are you sure you want to delete {{grade}} of {{varietyName}}?",
     "DeleteVarietyConfirmation": "Are you sure you want to delete {{varietyName}} form data?",
-    "GradeA_Rs":"Grade A (Rs.)",
-    "GradeB_Rs":"Grade B (Rs.)",
-    "GradeC_Rs":"Grade C (Rs.)",
-    "GrandTotal_Rs":"Grand Total (Rs.)",
-    "Auto Fill":"--Auto Fill--",
-    "AddMore":"Add More",
-    "FinishCollection":"Finish Collection"
+    "GradeA_Rs": "Grade A (Rs.)",
+    "GradeB_Rs": "Grade B (Rs.)",
+    "GradeC_Rs": "Grade C (Rs.)",
+    "GrandTotal_Rs": "Grand Total (Rs.)",
+    "Auto Fill": "--Auto Fill--",
+    "AddMore": "Add More",
+    "FinishCollection": "Finish Collection"
   },
   "GoodsReceivedNote": {
     "LNG": "en",
@@ -1209,7 +1209,10 @@
     "Grade": "Grade",
     "MarkAsUnloaded": "Mark as Unloaded",
     "SuccessTitle": "Unloaded Successfully!",
-    "MismatchDetected": "Mismatch Detected"
+    "MismatchDetected": "Mismatch Detected",
+    "GoBackConfirmation": "Are you sure you want to go back?",
+    "GoBack": "Go Back",
+    "Cancel": "Cancel"
   },
   "WeighGrade": {
     "Title": "Weigh the load",
@@ -1225,7 +1228,7 @@
     "MaxContainersMessage": "Cannot exceed the total loaded containers of {{max}} for this grade.",
     "NoOfCrates": "--No. of Containers--",
     "NoOfContainers": "--No. of Containers--",
-    "DeleteConfirmation": "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
+    "DeleteConfirmation": "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}}?",
     "Delete": "Delete",
     "Cancel": "Cancel"
   },
@@ -1374,7 +1377,7 @@
     "ScanLoadQR": "Scan Load QR",
     "AlignLoadQR": "Align the Load QR code within the frame to scan",
     "InvalidLoadQR": "Invalid QR code.\nPlease scan a valid Load QR code.",
-    "CenterMismatch": "This load is not assigned to your distribution center.",
+    "CenterMismatch": "This load is not assigned to your distribution centre.",
     "JourneyNotEnded": "This load's journey has not ended yet.\nPlease wait until the driver marks the journey as completed.",
     "LoadCode": "Load",
     "Vehicle": "Vehicle",
@@ -1833,7 +1836,7 @@
     "Yes, Save": "Yes, Save",
     "Done": "Done",
     "Failed to save signature": "Failed to save signature. Please try again.",
-    "Preparing signature pad":"Preparing signature pad..."
+    "Preparing signature pad": "Preparing signature pad..."
   },
   "PurchaseShortage": {
     "Assigned Products": "Assigned Products",
