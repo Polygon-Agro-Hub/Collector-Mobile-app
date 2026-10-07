@@ -35,6 +35,7 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
   const loadCode = route.params?.loadCode || "";
   const vehicleNo = route.params?.vehicleNo || "";
   const driverId = route.params?.driverId || "";
+  const driverEmpId = route.params?.driverEmpId || (route.params?.driverId && /^DRV/i.test(route.params.driverId) ? route.params.driverId : "");
   const driverName = route.params?.driverName || "";
   const driverNameEnglish = route.params?.driverNameEnglish || "";
   const driverNameSinhala = route.params?.driverNameSinhala || "";
@@ -62,6 +63,7 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
       loadCode,
       vehicleNo,
       driverId,
+      driverEmpId: driverEmpId || driverId,
       driverName,
       driverNameEnglish,
       driverNameSinhala,

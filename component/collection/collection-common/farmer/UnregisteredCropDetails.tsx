@@ -773,9 +773,17 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         if (g.gradeKey === gradeKey) {
           return {
             ...g,
-            sets: g.sets.map((s) =>
-              s.id === setId ? { ...s, crates: sanitized } : s,
-            ),
+            sets: g.sets.map((s) => {
+              if (s.id === setId) {
+                const isCratesChanged = s.crates !== sanitized;
+                return {
+                  ...s,
+                  crates: sanitized,
+                  weight: isCratesChanged ? null : s.weight,
+                };
+              }
+              return s;
+            }),
           };
         }
         return g;
@@ -1781,6 +1789,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       name="keyboard-arrow-down"
                       size={22}
                       color="#9CA3AF"
+                      style={{ alignSelf: "center", flexShrink: 0 }}
                     />
                   </TouchableOpacity>
 
@@ -1844,7 +1853,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                           name="keyboard-arrow-down"
                           size={22}
                           color="#9CA3AF"
-                          style={{ alignSelf: "center" }}
+                          style={{ alignSelf: "center", flexShrink: 0 }}
                         />
                       </>
                     )}

@@ -128,6 +128,14 @@ export default function SentProductsToday({
     return String(index + 1).padStart(2, "0");
   };
 
+  const formatWeight = (weight?: string | number) => {
+    if (weight === undefined || weight === null || weight === "") return "";
+    const cleaned = weight.toString().replace(/[^0-9.]/g, "");
+    const num = parseFloat(cleaned);
+    if (isNaN(num)) return weight.toString();
+    return `${num} ${t("Common.kg", "kg")}`;
+  };
+
   const formatDisplayTime = (timeStr?: string) => {
     if (!timeStr) return "";
     let str = timeStr;
@@ -204,6 +212,7 @@ export default function SentProductsToday({
                       loadCode: item.transferCode,
                       vehicleNo: item.vehicleNo,
                       driverId: item.driverEmpId || locDriverName,
+                      driverEmpId: item.driverEmpId,
                       driverName: locDriverName,
                       driverNameEnglish: item.driverNameEnglish,
                       driverNameSinhala: item.driverNameSinhala,
@@ -244,7 +253,7 @@ export default function SentProductsToday({
                 {/* Load Information */}
                 <View className="flex-1">
                   <Text className="font-extrabold text-[#030E25] text-base">
-                    {t("SentProductsToday.Containers", "Containers")} : {item.crates} | {item.weight ? item.weight.replace(/kg/i, t("Common.kg", "kg")) : ""}
+                    {t("SentProductsToday.Containers", "Containers")} : {item.crates} | {formatWeight(item.weight)}
                   </Text>
                   <Text className="text-xs text-[#030E25] mt-1 font-medium">
                     {item.destination}

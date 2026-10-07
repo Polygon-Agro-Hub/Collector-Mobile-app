@@ -1994,7 +1994,10 @@
     "UnauthorizedMessage": "Driver access has been rejected.\nPlease contact the company\nfor assistance.",
     "ScanTimeout": "Scan Timeout",
     "ScanTimeoutMessage": "The QR code could not be detected within the time limit. Please check and try again.",
-    "AlignDriverQR": "Align the Driver QR code within the frame to scan"
+    "AlignDriverQR": "Align the Driver QR code within the frame to scan",
+    "IdentifyingDriver": "Identifying Driver...",
+    "LoadingCamera": "Loading camera...",
+    "VerifyFailed": "Something went wrong. Please try again."
   },
   "SelectDistributionCentre": {
     "Title": "Select Distribution Centre",

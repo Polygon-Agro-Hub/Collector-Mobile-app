@@ -228,7 +228,7 @@
     "Replace request approved successfully": "ප්‍රතිස්ථාපන ඉල්ලීම සාර්ථකව අනුමත කරන ලදී",
     "Please select a product and enter quantity": "කරුණාකර නිෂ්පාදනයක් තෝරා එහි ප්‍රමාණය ඇතුළත් කරන්න.",
     "Session Expired": "ඇතුල්වීම කල් ඉකුත් විය",
-    "Your token has expired. Please log in again.":"ඔබේ ටෝකනයේ වලංගු කාලය අවසන් වී ඇත. කරුණාකර නැවත පිවිසෙන්න.",
+    "Your token has expired. Please log in again.": "ඔබේ ටෝකනයේ වලංගු කාලය අවසන් වී ඇත. කරුණාකර නැවත පිවිසෙන්න.",
     "Session expired": "ඇතුල්වීම කල් ඉකුත් විය. කරුණාකර නැවත පුරනය වන්න.",
     "Failed to complete order": "ඇණවුම සම්පූර්ණ කිරීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
     "Info": "තොරතුරු",
@@ -514,7 +514,7 @@
     "Variety": "ප්‍රභේදය",
     "UnitGrades": "ශ්‍රේණි අනුව ඒකකයක මිල",
     "SubTotal": "මුළු එකතුව",
-    "ClearAndDelete":"මකා දමා ඉවත් කරන්න",
+    "ClearAndDelete": "මකා දමා ඉවත් කරන්න",
     "Total": "එකතුව (රු.)",
     "Add": "අයිතම එකතු කරන්න",
     "Done": "තහවුරු කරන්න",
@@ -536,7 +536,7 @@
     "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න.",
     "DeleteGradeConfirmation": "{{varietyName}} හි {{grade}} මකා දැමීමට ඔබට විශ්වාසද?",
     "DeleteVarietyConfirmation": "එක් කළ {{varietyName}} ශ්‍රේණිය මකා දැමීමට ඔබට විශ්වාසද?",
-     "GradeA_Rs": "A ශ්‍රේණිය (රු.)",
+    "GradeA_Rs": "A ශ්‍රේණිය (රු.)",
     "GradeB_Rs": "B ශ්‍රේණිය (රු.)",
     "GradeC_Rs": "C ශ්‍රේණිය (රු.)",
     "GrandTotal_Rs": "මුළු එකතුව (රු.)",
@@ -1666,7 +1666,7 @@
     "End Shift Confirmation": "{{row}} හි {{pos}} සඳහා සේවා මුරය අවසන් කිරීමට ඔබට විශ්වාසද?",
     "End": "අවසන් කරන්න",
     "Position already occupied today": "මෙම ස්ථානය අද දින වෙනත් නිලධාරියෙකු විසින් දැනටමත් භාවිත කරමින් සිටී.",
-"Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය."
+    "Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය."
   },
   "QRHandling": {
     "QR Handling": "QR හැසිරවීම",
@@ -1756,7 +1756,7 @@
     "Yes, Save": "ඔව්, සුරකින්න",
     "Done": "සම්පූර්ණයි",
     "Failed to save signature": "අත්සන සුරැකීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
-    "Preparing signature pad":"අත්සන් තැබීමේ පුවරුව සූදානම් කරමින්..."
+    "Preparing signature pad": "අත්සන් තැබීමේ පුවරුව සූදානම් කරමින්..."
   },
   "PurchaseShortage": {
     "Assigned Products": "පවරන ලද නිෂ්පාදන",
@@ -1914,10 +1914,13 @@
     "Driver": "රියදුරු",
     "InvalidQR": "වලංගු නොවන QR කේතයකි.\nකරුණාකර වලංගු රියදුරු QR කේතයක් ස්කෑන් කරන්න.",
     "Unauthorized": "අවසර නැත!",
-    "UnauthorizedMessage": "රියදුරු ප්රවේශය ප්රතික්ෂේප කර ඇත.\nඋදව් සඳහා කරුණාකර සමාගම හා සම්බන්ධ වන්න.",
+    "UnauthorizedMessage": "රියදුරු ප්‍රවේශය ප්‍රතික්ෂේප කර ඇත.\nඋදව් සඳහා කරුණාකර සමාගම හා සම්බන්ධ වන්න.",
     "ScanTimeout": "ස්කෑන් කිරීමේ කාලය අවසන්",
     "ScanTimeoutMessage": "QR කේතය නියමිත කාල සීමාව තුළ හඳුනාගත නොහැකි විය. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.",
-    "AlignDriverQR": "ස්කෑන් කිරීමට රියදුරු QR කේතය රාමුව තුළ තබන්න"
+    "AlignDriverQR": "ස්කෑන් කිරීමට රියදුරු QR කේතය රාමුව තුළ තබන්න",
+    "IdentifyingDriver": "රියදුරු හඳුනාගනිමින් පවතී...",
+    "LoadingCamera": "කැමරාව පූරණය වෙමින්...",
+    "VerifyFailed": "දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න."
   },
   "SelectDistributionCentre": {
     "Title": "බෙදාහැරීමේ මධ්‍යස්ථානය තෝරන්න",

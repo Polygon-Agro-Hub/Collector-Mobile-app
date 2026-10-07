@@ -9,9 +9,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -218,6 +219,39 @@ export default function LoadingToVehicle({
       payload: savedVarieties,
     });
   }, [savedVarieties]);
+
+  const handleBack = () => {
+    navigation.navigate("SelectDistributionCentre", {
+      driverId: route.params?.driverId,
+      driverEmpId: route.params?.driverEmpId,
+      driverName: route.params?.driverName,
+      driverNameEnglish: route.params?.driverNameEnglish,
+      driverNameSinhala: route.params?.driverNameSinhala,
+      driverNameTamil: route.params?.driverNameTamil,
+      vehicleId: route.params?.vehicleId,
+      vehicleNo: route.params?.vehicleNo,
+      vType: route.params?.vType,
+      vCapacity: route.params?.vCapacity,
+    });
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        handleBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [navigation, route.params]),
+  );
 
   // Synchronize current working variety with Redux store
   useEffect(() => {
@@ -588,9 +622,17 @@ export default function LoadingToVehicle({
         if (g.gradeKey === gradeKey) {
           return {
             ...g,
-            sets: g.sets.map((s) =>
-              s.id === setId ? { ...s, crates: sanitized } : s
-            ),
+            sets: g.sets.map((s) => {
+              if (s.id === setId) {
+                const isCratesChanged = s.crates !== sanitized;
+                return {
+                  ...s,
+                  crates: sanitized,
+                  weight: isCratesChanged ? null : s.weight,
+                };
+              }
+              return s;
+            }),
           };
         }
         return g;
@@ -719,12 +761,18 @@ export default function LoadingToVehicle({
     };
 
     setSavedVarieties((prev) => {
-      const nextList = [...prev, newSavedVariety];
+      const nextList = [
+        ...prev,
+        {
+          ...newSavedVariety,
+          varietyNumber: prev.length + 1,
+        },
+      ];
       setCarouselIndex(nextList.length - 1);
+      setVarietyIndex(nextList.length + 1);
       return nextList;
     });
 
-    setVarietyIndex((prev) => prev + 1);
     setSelectedCrop(null);
     setSelectedVariety(null);
     setGrades(createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null));
@@ -733,12 +781,21 @@ export default function LoadingToVehicle({
   // Delete an entire saved variety from carousel
   const handleDeleteSavedVariety = (varietyId: string) => {
     setSavedVarieties((prev) => {
-      const filtered = prev.filter((v) => v.id !== varietyId);
+      const filtered = prev
+        .filter((v) => v.id !== varietyId)
+        .map((v, idx) => ({
+          ...v,
+          varietyNumber: idx + 1,
+        }));
+
       if (carouselIndex >= filtered.length && filtered.length > 0) {
         setCarouselIndex(filtered.length - 1);
       } else if (filtered.length === 0) {
         setCarouselIndex(0);
       }
+
+      setVarietyIndex(filtered.length + 1);
+
       return filtered;
     });
   };
@@ -749,7 +806,12 @@ export default function LoadingToVehicle({
       const updated = prev
         .map((v) => {
           if (v.id === varietyId) {
-            const filteredSets = v.sets.filter((s) => s.id !== setId);
+            const filteredSets = v.sets
+              .filter((s) => s.id !== setId)
+              .map((s, idx) => ({
+                ...s,
+                setNumber: idx + 1,
+              }));
             return {
               ...v,
               sets: filteredSets,
@@ -757,13 +819,20 @@ export default function LoadingToVehicle({
           }
           return v;
         })
-        .filter((v) => v.sets.length > 0);
+        .filter((v) => v.sets.length > 0)
+        .map((v, idx) => ({
+          ...v,
+          varietyNumber: idx + 1,
+        }));
 
       if (carouselIndex >= updated.length && updated.length > 0) {
         setCarouselIndex(updated.length - 1);
       } else if (updated.length === 0) {
         setCarouselIndex(0);
       }
+
+      setVarietyIndex(updated.length + 1);
+
       return updated;
     });
   };
@@ -918,7 +987,11 @@ export default function LoadingToVehicle({
   if (cropsLoading) {
     return (
       <View className="flex-1 bg-white">
-        <CustomHeader title={vehicleNo} navigation={navigation} />
+        <CustomHeader
+          title={vehicleNo}
+          navigation={navigation}
+          onBackPress={handleBack}
+        />
         <LoadingPage
           message={t("LoadingToVehicle.LoadingCrops", "Loading...")}
         />
@@ -936,6 +1009,7 @@ export default function LoadingToVehicle({
       <CustomHeader
         title={vehicleNo}
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       <ScrollView
@@ -1133,13 +1207,15 @@ export default function LoadingToVehicle({
               className="bg-[#F4F6F9] rounded-full h-[50px] px-4 flex-row items-center justify-between"
             >
               <Text
-                className={`text-sm font-medium ${
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className={`text-sm font-medium flex-1 mr-2 ${
                   selectedCrop ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
               >
                 {selectedCrop?.label || t("LoadingToVehicle.SelectCrop", "--Select Crop--")}
               </Text>
-              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
+              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" style={{ flexShrink: 0 }} />
             </TouchableOpacity>
           </View>
 
@@ -1157,14 +1233,16 @@ export default function LoadingToVehicle({
               }`}
             >
               <Text
-                className={`text-sm font-medium ${
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className={`text-sm font-medium flex-1 mr-2 ${
                   selectedVariety ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
               >
                 {selectedVariety?.label ||
                   t("LoadingToVehicle.SelectVariety", "--Select Variety--")}
               </Text>
-              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
+              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" style={{ flexShrink: 0 }} />
             </TouchableOpacity>
           </View>
 
