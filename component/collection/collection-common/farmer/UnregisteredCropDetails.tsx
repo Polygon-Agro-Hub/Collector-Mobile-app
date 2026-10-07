@@ -135,73 +135,6 @@ interface UnregisteredCropDetailsProps {
   route: UnregisteredCropDetailsRouteProp;
 }
 
-interface DeleteModalProps {
-  visible: boolean;
-  title: string;
-  message: string;
-  onCancel: () => void;
-  onDelete: () => void;
-}
-
-const DeleteModal: React.FC<DeleteModalProps> = ({
-  visible,
-  title,
-  message,
-  onCancel,
-  onDelete,
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      statusBarTranslucent={true}
-    >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingHorizontal: 20,
-        }}
-      >
-        <View className="bg-white rounded-xl p-6 items-center min-w-[280px] max-w-[320px]">
-          <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg justify-center items-center mb-4">
-            <Image
-              source={require("../../../../assets/images/collection-common/error-center-target.webp")}
-              style={{ width: 20, height: 20 }}
-            />
-          </View>
-          <Text className="text-gray-700 text-base text-center leading-6 mb-6">
-            {message}
-          </Text>
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              className="flex-1 py-3 px-5 border border-gray-300 rounded-lg items-center justify-center min-w-[80px]"
-              onPress={onCancel}
-            >
-              <Text className="text-gray-700 text-base font-medium">
-                {t("UnregisteredCropDetails.Cancel")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 py-3 px-5 bg-red-500 rounded-lg items-center justify-center min-w-[80px]"
-              onPress={onDelete}
-            >
-              <Text className="text-white text-base font-medium">
-                {t("UnregisteredCropDetails.Delete")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
 const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   navigation,
 }) => {
@@ -268,6 +201,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     varietyName: "",
     grade: "A" as "A" | "B" | "C",
   });
+
+  const [
+    deletePendingVarietyModalVisible,
+    setDeletePendingVarietyModalVisible,
+  ] = useState(false);
 
   const [isScaleConfigModalVisible, setIsScaleConfigModalVisible] =
     useState(false);
@@ -1847,7 +1785,7 @@ const cropModalData = cropNames
                 {crops.length > 0 && (
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={handleClearAndDeletePending}
+                    onPress={() => setDeletePendingVarietyModalVisible(true)}
                     style={{
                       backgroundColor: "#FEE2E2",
                       borderRadius: 9999,
@@ -2040,7 +1978,7 @@ const cropModalData = cropNames
                           <View
                             style={{
                               flexDirection: "row",
-                              alignItems: "center",
+                              alignItems: "flex-start",
                               flex: 1,
                             }}
                           >
@@ -2058,6 +1996,7 @@ const cropModalData = cropNames
                                 alignItems: "center",
                                 justifyContent: "center",
                                 marginRight: 12,
+                                marginTop: 2,
                               }}
                             >
                               {grade.isSelected && (
@@ -2068,48 +2007,62 @@ const cropModalData = cropNames
                                 />
                               )}
                             </View>
-                            <Text
-                              style={{
-                                fontWeight: "bold",
-                                color: "#0F172A",
-                                fontSize: 15,
-                              }}
-                            >
-                              {t("LoadingToVehicle.Grade", "Grade")}{" "}
-                              {grade.gradeKey}
-                            </Text>
-                            {price !== null && price !== undefined ? (
-                              <Text
+
+                            <View style={{ flex: 1 }}>
+                              <View
                                 style={{
-                                  fontSize: 12,
-                                  color: "#475569",
-                                  fontWeight: "normal",
-                                  marginLeft: 4,
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  flexWrap: "wrap",
                                 }}
                               >
-                                ({t("ReceivedCash.Rs", "Rs.")}
-                                {Number(price).toLocaleString("en-US", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}/
-                                {t("PassTargetBetweenOfficers.kg", "kg")})
-                              </Text>
-                            ) : null}
-                          </View>
+                                <Text
+                                  style={{
+                                    fontWeight: "bold",
+                                    color: "#0F172A",
+                                    fontSize: 15,
+                                  }}
+                                >
+                                  {t("LoadingToVehicle.Grade", "Grade")}{" "}
+                                  {grade.gradeKey}
+                                </Text>
+                                {price !== null && price !== undefined ? (
+                                  <Text
+                                    style={{
+                                      fontSize: 12,
+                                      color: "#475569",
+                                      fontWeight: "normal",
+                                      marginLeft: 4,
+                                    }}
+                                  >
+                                    ({t("ReceivedCash.Rs", "Rs.")}
+                                    {Number(price).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}/
+                                    {t("PassTargetBetweenOfficers.kg", "kg")})
+                                  </Text>
+                                ) : null}
+                              </View>
 
-                          {quantities[grade.gradeKey] ? (
-                            <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
-                              <Text className="text-xs font-bold text-[#000000]">
-                                {Number(
-                                  quantities[grade.gradeKey] || 0,
-                                ).toLocaleString("en-US", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}{" "}
-                                {t("PassTargetBetweenOfficers.kg", "kg")}
-                              </Text>
+                              {quantities[grade.gradeKey] ? (
+                                <View
+                                  className="bg-[#FEF08A] px-3 py-1 rounded-full"
+                                  style={{ alignSelf: "flex-start", marginTop: 6 }}
+                                >
+                                  <Text className="text-xs font-bold text-[#000000]">
+                                    {Number(
+                                      quantities[grade.gradeKey] || 0,
+                                    ).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}{" "}
+                                    {t("PassTargetBetweenOfficers.kg", "kg")}
+                                  </Text>
+                                </View>
+                              ) : null}
                             </View>
-                          ) : null}
+                          </View>
                         </TouchableOpacity>
 
                         {/* Expanded Grade Crate Sets: Separate Boxes */}
@@ -2832,12 +2785,17 @@ const cropModalData = cropNames
               </TouchableOpacity>
             </View>
 
-            <DeleteModal
+            {/* Delete Variety Confirmation Modal */}
+            <WarningConfirmation
               visible={deleteVarietyModal.visible}
-              title={t("UnregisteredCropDetails.ConfirmDelete")}
-              message={t("UnregisteredCropDetails.DeleteVarietyConfirmation", {
-                varietyName: deleteVarietyModal.varietyName,
-              })}
+              message={t(
+                "UnregisteredCropDetails.Are you sure you want to delete previously added",
+                "Are you sure you want to delete previously added {{varietyName}} ?",
+                {
+                  varietyName: deleteVarietyModal.varietyName,
+                },
+              )}
+              onConfirm={handleDeleteVariety}
               onCancel={() =>
                 setDeleteVarietyModal({
                   visible: false,
@@ -2845,18 +2803,23 @@ const cropModalData = cropNames
                   varietyName: "",
                 })
               }
-              onDelete={handleDeleteVariety}
+              confirmText={t("LoadingToVehicle.Delete", "Delete")}
+              cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+              confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
             />
 
-            <DeleteModal
+            {/* Delete Grade Confirmation Modal */}
+            <WarningConfirmation
               visible={deleteGradeModal.visible}
-              title={t("UnregisteredCropDetails.ConfirmDelete")}
-              message={t("UnregisteredCropDetails.DeleteGradeConfirmation", {
-                varietyName: deleteGradeModal.varietyName,
-                grade: t(
-                  `UnregisteredCropDetails.Grade${deleteGradeModal.grade}`,
-                ),
-              })}
+              message={t(
+                "UnregisteredCropDetails.Are you sure you want to delete grade",
+                "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}} ?",
+                {
+                  varietyName: deleteGradeModal.varietyName,
+                  grade: deleteGradeModal.grade,
+                },
+              )}
+              onConfirm={handleDeleteGrade}
               onCancel={() =>
                 setDeleteGradeModal({
                   visible: false,
@@ -2865,7 +2828,29 @@ const cropModalData = cropNames
                   varietyName: "",
                 })
               }
-              onDelete={handleDeleteGrade}
+              confirmText={t("LoadingToVehicle.Delete", "Delete")}
+              cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+              confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+            />
+
+            {/* Clear & Delete Pending Variety Confirmation Modal */}
+            <WarningConfirmation
+              visible={deletePendingVarietyModalVisible}
+              message={t(
+                "UnregisteredCropDetails.DeleteVarietyConfirmation",
+                "Are you sure you want to delete {{varietyName}} form data?",
+                {
+                  varietyName: `${t("UnregisteredCropDetails.Variety", "variety").toLowerCase()} ${cropCount}`,
+                },
+              )}
+              onConfirm={() => {
+                setDeletePendingVarietyModalVisible(false);
+                handleClearAndDeletePending();
+              }}
+              onCancel={() => setDeletePendingVarietyModalVisible(false)}
+              confirmText={t("LoadingToVehicle.Delete", "Delete")}
+              cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+              confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
             />
           </View>
         </View>

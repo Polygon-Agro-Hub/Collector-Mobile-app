@@ -533,6 +533,8 @@
     "Oops": "Oops!",
     "Unsuccessful": "Submission failed. Please try again.",
     "Close": "Close",
+    "Are you sure you want to delete previously added": "Are you sure you want to delete previously added {{varietyName}} ?",
+    "Are you sure you want to delete grade": "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}} ?",
     "Delete": "Delete Variety",
     "DeleteVariety": "Delete Variety",
     "DeleteConfirmation": "Are you sure you want to delete this variety?",

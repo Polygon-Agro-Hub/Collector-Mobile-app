@@ -372,6 +372,9 @@ export default function LoadingToVehicle({
     gradeKey: "A" | "B" | "C";
   } | null>(null);
 
+  // Clear & Delete Pending Variety Confirmation Modal State
+  const [clearAndDeleteModalVisible, setClearAndDeleteModalVisible] = useState(false);
+
   // Scale Connection State
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
     wifiScaleService.getStatus()
@@ -1477,7 +1480,7 @@ export default function LoadingToVehicle({
           {savedVarieties.length > 0 && (
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={handleClearAndDeletePending}
+              onPress={() => setClearAndDeleteModalVisible(true)}
               style={{
                 backgroundColor: "#FEE2E2",
                 borderRadius: 9999,
@@ -2144,8 +2147,8 @@ export default function LoadingToVehicle({
       <WarningConfirmation
         visible={varietyToDelete !== null}
         message={t(
-          "LoadingToVehicle.DeleteVarietyConfirmation",
-          "Are you sure you want to delete previously added {{varietyName}}?",
+          "UnregisteredCropDetails.Are you sure you want to delete previously added",
+          "Are you sure you want to delete previously added {{varietyName}} ?",
           {
             varietyName: varietyToDelete?.varietyLabel || "",
           }
@@ -2166,11 +2169,11 @@ export default function LoadingToVehicle({
       <WarningConfirmation
         visible={savedGradeToDelete !== null}
         message={t(
-          "UnregisteredCropDetails.DeleteGradeConfirmation",
-          "Are you sure you want to delete Grade {{grade}} of {{varietyName}}?",
+          "UnregisteredCropDetails.Are you sure you want to delete grade",
+          "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}} ?",
           {
-            grade: `${t("LoadingToVehicle.Grade", "Grade")} ${savedGradeToDelete?.gradeKey}`,
             varietyName: savedGradeToDelete?.varietyLabel || "",
+            grade: savedGradeToDelete?.gradeKey,
           }
         )}
         onConfirm={() => {
@@ -2183,6 +2186,26 @@ export default function LoadingToVehicle({
           }
         }}
         onCancel={() => setSavedGradeToDelete(null)}
+        confirmText={t("LoadingToVehicle.Delete", "Delete")}
+        cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+      />
+
+      {/* Clear & Delete Pending Variety Warning Confirmation Modal (same as Collection Form) */}
+      <WarningConfirmation
+        visible={clearAndDeleteModalVisible}
+        message={t(
+          "UnregisteredCropDetails.DeleteVarietyConfirmation",
+          "Are you sure you want to delete {{varietyName}} form data?",
+          {
+            varietyName: `${t("LoadingToVehicle.Variety", "variety").toLowerCase()} ${varietyIndex}`,
+          }
+        )}
+        onConfirm={() => {
+          setClearAndDeleteModalVisible(false);
+          handleClearAndDeletePending();
+        }}
+        onCancel={() => setClearAndDeleteModalVisible(false)}
         confirmText={t("LoadingToVehicle.Delete", "Delete")}
         cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
