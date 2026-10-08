@@ -223,7 +223,11 @@ export default function WeighGrade({
 
     if (!cleanText) {
       setSets((prev) =>
-        prev.map((s) => (s.id === setId ? { ...s, crates: "" } : s))
+        prev.map((s) =>
+          s.id === setId
+            ? { ...s, crates: "", weight: s.crates !== "" ? null : s.weight }
+            : s
+        )
       );
       return;
     }
@@ -231,7 +235,11 @@ export default function WeighGrade({
     let num = parseInt(cleanText, 10);
     if (isNaN(num) || num <= 0) {
       setSets((prev) =>
-        prev.map((s) => (s.id === setId ? { ...s, crates: "" } : s))
+        prev.map((s) =>
+          s.id === setId
+            ? { ...s, crates: "", weight: s.crates !== "" ? null : s.weight }
+            : s
+        )
       );
       return;
     }
@@ -249,7 +257,17 @@ export default function WeighGrade({
     }
 
     setSets((prev) =>
-      prev.map((s) => (s.id === setId ? { ...s, crates: String(num) } : s))
+      prev.map((s) => {
+        if (s.id === setId) {
+          const newCrates = String(num);
+          return {
+            ...s,
+            crates: newCrates,
+            weight: s.crates !== newCrates ? null : s.weight,
+          };
+        }
+        return s;
+      })
     );
   };
 
@@ -624,11 +642,6 @@ export default function WeighGrade({
                                 backgroundColor: isSelected ? "#FFFFFF" : "transparent",
                                 justifyContent: "center",
                                 alignItems: "center",
-                                shadowColor: isSelected ? "#000000" : "transparent",
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: isSelected ? 0.08 : 0,
-                                shadowRadius: 2,
-                                elevation: isSelected ? 2 : 0,
                               }}
                             >
                               <Text
@@ -789,6 +802,7 @@ export default function WeighGrade({
           {
             productName,
             gradeLabel: `${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)}`,
+            grade: extractGradeLetter(gradeTitle),
             setLabel: t("WeighGrade.Set", "Set"),
             setNumber: setToDelete?.setNumber || 1,
             defaultValue: `Are you sure you want to delete added\n${productName} - ${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)} - ${t("WeighGrade.Set", "Set")} ${setToDelete?.setNumber} ?`,

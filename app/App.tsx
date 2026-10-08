@@ -38,6 +38,7 @@ import {
   getScreenBackgroundColor,
   getScreenStatusBarStyle,
 } from "@/constants/bleedScreens";
+import { FloatingScaleButton } from "@/component/components/floating/FloatingScaleButton";
 
 
 // Global notifications handler (guarded for Expo Go & standalone)
@@ -268,6 +269,7 @@ function AppContent() {
           autoClose={alertState.autoClose}
           showOkButton={alertState.showOkButton}
         />
+        <FloatingScaleButton currentRoute={currentRoute} />
       </SafeAreaView>
     </GestureHandlerRootView>
   );

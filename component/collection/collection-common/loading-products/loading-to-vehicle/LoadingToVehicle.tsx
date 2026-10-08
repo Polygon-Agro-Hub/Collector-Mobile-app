@@ -9,9 +9,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,6 +33,7 @@ import {
 import axios from "axios";
 import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
+import NetInfo from "@react-native-community/netinfo";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
 type LoadingToVehicleNavigationProps = StackNavigationProp<
@@ -219,6 +221,39 @@ export default function LoadingToVehicle({
     });
   }, [savedVarieties]);
 
+  const handleBack = () => {
+    navigation.navigate("SelectDistributionCentre", {
+      driverId: route.params?.driverId,
+      driverEmpId: route.params?.driverEmpId,
+      driverName: route.params?.driverName,
+      driverNameEnglish: route.params?.driverNameEnglish,
+      driverNameSinhala: route.params?.driverNameSinhala,
+      driverNameTamil: route.params?.driverNameTamil,
+      vehicleId: route.params?.vehicleId,
+      vehicleNo: route.params?.vehicleNo,
+      vType: route.params?.vType,
+      vCapacity: route.params?.vCapacity,
+    });
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        handleBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [navigation, route.params]),
+  );
+
   // Synchronize current working variety with Redux store
   useEffect(() => {
     store.dispatch({
@@ -330,14 +365,15 @@ export default function LoadingToVehicle({
   // Delete Variety Confirmation Modal State (from carousel)
   const [varietyToDelete, setVarietyToDelete] = useState<SavedVariety | null>(null);
 
-  // Delete Saved Set Confirmation Modal State (from carousel)
-  const [savedSetToDelete, setSavedSetToDelete] = useState<{
+  // Delete Saved Grade Confirmation Modal State (from carousel)
+  const [savedGradeToDelete, setSavedGradeToDelete] = useState<{
     varietyId: string;
     varietyLabel: string;
-    id: string;
-    gradeKey: string;
-    setNumber: number;
+    gradeKey: "A" | "B" | "C";
   } | null>(null);
+
+  // Clear & Delete Pending Variety Confirmation Modal State
+  const [clearAndDeleteModalVisible, setClearAndDeleteModalVisible] = useState(false);
 
   // Scale Connection State
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
@@ -345,13 +381,27 @@ export default function LoadingToVehicle({
   );
   const [isScaleSelectModalVisible, setIsScaleSelectModalVisible] =
     useState<boolean>(false);
+  const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
 
   useEffect(() => {
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
     });
+    const checkWifi = (state: any) => {
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
+    };
+
+    NetInfo.fetch().then(checkWifi);
+    const unsubscribeNetInfo = NetInfo.addEventListener(checkWifi);
+    const interval = setInterval(() => {
+      NetInfo.fetch().then(checkWifi);
+    }, 3000);
+
     return () => {
       unsubscribe();
+      unsubscribeNetInfo();
+      clearInterval(interval);
     };
   }, []);
 
@@ -588,9 +638,17 @@ export default function LoadingToVehicle({
         if (g.gradeKey === gradeKey) {
           return {
             ...g,
-            sets: g.sets.map((s) =>
-              s.id === setId ? { ...s, crates: sanitized } : s
-            ),
+            sets: g.sets.map((s) => {
+              if (s.id === setId) {
+                const isCratesChanged = s.crates !== sanitized;
+                return {
+                  ...s,
+                  crates: sanitized,
+                  weight: isCratesChanged ? null : s.weight,
+                };
+              }
+              return s;
+            }),
           };
         }
         return g;
@@ -719,12 +777,18 @@ export default function LoadingToVehicle({
     };
 
     setSavedVarieties((prev) => {
-      const nextList = [...prev, newSavedVariety];
+      const nextList = [
+        ...prev,
+        {
+          ...newSavedVariety,
+          varietyNumber: prev.length + 1,
+        },
+      ];
       setCarouselIndex(nextList.length - 1);
+      setVarietyIndex(nextList.length + 1);
       return nextList;
     });
 
-    setVarietyIndex((prev) => prev + 1);
     setSelectedCrop(null);
     setSelectedVariety(null);
     setGrades(createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null));
@@ -733,23 +797,35 @@ export default function LoadingToVehicle({
   // Delete an entire saved variety from carousel
   const handleDeleteSavedVariety = (varietyId: string) => {
     setSavedVarieties((prev) => {
-      const filtered = prev.filter((v) => v.id !== varietyId);
+      const filtered = prev
+        .filter((v) => v.id !== varietyId)
+        .map((v, idx) => ({
+          ...v,
+          varietyNumber: idx + 1,
+        }));
+
       if (carouselIndex >= filtered.length && filtered.length > 0) {
         setCarouselIndex(filtered.length - 1);
       } else if (filtered.length === 0) {
         setCarouselIndex(0);
       }
+
+      setVarietyIndex(filtered.length + 1);
+
       return filtered;
     });
   };
 
-  // Delete an individual set from a saved variety
-  const handleDeleteSavedSet = (varietyId: string, setId: string) => {
+  // Delete an individual grade from a saved variety (same as Collection Form)
+  const handleDeleteSavedGrade = (
+    varietyId: string,
+    gradeKey: "A" | "B" | "C"
+  ) => {
     setSavedVarieties((prev) => {
       const updated = prev
         .map((v) => {
           if (v.id === varietyId) {
-            const filteredSets = v.sets.filter((s) => s.id !== setId);
+            const filteredSets = v.sets.filter((s) => s.gradeKey !== gradeKey);
             return {
               ...v,
               sets: filteredSets,
@@ -757,15 +833,116 @@ export default function LoadingToVehicle({
           }
           return v;
         })
-        .filter((v) => v.sets.length > 0);
+        .filter((v) => v.sets.length > 0)
+        .map((v, idx) => ({
+          ...v,
+          varietyNumber: idx + 1,
+        }));
 
       if (carouselIndex >= updated.length && updated.length > 0) {
         setCarouselIndex(updated.length - 1);
       } else if (updated.length === 0) {
         setCarouselIndex(0);
       }
+
+      setVarietyIndex(updated.length + 1);
+
       return updated;
     });
+  };
+
+  // Clear & Delete pending variety and restore previous variety into active form (same as Collection Form)
+  const handleClearAndDeletePending = () => {
+    if (savedVarieties.length === 0) return;
+
+    const lastIndex = savedVarieties.length - 1;
+    const lastVariety = savedVarieties[lastIndex];
+
+    // Remove last variety from savedVarieties list
+    const remaining = savedVarieties.slice(0, lastIndex);
+    setSavedVarieties(remaining);
+    setCarouselIndex(Math.max(0, remaining.length - 1));
+
+    // Restore variety number
+    setVarietyIndex(lastVariety.varietyNumber);
+
+    // Restore crop
+    const cropFound =
+      cropsData.find((c) => c.value === lastVariety.cropId) ||
+      (lastVariety.cropId
+        ? {
+            label: lastVariety.cropLabel,
+            value: lastVariety.cropId,
+            image: lastVariety.imageUri,
+          }
+        : null);
+    setSelectedCrop(cropFound);
+
+    // Restore variety
+    const cropVarieties =
+      (lastVariety.cropId && varietiesData[lastVariety.cropId]) || [];
+    const varietyFound =
+      cropVarieties.find((v) => v.value === lastVariety.varietyId) ||
+      (lastVariety.varietyId
+        ? {
+            label: lastVariety.varietyLabel,
+            value: lastVariety.varietyId,
+            image: lastVariety.imageUri,
+          }
+        : null);
+    setSelectedVariety(varietyFound);
+
+    // Restore grades & sets
+    const setsByGrade: Record<string, CrateSet[]> = {
+      A: [],
+      B: [],
+      C: [],
+    };
+
+    (lastVariety.sets || []).forEach((s) => {
+      if (setsByGrade[s.gradeKey]) {
+        setsByGrade[s.gradeKey].push({
+          id: s.id,
+          setNumber: s.setNumber,
+          containerTypeId: s.containerTypeId,
+          containerTypeName: s.containerTypeName,
+          containerTypeWeight: s.containerTypeWeight,
+          crates: s.crates,
+          weight: s.weight,
+          isExpanded: false,
+        });
+      }
+    });
+
+    const defaultC = containerTypes.length > 0 ? containerTypes[0] : null;
+
+    const restoredGrades: GradeData[] = (["A", "B", "C"] as const).map(
+      (gradeKey) => {
+        const gradeSets = setsByGrade[gradeKey];
+        const isSelected = gradeSets.length > 0;
+        return {
+          gradeKey,
+          title: `Grade ${gradeKey}`,
+          isSelected,
+          sets: isSelected
+            ? gradeSets.map((s, idx) => ({ ...s, isExpanded: idx === 0 }))
+            : [
+                {
+                  id: `set-${gradeKey.toLowerCase()}-${Date.now()}-1`,
+                  setNumber: 1,
+                  containerTypeId: defaultC?.id,
+                  containerTypeName: defaultC?.labelName,
+                  containerTypeWeight: defaultC?.weight,
+                  crates: "",
+                  weight: null,
+                  isExpanded: true,
+                },
+              ],
+        };
+      }
+    );
+
+    setGrades(restoredGrades);
   };
 
   // Helper to resolve DB image for a variety/crop
@@ -911,14 +1088,44 @@ export default function LoadingToVehicle({
     });
   };
 
+  // Used variety IDs that have already been saved to the vehicle
+  const usedVarietyIds = savedVarieties
+    .map((v) => v.varietyId)
+    .filter((id): id is string => Boolean(id));
+
+  // Crops whose varieties are ALL already added -> hide from crop list (same as Collection Form)
+  const fullyUsedCropIds = cropsData.reduce((acc: string[], c) => {
+    const cropVarieties = varietiesData[c.value] || [];
+    if (cropVarieties.length === 0) return acc;
+    const allUsed = cropVarieties.every((v) => usedVarietyIds.includes(v.value));
+    if (allUsed) acc.push(c.value);
+    return acc;
+  }, []);
+
+  const filteredCropsData = cropsData.filter(
+    (crop) => !fullyUsedCropIds.includes(crop.value)
+  );
+
   const varietyOptions = selectedCrop
-    ? varietiesData[selectedCrop.value] || []
+    ? (varietiesData[selectedCrop.value] || []).filter(
+        (v) => !usedVarietyIds.includes(v.value)
+      )
     : [];
+
+  useEffect(() => {
+    if (selectedVariety && usedVarietyIds.includes(selectedVariety.value)) {
+      setSelectedVariety(null);
+    }
+  }, [savedVarieties]);
 
   if (cropsLoading) {
     return (
       <View className="flex-1 bg-white">
-        <CustomHeader title={vehicleNo} navigation={navigation} />
+        <CustomHeader
+          title={vehicleNo}
+          navigation={navigation}
+          onBackPress={handleBack}
+        />
         <LoadingPage
           message={t("LoadingToVehicle.LoadingCrops", "Loading...")}
         />
@@ -936,6 +1143,7 @@ export default function LoadingToVehicle({
       <CustomHeader
         title={vehicleNo}
         navigation={navigation}
+        onBackPress={handleBack}
       />
 
       <ScrollView
@@ -951,8 +1159,73 @@ export default function LoadingToVehicle({
         showsVerticalScrollIndicator={false}
       >
         <View>
-          {/* Connect Scale Blue Button - Shown ONLY when scale is NOT connected */}
-          {!scaleStatus.connected && (
+          {/* Scale Status Card: Red (Wi-Fi Off), Blue (Wi-Fi On & Not Connected), Yellow (Connected) */}
+          {!isWifiEnabled ? (
+            /* State 1: Wi-Fi Off - #E91233 background, white text/icon */
+            <TouchableOpacity
+              activeOpacity={0.88}
+              onPress={() => {
+                Alert.alert(
+                  "Wi-Fi is not enabled!",
+                  "Please enable the Wi-Fi to connect with the Scale.",
+                  [{ text: "OK" }],
+                  { type: "error", autoClose: false, showOkButton: true } as any
+                );
+              }}
+              style={{
+                marginTop: 4,
+                marginBottom: 12,
+                backgroundColor: "#E91233",
+                borderRadius: 28,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: "#FFFFFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "#FFFFFF",
+                    letterSpacing: -0.2,
+                  }}
+                >
+                  {t("ScaleSelectModal.WifiOffTitle", "Wi-Fi is Off")}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: "#FFFFFF",
+                    fontWeight: "500",
+                    marginTop: 1,
+                    lineHeight: 16,
+                    opacity: 0.9,
+                  }}
+                >
+                  {t("ScaleSelectModal.WifiOffMessage", "Please turn on Wi-Fi on your phone to connect to the scale.")}
+                </Text>
+              </View>
+
+              <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+            </TouchableOpacity>
+          ) : !scaleStatus.connected ? (
+            /* State 2: Wi-Fi On & Not Connected - #1266FD background, white text/icon */
             <TouchableOpacity
               activeOpacity={0.88}
               onPress={() => setIsScaleSelectModalVisible(true)}
@@ -995,7 +1268,62 @@ export default function LoadingToVehicle({
 
               <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
             </TouchableOpacity>
-          )}
+          ) : scaleStatus.connected && scaleStatus.scale ? (
+            /* State 3: Scale Connected - #FAE432 background, black text/icon */
+            <TouchableOpacity
+              activeOpacity={0.88}
+              onPress={() => setIsScaleSelectModalVisible(true)}
+              style={{
+                marginTop: 4,
+                marginBottom: 12,
+                backgroundColor: "#FAE432",
+                borderRadius: 28,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: "#000000",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <MaterialCommunityIcons name="wifi" size={24} color="#FFFFFF" />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: 17,
+                    fontWeight: "bold",
+                    color: "#000000",
+                    letterSpacing: -0.3,
+                  }}
+                >
+                  {t("ScaleSelectModal.ScaleConnected", "Scale Connected")}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "500",
+                    color: "#000000",
+                    marginTop: 1,
+                  }}
+                >
+                  {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
+                </Text>
+              </View>
+
+              <MaterialIcons name="chevron-right" size={26} color="#000000" />
+            </TouchableOpacity>
+          ) : null}
 
           {/* Top Carousel of Saved Varieties (shown when items exist) */}
           {savedVarieties.length > 0 && (
@@ -1034,48 +1362,71 @@ export default function LoadingToVehicle({
                       </TouchableOpacity>
                     </View>
 
-                    {/* Sets Table */}
+                    {/* Grades Table (same as Collection Form: Left Grade A/B/C, Center Weight in kg, Right Delete icon) */}
                     <View className="border border-[#000000] rounded-2xl overflow-hidden bg-white">
-                      {savedVarieties[carouselIndex].sets.map((set, sIdx) => (
-                        <View
-                          key={set.id}
-                          className={`flex-row items-center justify-between px-4 py-2.5 ${
-                            sIdx !== savedVarieties[carouselIndex].sets.length - 1
-                              ? "border-b border-[#E2E8F0]"
-                              : ""
-                          }`}
-                        >
-                          {/* Grade */}
-                          <Text className="font-bold text-[#000000] text-sm w-8">
-                            {set.gradeKey}
-                          </Text>
+                      {(() => {
+                        const currentVariety = savedVarieties[carouselIndex];
+                        const availableGrades = (["A", "B", "C"] as const).filter((gKey) =>
+                          currentVariety.sets.some(
+                            (s) => s.gradeKey === gKey && s.weight !== null && s.weight > 0
+                          )
+                        );
 
-                          {/* Set Label */}
-                          <Text className="font-bold text-[#000000] text-sm flex-1 ml-4">
-                            {t("LoadingToVehicle.Set", "Set")} {set.setNumber}
-                          </Text>
+                        return availableGrades.map((gradeKey, gIdx) => {
+                          const gradeWeight = currentVariety.sets
+                            .filter((s) => s.gradeKey === gradeKey)
+                            .reduce((sum, s) => sum + (s.weight || 0), 0);
 
-                          {/* Delete Set */}
-                          <TouchableOpacity
-                            onPress={() =>
-                              setSavedSetToDelete({
-                                varietyId: savedVarieties[carouselIndex].id,
-                                varietyLabel: savedVarieties[carouselIndex].varietyLabel,
-                                id: set.id,
-                                gradeKey: set.gradeKey,
-                                setNumber: set.setNumber,
-                              })
-                            }
-                            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                          >
-                            <MaterialIcons
-                              name="delete"
-                              size={20}
-                              color="#EF4444"
-                            />
-                          </TouchableOpacity>
-                        </View>
-                      ))}
+                          return (
+                            <View
+                              key={gradeKey}
+                              className={`flex-row items-center justify-between px-4 py-2.5 ${
+                                gIdx !== availableGrades.length - 1
+                                  ? "border-b border-[#E2E8F0]"
+                                  : ""
+                              }`}
+                            >
+                              {/* Left: Grade A, B, or C */}
+                              <Text
+                                className="font-bold text-[#000000] text-sm w-8"
+                                style={{ includeFontPadding: false }}
+                              >
+                                {gradeKey}
+                              </Text>
+
+                              {/* Center: Weight in kg (not grade or set text) */}
+                              <Text
+                                className="font-bold text-[#000000] text-sm flex-1 text-center"
+                                style={{ includeFontPadding: false }}
+                              >
+                                {Number(gradeWeight || 0).toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}{" "}
+                                {t("PassTargetBetweenOfficers.kg", "kg")}
+                              </Text>
+
+                              {/* Right: Delete Icon */}
+                              <TouchableOpacity
+                                onPress={() =>
+                                  setSavedGradeToDelete({
+                                    varietyId: currentVariety.id,
+                                    varietyLabel: currentVariety.varietyLabel,
+                                    gradeKey,
+                                  })
+                                }
+                                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                              >
+                                <MaterialIcons
+                                  name="delete"
+                                  size={20}
+                                  color="#EF4444"
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          );
+                        });
+                      })()}
                     </View>
                   </View>
                 )}
@@ -1118,53 +1469,116 @@ export default function LoadingToVehicle({
           )}
 
           {/* Variety Subtitle */}
-          <Text className="text-center font-bold text-[#0F172A] text-base mb-4">
+          <Text
+            className="text-center font-bold text-[#0F172A] text-base mb-2"
+            style={{ lineHeight: 22, includeFontPadding: false }}
+          >
             {t("LoadingToVehicle.Variety", "Variety")} {varietyIndex}
           </Text>
 
+          {/* Clear & Delete Button (Same as Collection Form) */}
+          {savedVarieties.length > 0 && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setClearAndDeleteModalVisible(true)}
+              style={{
+                backgroundColor: "#FEE2E2",
+                borderRadius: 9999,
+                paddingVertical: 8,
+                paddingHorizontal: 24,
+                alignSelf: "center",
+                marginTop: 2,
+                marginBottom: 14,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#FF383C",
+                  fontWeight: "600",
+                  fontSize: 14,
+                  lineHeight: 20,
+                  includeFontPadding: false,
+                }}
+              >
+                {t(
+                  "LoadingToVehicle.ClearAndDelete",
+                  t("UnregisteredCropDetails.ClearAndDelete", "Clear & Delete")
+                )}
+              </Text>
+            </TouchableOpacity>
+          )}
+
           {/* Crop Name Selector (50px height, rounded-full) */}
           <View className="mb-4">
-            <Text className="text-xs font-bold text-[#1E293B] mb-1.5">
+            <Text
+              className="text-xs font-bold text-[#1E293B] mb-1.5"
+              style={{
+                lineHeight: 18,
+                paddingVertical: 2,
+                includeFontPadding: true,
+              }}
+            >
               {t("LoadingToVehicle.CropName", "Crop Name")}
             </Text>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => setIsCropModalVisible(true)}
-              className="bg-[#F4F6F9] rounded-full h-[50px] px-4 flex-row items-center justify-between"
+              className="bg-[#F4F6F9] rounded-full min-h-[50px] px-4 py-2 flex-row items-center justify-between"
             >
               <Text
-                className={`text-sm font-medium ${
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className={`text-sm font-medium flex-1 mr-2 ${
                   selectedCrop ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
+                style={{
+                  lineHeight: 22,
+                  paddingVertical: 2,
+                  includeFontPadding: true,
+                }}
               >
                 {selectedCrop?.label || t("LoadingToVehicle.SelectCrop", "--Select Crop--")}
               </Text>
-              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
+              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" style={{ flexShrink: 0 }} />
             </TouchableOpacity>
           </View>
 
           {/* Variety Selector (50px height, rounded-full) */}
           <View className="mb-4">
-            <Text className="text-xs font-bold text-[#1E293B] mb-1.5">
+            <Text
+              className="text-xs font-bold text-[#1E293B] mb-1.5"
+              style={{
+                lineHeight: 18,
+                paddingVertical: 2,
+                includeFontPadding: true,
+              }}
+            >
               {t("LoadingToVehicle.VarietyLabel", "Variety")}
             </Text>
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => selectedCrop && setIsVarietyModalVisible(true)}
               disabled={!selectedCrop}
-              className={`rounded-full h-[50px] px-4 flex-row items-center justify-between ${
+              className={`rounded-full min-h-[50px] px-4 py-2 flex-row items-center justify-between ${
                 selectedCrop ? "bg-[#F4F6F9]" : "bg-[#F4F6F9] opacity-60"
               }`}
             >
               <Text
-                className={`text-sm font-medium ${
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className={`text-sm font-medium flex-1 mr-2 ${
                   selectedVariety ? "text-[#0F172A] font-bold" : "text-[#94A3B8]"
                 }`}
+                style={{
+                  lineHeight: 22,
+                  paddingVertical: 2,
+                  includeFontPadding: true,
+                }}
               >
                 {selectedVariety?.label ||
                   t("LoadingToVehicle.SelectVariety", "--Select Variety--")}
               </Text>
-              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" />
+              <MaterialIcons name="keyboard-arrow-down" size={24} color="#64748B" style={{ flexShrink: 0 }} />
             </TouchableOpacity>
           </View>
 
@@ -1186,21 +1600,41 @@ export default function LoadingToVehicle({
                 <TouchableOpacity
                   activeOpacity={0.75}
                   onPress={() => handleToggleGrade(grade.gradeKey)}
-                  className="flex-row items-center py-2 gap-3"
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 10,
+                  }}
                 >
                   {/* Checkbox */}
                   <View
-                    className={`w-5 h-5 rounded-[4px] border items-center justify-center ${
-                      grade.isSelected
-                        ? "bg-[#000000] border-[#000000]"
-                        : "border-[#000000] bg-white"
-                    }`}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 4,
+                      borderWidth: 1.5,
+                      borderColor: "#000000",
+                      backgroundColor: grade.isSelected
+                        ? "#000000"
+                        : "#FFFFFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
                   >
                     {grade.isSelected && (
                       <FontAwesome name="check" size={12} color="#FFFFFF" />
                     )}
                   </View>
-                  <Text className="font-bold text-[#0F172A] text-sm">
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      color: "#0F172A",
+                      fontSize: 15,
+                      lineHeight: 24,
+                      includeFontPadding: false,
+                    }}
+                  >
                     {t("LoadingToVehicle.Grade", "Grade")} {grade.gradeKey}
                   </Text>
                 </TouchableOpacity>
@@ -1359,11 +1793,6 @@ export default function LoadingToVehicle({
                                               backgroundColor: isSelected ? "#FFFFFF" : "transparent",
                                               justifyContent: "center",
                                               alignItems: "center",
-                                              shadowColor: isSelected ? "#000000" : "transparent",
-                                              shadowOffset: { width: 0, height: 1 },
-                                              shadowOpacity: isSelected ? 0.08 : 0,
-                                              shadowRadius: 2,
-                                              elevation: isSelected ? 2 : 0,
                                             }}
                                           >
                                             <Text
@@ -1574,7 +2003,10 @@ export default function LoadingToVehicle({
                 : undefined
             }
           >
-            <Text className="text-white font-extrabold text-base">
+            <Text
+              className="text-white font-extrabold text-base"
+              style={{ includeFontPadding: false }}
+            >
               {t("LoadingToVehicle.FinishLoading", "Finish Loading")}
             </Text>
           </TouchableOpacity>
@@ -1599,7 +2031,10 @@ export default function LoadingToVehicle({
                 : undefined
             }
           >
-            <Text className="text-white font-extrabold text-base">
+            <Text
+              className="text-white font-extrabold text-base"
+              style={{ includeFontPadding: false }}
+            >
               {t("LoadingToVehicle.AddMoreItems", "Add More Items")}
             </Text>
           </TouchableOpacity>
@@ -1611,11 +2046,11 @@ export default function LoadingToVehicle({
         visible={isCropModalVisible}
         onClose={() => setIsCropModalVisible(false)}
         title={t("LoadingToVehicle.SelectCrop", "Select Crop")}
-        data={cropsData}
+        data={filteredCropsData}
         selectedItems={selectedCrop ? [selectedCrop.value] : []}
         onSelect={(selectedValues) => {
           if (selectedValues.length > 0) {
-            const found = cropsData.find((c) => c.value === selectedValues[0]);
+            const found = filteredCropsData.find((c) => c.value === selectedValues[0]);
             if (found) {
               setSelectedCrop(found);
               setSelectedVariety(null);
@@ -1712,8 +2147,8 @@ export default function LoadingToVehicle({
       <WarningConfirmation
         visible={varietyToDelete !== null}
         message={t(
-          "LoadingToVehicle.DeleteVarietyConfirmation",
-          "Are you sure you want to delete previously added {{varietyName}}?",
+          "UnregisteredCropDetails.Are you sure you want to delete previously added",
+          "Are you sure you want to delete previously added {{varietyName}} ?",
           {
             varietyName: varietyToDelete?.varietyLabel || "",
           }
@@ -1730,28 +2165,47 @@ export default function LoadingToVehicle({
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
       />
 
-      {/* Delete Saved Set Warning Confirmation Modal */}
+      {/* Delete Saved Grade Warning Confirmation Modal (same as Collection Form) */}
       <WarningConfirmation
-        visible={savedSetToDelete !== null}
+        visible={savedGradeToDelete !== null}
         message={t(
-          "LoadingToVehicle.DeleteSetConfirmation",
-          "Are you sure you want to delete added\n{{item}} - {{grade}} - {{set}}?",
+          "UnregisteredCropDetails.Are you sure you want to delete grade",
+          "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}} ?",
           {
-            item: savedSetToDelete?.varietyLabel || "",
-            grade: `${t("LoadingToVehicle.Grade", "Grade")} ${savedSetToDelete?.gradeKey}`,
-            set: `${t("LoadingToVehicle.Set", "Set")} ${savedSetToDelete?.setNumber}`,
+            varietyName: savedGradeToDelete?.varietyLabel || "",
+            grade: savedGradeToDelete?.gradeKey,
           }
         )}
         onConfirm={() => {
-          if (savedSetToDelete) {
-            handleDeleteSavedSet(
-              savedSetToDelete.varietyId,
-              savedSetToDelete.id
+          if (savedGradeToDelete) {
+            handleDeleteSavedGrade(
+              savedGradeToDelete.varietyId,
+              savedGradeToDelete.gradeKey
             );
-            setSavedSetToDelete(null);
+            setSavedGradeToDelete(null);
           }
         }}
-        onCancel={() => setSavedSetToDelete(null)}
+        onCancel={() => setSavedGradeToDelete(null)}
+        confirmText={t("LoadingToVehicle.Delete", "Delete")}
+        cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+      />
+
+      {/* Clear & Delete Pending Variety Warning Confirmation Modal (same as Collection Form) */}
+      <WarningConfirmation
+        visible={clearAndDeleteModalVisible}
+        message={t(
+          "UnregisteredCropDetails.DeleteVarietyConfirmation",
+          "Are you sure you want to delete {{varietyName}} form data?",
+          {
+            varietyName: `${t("LoadingToVehicle.Variety", "variety").toLowerCase()} ${varietyIndex}`,
+          }
+        )}
+        onConfirm={() => {
+          setClearAndDeleteModalVisible(false);
+          handleClearAndDeletePending();
+        }}
+        onCancel={() => setClearAndDeleteModalVisible(false)}
         confirmText={t("LoadingToVehicle.Delete", "Delete")}
         cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
