@@ -135,7 +135,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         }}
         pointerEvents="none"
       >
-        <View className="px-14 w-full items-center">
+        <View className="px-16 w-full items-center">
           {title ? (
             <Text
               style={[

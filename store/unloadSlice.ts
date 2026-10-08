@@ -4,6 +4,9 @@ export interface UnloadedGradeSetItem {
   setIndex: number;
   crates: number;
   weightKg: number;
+  crateWeight?: number | null;
+  containerTypeId?: number;
+  containerTypeName?: string;
 }
 
 export interface UnloadedGradeItem {
@@ -21,6 +24,7 @@ export interface UnloadVarietyItem {
   id: string; // varietyId / loadedItem id
   loadedItemId?: number | string;
   varietyId?: string;
+  displayName?: string;
   name: string;
   varietyNameEnglish?: string;
   varietyNameSinhala?: string;

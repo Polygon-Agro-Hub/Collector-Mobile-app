@@ -9,7 +9,7 @@
     "android": {
       "package": "com.polygonagro.Collector",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 15,
+      "versionCode": 16,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
@@ -147,7 +147,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "2b602d58-9a79-4696-87cd-28cb1c2b8fd2"
+        "projectId": ""
       }
     }
   }

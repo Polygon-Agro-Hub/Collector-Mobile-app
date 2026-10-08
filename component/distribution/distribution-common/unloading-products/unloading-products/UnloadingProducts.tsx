@@ -58,6 +58,7 @@ export interface MismatchItem {
 
 export const getLocalizedProductName = (
   item?: {
+    displayName?: string;
     name?: string;
     cropName?: string;
     varietyLabel?: string;
@@ -72,6 +73,9 @@ export const getLocalizedProductName = (
   lang?: string
 ): string => {
   if (!item) return "";
+  if (item.displayName) {
+    return item.displayName;
+  }
   const currentLang = (lang || "").toLowerCase();
   if (currentLang.startsWith("si")) {
     return (
@@ -152,12 +156,14 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
       id: String(item.varietyId || item.id || `prod-${idx}`),
       loadedItemId: item.loadedItemId || item.id,
       varietyId: item.varietyId ? String(item.varietyId) : undefined,
+      displayName: item.displayName || undefined,
       name:
+        item.displayName ||
         item.cropName ||
         item.varietyLabel ||
         item.cropLabel ||
         "Crop Item",
-      varietyNameEnglish: item.varietyNameEnglish || item.varietyLabel,
+      varietyNameEnglish: item.displayName || item.varietyNameEnglish || item.varietyLabel,
       varietyNameSinhala: item.varietyNameSinhala,
       varietyNameTamil: item.varietyNameTamil,
       cropNameEnglish: item.cropNameEnglish || item.cropLabel,
@@ -448,6 +454,7 @@ export default function UnloadingProducts({
             grade: gradeLetter,
             crateIndex: s.setIndex,
             crateCount: s.crates,
+            crateWeight: s.crateWeight ?? 0,
             qty: s.weightKg,
           }));
         }
@@ -457,6 +464,7 @@ export default function UnloadingProducts({
             grade: gradeLetter,
             crateIndex: 1,
             crateCount: g.unloadedCrates || 0,
+            crateWeight: 0,
             qty: g.unloadedWeightKg || 0,
           },
         ];
@@ -645,7 +653,11 @@ export default function UnloadingProducts({
               <View className="mb-4">
                 <View className="flex-row items-center justify-center my-3">
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-                  <Text className="mx-4 font-bold text-sm text-[#17262C]">
+                  <Text
+                    numberOfLines={1}
+                    style={{ flexShrink: 0 }}
+                    className="mx-3 font-bold text-sm text-[#17262C]"
+                  >
                     {t("UnloadingProducts.ToWeigh", "To Weigh")}
                   </Text>
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
@@ -662,7 +674,11 @@ export default function UnloadingProducts({
               <View className="mb-4">
                 <View className="flex-row items-center justify-center my-3">
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
-                  <Text className="mx-4 font-bold text-sm text-[#17262C]">
+                  <Text
+                    numberOfLines={1}
+                    style={{ flexShrink: 0 }}
+                    className="mx-3 font-bold text-sm text-[#17262C]"
+                  >
                     {t("UnloadingProducts.Weighed", "Weighed")}
                   </Text>
                   <View className="flex-1 h-[1.5px] bg-[#2E3134]" />
@@ -710,7 +726,7 @@ export default function UnloadingProducts({
                       {t("Mismatch.Point1", "1.")} {t("Mismatch.Expected", "Expected")}{" "}
                       <Text className="font-bold">
                         {mismatch.expectedKg.toFixed(2)} {t("Common.kg", "kg")}
-                      </Text>
+                      </Text>{" "}
                       {t("Mismatch.ButMeasured", ", but measured")}{" "}
                       <Text className="font-bold">
                         {mismatch.measuredKg.toFixed(2)} {t("Common.kg", "kg")}
@@ -728,7 +744,7 @@ export default function UnloadingProducts({
                           {t("Mismatch.Point2", "2.")} {t("Mismatch.ExpectedContainersCountIs", "Expected containers count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.expectedCrates}
-                          </Text>
+                          </Text>{" "}
                           {t("Mismatch.ButReceivedContainerCountIs", ", but received container count is")}{" "}
                           <Text className="font-bold">
                             {mismatch.receivedCrates}

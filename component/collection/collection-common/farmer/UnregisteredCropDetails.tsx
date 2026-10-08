@@ -135,73 +135,6 @@ interface UnregisteredCropDetailsProps {
   route: UnregisteredCropDetailsRouteProp;
 }
 
-interface DeleteModalProps {
-  visible: boolean;
-  title: string;
-  message: string;
-  onCancel: () => void;
-  onDelete: () => void;
-}
-
-const DeleteModal: React.FC<DeleteModalProps> = ({
-  visible,
-  title,
-  message,
-  onCancel,
-  onDelete,
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="fade"
-      statusBarTranslucent={true}
-    >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#00000040",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingHorizontal: 20,
-        }}
-      >
-        <View className="bg-white rounded-xl p-6 items-center min-w-[280px] max-w-[320px]">
-          <View className="w-10 h-10 bg-[#F6F7F9] rounded-lg justify-center items-center mb-4">
-            <Image
-              source={require("../../../../assets/images/collection-common/error-center-target.webp")}
-              style={{ width: 20, height: 20 }}
-            />
-          </View>
-          <Text className="text-gray-700 text-base text-center leading-6 mb-6">
-            {message}
-          </Text>
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              className="flex-1 py-3 px-5 border border-gray-300 rounded-lg items-center justify-center min-w-[80px]"
-              onPress={onCancel}
-            >
-              <Text className="text-gray-700 text-base font-medium">
-                {t("UnregisteredCropDetails.Cancel")}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 py-3 px-5 bg-red-500 rounded-lg items-center justify-center min-w-[80px]"
-              onPress={onDelete}
-            >
-              <Text className="text-white text-base font-medium">
-                {t("UnregisteredCropDetails.Delete")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
 const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   navigation,
 }) => {
@@ -269,6 +202,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     grade: "A" as "A" | "B" | "C",
   });
 
+  const [
+    deletePendingVarietyModalVisible,
+    setDeletePendingVarietyModalVisible,
+  ] = useState(false);
+
   const [isScaleConfigModalVisible, setIsScaleConfigModalVisible] =
     useState(false);
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
@@ -278,7 +216,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const [containerTypes, setContainerTypes] = useState<ContainerTypeItem[]>([]);
   const [containerSectionWidth, setContainerSectionWidth] = useState(300);
-  const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
+ const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
   const [setToDelete, setSetToDelete] = useState<{
     id: string;
     gradeKey: "A" | "B" | "C";
@@ -336,15 +274,20 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   useEffect(() => {
     const checkWifi = (state: any) => {
-      const isWifi =
-        state.isWifiEnabled ??
-        (state.type === "wifi" && Boolean(state.isConnected));
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
       setIsWifiOff(!isWifi);
     };
 
     NetInfo.fetch().then(checkWifi);
     const unsubNet = NetInfo.addEventListener(checkWifi);
-    return () => unsubNet();
+    const interval = setInterval(() => {
+      NetInfo.fetch().then(checkWifi);
+    }, 3000);
+
+    return () => {
+      unsubNet();
+      clearInterval(interval);
+    };
   }, []);
 
   const [images, setImages] = useState<{
@@ -388,9 +331,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       const timer = setTimeout(() => setResetImage(false), 100);
 
       NetInfo.fetch().then((state) => {
-        const isWifi =
-          state.isWifiEnabled ??
-          (state.type === "wifi" && Boolean(state.isConnected));
+        const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
         setIsWifiOff(!isWifi);
       });
       setScaleStatus(wifiScaleService.getStatus());
@@ -454,7 +395,19 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }, []),
   );
 
-  const cropModalData = cropNames.map((crop) => ({
+// Crops whose varieties are ALL already added -> hide from crop list
+const fullyUsedCropIds = crops.reduce((acc: string[], c: any) => {
+  if (acc.includes(c.cropId)) return acc;
+  const allVarieties: { id: string }[] = c.varietiesList || [];
+  if (allVarieties.length === 0) return acc;
+  const allUsed = allVarieties.every((v) => usedVarietyIds.includes(v.id));
+  if (allUsed) acc.push(c.cropId);
+  return acc;
+}, []);
+
+const cropModalData = cropNames
+  .filter((crop) => !fullyUsedCropIds.includes(crop.id))
+  .map((crop) => ({
     label:
       selectedLanguage === "si"
         ? crop.cropNameSinhala
@@ -562,7 +515,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setGrades(
       createInitialGrades(containerTypes.length > 0 ? containerTypes[0] : null),
     );
-    const found = varieties.find((variety) => variety.id === varietyId);
+    const found = varieties.find(
+      (variety) => String(variety.id) === String(varietyId),
+    );
     if (found) {
       setSelectedVarietyName(found.variety);
     }
@@ -691,6 +646,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       });
     });
   };
+  
 
   // Delete a set from a grade
   const handleDeleteSet = (gradeKey: "A" | "B" | "C", setId: string) => {
@@ -773,9 +729,17 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
         if (g.gradeKey === gradeKey) {
           return {
             ...g,
-            sets: g.sets.map((s) =>
-              s.id === setId ? { ...s, crates: sanitized } : s,
-            ),
+            sets: g.sets.map((s) => {
+              if (s.id === setId) {
+                const isCratesChanged = s.crates !== sanitized;
+                return {
+                  ...s,
+                  crates: sanitized,
+                  weight: isCratesChanged ? null : s.weight,
+                };
+              }
+              return s;
+            }),
           };
         }
         return g;
@@ -937,10 +901,19 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     setdonebutton2visibale(true);
     setUsedVarietyIds((prev) => [...prev, selectedVariety]);
 
+    const currentVarietyObj = varieties.find(
+      (v) => String(v.id) === String(selectedVariety),
+    );
+    const resolvedVarietyName =
+      selectedVarietyName ||
+      currentVarietyObj?.variety ||
+      selectedCrop.name ||
+      "";
+
     const newCrop = {
       cropId: selectedCrop.id || "",
       varietyId: selectedVariety || "",
-      varietyName: selectedVarietyName,
+      varietyName: resolvedVarietyName,
       gradeAprice: unitPrices.A || 0,
       gradeAquan: quantities.A ? parseFloat(quantities.A) : 0,
       gradeBprice: unitPrices.B || 0,
@@ -960,6 +933,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     resetCropEntry();
     setIsPendingVarietyOpen(true);
     setCropCount((prevCount) => prevCount + 1);
+
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 150);
   };
 
   const resetCropEntry = () => {
@@ -1338,10 +1315,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   );
   const hasAddedCrops = crops.length > 0;
 
-  // Once at least one crop is added, both buttons stay enabled.
-  // Before that, they need a valid current entry.
-  const isAddMoreDisabled =
-    loading || (!hasAddedCrops && !isCurrentVarietyValid);
+  // Add More is disabled whenever loading or when the current variety entry is not complete
+  const isAddMoreDisabled = loading || !isCurrentVarietyValid;
   const isFinishDisabled =
     loading || (!hasAddedCrops && !isCurrentVarietyValid);
 
@@ -1354,7 +1329,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       <ScrollView
         className="flex-1 bg-white mb-8"
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          alignItems: "center",
+          paddingBottom: 40,
+        }}
       >
         <View className="w-full ">
           <CustomHeader
@@ -1370,19 +1349,26 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
             {/* State 1: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */}
             {
               isWifiOff ? (
+                /* State 1: Mobile Wi-Fi Off - #E91233 background, white text/icon */
                 <TouchableOpacity
                   activeOpacity={0.88}
-                  onPress={() => setIsScaleConfigModalVisible(true)}
+                  onPress={() => {
+                    Alert.alert(
+                      "Wi-Fi is not enabled!",
+                      "Please enable the Wi-Fi to connect with the Scale.",
+                      [{ text: "OK" }],
+                      { type: "error", autoClose: false, showOkButton: true } as any
+                    );
+                  }}
                   style={{
                     marginTop: 8,
                     marginBottom: 10,
-                    backgroundColor: "#FDF0F1",
+                    backgroundColor: "#E91233",
                     borderRadius: 28,
                     paddingVertical: 10,
                     paddingHorizontal: 14,
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 12,
                   }}
                 >
                   <View
@@ -1393,6 +1379,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       backgroundColor: "#FFFFFF",
                       alignItems: "center",
                       justifyContent: "center",
+                      marginRight: 12,
                     }}
                   >
                     <MaterialCommunityIcons
@@ -1406,7 +1393,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       style={{
                         fontSize: 16,
                         fontWeight: "bold",
-                        color: "#E91233",
+                        color: "#FFFFFF",
                         letterSpacing: -0.2,
                       }}
                     >
@@ -1419,10 +1406,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                     <Text
                       style={{
                         fontSize: 12,
-                        color: "#0F172A",
+                        color: "#FFFFFF",
                         fontWeight: "500",
                         marginTop: 1,
                         lineHeight: 16,
+                        opacity: 0.9,
                       }}
                     >
                       {selectedLanguage === "si"
@@ -1432,6 +1420,11 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                           : "Please turn on Wi-Fi on your phone to connect to the scale."}
                     </Text>
                   </View>
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={26}
+                    color="#FFFFFF"
+                  />
                 </TouchableOpacity>
               ) : !scaleStatus.connected ? (
                 /* State 2: WiFi ON but scale not connected — show blue connect card */
@@ -1489,7 +1482,70 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                     color="#FFFFFF"
                   />
                 </TouchableOpacity>
-              ) : null /* State 3: Scale connected — card hidden */
+              ) : scaleStatus.connected && scaleStatus.scale ? (
+                /* State 3: Scale Connected - #FAE432 background, black text/icon */
+                <TouchableOpacity
+                  activeOpacity={0.88}
+                  onPress={() => setIsScaleConfigModalVisible(true)}
+                  style={{
+                    marginTop: 8,
+                    marginBottom: 10,
+                    backgroundColor: "#FAE432",
+                    borderRadius: 28,
+                    paddingVertical: 10,
+                    paddingHorizontal: 14,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      backgroundColor: "#000000",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="wifi"
+                      size={24}
+                      color="#FFFFFF"
+                    />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 17,
+                        fontWeight: "bold",
+                        color: "#000000",
+                        letterSpacing: -0.3,
+                      }}
+                    >
+                      {t("ScaleSelectModal.ScaleConnected", "Scale Connected")}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "500",
+                        color: "#000000",
+                        marginTop: 1,
+                      }}
+                    >
+                      {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
+                    </Text>
+                  </View>
+
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={26}
+                    color="#000000"
+                  />
+                </TouchableOpacity>
+              ) : null
             }
 
             {/* ── Added-crops carousel ── */}
@@ -1530,6 +1586,8 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       );
                       const isVarietyDeleting = deletingVariety === index;
 
+                      const displayName = crop.varietyName || "Variety";
+
                       return (
                         <View
                           key={index}
@@ -1561,9 +1619,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                               numberOfLines={1}
                             >
                               ({index + 1}){" "}
-                              {crop.varietyName.length > 20
-                                ? `${crop.varietyName.slice(0, 20)}...`
-                                : crop.varietyName}
+                              {displayName.length > 20
+                                ? `${displayName.slice(0, 20)}...`
+                                : displayName}
                             </Text>
 
                             {isVarietyDeleting ? (
@@ -1635,7 +1693,12 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                       textAlign: "center",
                                     }}
                                   >
-                                    {crop[`grade${grade}quan`]}{" "}
+                                    {Number(
+                                      crop[`grade${grade}quan`] || 0,
+                                    ).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}{" "}
                                     {t("PassTargetBetweenOfficers.kg")}
                                   </Text>
 
@@ -1707,7 +1770,14 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
             {/* ── Crop entry form ── */}
             {isPendingVarietyOpen && (
               <>
-                <Text className="text-center text-xl font-bold mt-2 text-[#0F172A]">
+                <Text
+                  className="text-center text-xl font-bold mt-2 text-[#0F172A]"
+                  style={{
+                    lineHeight: 28,
+                    paddingVertical: 2,
+                    includeFontPadding: true,
+                  }}
+                >
                   {t("UnregisteredCropDetails.Variety", "Variety")} {cropCount}
                 </Text>
 
@@ -1715,7 +1785,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                 {crops.length > 0 && (
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={handleClearAndDeletePending}
+                    onPress={() => setDeletePendingVarietyModalVisible(true)}
                     style={{
                       backgroundColor: "#FEE2E2",
                       borderRadius: 9999,
@@ -1731,6 +1801,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                         color: "#FF383C",
                         fontWeight: "600",
                         fontSize: 14,
+                        lineHeight: 20,
+                        paddingVertical: 1,
+                        includeFontPadding: true,
                       }}
                     >
                       {t(
@@ -1747,20 +1820,30 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               {isPendingVarietyOpen && (
                 <>
                   {/* Crop Name Selector */}
-                  <Text className="text-gray-600 mt-4">
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#4B5563",
+                      marginTop: 16,
+                      lineHeight: 22,
+                      paddingVertical: 2,
+                      includeFontPadding: true,
+                    }}
+                  >
                     {t("UnregisteredCropDetails.CropName")}
                   </Text>
                   <TouchableOpacity
                     onPress={() => setCropModalVisible(true)}
                     style={{
-                      height: 50,
+                      minHeight: 50,
                       backgroundColor: "#F4F4F4",
-                      borderRadius: 50,
+                      borderRadius: 25,
                       paddingHorizontal: 14,
+                      paddingVertical: 10,
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      marginTop: 8,
+                      marginTop: 6,
                     }}
                   >
                     <Text
@@ -1771,7 +1854,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                         fontSize: 14,
                         flex: 1,
                         marginRight: 8,
-                        lineHeight: 18,
+                        lineHeight: 22,
+                        paddingVertical: 2,
+                        includeFontPadding: true,
                       }}
                     >
                       {selectedCropLabel ||
@@ -1781,11 +1866,21 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       name="keyboard-arrow-down"
                       size={22}
                       color="#9CA3AF"
+                      style={{ alignSelf: "center", flexShrink: 0 }}
                     />
                   </TouchableOpacity>
 
                   {/* Variety Selector */}
-                  <Text className="text-gray-600 mt-4">
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#4B5563",
+                      marginTop: 16,
+                      lineHeight: 22,
+                      paddingVertical: 2,
+                      includeFontPadding: true,
+                    }}
+                  >
                     {t("UnregisteredCropDetails.Variety")}
                   </Text>
                   <TouchableOpacity
@@ -1811,7 +1906,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                       justifyContent: loadingVarieties
                         ? "center"
                         : "space-between",
-                      marginTop: 8,
+                      marginTop: 6,
                     }}
                   >
                     {loadingVarieties ? (
@@ -1834,7 +1929,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                             fontSize: 14,
                             flex: 1,
                             marginRight: 8,
-                            lineHeight: 18,
+                            lineHeight: 22,
+                            paddingVertical: 2,
+                            includeFontPadding: true,
                           }}
                         >
                           {selectedVarietyLabel ||
@@ -1844,7 +1941,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                           name="keyboard-arrow-down"
                           size={22}
                           color="#9CA3AF"
-                          style={{ alignSelf: "center" }}
+                          style={{ alignSelf: "center", flexShrink: 0 }}
                         />
                       </>
                     )}
@@ -1881,7 +1978,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                           <View
                             style={{
                               flexDirection: "row",
-                              alignItems: "center",
+                              alignItems: "flex-start",
                               flex: 1,
                             }}
                           >
@@ -1899,6 +1996,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                 alignItems: "center",
                                 justifyContent: "center",
                                 marginRight: 12,
+                                marginTop: 2,
                               }}
                             >
                               {grade.isSelected && (
@@ -1909,40 +2007,62 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                 />
                               )}
                             </View>
-                            <Text
-                              style={{
-                                fontWeight: "bold",
-                                color: "#0F172A",
-                                fontSize: 15,
-                              }}
-                            >
-                              {t("LoadingToVehicle.Grade", "Grade")}{" "}
-                              {grade.gradeKey}
-                            </Text>
-                            {price !== null && price !== undefined ? (
-                              <Text
+
+                            <View style={{ flex: 1 }}>
+                              <View
                                 style={{
-                                  fontSize: 12,
-                                  color: "#475569",
-                                  fontWeight: "normal",
-                                  marginLeft: 4,
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  flexWrap: "wrap",
                                 }}
                               >
-                                ({t("ReceivedCash.Rs", "Rs.")}
-                                {Number(price).toFixed(2)}/
-                                {t("PassTargetBetweenOfficers.kg", "kg")})
-                              </Text>
-                            ) : null}
-                          </View>
+                                <Text
+                                  style={{
+                                    fontWeight: "bold",
+                                    color: "#0F172A",
+                                    fontSize: 15,
+                                  }}
+                                >
+                                  {t("LoadingToVehicle.Grade", "Grade")}{" "}
+                                  {grade.gradeKey}
+                                </Text>
+                                {price !== null && price !== undefined ? (
+                                  <Text
+                                    style={{
+                                      fontSize: 12,
+                                      color: "#475569",
+                                      fontWeight: "normal",
+                                      marginLeft: 4,
+                                    }}
+                                  >
+                                    ({t("ReceivedCash.Rs", "Rs.")}
+                                    {Number(price).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}/
+                                    {t("PassTargetBetweenOfficers.kg", "kg")})
+                                  </Text>
+                                ) : null}
+                              </View>
 
-                          {quantities[grade.gradeKey] ? (
-                            <View className="bg-[#FEF08A] px-3 py-1 rounded-full">
-                              <Text className="text-xs font-bold text-[#000000]">
-                                {quantities[grade.gradeKey]}{" "}
-                                {t("PassTargetBetweenOfficers.kg", "kg")}
-                              </Text>
+                              {quantities[grade.gradeKey] ? (
+                                <View
+                                  className="bg-[#FEF08A] px-3 py-1 rounded-full"
+                                  style={{ alignSelf: "flex-start", marginTop: 6 }}
+                                >
+                                  <Text className="text-xs font-bold text-[#000000]">
+                                    {Number(
+                                      quantities[grade.gradeKey] || 0,
+                                    ).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}{" "}
+                                    {t("PassTargetBetweenOfficers.kg", "kg")}
+                                  </Text>
+                                </View>
+                              ) : null}
                             </View>
-                          ) : null}
+                          </View>
                         </TouchableOpacity>
 
                         {/* Expanded Grade Crate Sets: Separate Boxes */}
@@ -2134,19 +2254,6 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                                         justifyContent:
                                                           "center",
                                                         alignItems: "center",
-                                                        shadowColor: isSelected
-                                                          ? "#000000"
-                                                          : "transparent",
-                                                        shadowOffset: {
-                                                          width: 0,
-                                                          height: 1,
-                                                        },
-                                                        shadowOpacity:
-                                                          isSelected ? 0.08 : 0,
-                                                        shadowRadius: 2,
-                                                        elevation: isSelected
-                                                          ? 2
-                                                          : 0,
                                                       }}
                                                     >
                                                       <Text
@@ -2179,38 +2286,26 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                                           </View>
                                         )}
 
-                                        {/* Crates Count Input */}
-                                        <TextInput
-                                          placeholder={
-                                            focusedSetId === set.id
-                                              ? ""
-                                              : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
-                                          }
-                                          placeholderTextColor="#000000"
-                                          value={set.crates}
-                                          onChangeText={(val) =>
-                                            handleCratesChange(
-                                              grade.gradeKey,
-                                              set.id,
-                                              val,
-                                            )
-                                          }
-                                          onFocus={() =>
-                                            setFocusedSetId(set.id)
-                                          }
-                                          onBlur={() => setFocusedSetId(null)}
-                                          keyboardType="numeric"
-                                          textAlign="center"
-                                          className="bg-[#EEF2F6] rounded-full h-[50px] px-4 text-base text-[#000000] mb-3"
-                                          style={{
-                                            textAlign: "center",
-                                            textAlignVertical: "center",
-                                            includeFontPadding: false,
-                                            fontWeight: set.crates
-                                              ? "bold"
-                                              : "normal",
-                                          }}
-                                        />
+                                    
+                                      {/* Crates Count Input */}
+<TextInput
+  placeholder={`--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`}
+  placeholderTextColor="#000000"
+  value={set.crates}
+  onChangeText={(val) =>
+    handleCratesChange(grade.gradeKey, set.id, val)
+  }
+  keyboardType="numeric"
+  textAlign="center"
+  className="bg-[#EEF2F6] rounded-full h-[50px] px-4 text-base text-[#000000] mb-3"
+  style={{
+    textAlign: "center",
+    textAlignVertical: "center",
+    includeFontPadding: false,
+    paddingVertical: 0,
+    fontWeight: "normal",
+  }}
+/>
 
                                         {/* Weight Row */}
                                         {(() => {
@@ -2456,7 +2551,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                             : (
                                 (unitPrices.A || 0) *
                                 (quantities.A ? parseFloat(quantities.A) : 0)
-                              ).toFixed(2)}
+                              ).toLocaleString("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                         </Text>
                       </View>
                     </View>
@@ -2499,7 +2597,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                             : (
                                 (unitPrices.B || 0) *
                                 (quantities.B ? parseFloat(quantities.B) : 0)
-                              ).toFixed(2)}
+                              ).toLocaleString("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                         </Text>
                       </View>
                     </View>
@@ -2542,7 +2643,10 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                             : (
                                 (unitPrices.C || 0) *
                                 (quantities.C ? parseFloat(quantities.C) : 0)
-                              ).toFixed(2)}
+                              ).toLocaleString("en-US", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                         </Text>
                       </View>
                     </View>
@@ -2681,12 +2785,17 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
               </TouchableOpacity>
             </View>
 
-            <DeleteModal
+            {/* Delete Variety Confirmation Modal */}
+            <WarningConfirmation
               visible={deleteVarietyModal.visible}
-              title={t("UnregisteredCropDetails.ConfirmDelete")}
-              message={t("UnregisteredCropDetails.DeleteVarietyConfirmation", {
-                varietyName: deleteVarietyModal.varietyName,
-              })}
+              message={t(
+                "UnregisteredCropDetails.Are you sure you want to delete previously added",
+                "Are you sure you want to delete previously added {{varietyName}} ?",
+                {
+                  varietyName: deleteVarietyModal.varietyName,
+                },
+              )}
+              onConfirm={handleDeleteVariety}
               onCancel={() =>
                 setDeleteVarietyModal({
                   visible: false,
@@ -2694,18 +2803,23 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   varietyName: "",
                 })
               }
-              onDelete={handleDeleteVariety}
+              confirmText={t("LoadingToVehicle.Delete", "Delete")}
+              cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+              confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
             />
 
-            <DeleteModal
+            {/* Delete Grade Confirmation Modal */}
+            <WarningConfirmation
               visible={deleteGradeModal.visible}
-              title={t("UnregisteredCropDetails.ConfirmDelete")}
-              message={t("UnregisteredCropDetails.DeleteGradeConfirmation", {
-                varietyName: deleteGradeModal.varietyName,
-                grade: t(
-                  `UnregisteredCropDetails.Grade${deleteGradeModal.grade}`,
-                ),
-              })}
+              message={t(
+                "UnregisteredCropDetails.Are you sure you want to delete grade",
+                "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}} ?",
+                {
+                  varietyName: deleteGradeModal.varietyName,
+                  grade: deleteGradeModal.grade,
+                },
+              )}
+              onConfirm={handleDeleteGrade}
               onCancel={() =>
                 setDeleteGradeModal({
                   visible: false,
@@ -2714,7 +2828,29 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
                   varietyName: "",
                 })
               }
-              onDelete={handleDeleteGrade}
+              confirmText={t("LoadingToVehicle.Delete", "Delete")}
+              cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+              confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+            />
+
+            {/* Clear & Delete Pending Variety Confirmation Modal */}
+            <WarningConfirmation
+              visible={deletePendingVarietyModalVisible}
+              message={t(
+                "UnregisteredCropDetails.DeleteVarietyConfirmation",
+                "Are you sure you want to delete {{varietyName}} form data?",
+                {
+                  varietyName: `${t("UnregisteredCropDetails.Variety", "variety").toLowerCase()} ${cropCount}`,
+                },
+              )}
+              onConfirm={() => {
+                setDeletePendingVarietyModalVisible(false);
+                handleClearAndDeletePending();
+              }}
+              onCancel={() => setDeletePendingVarietyModalVisible(false)}
+              confirmText={t("LoadingToVehicle.Delete", "Delete")}
+              cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
+              confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
             />
           </View>
         </View>

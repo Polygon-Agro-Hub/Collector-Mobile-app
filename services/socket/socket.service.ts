@@ -5,6 +5,7 @@ import axios from "axios";
 import { AppState, AppStateStatus } from "react-native";
 import { DCMNotificationItem } from "@/services/notification/notification.types";
 import store from "@/services/reducxStore";
+import { ROLES } from "@/constants/user-roles";
 
 // The key Collector uses to persist auth state
 const AUTH_STORAGE_KEY = "@auth_state";
@@ -251,6 +252,12 @@ class SocketService {
     this.isPollingActive = true;
 
     try {
+      const currentRole = store.getState().auth.jobRole;
+      if (currentRole !== ROLES.DISTRIBUTION_MANAGER) {
+        // Skip DCM-specific notifications for non-DCM users (e.g. Collection Officers, CCMs)
+        return;
+      }
+
       const resolvedToken = token || (await this.getToken());
       if (!resolvedToken) return;
 
