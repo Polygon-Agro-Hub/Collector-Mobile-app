@@ -5,9 +5,10 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LottieView from "lottie-react-native";
@@ -17,8 +18,6 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
-
-import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type LoadAssignedNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -38,14 +37,35 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
 
   const [loadCode, setLoadCode] = useState<string>(route.params?.loadCode || "");
   const [driverEmpId, setDriverEmpId] = useState<string>(
-    route.params?.driverId && /^DRV/i.test(route.params.driverId)
-      ? route.params.driverId
-      : ""
+    route.params?.driverEmpId ||
+      (route.params?.driverId && /^DRV/i.test(route.params.driverId)
+        ? route.params.driverId
+        : "")
   );
   const [driverData, setDriverData] = useState<any>(route.params || null);
   const [vehicleNo, setVehicleNo] = useState<string>(route.params?.vehicleNo || "");
 
   const transportIdentifier = route.params?.transportId || route.params?.loadCode;
+
+  const handleBack = useCallback(() => {
+    navigation.navigate("SentProductsToday");
+  }, [navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        handleBack();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [handleBack])
+  );
 
   const fetchLoadDetails = useCallback(async () => {
     if (!transportIdentifier) return;
@@ -82,7 +102,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
   }, [fetchLoadDetails]);
 
   const handleGoToHome = () => {
-    navigation.navigate("CollectionDashboard");
+    (navigation as any).navigate("Main", { screen: "CollectionDashboard" });
   };
 
   return (
@@ -94,7 +114,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
         title={t("LoadAssigned.Title", "Load Assigned")}
         navigation={navigation}
         showBackButton={true}
-        onBackPress={() => navigation.goBack()}
+        onBackPress={handleBack}
       />
 
       <ScrollView
@@ -159,10 +179,12 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
                   {t("LoadAssigned.Driver", "Driver")}
                 </Text>
                 <Text className="text-white text-base font-bold mt-0.5">
-                  {getLocalizedDriverName(driverData, i18n.language) ||
-                    driverEmpId ||
-                    route.params?.driverName ||
-                    route.params?.driverId ||
+                  {driverEmpId ||
+                    driverData?.driverEmpId ||
+                    route.params?.driverEmpId ||
+                    (route.params?.driverId && /^DRV/i.test(route.params.driverId)
+                      ? route.params.driverId
+                      : "") ||
                     "—"}
                 </Text>
               </View>

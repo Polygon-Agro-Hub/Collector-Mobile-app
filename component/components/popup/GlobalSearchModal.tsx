@@ -210,7 +210,12 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         }`}
       onPress={() => handleItemPress(item.value)}
     >
-      <Text className="text-base text-gray-800">{item.label}</Text>
+      <Text
+        className="text-base text-gray-800"
+        style={{ lineHeight: 24, paddingVertical: 2, includeFontPadding: true }}
+      >
+        {item.label}
+      </Text>
       {isSelected && <MaterialIcons name="check" size={20} color="#21202B" />}
     </TouchableOpacity>
   );
@@ -247,54 +252,89 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     </View>
   );
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <View className="px-4 py-12 items-center justify-center">
-          <ActivityIndicator size="large" color="#6839CF" />
-          <Text className="text-sm mt-3 text-[#6839CF]">
-            {t("GlobalSearchModal.Loading")}
-          </Text>
-        </View>
-      );
-    }
+ const renderContent = () => {
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          paddingHorizontal: 16,
+          paddingVertical: 48,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color="#6839CF" />
+        <Text style={{ fontSize: 14, marginTop: 12, color: "#6839CF" }}>
+          {t("GlobalSearchModal.Loading")}
+        </Text>
+      </View>
+    );
+  }
 
-    if (filteredData.length === 0) {
-      return (
-        <View className="px-4 py-8 items-center justify-center">
-          <Text className="text-gray-500 text-base text-center font-medium">
+  if (filteredData.length === 0) {
+    return (
+      <View
+        style={{
+          paddingHorizontal: 16,
+          paddingVertical: 32,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            color: "#6B7280",
+            fontSize: 16,
+            textAlign: "center",
+            fontWeight: "500",
+          }}
+        >
+          {effectiveNoResultsText}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={filteredData}
+      keyExtractor={(item) => item.value}
+      style={{ maxHeight: 256 }}
+      ListEmptyComponent={
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 32,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: "#6B7280",
+              fontSize: 16,
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
             {effectiveNoResultsText}
           </Text>
         </View>
-      );
-    }
+      }
+      renderItem={({ item, index }) => {
+        const isSelected = selectedValues.includes(item.value);
+        const isLast = index === filteredData.length - 1;
 
-    return (
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.value}
-        ListEmptyComponent={
-          <View className="px-4 py-8 items-center justify-center">
-            <Text className="text-gray-500 text-base text-center font-medium">
-              {effectiveNoResultsText}
-            </Text>
-          </View>
+        if (renderItem) {
+          return renderItem(item, isSelected) as React.ReactElement | null;
         }
-        renderItem={({ item, index }) => {
-          const isSelected = selectedValues.includes(item.value);
-          const isLast = index === filteredData.length - 1;
 
-          if (renderItem) {
-            return renderItem(item, isSelected) as React.ReactElement | null;
-          }
-
-          return renderDefaultItem(item, isSelected, isLast);
-        }}
-        showsVerticalScrollIndicator={false}
-        className="max-h-64"
-      />
-    );
-  };
+        return renderDefaultItem(item, isSelected, isLast);
+      }}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+};
 
   return (
     <Modal
@@ -308,7 +348,12 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>
-              <Text className="text-lg font-semibold">{t(title, title)}</Text>
+              <Text
+                className="text-lg font-semibold"
+                style={{ lineHeight: 26, paddingVertical: 2, includeFontPadding: true }}
+              >
+                {t(title, title)}
+              </Text>
               {multiSelect && selectedValues.length > 0 && (
                 <Text className="text-sm text-gray-500">
                   {t("GlobalSearchModal.SelectedCount", { count: selectedValues.length })}

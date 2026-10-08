@@ -63,13 +63,12 @@ class WifiScaleService {
 
   private initNetInfoListener() {
     NetInfo.addEventListener((state) => {
-      // Only disconnect if the device is explicitly offline / disconnected.
-      // Do NOT check state.isWifiEnabled, because on Android isWifiEnabled returns false
-      // when location permission is denied ("Don't Allow"), even if Wi-Fi is actively connected.
-      const isOffline = state.isConnected === false || state.type === "none";
-      if (isOffline) {
+      // Scale is only reachable over Wi-Fi LAN.
+      // If Wi-Fi is turned off or network disconnected, disconnect scale.
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      if (!isWifi) {
         if (this.isConnected || this.isConnecting) {
-          console.log("[WifiScaleService] Network disconnected - disconnecting scale");
+          console.log("[WifiScaleService] Wi-Fi lost/disconnected - disconnecting scale");
           this.closeSocket();
           this.stopHttpPolling();
           this.isConnected = false;

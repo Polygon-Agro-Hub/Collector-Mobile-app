@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
@@ -17,8 +18,7 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import axios from "axios";
 import environment from "@/environment/environment";
 import store from "@/services/reducxStore";
-
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 
 type SelectDistributionCentreNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -46,12 +46,34 @@ export default function SelectDistributionCentre({
   navigation,
   route,
 }: SelectDistributionCentreProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const [centres, setCentres] = useState<DistributionCentreItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCentreId, setSelectedCentreId] = useState<string | null>(null);
+
+  const handleBack = () => {
+    navigation.navigate("ScanDriverQR");
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        navigation.navigate("ScanDriverQR");
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => {
+        subscription.remove();
+      };
+    }, [navigation]),
+  );
 
   const fetchCentres = useCallback(async () => {
     try {
@@ -125,6 +147,14 @@ export default function SelectDistributionCentre({
       <CustomHeader
         title={t("SelectDistributionCentre.Title", "Select Distribution Centre")}
         navigation={navigation}
+        onBackPress={handleBack}
+        titleStyle={
+          i18n.language?.startsWith("si")
+            ? { fontSize: 13.5, lineHeight: 20 }
+            : i18n.language?.startsWith("ta")
+              ? { fontSize: 14.5, lineHeight: 22 }
+              : undefined
+        }
       />
 
       <View className="flex-1">
@@ -169,10 +199,27 @@ export default function SelectDistributionCentre({
                 >
                   {/* Building Icon Badge */}
                   <View
-                    className="w-12 h-12 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: "#E9ECF1" }}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 24,
+                      backgroundColor: "#E9ECF1",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
                   >
-                    <FontAwesome6 name="building-circle-arrow-right" size={18} color="black" />
+                    <FontAwesome6
+                      name="building-circle-arrow-right"
+                      size={18}
+                      color="black"
+                      style={{
+                        textAlign: "center",
+                        textAlignVertical: "center",
+                        includeFontPadding: false,
+                        paddingLeft: 3,
+                      }}
+                    />
                   </View>
 
                   {/* Centre Info */}

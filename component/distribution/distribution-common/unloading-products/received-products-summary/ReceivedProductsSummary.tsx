@@ -21,7 +21,6 @@ import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
 import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
-import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type ReceivedProductsSummaryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -223,9 +222,9 @@ export default function ReceivedProductsSummary({
                     {t("LoadAssigned.Driver", "Driver")}
                   </Text>
                   <Text className="text-white text-base font-bold mt-0.5">
-                    {getLocalizedDriverName(driverData, i18n.language) ||
-                      driverName ||
-                      driverEmpId ||
+                    {driverEmpId ||
+                      driverData?.driverEmpId ||
+                      route.params?.driverEmpId ||
                       "—"}
                   </Text>
                 </View>

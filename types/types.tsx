@@ -76,6 +76,7 @@ export type RootStackParamList = {
         driverNameSinhala?: string;
         driverNameTamil?: string;
         driverId?: string;
+        driverEmpId?: string;
         centreName?: string;
       }
     | undefined;
@@ -85,6 +86,7 @@ export type RootStackParamList = {
         loadCode?: string;
         vehicleNo?: string;
         driverId?: string;
+        driverEmpId?: string;
         driverName?: string;
         driverNameEnglish?: string;
         driverNameSinhala?: string;

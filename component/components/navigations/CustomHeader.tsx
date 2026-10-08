@@ -93,7 +93,8 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         transparent ? "bg-transparent" : dark ? "bg-black" : "bg-white"
       }`}
       style={[
-      { minHeight: 56 },bgColor && !transparent ? { backgroundColor: bgColor } : undefined
+        { minHeight: 56 },
+        bgColor && !transparent ? { backgroundColor: bgColor } : undefined,
       ]}
     >
       <View style={{ minWidth: 50, zIndex: 20 }}>
@@ -107,7 +108,11 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
               size={30}
               color={textColor ? textColor : dark ? "white" : "black"}
               style={{
-                backgroundColor: iconBgColor ? iconBgColor : dark ? "#1F1F1F" : "#F7FAFF",
+                backgroundColor: iconBgColor
+                  ? iconBgColor
+                  : dark
+                    ? "#1F1F1F"
+                    : "#F7FAFF",
                 borderRadius: 50,
                 padding: 8,
               }}
@@ -130,21 +135,27 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
         }}
         pointerEvents="none"
       >
-        <View className="px-14 w-full items-center">
+        <View className="px-16 w-full items-center">
           {title ? (
             <Text
-              className={`text-lg font-semibold text-center ${
-                textColor ? "" : dark ? "text-white" : "text-black"
-              }`}
-              style={[titleStyle, textColor ? { color: textColor } : undefined]}
+              style={[
+                {
+                  fontSize: 18,
+                  lineHeight: 28,
+                  fontWeight: "600",
+                  textAlign: "center",
+                  color: textColor ?? (dark ? "#FFFFFF" : "#000000"),
+                },
+                titleStyle,
+              ]}
               numberOfLines={2}
               ellipsizeMode="tail"
             >
               {title}
             </Text>
           ) : null}
-          {subtitle && (
-            typeof subtitle === "string" ? (
+          {subtitle &&
+            (typeof subtitle === "string" ? (
               <Text
                 className={`text-xs text-center mt-0.5 ${
                   textColor ? "" : dark ? "text-gray-400" : "text-gray-500"
@@ -155,8 +166,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
               </Text>
             ) : (
               subtitle
-            )
-          )}
+            ))}
         </View>
       </View>
 
@@ -238,7 +248,10 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
   if (linearGradient) {
     return (
-      <LinearGradient colors={["#6839CF", "#854EDC"]} style={{ top: 0, left: 0, right: 0, zIndex: 10 }}>
+      <LinearGradient
+        colors={["#6839CF", "#854EDC"]}
+        style={{ top: 0, left: 0, right: 0, zIndex: 10 }}
+      >
         <HeaderContent />
       </LinearGradient>
     );

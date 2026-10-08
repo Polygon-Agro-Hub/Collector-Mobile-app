@@ -416,7 +416,7 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
                 borderColor: "#980775",
                 borderRadius: 12,
                 backgroundColor: "white",
-                paddingHorizontal: 16,
+                width: "150%",
                 paddingVertical: 8,
                 alignSelf: "center",
                 maxWidth: "90%",

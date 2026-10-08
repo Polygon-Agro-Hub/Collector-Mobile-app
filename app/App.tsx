@@ -32,11 +32,13 @@ import * as Notifications from "expo-notifications";
 import socketService from "@/services/socket/socket.service";
 import pushNotificationService from "@/services/notification/pushNotification.service";
 import { ROLES } from "@/constants/user-roles";
+import { AppUpdateProvider } from "@/features/app-update";
 import {
   isBleedScreen,
   getScreenBackgroundColor,
   getScreenStatusBarStyle,
 } from "@/constants/bleedScreens";
+import { FloatingScaleButton } from "@/component/components/floating/FloatingScaleButton";
 
 
 // Global notifications handler (guarded for Expo Go & standalone)
@@ -110,7 +112,8 @@ function AppContent() {
       const isRejected =
         accStatus === "rejected" ||
         accStatus === "banned" ||
-        accStatus === "not approved";
+        accStatus === "not approved" ||
+        accStatus === "not_approved";
       const isForceLogout =
         data?.type === "force_logout" ||
         data?.code === "FORCE_LOGOUT" ||
@@ -266,6 +269,7 @@ function AppContent() {
           autoClose={alertState.autoClose}
           showOkButton={alertState.showOkButton}
         />
+        <FloatingScaleButton currentRoute={currentRoute} />
       </SafeAreaView>
     </GestureHandlerRootView>
   );
@@ -276,7 +280,9 @@ export default function App() {
     <SafeAreaProvider>
       <Provider store={store}>
         <LanguageProvider>
-          <AppContent />
+          <AppUpdateProvider>
+            <AppContent />
+          </AppUpdateProvider>
         </LanguageProvider>
       </Provider>
     </SafeAreaProvider>

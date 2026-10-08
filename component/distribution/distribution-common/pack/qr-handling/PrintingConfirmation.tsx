@@ -29,7 +29,10 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import environment from "@/environment/environment";
 import { PACKING_ERROR_CODES } from "@/constants/packing/error-codes";
-import { formatTimeSlot, formatOrderCategory } from "@/constants/packing/time-slots";
+import {
+  formatTimeSlot,
+  formatOrderCategory,
+} from "@/constants/packing/time-slots";
 import { useTranslation } from "react-i18next";
 
 export default function PrintingConfirmation({
@@ -39,7 +42,8 @@ export default function PrintingConfirmation({
   route: any;
   navigation: any;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const tEn = i18n.getFixedT("en");
   const {
     orderNumber,
     invoiceNumber,
@@ -149,7 +153,8 @@ export default function PrintingConfirmation({
     return `${y}/${m}/${d}`;
   };
 
-  const activeCategory = category || "Moragahahena";
+  const activeCategory = category ;
+  const categoryEn = formatOrderCategory(activeCategory, tEn);
   const activeDate = route.params?.date || getFallbackDate();
   const activeTimeSlot = route.params?.timeSlot || "08:00AM - 12:00PM";
   const activeStepLabel = activeStep?.label || "A la carte";
@@ -185,14 +190,14 @@ export default function PrintingConfirmation({
       setAlertTitle(
         t(
           "QRHandling.Printer Connected Successfully",
-          "Printer Connected Successfully"
-        )
+          "Printer Connected Successfully",
+        ),
       );
       setAlertMessage(
         t("QRHandling.Connected to {{deviceName}}", {
           deviceName: device.displayName || device.name,
           defaultValue: `Connected to ${device.displayName || device.name}`,
-        })
+        }),
       );
       setAlertVisible(true);
     } else {
@@ -201,8 +206,8 @@ export default function PrintingConfirmation({
       setAlertMessage(
         t(
           "QRHandling.Failed to connect to printer",
-          "Failed to connect to printer. Please check if the printer is on and in range."
-        )
+          "Failed to connect to printer. Please check if the printer is on and in range.",
+        ),
       );
       setAlertVisible(true);
     }
@@ -218,8 +223,8 @@ export default function PrintingConfirmation({
       setAlertMessage(
         t(
           "QRHandling.Connect printer before printing message",
-          "Please connect to a Bluetooth thermal printer first before printing."
-        )
+          "Please connect to a Bluetooth thermal printer first before printing.",
+        ),
       );
       setAlertVisible(true);
       return;
@@ -259,8 +264,14 @@ export default function PrintingConfirmation({
           const code = response.data.code;
           const msg = response.data.message || "An error occurred.";
           const targetPos = response.data.targetPosition || 1;
-          const targetStationName = response.data.targetStationName || response.data.data?.targetStationName || "";
-          const occupiedInv = response.data.occupiedInvoice || response.data.data?.occupiedInvoice || "";
+          const targetStationName =
+            response.data.targetStationName ||
+            response.data.data?.targetStationName ||
+            "";
+          const occupiedInv =
+            response.data.occupiedInvoice ||
+            response.data.data?.occupiedInvoice ||
+            "";
           setAlertType("error");
 
           const isBusy =
@@ -276,13 +287,18 @@ export default function PrintingConfirmation({
           const isNoOfficer =
             code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
             code === "NO_OFFICER_ASSIGNED" ||
-            String(msg).toLowerCase().includes("no packing position user assigned") ||
+            String(msg)
+              .toLowerCase()
+              .includes("no packing position user assigned") ||
             String(msg).toLowerCase().includes("no officer assigned");
 
-          const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+          const isQc =
+            targetStationName?.toLowerCase().includes("qc") ||
+            targetPos === "QC";
           const posLabel = isQc
             ? t("Packing.QC Position", "QC Station")
-            : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+            : targetStationName ||
+              `${t("Packing.Position", "Position")} ${targetPos}`;
 
           if (isBusy) {
             setAlertTitle(t("Packing.Position Busy", "Position Busy"));
@@ -290,28 +306,39 @@ export default function PrintingConfirmation({
               t("Packing.Position Busy Message", {
                 position: isQc ? "QC" : targetPos,
                 invoice: occupiedInv,
-                defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
-              })
+                defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`,
+              }),
             );
           } else if (isNoOfficer) {
-            setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+            setAlertTitle(
+              t("Packing.Position Not Available", "Position Not Available"),
+            );
             setAlertMessage(
               t("Packing.No Officer Assigned Message", {
                 position: isQc ? "QC" : targetPos,
-                defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
-              })
+                defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`,
+              }),
             );
-          } else if (code === PACKING_ERROR_CODES.MAIN_CONTAINER_PENDING || code === "MAIN_CONTAINER_PENDING" || String(msg).includes("Main Container QR first")) {
+          } else if (
+            code === PACKING_ERROR_CODES.MAIN_CONTAINER_PENDING ||
+            code === "MAIN_CONTAINER_PENDING" ||
+            String(msg).includes("Main Container QR first")
+          ) {
             setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
             setAlertMessage(
               t(
                 "QRHandling.Main Container QR Required",
-                "Please print the Main Container QR first before printing individual package boxes."
-              )
+                "Please print the Main Container QR first before printing individual package boxes.",
+              ),
             );
           } else {
             setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
-            setAlertMessage(t("QRHandling.Failed to communicate with packing server", "Failed to communicate with packing server. Please try again."));
+            setAlertMessage(
+              t(
+                "QRHandling.Failed to communicate with packing server",
+                "Failed to communicate with packing server. Please try again.",
+              ),
+            );
           }
           setAlertVisible(true);
           setIsProcessing(false);
@@ -340,8 +367,14 @@ export default function PrintingConfirmation({
           const code = response.data.code;
           const msg = response.data.message || "An error occurred.";
           const targetPos = response.data.targetPosition || 1;
-          const targetStationName = response.data.targetStationName || response.data.data?.targetStationName || "";
-          const occupiedInv = response.data.occupiedInvoice || response.data.data?.occupiedInvoice || "";
+          const targetStationName =
+            response.data.targetStationName ||
+            response.data.data?.targetStationName ||
+            "";
+          const occupiedInv =
+            response.data.occupiedInvoice ||
+            response.data.data?.occupiedInvoice ||
+            "";
           setAlertType("error");
 
           const isBusy =
@@ -357,13 +390,18 @@ export default function PrintingConfirmation({
           const isNoOfficer =
             code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
             code === "NO_OFFICER_ASSIGNED" ||
-            String(msg).toLowerCase().includes("no packing position user assigned") ||
+            String(msg)
+              .toLowerCase()
+              .includes("no packing position user assigned") ||
             String(msg).toLowerCase().includes("no officer assigned");
 
-          const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+          const isQc =
+            targetStationName?.toLowerCase().includes("qc") ||
+            targetPos === "QC";
           const posLabel = isQc
             ? t("Packing.QC Position", "QC Station")
-            : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+            : targetStationName ||
+              `${t("Packing.Position", "Position")} ${targetPos}`;
 
           if (isBusy) {
             setAlertTitle(t("Packing.Position Busy", "Position Busy"));
@@ -371,28 +409,39 @@ export default function PrintingConfirmation({
               t("Packing.Position Busy Message", {
                 position: isQc ? "QC" : targetPos,
                 invoice: occupiedInv,
-                defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
-              })
+                defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`,
+              }),
             );
           } else if (isNoOfficer) {
-            setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+            setAlertTitle(
+              t("Packing.Position Not Available", "Position Not Available"),
+            );
             setAlertMessage(
               t("Packing.No Officer Assigned Message", {
                 position: isQc ? "QC" : targetPos,
-                defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
-              })
+                defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`,
+              }),
             );
-          } else if (code === PACKING_ERROR_CODES.MAIN_CONTAINER_PENDING || code === "MAIN_CONTAINER_PENDING" || String(msg).includes("Main Container QR first")) {
+          } else if (
+            code === PACKING_ERROR_CODES.MAIN_CONTAINER_PENDING ||
+            code === "MAIN_CONTAINER_PENDING" ||
+            String(msg).includes("Main Container QR first")
+          ) {
             setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
             setAlertMessage(
               t(
                 "QRHandling.Main Container QR Required",
-                "Please print the Main Container QR first before printing individual package boxes."
-              )
+                "Please print the Main Container QR first before printing individual package boxes.",
+              ),
             );
           } else {
             setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
-            setAlertMessage(t("QRHandling.Failed to communicate with packing server", "Failed to communicate with packing server. Please try again."));
+            setAlertMessage(
+              t(
+                "QRHandling.Failed to communicate with packing server",
+                "Failed to communicate with packing server. Please try again.",
+              ),
+            );
           }
           setAlertVisible(true);
           setIsProcessing(false);
@@ -406,7 +455,8 @@ export default function PrintingConfirmation({
       const labelData: LabelThemeData = {
         qrValue: qrValue,
         orderNumber: cleanInv,
-        category: activeCategory,
+        category: categoryEn,
+
         orderType: isWholesale ? "Wholesale" : "Retail",
         date: activeDate,
         timeSlot: activeTimeSlot,
@@ -439,23 +489,26 @@ export default function PrintingConfirmation({
         const errMsg = String(printErr?.message || "");
         let localizedMsg = t(
           "QRHandling.Failed to print sticker message",
-          "Failed to print sticker on thermal printer. Order state was reverted. Please check your printer connection and try again."
+          "Failed to print sticker on thermal printer. Order state was reverted. Please check your printer connection and try again.",
         );
 
-        if (errMsg.includes("data channel") || errMsg.includes("disconnect and reconnect")) {
+        if (
+          errMsg.includes("data channel") ||
+          errMsg.includes("disconnect and reconnect")
+        ) {
           localizedMsg = t(
             "QRHandling.Printer data channel not open",
-            "Printer connected but data channel is not open. Please disconnect and reconnect your printer."
+            "Printer connected but data channel is not open. Please disconnect and reconnect your printer.",
           );
         } else if (errMsg.includes("No printer connected")) {
           localizedMsg = t(
             "QRHandling.No printer connected message",
-            "No printer connected. Please connect to a printer first."
+            "No printer connected. Please connect to a printer first.",
           );
         } else if (errMsg.includes("No writable BLE data channel")) {
           localizedMsg = t(
             "QRHandling.No writable data channel message",
-            "No writable BLE data channel found on printer. Please power cycle printer and retry."
+            "No writable BLE data channel found on printer. Please power cycle printer and retry.",
           );
         }
 
@@ -474,8 +527,8 @@ export default function PrintingConfirmation({
       setAlertMessage(
         t(
           "QRHandling.QR code printed successfully!",
-          "QR code printed successfully!"
-        )
+          "QR code printed successfully!",
+        ),
       );
       setAlertVisible(true);
       setIsProcessing(false);
@@ -510,8 +563,14 @@ export default function PrintingConfirmation({
 
       setAlertType("error");
       const targetPos = err.response?.data?.targetPosition || 1;
-      const targetStationName = err.response?.data?.targetStationName || err.response?.data?.data?.targetStationName || "";
-      const occupiedInv = err.response?.data?.occupiedInvoice || err.response?.data?.data?.occupiedInvoice || "";
+      const targetStationName =
+        err.response?.data?.targetStationName ||
+        err.response?.data?.data?.targetStationName ||
+        "";
+      const occupiedInv =
+        err.response?.data?.occupiedInvoice ||
+        err.response?.data?.data?.occupiedInvoice ||
+        "";
 
       const isBusy =
         code === PACKING_ERROR_CODES.STATION_OCCUPIED ||
@@ -526,13 +585,17 @@ export default function PrintingConfirmation({
       const isNoOfficer =
         code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
         code === "NO_OFFICER_ASSIGNED" ||
-        String(msg).toLowerCase().includes("no packing position user assigned") ||
+        String(msg)
+          .toLowerCase()
+          .includes("no packing position user assigned") ||
         String(msg).toLowerCase().includes("no officer assigned");
 
-      const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+      const isQc =
+        targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
       const posLabel = isQc
         ? t("Packing.QC Position", "QC Station")
-        : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+        : targetStationName ||
+          `${t("Packing.Position", "Position")} ${targetPos}`;
 
       if (isBusy) {
         setAlertTitle(t("Packing.Position Busy", "Position Busy"));
@@ -540,32 +603,38 @@ export default function PrintingConfirmation({
           t("Packing.Position Busy Message", {
             position: isQc ? "QC" : targetPos,
             invoice: occupiedInv,
-            defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
-          })
+            defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`,
+          }),
         );
       } else if (isNoOfficer) {
-        setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+        setAlertTitle(
+          t("Packing.Position Not Available", "Position Not Available"),
+        );
         setAlertMessage(
           t("Packing.No Officer Assigned Message", {
             position: isQc ? "QC" : targetPos,
-            defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
-          })
+            defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`,
+          }),
         );
-      } else if (code === PACKING_ERROR_CODES.MAIN_CONTAINER_PENDING || code === "MAIN_CONTAINER_PENDING" || String(msg).includes("Main Container QR first")) {
+      } else if (
+        code === PACKING_ERROR_CODES.MAIN_CONTAINER_PENDING ||
+        code === "MAIN_CONTAINER_PENDING" ||
+        String(msg).includes("Main Container QR first")
+      ) {
         setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
         setAlertMessage(
           t(
             "QRHandling.Main Container QR Required",
-            "Please print the Main Container QR first before printing individual package boxes."
-          )
+            "Please print the Main Container QR first before printing individual package boxes.",
+          ),
         );
       } else {
         setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
         setAlertMessage(
           t(
             "QRHandling.Failed to communicate with packing server",
-            "Failed to communicate with packing server. Please try again."
-          )
+            "Failed to communicate with packing server. Please try again.",
+          ),
         );
       }
       setAlertVisible(true);
@@ -610,8 +679,9 @@ export default function PrintingConfirmation({
               return (
                 <View key={s.id} className="flex-1 items-center">
                   <View
-                    className={`w-full h-1.5 rounded-full mb-1 ${isFilled ? "bg-[#030E25]" : "bg-gray-200"
-                      }`}
+                    className={`w-full h-1.5 rounded-full mb-1 ${
+                      isFilled ? "bg-[#030E25]" : "bg-gray-200"
+                    }`}
                   />
                 </View>
               );
@@ -659,7 +729,7 @@ export default function PrintingConfirmation({
             style={{
               borderColor: "#000000",
               backgroundColor: "#ffffff",
-              alignItems: 'center'
+              alignItems: "center",
             }}
           >
             {/* Top Section: Left Details & Right Large QR */}
@@ -685,7 +755,7 @@ export default function PrintingConfirmation({
                     marginTop: 2,
                   }}
                 >
-                  {formatOrderCategory(activeCategory, t)}
+                  {categoryEn}
                 </Text>
                 <Text
                   numberOfLines={1}
@@ -818,7 +888,10 @@ export default function PrintingConfirmation({
               >
                 {connectedDevice
                   ? connectedDevice.displayName || connectedDevice.name
-                  : t("QRHandling.No Printer Connected", "No Printer Connected")}
+                  : t(
+                      "QRHandling.No Printer Connected",
+                      "No Printer Connected",
+                    )}
               </Text>
               <Text
                 style={{
@@ -827,8 +900,14 @@ export default function PrintingConfirmation({
                 }}
               >
                 {connectedDevice
-                  ? t("QRHandling.Bluetooth Ready", "Bluetooth Ready (50x30mm TSPL)")
-                  : t("QRHandling.Tap to scan & connect printer", "Tap to scan & connect printer")}
+                  ? t(
+                      "QRHandling.Bluetooth Ready",
+                      "Bluetooth Ready (50x30mm TSPL)",
+                    )
+                  : t(
+                      "QRHandling.Tap to scan & connect printer",
+                      "Tap to scan & connect printer",
+                    )}
               </Text>
             </View>
           </View>
@@ -845,7 +924,9 @@ export default function PrintingConfirmation({
             <Text
               style={{ fontSize: 12, fontWeight: "bold", color: "#ffffff" }}
             >
-              {connectedDevice ? t("QRHandling.Change", "Change") : t("QRHandling.Connect", "Connect")}
+              {connectedDevice
+                ? t("QRHandling.Change", "Change")
+                : t("QRHandling.Connect", "Connect")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -878,8 +959,9 @@ export default function PrintingConfirmation({
         <TouchableOpacity
           onPress={handlePrintPress}
           disabled={isPrinting || isProcessing}
-          className={`w-full h-[50px] rounded-full items-center justify-center ${isPrinting || isProcessing ? "bg-gray-400" : "bg-black"
-            }`}
+          className={`w-full h-[50px] rounded-full items-center justify-center ${
+            isPrinting || isProcessing ? "bg-gray-400" : "bg-black"
+          }`}
           activeOpacity={0.8}
           style={{
             shadowColor: "#000000",
@@ -903,7 +985,10 @@ export default function PrintingConfirmation({
             >
               {route.params?.isReprint
                 ? t("QRHandling.Start Again", "Start Again")
-                : t("QRHandling.Print Step", { current: currentStep, defaultValue: `Print (${currentStep})` })}
+                : t("QRHandling.Print Step", {
+                    current: currentStep,
+                    defaultValue: `Print (${currentStep})`,
+                  })}
             </Text>
           )}
         </TouchableOpacity>
