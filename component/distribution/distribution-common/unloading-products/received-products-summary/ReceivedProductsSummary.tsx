@@ -278,9 +278,11 @@ export default function ReceivedProductsSummary({
                       <MaterialCommunityIcons name="sprout" size={24} color="#54617D" />
                     </View>
                   )}
-                  <Text className="text-base font-bold text-black">
-                    {getLocalizedProductName(crop, i18n.language) || crop.cropName}
-                  </Text>
+                  <View className="flex-1 justify-center">
+                    <Text className="text-base font-bold text-black flex-wrap">
+                      {getLocalizedProductName(crop, i18n.language) || crop.cropName}
+                    </Text>
+                  </View>
                 </View>
 
                 {/* Total Dark Card */}
