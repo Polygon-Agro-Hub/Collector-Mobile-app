@@ -479,7 +479,7 @@ export default function WeighGrade({
             className="w-20 h-20 mb-2"
             resizeMode="contain"
           />
-          <Text className="font-extrabold text-base text-[#17262C] mb-2">
+          <Text className="font-extrabold text-base text-[#17262C] mb-2 text-center flex-wrap px-4">
             {productName}
           </Text>
           <View className="bg-[#E9ECF1] rounded-full px-5 py-1.5">
