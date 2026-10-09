@@ -221,11 +221,13 @@ export default function ReceivedProductsSummary({
                   <Text className="text-gray-400 text-xs font-normal">
                     {t("LoadAssigned.Driver", "Driver")}
                   </Text>
-                  <Text className="text-white text-base font-bold mt-0.5">
-                    {driverEmpId ||
-                      driverData?.driverEmpId ||
-                      route.params?.driverEmpId ||
-                      "—"}
+                  <Text className="text-white text-base font-bold mt-0.5 flex-wrap">
+                    {(driverName || driverData?.driverName || route.params?.driverName)
+                      ? `${driverName || driverData?.driverName || route.params?.driverName}${driverEmpId ? ` (${driverEmpId})` : ""}`
+                      : driverEmpId ||
+                        driverData?.driverEmpId ||
+                        route.params?.driverEmpId ||
+                        "—"}
                   </Text>
                 </View>
               </View>
@@ -245,7 +247,7 @@ export default function ReceivedProductsSummary({
                       "Vehicle Registration Number"
                     )}
                   </Text>
-                  <Text className="text-white text-base font-bold mt-0.5">
+                  <Text className="text-white text-base font-bold mt-0.5 flex-wrap">
                     {vehicleNo || "—"}
                   </Text>
                 </View>

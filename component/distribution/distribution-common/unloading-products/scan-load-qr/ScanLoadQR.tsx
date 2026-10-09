@@ -58,6 +58,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [showRescanButton, setShowRescanButton] = useState(false);
+  const [showOkButton, setShowOkButton] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | React.ReactElement>("");
   const [modalType, setModalType] = useState<"error" | "success">("error");
 
@@ -73,6 +74,8 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       setShowTimeoutModal(false);
       setShowErrorModal(false);
       setShowSuccessModal(false);
+      setShowRescanButton(false);
+      setShowOkButton(false);
 
       if (permission?.granted) {
         startTimeoutTimer();
@@ -146,6 +149,8 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
     setShowTimeoutModal(false);
     setShowErrorModal(false);
     setShowSuccessModal(false);
+    setShowRescanButton(false);
+    setShowOkButton(false);
 
     if (isFocusedRef.current) {
       startTimeoutTimer();
@@ -209,6 +214,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         )
       );
       setShowRescanButton(true);
+      setShowOkButton(false);
       setModalType("error");
       setShowErrorModal(true);
       return;
@@ -249,6 +255,32 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
 
       if (response.data.success) {
         const load = response.data.data;
+
+        // If load has already been unloaded, display already unloaded popup with OK button
+        if (load?.isUnloaded || load?.unloadTime) {
+          setModalTitle(t("qrcode.AlreadyUnloaded", "Already Unloaded!"));
+          setModalMessage(
+            <View className="items-center">
+              <Text className="text-center text-[#4E4E4E] mb-2 mt-2">
+                {t(
+                  "qrcode.AlreadyUnloadedMessage",
+                  "This product has already been unloaded."
+                )}
+              </Text>
+              {load.transferCode ? (
+                <Text className="text-center font-bold text-[#000000] text-base">
+                  {load.transferCode}
+                </Text>
+              ) : null}
+            </View>
+          );
+          setShowRescanButton(false);
+          setShowOkButton(true);
+          setModalType("error");
+          setShowErrorModal(true);
+          return;
+        }
+
         verifiedLoadRef.current = load;
 
         setModalTitle(t("qrcode.Successful", "Successful!"));
@@ -262,6 +294,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
             </Text>
           </View>
         );
+        setShowOkButton(false);
         setModalType("success");
         setShowSuccessModal(true);
       }
@@ -270,6 +303,31 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
 
       const errData = err?.response?.data;
       const code = errData?.code;
+
+      if (code === "ALREADY_UNLOADED") {
+        const transferCode = errData?.data?.transferCode || errData?.data?.loadCode || cleanCode;
+        setModalTitle(t("qrcode.AlreadyUnloaded", "Already Unloaded!"));
+        setModalMessage(
+          <View className="items-center">
+            <Text className="text-center text-[#4E4E4E] mb-2 mt-2">
+              {t(
+                "qrcode.AlreadyUnloadedMessage",
+                "This product has already been unloaded."
+              )}
+            </Text>
+            {transferCode ? (
+              <Text className="text-center font-bold text-[#000000] text-base">
+                {transferCode}
+              </Text>
+            ) : null}
+          </View>
+        );
+        setShowRescanButton(false);
+        setShowOkButton(true);
+        setModalType("error");
+        setShowErrorModal(true);
+        return;
+      }
 
       if (code === "DISTRIBUTION_CENTER_MISMATCH") {
         setModalTitle(t("qrcode.Unauthorized", "Unauthorized!"));
@@ -280,6 +338,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
           )
         );
         setShowRescanButton(true);
+        setShowOkButton(false);
         setModalType("error");
         setShowErrorModal(true);
         return;
@@ -294,6 +353,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
           )
         );
         setShowRescanButton(true);
+        setShowOkButton(false);
         setModalType("error");
         setShowErrorModal(true);
         return;
@@ -308,6 +368,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
           )
         );
         setShowRescanButton(true);
+        setShowOkButton(false);
         setModalType("error");
         setShowErrorModal(true);
         return;
@@ -320,6 +381,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         t("qrcode.VerifyFailed", "Something went wrong. Please try again.")
       );
       setShowRescanButton(true);
+      setShowOkButton(false);
       setModalType("error");
       setShowErrorModal(true);
     }
@@ -327,6 +389,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
 
   const handleErrorModalClose = () => {
     setShowErrorModal(false);
+    setShowOkButton(false);
     resetScanning();
   };
 
@@ -434,8 +497,9 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         onClose={handleErrorModalClose}
         showRescanButton={showRescanButton}
         onRescan={resetScanning}
+        showOkButton={showOkButton}
         duration={7000}
-        autoClose={true}
+        autoClose={!showOkButton}
       />
 
       {/* Success Modal */}
