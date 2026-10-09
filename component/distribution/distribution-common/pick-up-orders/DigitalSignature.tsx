@@ -177,6 +177,7 @@ export default function DigitalSignature({
   const { t } = useTranslation();
   const { orderId } = route.params || {};
   const signatureRef = useRef<any>(null);
+  const isSubmittingRef = useRef<boolean>(false);
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   const [signatureDrawn, setSignatureDrawn] = useState(false);
@@ -199,6 +200,7 @@ export default function DigitalSignature({
 
         setSignatureDrawn(false);
         setLoading(false);
+        isSubmittingRef.current = false;
         setShowSuccessModal(false);
         setSuccessMessage("");
         setShouldRenderSignature(false);
@@ -240,6 +242,9 @@ export default function DigitalSignature({
   };
 
   const saveSignature = async (signatureBase64: string) => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     try {
       setLoading(true);
 
@@ -248,6 +253,7 @@ export default function DigitalSignature({
       if (!token) {
         Alert.alert("Error", "Authentication token not found");
         setLoading(false);
+        isSubmittingRef.current = false;
         navigation.navigate("Login");
         return;
       }
@@ -255,6 +261,7 @@ export default function DigitalSignature({
       if (!orderId) {
         Alert.alert("Error", "Order ID not provided");
         setLoading(false);
+        isSubmittingRef.current = false;
         return;
       }
 
@@ -313,6 +320,7 @@ export default function DigitalSignature({
     } catch (error: any) {
       console.error("Error saving pickup signature:", error);
       setLoading(false);
+      isSubmittingRef.current = false;
 
       let errorMessage = t("DigitalSignature.Failed to save signature", "Failed to save signature. Please try again.");
 
@@ -389,6 +397,7 @@ export default function DigitalSignature({
         {
           text: t("DigitalSignature.Yes, Save", "Yes, Save"),
           onPress: async () => {
+            if (isSubmittingRef.current || loading) return;
             await saveSignature(signature);
           },
         },
@@ -607,6 +616,7 @@ export default function DigitalSignature({
         ) : (
           <TouchableOpacity
             onPress={() => {
+              if (isSubmittingRef.current || loading) return;
               if (!signatureDrawn) {
                 Alert.alert(
                   "Warning",
