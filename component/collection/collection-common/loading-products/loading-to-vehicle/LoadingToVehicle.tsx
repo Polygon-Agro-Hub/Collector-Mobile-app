@@ -1348,7 +1348,7 @@ export default function LoadingToVehicle({
                   <View className="flex-1 mx-2">
                     {/* Card Header: (01) Variety Name + Red Trash */}
                     <View className="flex-row items-center justify-between mb-2">
-                      <Text className="font-extrabold text-[#000000] text-sm">
+                      <Text className="font-extrabold text-[#000000] text-sm flex-1 mr-2 flex-wrap">
                         ({String(savedVarieties[carouselIndex].varietyNumber).padStart(2, "0")}){" "}
                         {savedVarieties[carouselIndex].varietyLabel}
                       </Text>
