@@ -1388,6 +1388,8 @@
     "InvalidLoadQR": "Invalid QR code.\nPlease scan a valid Load QR code.",
     "CenterMismatch": "This load is not assigned to your distribution centre.",
     "JourneyNotEnded": "This load's journey has not ended yet.\nPlease wait until the driver marks the journey as completed.",
+    "AlreadyUnloaded": "Already Unloaded!",
+    "AlreadyUnloadedMessage": "This product has already been unloaded.",
     "LoadCode": "Load",
     "Vehicle": "Vehicle",
     "Verifying": "Verifying...",

@@ -576,13 +576,13 @@ export default function WeighTheLoad({
         {/* Scale Connection Section (Dashboard style) */}
         {renderScaleSection()}
         {/* Product Image & Name */}
-        <View className="items-center justify-center my-3">
+        <View className="items-center justify-center my-3 px-4">
           <Image
             source={{ uri: cropData.image }}
             className="w-20 h-20 mb-2"
             resizeMode="contain"
           />
-          <Text className="font-extrabold text-base text-[#17262C]">
+          <Text className="font-extrabold text-base text-[#17262C] text-center flex-wrap">
             {getLocalizedProductName(cropData, i18n.language) || cropData.name}
           </Text>
         </View>
