@@ -34,7 +34,9 @@
     "Grade": "Grade",
     "Transport": "Transport",
     "Centre": "Centre",
-    "Search Price": "Search Price"
+    "Search Price": "Search Price",
+    "ReadyToFinalize": "Ready to Finalize?",
+    "NoGoBack": "No, Go back"
   },
   "Main": {
     "No Internet Connection": "No Internet Connection",
@@ -514,6 +516,8 @@
     "VarietyPlaceholder": "Enter variety name",
     "SubTotal": "Sub Total",
     "ClearAndDelete": "Clear & Delete",
+    "FinalizeMessage": "Please review your collection details again before finalize.",
+    "ConfirmCollection": "Confirm Collection",
     "Quantity": "Quantity (Kg)",
     "FillDetails": "Fill Details",
     "Select": "Select Crop",
@@ -1176,6 +1180,8 @@
     "ReportMismatch": "Report Mismatch",
     "ReportedMismatch": "Mismatch Reported",
     "FinishUnloading": "Finish Unloading",
+    "FinalizeMessage": "Please review your unloading details again before finalize.",
+    "ConfirmUnloading": "Confirm Unloading",
     "PleaseWeighAllProducts": "Please weigh all products before finishing unloading.",
     "PleaseReportMismatch": "Please report the mismatch before finishing unloading.",
     "MismatchReportedTitle": "Mismatch Reported!",
@@ -2020,6 +2026,8 @@
     "SelectVariety": "--Select Variety--",
     "Grade": "Grade",
     "FinishLoading": "Finish Loading",
+    "FinalizeMessage": "Please review your loading details again before finalize.",
+    "ConfirmLoading": "Confirm Loading",
     "AddMoreItems": "Add More Items",
     "ClearAndDelete": "Clear & Delete",
     "Set": "Set",

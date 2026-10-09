@@ -19,6 +19,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { AlertModal } from "@/component/components/popup/AlertModal";
+import FinalizeConfirmationModal from "@/component/components/popup/FinalizeConfirmationModal";
 import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
@@ -218,6 +219,7 @@ export default function UnloadingProducts({
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showFinalizeModal, setShowFinalizeModal] = useState<boolean>(false);
 
   // Sync with Redux state on every screen focus
   useFocusEffect(
@@ -793,7 +795,10 @@ export default function UnloadingProducts({
             )}
 
             <TouchableOpacity
-              onPress={handleFinishUnloading}
+              onPress={() => {
+                if (!canFinish || submitting) return;
+                setShowFinalizeModal(true);
+              }}
               disabled={!canFinish || submitting}
               activeOpacity={0.8}
               className={`w-full h-[50px] rounded-full items-center justify-center ${
@@ -856,6 +861,23 @@ export default function UnloadingProducts({
         onClose={handleCloseSuccessModal}
         duration={3000}
         autoClose={true}
+      />
+
+      {/* Finalize Confirmation Modal */}
+      <FinalizeConfirmationModal
+        visible={showFinalizeModal}
+        title={t("Common.ReadyToFinalize", "Ready to Finalize?")}
+        message={t(
+          "UnloadingProducts.FinalizeMessage",
+          "Please review your unloading details again before finalize."
+        )}
+        confirmText={t("UnloadingProducts.ConfirmUnloading", "Confirm Unloading")}
+        cancelText={t("Common.NoGoBack", "No, Go back")}
+        onConfirm={() => {
+          setShowFinalizeModal(false);
+          handleFinishUnloading();
+        }}
+        onCancel={() => setShowFinalizeModal(false)}
       />
     </View>
   );

@@ -483,8 +483,11 @@ export default function WeighGrade({
             {productName}
           </Text>
           <View className="bg-[#E9ECF1] rounded-full px-5 py-1.5">
-            <Text className="font-bold text-xs text-[#17262C]">
-              {t("WeighGrade.Grade", "Grade")} {extractGradeLetter(gradeTitle)}
+            <Text
+              className="font-bold text-xs text-[#17262C]"
+              style={{ includeFontPadding: true, paddingVertical: 1 }}
+            >
+              {`${t("WeighGrade.Grade", "Grade")}\u00A0${extractGradeLetter(gradeTitle)}`}
             </Text>
           </View>
         </View>
