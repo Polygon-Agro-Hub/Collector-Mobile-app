@@ -189,13 +189,13 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
     }
 
     // Validate format "L-DRV00001260912001"
-    let cleanCode = (data || "").trim();
+    let cleanCode = (data || "").trim().toUpperCase();
     try {
       const parsed = JSON.parse(data);
       if (parsed && typeof parsed === "object") {
         const codeVal = parsed.transferCode || parsed.loadCode || parsed.code;
         if (codeVal && typeof codeVal === "string") {
-          cleanCode = codeVal.trim();
+          cleanCode = codeVal.trim().toUpperCase();
         }
       }
     } catch (e) {
