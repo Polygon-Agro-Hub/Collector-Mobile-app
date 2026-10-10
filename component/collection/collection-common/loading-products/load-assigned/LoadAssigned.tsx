@@ -35,7 +35,9 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
 
-  const [loadCode, setLoadCode] = useState<string>(route.params?.loadCode || "");
+  const [loadCode, setLoadCode] = useState<string>(
+    (route.params?.loadCode || "").trim().toUpperCase()
+  );
   const [driverEmpId, setDriverEmpId] = useState<string>(
     route.params?.driverEmpId ||
       (route.params?.driverId && /^DRV/i.test(route.params.driverId)
@@ -83,7 +85,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
 
       if (response.data.success && response.data.data) {
         const data = response.data.data;
-        if (data.transferCode) setLoadCode(data.transferCode);
+        if (data.transferCode) setLoadCode(data.transferCode.trim().toUpperCase());
         if (data.driverEmpId) {
           setDriverEmpId(data.driverEmpId);
         }
