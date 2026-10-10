@@ -34,7 +34,7 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
     wifiScaleService.getStatus(),
   );
-  const [displayWeight, setDisplayWeight] = useState<number>(initialWeight);
+  const [displayWeight, setDisplayWeight] = useState<number>(0);
 
   const tare = Math.max(0, tareWeight || 0);
   const grossWeight = displayWeight;
@@ -46,29 +46,27 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
     const current = wifiScaleService.getStatus();
     setScaleStatus(current);
 
-    // If initialWeight is provided (> 0) and scale is disconnected or reading 0,
-    // display the previously recorded initialWeight (+ tare if tare was applied)
-    if (initialWeight > 0 && (!current.connected || current.currentWeight <= 0)) {
-      setDisplayWeight(initialWeight + tare);
-    } else if (current.connected && current.currentWeight > 0) {
-      setDisplayWeight(current.currentWeight);
-    } else if (initialWeight > 0) {
-      setDisplayWeight(initialWeight + tare);
-    } else {
+    // If scale is connected, show live reading (including 0).
+    // If disconnected or not receiving value, set to 0.
+    if (!current.connected) {
       setDisplayWeight(0);
+    } else {
+      setDisplayWeight(Math.max(0, current.currentWeight || 0));
     }
 
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
-      if (status.connected && status.currentWeight !== undefined && status.currentWeight > 0) {
-        setDisplayWeight(status.currentWeight);
+      if (!status.connected) {
+        setDisplayWeight(0);
+      } else if (status.currentWeight !== undefined) {
+        setDisplayWeight(Math.max(0, status.currentWeight));
       }
     });
 
     return () => {
       unsubscribe();
     };
-  }, [visible, initialWeight, tare]);
+  }, [visible, tare]);
 
   const handleContinue = () => {
     // Save only Net Total to the set / database
@@ -445,12 +443,12 @@ export const ScaleWeightModal: React.FC<ScaleWeightModalProps> = ({
 
               {/* Continue button */}
               <TouchableOpacity
-                disabled={netWeight <= 0}
+                disabled={netWeight < 0}
                 activeOpacity={0.85}
                 onPress={handleContinue}
                 style={{
                   width: "100%",
-                  backgroundColor: netWeight > 0 ? "#000000" : "#ACB5BE",
+                  backgroundColor: netWeight >= 0 ? "#000000" : "#ACB5BE",
                   height: 52,
                   borderRadius: 26,
                   alignItems: "center",

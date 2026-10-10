@@ -41,6 +41,7 @@ import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
 import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
+import FinalizeConfirmationModal from "@/component/components/popup/FinalizeConfirmationModal";
 import {
   wifiScaleService,
   ScaleStatus,
@@ -206,6 +207,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     deletePendingVarietyModalVisible,
     setDeletePendingVarietyModalVisible,
   ] = useState(false);
+
+  // Finalize Confirmation Modal State
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
 
   const [isScaleConfigModalVisible, setIsScaleConfigModalVisible] =
     useState(false);
@@ -747,12 +751,12 @@ const cropModalData = cropNames
     );
   };
 
-  // Set weight from scale modal (Net Total weight, cannot be 0)
+  // Set weight from scale modal (Net Total weight)
   const handleScaleContinue = (weight: number) => {
-    if (!scaleTarget || weight <= 0) {
-      setScaleTarget(null);
+    if (!scaleTarget) {
       return;
     }
+    const finalWeight = Math.max(0, weight || 0);
     const currentTarget = scaleTarget;
     setScaleTarget(null);
     setGrades((prev) => {
@@ -761,7 +765,7 @@ const cropModalData = cropNames
           return {
             ...g,
             sets: g.sets.map((s) =>
-              s.id === currentTarget.setId ? { ...s, weight } : s,
+              s.id === currentTarget.setId ? { ...s, weight: finalWeight } : s,
             ),
           };
         }
@@ -2021,10 +2025,11 @@ const cropModalData = cropNames
                                     fontWeight: "bold",
                                     color: "#0F172A",
                                     fontSize: 15,
+                                    includeFontPadding: true,
+                                    paddingVertical: 2,
                                   }}
                                 >
-                                  {t("LoadingToVehicle.Grade", "Grade")}{" "}
-                                  {grade.gradeKey}
+                                  {`${t("LoadingToVehicle.Grade", "Grade")}\u00A0${grade.gradeKey}`}
                                 </Text>
                                 {price !== null && price !== undefined ? (
                                   <Text
@@ -2728,7 +2733,10 @@ const cropModalData = cropNames
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={handleSubmit}
+                onPress={() => {
+                  if (isFinishDisabled || loading) return;
+                  setShowFinalizeModal(true);
+                }}
                 disabled={isFinishDisabled || loading}
                 style={{
                   backgroundColor:
@@ -2943,6 +2951,23 @@ const cropModalData = cropNames
       <ScaleSelectModal
         visible={isScaleConfigModalVisible}
         onClose={() => setIsScaleConfigModalVisible(false)}
+      />
+
+      {/* Finalize Confirmation Modal */}
+      <FinalizeConfirmationModal
+        visible={showFinalizeModal}
+        title={t("Common.ReadyToFinalize", "Ready to Finalize?")}
+        message={t(
+          "UnregisteredCropDetails.FinalizeMessage",
+          "Please review your collection details again before finalize."
+        )}
+        confirmText={t("UnregisteredCropDetails.ConfirmCollection", "Confirm Collection")}
+        cancelText={t("Common.NoGoBack", "No, Go back")}
+        onConfirm={() => {
+          setShowFinalizeModal(false);
+          handleSubmit();
+        }}
+        onCancel={() => setShowFinalizeModal(false)}
       />
     </KeyboardAvoidingView>
   );
