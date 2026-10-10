@@ -86,6 +86,36 @@ function withCustomAndroidPermissions(config) {
       btScan.$["tools:targetApi"] = "31";
     }
 
+    // 5. Clean up conflicting uses-permission-sdk-23 entries (injected by react-native-ble-plx)
+    if (Array.isArray(androidManifest["uses-permission-sdk-23"])) {
+      androidManifest["uses-permission-sdk-23"] = androidManifest["uses-permission-sdk-23"].filter(
+        (perm) => {
+          const name = perm?.$?.["android:name"];
+          return (
+            name !== "android.permission.ACCESS_COARSE_LOCATION" &&
+            name !== "android.permission.ACCESS_FINE_LOCATION"
+          );
+        }
+      );
+      if (androidManifest["uses-permission-sdk-23"].length === 0) {
+        delete androidManifest["uses-permission-sdk-23"];
+      }
+    }
+
+    // 6. Ensure location permissions in uses-permission do not have maxSdkVersion
+    if (Array.isArray(androidManifest["uses-permission"])) {
+      androidManifest["uses-permission"].forEach((perm) => {
+        const name = perm?.$?.["android:name"];
+        if (
+          (name === "android.permission.ACCESS_COARSE_LOCATION" ||
+            name === "android.permission.ACCESS_FINE_LOCATION") &&
+          perm.$
+        ) {
+          delete perm.$["android:maxSdkVersion"];
+        }
+      });
+    }
+
     return config;
   });
 }

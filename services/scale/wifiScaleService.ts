@@ -50,6 +50,8 @@ class WifiScaleService {
   private pollInterval: NodeJS.Timeout | null = null;
   private isConnecting: boolean = false;
   private pendingConnectionReject: ((err: any) => void) | null = null;
+  private dataWatchdogTimeout: NodeJS.Timeout | null = null;
+  private readonly DATA_TIMEOUT_MS = 3500;
 
   constructor() {
     // Wrap in try/catch so a failed auto-connect never prevents app startup
@@ -59,6 +61,27 @@ class WifiScaleService {
       console.warn("Scale auto-connect skipped:", err);
     }
     this.initNetInfoListener();
+  }
+
+  private resetDataWatchdog() {
+    if (this.dataWatchdogTimeout) {
+      clearTimeout(this.dataWatchdogTimeout);
+    }
+    this.dataWatchdogTimeout = setTimeout(() => {
+      // If connected but no scale data received for DATA_TIMEOUT_MS, reset weight to 0
+      if (this.isConnected && this.currentWeight !== 0) {
+        console.log("[WifiScaleService] No scale data received recently, setting weight to 0");
+        this.currentWeight = 0;
+        this.notifyListeners();
+      }
+    }, this.DATA_TIMEOUT_MS);
+  }
+
+  private stopDataWatchdog() {
+    if (this.dataWatchdogTimeout) {
+      clearTimeout(this.dataWatchdogTimeout);
+      this.dataWatchdogTimeout = null;
+    }
   }
 
   private initNetInfoListener() {
@@ -100,6 +123,7 @@ class WifiScaleService {
       } catch (_) {
         this.currentScale = { ...saved, connected: false };
         this.isConnected = false;
+        this.currentWeight = 0;
         this.notifyListeners();
       }
     }
@@ -113,29 +137,40 @@ class WifiScaleService {
    *   SDT\t1\t1\t0\t0\t0\t0,0\t0,0\t0,0\t0,0\t8.3kg\t0.0kg
    *   END\tSDT
    *
-   * The FIRST "kg" value in the packet is always the measured weight (e.g. 8.3kg).
-   * The SECOND "kg" value is the tare weight (e.g. 0.0kg) — never read it.
+   * The FIRST "kg" value in each SDT line is the measured weight (e.g. 8.3kg).
+   * The SECOND "kg" value is tare (e.g. 0.0kg) — never read it.
    *
-   * Root cause of the old 8.3 → 0 oscillation:
-   *   When weight was stable (8.3 === currentWeight), the original code did NOT return
-   *   early, fell through to a secondary loop, and found the tare 0.0kg instead.
-   *
-   * Fix: match the FIRST kg in the raw chunk and ALWAYS return — even when the value
-   * hasn't changed — so we never accidentally read the tare column.
+   * TCP chunks may contain multiple packets or lines. We split by newlines and inspect
+   * from newest (bottom) to oldest line to find the most recent valid packet,
+   * matching its FIRST "kg" value.
    */
   private parseScaleData(rawChunk: string) {
     if (!rawChunk) return;
 
-    const match = rawChunk.match(/([+-]?\s*\d+(?:\.\d+)?)\s*kg/i);
-    if (match && match[1]) {
-      const val = parseFloat(match[1].replace(/\s+/g, ""));
-      if (!isNaN(val)) {
-        if (val !== this.currentWeight) {
-          this.currentWeight = val;
-          this.notifyListeners();
+    this.resetDataWatchdog();
+
+    // Split chunk into lines to handle concatenated TCP packets and get latest reading
+    const lines = rawChunk.split(/[\r\n]+/);
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i];
+      if (!line) continue;
+
+      // Match the first kg value on this line (measured weight)
+      const match = line.match(/([+-]?\s*\d+(?:[\.,]\d+)?)\s*kg/i);
+      if (match && match[1]) {
+        let val = parseFloat(match[1].replace(/\s+/g, "").replace(",", "."));
+        if (!isNaN(val)) {
+          // Clamp negative drift or values extremely close to zero
+          if (Math.abs(val) < 0.005 || val < 0 || Object.is(val, -0)) {
+            val = 0;
+          }
+          if (val !== this.currentWeight) {
+            this.currentWeight = val;
+            this.notifyListeners();
+          }
+          // Found latest valid packet on this chunk, return early
+          return;
         }
-        // ← Always return here. Never fall through to secondary kg values (tare).
-        return;
       }
     }
   }
@@ -209,6 +244,7 @@ class WifiScaleService {
             this.tcpClient = client;
             this.isConnected = true;
             this.isConnecting = false;
+            this.resetDataWatchdog();
 
             const scaleConfig: SavedScale = {
               id: `wifi_${cleanIp}_${port}`,
@@ -233,8 +269,20 @@ class WifiScaleService {
           this.parseScaleData(str);
         });
 
+        client.on("timeout", () => {
+          console.warn("Scale TCP socket timeout (no data received)");
+          this.stopDataWatchdog();
+          this.isConnected = false;
+          this.currentWeight = 0;
+          if (this.currentScale) this.currentScale.connected = false;
+          this.notifyListeners();
+          this.closeSocket();
+        });
+
         client.on("error", (err: any) => {
           console.error("Scale TCP socket error:", err);
+          this.stopDataWatchdog();
+          this.currentWeight = 0;
           if (!isSettled) {
             isSettled = true;
             this.pendingConnectionReject = null;
@@ -260,7 +308,9 @@ class WifiScaleService {
         });
 
         client.on("close", () => {
+          this.stopDataWatchdog();
           this.isConnected = false;
+          this.currentWeight = 0;
           if (this.currentScale) this.currentScale.connected = false;
           this.notifyListeners();
         });
@@ -351,9 +401,18 @@ class WifiScaleService {
           this.failedPollCount = 0;
           const data = await res.json();
           if (data.weight !== undefined) {
-            const newWeight = parseFloat(data.weight);
-            if (!isNaN(newWeight) && newWeight !== this.currentWeight) {
+            let newWeight = parseFloat(data.weight);
+            if (isNaN(newWeight) || Math.abs(newWeight) < 0.005 || newWeight < 0 || Object.is(newWeight, -0)) {
+              newWeight = 0;
+            }
+            if (newWeight !== this.currentWeight) {
               this.currentWeight = newWeight;
+              this.notifyListeners();
+            }
+          }
+          if (data.connected === false || data.stale === true) {
+            if (this.currentWeight !== 0) {
+              this.currentWeight = 0;
               this.notifyListeners();
             }
           }
@@ -363,12 +422,19 @@ class WifiScaleService {
           }
         } else {
           this.failedPollCount++;
+          if (this.failedPollCount >= 6 && this.isConnected) {
+            this.isConnected = false;
+            this.currentWeight = 0;
+            if (this.currentScale) this.currentScale.connected = false;
+            this.notifyListeners();
+          }
         }
       } catch (_) {
         this.failedPollCount++;
         // Only mark disconnected after 6 consecutive failed requests (3 seconds)
         if (this.failedPollCount >= 6 && this.isConnected) {
           this.isConnected = false;
+          this.currentWeight = 0;
           if (this.currentScale) this.currentScale.connected = false;
           this.notifyListeners();
         }
@@ -384,6 +450,7 @@ class WifiScaleService {
   }
 
   private closeSocket() {
+    this.stopDataWatchdog();
     if (this.pendingConnectionReject) {
       const rejectFn = this.pendingConnectionReject;
       this.pendingConnectionReject = null;
