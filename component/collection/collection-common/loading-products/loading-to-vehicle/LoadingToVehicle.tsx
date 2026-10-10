@@ -21,6 +21,7 @@ import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
 import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal";
 import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
+import FinalizeConfirmationModal from "@/component/components/popup/FinalizeConfirmationModal";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import {
   MaterialIcons,
@@ -375,6 +376,9 @@ export default function LoadingToVehicle({
   // Clear & Delete Pending Variety Confirmation Modal State
   const [clearAndDeleteModalVisible, setClearAndDeleteModalVisible] = useState(false);
 
+  // Finalize Confirmation Modal State
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+
   // Scale Connection State
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(
     wifiScaleService.getStatus()
@@ -656,19 +660,19 @@ export default function LoadingToVehicle({
     );
   };
 
-  // Set weight from scale modal (cannot be 0)
+  // Set weight from scale modal
   const handleScaleContinue = (weight: number) => {
-    if (!scaleTarget || weight <= 0) {
-      setScaleTarget(null);
+    if (!scaleTarget) {
       return;
     }
+    const finalWeight = Math.max(0, weight || 0);
     setGrades((prev) =>
       prev.map((g) => {
         if (g.gradeKey === scaleTarget.gradeKey) {
           return {
             ...g,
             sets: g.sets.map((s) =>
-              s.id === scaleTarget.setId ? { ...s, weight } : s
+              s.id === scaleTarget.setId ? { ...s, weight: finalWeight } : s
             ),
           };
         }
@@ -1348,7 +1352,7 @@ export default function LoadingToVehicle({
                   <View className="flex-1 mx-2">
                     {/* Card Header: (01) Variety Name + Red Trash */}
                     <View className="flex-row items-center justify-between mb-2">
-                      <Text className="font-extrabold text-[#000000] text-sm">
+                      <Text className="font-extrabold text-[#000000] text-sm flex-1 mr-2 flex-wrap">
                         ({String(savedVarieties[carouselIndex].varietyNumber).padStart(2, "0")}){" "}
                         {savedVarieties[carouselIndex].varietyLabel}
                       </Text>
@@ -1626,17 +1630,19 @@ export default function LoadingToVehicle({
                       <FontAwesome name="check" size={12} color="#FFFFFF" />
                     )}
                   </View>
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      color: "#0F172A",
-                      fontSize: 15,
-                      lineHeight: 24,
-                      includeFontPadding: false,
-                    }}
-                  >
-                    {t("LoadingToVehicle.Grade", "Grade")} {grade.gradeKey}
-                  </Text>
+                  <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: "#0F172A",
+                        fontSize: 15,
+                        includeFontPadding: true,
+                        paddingVertical: 2,
+                      }}
+                    >
+                      {`${t("LoadingToVehicle.Grade", "Grade")}\u00A0${grade.gradeKey}`}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
 
                 {/* Expanded Grade Crate Sets: Separate Boxes */}
@@ -1986,7 +1992,10 @@ export default function LoadingToVehicle({
           {/* Finish Loading Button */}
           <TouchableOpacity
             disabled={!canFinishLoading}
-            onPress={handleFinishLoading}
+            onPress={() => {
+              if (!canFinishLoading) return;
+              setShowFinalizeModal(true);
+            }}
             activeOpacity={0.8}
             className={`w-full h-[50px] rounded-full items-center justify-center ${
               canFinishLoading ? "bg-[#000000]" : "bg-[#ACB5BE]"
@@ -2127,7 +2136,7 @@ export default function LoadingToVehicle({
               selectedVariety?.label ||
               selectedCrop?.label ||
               t("LoadingToVehicle.Crop", "Crop"),
-            grade: `${t("LoadingToVehicle.Grade", "Grade")} ${setToDelete?.gradeKey}`,
+            grade: `${t("LoadingToVehicle.Grade", "Grade")}\u00A0${setToDelete?.gradeKey}`,
             set: `${t("LoadingToVehicle.Set", "Set")} ${setToDelete?.setNumber}`,
           }
         )}
@@ -2209,6 +2218,23 @@ export default function LoadingToVehicle({
         confirmText={t("LoadingToVehicle.Delete", "Delete")}
         cancelText={t("LoadingToVehicle.Cancel", "Cancel")}
         confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+      />
+
+      {/* Finalize Confirmation Modal */}
+      <FinalizeConfirmationModal
+        visible={showFinalizeModal}
+        title={t("Common.ReadyToFinalize", "Ready to Finalize?")}
+        message={t(
+          "LoadingToVehicle.FinalizeMessage",
+          "Please review your loading details again before finalize."
+        )}
+        confirmText={t("LoadingToVehicle.ConfirmLoading", "Confirm Loading")}
+        cancelText={t("Common.NoGoBack", "No, Go back")}
+        onConfirm={() => {
+          setShowFinalizeModal(false);
+          handleFinishLoading();
+        }}
+        onCancel={() => setShowFinalizeModal(false)}
       />
     </KeyboardAvoidingView>
   );

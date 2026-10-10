@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -73,10 +73,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     .substring(0, 2);
 };
 
-  const bankModalData = bankNames.map((bank) => ({
-    label: bank.name,
-    value: bank.name,
-  }));
+  const bankModalData = useMemo(() => {
+    return [...bankNames]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((bank) => ({
+        label: bank.name,
+        value: bank.name,
+      }));
+  }, []);
 
   const branchModalData = filteredBranches.map((branch) => ({
     label: branch.name,
