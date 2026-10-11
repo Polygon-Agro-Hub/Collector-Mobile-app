@@ -157,7 +157,7 @@ export default function LoadingToVehicleSummary({
   const handleViewQRCode = () => {
     navigation.navigate("LoadQR", {
       transportId,
-      loadCode: loadCode || route.params?.loadCode,
+      loadCode: (loadCode || route.params?.loadCode || "").trim().toUpperCase(),
       vehicleNo: vehicleNo || route.params?.vehicleNo,
       centreName: centreName || route.params?.centreName,
       driverId: driverEmpId || route.params?.driverEmpId,
@@ -201,10 +201,11 @@ export default function LoadingToVehicleSummary({
 
       if (response.data.success) {
         const { transferCode, transportId: newTransportId } = response.data.data;
+        const normalizedCode = (transferCode || loadCode || "").trim().toUpperCase();
         store.dispatch(clearTransportLoad());
         navigation.navigate("LoadQR", {
           transportId: newTransportId || transportId,
-          loadCode: transferCode || loadCode,
+          loadCode: normalizedCode,
           vehicleNo: route.params?.vehicleNo || vehicleNo,
           centreName: route.params?.centreName || centreName,
           driverId: route.params?.driverEmpId || transportState.driverEmpId || driverEmpId || undefined,

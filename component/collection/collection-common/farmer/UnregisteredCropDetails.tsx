@@ -2206,87 +2206,155 @@ const cropModalData = cropNames
                                                 overflow: "hidden",
                                               }}
                                             >
-                                              <ScrollView
-                                                horizontal
-                                                showsHorizontalScrollIndicator={
-                                                  false
-                                                }
-                                                style={{
-                                                  borderRadius: 9999,
-                                                  overflow: "hidden",
-                                                }}
-                                                contentContainerStyle={{
-                                                  flexDirection: "row",
-                                                  alignItems: "center",
-                                                }}
-                                              >
-                                                {containerTypes.map((cType) => {
-                                                  const isSelected =
-                                                    set.containerTypeId ===
-                                                      cType.id ||
-                                                    (!set.containerTypeId &&
-                                                      cType.id ===
-                                                        containerTypes[0]?.id);
+                                              {containerTypes.length <= 3 ? (
+                                                <View
+                                                  style={{
+                                                    flexDirection: "row",
+                                                    alignItems: "center",
+                                                    width: "100%",
+                                                  }}
+                                                >
+                                                  {containerTypes.map((cType) => {
+                                                    const isSelected =
+                                                      set.containerTypeId ===
+                                                        cType.id ||
+                                                      (!set.containerTypeId &&
+                                                        cType.id ===
+                                                          containerTypes[0]?.id);
 
-                                                  const pillWidth = Math.max(
-                                                    80,
-                                                    Math.floor(
-                                                      (containerSectionWidth -
-                                                        8) /
-                                                        3,
-                                                    ),
-                                                  );
+                                                    return (
+                                                      <TouchableOpacity
+                                                        key={cType.id}
+                                                        activeOpacity={0.75}
+                                                        onPress={() =>
+                                                          handleSelectContainerType(
+                                                            grade.gradeKey,
+                                                            set.id,
+                                                            cType,
+                                                          )
+                                                        }
+                                                        style={{
+                                                          flex: 1,
+                                                          height: 52,
+                                                          borderRadius: 9999,
+                                                          backgroundColor:
+                                                            isSelected
+                                                              ? "#FFFFFF"
+                                                              : "transparent",
+                                                          justifyContent:
+                                                            "center",
+                                                          alignItems: "center",
+                                                        }}
+                                                      >
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 14,
+                                                            fontWeight: "700",
+                                                            color: "#0F172A",
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.labelName}
+                                                        </Text>
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 11,
+                                                            color: "#64748B",
+                                                            marginTop: 2,
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.weight != null
+                                                            ? `${cType.weight} ${t("Common.kg", "kg")}`
+                                                            : ""}
+                                                        </Text>
+                                                      </TouchableOpacity>
+                                                    );
+                                                  })}
+                                                </View>
+                                              ) : (
+                                                <ScrollView
+                                                  horizontal
+                                                  showsHorizontalScrollIndicator={
+                                                    false
+                                                  }
+                                                  style={{
+                                                    borderRadius: 9999,
+                                                    overflow: "hidden",
+                                                  }}
+                                                  contentContainerStyle={{
+                                                    flexDirection: "row",
+                                                    alignItems: "center",
+                                                  }}
+                                                >
+                                                  {containerTypes.map((cType) => {
+                                                    const isSelected =
+                                                      set.containerTypeId ===
+                                                        cType.id ||
+                                                      (!set.containerTypeId &&
+                                                        cType.id ===
+                                                          containerTypes[0]?.id);
 
-                                                  return (
-                                                    <TouchableOpacity
-                                                      key={cType.id}
-                                                      activeOpacity={0.75}
-                                                      onPress={() =>
-                                                        handleSelectContainerType(
-                                                          grade.gradeKey,
-                                                          set.id,
-                                                          cType,
-                                                        )
-                                                      }
-                                                      style={{
-                                                        width: pillWidth,
-                                                        height: 52,
-                                                        borderRadius: 9999,
-                                                        backgroundColor:
-                                                          isSelected
-                                                            ? "#FFFFFF"
-                                                            : "transparent",
-                                                        justifyContent:
-                                                          "center",
-                                                        alignItems: "center",
-                                                      }}
-                                                    >
-                                                      <Text
+                                                    const pillWidth = Math.max(
+                                                      80,
+                                                      Math.floor(
+                                                        (containerSectionWidth -
+                                                          8) /
+                                                          3,
+                                                      ),
+                                                    );
+
+                                                    return (
+                                                      <TouchableOpacity
+                                                        key={cType.id}
+                                                        activeOpacity={0.75}
+                                                        onPress={() =>
+                                                          handleSelectContainerType(
+                                                            grade.gradeKey,
+                                                            set.id,
+                                                            cType,
+                                                          )
+                                                        }
                                                         style={{
-                                                          fontSize: 14,
-                                                          fontWeight: "700",
-                                                          color: "#0F172A",
+                                                          width: pillWidth,
+                                                          height: 52,
+                                                          borderRadius: 9999,
+                                                          backgroundColor:
+                                                            isSelected
+                                                              ? "#FFFFFF"
+                                                              : "transparent",
+                                                          justifyContent:
+                                                            "center",
+                                                          alignItems: "center",
                                                         }}
-                                                        numberOfLines={1}
                                                       >
-                                                        {cType.labelName}
-                                                      </Text>
-                                                      <Text
-                                                        style={{
-                                                          fontSize: 11,
-                                                          color: "#64748B",
-                                                          marginTop: 2,
-                                                        }}
-                                                        numberOfLines={1}
-                                                      >
-                                                        {cType.weight != null
-                                                          ? `${cType.weight} ${t("Common.kg", "kg")}`
-                                                          : ""}
-                                                      </Text>
-                                                    </TouchableOpacity>
-                                                  );
-                                                })}
-                                              </ScrollView>
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 14,
+                                                            fontWeight: "700",
+                                                            color: "#0F172A",
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.labelName}
+                                                        </Text>
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 11,
+                                                            color: "#64748B",
+                                                            marginTop: 2,
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.weight != null
+                                                            ? `${cType.weight} ${t("Common.kg", "kg")}`
+                                                            : ""}
+                                                        </Text>
+                                                      </TouchableOpacity>
+                                                    );
+                                                  })}
+                                                </ScrollView>
+                                              )}
                                             </View>
                                           </View>
                                         )}
