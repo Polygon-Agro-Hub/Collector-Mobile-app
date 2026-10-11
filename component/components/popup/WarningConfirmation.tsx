@@ -34,9 +34,10 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
           backgroundColor: "#00000040",
           justifyContent: "center",
           alignItems: "center",
+          paddingHorizontal: 16,
         }}
       >
-        <View className="bg-white items-center rounded-2xl w-[88%] max-w-[340px] px-5 py-6 shadow-2xl">
+        <View className="bg-white items-center rounded-2xl w-[92%] max-w-[360px] px-5 py-6 shadow-2xl">
           <View className="flex items-center justify-center mb-4 rounded-xl bg-[#F6F7F9] p-3 w-14 h-14">
             <Ionicons name="warning" size={32} color="#6c7e8c" />
           </View>
@@ -47,7 +48,7 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
           <View className="flex-row items-center justify-center gap-3 w-full">
             <TouchableOpacity
               onPress={onCancel}
-              className="flex-1 py-3 px-2 bg-[#F6F7F9] border border-[#D1D5DB] rounded-full items-center justify-center active:bg-gray-100"
+              className="flex-1 min-h-[46px] py-2.5 px-2 bg-[#F6F7F9] border border-[#D1D5DB] rounded-full items-center justify-center active:bg-gray-100"
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 2 },
@@ -57,9 +58,11 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
               }}
             >
               <Text
-                numberOfLines={1}
+                numberOfLines={2}
                 adjustsFontSizeToFit
+                minimumFontScale={0.75}
                 className="text-sm font-bold text-gray-700 text-center"
+                style={{ textAlign: "center" }}
               >
                 {cancelText}
               </Text>
@@ -67,7 +70,7 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
 
             <TouchableOpacity
               onPress={onConfirm}
-              className={`flex-1 py-3 px-2 rounded-full items-center justify-center ${confirmButtonBgClass}`}
+              className={`flex-1 min-h-[46px] py-2.5 px-2 rounded-full items-center justify-center ${confirmButtonBgClass}`}
               style={{
                 shadowColor: "#000000",
                 shadowOffset: { width: 0, height: 2 },
@@ -77,9 +80,11 @@ const WarningConfirmation: React.FC<WarningConfirmationProps> = ({
               }}
             >
               <Text
-                numberOfLines={1}
+                numberOfLines={2}
                 adjustsFontSizeToFit
+                minimumFontScale={0.75}
                 className="text-sm font-bold text-white text-center"
+                style={{ textAlign: "center" }}
               >
                 {confirmText}
               </Text>
