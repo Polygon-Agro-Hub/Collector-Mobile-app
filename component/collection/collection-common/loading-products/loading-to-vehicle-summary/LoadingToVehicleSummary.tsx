@@ -23,7 +23,7 @@ import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
 import { clearTransportLoad } from "@/store/transportSlice";
-import { getLocalizedProductName } from "@/component/distribution/distribution-common/unloading-products/unloading-products/UnloadingProducts";
+import { getLocalizedProductName } from "@/utils/productLocalization";
 import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type LoadingToVehicleSummaryNavigationProp = StackNavigationProp<

@@ -30,7 +30,11 @@ import {
   UnloadVarietyItem,
   UnloadedGradeItem,
 } from "@/store/unloadSlice";
-import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
+import {
+  extractGradeLetter,
+  getLocalizedProductName,
+} from "@/utils/productLocalization";
+export { getLocalizedProductName };
 
 type UnloadingProductsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -60,63 +64,6 @@ export interface MismatchItem {
   hasCrateMismatch: boolean;
 }
 
-export const getLocalizedProductName = (
-  item?: {
-    displayName?: string;
-    name?: string;
-    cropName?: string;
-    varietyLabel?: string;
-    cropLabel?: string;
-    varietyNameEnglish?: string;
-    varietyNameSinhala?: string;
-    varietyNameTamil?: string;
-    cropNameEnglish?: string;
-    cropNameSinhala?: string;
-    cropNameTamil?: string;
-  } | null,
-  lang?: string
-): string => {
-  if (!item) return "";
-  if (item.displayName) {
-    return item.displayName;
-  }
-  const currentLang = (lang || "").toLowerCase();
-  if (currentLang.startsWith("si")) {
-    return (
-      item.varietyNameSinhala ||
-      item.cropNameSinhala ||
-      item.name ||
-      item.cropName ||
-      item.varietyNameEnglish ||
-      item.cropNameEnglish ||
-      item.varietyLabel ||
-      item.cropLabel ||
-      ""
-    );
-  }
-  if (currentLang.startsWith("ta")) {
-    return (
-      item.varietyNameTamil ||
-      item.cropNameTamil ||
-      item.name ||
-      item.cropName ||
-      item.varietyNameEnglish ||
-      item.cropNameEnglish ||
-      item.varietyLabel ||
-      item.cropLabel ||
-      ""
-    );
-  }
-  return (
-    item.varietyNameEnglish ||
-    item.cropNameEnglish ||
-    item.name ||
-    item.cropName ||
-    item.varietyLabel ||
-    item.cropLabel ||
-    ""
-  );
-};
 
 const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
   return (rawItems || []).map((item, idx) => {
