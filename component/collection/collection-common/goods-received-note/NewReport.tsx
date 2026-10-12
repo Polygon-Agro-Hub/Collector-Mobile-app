@@ -71,6 +71,27 @@ interface Crop {
   invoiceNumber: string;
 }
 
+// NEW: localizes the AM/PM marker since toLocaleTimeString() always
+// returns the English marker regardless of i18n.language.
+const getLocalizedTime = (date: Date, lang: "en" | "si" | "ta"): string => {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  const minuteStr = minutes.toString().padStart(2, "0");
+  const isPM = hours >= 12;
+
+  let period: string;
+  if (lang === "si") {
+    period = isPM ? "ප.ව." : "පෙ.ව.";
+  } else if (lang === "ta") {
+    period = isPM ? "பிற்பகல்" : "முற்பகல்";
+  } else {
+    period = isPM ? "PM" : "AM";
+  }
+
+  return `${hour12}:${minuteStr} ${period}`;
+};
+
 const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
@@ -101,6 +122,15 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   useEffect(() => {
     fetchSelectedLanguage();
   }, []);
+
+  // NEW: single source of truth for the active language, used to pick
+  // the AM/PM marker consistently in both the JSX header and the PDF.
+  const activeLang: "en" | "si" | "ta" = (() => {
+    const lang = (i18n.language || selectedLanguage || "en").toLowerCase();
+    if (lang.startsWith("si")) return "si";
+    if (lang.startsWith("ta")) return "ta";
+    return "en";
+  })();
 
   const getCompanyName = () => {
     const authState = store.getState().auth;
@@ -282,7 +312,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     }
   };
 
-  const generatePDF = async () => {
+const generatePDF = async () => {
     if (!details) {
       Alert.alert(
         t("Error.error"),
@@ -291,9 +321,31 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       return "";
     }
 
-    const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-    const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+    const isSinhala = activeLang === "si";
+    const isTamil = activeLang === "ta";
+    const isIndic = isSinhala || isTamil;
     const currencyPrefix = isSinhala ? "රු." : isTamil ? "ரூ." : "Rs.";
+
+    // Sinhala/Tamil glyphs render smaller than Latin at the same px size,
+    // so scale the sizes up for those languages. English stays unchanged.
+    const sizes = {
+      h1: isIndic ? 24 : 22,
+      headerItem: isIndic ? 15 : 11, // GRN No / Date
+      sectionTitle: isIndic ? 17 : 14, // Supplier Details / Received By
+      detail: isIndic ? 14 : 10, // name, phone, company, centre
+      tableTitle: isIndic ? 18 : 16,
+      th: isIndic ? 13 : 12,
+      td: isIndic ? 13 : 10,
+      totalLabel: isIndic ? 15 : 13,
+      totalValue: isIndic ? 15 : 13,
+      note: isIndic ? 13 : 11,
+    };
+
+    const fontFamily = isSinhala
+      ? "'Noto Sans Sinhala', 'Iskoola Pota', 'Sinhala Sangam MN', Arial, sans-serif"
+      : isTamil
+        ? "'Noto Sans Tamil', 'Latha', 'Tamil Sangam MN', Arial, sans-serif"
+        : "Arial, sans-serif";
 
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
       return sum + Number(crop.subTotal);
@@ -304,9 +356,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       <head>
         <style>
           body {
-            font-family: Arial, sans-serif;
+            font-family: ${fontFamily};
             margin: 20px;
-            font-size: 10px;
+            font-size: ${sizes.detail}px;
             background-color: white;
             max-width: 800px;
             margin: 0 auto;
@@ -317,7 +369,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           }
           h1 {
             text-align: center;
-            font-size: 22px;
+            font-size: ${sizes.h1}px;
             margin-bottom: 15px;
             font-weight: bold;
           }
@@ -332,12 +384,12 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
           }
           .header-item {
             margin-bottom: 5px;
-            font-size: 11px;
+            font-size: ${sizes.headerItem}px;
           }
           .section-title {
             font-weight: bold;
             margin-bottom: 5px;
-            font-size: 14px;
+            font-size: ${sizes.sectionTitle}px;
           }
           .supplier-section {
             display: flex;
@@ -345,7 +397,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             margin-bottom: 15px;
           }
           .supplier-section div div:not(.section-title) {
-            font-size: 10px;
+            font-size: ${sizes.detail}px;
           }
           .received-by-section {
             display: flex;
@@ -353,7 +405,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             margin-bottom: 15px;
           }
           .received-by-section div div:not(.section-title) {
-            font-size: 10px;
+            font-size: ${sizes.detail}px;
           }
           .table-title {
             font-weight: bold;
@@ -362,7 +414,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             background-color: #D6E6F4;
             padding: 8px;
             border: 1px solid #000;
-            font-size: 16px;
+            font-size: ${sizes.tableTitle}px;
           }
           table {
             width: 100%;
@@ -376,14 +428,14 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             padding: 8px;
             border: 1px solid #000;
             font-weight: bold;
-            font-size: 12px;
+            font-size: ${sizes.th}px;
           }
           td {
             padding: 8px;
             text-align: center;
             border: 1px solid #000;
             background-color: white;
-            font-size: 10px;
+            font-size: ${sizes.td}px;
           }
           .total-row {
             display: flex;
@@ -400,17 +452,17 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             font-weight: bold;
             border-right: 1px solid #000;
             background-color: #D6E6F4;
-            font-size: 13px;
+            font-size: ${sizes.totalLabel}px;
           }
           .total-value {
             padding: 8px;
             min-width: 150px;
             text-align: center;
             font-weight: bold;
-            font-size: 13px;
+            font-size: ${sizes.totalValue}px;
           }
           .note {
-            font-size: 11px;
+            font-size: ${sizes.note}px;
             margin: 15px 0;
             font-style: italic;
             text-align: justify;
@@ -420,7 +472,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
       <body>
         <h1>${t("NewReport.Goods Received Note")}</h1>
         <div class="header-line"></div>
-        
+
         <div class="header-row">
           <div class="header-item">
             <strong>${t("NewReport.GRN No")}</strong> ${
@@ -432,16 +484,10 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               .toLocaleDateString("en-GB")
               .split("/")
               .reverse()
-              .join("/")} ${new Date()
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })
-              .toUpperCase()}
+              .join("/")} ${getLocalizedTime(new Date(), activeLang)}
           </div>
         </div>
-        
+
         <div class="supplier-section">
           <div>
             <div class="section-title">${t("NewReport.Supplier Details")}</div>
@@ -452,7 +498,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             <div>${details.phoneNumber}</div>
           </div>
         </div>
-        
+
         <div class="received-by-section">
           <div>
             <div class="section-title">${t("NewReport.Received By")}</div>
@@ -463,7 +509,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             <div>${t("NewReport.Centre")} ${details.collectionCenterName || "Collection Centre"}</div>
           </div>
         </div>
-        
+
         <div class="table-title">${t("NewReport.Received Items")}</div>
         <table>
           <thead>
@@ -493,14 +539,14 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               .join("")}
           </tbody>
         </table>
-        
+
         <div class="total-row">
           <div class="total-box">
             <div class="total-label">${t("NewReport.Full Total (Rs.)")}</div>
             <div class="total-value">${currencyPrefix} ${formatNumberWithCommas(totalSum)}</div>
           </div>
         </div>
-        
+
         <div class="note">
           <strong style="font-style: normal;">${t("NewReport.Note")}</strong> ${t("NewReport.GRNnote")}
         </div>
@@ -509,8 +555,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
     `;
     try {
       const { uri, base64 } = await Print.printToFileAsync({ html, base64: true });
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
       const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
       const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
@@ -547,8 +591,8 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
         return;
       }
 
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+      const isSinhala = activeLang === "si";
+      const isTamil = activeLang === "ta";
       const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
       const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const date = new Date().toISOString().slice(0, 10);
@@ -658,12 +702,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
-      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const cleanGrn = (crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA").replace(/[^a-zA-Z0-9_-]/g, "_");
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
+      const fileName = `GRN_${cleanGrn}_${date}.pdf`;
 
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
@@ -720,13 +761,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
                 .split("/")
                 .reverse()
                 .join("/")}{" "}
-              {new Date()
-                .toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })
-                .toUpperCase()}
+              {getLocalizedTime(new Date(), activeLang)}
             </Text>
           </View>
 
@@ -783,7 +818,7 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
                     <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 2 }}>
                       {t("NewReport.Variety")}
                     </Text>
-                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1 }}>
+                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1.5 }}>
                       {t("NewReport.Grade")}
                     </Text>
                     <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1.5 }}>
@@ -863,7 +898,9 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* Action Buttons */}
+         
+        </View>
+         {/* Action Buttons */}
           <View
             className="w-full mt-4"
             style={{ paddingBottom: insets.bottom || 20 }}
@@ -875,7 +912,6 @@ const NewReport: React.FC<NewReportProps> = ({ navigation }) => {
               shareLabel={t("NewReport.Share")}
             />
           </View>
-        </View>
       </ScrollView>
     </View>
   );

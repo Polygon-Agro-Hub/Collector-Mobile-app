@@ -444,12 +444,9 @@ const ReportPage: React.FC<ReportPageProps> = ({ navigation }) => {
 const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const isSinhala = (i18n.language || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || "en").toLowerCase().startsWith("ta");
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
-      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
+      const cleanGrn = (crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA").replace(/[^a-zA-Z0-9_-]/g, "_");
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `${prefix}_${grnNumber}_${date}.pdf`;
+      const fileName = `PurchaseReport_${cleanGrn}_${date}.pdf`;
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
       try {

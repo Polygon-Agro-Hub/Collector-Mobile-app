@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -96,10 +96,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     value: d.value,
   }));
 
-  const bankModalData = bankNames.map((bank) => ({
-    label: bank.name,
-    value: bank.name,
-  }));
+  const bankModalData = useMemo(() => {
+    return [...bankNames]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((bank) => ({
+        label: bank.name,
+        value: bank.name,
+      }));
+  }, []);
 
   const branchModalData = filteredBranches.map((branch) => ({
     label: branch.name,
@@ -206,11 +210,9 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         setLoading(false);
         return;
       } else if (checkResponse.data.message === "This NIC already exists.") {
-        Alert.alert(
-          t("Error.error"),
-          t("Error.This NIC already exists."),
-          [{ text: t("AlertModal.OK", "OK") }],
-        );
+        Alert.alert(t("Error.error"), t("Error.This NIC already exists."), [
+          { text: t("AlertModal.OK", "OK") },
+        ]);
         setLoading(false);
         return;
       } else if (
@@ -226,12 +228,6 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         return;
       }
 
-      const apiUrl = "https://api.getshoutout.com/otpservice/send";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let otpMessage = "";
       let companyName = "";
 
@@ -241,54 +237,50 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
         lang === "si" ||
         lang === "sinhalese" ||
         lang === "සිංහල";
-      const isTamil =
-        lang === "tamil" ||
-        lang === "ta" ||
-        lang === "தமிழ்";
+      const isTamil = lang === "tamil" || lang === "ta" || lang === "தமிழ்";
 
       if (isSinhala) {
-        companyName =
-          (store.getState().auth.companyNameSinhala) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameSinhala || "Polygon";
         otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
       } else if (isTamil) {
-        companyName =
-          (store.getState().auth.companyNameTamil) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameTamil || "Polygon";
         otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
       } else {
-        companyName =
-          (store.getState().auth.companyNameEnglish) || "PolygonAgro";
+        companyName = store.getState().auth.companyNameEnglish || "Polygon";
         otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
       }
 
-      const body = {
-        source: "PolygonAgro",
-        transport: "sms",
-        content: { sms: otpMessage },
-        destination: `${callingCode}${phoneNumber}`,
-      };
-
-      const response = await axios.post(apiUrl, body, { headers });
-      await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/farmer/send-otp`,
+        {
+          phoneNumber: `${callingCode}${phoneNumber}`,
+          message: otpMessage,
+        },
+      );
+      if (response.data?.referenceId) {
+        await AsyncStorage.setItem("referenceId", response.data.referenceId);
+      }
 
       cameFromOTP.current = true;
 
-      navigation.navigate("Main" as any, {
-        screen: "OTPE",
-        params: {
-          firstName,
-          lastName,
-          NICnumber,
-          phoneNumber: `${callingCode}${phoneNumber}`,
-          district,
-          accNumber,
-          accHolderName,
-          bankName,
-          branchName,
-          PreferdLanguage,
-        },
+      navigation.navigate("OTPE" as any, {
+        firstName,
+        lastName,
+        NICnumber,
+        phoneNumber: `${callingCode}${phoneNumber}`,
+        district,
+        accNumber,
+        accHolderName,
+        bankName,
+        branchName,
+        PreferdLanguage,
       });
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      console.error(
+        "Error sending OTP in UnregisteredFarmerForm:",
+        error?.response?.data || error?.message || error,
+      );
       Alert.alert(t("Error.error"), t("Error.otpSendFailed"), [
         { text: t("AlertModal.OK", "OK") },
       ]);
@@ -397,20 +389,26 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     <TouchableOpacity
       onPress={onPress}
       style={{
-        height: 50,
+        minHeight: 50,
         backgroundColor: "#F4F4F4",
-        borderRadius: 50,
+        borderRadius: 25,
         borderWidth: 1,
         borderColor: hasError ? "#ef4444" : "#F4F4F4",
         paddingHorizontal: 14,
+        paddingVertical: 12,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
       }}
     >
       <Text
-        style={{ color: value ? "#000" : "#9CA3AF", fontSize: 14, flex: 1 }}
-        numberOfLines={1}
+        style={{
+          color: value ? "#000" : "#9CA3AF",
+          fontSize: 14,
+          flex: 1,
+          flexWrap: "wrap",
+          marginRight: 8,
+        }}
       >
         {value || placeholder}
       </Text>
@@ -572,10 +570,11 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
               {t("UnregisteredFarmerDetails.Phone")}
             </Text>
             <View
-              className={`flex-row items-center border ${fieldErrors.phone || phoneError
+              className={`flex-row items-center border ${
+                fieldErrors.phone || phoneError
                   ? "border-red-500"
                   : "border-[#F4F4F4] bg-[#F4F4F4]"
-                } px-4 rounded-full h-[50px]`}
+              } px-4 rounded-full h-[50px]`}
             >
               <TextInput
                 placeholder="7XXXXXXXX"
@@ -616,7 +615,12 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
                   }
                 }}
                 className="flex-1 h-full"
-                style={{ fontSize: 14, height: 50, paddingVertical: 0, color: "#000000" }}
+                style={{
+                  fontSize: 14,
+                  height: 50,
+                  paddingVertical: 0,
+                  color: "#000000",
+                }}
                 maxLength={9}
               />
             </View>

@@ -13,7 +13,8 @@ export async function saveImageToGallery(
   filenamePrefix: string = "QRCode"
 ): Promise<boolean> {
   try {
-    const fileUri = `${(FileSystem as any).documentDirectory}${filenamePrefix}_${Date.now()}.png`;
+    const sanitizedPrefix = (filenamePrefix || "QRCode").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const fileUri = `${(FileSystem as any).cacheDirectory}${sanitizedPrefix}_${Date.now()}.png`;
     let localUri = sourceUri;
 
     if (sourceUri.startsWith("http://") || sourceUri.startsWith("https://")) {

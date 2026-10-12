@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   BackHandler,
+  Animated,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import axios from "axios";
@@ -16,7 +17,6 @@ import { Ionicons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { RootStackParamList } from "@/types/types";
 import { useTranslation } from "react-i18next";
-import { Animated } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { ROLES } from "@/constants/user-roles";
@@ -46,14 +46,15 @@ interface TargetData {
 }
 
 const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
-  const [todoData, setTodoData] = useState<TargetData[]>([]);
-  const [completedData, setCompletedData] = useState<TargetData[]>([]);
+  // Raw API data. Filtering and sorting are derived below so a language
+  // change is applied immediately without another API call.
+  const [allData, setAllData] = useState<TargetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const [selectedToggle, setSelectedToggle] = useState("ToDo");
-  const { t } = useTranslation();
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const { t, i18n } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [jobRole, setJobRole] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,25 +69,36 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
     fetchJobRole();
   }, []);
 
-  const fetchSelectedLanguage = async () => {
+  // Read the saved language (called every time the screen gains focus)
+  const fetchSelectedLanguage = useCallback(async () => {
     try {
       const lang = await AsyncStorage.getItem("@user_language");
-      setSelectedLanguage(lang || "en");
+      setSelectedLanguage(lang || i18n.language || "en");
     } catch (error) {
       console.error("Error fetching language preference:", error);
     }
-  };
+  }, [i18n.language]);
 
-  const getVarietyNameForSort = (item: TargetData) => {
-    switch (selectedLanguage) {
-      case "si":
-        return item.varietyNameSinhala || "";
-      case "ta":
-        return item.varietyNameTamil || "";
-      default:
-        return item.varietyNameEnglish || "";
+  // Also react when i18n itself changes language
+  useEffect(() => {
+    if (i18n.language) {
+      setSelectedLanguage(i18n.language);
     }
-  };
+  }, [i18n.language]);
+
+  const getVarietyNameForSort = useCallback(
+    (item: TargetData) => {
+      switch (selectedLanguage) {
+        case "si":
+          return item.varietyNameSinhala || item.varietyNameEnglish || "";
+        case "ta":
+          return item.varietyNameTamil || item.varietyNameEnglish || "";
+        default:
+          return item.varietyNameEnglish || "";
+      }
+    },
+    [selectedLanguage],
+  );
 
   const getGradePriority = (grade: string): number => {
     switch (grade) {
@@ -101,21 +113,24 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
     }
   };
 
-  const sortData = (data: TargetData[]): TargetData[] => {
-    return [...data].sort((a, b) => {
-      const nameA = getVarietyNameForSort(a);
-      const nameB = getVarietyNameForSort(b);
+  const sortData = useCallback(
+    (data: TargetData[]): TargetData[] => {
+      return [...data].sort((a, b) => {
+        const nameComparison = getVarietyNameForSort(a).localeCompare(
+          getVarietyNameForSort(b),
+        );
 
-      const nameComparison = nameA.localeCompare(nameB);
+        if (nameComparison === 0) {
+          return getGradePriority(a.grade) - getGradePriority(b.grade);
+        }
 
-      if (nameComparison === 0) {
-        return getGradePriority(a.grade) - getGradePriority(b.grade);
-      }
+        return nameComparison;
+      });
+    },
+    [getVarietyNameForSort],
+  );
 
-      return nameComparison;
-    });
-  };
-
+  // Fetch raw data only (no language dependency, no sorting)
   const fetchTargets = useCallback(async () => {
     setLoading(true);
     try {
@@ -129,51 +144,57 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
         },
       );
 
-      const allData = response.data.data;
-      const todoItems = allData.filter((item: TargetData) => item.todo > 0);
-      const completedItems = allData.filter(
-        (item: TargetData) => item.todo === 0 && item.complete !== 0,
-      );
-
-      setTodoData(sortData(todoItems));
-      setCompletedData(sortData(completedItems));
+      setAllData(response.data.data || []);
     } catch (err) {
       console.log(t("Error.Failed to fetch data."));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedLanguage]);
+  }, []);
 
-  useEffect(() => {
-    fetchTargets();
-  }, [fetchTargets]);
+  // Derived, sorted lists – recomputed when data or language changes
+  const todoData = useMemo(
+    () => sortData(allData.filter((item) => item.todo > 0)),
+    [allData, sortData],
+  );
+
+  const completedData = useMemo(
+    () =>
+      sortData(
+        allData.filter((item) => item.todo === 0 && item.complete !== 0),
+      ),
+    [allData, sortData],
+  );
+
+  // Reload language + data every time this screen is navigated to
+  useFocusEffect(
+    useCallback(() => {
+      fetchSelectedLanguage();
+      fetchTargets();
+    }, [fetchSelectedLanguage, fetchTargets]),
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
+    fetchSelectedLanguage();
     fetchTargets();
   };
 
   const displayedData = selectedToggle === "ToDo" ? todoData : completedData;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchSelectedLanguage();
-    };
-    fetchData();
-  }, []);
-
-  const getvarietyName = (TargetData: TargetData) => {
+  const getvarietyName = (item: TargetData) => {
     switch (selectedLanguage) {
       case "si":
-        return TargetData.varietyNameSinhala;
+        return item.varietyNameSinhala || item.varietyNameEnglish;
       case "ta":
-        return TargetData.varietyNameTamil;
+        return item.varietyNameTamil || item.varietyNameEnglish;
       default:
-        return TargetData.varietyNameEnglish;
+        return item.varietyNameEnglish;
     }
   };
 
+  // Hardware back button
   useFocusEffect(
     useCallback(() => {
       const handleBackPress = () => {
@@ -200,7 +221,6 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
   return (
     <View className="flex-1 bg-[#282828] w-full">
       {/* Header */}
-
       <CustomHeader
         title={t("DailyTarget.MyDailyTarget")}
         showBackButton={false}
@@ -307,7 +327,6 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
       </View>
 
       {/* Table */}
-      {/* Table */}
       <View className="flex-1 bg-white">
         <ScrollView
           horizontal
@@ -377,7 +396,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 >
                   {selectedToggle === "Completed"
                     ? t("DailyTarget.Completedkg")
-                    : t("DailyTarget.Todo()")}
+                    : t("DailyTarget.Todo")}
                 </Text>
               </View>
             </View>
@@ -409,10 +428,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                     style={{ width: 150, height: 150 }}
                   />
                   <Text className="text-gray-500 mt-[-5%] text-center">
-                    {selectedToggle === "ToDo"
-                      ? t("DailyTarget.NoTodoItems") || "No items to do"
-                      : t("DailyTarget.noCompletedTargets") ||
-                        "No completed items"}
+                    {t("DailyTarget.NoTodoItems") || "No items to do"}
                   </Text>
                 </View>
               ) : selectedToggle === "Completed" &&
@@ -489,7 +505,6 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                         </Text>
                       </View>
 
-                      {/* Todo / Completed */}
                       {/* Todo / Completed */}
                       <View
                         style={{ width: 100 }}

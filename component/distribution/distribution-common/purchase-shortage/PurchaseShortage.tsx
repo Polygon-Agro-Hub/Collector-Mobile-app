@@ -41,7 +41,13 @@ const formatKg = (val: number | string | undefined | null): string => {
   return String(rounded);
 };
 
-export default function PurchaseShortage({ navigation }: { navigation: any }) {
+export default function PurchaseShortage({
+  route,
+  navigation,
+}: {
+  route?: any;
+  navigation: any;
+}) {
   const { t } = useTranslation();
   const [products, setProducts] = useState<ShortageProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -61,11 +67,22 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
       return () => backHandler.remove();
     }, [navigation]),
   );
-  
+
+  const sortAlphabetically = (list: ShortageProductItem[]): ShortageProductItem[] => {
+    return [...list].sort((a, b) =>
+      (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" })
+    );
+  };
 
   const fetchShortages = async () => {
     try {
       setLoading(true);
+      if (route?.params?.products && Array.isArray(route.params.products)) {
+        setProducts(sortAlphabetically(route.params.products));
+        setLoading(false);
+        return;
+      }
+
       const token = store.getState().auth.token;
       const res = await axios.get(
         `${environment.API_BASE_URL}api/purchase-shortage`,
@@ -74,14 +91,18 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
         },
       );
 
-      if (res.data && res.data.success) {
-        setProducts(res.data.data);
+      if (res.data && res.data.success && Array.isArray(res.data.data)) {
+        setProducts(sortAlphabetically(res.data.data));
       } else {
         setProducts([]);
       }
     } catch (err) {
       console.error("Error fetching shortages:", err);
-      setProducts([]);
+      if (route?.params?.products && Array.isArray(route.params.products)) {
+        setProducts(sortAlphabetically(route.params.products));
+      } else {
+        setProducts([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -181,7 +202,9 @@ export default function PurchaseShortage({ navigation }: { navigation: any }) {
                       style={{ color: subTextColor }}
                       className="text-sm font-semibold mt-0.5"
                     >
-                      {isDisabled ? `0 kg` : `${formatKg(item.kg)} kg`}
+                      {isDisabled
+                        ? `0 ${t("PurchaseShortage.kg", "kg")}`
+                        : `${formatKg(item.kg)} ${t("PurchaseShortage.kg", "kg")}`}
                     </Text>
                   </View>
 

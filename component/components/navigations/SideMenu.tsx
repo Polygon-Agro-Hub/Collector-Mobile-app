@@ -9,8 +9,9 @@ import {
   Alert,
   BackHandler,
   Modal,
+  Switch,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import axios from "axios";
@@ -25,6 +26,10 @@ import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { ROLES } from "@/constants/user-roles";
+import {
+  isQuickAccessScaleEnabled,
+  setQuickAccessScaleEnabled,
+} from "@/utils/scale/scale-storage";
 
 type SideMenuNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -71,6 +76,18 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const { changeLanguage } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [jobRole, setJobRole] = useState<string | null>(null);
+  const [isQuickAccessEnabled, setIsQuickAccessEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    isQuickAccessScaleEnabled().then((val) => {
+      setIsQuickAccessEnabled(val);
+    });
+  }, []);
+
+  const handleToggleQuickAccess = async (val: boolean) => {
+    setIsQuickAccessEnabled(val);
+    await setQuickAccessScaleEnabled(val);
+  };
 
   useEffect(() => {
     const fetchJobRole = async () => {
@@ -96,16 +113,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     React.useCallback(() => {
       setComplaintDropdownOpen(false);
       setLanguageDropdownOpen(false);
-      if (i18n.language === "en") {
-        LanguageSelect("en");
-        setSelectedLanguage("ENGLISH");
-      } else if (i18n.language === "si") {
-        LanguageSelect("si");
+      const curLang = (i18n.language || "").toLowerCase();
+      if (curLang.startsWith("si")) {
         setSelectedLanguage("SINHALA");
-      } else if (i18n.language === "ta") {
-        LanguageSelect("ta");
+      } else if (curLang.startsWith("ta")) {
         setSelectedLanguage("TAMIL");
+      } else {
+        setSelectedLanguage("ENGLISH");
       }
+      isQuickAccessScaleEnabled().then((val) => {
+        setIsQuickAccessEnabled(val);
+      });
     }, [i18n.language]),
   );
   useEffect(() => {
@@ -131,7 +149,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     } else if (complaint === t("SideMenu.View Complaint History")) {
       navigation.navigate("Main", {
         screen: "ComplainHistory",
-        params: { fullname: getFullName },
+        params: {
+          fullname: profile
+            ? `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim()
+            : "",
+          fullnameSi: profile
+            ? `${profile.firstNameSinhala || ""} ${profile.lastNameSinhala || ""}`.trim()
+            : "",
+          fullnameTa: profile
+            ? `${profile.firstNameTamil || ""} ${profile.lastNameTamil || ""}`.trim()
+            : "",
+        },
       });
     }
   };
@@ -140,15 +168,28 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     const fetchUserProfile = async () => {
       try {
         const token = store.getState().auth.token;
+        const role = store.getState().auth.jobRole;
         if (token) {
-          const response = await api.get(
-            "api/collection-officer/user-profile",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            },
-          );
+          const endpoint =
+            role === ROLES.DISTRIBUTION_OFFICER ||
+            role === ROLES.DISTRIBUTION_MANAGER ||
+            role === "Distribution Officer" ||
+            role === "Distribution Centre Manager"
+              ? "api/distribution-manager/user-profile"
+              : "api/collection-officer/user-profile";
+
+          const response = await api.get(endpoint, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           if (response.data && response.data.data) {
-            setProfile(response.data.data);
+            const data = response.data.data;
+            setProfile(data);
+            const fnEn = `${data.firstNameEnglish || ""} ${data.lastNameEnglish || ""}`.trim();
+            const fnSi = `${data.firstNameSinhala || ""} ${data.lastNameSinhala || ""}`.trim();
+            const fnTa = `${data.firstNameTamil || ""} ${data.lastNameTamil || ""}`.trim();
+            if (fnEn) AsyncStorage.setItem("fullname", fnEn);
+            if (fnSi) AsyncStorage.setItem("fullnameSi", fnSi);
+            if (fnTa) AsyncStorage.setItem("fullnameTa", fnTa);
           }
         }
       } catch (error: any) {
@@ -177,17 +218,11 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
     setLanguageDropdownOpen(false);
+    const code = language === "SINHALA" ? "si" : language === "TAMIL" ? "ta" : "en";
     try {
-      if (language === "ENGLISH") {
-        LanguageSelect("en");
-        HanldeAsynStorage("en");
-      } else if (language === "TAMIL") {
-        LanguageSelect("ta");
-        HanldeAsynStorage("ta");
-      } else if (language === "SINHALA") {
-        LanguageSelect("si");
-        HanldeAsynStorage("si");
-      }
+      AsyncStorage.setItem("@user_language", code);
+      changeLanguage(code);
+      i18n.changeLanguage(code);
     } catch (error) {}
   };
 
@@ -200,7 +235,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   };
 
   const getTextStyle = (language: string) => {
-    if (language === "si") {
+    if (language === "si" || language === "SINHALA" || i18n.language?.startsWith("si")) {
       return {
         fontSize: 14,
         lineHeight: 20,
@@ -214,14 +249,19 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
 
   const getFullName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
-      case "si":
-        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
-      case "ta":
-        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
-      default:
-        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+    const lang = (i18n.language || "").toLowerCase();
+    const isSinhala = selectedLanguage === "SINHALA" || selectedLanguage === "si" || lang.startsWith("si");
+    const isTamil = selectedLanguage === "TAMIL" || selectedLanguage === "ta" || lang.startsWith("ta");
+
+    if (isSinhala) {
+      const siName = `${profile.firstNameSinhala || ""} ${profile.lastNameSinhala || ""}`.trim();
+      if (siName) return siName;
     }
+    if (isTamil) {
+      const taName = `${profile.firstNameTamil || ""} ${profile.lastNameTamil || ""}`.trim();
+      if (taName) return taName;
+    }
+    return `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim() || t("SideMenu.Officer");
   };
 
   const handleBackPress = () => {
@@ -378,6 +418,25 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
               {t("SideMenu.ChangePassword")}
             </Text>
           </TouchableOpacity>
+
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          {/* Quick Access to Scale */}
+          <View className="flex-row items-center justify-between py-2">
+            <View className="flex-row items-center flex-1 pr-2">
+              <MaterialCommunityIcons name="scale" size={22} color="black" />
+              <Text className="text-lg ml-2 font-normal text-black">
+                {t("SideMenu.Quick Access to Scale", "Quick Access to Scale")}
+              </Text>
+            </View>
+            <Switch
+              value={isQuickAccessEnabled}
+              onValueChange={handleToggleQuickAccess}
+              trackColor={{ false: "#e2e8f0", true: "#007AFF" }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor="#e2e8f0"
+            />
+          </View>
 
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 

@@ -53,8 +53,10 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
   const [taskPercentage, setTaskPercentage] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
-  const { t } = useTranslation();
+  const { t ,i18n } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
+
+ const openTargetFontSize = i18n.language === "en" ? 14 : 12;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -436,7 +438,11 @@ const OfficerSummary: React.FC<OfficerSummaryProps> = ({
                 elevation: 8,
               }}
             >
-              <Text className="text-white text-center font-medium">
+              <Text className="text-white text-center font-medium"
+              style={{
+                  fontSize: openTargetFontSize,
+                }}
+              >
                 {t("OfficerSummary.OpenTarget")}
               </Text>
             </TouchableOpacity>

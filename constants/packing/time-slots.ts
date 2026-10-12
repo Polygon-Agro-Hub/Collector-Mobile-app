@@ -25,13 +25,15 @@ export const SRI_LANKA_DISTRICTS = [
   "Matale", "Matara", "Moneragala", "Monaragala", "Mullaitivu",
   "Nuwara Eliya", "NuwaraEliya", "Polonnaruwa", "Puttalam",
   "Ratnapura", "Rathnapura", "Trincomalee", "Vavuniya",
-  "Moragahahena", "Horana", "Homagama", "Maharagama", "Kottawa", "Piliyandala", "Kaduwela"
+  "Moragahahena", "Horana", "Homagama", "Maharagama", "Kottawa", "Piliyandala", "Kaduwela",
+  "Bambalapitiya", "Dehiwala", "Moratuwa", "Negombo", "Kelaniya", "Beruwala", "Aluthgama",
+  "Peradeniya", "Gampola"
 ];
 
 /**
- * Formats raw timeSlot key into standard human-readable time string
- * and translates AM / PM tokens with prefix format (e.g. පෙ.ව. 08:00 - ප.ව. 12:00) according to active language.
- * @param timeSlot raw timeSlot string
+ * Formats raw timeSlot or single time string (e.g. "08:00 AM - 12:00 PM" or "08:30 AM")
+ * and translates AM / PM tokens with prefix format (e.g. පෙ.ව. 08:00 - ප.ව. 12:00 or පෙ.ව. 08:30) according to active language.
+ * @param timeSlot raw timeSlot string or timestamp
  * @param t optional translation function
  * @returns formatted string
  */
@@ -40,26 +42,66 @@ export const formatTimeSlot = (
   t?: any
 ): string => {
   if (!timeSlot) return "";
-  let standard = TIME_SLOT_MAP[timeSlot] || timeSlot;
+  let standard = String(TIME_SLOT_MAP[timeSlot] || timeSlot).trim();
+  if (standard === "-" || standard === "–") return "-";
+
+  // If standard is an ISO timestamp or date-time like "2026-09-25 08:30:00" or "2026-09-25T08:30:00"
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(standard)) {
+    const d = new Date(standard.replace(" ", "T"));
+    if (!isNaN(d.getTime())) {
+      let h = d.getHours();
+      const m = String(d.getMinutes()).padStart(2, "0");
+      const p = h >= 12 ? "PM" : "AM";
+      h = h % 12;
+      if (h === 0) h = 12;
+      standard = `${String(h).padStart(2, "0")}:${m} ${p}`;
+    }
+  } else if (/^\d{1,2}:\d{2}:\d{2}$/.test(standard)) {
+    // 24-hour time without AM/PM like "14:30:00"
+    const [hStr, mStr] = standard.split(":");
+    let h = parseInt(hStr, 10);
+    const p = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    standard = `${String(h).padStart(2, "0")}:${mStr} ${p}`;
+  }
 
   // Clean "within" prefix and trim
   standard = standard.replace(/within\s*/i, "").trim();
 
-  // Normalize previous localized tokens back to AM/PM so formatTimeSlot is idempotent
+  // Normalize en-dash / em-dash to hyphen
+  standard = standard.replace(/[–—]/g, "-");
+
+  // Normalize localized tokens and positions to standard "HH:MM AM - HH:MM PM"
   standard = standard
+    .replace(/(?:පෙ\.ව\.|මුற்பகல்)\s*(\d{1,2}(?:[:.]\d{2})?)/gi, "$1 AM")
+    .replace(/(?:ප\.ව\.|பிற்பகல்)\s*(\d{1,2}(?:[:.]\d{2})?)/gi, "$1 PM")
+    .replace(/(\d{1,2}(?:[:.]\d{2})?)\s*(?:පෙ\.ව\.|මුற்பகல்)/gi, "$1 AM")
+    .replace(/(\d{1,2}(?:[:.]\d{2})?)\s*(?:ප\.ව\.|பிற்பகல்)/gi, "$1 PM")
     .replace(/පෙ\.ව\.|මුற்பகல்/g, "AM")
     .replace(/ප\.ව\.|பிற்பகல்/g, "PM");
 
-  // Handle shorthand patterns like 8AM - 12PM or 8AM-12PM
-  standard = standard.replace(/(\d{1,2})\s*(AM|PM)/gi, (match, h, p) => {
-    return `${h.padStart(2, "0")}:00 ${p.toUpperCase()}`;
+  // Strip seconds if present e.g. "08:30:00 AM" -> "08:30 AM"
+  standard = standard.replace(/(\d{1,2}:\d{2}):\d{2}\s*(AM|PM)/gi, "$1 $2");
+
+  // Handle shorthand patterns like 8AM, 8 AM, 8.00 AM -> 08:00 AM
+  standard = standard.replace(/(\d{1,2})(?:[:.](\d{2}))?\s*(AM|PM)/gi, (match, h, m, p) => {
+    const mins = m || "00";
+    return `${h.padStart(2, "0")}:${mins} ${p.toUpperCase()}`;
   });
 
   const am = t ? t("Time.AM", { defaultValue: "AM" }) : i18n.t("Time.AM", { defaultValue: "AM" });
   const pm = t ? t("Time.PM", { defaultValue: "PM" }) : i18n.t("Time.PM", { defaultValue: "PM" });
 
-  const isSinhala = am === "පෙ.ව." || (t && t("AddOfficerBasicDetails.LNG") === "si");
-  const isTamil = am === "முற்பகல்" || (t && t("AddOfficerBasicDetails.LNG") === "ta");
+  const currentLang =
+    (t && t("SignIn.LNG")) ||
+    (t && t("LNG")) ||
+    (t && t("AddOfficerBasicDetails.LNG")) ||
+    i18n.language ||
+    "en";
+
+  const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
+  const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
 
   if (isSinhala) {
     return standard
@@ -138,6 +180,20 @@ export const formatOrderCategory = (category?: string | null, t?: any): string =
     return i18n.t(key, { defaultValue: defVal });
   };
 
+  const currentLang =
+    (t && t("SignIn.LNG")) ||
+    (t && t("LNG")) ||
+    (t && t("AddOfficerBasicDetails.LNG")) ||
+    i18n.language ||
+    "en";
+
+  const isSinhala =
+    currentLang.toLowerCase().startsWith("si") ||
+    (t && t("DistributionCenterTarget.Close") === "වසා දමන්න");
+  const isTamil =
+    currentLang.toLowerCase().startsWith("ta") ||
+    (t && t("DistributionCenterTarget.Close") === "மூடு");
+
   const trimmed = category.trim();
 
   // 1. Check if it is a Pickup Order
@@ -145,14 +201,54 @@ export const formatOrderCategory = (category?: string | null, t?: any): string =
     trimmed.toLowerCase() === "pickup order" ||
     trimmed.toLowerCase() === "pickup orders" ||
     trimmed.toLowerCase() === "pickup" ||
-    trimmed.toLowerCase().includes("pickup")
+    trimmed.toLowerCase().includes("pickup") ||
+    trimmed.includes("රැගෙන යාමේ") ||
+    trimmed.includes("பிக்அப்")
   ) {
-    return translate("QRHandling.Pickup Orders", translate("AssignGroups.Pickup Orders", "රැගෙන යාමේ ඇණවුම්"));
+    const defaultPickup = isSinhala
+      ? "රැගෙන යාමේ ඇණවුම්"
+      : isTamil
+      ? "பிக்அப் ஆர்டர்கள்"
+      : "Pickup Orders";
+
+    return translate(
+      "DistributionCenterTarget.Pickup Orders",
+      translate(
+        "QRHandling.Pickup Orders",
+        translate("AssignGroups.Pickup Orders", defaultPickup)
+      )
+    );
+  }
+
+  // 2. Check if it is a Delivery Order
+  if (
+    trimmed.toLowerCase() === "delivery" ||
+    trimmed.toLowerCase() === "delivery order" ||
+    trimmed.toLowerCase() === "delivery orders" ||
+    trimmed.toLowerCase().includes("delivery") ||
+    trimmed.includes("බෙදා හැරීමේ") ||
+    trimmed.includes("බෙදාහැරීම්") ||
+    trimmed.includes("බෙදාහැරීමේ") ||
+    trimmed.includes("விநியோக")
+  ) {
+    const defaultDelivery = isSinhala
+      ? "බෙදා හැරීමේ ඇණවුම්"
+      : isTamil
+      ? "விநியோக ஆர்டர்கள்"
+      : "Delivery";
+
+    return translate(
+      "DistributionCenterTarget.Delivery",
+      translate(
+        "AssignGroups.Delivery Orders",
+        translate("DistributionCenterTarget.Delivery Orders", defaultDelivery)
+      )
+    );
   }
 
   let text = trimmed;
 
-  // 2. Check and translate any district names found within the text
+  // 3. Check and translate any district names found within the text
   for (const dist of SRI_LANKA_DISTRICTS) {
     const regex = new RegExp(`\\b${dist}\\b`, "i");
     if (regex.test(text)) {
@@ -162,7 +258,7 @@ export const formatOrderCategory = (category?: string | null, t?: any): string =
     }
   }
 
-  // 3. Translate the word "District" if present (e.g. "Colombo District" -> "කොළඹ දිස්ත්‍රික්කය")
+  // 4. Translate the word "District" if present (e.g. "Colombo District" -> "කොළඹ දිස්ත්‍රික්කය")
   const districtWord = translate("AssignGroups.District", translate("District", "දිස්ත්‍රික්කය"));
   text = text.replace(/\bDistrict\b/gi, districtWord);
 

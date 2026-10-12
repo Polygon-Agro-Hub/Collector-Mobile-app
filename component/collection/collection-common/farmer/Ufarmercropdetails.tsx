@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { ScrollView, TextInput } from "react-native-gesture-handler";
-import * as ImagePicker from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 import { useTranslation } from "react-i18next";
 import { MaterialIcons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -57,29 +57,25 @@ const Ufarmercropdetails: React.FC<UfarmercropdetailsProps> = ({
     setTotal(totalValue);
   };
 
-  const handleChooseImage = () => {
-    ImagePicker.launchImageLibrary(
-      {
-        mediaType: "photo",
-        maxWidth: 300,
-        maxHeight: 300,
+  const handleChooseImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
         quality: 1,
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log("User cancelled image picker");
-        } else if (response.errorCode) {
-          console.log("ImagePicker Error: ", response.errorMessage);
-        } else if (response.assets && response.assets.length > 0) {
-          const selectedImageUri = response.assets[0].uri;
-          if (selectedImageUri) {
-            setImageUri(selectedImageUri);
-          } else {
-            console.log("Selected image URI is undefined");
-          }
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedImageUri = result.assets[0].uri;
+        if (selectedImageUri) {
+          setImageUri(selectedImageUri);
+        } else {
+          console.log("Selected image URI is undefined");
         }
-      },
-    );
+      }
+    } catch (error) {
+      console.log("ImagePicker Error: ", error);
+    }
   };
 
   const selectedCropLabel =

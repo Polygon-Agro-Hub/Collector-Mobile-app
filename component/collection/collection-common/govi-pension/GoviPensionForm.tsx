@@ -68,21 +68,33 @@ const CustomDatePicker = ({
   maximumDate?: Date;
   minimumDate?: Date;
 }) => {
-  const currentDate = initialDate || new Date();
+  // Clamp the initial date so the picker never opens already sitting on an
+  // out-of-range (e.g. future) date.
+  const clampInitialDate = (date: Date): Date => {
+    if (date > maximumDate) return maximumDate;
+    if (minimumDate && date < minimumDate) return minimumDate;
+    return date;
+  };
+
+  const currentDate = clampInitialDate(initialDate || new Date());
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(currentDate.getDate());
 
   const { t } = useTranslation();
 
+  const maxYear = maximumDate.getFullYear();
+  const maxMonth = maximumDate.getMonth();
+  const maxDay = maximumDate.getDate();
+
   const startYear = minimumDate ? minimumDate.getFullYear() : 1900;
-  const endYear = maximumDate.getFullYear();
+  const endYear = maxYear;
   const years = Array.from(
     { length: endYear - startYear + 1 },
     (_, i) => endYear - i,
   );
 
-  const months = [
+  const allMonths = [
     { label: t("GoviPensionForm.January") || "January", value: 0 },
     { label: t("GoviPensionForm.February") || "February", value: 1 },
     { label: t("GoviPensionForm.March") || "March", value: 2 },
@@ -97,16 +109,67 @@ const CustomDatePicker = ({
     { label: t("GoviPensionForm.December") || "December", value: 11 },
   ];
 
+  // Only show months that don't push the date past maximumDate (or before
+  // minimumDate) for the currently selected year.
+  const months = allMonths.filter((m) => {
+    if (selectedYear === maxYear && m.value > maxMonth) return false;
+    if (
+      minimumDate &&
+      selectedYear === minimumDate.getFullYear() &&
+      m.value < minimumDate.getMonth()
+    )
+      return false;
+    return true;
+  });
+
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
   };
 
   const daysInMonth = getDaysInMonth(selectedYear, selectedMonth);
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
+  // Cap the day list so a future day within the max month/year (or a day
+  // before minimumDate) can't be picked.
+  let maxSelectableDay = daysInMonth;
+  if (selectedYear === maxYear && selectedMonth === maxMonth) {
+    maxSelectableDay = Math.min(maxSelectableDay, maxDay);
+  }
+  let minSelectableDay = 1;
+  if (
+    minimumDate &&
+    selectedYear === minimumDate.getFullYear() &&
+    selectedMonth === minimumDate.getMonth()
+  ) {
+    minSelectableDay = minimumDate.getDate();
+  }
+
+  const days = Array.from(
+    { length: maxSelectableDay - minSelectableDay + 1 },
+    (_, i) => minSelectableDay + i,
+  );
+
+  // If the currently selected year no longer has the selected month
+  // available (e.g. user picked the current year while a future month was
+  // selected), snap the month back into range.
   useEffect(() => {
-    if (selectedDay > daysInMonth) {
-      setSelectedDay(daysInMonth);
+    if (selectedYear === maxYear && selectedMonth > maxMonth) {
+      setSelectedMonth(maxMonth);
+    } else if (
+      minimumDate &&
+      selectedYear === minimumDate.getFullYear() &&
+      selectedMonth < minimumDate.getMonth()
+    ) {
+      setSelectedMonth(minimumDate.getMonth());
+    }
+  }, [selectedYear]);
+
+  // If the day is now out of range for the (possibly just-changed) year/month,
+  // clamp it back into range.
+  useEffect(() => {
+    if (selectedDay > maxSelectableDay) {
+      setSelectedDay(maxSelectableDay);
+    } else if (selectedDay < minSelectableDay) {
+      setSelectedDay(minSelectableDay);
     }
   }, [selectedYear, selectedMonth]);
 
@@ -244,11 +307,22 @@ const CustomDatePicker = ({
   );
 };
 
+/**
+ * Sanitizes free-text name input.
+ *
+ * Allows:
+ *  - Latin letters (incl. accented Latin ranges)
+ *  - Sinhala letters (U+0D80–U+0DFF)
+ *  - Tamil letters (U+0B80–U+0BFF)
+ *  - Dots and spaces
+ *
+ * Strips leading whitespace and uppercases the first character
+ * (a no-op for Sinhala/Tamil, since those scripts have no case).
+ */
 const sanitizeNameInput = (text: string): string => {
-  const lettersDotsSpaces = text.replace(
-    /[^a-zA-Z.\u00C0-\u024F\u1E00-\u1EFF\s]/g,
-    "",
-  );
+  const allowedCharsPattern =
+    /[^a-zA-Z.\u00C0-\u024F\u1E00-\u1EFF\u0B80-\u0BFF\u0D80-\u0DFF\s]/g;
+  const lettersDotsSpaces = text.replace(allowedCharsPattern, "");
   const trimmed = lettersDotsSpaces.replace(/^\s+/, "");
   if (trimmed.length === 0) return trimmed;
   return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);

@@ -378,7 +378,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
           )}
 
           <TouchableOpacity
-            className="mt-6 mb-10 bg-[#000000] py-4 rounded-full"
+            className="mt-6 mb-10 bg-[#000000] py-4 rounded-full mx-6"
             onPress={() => setModalVisible(true)}
             style={{
               shadowColor: "#000000",
@@ -389,9 +389,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
             }}
           >
             <Text
-              className={`text-white text-lg ${
-                i18n.language === "en" ? "px-28" : "px-24"
-              } font-semibold text-center`}
+              className={`text-white text-lg px-8 font-semibold text-center`}
               style={{ fontSize: 16 }}
             >
               {t("ClaimOfficer.Claim Officer")}

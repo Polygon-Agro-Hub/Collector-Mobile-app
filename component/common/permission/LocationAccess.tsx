@@ -10,7 +10,6 @@ import {
   ScrollView,
   Platform,
   StatusBar,
-  SafeAreaView,
   LayoutChangeEvent,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -142,7 +141,7 @@ const LocationAccess: React.FC<LocationAccessProps> = ({
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#121212" }}>
+    <View style={{ flex: 1, backgroundColor: "#121212" }}>
       <StatusBar barStyle="light-content" backgroundColor="#121212" />
 
       <ScrollView
@@ -300,7 +299,7 @@ const LocationAccess: React.FC<LocationAccessProps> = ({
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

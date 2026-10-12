@@ -568,6 +568,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
       className="rounded-2xl p-4 mb-3"
       style={{
         backgroundColor: "#F7F7F7",
+        overflow: "hidden",
         shadowColor: "#000000",
         shadowOffset: {
           width: 0,
@@ -578,39 +579,70 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
         elevation: 3,
       }}
     >
-      <View className="flex-row mb-2">
-        <Text className="text-base font-semibold">
+      <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 8 }}>
+        <Text style={{ fontSize: 16, fontWeight: "600", flexShrink: 0, color: "#1F2937" }}>
           {t("ReadytoPickupOrders.Order ID")} :
         </Text>
-        <Text className="text-base font-semibold ml-1">{order.invNo}</Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "600",
+            marginLeft: 6,
+            flex: 1,
+            flexWrap: "wrap",
+            color: "#1F2937",
+          }}
+        >
+          {order.invNo}
+        </Text>
       </View>
 
-      <View className="flex-row mb-2 items-center">
+      <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 8 }}>
         <FontAwesome5
           name="phone-alt"
-          size={16}
+          size={15}
           color="black"
-          style={{ marginRight: 8 }}
+          style={{ marginRight: 8, marginTop: 2 }}
         />
-        <Text className="text-sm text-[#565559]">
+        <Text style={{ fontSize: 14, color: "#565559", flexShrink: 0 }}>
           {t("ReadytoPickupOrders.Phone")} :{" "}
         </Text>
-        <Text className="text-sm font-semibold ml-1">{phoneDisplay}</Text>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            marginLeft: 4,
+            flex: 1,
+            flexWrap: "wrap",
+            color: "#1F2937",
+          }}
+        >
+          {phoneDisplay}
+        </Text>
       </View>
 
-      <View className="flex-row items-center mb-2">
+      <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 8 }}>
         {shouldShowAmount ? (
           <>
             <FontAwesome5
               name="coins"
-              size={16}
+              size={15}
               color="black"
-              style={{ marginRight: 8 }}
+              style={{ marginRight: 8, marginTop: 2 }}
             />
-            <Text className="text-sm text-[#565559]">
+            <Text style={{ fontSize: 14, color: "#565559", flexShrink: 0 }}>
               {t("ViewPickupOrders.Cash")} :{" "}
             </Text>
-            <Text className="text-sm font-semibold ml-1">
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                marginLeft: 4,
+                flex: 1,
+                flexWrap: "wrap",
+                color: "#1F2937",
+              }}
+            >
               {t("ViewPickupOrders.Rs")}. {cashAmount}
             </Text>
           </>
@@ -618,42 +650,71 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
           <>
             <Ionicons
               name="checkmark-circle"
-              size={20}
-              color="black"
-              style={{ marginRight: 8 }}
+              size={18}
+              color="#16A34A"
+              style={{ marginRight: 8, marginTop: 1 }}
             />
-            <Text className="text-sm font-semibold text-[#565559]">
-              {" "}
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: "#16A34A",
+                flex: 1,
+                flexWrap: "wrap",
+              }}
+            >
               {t("ViewPickupOrders.Already Paid") || "Already Paid!"}
             </Text>
           </>
         )}
       </View>
 
-      <View className="flex-row mb-2 items-center">
+      <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 8 }}>
         <FontAwesome5
           name="clock"
-          size={16}
+          size={15}
           color="black"
-          style={{ marginRight: 8 }}
+          style={{ marginRight: 8, marginTop: 2 }}
         />
-        <Text className="text-sm text-[#565559]">
+        <Text style={{ fontSize: 14, color: "#565559", flexShrink: 0 }}>
           {t("ReadytoPickupOrders.Scheduled")} :{" "}
         </Text>
-        <Text className="text-sm font-semibold ml-1">{scheduledDisplay}</Text>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            marginLeft: 4,
+            flex: 1,
+            flexWrap: "wrap",
+            color: "#1F2937",
+          }}
+        >
+          {scheduledDisplay}
+        </Text>
       </View>
 
-      <View className="flex-row items-center mb-2">
+      <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
         <FontAwesome6
           name="clock-rotate-left"
-          size={16}
+          size={15}
           color="black"
-          style={{ marginRight: 8 }}
+          style={{ marginRight: 8, marginTop: 2 }}
         />
-        <Text className="text-sm text-[#565559]">
+        <Text style={{ fontSize: 14, color: "#565559", flexShrink: 0 }}>
           {t("ReadytoPickupOrders.Ready Time")} :{" "}
         </Text>
-        <Text className="text-sm font-semibold ml-1">{readyTimeDisplay}</Text>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            marginLeft: 4,
+            flex: 1,
+            flexWrap: "wrap",
+            color: "#1F2937",
+          }}
+        >
+          {readyTimeDisplay}
+        </Text>
       </View>
     </TouchableOpacity>
   );

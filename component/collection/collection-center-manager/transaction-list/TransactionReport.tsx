@@ -779,11 +779,9 @@ const handleDownloadPDF = async () => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
-      const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
-      const fileName = `${prefix}_${grnNumber}_${selectedDate}.pdf`;
+      const cleanGrn = (crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA").replace(/[^a-zA-Z0-9_-]/g, "_");
+      const cleanDate = (selectedDate || new Date().toISOString().slice(0, 10)).replace(/[^a-zA-Z0-9_-]/g, "_");
+      const fileName = `PurchaseReport_${cleanGrn}_${cleanDate}.pdf`;
 
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 

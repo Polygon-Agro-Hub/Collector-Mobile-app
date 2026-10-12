@@ -12,6 +12,7 @@ import {
   RefreshControl,
 } from "react-native";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -64,7 +65,7 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
           const mappedCrops = fetchedCrops.map((c: any) => ({
             id: c.id,
             name: c.name,
-            image: c.image || "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&auto=format&fit=crop&q=80"
+            image: c.image || ""
           }));
           // Sort A to Z (ascending alphabetical order by product name)
           mappedCrops.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
@@ -171,12 +172,20 @@ export default function WelcomeToPacking({ route, navigation }: { route: any; na
                     }}
                   >
                     {/* Crop image with clean border wrapper */}
-                    <View className="w-20 h-20 mb-4 items-center justify-center rounded-full overflow-hidden">
-                      <Image
-                        source={{ uri: product.image }}
-                        className="w-full h-full"
-                        resizeMode="contain"
-                      />
+                    <View className="w-20 h-20 mb-4 items-center justify-center rounded-full overflow-hidden bg-gray-100">
+                      {product.image ? (
+                        <Image
+                          source={{ uri: product.image }}
+                          className="w-full h-full"
+                          resizeMode="contain"
+                        />
+                      ) : (
+                        <MaterialCommunityIcons
+                          name="sprout"
+                          size={32}
+                          color="#54617D"
+                        />
+                      )}
                     </View>
                     {/* Crop label */}
                     <Text className="text-[#030E25] font-bold text-center text-sm leading-4">

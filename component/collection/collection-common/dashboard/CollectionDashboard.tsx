@@ -33,6 +33,9 @@ type CollectionDashboardNavigationProps = StackNavigationProp<
   "CollectionDashboard"
 >;
 
+import { LanguageContext } from "@/context/LanguageContext";
+import { useContext } from "react";
+
 interface CollectionDashboardProps {
   navigation: CollectionDashboardNavigationProps;
 }
@@ -61,7 +64,8 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   const [isLoadingTarget, setIsLoadingTarget] = useState(true);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
   const [activeTab, setActiveTab] = useState<"collection" | "transport">("collection");
@@ -75,12 +79,21 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     const unsubscribe = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
     });
-    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-      setIsWifiEnabled(state.isConnected !== false && state.type !== "none");
-    });
+    const checkWifi = (state: any) => {
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
+    };
+
+    NetInfo.fetch().then(checkWifi);
+    const unsubscribeNetInfo = NetInfo.addEventListener(checkWifi);
+    const interval = setInterval(() => {
+      NetInfo.fetch().then(checkWifi);
+    }, 3000);
+
     return () => {
       unsubscribe();
       unsubscribeNetInfo();
+      clearInterval(interval);
     };
   }, []);
 
@@ -108,6 +121,12 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
         );
         const data = response.data.data;
         setProfile(data);
+        const fnEn = `${data.firstNameEnglish || ""} ${data.lastNameEnglish || ""}`.trim();
+        const fnSi = `${data.firstNameSinhala || ""} ${data.lastNameSinhala || ""}`.trim();
+        const fnTa = `${data.firstNameTamil || ""} ${data.lastNameTamil || ""}`.trim();
+        if (fnEn) AsyncStorage.setItem("fullname", fnEn);
+        if (fnSi) AsyncStorage.setItem("fullnameSi", fnSi);
+        if (fnTa) AsyncStorage.setItem("fullnameTa", fnTa);
         if (data.empId) {
           setEmpId(data.empId);
         }
@@ -185,37 +204,55 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
     }, []),
   );
 
+  const getCurrentLanguage = (): string => {
+    return (i18n.language || language || selectedLanguage || "en")
+      .toLowerCase()
+      .substring(0, 2);
+  };
+
   const getFullName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.firstNameSinhala} ${profile.lastNameSinhala}`;
+        return `${profile.firstNameSinhala || profile.firstNameEnglish || ""} ${profile.lastNameSinhala || profile.lastNameEnglish || ""}`.trim();
       case "ta":
-        return `${profile.firstNameTamil} ${profile.lastNameTamil}`;
+        return `${profile.firstNameTamil || profile.firstNameEnglish || ""} ${profile.lastNameTamil || profile.lastNameEnglish || ""}`.trim();
       default:
-        return `${profile.firstNameEnglish} ${profile.lastNameEnglish}`;
+        return `${profile.firstNameEnglish || ""} ${profile.lastNameEnglish || ""}`.trim();
     }
   };
 
   const getcompanyName = () => {
     if (!profile) return t("ManagerTransactions.Loading");
-    switch (selectedLanguage) {
+    const currentLang = getCurrentLanguage();
+    switch (currentLang) {
       case "si":
-        return `${profile.companyNameSinhala}`;
+        return `${profile.companyNameSinhala || profile.companyNameEnglish || ""}`;
       case "ta":
-        return `${profile.companyNameTamil}`;
+        return `${profile.companyNameTamil || profile.companyNameEnglish || ""}`;
       default:
-        return `${profile.companyNameEnglish} `;
+        return `${profile.companyNameEnglish || ""}`;
     }
   };
 
-  const getTextStyle = (language: string) => {
-    if (language === "si") {
+  const getTextStyle = (lang?: string) => {
+    const activeLang = (lang || getCurrentLanguage()).toLowerCase();
+    if (activeLang.startsWith("si")) {
       return {
         fontSize: 14,
-        lineHeight: 20,
+        lineHeight: 18,
+      };
+    } else if (activeLang.startsWith("ta")) {
+      return {
+        fontSize: 13,
+        lineHeight: 18,
       };
     }
+    return {
+      fontSize: 15,
+      lineHeight: 20,
+    };
   };
 
   const getTranslationPrefix = () => {
@@ -270,19 +307,25 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
   const renderScaleSection = () => {
     if (!isWifiEnabled) {
       return (
-        /* State 3: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */
+        /* State 3: Mobile Wi-Fi Off - #E91233 background, white text/icon */
         <TouchableOpacity
           activeOpacity={0.88}
-          onPress={() => setIsScaleModalVisible(true)}
+          onPress={() => {
+            Alert.alert(
+              "Wi-Fi is not enabled!",
+              "Please enable the Wi-Fi to connect with the Scale.",
+              [{ text: "OK" }],
+              { type: "error", autoClose: false, showOkButton: true } as any
+            );
+          }}
           style={{
             marginTop: 10,
-            backgroundColor: "#FDF0F1",
+            backgroundColor: "#E91233",
             borderRadius: 28,
             paddingVertical: 10,
             paddingHorizontal: 14,
             flexDirection: "row",
             alignItems: "center",
-            gap: 12,
           }}
         >
           <View
@@ -293,6 +336,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
               backgroundColor: "#FFFFFF",
               alignItems: "center",
               justifyContent: "center",
+              marginRight: 12,
             }}
           >
             <MaterialCommunityIcons name="wifi" size={24} color="#E91233" />
@@ -302,7 +346,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
               style={{
                 fontSize: 16,
                 fontWeight: "bold",
-                color: "#E91233",
+                color: "#FFFFFF",
                 letterSpacing: -0.2,
               }}
             >
@@ -311,15 +355,17 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
             <Text
               style={{
                 fontSize: 12,
-                color: "#0F172A",
+                color: "#FFFFFF",
                 fontWeight: "500",
                 marginTop: 1,
                 lineHeight: 16,
+                opacity: 0.9,
               }}
             >
               {t("ScaleSelectModal.WifiOffMessage")}
             </Text>
           </View>
+          <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
         </TouchableOpacity>
       );
     }
@@ -625,7 +671,7 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
                 getTextStyle(selectedLanguage),
               ]}
             >
-              {t(`${getTranslationPrefix()}.Transport`)}
+              {t(`${getTranslationPrefix()}.Transport`, t("Common.Transport", "Transport"))}
             </Text>
             {activeTab === "transport" && (
               <View
@@ -743,12 +789,17 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
                   }}
                 >
                   {item.icon}
-                  <Text
-                    style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                    className="text-gray-700 text-lg absolute bottom-2 left-4"
-                  >
-                    {item.title}
-                  </Text>
+                  <View className="absolute bottom-3 left-4 right-4">
+                    <Text
+                      numberOfLines={2}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}
+                      style={getTextStyle()}
+                      className="text-gray-700 font-semibold"
+                    >
+                      {item.title}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -779,12 +830,17 @@ const CollectionDashboard: React.FC<CollectionDashboardProps> = ({ navigation })
                   className="w-10 h-10 absolute top-2 right-2"
                   resizeMode="contain"
                 />
-                <Text
-                  style={[{ fontSize: 16 }, getTextStyle(selectedLanguage)]}
-                  className="text-gray-700 text-lg absolute bottom-2 left-4"
-                >
-                  {t(`${getTranslationPrefix()}.ReadyToTransport`)}
-                </Text>
+                <View className="absolute bottom-3 left-4 right-4">
+                  <Text
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                    style={getTextStyle()}
+                    className="text-gray-700 font-semibold"
+                  >
+                    {t(`${getTranslationPrefix()}.ReadyToTransport`)}
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
           </>

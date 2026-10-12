@@ -29,6 +29,68 @@ export interface UploadFileItem {
   base64?: string;
 }
 
+export async function convertUriToBase64(
+  uri: string,
+  mimeType?: string
+): Promise<string> {
+  // Method 1: FileSystem legacy readAsStringAsync
+  try {
+    const raw = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    if (raw) {
+      const mime =
+        mimeType ||
+        (uri.toLowerCase().endsWith(".pdf")
+          ? "application/pdf"
+          : "image/jpeg");
+      return `data:${mime};base64,${raw}`;
+    }
+  } catch (fsErr) {
+    console.warn("FileSystem read failed, trying alternative methods:", fsErr);
+  }
+
+  // Method 2: Copy to local cache first if content URI, then read
+  if (uri.startsWith("content://") && FileSystem.cacheDirectory) {
+    try {
+      const ext = uri.toLowerCase().endsWith(".pdf") ? "pdf" : "png";
+      const tempPath = `${FileSystem.cacheDirectory}temp_upload_${Date.now()}.${ext}`;
+      await FileSystem.copyAsync({ from: uri, to: tempPath });
+      const raw = await FileSystem.readAsStringAsync(tempPath, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      if (raw) {
+        const mime =
+          mimeType || (ext === "pdf" ? "application/pdf" : "image/jpeg");
+        return `data:${mime};base64,${raw}`;
+      }
+    } catch (copyErr) {
+      console.warn("FileSystem copy and read failed:", copyErr);
+    }
+  }
+
+  // Method 3: fetch blob + FileReader
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to convert file to base64 string"));
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (fetchErr) {
+    console.error("Fetch blob base64 conversion failed:", fetchErr);
+    throw fetchErr;
+  }
+}
+
 interface UploadFileProps {
   file: UploadFileItem | null;
   onFileChange: (file: UploadFileItem | null) => void;
@@ -75,11 +137,24 @@ export default function UploadFile({
           ? (asset.fileSize / (1024 * 1024)).toFixed(1) + " MB"
           : "1.2 MB";
 
+        let base64Data = asset.base64
+          ? `data:image/jpeg;base64,${asset.base64}`
+          : undefined;
+
+        if (!base64Data && asset.uri) {
+          try {
+            base64Data = await convertUriToBase64(
+              asset.uri,
+              asset.mimeType || "image/jpeg"
+            );
+          } catch (e) {
+            console.warn("Could not read image as base64:", e);
+          }
+        }
+
         onFileChange({
           uri: asset.uri,
-          base64: asset.base64
-            ? `data:image/jpeg;base64,${asset.base64}`
-            : undefined,
+          base64: base64Data,
           name:
             asset.fileName ||
             "Transfer_Slip_" + Date.now().toString().slice(-6) + ".png",
@@ -109,7 +184,7 @@ export default function UploadFile({
 
       const asset = result.assets[0];
       const isPdf =
-        asset.mimeType === "application/pdf" || asset.name?.endsWith(".pdf");
+        asset.mimeType === "application/pdf" || asset.name?.toLowerCase().endsWith(".pdf");
 
       if (asset.size && asset.size > MAX_FILE_SIZE_BYTES) {
         showFileTooLargeAlert();
@@ -120,8 +195,19 @@ export default function UploadFile({
         ? (asset.size / (1024 * 1024)).toFixed(1) + " MB"
         : "1.2 MB";
 
+      let base64Data: string | undefined;
+      const mime = isPdf
+        ? "application/pdf"
+        : (asset.mimeType || (asset.name?.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg"));
+      try {
+        base64Data = await convertUriToBase64(asset.uri, mime);
+      } catch (readErr) {
+        console.warn("Could not read document as base64:", readErr);
+      }
+
       onFileChange({
         uri: asset.uri,
+        base64: base64Data,
         name:
           asset.name ||
           (isPdf

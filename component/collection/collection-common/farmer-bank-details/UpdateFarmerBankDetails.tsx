@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -51,13 +51,14 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const { id, phoneNumber, PreferdLanguage, officerRole, comingFromOtp } =
     route.params;
 
+
   const [accNumber, setAccNumber] = useState("");
   const [accHolderName, setAccHolderName] = useState("");
   const [bankName, setBankName] = useState("");
   const [branchName, setBranchName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [filteredBranches, setFilteredBranches] = useState<allBranches[]>([]);
   const [selectedLanguage] = useState<string>("en");
   const [accNumberError, setAccNumberError] = useState("");
@@ -66,10 +67,20 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
   const [branchModalVisible, setBranchModalVisible] = useState(false);
   const isFirstMount = useRef(true);
 
-  const bankModalData = bankNames.map((bank) => ({
-    label: bank.name,
-    value: bank.name,
-  }));
+  const getCurrentLanguage = (): string => {
+  return (i18n.language || selectedLanguage || "en")
+    .toLowerCase()
+    .substring(0, 2);
+};
+
+  const bankModalData = useMemo(() => {
+    return [...bankNames]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((bank) => ({
+        label: bank.name,
+        value: bank.name,
+      }));
+  }, []);
 
   const branchModalData = filteredBranches.map((branch) => ({
     label: branch.name,
@@ -121,48 +132,32 @@ const UnregisteredFarmerDetails: React.FC<UnregisteredFarmerDetailsProps> = ({
     if (!netState.isConnected) return;
 
     try {
-      const apiUrl = "https://api.getshoutout.com/otpservice/send";
-      const headers = {
-        Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-        "Content-Type": "application/json",
-      };
-
       let otpMessage = "";
       let companyName = "";
 
-      const normLang = (PreferdLanguage || "").toLowerCase().trim();
-      if (
-        normLang === "sinhala" ||
-        normLang === "si" ||
-        normLang === "sinhalese" ||
-        normLang === "සිංහල"
-      ) {
-        companyName =
-          (store.getState().auth.companyNameSinhala) || "PolygonAgro";
-        otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
-      } else if (
-        normLang === "tamil" ||
-        normLang === "ta" ||
-        normLang === "தமிழ்"
-      ) {
-        companyName =
-          (store.getState().auth.companyNameTamil) || "PolygonAgro";
-        otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
-      } else {
-        companyName =
-          (store.getState().auth.companyNameEnglish) || "PolygonAgro";
-        otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
+    const currentLang = getCurrentLanguage(); 
+
+if (currentLang === "si") {
+  companyName = store.getState().auth.companyNameSinhala || "Polygon";
+  otpMessage = `${companyName} සමඟ බැංකු විස්තර සත්‍යාපනය සඳහා ඔබගේ OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nනිවැරදි නම්, ඔබව සම්බන්ධ කර ගන්නා ${companyName} නියෝජිතයා සමඟ පමණක් OTP අංකය බෙදා ගන්න.`;
+} else if (currentLang === "ta") {
+  companyName = store.getState().auth.companyNameTamil || "Polygon";
+  otpMessage = `${companyName} உடன் வங்கி விவர சரிபார்ப்புக்கான உங்கள் OTP: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nசரியாக இருந்தால், உங்களைத் தொடர்பு கொள்ளும் ${companyName} பிரதிநிதியுடன் மட்டும் OTP ஐப் பகிரவும்.`;
+} else {
+  companyName = store.getState().auth.companyNameEnglish || "Polygon";
+  otpMessage = `Your OTP for bank detail verification with ${companyName} is: {{code}}\n\n${accHolderName}\n${accNumber}\n${bankName}\n${branchName}\n\nIf correct, share OTP only with the ${companyName} representative who contacts you.`;
+}
+
+      const response = await axios.post(
+        `${environment.API_BASE_URL}api/farmer/send-otp`,
+        {
+          phoneNumber: `${phoneNumber}`,
+          message: otpMessage,
+        },
+      );
+      if (response.data?.referenceId) {
+        await AsyncStorage.setItem("referenceId", response.data.referenceId);
       }
-
-      const body = {
-        source: "PolygonAgro",
-        transport: "sms",
-        content: { sms: otpMessage },
-        destination: `${phoneNumber}`,
-      };
-
-      const response = await axios.post(apiUrl, body, { headers });
-      await AsyncStorage.setItem("referenceId", response.data.referenceId);
 
       navigation.navigate("otpBankDetailsupdate", {
         phoneNumber,

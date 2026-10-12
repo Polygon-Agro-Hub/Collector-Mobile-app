@@ -13,9 +13,9 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import Constants from "expo-constants";
 import NetInfo from "@react-native-community/netinfo";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
 interface ScaleSelectModalProps {
@@ -23,44 +23,95 @@ interface ScaleSelectModalProps {
   onClose: () => void;
 }
 
-const isExpoGo = Constants.appOwnership === "expo";
-
 // Device config is data, not translated text — keep the model name out of the
 // translation files and only translate the descriptive suffix around it.
 const DEFAULT_DEVICE = {
   name: "BUDRY MFD-300",
   ip: "192.168.1.30",
-  port: isExpoGo ? "3001" : "33581",
+  port: "33581",
 };
 const DEFAULT_IP = "192.168.1.30";
-const DEFAULT_PORT = DEFAULT_DEVICE.port;
+const DEFAULT_PORT = "33581";
 
 export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   visible,
   onClose,
 }) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
   const [ipAddress, setIpAddress] = useState<string>(DEFAULT_IP);
   const [port, setPort] = useState<string>(DEFAULT_PORT);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
 
+  const fetchCurrentNetworkIp = async () => {
+    try {
+      const state = await NetInfo.fetch();
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
+
+      if (
+        state.details &&
+        "ipAddress" in state.details &&
+        typeof (state.details as any).ipAddress === "string" &&
+        (state.details as any).ipAddress.trim() !== ""
+      ) {
+        const ip = (state.details as any).ipAddress.trim();
+        setIpAddress(ip);
+        return ip;
+      }
+      return null;
+    } catch (err) {
+      console.warn("Failed to fetch current network IP:", err);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (visible) {
+      const status = wifiScaleService.getStatus();
+      if (status.scale?.ip) {
+        setIpAddress(status.scale.ip);
+        if (status.scale?.port) {
+          setPort(status.scale.port.toString());
+        }
+      } else {
+        fetchCurrentNetworkIp();
+      }
+    }
+  }, [visible]);
+
   useEffect(() => {
     const unsubscribeScale = wifiScaleService.subscribe((status) => {
       setScaleStatus(status);
       if (status.scale?.ip) {
-        setIpAddress(status.scale.ip || "192.168.1.30");
+        setIpAddress(status.scale.ip || DEFAULT_IP);
         if (status.scale?.port) {
           setPort(status.scale.port.toString());
         }
       }
     });
+
     const unsubscribeNet = NetInfo.addEventListener((state) => {
-      // Do not use state.isWifiEnabled alone because on Android it returns false if location permission is denied ("Don't Allow")
-      const isOnline = state.isConnected !== false && state.type !== "none";
-      setIsWifiEnabled(isOnline);
+      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      setIsWifiEnabled(!!isWifi);
+      if (
+        state.details &&
+        "ipAddress" in state.details &&
+        typeof (state.details as any).ipAddress === "string" &&
+        (state.details as any).ipAddress.trim() !== ""
+      ) {
+        const liveIp = (state.details as any).ipAddress.trim();
+        const current = wifiScaleService.getStatus();
+        if (!current.connected) {
+          setIpAddress(liveIp);
+        }
+      }
     });
+
+    fetchCurrentNetworkIp();
+
     return () => {
       unsubscribeScale();
       unsubscribeNet();
@@ -123,6 +174,8 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
     }
   };
 
+  const bottomInset = Math.max(insets.bottom, Platform.OS === "android" ? 28 : 20);
+
   return (
     <Modal
       visible={visible}
@@ -139,7 +192,18 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
         <TouchableWithoutFeedback onPress={onClose}>
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />
         </TouchableWithoutFeedback>
-        <View style={{ backgroundColor: "#ffffff", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, minHeight: 440, maxHeight: "85%" }}>
+        <View
+          style={{
+            backgroundColor: "#ffffff",
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            paddingTop: 24,
+            paddingHorizontal: 24,
+            paddingBottom: bottomInset + 8,
+            minHeight: 440,
+            maxHeight: "90%",
+          }}
+        >
           {/* Header */}
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -244,7 +308,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
           {/* Configuration & Preset Section */}
           <ScrollView
             style={{ marginTop: 20 }}
-            contentContainerStyle={{ paddingBottom: 24 }}
+            contentContainerStyle={{
+              paddingBottom: Math.max(insets.bottom, 20) + 24,
+              paddingHorizontal: 2,
+            }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
@@ -266,6 +333,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 marginBottom: 16,
                 borderWidth: 1,
                 borderColor: "#9D9D9D",
+                marginHorizontal: 1,
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -275,7 +343,6 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 <View>
                   <Text style={{ fontSize: 14, fontWeight: "bold", color: "#0f172a" }}>
                     {DEFAULT_DEVICE.name}
-                    {isExpoGo ? ` (${t("ScaleSelectModal.PcBridgeSuffix")})` : ""}
                   </Text>
                   <Text style={{ fontSize: 12, color: "#64748b" }}>
                     {t("ScaleSelectModal.IpLabel")}: {DEFAULT_DEVICE.ip} | {t("ScaleSelectModal.PortLabel")}: {DEFAULT_DEVICE.port}
@@ -291,27 +358,65 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155", marginBottom: 4 }}>
                   {t("ScaleSelectModal.ScaleIpAddress")}
                 </Text>
-                <TextInput
-                  value={ipAddress}
-                  onChangeText={setIpAddress}
-                  placeholder={t("ScaleSelectModal.IpPlaceholder")}
-                  keyboardType="numeric"
-                  style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
-                />
+                <View
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderWidth: 1,
+                    borderColor: "#9D9D9D",
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    height: 48,
+                    justifyContent: "center",
+                    marginHorizontal: 1,
+                  }}
+                >
+                  <TextInput
+                    value={ipAddress}
+                    onChangeText={setIpAddress}
+                    placeholder={t("ScaleSelectModal.IpPlaceholder")}
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="numeric"
+                    style={{
+                      fontSize: 14,
+                      color: "#0f172a",
+                      paddingVertical: 0,
+                      paddingHorizontal: 0,
+                    }}
+                  />
+                </View>
               </View>
 
               <View>
                 <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155", marginBottom: 4 }}>
                   {t("ScaleSelectModal.PortNumber")}
                 </Text>
-                <TextInput
-                  value={port}
-                  onChangeText={(text) => setPort(text.replace(/[^0-9]/g, "").slice(0, 5))}
-                  placeholder="8080"
-                  keyboardType="number-pad"
-                  maxLength={5}
-                  style={{ backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#9D9D9D", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: "#0f172a" }}
-                />
+                <View
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderWidth: 1,
+                    borderColor: "#9D9D9D",
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    height: 48,
+                    justifyContent: "center",
+                    marginHorizontal: 1,
+                  }}
+                >
+                  <TextInput
+                    value={port}
+                    onChangeText={(text) => setPort(text.replace(/[^0-9]/g, "").slice(0, 5))}
+                    placeholder="8080"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="number-pad"
+                    maxLength={5}
+                    style={{
+                      fontSize: 14,
+                      color: "#0f172a",
+                      paddingVertical: 0,
+                      paddingHorizontal: 0,
+                    }}
+                  />
+                </View>
               </View>
             </View>
 
@@ -333,6 +438,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 shadowOpacity: 0.1,
                 shadowRadius: 4,
                 elevation: 2,
+                marginBottom: 16,
               }}
             >
               {isConnecting ? (

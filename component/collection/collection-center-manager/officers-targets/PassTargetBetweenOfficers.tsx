@@ -1,5 +1,5 @@
 import store from "@/services/reducxStore";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useContext, useMemo } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import GlobalSearchModal from "@/component/components/popup/GlobalSearchModal";
+import { LanguageContext } from "@/context/LanguageContext";
 
 type PassTargetBetweenOfficersScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -64,14 +65,14 @@ const PassTargetBetweenOfficers: React.FC<
   const [assignee, setAssignee] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
-  const [officers, setOfficers] = useState<{ label: string; value: string }[]>(
-    [],
-  );
+  const [rawOfficers, setRawOfficers] = useState<Officer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [officerModalVisible, setOfficerModalVisible] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
 
   const {
     grade,
@@ -91,7 +92,49 @@ const PassTargetBetweenOfficers: React.FC<
   } = route.params;
 
   const maxAmount = parseFloat(todo);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+
+  const fetchSelectedLanguage = async () => {
+    try {
+      const lang = await AsyncStorage.getItem("@user_language");
+      if (lang) setSelectedLanguage(lang);
+    } catch (error) {
+      console.error("Error fetching language preference:", error);
+    }
+  };
+
+  const getActiveLang = useCallback(() => {
+    return (language || selectedLanguage || i18n.language || "en").toLowerCase();
+  }, [language, selectedLanguage, i18n.language]);
+
+  const getOfficerName = useCallback(
+    (officer: Officer) => {
+      if (!officer) return "";
+      const lang = getActiveLang();
+      if (lang.startsWith("si") && officer.fullNameSinhala?.trim()) {
+        return officer.fullNameSinhala.trim();
+      }
+      if (lang.startsWith("ta") && officer.fullNameTamil?.trim()) {
+        return officer.fullNameTamil.trim();
+      }
+      return (
+        officer.fullNameEnglish?.trim() ||
+        officer.fullNameSinhala?.trim() ||
+        officer.fullNameTamil?.trim() ||
+        officer.empId ||
+        ""
+      );
+    },
+    [getActiveLang],
+  );
+
+  const officers = useMemo(() => {
+    return rawOfficers
+      .filter((officer) => officer.collectionOfficerId !== collectionOfficerId)
+      .map((officer) => ({
+        label: `${getOfficerName(officer)} (${officer.empId})`,
+        value: officer.collectionOfficerId.toString(),
+      }));
+  }, [rawOfficers, collectionOfficerId, getOfficerName]);
 
   const goBackToEditTarget = () => {
     navigation.reset({
@@ -134,27 +177,8 @@ const PassTargetBetweenOfficers: React.FC<
   );
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const lang = await AsyncStorage.getItem("@user_language");
-        if (lang) setSelectedLanguage(lang);
-      } catch (error) {
-        console.error("Error fetching language preference:", error);
-      }
-    };
-    fetchData();
+    fetchSelectedLanguage();
   }, []);
-
-  const getOfficerName = (officer: Officer) => {
-    switch (selectedLanguage) {
-      case "si":
-        return officer.fullNameSinhala;
-      case "ta":
-        return officer.fullNameTamil;
-      default:
-        return officer.fullNameEnglish;
-    }
-  };
 
   const isSaveDisabled = () => {
     const numericAmount = parseFloat(amount);
@@ -183,16 +207,7 @@ const PassTargetBetweenOfficers: React.FC<
       );
 
       if (response.data.status === "success") {
-        const filteredOfficers = response.data.data.filter(
-          (officer: any) => officer.collectionOfficerId !== collectionOfficerId,
-        );
-
-        const formattedOfficers = filteredOfficers.map((officer: any) => ({
-          label: `${getOfficerName(officer)}  (${officer.empId})`,
-          value: officer.collectionOfficerId.toString(),
-        }));
-
-        setOfficers(formattedOfficers);
+        setRawOfficers(response.data.data || []);
       } else {
         setErrorMessage(t("Error.Failed to fetch officers."));
       }
@@ -210,10 +225,11 @@ const PassTargetBetweenOfficers: React.FC<
   useFocusEffect(
     React.useCallback(() => {
       setAssignee("");
-      setAmount(maxAmount.toString()); 
+      setAmount(maxAmount.toString());
       setError("");
+      fetchSelectedLanguage();
       fetchOfficers();
-    }, [maxAmount]), 
+    }, [maxAmount]),
   );
 
   const handleAmountChange = (text: string) => {
@@ -309,16 +325,21 @@ const PassTargetBetweenOfficers: React.FC<
     }
   };
 
-  const getvarietyName = () => {
-    switch (selectedLanguage) {
-      case "si":
-        return route.params.varietyNameSinhala;
-      case "ta":
-        return route.params.varietyNameTamil;
-      default:
-        return route.params.varietyNameEnglish;
+  const getvarietyName = useCallback(() => {
+    const lang = getActiveLang();
+    if (lang.startsWith("si") && route.params.varietyNameSinhala) {
+      return route.params.varietyNameSinhala;
     }
-  };
+    if (lang.startsWith("ta") && route.params.varietyNameTamil) {
+      return route.params.varietyNameTamil;
+    }
+    return (
+      route.params.varietyNameEnglish ||
+      route.params.varietyNameSinhala ||
+      route.params.varietyNameTamil ||
+      ""
+    );
+  }, [getActiveLang, route.params]);
 
   const selectedOfficerLabel =
     officers.find((o) => o.value === assignee)?.label || null;
@@ -443,7 +464,6 @@ const PassTargetBetweenOfficers: React.FC<
         onSelect={(items) => setAssignee(items[0] ?? "")}
         searchPlaceholder={t("PassTargetBetweenOfficers.Search an officer")}
         multiSelect={false}
-        noResultsText={t("PassTargetBetweenOfficers.No Officers Found")}
       />
     </View>
   );

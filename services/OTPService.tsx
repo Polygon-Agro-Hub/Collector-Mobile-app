@@ -8,26 +8,16 @@ export const sendOTP = async (
   navigation: any,
 ) => {
   try {
-    const apiUrl = "https://api.getshoutout.com/otpservice/send";
-
-    const headers = {
-      Authorization: `Apikey ${environment.SHOUTOUT_API_KEY}`,
-      "Content-Type": "application/json",
-    };
-
-    const body = {
-      source: "ShoutDEMO",
-      transport: "sms",
-      content: {
-        sms: "Your code is {{code}}",
+    const response = await axios.post(
+      `${environment.API_BASE_URL}api/farmer/send-otp`,
+      {
+        phoneNumber: formattedPhonenumber,
       },
-      destination: formattedPhonenumber,
-    };
+    );
 
-    const response = await axios.post(apiUrl, body, { headers });
-
-    // Store referenceId in AsyncStorage
-    await AsyncStorage.setItem("referenceId", response.data.referenceId);
+    if (response.data?.referenceId) {
+      await AsyncStorage.setItem("referenceId", response.data.referenceId);
+    }
 
     // Navigate to the OTPE screen with the mobile number
     navigation.navigate("OTPEOLDUSER", {

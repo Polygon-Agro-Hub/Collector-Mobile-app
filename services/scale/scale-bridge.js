@@ -29,15 +29,24 @@ let scaleSocket    = null;
 
 function parseScaleChunk(chunk) {
   const str = chunk.toString("utf8");
-  const m = str.match(/([+-]?\s*\d+(?:\.\d+)?)\s*kg/i);
-  if (m && m[1]) {
-    const val = parseFloat(m[1].replace(/\s+/g, ""));
-    if (!isNaN(val)) {
-      if (val !== currentWeight) {
-        console.log("Weight update: " + val + " kg");
+  const lines = str.split(/[\r\n]+/);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i];
+    if (!line) continue;
+    const m = line.match(/([+-]?\s*\d+(?:[\.,]\d+)?)\s*kg/i);
+    if (m && m[1]) {
+      let val = parseFloat(m[1].replace(/\s+/g, "").replace(",", "."));
+      if (!isNaN(val)) {
+        if (Math.abs(val) < 0.005 || val < 0 || Object.is(val, -0)) {
+          val = 0;
+        }
+        if (val !== currentWeight) {
+          console.log("Weight update: " + val + " kg");
+        }
+        currentWeight = val;
+        lastUpdateAt = Date.now();
+        return;
       }
-      currentWeight = val;
-      lastUpdateAt = Date.now();
     }
   }
 }
@@ -62,6 +71,8 @@ function connectToScale() {
 
   sock.on("timeout", function() {
     console.warn("Scale socket timed out, reconnecting...");
+    scaleConnected = false;
+    currentWeight = 0;
     sock.destroy();
   });
 
@@ -70,11 +81,13 @@ function connectToScale() {
       console.error("Scale connection error: " + err.message);
     }
     scaleConnected = false;
+    currentWeight = 0;
     scheduleReconnect();
   });
 
   sock.on("close", function() {
     scaleConnected = false;
+    currentWeight = 0;
     scheduleReconnect();
   });
 
@@ -102,12 +115,13 @@ const server = http.createServer(function(req, res) {
   }
 
   if (req.url === "/api/weight" || req.url === "/") {
-    var stale = lastUpdateAt ? (Date.now() - lastUpdateAt) > 5000 : true;
+    var stale = lastUpdateAt ? (Date.now() - lastUpdateAt) > 3500 : true;
+    var liveWeight = (!scaleConnected || stale) ? 0 : (currentWeight !== null ? currentWeight : 0);
     res.writeHead(200);
     res.end(JSON.stringify({
-      weight:    currentWeight !== null ? currentWeight : 0,
+      weight:    liveWeight,
       unit:      "kg",
-      connected: scaleConnected,
+      connected: scaleConnected && !stale,
       stale:     stale,
     }));
     return;

@@ -200,10 +200,21 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
 
   useEffect(() => {
     if (selectedJobRole) {
-      const filtered = officers.filter(
-        (officer) => officer.jobRole === selectedJobRole,
-      );
-      setFilteredOfficers(filtered);
+      if (selectedJobRole === "Driver") {
+        const filtered = officers.filter(
+          (officer) =>
+            officer.jobRole === "Driver" ||
+            officer.jobRole === "Heavy Weight Driver" ||
+            officer.jobRole === "Light Weight Driver" ||
+            officer.jobRole?.toLowerCase().includes("driver"),
+        );
+        setFilteredOfficers(filtered);
+      } else {
+        const filtered = officers.filter(
+          (officer) => officer.jobRole === selectedJobRole,
+        );
+        setFilteredOfficers(filtered);
+      }
     } else {
       setFilteredOfficers(officers);
     }
@@ -277,7 +288,7 @@ const CollectionOfficersList: React.FC<CollectionOfficersListProps> = ({
                 right: 14,
               },
               selectedLanguage === "si"
-                ? { fontSize: 12 }
+                ? { fontSize: 10 }
                 : selectedLanguage === "ta"
                   ? { fontSize: 9 }
                   : { fontSize: 12 },

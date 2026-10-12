@@ -16,68 +16,136 @@ export type RootStackParamList = {
   CollectionDashboard: undefined;
   SentProductsToday: undefined;
   ScanDriverQR: undefined;
-  SelectDistributionCentre: undefined;
+  SelectDistributionCentre:
+    | {
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        vehicleId?: number;
+        vehicleNo?: string;
+        vType?: string;
+        vCapacity?: string;
+      }
+    | undefined;
   LoadingToVehicle:
     | {
         vehicleNo?: string;
         centreId?: string;
+        disComCenId?: string;
         centreName?: string;
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        vehicleId?: number;
+        vType?: string;
+        vCapacity?: string;
       }
     | undefined;
   LoadingToVehicleSummary:
     | {
+        transportId?: string | number;
         vehicleNo?: string;
         centreId?: string;
+        disComCenId?: string;
         centreName?: string;
+        driverId?: number;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        vehicleId?: number;
         loadCode?: string;
         items?: any[];
+        isViewOnly?: boolean;
       }
     | undefined;
   LoadQR:
     | {
+        transportId?: string | number;
         loadCode?: string;
         vehicleNo?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
         driverId?: string;
+        driverEmpId?: string;
         centreName?: string;
       }
     | undefined;
   LoadAssigned:
     | {
+        transportId?: string | number;
         loadCode?: string;
         vehicleNo?: string;
         driverId?: string;
+        driverEmpId?: string;
         driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
       }
     | undefined;
   ReceivedProductsToday: undefined;
+  ScanLoadQR: undefined;
   DistributionScanDriverQR: undefined;
   ReceivedProductsSummary:
     | {
+        transportId?: string | number;
+        loadCode?: string;
         vehicleNo?: string;
+        driverEmpId?: string;
+        driverName?: string;
+        driverNameEnglish?: string;
+        driverNameSinhala?: string;
+        driverNameTamil?: string;
+        origin?: string;
         items?: any[];
+        isUnloaded?: boolean;
+        title?: string;
       }
     | undefined;
   UnloadingProducts:
     | {
-        loadCode?: string;
-        vehicleNo?: string;
+        transportId?: string | number | null;
+        loadCode?: string | null;
+        vehicleNo?: string | null;
         items?: any[];
       }
     | undefined;
   WeighTheLoad:
     | {
-        loadCode?: string;
+        transportId?: string | number | null;
+        varietyId?: string;
+        productId?: string;
+        loadCode?: string | null;
+        vehicleNo?: string | null;
         product?: any;
         updatedGrade?: {
+          varietyId?: string;
           gradeId: string;
           unloadedWeightKg: number;
           unloadedCrates: number;
+          sets?: {
+            setIndex: number;
+            crates: number;
+            weightKg: number;
+          }[];
         };
       }
     | undefined;
   WeighGrade:
     | {
+        varietyId?: string;
+        productId?: string;
+        product?: any;
         productName?: string;
         productImage?: string;
         gradeTitle?: string;
@@ -86,6 +154,7 @@ export type RootStackParamList = {
         loadedCrates?: number;
       }
     | undefined;
+  MyNotifications: undefined;
   SideMenu: undefined;
   ReadytoPickupOrders: undefined;
   SinChangePassword: undefined;
@@ -131,7 +200,7 @@ export type RootStackParamList = {
   ManagerTransactions: undefined;
   SearchFarmerScreen: undefined;
   DistridutionaDashboard: undefined;
-  PurchaseShortage: undefined;
+  PurchaseShortage: { products?: any[] } | undefined;
   PurchaseProduct: { product?: any } | undefined;
   DistributionOfficersList: undefined;
   ReceivedCash: undefined;
@@ -143,6 +212,12 @@ export type RootStackParamList = {
 };
   CameraAccess: undefined;
   LocationAccess: undefined;
+  NotificationAccess:
+    | {
+        returnScreen?: keyof RootStackParamList;
+        blockBackNavigation?: boolean;
+      }
+    | undefined;
   QRScanner: {
     userId: any;
   };

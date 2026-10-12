@@ -14,6 +14,8 @@ import { useDispatch } from "react-redux";
 import { clearActiveAssignment } from "@/store/authSlice";
 import { useTranslation } from "react-i18next";
 
+import { formatPositionDisplayName, formatRowTitle } from "@/constants/packing/time-slots";
+
 export function EndShiftHeaderRight({ onPress }: { onPress: () => void }) {
   return (
     <TouchableOpacity
@@ -55,11 +57,14 @@ export function EndShiftModal({
   const [loading, setLoading] = useState(false);
 
   const activeAssignment = store.getState().auth.activeAssignment;
-  const resolvedRow =
+  const rawRow =
     rowText ||
     activeAssignment?.rowName ||
     (activeAssignment?.rowIndex ? `Row ${activeAssignment.rowIndex}` : "Row 1");
-  const resolvedPos = positionText || activeAssignment?.positionName || "Packing Position 1";
+  const rawPos = positionText || activeAssignment?.positionName || "Packing Position 1";
+
+  const resolvedRow = formatRowTitle(rawRow, t);
+  const resolvedPos = formatPositionDisplayName(rawPos, t);
 
   const message =
     customMessage ||

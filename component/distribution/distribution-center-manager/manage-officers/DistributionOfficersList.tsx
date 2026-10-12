@@ -263,12 +263,14 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     );
   };
 
-  const officersList = officers.filter(
-    (o) =>
-      o.jobRole === "Collection Officer" ||
-      o.jobRole === "Distribution Officer",
-  );
-  const driversList = officers.filter((o) => o.jobRole === "Driver");
+  const isDriver = (role?: string) => {
+    if (!role) return false;
+    const r = role.toLowerCase();
+    return r.includes("driver");
+  };
+
+  const officersList = officers.filter((o) => !isDriver(o.jobRole));
+  const driversList = officers.filter((o) => isDriver(o.jobRole));
 
   const officersCount = officersList.length || officers.length;
   const driversCount = driversList.length;

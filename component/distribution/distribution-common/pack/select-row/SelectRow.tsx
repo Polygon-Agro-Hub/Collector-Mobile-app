@@ -11,7 +11,7 @@ import {
   BackHandler,
   RefreshControl,
 } from "react-native";
-import { Entypo, Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import axios from "axios";
 import environment from "@/environment/environment";
 import { useFocusEffect } from "@react-navigation/native";
@@ -28,6 +28,13 @@ interface RowData {
   name: string;
   positionsCount: number;
   rowIndex?: number;
+  allocatedCount?: number;
+  orderCount?: number;
+  ordersCount?: number;
+  targetCount?: number;
+  ordersAssigned?: number;
+  totalOrders?: number;
+  hasOrders?: boolean;
 }
 
 interface PositionData {
@@ -45,6 +52,8 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<PositionData | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [noOrdersModalVisible, setNoOrdersModalVisible] = useState(false);
+  const [noOrdersRowNumber, setNoOrdersRowNumber] = useState("");
 
   const [rows, setRows] = useState<RowData[]>([]);
   const [positions, setPositions] = useState<PositionData[]>([]);
@@ -348,6 +357,22 @@ export default function SelectRow({ navigation }: { navigation: any }) {
   };
 
   const handleRowSelect = async (row: RowData) => {
+    const rowNum = getRowNumber(row);
+
+    // If row data already indicates no orders
+    if (
+      row.hasOrders === false ||
+      (row.ordersCount !== undefined && row.ordersCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.allocatedCount !== undefined && row.allocatedCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.orderCount !== undefined && row.orderCount === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.totalOrders !== undefined && row.totalOrders === 0 && (!row.targetCount || row.targetCount === 0)) ||
+      (row.ordersAssigned !== undefined && row.ordersAssigned === 0 && (!row.targetCount || row.targetCount === 0))
+    ) {
+      setNoOrdersRowNumber(rowNum);
+      setNoOrdersModalVisible(true);
+      return;
+    }
+
     setSelectedRow(row);
     try {
       setLoading(true);
@@ -365,18 +390,53 @@ export default function SelectRow({ navigation }: { navigation: any }) {
       });
 
       if (response.data && response.data.success) {
+        const resData = response.data;
+        if (
+          resData.hasOrders === false ||
+          (resData.ordersCount !== undefined && resData.ordersCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.allocatedCount !== undefined && resData.allocatedCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.orderCount !== undefined && resData.orderCount === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.totalOrders !== undefined && resData.totalOrders === 0 && (!resData.targetCount || resData.targetCount === 0)) ||
+          (resData.ordersAssigned !== undefined && resData.ordersAssigned === 0 && (!resData.targetCount || resData.targetCount === 0))
+        ) {
+          setNoOrdersRowNumber(rowNum);
+          setNoOrdersModalVisible(true);
+          return;
+        }
+
         setPositions(response.data.data);
         setStep(2);
       } else {
-        Alert.alert(
-          t("Packing.Error", "Error"),
-          response.data.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
-        );
+        const msg = (response.data?.message || "").toLowerCase();
+        if (
+          response.data?.hasOrders === false ||
+          msg.includes("no order") ||
+          (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
+        ) {
+          setNoOrdersRowNumber(rowNum);
+          setNoOrdersModalVisible(true);
+        } else {
+          Alert.alert(
+            t("Packing.Error", "Error"),
+            response.data?.message || t("Packing.Failed to fetch positions.", "Failed to fetch positions.")
+          );
+        }
       }
     } catch (error: any) {
       console.error("Error fetching positions:", error);
-      const errMsg = error.response?.data?.message || t("Packing.Failed to fetch positions.", "An error occurred while fetching positions.");
-      Alert.alert(t("Packing.Error", "Error"), errMsg);
+      const errMsg = error.response?.data?.message || "";
+      const msg = errMsg.toLowerCase();
+      if (
+        error.response?.data?.hasOrders === false ||
+        msg.includes("no order") ||
+        (msg.includes("order") && (msg.includes("not assigned") || msg.includes("unassigned") || msg.includes("no ")))
+      ) {
+        setNoOrdersRowNumber(rowNum);
+        setNoOrdersModalVisible(true);
+      } else {
+        const displayMsg = errMsg || t("Packing.Failed to fetch positions.", "An error occurred while fetching positions.");
+        Alert.alert(t("Packing.Error", "Error"), displayMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -398,77 +458,113 @@ export default function SelectRow({ navigation }: { navigation: any }) {
     setShowConfirmModal(true);
   };
 
-  const handleConfirm = async () => {
-    if (!selectedPosition) return;
-    try {
-      setSubmitting(true);
-      const token = store.getState().auth.token;
-      if (!token) {
-        Alert.alert(
-          t("Packing.Error", "Error"),
-          t("Packing.Authentication token not found. Please log in again.", "Authentication token not found. Please log in again.")
-        );
-        return;
-      }
-
-      const response = await axios.post(
-        `${environment.API_BASE_URL}api/packing/positions/assign`,
-        { positionId: selectedPosition.id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+const handleConfirm = async () => {
+  if (!selectedPosition) return;
+  try {
+    setSubmitting(true);
+    const token = store.getState().auth.token;
+    if (!token) {
       setShowConfirmModal(false);
-
-      if (response.data && response.data.success) {
-        const assignmentData = {
-          rowId: selectedRow?.id || 0,
-          rowIndex: selectedRow?.rowIndex,
-          rowName: selectedRow?.name || (selectedRow?.rowIndex ? `Row ${selectedRow.rowIndex}` : undefined),
-          positionId: selectedPosition.id,
-          positionName: selectedPosition.name,
-          pType: selectedPosition.type,
-        };
-        dispatch(setActiveAssignmentAction(assignmentData));
-
-        Alert.alert(
-          t("Packing.Confirmation Success", "Confirmation Success"),
-          t("Packing.You have been successfully assigned to this position", "You have been successfully assigned to this position"),
-          [
-            {
-              text: t("AlertModal.OK", "OK"),
-              onPress: () => {
-                if (selectedPosition.type === "QR") {
-                  navigation.navigate("QRHandling");
-                } else if (selectedPosition.type === "NOR") {
-                  navigation.navigate("WelcomeToPacking", { 
-                    positionId: selectedPosition.id,
-                    positionName: formatPositionName(selectedPosition),
-                    rowId: selectedRow?.id,
-                  });
-                } else if (selectedPosition.type === "QC") {
-                  navigation.navigate("WelcomeToQC", { 
-                    positionName: formatPositionName(selectedPosition),
-                    rowId: selectedRow?.id,
-                  });
-                }
-              },
-            },
-          ]
-        );
-      } else {
-        Alert.alert(
-          t("Packing.Error", "Error"),
-          response.data.message || t("Packing.Failed to assign position.", "Failed to assign position.")
-        );
-      }
-    } catch (error: any) {
-      console.error("Error assigning position:", error);
-      const errMsg = error.response?.data?.message || t("Packing.An error occurred while confirming assignment.", "An error occurred while confirming assignment.");
-      Alert.alert(t("Packing.Error", "Error"), errMsg);
-    } finally {
-      setSubmitting(false);
+      Alert.alert(
+        t("Packing.Error", "Error"),
+        t(
+          "Packing.Authentication token not found. Please log in again.",
+          "Authentication token not found. Please log in again."
+        )
+      );
+      return;
     }
-  };
+
+    const response = await axios.post(
+      `${environment.API_BASE_URL}api/packing/positions/assign`,
+      { positionId: selectedPosition.id },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setShowConfirmModal(false);
+
+    if (response.data && response.data.success) {
+      const assignmentData = {
+        rowId: selectedRow?.id || 0,
+        rowIndex: selectedRow?.rowIndex,
+        rowName:
+          selectedRow?.name ||
+          (selectedRow?.rowIndex ? `Row ${selectedRow.rowIndex}` : undefined),
+        positionId: selectedPosition.id,
+        positionName: selectedPosition.name,
+        pType: selectedPosition.type,
+      };
+      dispatch(setActiveAssignmentAction(assignmentData));
+
+      Alert.alert(
+        t("Packing.Confirmation Success", "Confirmation Success"),
+        t(
+          "Packing.You have been successfully assigned to this position",
+          "You have been successfully assigned to this position"
+        ),
+        [
+          {
+            text: t("AlertModal.OK", "OK"),
+            onPress: () => {
+              if (selectedPosition.type === "QR") {
+                navigation.navigate("QRHandling");
+              } else if (selectedPosition.type === "NOR") {
+                navigation.navigate("WelcomeToPacking", {
+                  positionId: selectedPosition.id,
+                  positionName: formatPositionName(selectedPosition),
+                  rowId: selectedRow?.id,
+                });
+              } else if (selectedPosition.type === "QC") {
+                navigation.navigate("WelcomeToQC", {
+                  positionName: formatPositionName(selectedPosition),
+                  rowId: selectedRow?.id,
+                });
+              }
+            },
+          },
+        ]
+      );
+    } else {
+      Alert.alert(
+        t("Packing.Error", "Error"),
+        response.data.message ||
+          t("Packing.Failed to assign position.", "Failed to assign position.")
+      );
+    }
+  } catch (error: any) {
+    console.error("Error assigning position:", error);
+
+    const code = error.response?.data?.code;
+    const serverMsg = error.response?.data?.message;
+
+    let errMsg: string;
+    if (code === "POSITION_OCCUPIED") {
+      errMsg = t(
+        "Packing.Position already occupied today",
+        "This position is already occupied by another officer today."
+      );
+      // refresh so the card shows as Occupied
+      if (selectedRow) fetchPositionsSilently(selectedRow.id);
+    } else if (code === "POSITION_NOT_FOUND") {
+      errMsg = t(
+        "Packing.Selected position not found",
+        "Selected packing position not found."
+      );
+    } else {
+      errMsg =
+        serverMsg ||
+        t(
+          "Packing.An error occurred while confirming assignment.",
+          "An error occurred while confirming assignment."
+        );
+    }
+
+    setShowConfirmModal(false);
+    Alert.alert(t("Packing.Error", "Error"), errMsg);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <View className="flex-1 bg-white">
@@ -496,15 +592,13 @@ export default function SelectRow({ navigation }: { navigation: any }) {
         <View className="flex-row items-center gap-2">
           {/* Segment 1 */}
           <View
-            className={`h-1.5 w-20 rounded-full ${
-              step === 1 ? "bg-slate-900" : "bg-gray-200"
-            }`}
+            className={`h-1.5 w-20 rounded-full ${step === 1 ? "bg-slate-900" : "bg-gray-200"
+              }`}
           />
           {/* Segment 2 */}
           <View
-            className={`h-1.5 w-20 rounded-full ${
-              step === 2 ? "bg-slate-900" : "bg-gray-200"
-            }`}
+            className={`h-1.5 w-20 rounded-full ${step === 2 ? "bg-slate-900" : "bg-gray-200"
+              }`}
           />
         </View>
 
@@ -541,174 +635,173 @@ export default function SelectRow({ navigation }: { navigation: any }) {
           }
         >
           {step === 1 ? (
-          <>
-            {/* Step 1 Title */}
-            <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
-              {t("Packing.Choose the packing row you will be working at.", "Select the row you work with")}
-            </Text>
-
-            {/* Step 1 list of rows */}
-            <View className="gap-4">
-              {rows.map((row, index) => {
-                const formattedIndex = String(index + 1).padStart(2, "0");
-                return (
-                  <TouchableOpacity
-                    key={row.id}
-                    onPress={() => handleRowSelect(row)}
-                    className="flex-row items-center border border-gray-100 rounded-2xl p-4 my-1"
-                    style={{
-                      backgroundColor: "#ffffff",
-                      shadowColor: "#000000",
-                      shadowOffset: { width: 0, height: 3 },
-                      shadowOpacity: 0.12,
-                      shadowRadius: 6,
-                      elevation: 4,
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    {/* Circle Indicator */}
-                    <View className="w-12 h-12 rounded-full items-center justify-center bg-[#E9ECF1] mr-4">
-                      <Text className="font-bold text-black text-lg">
-                        {formattedIndex}
-                      </Text>
-                    </View>
-
-                    {/* Content */}
-                    <View className="flex-1">
-                      <Text className="font-bold text-slate-950 text-base">
-                        {formatRowTitle(row)}
-                      </Text>
-                      <Text className="text-xs text-[#54617D] mt-0.5">
-                        {row.positionsCount}{" "}
-                        {row.positionsCount === 1 ? t("Packing.Position", "Position") : t("Packing.Positions", "Positions")}{" "}
-                        {t("Packing.Available", "Available")}
-                      </Text>
-                    </View>
-
-                    {/* Chevron Right */}
-                    <Ionicons name="chevron-forward" size={20} color="black" />
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </>
-        ) : (
-          <>
-            {/* Step 2 Title */}
-            <Text className="text-lg text-center text-slate-600 mb-6 mt-2">
-              {t("Packing.Selected: Row", "Selected: Row")}{" "}
-              <Text className="font-extrabold text-slate-950">
-                {getRowNumber(selectedRow)}
+            <>
+              {/* Step 1 Title */}
+              <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
+                {t("AssignGroups.Select the row you work with", "Select the row you work with")}
               </Text>
-            </Text>
 
-            {/* Step 2 list of positions */}
-            <View className="gap-4">
-              {positions.map((position) => {
-                const isOccupied = position.status === "Occupied";
-
-                // Determine styling based on type and status
-                let leftCircleStyle = "bg-slate-50 border-[#E1E7EE]";
-                let leftTextStyle = "text-slate-800";
-                let cardStyle = "border-[#E1E7EE] border";
-
-                const isQrOrQc = position.type === "QR" || position.type === "QC";
-                const circleStyle = isQrOrQc
-                  ? (isOccupied ? "bg-[#D9B700] border-[#D9B700]" : "bg-[#FAE432] border-[#FAE432]")
-                  : (isOccupied ? "bg-white/40 border-gray-300/40" : leftCircleStyle);
-
-                if (isQrOrQc) {
-                  leftTextStyle = "text-black";
-                  cardStyle = "border-yellow-300 border";
-                }
-
-                if (selectedPosition?.id === position.id) {
-                  cardStyle = "bg-slate-100 border-yellow-400 border-2";
-                }
-
-                return (
-                  <TouchableOpacity
-                    key={position.id}
-                    onPress={() => handlePositionSelect(position)}
-                    disabled={isOccupied}
-                    className={`flex-row items-center rounded-2xl p-4 my-1 ${
-                      isOccupied
-                        ? (isQrOrQc ? "border-[#D9B700] border-2" : "border border-transparent")
-                        : cardStyle
-                    }`}
-                    style={{
-                      backgroundColor: isOccupied ? "#4E52734D" : "#ffffff",
-                      shadowColor: "#000000",
-                      shadowOffset: { width: 0, height: isOccupied ? 0 : 3 },
-                      shadowOpacity: isOccupied ? 0 : 0.12,
-                      shadowRadius: isOccupied ? 0 : 6,
-                      elevation: isOccupied ? 0 : 4,
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    {/* Circle Indicator */}
-                    <View
-                      className={`w-12 h-12 rounded-full border items-center justify-center mr-4 ${circleStyle}`}
+              {/* Step 1 list of rows */}
+              <View className="gap-4">
+                {rows.map((row, index) => {
+                  const formattedIndex = String(index + 1).padStart(2, "0");
+                  return (
+                    <TouchableOpacity
+                      key={row.id}
+                      onPress={() => handleRowSelect(row)}
+                      className="flex-row items-center border border-gray-100 rounded-2xl p-4 my-1"
+                      style={{
+                        backgroundColor: "#ffffff",
+                        shadowColor: "#000000",
+                        shadowOffset: { width: 0, height: 3 },
+                        shadowOpacity: 0.12,
+                        shadowRadius: 6,
+                        elevation: 4,
+                      }}
+                      activeOpacity={0.8}
                     >
-                      <Text
-                        className={`font-bold text-sm ${
-                          isQrOrQc ? "text-black" : (isOccupied ? "text-[#54617D]" : leftTextStyle)
-                        }`}
-                      >
-                        {position.leftLabel}
-                      </Text>
-                    </View>
+                      {/* Circle Indicator */}
+                      <View className="w-12 h-12 rounded-full items-center justify-center bg-[#E9ECF1] mr-4">
+                        <Text className="font-bold text-black text-lg">
+                          {formattedIndex}
+                        </Text>
+                      </View>
 
-                    {/* Content */}
-                    <View className="flex-1">
-                      <Text
-                        className={`font-bold text-base ${
-                          isOccupied ? "text-[#54617D]" : "text-slate-950"
+                      {/* Content */}
+                      <View className="flex-1">
+                        <Text className="font-bold text-slate-950 text-base">
+                          {formatRowTitle(row)}
+                        </Text>
+                        <Text className="text-xs text-[#54617D] mt-0.5">
+                          {t("Packing.PositionsAvailableCount", {
+                            count: row.positionsCount,
+                            defaultValue: `${row.positionsCount} ${row.positionsCount === 1
+                                ? t("Packing.Position", "Position")
+                                : t("Packing.Positions", "Positions")
+                              } ${t("Packing.Available", "Available")}`,
+                          })}
+                        </Text>
+                      </View>
+
+                      {/* Chevron Right */}
+                      <Ionicons name="chevron-forward" size={20} color="black" />
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          ) : (
+            <>
+              {/* Step 2 Title */}
+              <Text className="text-lg text-center text-slate-600 mb-6 mt-2">
+                {t("Packing.Selected: Row", "Selected: Row")}{" "}
+                <Text className="font-extrabold text-slate-950">
+                  {getRowNumber(selectedRow)}
+                </Text>
+              </Text>
+
+              {/* Step 2 list of positions */}
+              <View className="gap-4">
+                {positions.map((position) => {
+                  const isOccupied = position.status === "Occupied";
+
+                  // Determine styling based on type and status
+                  let leftCircleStyle = "bg-slate-50 border-[#E1E7EE]";
+                  let leftTextStyle = "text-slate-800";
+                  let cardStyle = "border-[#E1E7EE] border";
+
+                  const isQrOrQc = position.type === "QR" || position.type === "QC";
+                  const circleStyle = isQrOrQc
+                    ? (isOccupied ? "bg-[#D9B700] border-[#D9B700]" : "bg-[#FAE432] border-[#FAE432]")
+                    : (isOccupied ? "bg-white/40 border-gray-300/40" : leftCircleStyle);
+
+                  if (isQrOrQc) {
+                    leftTextStyle = "text-black";
+                    cardStyle = "border-yellow-300 border";
+                  }
+
+                  if (selectedPosition?.id === position.id) {
+                    cardStyle = "bg-slate-100 border-yellow-400 border-2";
+                  }
+
+                  return (
+                    <TouchableOpacity
+                      key={position.id}
+                      onPress={() => handlePositionSelect(position)}
+                      disabled={isOccupied}
+                      className={`flex-row items-center rounded-2xl p-4 my-1 ${isOccupied
+                          ? (isQrOrQc ? "border-[#D9B700] border-2" : "border border-transparent")
+                          : cardStyle
                         }`}
+                      style={{
+                        backgroundColor: isOccupied ? "#4E52734D" : "#ffffff",
+                        shadowColor: "#000000",
+                        shadowOffset: { width: 0, height: isOccupied ? 0 : 3 },
+                        shadowOpacity: isOccupied ? 0 : 0.12,
+                        shadowRadius: isOccupied ? 0 : 6,
+                        elevation: isOccupied ? 0 : 4,
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      {/* Circle Indicator */}
+                      <View
+                        className={`w-12 h-12 rounded-full border items-center justify-center mr-4 ${circleStyle}`}
                       >
-                        {formatPositionName(position)}
-                      </Text>
-                      {/* Badge status */}
-                      <View className="flex-row mt-1">
-                        <View
-                          className={`flex-row items-center px-2 py-0.5 rounded-full ${
-                            isOccupied ? "bg-[#00000010]" : "bg-slate-50"
-                          }`}
-                        >
-                          <View
-                            style={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: 3,
-                              backgroundColor: isOccupied ? "#54617D" : "black",
-                              marginRight: 6,
-                            }}
-                          />
-                          <Text
-                            className={`text-[10px] font-semibold ${
-                              isOccupied ? "text-[#54617D]" : "text-black"
+                        <Text
+                          className={`font-bold text-sm ${isQrOrQc ? "text-black" : (isOccupied ? "text-[#54617D]" : leftTextStyle)
                             }`}
+                        >
+                          {position.leftLabel}
+                        </Text>
+                      </View>
+
+                      {/* Content */}
+                      <View className="flex-1">
+                        <Text
+                          className={`font-bold text-base ${isOccupied ? "text-[#54617D]" : "text-slate-950"
+                            }`}
+                        >
+                          {formatPositionName(position)}
+                        </Text>
+                        {/* Badge status */}
+                        <View className="flex-row mt-1">
+                          <View
+                            className={`flex-row items-center px-2 py-0.5 rounded-full ${isOccupied ? "bg-[#00000010]" : "bg-slate-50"
+                              }`}
                           >
-                            {position.status === "Occupied" ? t("Packing.Occupied", "Occupied") : t("Packing.Available", "Available")}
-                          </Text>
+                            <View
+                              style={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: 3,
+                                backgroundColor: isOccupied ? "#54617D" : "black",
+                                marginRight: 6,
+                              }}
+                            />
+                            <Text
+                              className={`text-[10px] font-semibold ${isOccupied ? "text-[#54617D]" : "text-black"
+                                }`}
+                            >
+                              {position.status === "Occupied" ? t("Packing.Occupied", "Occupied") : t("Packing.Available", "Available")}
+                            </Text>
+                          </View>
                         </View>
                       </View>
-                    </View>
 
-                    {/* Chevron Right */}
-                    <Ionicons
-                      name="chevron-forward"
-                      size={20}
-                      color={isOccupied ? "#54617D" : "#9ca3af"}
-                    />
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </>
-        )}
-      </ScrollView>
-    )}
+                      {/* Chevron Right */}
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color={isOccupied ? "#54617D" : "#9ca3af"}
+                      />
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          )}
+        </ScrollView>
+      )}
 
       {/* Confirmation Modal overlay matching screenshot */}
       <Modal
@@ -779,6 +872,67 @@ export default function SelectRow({ navigation }: { navigation: any }) {
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* No Orders Assigned Modal matching screenshot */}
+      <Modal
+        visible={noOrdersModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setNoOrdersModalVisible(false)}
+      >
+        <View
+          className="flex-1 justify-center items-center px-6"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+        >
+          <View
+            className="bg-white rounded-3xl p-6 w-full max-w-sm items-center shadow-2xl"
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.25,
+              shadowRadius: 10,
+              elevation: 8,
+            }}
+          >
+            {/* Exclamation badge in black circle */}
+            <View className="w-12 h-12 rounded-full bg-black items-center justify-center mb-4">
+              <FontAwesome5 name="exclamation" size={22} color="white" />
+            </View>
+
+            {/* Modal Title */}
+            <Text className="text-lg font-bold text-slate-950 text-center mb-3">
+              {t("Packing.No Orders Assigned!", "No Orders Assigned!")}
+            </Text>
+
+            {/* Modal Description */}
+            <Text className="text-[#64748B] text-sm text-center leading-relaxed px-2 mb-6">
+              {t("Packing.No orders assigned message", {
+                number: noOrdersRowNumber,
+                defaultValue: `There are still no orders assigned to Row ${noOrdersRowNumber}. Please wait and re-check once orders have been assigned.`,
+              })}
+            </Text>
+
+            {/* Close Button */}
+            <TouchableOpacity
+              onPress={() => setNoOrdersModalVisible(false)}
+              className="w-full py-4 rounded-full items-center justify-center"
+              style={{
+                backgroundColor: "#D9D9D9",
+                shadowColor: "#000000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+              activeOpacity={0.8}
+            >
+              <Text className="text-slate-800 font-bold text-base">
+                {t("Packing.Close", t("Close", "Close"))}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

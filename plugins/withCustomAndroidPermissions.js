@@ -32,12 +32,6 @@ function withCustomAndroidPermissions(config) {
       "android.permission.CALL_PHONE",
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
-      "android.permission.POST_NOTIFICATIONS",
-      "android.permission.BLUETOOTH",
-      "android.permission.BLUETOOTH_ADMIN",
-      "android.permission.BLUETOOTH_SCAN",
-      "android.permission.BLUETOOTH_CONNECT",
-      "android.permission.VIBRATE",
       "android.permission.WAKE_LOCK",
       "android.permission.RECEIVE_BOOT_COMPLETED",
       "android.permission.CHANGE_WIFI_STATE",
@@ -72,6 +66,54 @@ function withCustomAndroidPermissions(config) {
           },
         });
       }
+    }
+
+    // 3. Explicitly remove android:requestLegacyExternalStorage from <application>
+    if (Array.isArray(androidManifest.application)) {
+      androidManifest.application.forEach((app) => {
+        if (app && app.$) {
+          delete app.$["android:requestLegacyExternalStorage"];
+        }
+      });
+    }
+
+    // 4. Ensure BLUETOOTH_SCAN has neverForLocation flag
+    const btScan = androidManifest["uses-permission"].find(
+      (p) => p?.$?.["android:name"] === "android.permission.BLUETOOTH_SCAN"
+    );
+    if (btScan && btScan.$) {
+      btScan.$["android:usesPermissionFlags"] = "neverForLocation";
+      btScan.$["tools:targetApi"] = "31";
+    }
+
+    // 5. Clean up conflicting uses-permission-sdk-23 entries (injected by react-native-ble-plx)
+    if (Array.isArray(androidManifest["uses-permission-sdk-23"])) {
+      androidManifest["uses-permission-sdk-23"] = androidManifest["uses-permission-sdk-23"].filter(
+        (perm) => {
+          const name = perm?.$?.["android:name"];
+          return (
+            name !== "android.permission.ACCESS_COARSE_LOCATION" &&
+            name !== "android.permission.ACCESS_FINE_LOCATION"
+          );
+        }
+      );
+      if (androidManifest["uses-permission-sdk-23"].length === 0) {
+        delete androidManifest["uses-permission-sdk-23"];
+      }
+    }
+
+    // 6. Ensure location permissions in uses-permission do not have maxSdkVersion
+    if (Array.isArray(androidManifest["uses-permission"])) {
+      androidManifest["uses-permission"].forEach((perm) => {
+        const name = perm?.$?.["android:name"];
+        if (
+          (name === "android.permission.ACCESS_COARSE_LOCATION" ||
+            name === "android.permission.ACCESS_FINE_LOCATION") &&
+          perm.$
+        ) {
+          delete perm.$["android:maxSdkVersion"];
+        }
+      });
     }
 
     return config;

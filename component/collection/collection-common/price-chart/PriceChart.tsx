@@ -66,9 +66,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
   };
 
   const getEditingButtonText = () => {
-    return isManager
-      ? t("PriceChart.Update")
-      : t("PriceChart.Submit Request");
+    return isManager ? t("PriceChart.Update") : t("PriceChart.Submit Request");
   };
 
   const [buttonText, setButtonText] = useState(getInitialButtonText());
@@ -248,11 +246,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           }));
 
         if (requestData.length === 0) {
-          Alert.alert(
-            t("Error.error"),
-            t("Error.No prices to update"),
-            [{ text: t("AlertModal.OK", "OK") }],
-          );
+          Alert.alert(t("Error.error"), t("Error.No prices to update"), [
+            { text: t("AlertModal.OK", "OK") },
+          ]);
           setIsSubmitting(false);
           return;
         }
@@ -450,13 +446,15 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
                       />
                     </View>
                   </View>
-                  {isManager && isEditable && editedPrices[index]?.isValid === false && (
-                    <Text className="text-red-500 text-xs mt-1 ml-32">
-                      {getAllowedRange(
-                        editedPrices[index]?.originalPrice || priceItem.price,
-                      )}
-                    </Text>
-                  )}
+                  {isManager &&
+                    isEditable &&
+                    editedPrices[index]?.isValid === false && (
+                      <Text className="text-red-500 text-xs mt-1 ml-32">
+                        {getAllowedRange(
+                          editedPrices[index]?.originalPrice || priceItem.price,
+                        )}
+                      </Text>
+                    )}
                 </View>
               ))}
             </View>
@@ -466,7 +464,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
         <TouchableOpacity
           className="rounded-[45px] py-3 mt-4 w-3/4 mx-auto h-[50px] justify-center"
           onPress={handleButtonClick}
-          disabled={(isEditable && isManager && !areAllPricesValid()) || isSubmitting}
+          disabled={
+            (isEditable && isManager && !areAllPricesValid()) || isSubmitting
+          }
           style={{
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 4 },
@@ -523,9 +523,16 @@ const PriceChart: React.FC<PriceChartProps> = ({ navigation, route }) => {
           }}
         >
           <Text
-            style={[{flexShrink: 0 , fontSize: 16 }, getTextStyle(selectedLanguage)]}
-            className="text-center text-base text-[#606060] font-semibold"
-       
+            style={[
+              {
+                flexShrink: 0,
+                fontSize: 16,
+                textAlign: "center",
+                color: "#606060",
+                fontWeight: "600",
+              },
+              getTextStyle(selectedLanguage),
+            ]}
           >
             {isEditable ? t("PriceChart.Cancel") : t("PriceChart.Go")}
           </Text>

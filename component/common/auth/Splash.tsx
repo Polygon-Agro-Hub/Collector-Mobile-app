@@ -115,7 +115,8 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
                 name: "BannedScreen",
                 params: {
                   statusType:
-                    result.accountStatus === "Rejected"
+                    (result.accountStatus || "").toLowerCase() === "rejected" ||
+                    (result.accountStatus || "").toLowerCase() === "banned"
                       ? "rejected"
                       : "not_approved",
                   message: result.message,

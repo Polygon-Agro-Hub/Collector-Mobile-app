@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
+import { LanguageContext } from "@/context/LanguageContext";
 
 interface GlobalSearchModalProps {
   visible: boolean;
@@ -47,13 +48,77 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   showSearch = true,
   isLoading = false,
 }) => {
-  const { t } = useTranslation();
-  const effectiveSearchPlaceholder =
-    searchPlaceholder || t("GlobalSearchModal.Search", "Search...");
-  const effectiveDoneText =
-    doneButtonText || t("GlobalSearchModal.Done", "Done");
-  const effectiveNoResultsText =
-    noResultsText || t("GlobalSearchModal.No items found", "No items found");
+  const { t, i18n } = useTranslation();
+  const { language } = useContext(LanguageContext);
+  const currentLng = language || i18n.language || "en";
+
+  const formatSearchPlaceholder = (placeholder?: string) => {
+    if (!placeholder) {
+      if (currentLng === "si") return "සොයන්න...";
+      if (currentLng === "ta") return "தேடுங்கள்...";
+      return t("GlobalSearchModal.Search", "Search...");
+    }
+    const trimmed = placeholder.trim().toLowerCase();
+    if (
+      trimmed === "search" ||
+      trimmed === "search..." ||
+      trimmed === "search…" ||
+      trimmed === "search text"
+    ) {
+      if (currentLng === "si") return "සොයන්න...";
+      if (currentLng === "ta") return "தேடுங்கள்...";
+      return t("GlobalSearchModal.Search", "Search...");
+    }
+    return t(placeholder, placeholder);
+  };
+
+  const formatNoResultsText = (text?: string) => {
+    if (text) {
+      const trimmed = text.trim().toLowerCase();
+      const genericVariants = [
+        "no items found",
+        "no item found",
+        "no results found",
+        "no search result found",
+        "no search results found",
+        "no results",
+        "- no items found. -",
+        "- no results found. -",
+        "no officers found",
+        "නිලධාරීන් හමු නොවීය",
+        "no search result found.",
+        "no search results found.",
+      ];
+      if (!genericVariants.includes(trimmed)) {
+        return t(text, text);
+      }
+    }
+
+    if (currentLng === "si") {
+      return "සෙවුම් ප්‍රතිඵල හමු නොවීය";
+    }
+    if (currentLng === "ta") {
+      return "தேடல் முடிவுகள் எதுவும் காணப்படவில்லை";
+    }
+
+    return t(
+      "GlobalSearchModal.No Search Result Found",
+      t("GlobalSearchModal.NoResultsText", "No Search Result Found")
+    );
+  };
+
+  const formatDoneButtonText = (btnText?: string) => {
+    if (!btnText) {
+      if (currentLng === "si") return "හරි";
+      if (currentLng === "ta") return "முடிந்தது";
+      return t("GlobalSearchModal.Done", "Done");
+    }
+    return t(btnText, btnText);
+  };
+
+  const effectiveSearchPlaceholder = formatSearchPlaceholder(searchPlaceholder);
+  const effectiveDoneText = formatDoneButtonText(doneButtonText);
+  const effectiveNoResultsText = formatNoResultsText(noResultsText);
 
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState(data);
@@ -145,7 +210,12 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         }`}
       onPress={() => handleItemPress(item.value)}
     >
-      <Text className="text-base text-gray-800">{item.label}</Text>
+      <Text
+        className="text-base text-gray-800"
+        style={{ lineHeight: 24, paddingVertical: 2, includeFontPadding: true }}
+      >
+        {item.label}
+      </Text>
       {isSelected && <MaterialIcons name="check" size={20} color="#21202B" />}
     </TouchableOpacity>
   );
@@ -182,45 +252,89 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     </View>
   );
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <View className="px-4 py-12 items-center justify-center">
-          <ActivityIndicator size="large" color="#6839CF" />
-          <Text className="text-sm mt-3 text-[#6839CF]">
-            {t("GlobalSearchModal.Loading")}
+ const renderContent = () => {
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          paddingHorizontal: 16,
+          paddingVertical: 48,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color="#6839CF" />
+        <Text style={{ fontSize: 14, marginTop: 12, color: "#6839CF" }}>
+          {t("GlobalSearchModal.Loading")}
+        </Text>
+      </View>
+    );
+  }
+
+  if (filteredData.length === 0) {
+    return (
+      <View
+        style={{
+          paddingHorizontal: 16,
+          paddingVertical: 32,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            color: "#6B7280",
+            fontSize: 16,
+            textAlign: "center",
+            fontWeight: "500",
+          }}
+        >
+          {effectiveNoResultsText}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={filteredData}
+      keyExtractor={(item) => item.value}
+      style={{ maxHeight: 256 }}
+      ListEmptyComponent={
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 32,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: "#6B7280",
+              fontSize: 16,
+              textAlign: "center",
+              fontWeight: "500",
+            }}
+          >
+            {effectiveNoResultsText}
           </Text>
         </View>
-      );
-    }
+      }
+      renderItem={({ item, index }) => {
+        const isSelected = selectedValues.includes(item.value);
+        const isLast = index === filteredData.length - 1;
 
-    if (filteredData.length === 0) {
-      return (
-        <View className="px-4 py-8 items-center">
-          <Text className="text-gray-500 text-base">{effectiveNoResultsText}</Text>
-        </View>
-      );
-    }
+        if (renderItem) {
+          return renderItem(item, isSelected) as React.ReactElement | null;
+        }
 
-    return (
-      <FlatList
-        data={filteredData}
-        keyExtractor={(item) => item.value}
-        renderItem={({ item, index }) => {
-          const isSelected = selectedValues.includes(item.value);
-          const isLast = index === filteredData.length - 1;
-
-          if (renderItem) {
-            return renderItem(item, isSelected) as React.ReactElement | null;
-          }
-
-          return renderDefaultItem(item, isSelected, isLast);
-        }}
-        showsVerticalScrollIndicator={false}
-        className="max-h-64"
-      />
-    );
-  };
+        return renderDefaultItem(item, isSelected, isLast);
+      }}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+};
 
   return (
     <Modal
@@ -234,7 +348,12 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           {/* Header */}
           <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
             <View>
-              <Text className="text-lg font-semibold">{title}</Text>
+              <Text
+                className="text-lg font-semibold"
+                style={{ lineHeight: 26, paddingVertical: 2, includeFontPadding: true }}
+              >
+                {t(title, title)}
+              </Text>
               {multiSelect && selectedValues.length > 0 && (
                 <Text className="text-sm text-gray-500">
                   {t("GlobalSearchModal.SelectedCount", { count: selectedValues.length })}

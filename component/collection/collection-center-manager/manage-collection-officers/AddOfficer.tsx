@@ -21,8 +21,6 @@ import {
 } from "react-native";
 import axios from "axios";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { RadioButton } from "react-native-paper";
-import Checkbox from "expo-checkbox";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -81,7 +79,12 @@ type Province = {
 type ModalKey = "province" | "district" | "bank" | "branch" | null;
 
 const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = (i18n.language?.startsWith("si")
+    ? "si"
+    : i18n.language?.startsWith("ta")
+    ? "ta"
+    : "en") as "en" | "si" | "ta";
   const scrollRef = useRef<ScrollView>(null);
 
   // Unified step navigation state
@@ -1149,7 +1152,11 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
     clearFieldErrorAddress("district");
 
     const selectedProvince = (provincesData.provinces as Province[]).find(
-      (p) => p.name.en === provinceName,
+      (p) =>
+        p.name.en === provinceName ||
+        p.name.si === provinceName ||
+        p.name.ta === provinceName ||
+        (p.name.en === "Uva" && (provinceName === "උව" || provinceName === "ඌව")),
     );
 
     if (selectedProvince) {
@@ -1181,7 +1188,16 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
     if (!districtName) return;
 
     clearFieldErrorAddress("district");
-    const updatedData = { ...formDataAddress, district: districtName };
+    const foundDistrict = districts.find(
+      (d) =>
+        d.en === districtName ||
+        d.si === districtName ||
+        d.ta === districtName,
+    );
+    const updatedData = {
+      ...formDataAddress,
+      district: foundDistrict ? foundDistrict.en : districtName,
+    };
     setFormDataAddress(updatedData);
     saveToStorage(
       step,
@@ -1371,18 +1387,25 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
       );
 
       if (response.status === 201) {
-        Alert.alert(
-          t("Error.Success"),
-          t("Error.Officer created successfully"),
-        );
         setLoading(false);
         await AsyncStorage.removeItem("officerFormData");
         resetForm();
-        if (jobRole === "Collection Officer") {
-          navigation.navigate("Main", { screen: "CollectionOfficersList" });
-        } else if (jobRole === "Distribution Officer") {
-          navigation.navigate("Main", { screen: "DistributionOfficersList" });
-        }
+        Alert.alert(
+          t("Error.Success", "Success"),
+          t("Error.Officer created successfully", "Officer created successfully"),
+          [
+            {
+              text: t("AlertModal.OK", "OK"),
+              onPress: () => {
+                if (jobRole === "Collection Officer") {
+                  navigation.navigate("Main", { screen: "CollectionOfficersList" });
+                } else if (jobRole === "Distribution Officer") {
+                  navigation.navigate("Main", { screen: "DistributionOfficersList" });
+                }
+              },
+            },
+          ]
+        );
       }
     } catch (err) {
       console.error("Error submitting officer data:", err);
@@ -1402,14 +1425,14 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
 
   const provinceModalData = (provincesData.provinces as Province[])
     .map((p) => ({
-      label: p.name[selectedLanguage as keyof typeof p.name] || p.name.en,
+      label: p.name[currentLang] || p.name.en,
       value: p.name.en,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
 
   const districtModalData = districts
     .map((d) => ({
-      label: (d[selectedLanguage as keyof typeof d] as string) || d.en,
+      label: (d[currentLang] as string) || d.en,
       value: d.en,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
@@ -1537,20 +1560,23 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
 
           <View className="">
             <View className="px-0 mt-6 items-center">
-              <View className="flex flex-row items-center gap-2 justify-between">
-                <Text className="text-base font-medium">
+              <View className="flex flex-row items-center gap-3">
+                <Text className="text-base font-medium mr-1">
                   {t("AddOfficerBasicDetails.Type")}
                 </Text>
                 <TouchableOpacity
                   className="flex-row items-center"
+                  activeOpacity={0.7}
                   onPress={() => handleTypeChange("Permanent")}
                 >
-                  <RadioButton.Android
-                    value="Permanent"
-                    status={type === "Permanent" ? "checked" : "unchecked"}
-                    onPress={() => handleTypeChange("Permanent")}
+                  <Ionicons
+                    name={
+                      type === "Permanent"
+                        ? "radio-button-on"
+                        : "radio-button-off"
+                    }
+                    size={22}
                     color="#980775"
-                    uncheckedColor="#980775"
                   />
                   <Text
                     className="ml-1 text-base text-[#534E4E]"
@@ -1567,15 +1593,18 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  className="flex-row items-center"
+                  className="flex-row items-center ml-2"
+                  activeOpacity={0.7}
                   onPress={() => handleTypeChange("Temporary")}
                 >
-                  <RadioButton.Android
-                    value="Temporary"
-                    status={type === "Temporary" ? "checked" : "unchecked"}
-                    onPress={() => handleTypeChange("Temporary")}
+                  <Ionicons
+                    name={
+                      type === "Temporary"
+                        ? "radio-button-on"
+                        : "radio-button-off"
+                    }
+                    size={22}
                     color="#980775"
-                    uncheckedColor="#980775"
                   />
                   <Text
                     className="ml-1 text-base text-[#534E4E]"
@@ -1605,16 +1634,27 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                     keyof typeof preferredLanguages
                   >
                 ).map((lang) => (
-                  <View key={lang} className="flex-row items-center gap-1">
-                    <Checkbox
-                      value={preferredLanguages[lang]}
-                      onValueChange={() => toggleLanguage(lang)}
-                      color={preferredLanguages[lang] ? "#980775" : "#980775"}
-                    />
+                  <TouchableOpacity
+                    key={lang}
+                    activeOpacity={0.7}
+                    onPress={() => toggleLanguage(lang)}
+                    className="flex-row items-center gap-2"
+                  >
+                    <View
+                      className={`w-5 h-5 rounded-md items-center justify-center border-2 ${
+                        preferredLanguages[lang]
+                          ? "bg-[#980775] border-[#980775]"
+                          : "border-[#980775] bg-white"
+                      }`}
+                    >
+                      {preferredLanguages[lang] && (
+                        <Ionicons name="checkmark" size={14} color="white" />
+                      )}
+                    </View>
                     <Text className="text-base text-[#534E4E]">
                       {t(`AddOfficerBasicDetails.${lang}`)}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
               {fieldErrors.preferredLanguages && (
@@ -2116,8 +2156,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                             (pr) => pr.name.en === formDataAddress.province,
                           );
                           return p
-                            ? p.name[selectedLanguage as keyof typeof p.name] ||
-                                p.name.en
+                            ? p.name[currentLang] || p.name.en
                             : formDataAddress.province;
                         })()
                       : ""
@@ -2149,9 +2188,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
                                 (dis) => dis.en === formDataAddress.district,
                               );
                               return d
-                                ? (d[
-                                    selectedLanguage as keyof typeof d
-                                  ] as string) || d.en
+                                ? (d[currentLang] as string) || d.en
                                 : formDataAddress.district;
                             })()
                           : ""
@@ -2463,6 +2500,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
           setActiveModal(null);
         }}
         searchPlaceholder={t("AddOfficerAddressDetails.SearchProvince")}
+        searchKeys={["label", "value"]}
         multiSelect={false}
       />
 
@@ -2480,6 +2518,7 @@ const AddOfficer: React.FC<AddOfficerProp> = ({ route, navigation }) => {
           setActiveModal(null);
         }}
         searchPlaceholder={t("AddOfficerAddressDetails.SearchDistrict")}
+        searchKeys={["label", "value"]}
         multiSelect={false}
       />
 

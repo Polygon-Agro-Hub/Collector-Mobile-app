@@ -100,6 +100,26 @@ export const AlertModal: React.FC<AlertModalProps> = ({
     if (showOpenOngoingButton) {
       return t("AlertModal.Cannot Proceed!", "Cannot Proceed!");
     }
+    if (typeof title === "string") {
+      const clean = title.trim().toLowerCase();
+      if (clean === "error" || clean === "error!" || clean === "error !") {
+        return t("AlertModal.Error", t("qrcode.Error", "Error!"));
+      }
+      if (
+        clean === "success" ||
+        clean === "success!" ||
+        clean === "successful" ||
+        clean === "successful!"
+      ) {
+        return t("AlertModal.Successful", t("qrcode.Successful", "Successful!"));
+      }
+      if (
+        clean === "scan timeout" ||
+        clean === "scan timeout!"
+      ) {
+        return t("AlertModal.ScanTimeout", t("qrcode.ScanTimeout", "Scan Timeout"));
+      }
+    }
     return title;
   };
 
