@@ -540,7 +540,7 @@
     "UnsavedChanges": "සුරැක නොමැති වෙනස්කම්",
     "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න.",
     "DeleteGradeConfirmation": "{{varietyName}} හි {{grade}} මකා දැමීමට ඔබට විශ්වාසද?",
-    "DeleteVarietyConfirmation": "එක් කළ {{varietyName}} ශ්‍රේණිය මකා දැමීමට ඔබට විශ්වාසද?",
+    "DeleteVarietyConfirmation": "එක් කල {{varietyName}} ශ්‍රේණිය මකා දැමීමට ඔබට විශ්වාසද?",
     "GradeA_Rs": "A ශ්‍රේණිය (රු.)",
     "GradeB_Rs": "B ශ්‍රේණිය (රු.)",
     "GradeC_Rs": "C ශ්‍රේණිය (රු.)",
@@ -1161,7 +1161,7 @@
     "MaxContainersMessage": "මෙම ශ්‍රේණිය සඳහා පටවන ලද මුළු පෙට්ටි {{max}} ඉක්මවිය නොහැක.",
     "NoOfCrates": "--පෙට්ටි ගණන--",
     "NoOfContainers": "--පෙට්ටි ගණන--",
-    "DeleteConfirmation": "එකතු කරන ලද\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}} ඉවත් කිරීම ගැන ඔබට විශ්වාසද?",
+    "DeleteConfirmation": "එකතු කරන ලද\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ඉවත් කිරීම ගැන ඔබට විශ්වාසද?",
     "Delete": "මකන්න",
     "Cancel": "අවලංගු කරන්න"
   },
@@ -2082,8 +2082,8 @@
     "Account Rejected": "ගිණුම ප්‍රතික්ෂේප කර ඇත",
     "Account Not Approved": "ගිණුම අනුමත කර නැත",
     "Pending Verification": "සත්‍යාපනය වෙමින් පවතී",
-    "Your account has been rejected or is not approved.": "ඔබගේ ගිණුම ප්‍රතික්ෂේප කර ඇත හෝ අනුමත කර නැත.",
-    "Your account approval has been revoked by the administrator.": "පරිපාලක විසින් ඔබගේ ගිණුම් අනුමැතිය අවලංගු කර ඇත.",
+    "Your account has been rejected or is not approved.": "සේවක හැඳුනුම් අංකය ප්රතික්ෂේප කර ඇත.",
+    "Your account approval has been revoked by the administrator.": "සේවක හැඳුනුම් අංකය අනුමත කර නොමැත.",
     "Your account status is pending verification.": "ඔබගේ ගිණුමේ තත්ත්වය සත්‍යාපනය වෙමින් පවතී.",
     "Please contact Polygon Customer Support for further details.": "වැඩිදුර විස්තර සඳහා කරුණාකර Polygon පාරිභෝගික සහාය අමතන්න.",
     "Back to Login": "නැවත පුරනය වීමට"

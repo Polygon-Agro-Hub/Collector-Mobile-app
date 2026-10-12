@@ -8,6 +8,7 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -233,6 +234,33 @@ export default function UnloadingProducts({
     }, [])
   );
 
+  const handleBackToSummary = useCallback(() => {
+    const currentUnload = store.getState().unload;
+    const finalTransportId = transportId || currentUnload.transportId || undefined;
+    const finalLoadCode = loadCode || currentUnload.loadCode || undefined;
+    navigation.navigate("ReceivedProductsSummary", {
+      transportId: finalTransportId,
+      loadCode: finalLoadCode,
+      vehicleNo: route.params?.vehicleNo || undefined,
+    });
+  }, [navigation, transportId, loadCode, route.params?.vehicleNo]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        handleBackToSummary();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [handleBackToSummary])
+  );
+
   const fetchLoadDetails = useCallback(async () => {
     const identifier = transportId || loadCode;
     if (!identifier) return;
@@ -370,6 +398,7 @@ export default function UnloadingProducts({
     navigation.navigate("WeighTheLoad", {
       transportId: finalTransportId,
       loadCode: finalLoadCode,
+      vehicleNo: route.params?.vehicleNo,
       varietyId: item.id,
       productId: item.id,
       product: {
@@ -633,6 +662,7 @@ export default function UnloadingProducts({
       <CustomHeader
         title={t("UnloadingProducts.Title", "Unloading Products")}
         navigation={navigation}
+        onBackPress={handleBackToSummary}
       />
 
       {loading ? (
