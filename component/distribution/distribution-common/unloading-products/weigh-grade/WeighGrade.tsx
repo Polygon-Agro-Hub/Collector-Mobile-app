@@ -742,8 +742,10 @@ export default function WeighGrade({
                     onBlur={() => setFocusedSetId(null)}
                     keyboardType="number-pad"
                     textAlign="center"
+                    cursorColor="#000000"
+                    selectionColor="rgba(0, 0, 0, 0.3)"
                     className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
-                    style={{ textAlign: "center", textAlignVertical: "center", includeFontPadding: false }}
+                    style={{ textAlign: "center", textAlignVertical: "center", includeFontPadding: false, paddingVertical: 0 }}
                   />
 
                   {/* Weight Row with Scale Arrow / Reload Button */}
@@ -854,10 +856,10 @@ export default function WeighGrade({
         visible={setToDelete !== null}
         message={t(
           "WeighGrade.DeleteConfirmation",
-          "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}}?",
+          "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
           {
             productName,
-            gradeLabel: `${t("WeighGrade.Grade", "Grade")} ${extractGradeLetter(gradeTitle)}`,
+            gradeLabel: t("WeighGrade.Grade", "Grade"),
             grade: extractGradeLetter(gradeTitle),
             setLabel: t("WeighGrade.Set", "Set"),
             setNumber: setToDelete?.setNumber || 1,

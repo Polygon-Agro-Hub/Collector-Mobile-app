@@ -349,8 +349,7 @@ export default function WeighTheLoad({
     setGradeToDelete(null);
   };
 
-  const handleMarkAsUnloaded = () => {
-    if (!isAllUnloaded) return;
+  const handleNavigateToUnloadingProducts = useCallback(() => {
     if (cropData.id) {
       store.dispatch(
         updateVarietyGrades({
@@ -363,24 +362,23 @@ export default function WeighTheLoad({
     navigation.navigate("UnloadingProducts", {
       transportId: currentUnloadState.transportId || route.params?.loadCode,
       loadCode: currentUnloadState.loadCode || route.params?.loadCode,
+      vehicleNo: route.params?.vehicleNo,
     });
+  }, [cropData, navigation, route.params]);
+
+  const handleConfirmGoBack = () => {
+    setShowBackConfirmModal(false);
+    handleNavigateToUnloadingProducts();
+  };
+
+  const handleMarkAsUnloaded = () => {
+    if (!isAllUnloaded) return;
+    handleNavigateToUnloadingProducts();
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    if (cropData.id) {
-      store.dispatch(
-        updateVarietyGrades({
-          varietyId: cropData.id,
-          grades: cropData.grades,
-        })
-      );
-    }
-    const currentUnloadState = store.getState().unload;
-    navigation.navigate("UnloadingProducts", {
-      transportId: currentUnloadState.transportId || route.params?.loadCode,
-      loadCode: currentUnloadState.loadCode || route.params?.loadCode,
-    });
+    handleNavigateToUnloadingProducts();
   };
 
   const renderScaleSection = () => {
@@ -934,10 +932,7 @@ export default function WeighTheLoad({
           "WeighTheLoad.GoBackConfirmation",
           "Are you sure you want to go back?"
         )}
-        onConfirm={() => {
-          setShowBackConfirmModal(false);
-          navigation.goBack();
-        }}
+        onConfirm={handleConfirmGoBack}
         onCancel={() => setShowBackConfirmModal(false)}
         confirmText={t("WeighTheLoad.GoBack", "Go Back")}
         cancelText={t("WeighTheLoad.Cancel", "Cancel")}
