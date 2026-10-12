@@ -9,7 +9,9 @@ import {
   StatusBar,
   Alert,
   Dimensions,
+  Platform,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
@@ -28,8 +30,7 @@ import { ScaleWeightModal } from "@/component/components/popup/ScaleWeightModal"
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
 import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
-import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
-import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
+import { extractGradeLetter, getLocalizedProductName } from "@/utils/productLocalization";
 import axios from "axios";
 import environment from "@/environment/environment";
 
@@ -464,13 +465,20 @@ export default function WeighGrade({
         navigation={navigation}
       />
 
-      <ScrollView
-        className="flex-1 px-6"
+      <KeyboardAwareScrollView
+        className="flex-1 px-6 bg-white"
         contentContainerStyle={{
+          flexGrow: 1,
           paddingTop: 8,
-          paddingBottom: 24,
+          paddingBottom: Math.max(insets.bottom, 24) + 120,
         }}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={Platform.OS === "android" ? 100 : 40}
+        extraHeight={Platform.OS === "android" ? 100 : 40}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         {/* Product Image, Name & Grade Badge */}
         <View className="items-center justify-center my-3">
@@ -849,7 +857,7 @@ export default function WeighGrade({
             {t("WeighGrade.Continue", "Continue")}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Delete Set Warning Confirmation Modal */}
       <WarningConfirmation

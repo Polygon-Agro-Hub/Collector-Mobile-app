@@ -22,7 +22,11 @@ import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService
 import NetInfo from "@react-native-community/netinfo";
 import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
-import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
+import {
+  getLocalizedProductName,
+  extractGradeLetter,
+} from "@/utils/productLocalization";
+export { extractGradeLetter };
 
 type WeighTheLoadNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -64,17 +68,6 @@ export interface CropWeighData {
   grades: GradeWeighItem[];
 }
 
-export const extractGradeLetter = (title?: string): string => {
-  if (!title) return "A";
-  return (
-    title
-      .replace(/Grade/gi, "")
-      .replace(/ශ්‍රේණිය/g, "")
-      .replace(/ශ්‍රේණිය/g, "")
-      .replace(/தரம்/g, "")
-      .trim() || "A"
-  );
-};
 
 const EMPTY_CROP_DATA: CropWeighData = {
   id: "",
