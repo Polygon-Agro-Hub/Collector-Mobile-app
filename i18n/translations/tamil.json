@@ -1161,7 +1161,7 @@
     "MaxContainersMessage": "இந்த தரத்திற்கான மொத்த ஏற்றப்பட்ட பெட்டிகளை {{max}} தாண்ட முடியாது.",
     "NoOfCrates": "--பெட்டிகளின் எண்ணிக்கை--",
     "NoOfContainers": "--பெட்டிகளின் எண்ணிக்கை--",
-    "DeleteConfirmation": "சேர்க்கப்பட்ட\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}} ஐ நீக்க விரும்புகிறீர்களா?",
+    "DeleteConfirmation": "சேர்க்கப்பட்ட\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}} ஐ நீக்க விரும்புகிறீர்களா?",
     "Delete": "நீக்கு",
     "Cancel": "ரத்துசெய்"
   },
@@ -2082,8 +2082,8 @@
     "Account Rejected": "கணக்கு நிராகரிக்கப்பட்டது",
     "Account Not Approved": "கணக்கு அங்கீகரிக்கப்படவில்லை",
     "Pending Verification": "சரிபார்ப்பு நிலுவையில் உள்ளது",
-    "Your account has been rejected or is not approved.": "உங்கள் கணக்கு நிராகரிக்கப்பட்டது அல்லது அங்கீகரிக்கப்படவில்லை.",
-    "Your account approval has been revoked by the administrator.": "நிர்வாகியால் உங்கள் கணக்கு ஒப்புதல் ரத்து செய்யப்பட்டுள்ளது.",
+    "Your account has been rejected or is not approved.": "பணியாளர் அடையாள எண் நிராகரிக்கப்பட்டுள்ளது.",
+    "Your account approval has been revoked by the administrator.": "பணியாளர் அடையாள எண் அங்கீகரிக்கப்படவில்லை.",
     "Your account status is pending verification.": "உங்கள் கணக்கு நிலை சரிபார்ப்பில் உள்ளது.",
     "Please contact Polygon Customer Support for further details.": "கூடுதல் விவரங்களுக்கு Polygon வாடிக்கையாளர் ஆதரவைத் தொடர்பு கொள்ளவும்.",
     "Back to Login": "மீண்டும் உள்நுழைய"

@@ -211,12 +211,21 @@ const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       onPress={() => handleItemPress(item.value)}
     >
       <Text
-        className="text-base text-gray-800"
-        style={{ lineHeight: 24, paddingVertical: 2, includeFontPadding: true }}
+        style={{
+          fontSize: 16,
+          lineHeight: 24,
+          paddingVertical: 2,
+          includeFontPadding: false,
+          color: "#1F2937",
+          flex: 1,
+          flexWrap: "wrap",
+          flexShrink: 1,
+          marginRight: isSelected ? 8 : 0,
+        }}
       >
         {item.label}
       </Text>
-      {isSelected && <MaterialIcons name="check" size={20} color="#21202B" />}
+      {isSelected && <MaterialIcons name="check" size={20} color="#21202B" style={{ flexShrink: 0 }} />}
     </TouchableOpacity>
   );
 

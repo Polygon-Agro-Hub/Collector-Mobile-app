@@ -1904,7 +1904,15 @@ export default function LoadingToVehicle({
                                   onBlur={() => setFocusedSetId(null)}
                                   keyboardType="numeric"
                                   textAlign="center"
+                                  cursorColor="#000000"
+                                  selectionColor="rgba(0, 0, 0, 0.3)"
                                   className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
+                                  style={{
+                                    textAlign: "center",
+                                    textAlignVertical: "center",
+                                    includeFontPadding: false,
+                                    paddingVertical: 0,
+                                  }}
                                 />
 
                                  {/* Weight Row */}
@@ -2262,7 +2270,11 @@ export default function LoadingToVehicle({
           "UnregisteredCropDetails.DeleteVarietyConfirmation",
           "Are you sure you want to delete {{varietyName}} form data?",
           {
-            varietyName: `${t("LoadingToVehicle.Variety", "variety").toLowerCase()} ${varietyIndex}`,
+            varietyName:
+              (i18n.language || "").toLowerCase().startsWith("si") ||
+              (i18n.language || "").toLowerCase().startsWith("ta")
+                ? `${varietyIndex} ${t("LoadingToVehicle.Variety", "variety").toLowerCase()}`
+                : `${t("LoadingToVehicle.Variety", "variety").toLowerCase()} ${varietyIndex}`,
           }
         )}
         onConfirm={() => {

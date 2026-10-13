@@ -8,6 +8,7 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -29,7 +30,11 @@ import {
   UnloadVarietyItem,
   UnloadedGradeItem,
 } from "@/store/unloadSlice";
-import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
+import {
+  extractGradeLetter,
+  getLocalizedProductName,
+} from "@/utils/productLocalization";
+export { getLocalizedProductName };
 
 type UnloadingProductsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -59,63 +64,6 @@ export interface MismatchItem {
   hasCrateMismatch: boolean;
 }
 
-export const getLocalizedProductName = (
-  item?: {
-    displayName?: string;
-    name?: string;
-    cropName?: string;
-    varietyLabel?: string;
-    cropLabel?: string;
-    varietyNameEnglish?: string;
-    varietyNameSinhala?: string;
-    varietyNameTamil?: string;
-    cropNameEnglish?: string;
-    cropNameSinhala?: string;
-    cropNameTamil?: string;
-  } | null,
-  lang?: string
-): string => {
-  if (!item) return "";
-  if (item.displayName) {
-    return item.displayName;
-  }
-  const currentLang = (lang || "").toLowerCase();
-  if (currentLang.startsWith("si")) {
-    return (
-      item.varietyNameSinhala ||
-      item.cropNameSinhala ||
-      item.name ||
-      item.cropName ||
-      item.varietyNameEnglish ||
-      item.cropNameEnglish ||
-      item.varietyLabel ||
-      item.cropLabel ||
-      ""
-    );
-  }
-  if (currentLang.startsWith("ta")) {
-    return (
-      item.varietyNameTamil ||
-      item.cropNameTamil ||
-      item.name ||
-      item.cropName ||
-      item.varietyNameEnglish ||
-      item.cropNameEnglish ||
-      item.varietyLabel ||
-      item.cropLabel ||
-      ""
-    );
-  }
-  return (
-    item.varietyNameEnglish ||
-    item.cropNameEnglish ||
-    item.name ||
-    item.cropName ||
-    item.varietyLabel ||
-    item.cropLabel ||
-    ""
-  );
-};
 
 const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
   return (rawItems || []).map((item, idx) => {
@@ -231,6 +179,33 @@ export default function UnloadingProducts({
         setProducts(reduxVarieties);
       }
     }, [])
+  );
+
+  const handleBackToSummary = useCallback(() => {
+    const currentUnload = store.getState().unload;
+    const finalTransportId = transportId || currentUnload.transportId || undefined;
+    const finalLoadCode = loadCode || currentUnload.loadCode || undefined;
+    navigation.navigate("ReceivedProductsSummary", {
+      transportId: finalTransportId,
+      loadCode: finalLoadCode,
+      vehicleNo: route.params?.vehicleNo || undefined,
+    });
+  }, [navigation, transportId, loadCode, route.params?.vehicleNo]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        handleBackToSummary();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [handleBackToSummary])
   );
 
   const fetchLoadDetails = useCallback(async () => {
@@ -370,6 +345,7 @@ export default function UnloadingProducts({
     navigation.navigate("WeighTheLoad", {
       transportId: finalTransportId,
       loadCode: finalLoadCode,
+      vehicleNo: route.params?.vehicleNo,
       varietyId: item.id,
       productId: item.id,
       product: {
@@ -633,6 +609,7 @@ export default function UnloadingProducts({
       <CustomHeader
         title={t("UnloadingProducts.Title", "Unloading Products")}
         navigation={navigation}
+        onBackPress={handleBackToSummary}
       />
 
       {loading ? (
