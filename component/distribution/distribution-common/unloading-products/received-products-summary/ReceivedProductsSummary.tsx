@@ -20,7 +20,7 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
-import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
+import { getLocalizedProductName } from "@/utils/productLocalization";
 
 type ReceivedProductsSummaryNavigationProp = StackNavigationProp<
   RootStackParamList,

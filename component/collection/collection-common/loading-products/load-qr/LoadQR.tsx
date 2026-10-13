@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,9 @@ import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import store from "@/services/reducxStore";
+import environment from "@/environment/environment";
 
 type LoadQRNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -32,7 +35,8 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const transportId = route.params?.transportId;
-  const loadCode = route.params?.loadCode || "";
+  const rawLoadCode = route.params?.loadCode || "";
+  const [loadCode, setLoadCode] = useState<string>(rawLoadCode.trim().toUpperCase());
   const vehicleNo = route.params?.vehicleNo || "";
   const driverId = route.params?.driverId || "";
   const driverEmpId = route.params?.driverEmpId || (route.params?.driverId && /^DRV/i.test(route.params.driverId) ? route.params.driverId : "");
@@ -40,6 +44,30 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
   const driverNameEnglish = route.params?.driverNameEnglish || "";
   const driverNameSinhala = route.params?.driverNameSinhala || "";
   const driverNameTamil = route.params?.driverNameTamil || "";
+
+  useEffect(() => {
+    if (route.params?.loadCode) {
+      setLoadCode(route.params.loadCode.trim().toUpperCase());
+    } else if (transportId && !loadCode) {
+      const fetchDetails = async () => {
+        try {
+          const authToken = store.getState().auth.token;
+          const res = await axios.get(
+            `${environment.API_BASE_URL}api/transport/load/${transportId}`,
+            {
+              headers: { Authorization: `Bearer ${authToken}` },
+            }
+          );
+          if (res.data?.success && res.data?.data?.transferCode) {
+            setLoadCode(res.data.data.transferCode.trim().toUpperCase());
+          }
+        } catch (e) {
+          // ignore
+        }
+      };
+      fetchDetails();
+    }
+  }, [route.params?.loadCode, transportId]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -75,9 +103,9 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
     <View className="flex-1 bg-white">
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
 
-      {/* Header with Title */}
+      {/* Header with Title formatted e.g. L-DRV00001260911001 */}
       <CustomHeader
-        title={t("LoadQR.Title", "Generated QR")}
+        title={loadCode || t("LoadQR.Title", "Generated QR")}
         navigation={navigation}
         showBackButton={true}
         showLanguageSelector={false}
@@ -130,7 +158,7 @@ const LoadQR: React.FC<LoadQRProps> = ({ navigation, route }) => {
               }}
             >
               <QRCode
-                value={loadCode || "N/A"}
+                value={loadCode ? loadCode.trim().toUpperCase() : "N/A"}
                 size={240}
                 color="#000000"
                 backgroundColor="#FFFFFF"

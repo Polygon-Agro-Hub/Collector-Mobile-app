@@ -126,6 +126,7 @@ export type RootStackParamList = {
         varietyId?: string;
         productId?: string;
         loadCode?: string | null;
+        vehicleNo?: string | null;
         product?: any;
         updatedGrade?: {
           varietyId?: string;

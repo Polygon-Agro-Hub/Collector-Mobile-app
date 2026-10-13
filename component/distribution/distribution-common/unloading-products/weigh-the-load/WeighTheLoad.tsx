@@ -22,7 +22,11 @@ import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService
 import NetInfo from "@react-native-community/netinfo";
 import store from "@/services/reducxStore";
 import { updateVarietyGrades } from "@/store/unloadSlice";
-import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
+import {
+  getLocalizedProductName,
+  extractGradeLetter,
+} from "@/utils/productLocalization";
+export { extractGradeLetter };
 
 type WeighTheLoadNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -64,17 +68,6 @@ export interface CropWeighData {
   grades: GradeWeighItem[];
 }
 
-export const extractGradeLetter = (title?: string): string => {
-  if (!title) return "A";
-  return (
-    title
-      .replace(/Grade/gi, "")
-      .replace(/ශ්‍රේණිය/g, "")
-      .replace(/ශ්‍රේණිය/g, "")
-      .replace(/தரம்/g, "")
-      .trim() || "A"
-  );
-};
 
 const EMPTY_CROP_DATA: CropWeighData = {
   id: "",
@@ -349,8 +342,7 @@ export default function WeighTheLoad({
     setGradeToDelete(null);
   };
 
-  const handleMarkAsUnloaded = () => {
-    if (!isAllUnloaded) return;
+  const handleNavigateToUnloadingProducts = useCallback(() => {
     if (cropData.id) {
       store.dispatch(
         updateVarietyGrades({
@@ -363,24 +355,23 @@ export default function WeighTheLoad({
     navigation.navigate("UnloadingProducts", {
       transportId: currentUnloadState.transportId || route.params?.loadCode,
       loadCode: currentUnloadState.loadCode || route.params?.loadCode,
+      vehicleNo: route.params?.vehicleNo,
     });
+  }, [cropData, navigation, route.params]);
+
+  const handleConfirmGoBack = () => {
+    setShowBackConfirmModal(false);
+    handleNavigateToUnloadingProducts();
+  };
+
+  const handleMarkAsUnloaded = () => {
+    if (!isAllUnloaded) return;
+    handleNavigateToUnloadingProducts();
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    if (cropData.id) {
-      store.dispatch(
-        updateVarietyGrades({
-          varietyId: cropData.id,
-          grades: cropData.grades,
-        })
-      );
-    }
-    const currentUnloadState = store.getState().unload;
-    navigation.navigate("UnloadingProducts", {
-      transportId: currentUnloadState.transportId || route.params?.loadCode,
-      loadCode: currentUnloadState.loadCode || route.params?.loadCode,
-    });
+    handleNavigateToUnloadingProducts();
   };
 
   const renderScaleSection = () => {
@@ -934,10 +925,7 @@ export default function WeighTheLoad({
           "WeighTheLoad.GoBackConfirmation",
           "Are you sure you want to go back?"
         )}
-        onConfirm={() => {
-          setShowBackConfirmModal(false);
-          navigation.goBack();
-        }}
+        onConfirm={handleConfirmGoBack}
         onCancel={() => setShowBackConfirmModal(false)}
         confirmText={t("WeighTheLoad.GoBack", "Go Back")}
         cancelText={t("WeighTheLoad.Cancel", "Cancel")}

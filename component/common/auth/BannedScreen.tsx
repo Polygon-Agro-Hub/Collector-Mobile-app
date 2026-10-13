@@ -57,14 +57,14 @@ const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
   let titleKey = "Access Denied";
   let defaultTitle = "Access Denied";
   let descKey = "Your account has been rejected or is not approved.";
-  let defaultDesc = "Your account has been rejected or is not approved.";
+  let defaultDesc = "EMP ID is Rejected.";
 
   const normalizedStatus = (statusType || "").toLowerCase().trim();
   if (normalizedStatus === "rejected") {
     titleKey = "Account Rejected";
     defaultTitle = "Account Rejected";
-    descKey = "Your account approval has been revoked by the administrator.";
-    defaultDesc = "Your account approval has been revoked by the administrator.";
+    descKey = "Your account has been rejected or is not approved.";
+    defaultDesc = "EMP ID is Rejected.";
   } else if (
     normalizedStatus === "not_approved" ||
     normalizedStatus === "not approved"
@@ -72,7 +72,7 @@ const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
     titleKey = "Account Not Approved";
     defaultTitle = "Account Not Approved";
     descKey = "Your account approval has been revoked by the administrator.";
-    defaultDesc = "Your account approval has been revoked by the administrator.";
+    defaultDesc = "EMP ID is Not Approved.";
   } else if (normalizedStatus === "pending") {
     titleKey = "Pending Verification";
     defaultTitle = "Pending Verification";

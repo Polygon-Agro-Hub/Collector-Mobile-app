@@ -34,6 +34,7 @@ import DashedLine from "react-native-dashed-line";
 import generateInvoiceNumber from "@/utils/generateInvoiceNumber";
 import CameraComponent from "@/utils/CameraComponent";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -139,6 +140,7 @@ interface UnregisteredCropDetailsProps {
 const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   navigation,
 }) => {
+  const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const cardWidth = screenWidth - 134;
   const itemWidth = cardWidth + 10;
@@ -173,7 +175,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
   const [showCameraModels, setShowCameraModels] = useState(false);
   const [addbutton, setaddbutton] = useState(true);
   const [loading, setLoading] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [resetImage, setResetImage] = useState(false);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -1336,7 +1338,7 @@ const cropModalData = cropNames
         contentContainerStyle={{
           flexGrow: 1,
           alignItems: "center",
-          paddingBottom: 40,
+          paddingBottom: Math.max(insets.bottom, 24) + 40,
         }}
       >
         <View className="w-full ">
@@ -2206,111 +2208,186 @@ const cropModalData = cropNames
                                                 overflow: "hidden",
                                               }}
                                             >
-                                              <ScrollView
-                                                horizontal
-                                                showsHorizontalScrollIndicator={
-                                                  false
-                                                }
-                                                style={{
-                                                  borderRadius: 9999,
-                                                  overflow: "hidden",
-                                                }}
-                                                contentContainerStyle={{
-                                                  flexDirection: "row",
-                                                  alignItems: "center",
-                                                }}
-                                              >
-                                                {containerTypes.map((cType) => {
-                                                  const isSelected =
-                                                    set.containerTypeId ===
-                                                      cType.id ||
-                                                    (!set.containerTypeId &&
-                                                      cType.id ===
-                                                        containerTypes[0]?.id);
+                                              {containerTypes.length <= 3 ? (
+                                                <View
+                                                  style={{
+                                                    flexDirection: "row",
+                                                    alignItems: "center",
+                                                    width: "100%",
+                                                  }}
+                                                >
+                                                  {containerTypes.map((cType) => {
+                                                    const isSelected =
+                                                      set.containerTypeId ===
+                                                        cType.id ||
+                                                      (!set.containerTypeId &&
+                                                        cType.id ===
+                                                          containerTypes[0]?.id);
 
-                                                  const pillWidth = Math.max(
-                                                    80,
-                                                    Math.floor(
-                                                      (containerSectionWidth -
-                                                        8) /
-                                                        3,
-                                                    ),
-                                                  );
+                                                    return (
+                                                      <TouchableOpacity
+                                                        key={cType.id}
+                                                        activeOpacity={0.75}
+                                                        onPress={() =>
+                                                          handleSelectContainerType(
+                                                            grade.gradeKey,
+                                                            set.id,
+                                                            cType,
+                                                          )
+                                                        }
+                                                        style={{
+                                                          flex: 1,
+                                                          height: 52,
+                                                          borderRadius: 9999,
+                                                          backgroundColor:
+                                                            isSelected
+                                                              ? "#FFFFFF"
+                                                              : "transparent",
+                                                          justifyContent:
+                                                            "center",
+                                                          alignItems: "center",
+                                                        }}
+                                                      >
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 14,
+                                                            fontWeight: "700",
+                                                            color: "#0F172A",
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.labelName}
+                                                        </Text>
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 11,
+                                                            color: "#64748B",
+                                                            marginTop: 2,
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.weight != null
+                                                            ? `${cType.weight} ${t("Common.kg", "kg")}`
+                                                            : ""}
+                                                        </Text>
+                                                      </TouchableOpacity>
+                                                    );
+                                                  })}
+                                                </View>
+                                              ) : (
+                                                <ScrollView
+                                                  horizontal
+                                                  showsHorizontalScrollIndicator={
+                                                    false
+                                                  }
+                                                  style={{
+                                                    borderRadius: 9999,
+                                                    overflow: "hidden",
+                                                  }}
+                                                  contentContainerStyle={{
+                                                    flexDirection: "row",
+                                                    alignItems: "center",
+                                                  }}
+                                                >
+                                                  {containerTypes.map((cType) => {
+                                                    const isSelected =
+                                                      set.containerTypeId ===
+                                                        cType.id ||
+                                                      (!set.containerTypeId &&
+                                                        cType.id ===
+                                                          containerTypes[0]?.id);
 
-                                                  return (
-                                                    <TouchableOpacity
-                                                      key={cType.id}
-                                                      activeOpacity={0.75}
-                                                      onPress={() =>
-                                                        handleSelectContainerType(
-                                                          grade.gradeKey,
-                                                          set.id,
-                                                          cType,
-                                                        )
-                                                      }
-                                                      style={{
-                                                        width: pillWidth,
-                                                        height: 52,
-                                                        borderRadius: 9999,
-                                                        backgroundColor:
-                                                          isSelected
-                                                            ? "#FFFFFF"
-                                                            : "transparent",
-                                                        justifyContent:
-                                                          "center",
-                                                        alignItems: "center",
-                                                      }}
-                                                    >
-                                                      <Text
+                                                    const pillWidth = Math.max(
+                                                      80,
+                                                      Math.floor(
+                                                        (containerSectionWidth -
+                                                          8) /
+                                                          3,
+                                                      ),
+                                                    );
+
+                                                    return (
+                                                      <TouchableOpacity
+                                                        key={cType.id}
+                                                        activeOpacity={0.75}
+                                                        onPress={() =>
+                                                          handleSelectContainerType(
+                                                            grade.gradeKey,
+                                                            set.id,
+                                                            cType,
+                                                          )
+                                                        }
                                                         style={{
-                                                          fontSize: 14,
-                                                          fontWeight: "700",
-                                                          color: "#0F172A",
+                                                          width: pillWidth,
+                                                          height: 52,
+                                                          borderRadius: 9999,
+                                                          backgroundColor:
+                                                            isSelected
+                                                              ? "#FFFFFF"
+                                                              : "transparent",
+                                                          justifyContent:
+                                                            "center",
+                                                          alignItems: "center",
                                                         }}
-                                                        numberOfLines={1}
                                                       >
-                                                        {cType.labelName}
-                                                      </Text>
-                                                      <Text
-                                                        style={{
-                                                          fontSize: 11,
-                                                          color: "#64748B",
-                                                          marginTop: 2,
-                                                        }}
-                                                        numberOfLines={1}
-                                                      >
-                                                        {cType.weight != null
-                                                          ? `${cType.weight} ${t("Common.kg", "kg")}`
-                                                          : ""}
-                                                      </Text>
-                                                    </TouchableOpacity>
-                                                  );
-                                                })}
-                                              </ScrollView>
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 14,
+                                                            fontWeight: "700",
+                                                            color: "#0F172A",
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.labelName}
+                                                        </Text>
+                                                        <Text
+                                                          style={{
+                                                            fontSize: 11,
+                                                            color: "#64748B",
+                                                            marginTop: 2,
+                                                          }}
+                                                          numberOfLines={1}
+                                                        >
+                                                          {cType.weight != null
+                                                            ? `${cType.weight} ${t("Common.kg", "kg")}`
+                                                            : ""}
+                                                        </Text>
+                                                      </TouchableOpacity>
+                                                    );
+                                                  })}
+                                                </ScrollView>
+                                              )}
                                             </View>
                                           </View>
                                         )}
 
                                     
                                       {/* Crates Count Input */}
-<TextInput
-  placeholder={`--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`}
-  placeholderTextColor="#000000"
-  value={set.crates}
-  onChangeText={(val) =>
-    handleCratesChange(grade.gradeKey, set.id, val)
-  }
-  keyboardType="numeric"
-  textAlign="center"
-  className="bg-[#EEF2F6] rounded-full h-[50px] px-4 text-base text-[#000000] mb-3"
-  style={{
-    textAlign: "center",
-    textAlignVertical: "center",
-    includeFontPadding: false,
-    paddingVertical: 0,
-    fontWeight: "normal",
-  }}
-/>
+                                       <TextInput
+                                         placeholder={
+                                           focusedSetId === set.id
+                                             ? ""
+                                             : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
+                                         }
+                                         placeholderTextColor="#94A3B8"
+                                         value={set.crates}
+                                         onChangeText={(val) =>
+                                           handleCratesChange(grade.gradeKey, set.id, val)
+                                         }
+                                         onFocus={() => setFocusedSetId(set.id)}
+                                         onBlur={() => setFocusedSetId(null)}
+                                         keyboardType="numeric"
+                                         textAlign="center"
+                                         cursorColor="#000000"
+                                         selectionColor="rgba(0, 0, 0, 0.3)"
+                                         className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#000000] mb-3"
+                                         style={{
+                                           textAlign: "center",
+                                           textAlignVertical: "center",
+                                           includeFontPadding: false,
+                                           paddingVertical: 0,
+                                         }}
+                                       />
 
                                         {/* Weight Row */}
                                         {(() => {
@@ -2848,7 +2925,11 @@ const cropModalData = cropNames
                 "UnregisteredCropDetails.DeleteVarietyConfirmation",
                 "Are you sure you want to delete {{varietyName}} form data?",
                 {
-                  varietyName: `${t("UnregisteredCropDetails.Variety", "variety").toLowerCase()} ${cropCount}`,
+                  varietyName:
+                    (i18n.language || "").toLowerCase().startsWith("si") ||
+                    (i18n.language || "").toLowerCase().startsWith("ta")
+                      ? `${cropCount} ${t("UnregisteredCropDetails.Variety", "variety").toLowerCase()}`
+                      : `${t("UnregisteredCropDetails.Variety", "variety").toLowerCase()} ${cropCount}`,
                 },
               )}
               onConfirm={() => {
@@ -2945,6 +3026,9 @@ const cropModalData = cropNames
             setSetToDelete(null);
           }
         }}
+        confirmText={t("WeighGrade.Delete", "Delete")}
+        cancelText={t("WeighGrade.Cancel", "Cancel")}
+        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
       />
 
       {/* Scale Setup / Connect Bottom Sheet Modal */}
