@@ -1237,7 +1237,7 @@
     "MaxContainersMessage": "Cannot exceed the total loaded containers of {{max}} for this grade.",
     "NoOfCrates": "--No. of Containers--",
     "NoOfContainers": "--No. of Containers--",
-    "DeleteConfirmation": "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} - {{setLabel}} {{setNumber}}?",
+    "DeleteConfirmation": "Are you sure you want to delete added\n{{productName}} - {{gradeLabel}} {{grade}} - {{setLabel}} {{setNumber}}?",
     "Delete": "Delete",
     "Cancel": "Cancel"
   },
@@ -2160,8 +2160,8 @@
     "Account Rejected": "Account Rejected",
     "Account Not Approved": "Account Not Approved",
     "Pending Verification": "Pending Verification",
-    "Your account has been rejected or is not approved.": "Your account has been rejected or is not approved.",
-    "Your account approval has been revoked by the administrator.": "Your account approval has been revoked by the administrator.",
+    "Your account has been rejected or is not approved.": "EMP ID is Rejected.",
+    "Your account approval has been revoked by the administrator.": "EMP ID is Not Approved.",
     "Your account status is pending verification.": "Your account status is pending verification.",
     "Please contact Polygon Customer Support for further details.": "Please contact Polygon Customer Support for further details.",
     "Back to Login": "Back to Login"

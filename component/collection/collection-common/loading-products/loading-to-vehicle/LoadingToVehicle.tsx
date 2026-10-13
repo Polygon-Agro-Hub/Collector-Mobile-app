@@ -1765,66 +1765,121 @@ export default function LoadingToVehicle({
                                       overflow: "hidden",
                                     }}
                                   >
-                                    <ScrollView
-                                      horizontal
-                                      showsHorizontalScrollIndicator={false}
-                                      style={{ borderRadius: 9999, overflow: "hidden" }}
-                                      contentContainerStyle={{
-                                        flexDirection: "row",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      {containerTypes.map((cType) => {
-                                        const isSelected =
-                                          set.containerTypeId === cType.id ||
-                                          (!set.containerTypeId && cType.id === containerTypes[0]?.id);
+                                    {containerTypes.length <= 3 ? (
+                                      <View
+                                        style={{
+                                          flexDirection: "row",
+                                          alignItems: "center",
+                                          width: "100%",
+                                        }}
+                                      >
+                                        {containerTypes.map((cType) => {
+                                          const isSelected =
+                                            set.containerTypeId === cType.id ||
+                                            (!set.containerTypeId && cType.id === containerTypes[0]?.id);
 
-                                        // Width of section minus 8px padding divided by 3 so max 3 are visible at once
-                                        const itemWidth = Math.max(
-                                          80,
-                                          Math.floor((containerSectionWidth - 8) / 3)
-                                        );
+                                          return (
+                                            <TouchableOpacity
+                                              key={cType.id}
+                                              activeOpacity={0.75}
+                                              onPress={() =>
+                                                handleSelectContainerType(grade.gradeKey, set.id, cType)
+                                              }
+                                              style={{
+                                                flex: 1,
+                                                height: 52,
+                                                borderRadius: 9999,
+                                                backgroundColor: isSelected ? "#FFFFFF" : "transparent",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                              }}
+                                            >
+                                              <Text
+                                                style={{
+                                                  fontSize: 14,
+                                                  fontWeight: "700",
+                                                  color: "#0F172A",
+                                                }}
+                                                numberOfLines={1}
+                                              >
+                                                {cType.labelName}
+                                              </Text>
+                                              <Text
+                                                style={{
+                                                  fontSize: 11,
+                                                  color: "#64748B",
+                                                  marginTop: 2,
+                                                }}
+                                                numberOfLines={1}
+                                              >
+                                                {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                                              </Text>
+                                            </TouchableOpacity>
+                                          );
+                                        })}
+                                      </View>
+                                    ) : (
+                                      <ScrollView
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        style={{ borderRadius: 9999, overflow: "hidden" }}
+                                        contentContainerStyle={{
+                                          flexDirection: "row",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        {containerTypes.map((cType) => {
+                                          const isSelected =
+                                            set.containerTypeId === cType.id ||
+                                            (!set.containerTypeId && cType.id === containerTypes[0]?.id);
 
-                                        return (
-                                          <TouchableOpacity
-                                            key={cType.id}
-                                            activeOpacity={0.75}
-                                            onPress={() =>
-                                              handleSelectContainerType(grade.gradeKey, set.id, cType)
-                                            }
-                                            style={{
-                                              width: itemWidth,
-                                              height: 52,
-                                              borderRadius: 9999,
-                                              backgroundColor: isSelected ? "#FFFFFF" : "transparent",
-                                              justifyContent: "center",
-                                              alignItems: "center",
-                                            }}
-                                          >
-                                            <Text
+                                          // Width of section minus 8px padding divided by 3 so max 3 are visible at once
+                                          const itemWidth = Math.max(
+                                            80,
+                                            Math.floor((containerSectionWidth - 8) / 3)
+                                          );
+
+                                          return (
+                                            <TouchableOpacity
+                                              key={cType.id}
+                                              activeOpacity={0.75}
+                                              onPress={() =>
+                                                handleSelectContainerType(grade.gradeKey, set.id, cType)
+                                              }
                                               style={{
-                                                fontSize: 14,
-                                                fontWeight: "700",
-                                                color: "#0F172A",
+                                                width: itemWidth,
+                                                height: 52,
+                                                borderRadius: 9999,
+                                                backgroundColor: isSelected ? "#FFFFFF" : "transparent",
+                                                justifyContent: "center",
+                                                alignItems: "center",
                                               }}
-                                              numberOfLines={1}
                                             >
-                                              {cType.labelName}
-                                            </Text>
-                                            <Text
-                                              style={{
-                                                fontSize: 11,
-                                                color: "#64748B",
-                                                marginTop: 2,
-                                              }}
-                                              numberOfLines={1}
-                                            >
-                                              {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
-                                            </Text>
-                                          </TouchableOpacity>
-                                        );
-                                      })}
-                                    </ScrollView>
+                                              <Text
+                                                style={{
+                                                  fontSize: 14,
+                                                  fontWeight: "700",
+                                                  color: "#0F172A",
+                                                }}
+                                                numberOfLines={1}
+                                              >
+                                                {cType.labelName}
+                                              </Text>
+                                              <Text
+                                                style={{
+                                                  fontSize: 11,
+                                                  color: "#64748B",
+                                                  marginTop: 2,
+                                                }}
+                                                numberOfLines={1}
+                                              >
+                                                {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                                              </Text>
+                                            </TouchableOpacity>
+                                          );
+                                        })}
+                                      </ScrollView>
+                                    )}
                                   </View>
                                 </View>
                               )}
@@ -1849,7 +1904,15 @@ export default function LoadingToVehicle({
                                   onBlur={() => setFocusedSetId(null)}
                                   keyboardType="numeric"
                                   textAlign="center"
+                                  cursorColor="#000000"
+                                  selectionColor="rgba(0, 0, 0, 0.3)"
                                   className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
+                                  style={{
+                                    textAlign: "center",
+                                    textAlignVertical: "center",
+                                    includeFontPadding: false,
+                                    paddingVertical: 0,
+                                  }}
                                 />
 
                                  {/* Weight Row */}
@@ -2207,7 +2270,11 @@ export default function LoadingToVehicle({
           "UnregisteredCropDetails.DeleteVarietyConfirmation",
           "Are you sure you want to delete {{varietyName}} form data?",
           {
-            varietyName: `${t("LoadingToVehicle.Variety", "variety").toLowerCase()} ${varietyIndex}`,
+            varietyName:
+              (i18n.language || "").toLowerCase().startsWith("si") ||
+              (i18n.language || "").toLowerCase().startsWith("ta")
+                ? `${varietyIndex} ${t("LoadingToVehicle.Variety", "variety").toLowerCase()}`
+                : `${t("LoadingToVehicle.Variety", "variety").toLowerCase()} ${varietyIndex}`,
           }
         )}
         onConfirm={() => {

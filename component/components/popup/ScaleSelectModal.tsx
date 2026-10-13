@@ -15,6 +15,7 @@ import {
 import { FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import NetInfo from "@react-native-community/netinfo";
 import { useTranslation } from "react-i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 
 interface ScaleSelectModalProps {
@@ -37,6 +38,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [scaleStatus, setScaleStatus] = useState<ScaleStatus>(wifiScaleService.getStatus());
   const [ipAddress, setIpAddress] = useState<string>(DEFAULT_IP);
   const [port, setPort] = useState<string>(DEFAULT_PORT);
@@ -172,6 +174,8 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
     }
   };
 
+  const bottomInset = Math.max(insets.bottom, Platform.OS === "android" ? 28 : 20);
+
   return (
     <Modal
       visible={visible}
@@ -188,7 +192,18 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
         <TouchableWithoutFeedback onPress={onClose}>
           <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />
         </TouchableWithoutFeedback>
-        <View style={{ backgroundColor: "#ffffff", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, minHeight: 440, maxHeight: "85%" }}>
+        <View
+          style={{
+            backgroundColor: "#ffffff",
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            paddingTop: 24,
+            paddingHorizontal: 24,
+            paddingBottom: bottomInset + 8,
+            minHeight: 440,
+            maxHeight: "90%",
+          }}
+        >
           {/* Header */}
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -293,7 +308,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
           {/* Configuration & Preset Section */}
           <ScrollView
             style={{ marginTop: 20 }}
-            contentContainerStyle={{ paddingBottom: 24, paddingHorizontal: 2 }}
+            contentContainerStyle={{
+              paddingBottom: Math.max(insets.bottom, 20) + 24,
+              paddingHorizontal: 2,
+            }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
@@ -420,6 +438,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
                 shadowOpacity: 0.1,
                 shadowRadius: 4,
                 elevation: 2,
+                marginBottom: 16,
               }}
             >
               {isConnecting ? (
