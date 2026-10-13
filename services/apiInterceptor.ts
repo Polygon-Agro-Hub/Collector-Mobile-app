@@ -289,8 +289,7 @@ setupAxiosInterceptors(axios);
  * to avoid double-processing. Throttled to once per 25 seconds unless forced.
  */
 export const verifyOfficerStatus = async (force = false): Promise<boolean> => {
-  const now = Date.now();
-  if (isCheckingStatus || (!force && now - lastStatusCheckTime < 25000)) {
+  if (isCheckingStatus) {
     return false;
   }
 
@@ -298,7 +297,6 @@ export const verifyOfficerStatus = async (force = false): Promise<boolean> => {
   if (!token || isOnAuthScreen()) return false;
 
   isCheckingStatus = true;
-  lastStatusCheckTime = now;
 
   try {
     // Use raw fetch — we handle the response manually below
