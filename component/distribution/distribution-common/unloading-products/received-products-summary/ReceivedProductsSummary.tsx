@@ -7,9 +7,10 @@ import {
   Image,
   StatusBar,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LoadingPage from "@/component/components/loading/LoadingPage";
@@ -142,6 +143,34 @@ export default function ReceivedProductsSummary({
     fetchLoadDetails();
   }, [fetchLoadDetails]);
 
+  const handleBackPress = useCallback(() => {
+    if (isUnloaded) {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate("ReceivedProductsToday");
+      }
+    } else {
+      navigation.navigate("ScanLoadQR");
+    }
+  }, [isUnloaded, navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        handleBackPress();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [handleBackPress])
+  );
+
   const handleStartUnloading = () => {
     navigation.navigate("UnloadingProducts", {
       transportId,
@@ -163,6 +192,7 @@ export default function ReceivedProductsSummary({
             : t("ReceivedProductsSummary.Title", "Summery")
         }
         navigation={navigation}
+        onBackPress={handleBackPress}
       />
 
       {loading ? (

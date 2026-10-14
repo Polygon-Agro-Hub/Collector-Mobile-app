@@ -118,6 +118,9 @@ export type RootStackParamList = {
         loadCode?: string | null;
         vehicleNo?: string | null;
         items?: any[];
+        lastVarietyId?: string;
+        isGoBack?: boolean;
+        isgoback?: boolean;
       }
     | undefined;
   WeighTheLoad:

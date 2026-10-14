@@ -132,7 +132,7 @@ const unloadSlice = createSlice({
       }>
     ) => {
       const { varietyId, grades } = action.payload;
-      const variety = state.varieties.find((v) => v.id === varietyId);
+      const variety = state.varieties.find((v) => String(v.id) === String(varietyId));
       if (variety) {
         variety.grades = grades;
         const allCompleted =
@@ -153,22 +153,41 @@ const unloadSlice = createSlice({
         );
 
         variety.hasMismatch =
-          Math.abs(variety.measuredKg - variety.expectedKg) > 0.01 ||
-          variety.receivedCrates !== variety.expectedCrates;
+          allCompleted &&
+          (Math.abs(variety.measuredKg - variety.expectedKg) > 0.01 ||
+            variety.receivedCrates !== variety.expectedCrates);
+        state.varieties = [...state.varieties];
       }
     },
     resetVarietyWeighed: (state, action: PayloadAction<string>) => {
-      const variety = state.varieties.find((v) => v.id === action.payload);
+      const variety = state.varieties.find((v) => String(v.id) === String(action.payload));
       if (variety) {
         variety.weighed = false;
         variety.grades = variety.grades.map((g) => ({
           ...g,
           unloadedWeightKg: null,
           unloadedCrates: null,
+          sets: undefined,
         }));
         variety.measuredKg = 0;
         variety.receivedCrates = 0;
         variety.hasMismatch = false;
+        state.varieties = [...state.varieties];
+      }
+    },
+    restoreVariety: (
+      state,
+      action: PayloadAction<{
+        variety: UnloadVarietyItem;
+      }>
+    ) => {
+      const restored = action.payload.variety;
+      const index = state.varieties.findIndex(
+        (v) => String(v.id) === String(restored.id)
+      );
+      if (index !== -1) {
+        state.varieties[index] = { ...restored };
+        state.varieties = [...state.varieties];
       }
     },
     clearUnloadState: (state) => {
@@ -189,6 +208,7 @@ export const {
   initUnloadTransfer,
   updateVarietyGrades,
   resetVarietyWeighed,
+  restoreVariety,
   clearUnloadState,
 } = unloadSlice.actions;
 
