@@ -1077,8 +1077,9 @@
     "ReceiveProducts": "නිෂ්පාදන ලබා ගැනීම"
   },
   "ReceivedProductsToday": {
-    "Title": "අද ලැබුණු නිෂ්පාදන",
-    "NoProductsReceivedToday": "- අද නිෂ්පාදන ලැබී නැත -",
+    "Title": "ලැබුණු නිෂ්පාදන",
+    "NoProductsReceivedToday": "- නිෂ්පාදන ලැබී නැත -",
+    "FilterByUnloadedDate": "බාන ලද දිනය",
     "Crates": "පෙට්ටි",
     "Containers": "පෙට්ටි"
   },
@@ -1911,8 +1912,9 @@
     "Continue": "ඉදිරියට යන්න"
   },
   "SentProductsToday": {
-    "Title": "අද යවන ලද තොග",
-    "NoLoadsToday": "අද තොග ප්‍රවාහනයන් කර නොමැත",
+    "Title": "යවන ලද තොග",
+    "NoLoadsToday": "- තොග හමු නොවීය -",
+    "FilterByLoadedDate": "යවන ලද දිනය",
     "Crates": "පෙට්ටි",
     "Containers": "පෙට්ටි",
     "AddLoadTitle": "නව තොග එක් කරන්න",

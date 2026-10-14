@@ -1152,8 +1152,9 @@
     "ReceiveProducts": "Receive Products"
   },
   "ReceivedProductsToday": {
-    "Title": "Received Products Today",
-    "NoProductsReceivedToday": "- No products were received today -",
+    "Title": "Received Products",
+    "NoProductsReceivedToday": "- No products were received -",
+    "FilterByUnloadedDate": "Filter By Unloaded Date",
     "Crates": "Containers",
     "Containers": "Containers"
   },
@@ -1990,8 +1991,9 @@
     "Continue": "Continue"
   },
   "SentProductsToday": {
-    "Title": "Sent Products Today",
-    "NoLoadsToday": "No loads today",
+    "Title": "Sent Products",
+    "NoLoadsToday": "- No loads found -",
+    "FilterByLoadedDate": "Filter By Loaded Date",
     "Crates": "Containers",
     "Containers": "Containers",
     "AddLoadTitle": "Add New Load",
