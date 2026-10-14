@@ -194,6 +194,15 @@ export default function OrderDetails({
 
                 const statusDisplay = `(${formatRowTitle(rName, t)}) ${sTranslated}`;
 
+                const rawCategory = String(details.category || params.category || "").trim();
+                const isPickup =
+                  rawCategory.toLowerCase().includes("pickup") ||
+                  rawCategory.includes("රැගෙන") ||
+                  rawCategory.includes("பிக்அப்");
+                const categoryDisplay = isPickup
+                  ? t("DistributionCenterTarget.Pickup Orders", "Pickup Orders")
+                  : t("DistributionCenterTarget.Delivery", "Delivery");
+
                 return (
                   <View className="bg-white rounded-2xl p-4 mb-5 border border-[#000000] items-center shadow-sm">
                     <Text className="font-extrabold text-slate-950 text-base text-center">
@@ -207,7 +216,7 @@ export default function OrderDetails({
                       {formatTimeSlot(details.timeSlotLabel || params.timeSlotLabel, t)}
                     </Text>
                     <Text className="text-xs text-[#54617D] mt-0.5 font-medium text-center">
-                      {formatOrderCategory(details.category || params.category, t)}
+                      {categoryDisplay}
                     </Text>
                     <Text className="text-xs font-extrabold mt-0.5 text-[#980775] text-center">
                       {statusDisplay}
