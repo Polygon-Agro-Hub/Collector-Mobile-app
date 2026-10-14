@@ -102,34 +102,9 @@ function AppContent() {
       pushNotificationService.displayLocalNotification(item, bodyText);
     });
 
-    // When officer/account status changes via socket, handle immediately (push-based, no polling)
-    const unsubscribeOfficerStatus = socketService.onOfficerStatusChanged(async (data: any) => {
-      console.log("🔒 [App.tsx] Officer status changed via socket:", data);
-      const accStatus = (
-        data?.accountStatus ||
-        (typeof data?.status === "string" ? data.status : "")
-      ).toLowerCase();
-      const isRejected =
-        accStatus === "rejected" ||
-        accStatus === "banned" ||
-        accStatus === "not approved" ||
-        accStatus === "not_approved";
-      const isForceLogout =
-        data?.type === "force_logout" ||
-        data?.code === "FORCE_LOGOUT" ||
-        data?.action === "logout";
-
-      if (isRejected || isForceLogout) {
-        handleAuthError(isRejected ? 403 : 401, data);
-      } else {
-        await verifyOfficerStatus(true);
-      }
-    });
-
     return () => {
       unsubscribeStore();
       unsubscribeNotif();
-      unsubscribeOfficerStatus();
     };
   }, []);
 
@@ -255,7 +230,11 @@ function AppContent() {
           }}
           onStateChange={() => {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
-            if (routeName) setCurrentRoute(routeName);
+            if (routeName) {
+              setCurrentRoute(routeName);
+              // Validate account status & token when user navigates
+              verifyOfficerStatus().catch(() => {});
+            }
           }}
         >
           <RootStackNavigator />

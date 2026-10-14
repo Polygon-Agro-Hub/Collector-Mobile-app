@@ -638,7 +638,7 @@ const handleConfirm = async () => {
             <>
               {/* Step 1 Title */}
               <Text className="text-xl font-bold text-center text-slate-900 mb-6 mt-2">
-                {t("AssignGroups.Select the row you work with", "Select the row you work with")}
+                {t("Packing.Select the row you work with", "Select the row you work with")}
               </Text>
 
               {/* Step 1 list of rows */}

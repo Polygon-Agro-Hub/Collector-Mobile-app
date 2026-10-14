@@ -1077,8 +1077,9 @@
     "ReceiveProducts": "නිෂ්පාදන ලබා ගැනීම"
   },
   "ReceivedProductsToday": {
-    "Title": "අද ලැබුණු නිෂ්පාදන",
-    "NoProductsReceivedToday": "- අද නිෂ්පාදන ලැබී නැත -",
+    "Title": "ලැබුණු නිෂ්පාදන",
+    "NoProductsReceivedToday": "- නිෂ්පාදන ලැබී නැත -",
+    "FilterByUnloadedDate": "බාන ලද දිනය",
     "Crates": "පෙට්ටි",
     "Containers": "පෙට්ටි"
   },
@@ -1144,7 +1145,7 @@
     "MarkAsUnloaded": "බාන ලද බව සලකුණු කරන්න",
     "SuccessTitle": "සාර්ථකව බාන ලදී!",
     "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
-    "GoBackConfirmation": "ඔබට ආපසු යාමට අවශ්‍ය බව සහතිකද?",
+    "GoBackConfirmation": "ඔබට ආපසු යාමට අවශ්‍ය බව සහතිකද?\nඔබ විසින් සිදු කරන ලද සියලු වෙනස්කම් ඉවතලනු ඇත.",
     "GoBack": "ආපසු යන්න",
     "Cancel": "අවලංගු කරන්න"
   },
@@ -1595,6 +1596,7 @@
     "Close": "වසා දමන්න"
   },
   "Packing": {
+    "Select the row you work with": "ඔබ වැඩ කරන පේළිය තෝරන්න.",
     "Select a Row": "පේළියක් තෝරන්න",
     "Choose the packing row you will be working at.": "ඔබ වැඩ කරන ඇසුරුම් පේළිය තෝරන්න.",
     "Packing Positions": "ඇසුරුම් ස්ථාන",
@@ -1911,8 +1913,9 @@
     "Continue": "ඉදිරියට යන්න"
   },
   "SentProductsToday": {
-    "Title": "අද යවන ලද තොග",
-    "NoLoadsToday": "අද තොග ප්‍රවාහනයන් කර නොමැත",
+    "Title": "යවන ලද තොග",
+    "NoLoadsToday": "- තොග හමු නොවීය -",
+    "FilterByLoadedDate": "යවන ලද දිනය",
     "Crates": "පෙට්ටි",
     "Containers": "පෙට්ටි",
     "AddLoadTitle": "නව තොග එක් කරන්න",
