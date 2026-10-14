@@ -27,6 +27,7 @@ import environment from "@/environment/environment";
 import {
   initUnloadTransfer,
   clearUnloadState,
+  resetVarietyWeighed,
   UnloadVarietyItem,
   UnloadedGradeItem,
 } from "@/store/unloadSlice";
@@ -171,31 +172,135 @@ export default function UnloadingProducts({
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showFinalizeModal, setShowFinalizeModal] = useState<boolean>(false);
 
+  const [lastVarietyId, setLastVarietyId] = useState<string | null>(
+    route.params?.lastVarietyId ? String(route.params.lastVarietyId) : null
+  );
+
+  useEffect(() => {
+    if (route.params?.lastVarietyId) {
+      setLastVarietyId(String(route.params.lastVarietyId));
+    }
+  }, [route.params?.lastVarietyId]);
+
   // Sync with Redux state on every screen focus
   useFocusEffect(
     useCallback(() => {
+      const isFromGoBack = Boolean(route.params?.isGoBack ?? route.params?.isgoback);
+      const targetId = route.params?.lastVarietyId || lastVarietyId;
+      if (isFromGoBack && targetId) {
+        store.dispatch(resetVarietyWeighed(String(targetId)));
+      }
       const reduxVarieties = store.getState().unload.varieties;
       if (reduxVarieties && reduxVarieties.length > 0) {
-        setProducts(reduxVarieties);
+        setProducts([...reduxVarieties]);
       }
-    }, [])
+    }, [route.params?.isGoBack, route.params?.isgoback, route.params?.lastVarietyId, lastVarietyId])
   );
 
   const handleBackToSummary = useCallback(() => {
     const currentUnload = store.getState().unload;
     const finalTransportId = transportId || currentUnload.transportId || undefined;
     const finalLoadCode = loadCode || currentUnload.loadCode || undefined;
+    const finalVehicleNo = route.params?.vehicleNo || currentUnload.vehicleNo || undefined;
+
+    // Reset Redux unload state and clear local products state
+    store.dispatch(clearUnloadState());
+    setProducts([]);
+
     navigation.navigate("ReceivedProductsSummary", {
       transportId: finalTransportId,
       loadCode: finalLoadCode,
-      vehicleNo: route.params?.vehicleNo || undefined,
+      vehicleNo: finalVehicleNo,
     });
   }, [navigation, transportId, loadCode, route.params?.vehicleNo]);
+
+  const handleProductPress = useCallback(
+    (item: UnloadVarietyItem) => {
+      setLastVarietyId(String(item.id));
+      const currentUnload = store.getState().unload;
+      const finalTransportId = transportId || currentUnload.transportId;
+      const finalLoadCode = loadCode || currentUnload.loadCode;
+
+      navigation.navigate("WeighTheLoad", {
+        transportId: finalTransportId,
+        loadCode: finalLoadCode,
+        vehicleNo: route.params?.vehicleNo,
+        varietyId: item.id,
+        productId: item.id,
+        product: {
+          id: item.id,
+          name: item.name,
+          displayName: item.displayName,
+          varietyNameEnglish: item.varietyNameEnglish,
+          varietyNameSinhala: item.varietyNameSinhala,
+          varietyNameTamil: item.varietyNameTamil,
+          cropNameEnglish: item.cropNameEnglish,
+          cropNameSinhala: item.cropNameSinhala,
+          cropNameTamil: item.cropNameTamil,
+          image: item.image,
+          totalWeightKg: item.expectedKg || 0,
+          totalCrates: item.expectedCrates || 0,
+          grades: item.grades || [
+            {
+              id: "g-1",
+              gradeTitle: "Grade A",
+              loadedWeightKg: item.expectedKg || 0,
+              loadedCrates: item.expectedCrates || 0,
+              unloadedWeightKg: null,
+              unloadedCrates: null,
+            },
+          ],
+        },
+      });
+    },
+    [navigation, transportId, loadCode, route.params?.vehicleNo]
+  );
+
+  const handleBackPress = useCallback(() => {
+    const reduxVarieties = store.getState().unload.varieties;
+    const currentProducts =
+      reduxVarieties && reduxVarieties.length > 0 ? reduxVarieties : products;
+
+    const hasWeighedProducts = currentProducts.some((p) => p.weighed);
+    const isFromGoBack = Boolean(route.params?.isGoBack ?? route.params?.isgoback);
+
+    if (isFromGoBack || !hasWeighedProducts) {
+      // Initial unloading products screen or when returning via Go Back from WeighTheLoad: navigates to summary screen
+      handleBackToSummary();
+    } else {
+      // After weigh the load screen with data: normally navigate to weigh the load screen
+      const targetId = route.params?.lastVarietyId || lastVarietyId;
+      let targetItem: UnloadVarietyItem | undefined;
+
+      if (targetId) {
+        targetItem = currentProducts.find((p) => String(p.id) === String(targetId));
+      }
+
+      if (!targetItem) {
+        const weighedList = currentProducts.filter((p) => p.weighed);
+        targetItem = weighedList[weighedList.length - 1] || currentProducts[0];
+      }
+
+      if (targetItem) {
+        handleProductPress(targetItem);
+      } else {
+        handleBackToSummary();
+      }
+    }
+  }, [
+    products,
+    route.params?.isGoBack,
+    route.params?.isgoback,
+    route.params?.lastVarietyId,
+    lastVarietyId,
+    handleBackToSummary,
+    handleProductPress,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        handleBackToSummary();
+        handleBackPress();
         return true;
       };
 
@@ -205,7 +310,7 @@ export default function UnloadingProducts({
       );
 
       return () => subscription.remove();
-    }, [handleBackToSummary])
+    }, [handleBackPress])
   );
 
   const fetchLoadDetails = useCallback(async () => {
@@ -337,42 +442,6 @@ export default function UnloadingProducts({
     setShowMismatchSuccessModal(true);
   };
 
-  const handleProductPress = (item: UnloadVarietyItem) => {
-    const currentUnload = store.getState().unload;
-    const finalTransportId = transportId || currentUnload.transportId;
-    const finalLoadCode = loadCode || currentUnload.loadCode;
-
-    navigation.navigate("WeighTheLoad", {
-      transportId: finalTransportId,
-      loadCode: finalLoadCode,
-      vehicleNo: route.params?.vehicleNo,
-      varietyId: item.id,
-      productId: item.id,
-      product: {
-        id: item.id,
-        name: item.name,
-        varietyNameEnglish: item.varietyNameEnglish,
-        varietyNameSinhala: item.varietyNameSinhala,
-        varietyNameTamil: item.varietyNameTamil,
-        cropNameEnglish: item.cropNameEnglish,
-        cropNameSinhala: item.cropNameSinhala,
-        cropNameTamil: item.cropNameTamil,
-        image: item.image,
-        totalWeightKg: item.expectedKg || 0,
-        totalCrates: item.expectedCrates || 0,
-        grades: item.grades || [
-          {
-            id: "g-1",
-            gradeTitle: "Grade A",
-            loadedWeightKg: item.expectedKg || 0,
-            loadedCrates: item.expectedCrates || 0,
-            unloadedWeightKg: null,
-            unloadedCrates: null,
-          },
-        ],
-      },
-    });
-  };
 
   const allWeighed = useMemo(() => {
     return products.length > 0 && products.every((p) => p.weighed);
@@ -609,7 +678,7 @@ export default function UnloadingProducts({
       <CustomHeader
         title={t("UnloadingProducts.Title", "Unloading Products")}
         navigation={navigation}
-        onBackPress={handleBackToSummary}
+        onBackPress={handleBackPress}
       />
 
       {loading ? (

@@ -1219,7 +1219,7 @@
     "MarkAsUnloaded": "Mark as Unloaded",
     "SuccessTitle": "Unloaded Successfully!",
     "MismatchDetected": "Mismatch Detected",
-    "GoBackConfirmation": "Are you sure you want to go back?",
+    "GoBackConfirmation": "Are you sure you want to go back?\nAll the changes you made will be discarded.",
     "GoBack": "Go Back",
     "Cancel": "Cancel"
   },
