@@ -78,8 +78,15 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
     setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
 
   const isDisabled = (date: Date) => {
-    if (maximumDate && date > maximumDate) return true;
-    if (minimumDate && date < minimumDate) return true;
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    if (maximumDate) {
+      const max = new Date(maximumDate.getFullYear(), maximumDate.getMonth(), maximumDate.getDate()).getTime();
+      if (d > max) return true;
+    }
+    if (minimumDate) {
+      const min = new Date(minimumDate.getFullYear(), minimumDate.getMonth(), minimumDate.getDate()).getTime();
+      if (d < min) return true;
+    }
     return false;
   };
 

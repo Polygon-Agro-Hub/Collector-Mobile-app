@@ -24,6 +24,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
+import CustomCalendar from "@/component/components/popup/CustomcalendarModal";
+import { Ionicons } from "@expo/vector-icons";
+
 type ReceivedProductsTodayNavigationProp = StackNavigationProp<
   RootStackParamList,
   "ReceivedProductsToday"
@@ -55,8 +58,24 @@ export default function ReceivedProductsToday({
   const [products, setProducts] = useState<ReceivedProductItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
-  const fetchReceivedProducts = useCallback(async (isRefresh = false) => {
+  const formatDateLocal = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDateDisplay = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  };
+
+  const fetchReceivedProducts = useCallback(async (isRefresh = false, targetDate?: Date) => {
     try {
       if (isRefresh) {
         setRefreshing(true);
@@ -65,11 +84,12 @@ export default function ReceivedProductsToday({
       }
 
       const authToken = store.getState().auth.token;
+      const dateToQuery = formatDateLocal(targetDate || selectedDate);
 
       let resData = null;
       try {
         const response = await axios.get(
-          `${environment.API_BASE_URL}api/distribution/received-today`,
+          `${environment.API_BASE_URL}api/distribution/received-today?date=${dateToQuery}`,
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -82,7 +102,7 @@ export default function ReceivedProductsToday({
       } catch (distErr) {
         // Fallback to transport route if needed
         const response = await axios.get(
-          `${environment.API_BASE_URL}api/transport/received-today`,
+          `${environment.API_BASE_URL}api/transport/received-today?date=${dateToQuery}`,
           {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -113,7 +133,7 @@ export default function ReceivedProductsToday({
       setLoading(false);
       setRefreshing(false);
     }
-  }, [t]);
+  }, [t, selectedDate]);
 
   const handleBackToHome = useCallback(() => {
     navigation.navigate("Main", { screen: "DistridutionaDashboard" });
@@ -193,6 +213,67 @@ export default function ReceivedProductsToday({
         onBackPress={handleBackToHome}
       />
 
+      {/* Date Filter Section */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+          paddingVertical: 12,
+          backgroundColor: "#fff",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 14,
+            color: "#54617D",
+            marginRight: 12,
+            fontWeight: "500",
+          }}
+        >
+          {t("ReceivedProductsToday.FilterByUnloadedDate", "Filter By Unloaded Date")}
+        </Text>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => setShowDatePicker(true)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: "#B0C0D0",
+            backgroundColor: "#fff",
+          }}
+        >
+          <View
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: "#EDF2F7",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 8,
+            }}
+          >
+            <Ionicons name="calendar-clear" size={16} color="black" />
+          </View>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: "#030E25",
+            }}
+          >
+            {formatDateDisplay(selectedDate)}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <View className="flex-1 relative">
         {loading ? (
           <LoadingPage
@@ -266,6 +347,19 @@ export default function ReceivedProductsToday({
         {/* Floating Add Button */}
         <AddButton onPress={handleAdd} />
       </View>
+
+      {/* Date Picker Modal */}
+      <CustomCalendar
+        visible={showDatePicker}
+        value={selectedDate}
+        maximumDate={new Date()}
+        onClose={() => setShowDatePicker(false)}
+        onConfirm={(date) => {
+          setSelectedDate(date);
+          setShowDatePicker(false);
+          fetchReceivedProducts(false, date);
+        }}
+      />
     </View>
   );
 }

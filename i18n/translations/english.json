@@ -1152,8 +1152,9 @@
     "ReceiveProducts": "Receive Products"
   },
   "ReceivedProductsToday": {
-    "Title": "Received Products Today",
-    "NoProductsReceivedToday": "- No products were received today -",
+    "Title": "Received Products",
+    "NoProductsReceivedToday": "- No products were received -",
+    "FilterByUnloadedDate": "Filter By Unloaded Date",
     "Crates": "Containers",
     "Containers": "Containers"
   },
@@ -1219,7 +1220,7 @@
     "MarkAsUnloaded": "Mark as Unloaded",
     "SuccessTitle": "Unloaded Successfully!",
     "MismatchDetected": "Mismatch Detected",
-    "GoBackConfirmation": "Are you sure you want to go back?",
+    "GoBackConfirmation": "Are you sure you want to go back?\nAll the changes you made will be discarded.",
     "GoBack": "Go Back",
     "Cancel": "Cancel"
   },
@@ -1672,6 +1673,7 @@
     "Close": "Close"
   },
   "Packing": {
+    "Select the row you work with": "Select the row you work with",
     "Select a Row": "Select a Row",
     "Choose the packing row you will be working at.": "Choose the packing row you will be working at.",
     "Packing Positions": "Packing Positions",
@@ -1990,8 +1992,9 @@
     "Continue": "Continue"
   },
   "SentProductsToday": {
-    "Title": "Sent Products Today",
-    "NoLoadsToday": "No loads today",
+    "Title": "Sent Products",
+    "NoLoadsToday": "- No loads found -",
+    "FilterByLoadedDate": "Filter By Loaded Date",
     "Crates": "Containers",
     "Containers": "Containers",
     "AddLoadTitle": "Add New Load",
