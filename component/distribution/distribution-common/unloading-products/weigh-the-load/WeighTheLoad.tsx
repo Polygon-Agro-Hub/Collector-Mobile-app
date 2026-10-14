@@ -21,7 +21,12 @@ import WarningConfirmation from "@/component/components/popup/WarningConfirmatio
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
 import NetInfo from "@react-native-community/netinfo";
 import store from "@/services/reducxStore";
-import { updateVarietyGrades } from "@/store/unloadSlice";
+import {
+  updateVarietyGrades,
+  restoreVariety,
+  resetVarietyWeighed,
+  UnloadVarietyItem,
+} from "@/store/unloadSlice";
 import {
   getLocalizedProductName,
   extractGradeLetter,
@@ -123,6 +128,42 @@ export default function WeighTheLoad({
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [gradeToDelete, setGradeToDelete] = useState<GradeWeighItem | null>(null);
   const [showBackConfirmModal, setShowBackConfirmModal] = useState<boolean>(false);
+  const initialVarietySnapshotRef = React.useRef<UnloadVarietyItem | null>(null);
+
+  // Capture snapshot of the variety before any changes in this WeighTheLoad session
+  if (
+    targetVarietyId &&
+    (!initialVarietySnapshotRef.current ||
+      String(initialVarietySnapshotRef.current.id) !== String(targetVarietyId)) &&
+    !route.params?.updatedGrade
+  ) {
+    const reduxVariety = store
+      .getState()
+      .unload.varieties.find((v) => String(v.id) === String(targetVarietyId));
+    if (reduxVariety) {
+      initialVarietySnapshotRef.current = JSON.parse(JSON.stringify(reduxVariety));
+    } else if (passedProduct) {
+      initialVarietySnapshotRef.current = {
+        id: String(passedProduct.id),
+        name: passedProduct.name,
+        displayName: passedProduct.displayName,
+        varietyNameEnglish: passedProduct.varietyNameEnglish,
+        varietyNameSinhala: passedProduct.varietyNameSinhala,
+        varietyNameTamil: passedProduct.varietyNameTamil,
+        cropNameEnglish: passedProduct.cropNameEnglish,
+        cropNameSinhala: passedProduct.cropNameSinhala,
+        cropNameTamil: passedProduct.cropNameTamil,
+        image: passedProduct.image,
+        weighed: false,
+        expectedKg: passedProduct.totalWeightKg,
+        measuredKg: 0,
+        expectedCrates: passedProduct.totalCrates,
+        receivedCrates: 0,
+        grades: JSON.parse(JSON.stringify(passedProduct.grades || [])),
+        hasMismatch: false,
+      };
+    }
+  }
 
   const handleBackPress = useCallback(() => {
     setShowBackConfirmModal(true);
@@ -356,16 +397,33 @@ export default function WeighTheLoad({
       transportId: currentUnloadState.transportId || route.params?.loadCode,
       loadCode: currentUnloadState.loadCode || route.params?.loadCode,
       vehicleNo: route.params?.vehicleNo,
+      lastVarietyId: cropData.id ? String(cropData.id) : undefined,
+      isGoBack: false,
+      isgoback: false,
     });
   }, [cropData, navigation, route.params]);
 
   const handleConfirmGoBack = () => {
     setShowBackConfirmModal(false);
-    handleNavigateToUnloadingProducts();
+    const vId = targetVarietyId || cropData.id;
+    if (vId) {
+      store.dispatch(resetVarietyWeighed(String(vId)));
+    }
+    initialVarietySnapshotRef.current = null;
+    const currentUnloadState = store.getState().unload;
+    navigation.navigate("UnloadingProducts", {
+      transportId: currentUnloadState.transportId || route.params?.loadCode,
+      loadCode: currentUnloadState.loadCode || route.params?.loadCode,
+      vehicleNo: route.params?.vehicleNo,
+      lastVarietyId: vId ? String(vId) : undefined,
+      isGoBack: true,
+      isgoback: true,
+    });
   };
 
   const handleMarkAsUnloaded = () => {
     if (!isAllUnloaded) return;
+    initialVarietySnapshotRef.current = null;
     handleNavigateToUnloadingProducts();
   };
 
@@ -923,7 +981,7 @@ export default function WeighTheLoad({
         visible={showBackConfirmModal}
         message={t(
           "WeighTheLoad.GoBackConfirmation",
-          "Are you sure you want to go back?"
+          "Are you sure you want to go back?\nAll the changes you made will be discarded."
         )}
         onConfirm={handleConfirmGoBack}
         onCancel={() => setShowBackConfirmModal(false)}
