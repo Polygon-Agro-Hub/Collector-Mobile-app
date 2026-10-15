@@ -15,6 +15,7 @@ import { AlertModal, setGlobalAlertListener } from "@/component/components/popup
 import {
   setupGlobalApiInterceptors,
   handleAuthError,
+  verifyOfficerStatus,
 } from "@/services/apiInterceptor";
 import {
   SafeAreaProvider,
@@ -169,6 +170,9 @@ function AppContent() {
       if (nextAppState === "active") {
         if (storedEmpId) {
           await status(storedEmpId, true);
+        }
+        if (store.getState().auth.token) {
+          verifyOfficerStatus(true);
         }
       } else if (nextAppState === "background") {
         if (storedEmpId) {
