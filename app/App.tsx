@@ -13,7 +13,6 @@ import environment from "../environment/environment";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
 import {
-  verifyOfficerStatus,
   setupGlobalApiInterceptors,
   handleAuthError,
 } from "@/services/apiInterceptor";
@@ -232,8 +231,6 @@ function AppContent() {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
             if (routeName) {
               setCurrentRoute(routeName);
-              // Validate account status & token when user navigates
-              verifyOfficerStatus().catch(() => {});
             }
           }}
         >

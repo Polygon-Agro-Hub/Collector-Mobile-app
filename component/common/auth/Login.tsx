@@ -255,7 +255,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       }
 
       const timestamp = new Date();
-      const expirationTime = new Date(timestamp.getTime() + 10 * 60 * 60 * 1000);
+      const expirationTime = new Date(timestamp.getTime() + 12 * 60 * 60 * 1000); // 12h matching JWT
 
       const authPayload = {
         token,
