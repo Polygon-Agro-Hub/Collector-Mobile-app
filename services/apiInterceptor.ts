@@ -34,7 +34,7 @@ const isOnAuthScreen = (): boolean => {
   return AUTH_SCREENS.includes(name);
 };
 
-const doLogout = (): void => {
+export const doLogout = (): void => {
   try {
     store.dispatch(logoutUser());
     socketService.disconnect();
@@ -101,7 +101,6 @@ export const handleAuthError = (status: number, data: any): boolean => {
     msg === "banned";
 
   if (isRejected) {
-    doLogout();
     navigateToBannedScreen(
       "rejected",
       data?.message || t("Error.This EMP ID is Rejected", "This EMP ID is Rejected")
@@ -119,7 +118,6 @@ export const handleAuthError = (status: number, data: any): boolean => {
     code === "NOT_APPROVED";
 
   if (isNotApproved) {
-    doLogout();
     navigateToBannedScreen(
       "not_approved",
       data?.message || t("Error.This EMP ID is not approved.", "This EMP ID is not approved.")
@@ -293,10 +291,16 @@ export const verifyOfficerStatus = async (force = false): Promise<boolean> => {
     return false;
   }
 
+  const now = Date.now();
+  if (!force && now - lastStatusCheckTime < 10000) {
+    return false;
+  }
+
   const token = store.getState().auth.token;
   if (!token || isOnAuthScreen()) return false;
 
   isCheckingStatus = true;
+  lastStatusCheckTime = now;
 
   try {
     // Use raw fetch — we handle the response manually below
@@ -324,7 +328,8 @@ export const verifyOfficerStatus = async (force = false): Promise<boolean> => {
         msg.includes("token") ||
         msg.includes("jwt expired") ||
         data?.code === "TOKEN_EXPIRED" ||
-        data?.code === "INVALID_TOKEN"
+        data?.code === "INVALID_TOKEN" ||
+        data?.statusType === "not_found"
       ) {
         return handleAuthError(401, data);
       }
