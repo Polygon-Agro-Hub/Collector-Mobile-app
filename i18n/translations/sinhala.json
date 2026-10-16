@@ -1104,6 +1104,7 @@
     "Weighed": "බර කිරන ලද",
     "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
     "ReportMismatch": "වෙනස වාර්තා කරන්න",
+"MismatchReportedButton": "වෙනස වාර්තා කරන ලදි",
     "ReportedMismatch": "වෙනස වාර්තා කර ඇත",
     "FinishUnloading": "බෑම අවසන් කරන්න",
     "FinalizeMessage": "අවසන් කිරීමට පෙර කරුණාකර ඔබගේ බෑමේ විස්තර නැවත සමාලෝචනය කරන්න.",
@@ -1147,7 +1148,9 @@
     "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
     "GoBackConfirmation": "ඔබට ආපසු යාමට අවශ්‍ය බව සහතිකද?\nඔබ විසින් සිදු කරන ලද සියලු වෙනස්කම් ඉවතලනු ඇත.",
     "GoBack": "ආපසු යන්න",
-    "Cancel": "අවලංගු කරන්න"
+    "Cancel": "අවලංගු කරන්න",
+    "DeleteGradeConfirmation": "ඔබ එක් කළ\n{{item}} - {{grade}} මකා දැමීමට අවශ්‍ය බව විශ්වාසද?",
+    "Delete":"ඉවත් කරන්න"
   },
   "WeighGrade": {
     "Title": "බර කිරන්න",

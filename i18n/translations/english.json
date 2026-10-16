@@ -1179,6 +1179,7 @@
     "Weighed": "Weighed",
     "MismatchDetected": "Mismatch Detected",
     "ReportMismatch": "Report Mismatch",
+"MismatchReportedButton": "Mismatch Reported",
     "ReportedMismatch": "Mismatch Reported",
     "FinishUnloading": "Finish Unloading",
     "FinalizeMessage": "Please review your unloading details again before finalize.",
@@ -1222,7 +1223,9 @@
     "MismatchDetected": "Mismatch Detected",
     "GoBackConfirmation": "Are you sure you want to go back?\nAll the changes you made will be discarded.",
     "GoBack": "Go Back",
-    "Cancel": "Cancel"
+    "Cancel": "Cancel",
+    "DeleteGradeConfirmation": "Are you sure you want to delete added\n{{item}} - {{grade}}?",
+    "Delete":"Delete"
   },
   "WeighGrade": {
     "Title": "Weigh the load",
