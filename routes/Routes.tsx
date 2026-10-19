@@ -164,10 +164,16 @@ export function withRoleGuard<P extends object>(
 
       if (!jobRole) {
         if (navigationRef.isReady()) {
-          navigationRef.reset({
-            index: 0,
-            routes: [{ name: UNAUTHORIZED_FALLBACK_ROUTE }],
-          });
+          const currentName = (navigationRef.getCurrentRoute() as any)?.name || "";
+          // Do not redirect if we're already heading to/on an auth screen
+          // (e.g. BannedScreen navigation is in flight and doLogout clears jobRole)
+          const safeScreens = ["BannedScreen", "Login", "Logout", "Splash", "Lanuage"];
+          if (!safeScreens.includes(currentName)) {
+            navigationRef.reset({
+              index: 0,
+              routes: [{ name: UNAUTHORIZED_FALLBACK_ROUTE }],
+            });
+          }
         }
         return;
       }

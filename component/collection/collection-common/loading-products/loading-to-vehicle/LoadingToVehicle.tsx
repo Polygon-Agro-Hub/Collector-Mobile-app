@@ -2219,8 +2219,8 @@ export default function LoadingToVehicle({
       <WarningConfirmation
         visible={varietyToDelete !== null}
         message={t(
-          "UnregisteredCropDetails.Are you sure you want to delete previously added",
-          "Are you sure you want to delete previously added {{varietyName}} ?",
+          "UnregisteredCropDetails.DeleteVarietyConfirmation",
+          "Are you sure you want to delete previously added {{varietyName}} ?",  
           {
             varietyName: varietyToDelete?.varietyLabel || "",
           }

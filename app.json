@@ -9,7 +9,7 @@
     "android": {
       "package": "com.polygonagro.Collector",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 17,
+      "versionCode": 18,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
@@ -79,6 +79,7 @@
       "favicon": "./assets/images/app/favicon.png"
     },
     "plugins": [
+      "./plugins/withCustomAndroidPermissions",
       [
         "expo-build-properties",
         {
@@ -142,12 +143,11 @@
           "defaultChannel": "dcm-otp-notifications",
           "enableBackgroundRemoteNotifications": true
         }
-      ],
-      "./plugins/withCustomAndroidPermissions"
+      ]
     ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "5aae5089-be91-499b-8a43-8fdf48e7b68c"
       }
     }
   }

@@ -13,9 +13,9 @@ import environment from "../environment/environment";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
 import {
-  verifyOfficerStatus,
   setupGlobalApiInterceptors,
   handleAuthError,
+  verifyOfficerStatus,
 } from "@/services/apiInterceptor";
 import {
   SafeAreaProvider,
@@ -171,6 +171,9 @@ function AppContent() {
         if (storedEmpId) {
           await status(storedEmpId, true);
         }
+        if (store.getState().auth.token) {
+          verifyOfficerStatus(true);
+        }
       } else if (nextAppState === "background") {
         if (storedEmpId) {
           await status(storedEmpId, false);
@@ -232,8 +235,6 @@ function AppContent() {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
             if (routeName) {
               setCurrentRoute(routeName);
-              // Validate account status & token when user navigates
-              verifyOfficerStatus().catch(() => {});
             }
           }}
         >
