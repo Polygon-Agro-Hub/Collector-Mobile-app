@@ -13,6 +13,9 @@ const environment = {
 
   // PROD --------------------
   // API_BASE_URL: "https://collector-api-prod.polygonagro.com/agro-api/collection-api/",
+
+  // ⚠️ DEVELOPER MODE (Default false) --------------------
+  isDeveloper: true,
 };
 
 export { environment };
