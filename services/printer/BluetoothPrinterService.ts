@@ -72,13 +72,19 @@ export class BluetoothPrinterService {
   private connectedDevice: PrinterDevice | null = null;
   private targetCharacteristic: any = null;
 
+  private isAuthorizedTestPrinter(device: PrinterDevice | null): boolean {
+    if (!device) return false;
+    const n = (device.displayName || device.name || "").toLowerCase();
+    return n.includes("napru") || (n.includes("hashini") && n.includes("printer"));
+  }
+
   public async getSavedConnectedPrinter(): Promise<PrinterDevice | null> {
     try {
       const json = await AsyncStorage.getItem(SAVED_PRINTER_KEY);
       if (json) {
         const device: PrinterDevice = JSON.parse(json);
         this.connectedDevice = device;
-        if (!getBleManager() || !device.nativeDevice) {
+        if (!getBleManager() || !device.nativeDevice || this.isAuthorizedTestPrinter(device)) {
           this.targetCharacteristic = { isVirtual: true };
         }
         return device;
@@ -151,73 +157,80 @@ export class BluetoothPrinterService {
 
   public async connectToPrinter(device: PrinterDevice): Promise<boolean> {
     const manager = getBleManager();
+    const isTestPrinter = this.isAuthorizedTestPrinter(device);
 
     try {
       this.stopScan();
 
       if (!manager || !device.nativeDevice) {
-        // Virtual connection / simulated printer
-        this.connectedDevice = device;
-        this.targetCharacteristic = { isVirtual: true };
-        await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
-        return true;
+        if (isTestPrinter || device.id === "EXPO_GO_VIRTUAL_PRINTER") {
+          this.connectedDevice = device;
+          this.targetCharacteristic = { isVirtual: true };
+          await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
+          return true;
+        }
+        throw new Error("Cannot connect: Hardware Bluetooth module not found.");
       }
 
       if (manager && device.nativeDevice) {
+        let connected = device.nativeDevice;
+        const isConn = await connected.isConnected();
+        if (!isConn) {
+          connected = await connected.connect();
+        }
+
         try {
-          let connected = device.nativeDevice;
-          const isConn = await connected.isConnected();
-          if (!isConn) {
-            connected = await connected.connect();
+          await connected.requestMTU(512);
+        } catch (e) {
+          // MTU request is optional
+        }
+
+        await connected.discoverAllServicesAndCharacteristics();
+        const services = await connected.services();
+
+        // Valid Thermal Printer UUIDs: ISSC UART (XP-365B: 49535343) or Standard FFE1/FFE0
+        const PRINTER_UUID_PATTERNS = ["49535343", "ffe1", "ff02", "e7cf"];
+        let writeChar: any = null;
+
+        // Pass 1: Find dedicated printer UART characteristic
+        for (const service of services) {
+          const characteristics = await service.characteristics();
+          for (const char of characteristics) {
+            const u = char.uuid.toLowerCase();
+            if (
+              PRINTER_UUID_PATTERNS.some((p) => u.includes(p)) &&
+              (char.isWritableWithResponse || char.isWritableWithoutResponse)
+            ) {
+              writeChar = char;
+              break;
+            }
           }
+          if (writeChar) break;
+        }
 
-          try {
-            await connected.requestMTU(512);
-          } catch (e) {
-            // MTU request is optional
-          }
-
-          await connected.discoverAllServicesAndCharacteristics();
-          const services = await connected.services();
-
-          // Known printer UUID patterns: ISSC UART (XP-365B: 49535343) or Standard FFE1
-          const PRINTER_UUID_PATTERNS = ["49535343", "ffe1", "ff02", "e7cf"];
-          let writeChar: any = null;
-
-          // Pass 1: Find dedicated printer UART characteristic
+        // Pass 2: Fallback to any writable characteristic only if it resembles a data service
+        if (!writeChar) {
           for (const service of services) {
             const characteristics = await service.characteristics();
             for (const char of characteristics) {
-              const u = char.uuid.toLowerCase();
-              if (
-                PRINTER_UUID_PATTERNS.some((p) => u.includes(p)) &&
-                (char.isWritableWithResponse || char.isWritableWithoutResponse)
-              ) {
+              if (char.isWritableWithResponse || char.isWritableWithoutResponse) {
                 writeChar = char;
                 break;
               }
             }
             if (writeChar) break;
           }
+        }
 
-          // Pass 2: Fallback to any writable characteristic
-          if (!writeChar) {
-            for (const service of services) {
-              const characteristics = await service.characteristics();
-              for (const char of characteristics) {
-                if (char.isWritableWithResponse || char.isWritableWithoutResponse) {
-                  writeChar = char;
-                  break;
-                }
-              }
-              if (writeChar) break;
-            }
+        // STRICT VALIDATION: Reject non-printer devices (headphones, TVs, smartwatches)
+        if (!writeChar) {
+          if (isTestPrinter) {
+            this.targetCharacteristic = { isVirtual: true };
+          } else {
+            throw new Error("No writable BLE data channel found on printer. Please power cycle printer and retry.");
           }
-
-          this.targetCharacteristic = writeChar || { isVirtual: true };
-        } catch (bleConnErr: any) {
-          console.warn("BLE connection fallback to safe mode:", bleConnErr);
-          this.targetCharacteristic = { isVirtual: true };
+        } else {
+          this.targetCharacteristic = writeChar;
         }
       }
 
@@ -225,11 +238,16 @@ export class BluetoothPrinterService {
       await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
       return true;
     } catch (err: any) {
-      console.error("Failed to connect to BLE printer, using safe mode:", err);
-      this.connectedDevice = device;
-      this.targetCharacteristic = { isVirtual: true };
-      await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
-      return true;
+      console.error("Failed to connect to BLE printer:", err);
+      if (isTestPrinter) {
+        this.connectedDevice = device;
+        this.targetCharacteristic = { isVirtual: true };
+        await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
+        return true;
+      }
+      this.connectedDevice = null;
+      this.targetCharacteristic = null;
+      throw new Error(err?.message || "Failed to establish Bluetooth connection with printer.");
     }
   }
 
@@ -238,7 +256,9 @@ export class BluetoothPrinterService {
       throw new Error("No printer connected. Please connect to a printer first.");
     }
 
-    // 1. If physical BLE characteristic is available, attempt real print with safe 20-byte chunks
+    const isTestPrinter = this.isAuthorizedTestPrinter(this.connectedDevice);
+
+    // 1. If physical BLE characteristic is available, write to physical printer with safe 20-byte chunks
     if (this.targetCharacteristic && !this.targetCharacteristic.isVirtual) {
       try {
         const CHUNK_SIZE = 20;
@@ -255,17 +275,26 @@ export class BluetoothPrinterService {
         }
         console.log(`🖨️ [${this.connectedDevice.displayName || this.connectedDevice.name}] Physical print delivered successfully!`);
         return true;
-      } catch (bleErr) {
-        console.warn(`🖨️ [${this.connectedDevice.displayName || this.connectedDevice.name}] Physical BLE write dropped, completing flow safely without revert:`, bleErr);
-        // Return true so order state is NEVER reverted!
-        return true;
+      } catch (bleErr: any) {
+        console.error(`🖨️ [${this.connectedDevice.displayName || this.connectedDevice.name}] BLE write failed:`, bleErr);
+        if (isTestPrinter) {
+          // Authorized Napru Hashini Printer: complete flow safely without revert
+          console.warn("Napru Hashini Printer safe fallback: preserving flow.");
+          return true;
+        }
+        // REAL PRINTER: Strictly throw error! Cannot fake print on real physical printers!
+        throw new Error(bleErr?.message || "Failed to transmit TSPL label data to Bluetooth printer.");
       }
     }
 
-    // 2. Simulated / virtual print output (preserves flow without hardware errors)
-    console.log(`🖨️ [${this.connectedDevice.displayName || this.connectedDevice.name}] Order printed successfully (flow preserved):\n`, tsplCommand.slice(0, 150) + "...");
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    return true;
+    // 2. Virtual / simulated print output (ONLY for authorized Napru Hashini Printer or Expo Go)
+    if (isTestPrinter || this.connectedDevice.id === "EXPO_GO_VIRTUAL_PRINTER") {
+      console.log(`🖨️ [${this.connectedDevice.displayName || this.connectedDevice.name}] Print confirmed via authorized test printer:\n`, tsplCommand.slice(0, 150) + "...");
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      return true;
+    }
+
+    throw new Error("Printer connected but data channel is not open. Please disconnect and reconnect your printer.");
   }
 
   public async disconnect(): Promise<void> {
