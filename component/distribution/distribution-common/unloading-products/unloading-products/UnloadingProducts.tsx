@@ -66,7 +66,7 @@ export interface MismatchItem {
 }
 
 const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
-  return (rawItems || []).map((item, idx) => {
+  const mapped: UnloadVarietyItem[] = (rawItems || []).map((item, idx) => {
     const gradesMap: Record<
       string,
       {
@@ -150,6 +150,12 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
             ],
       hasMismatch: false,
     };
+  });
+
+  return mapped.sort((a, b) => {
+    const nameA = (a.displayName || a.name || "").trim();
+    const nameB = (b.displayName || b.name || "").trim();
+    return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
   });
 };
 
@@ -342,7 +348,7 @@ export default function UnloadingProducts({
       const authToken = store.getState().auth.token;
 
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/transport/load/${identifier}`,
+        `${environment.API_BASE_URL}api/transport/load/${identifier}?sortBy=display`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -407,21 +413,25 @@ export default function UnloadingProducts({
     fetchLoadDetails,
   ]);
 
-  // Split and sort alphabetically in A to Z order
+  // Split and sort alphabetically in A to Z order under display name
   const toWeighProducts = useMemo(() => {
     return [...products]
       .filter((p) => !p.weighed)
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-      );
+      .sort((a, b) => {
+        const nameA = (a.displayName || a.name || "").trim();
+        const nameB = (b.displayName || b.name || "").trim();
+        return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+      });
   }, [products]);
 
   const weighedProducts = useMemo(() => {
     return [...products]
       .filter((p) => p.weighed)
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-      );
+      .sort((a, b) => {
+        const nameA = (a.displayName || a.name || "").trim();
+        const nameB = (b.displayName || b.name || "").trim();
+        return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+      });
   }, [products]);
 
   // Check if mismatches exist among weighed products
