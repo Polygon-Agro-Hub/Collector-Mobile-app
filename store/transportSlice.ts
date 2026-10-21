@@ -15,6 +15,13 @@ export interface LoadedVarietyItem {
   cropLabel: string;
   varietyId?: string;
   varietyLabel: string;
+  varietyNameEnglish?: string;
+  varietyNameSinhala?: string;
+  varietyNameTamil?: string;
+  cropNameEnglish?: string;
+  cropNameSinhala?: string;
+  cropNameTamil?: string;
+  cropName?: string;
   imageUri?: string;
   totalWeightKg: number;
   totalCrates: number;
@@ -36,6 +43,13 @@ export interface SavedVariety {
   cropLabel: string;
   varietyId?: string;
   varietyLabel: string;
+  varietyNameEnglish?: string;
+  varietyNameSinhala?: string;
+  varietyNameTamil?: string;
+  cropNameEnglish?: string;
+  cropNameSinhala?: string;
+  cropNameTamil?: string;
+  imageUri?: string;
   sets: SavedSet[];
 }
 
