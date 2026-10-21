@@ -124,7 +124,7 @@ export default function DistributionCenterTarget({
       ) {
         const allOrders: TargetOrder[] = response.data.data.map((o: any) => {
           const slotLabel = timeSlotMap[o.timeSlot] || o.timeSlot;
-          const isOutStatus = o.orderStatus === "Completed" || Number(o.minPIndex) >= 4;
+          const isOutStatus = o.orderStatus === "Completed";
           return {
             id: o.id,
             orderNumber: o.orderNumber,
