@@ -2364,11 +2364,7 @@ const cropModalData = cropNames
                                     
                                       {/* Crates Count Input */}
                                        <TextInput
-                                         placeholder={
-                                           focusedSetId === set.id
-                                             ? ""
-                                             : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
-                                         }
+                                         placeholder={`--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`}
                                          placeholderTextColor="#94A3B8"
                                          value={set.crates}
                                          onChangeText={(val) =>
