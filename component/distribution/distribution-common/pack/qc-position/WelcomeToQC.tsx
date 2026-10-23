@@ -11,6 +11,7 @@ import {
   BackHandler,
   ActivityIndicator,
   RefreshControl,
+  Modal,
 } from "react-native";
 import { Ionicons, Feather, FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
@@ -37,6 +38,7 @@ interface QCItem {
   categoryType: string;
   checked: boolean;
   image: string;
+  isPackedByPacker?: boolean;
 }
 
 import { formatTimeSlot, formatOrderTitle } from "@/constants/packing/time-slots";
@@ -100,6 +102,7 @@ export default function WelcomeToQC({
   const [officerPosIndex, setOfficerPosIndex] = useState<number>(3);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
+  const [missingModalVisible, setMissingModalVisible] = useState<boolean>(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -259,6 +262,10 @@ export default function WelcomeToQC({
                   categoryType: isAlacarte ? "alacarte" : "package",
                   checked: false,
                   image: item.image || "",
+                  isPackedByPacker:
+                    item.isPackedByPacker !== undefined
+                      ? Boolean(item.isPackedByPacker)
+                      : true,
                 };
               });
 
@@ -665,6 +672,47 @@ export default function WelcomeToQC({
 
             {status === "qc_checklist" && qcItems.length > 0 && (
               <View className="flex-1">
+                {/* Warning Bar for Missing / Unallocated Items from Packers */}
+                {(() => {
+                  const unallocated = qcItems.filter((i) => !i.isPackedByPacker);
+                  if (unallocated.length === 0) return null;
+                  return (
+                    <TouchableOpacity
+                      onPress={() => setMissingModalVisible(true)}
+                      activeOpacity={0.8}
+                      className="flex-row items-center justify-between bg-[#FFF1F3] border border-[#FF2D55] rounded-2xl px-4 py-3.5 mb-4 shadow-sm"
+                    >
+                      <View className="flex-row items-center flex-1 pr-2">
+                        <View className="w-9 h-9 rounded-full bg-[#FFE2E6] items-center justify-center mr-3">
+                          <Feather name="alert-triangle" size={18} color="#FF2D55" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-[#FF2D55] font-extrabold text-xs">
+                            {t("Packing.Warning Missing Items", {
+                              count: unallocated.length,
+                              defaultValue: `Warning: ${unallocated.length} Unallocated Item${unallocated.length > 1 ? "s" : ""}`,
+                            })}
+                          </Text>
+                          <Text className="text-[#54617D] text-[11px] font-semibold mt-0.5">
+                            {t(
+                              "Packing.Tap to inspect unallocated items",
+                              "Missed by packers. Tap to view list."
+                            )}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="flex-row items-center">
+                        <View className="bg-[#FF2D55] px-2.5 py-0.5 rounded-full mr-1.5">
+                          <Text className="text-white font-extrabold text-[11px]">
+                            {unallocated.length}
+                          </Text>
+                        </View>
+                        <Feather name="chevron-right" size={18} color="#FF2D55" />
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })()}
+
                 <Text
                   className={`font-extrabold text-sm mb-4 ${currentPackName === "À la carte"
                       ? "text-[#AC7F5E]"
@@ -703,9 +751,19 @@ export default function WelcomeToQC({
                           <Text className="text-[#030E25] font-bold text-sm leading-5 mb-0.5">
                             {item.name}
                           </Text>
-                          <Text className="text-[#54617D] font-extrabold text-xs">
-                            {item.weight}
-                          </Text>
+                          <View className="flex-row items-center gap-1.5 mt-0.5">
+                            <Text className="text-[#54617D] font-extrabold text-xs">
+                              {item.weight}
+                            </Text>
+                            {!item.isPackedByPacker && (
+                              <Text
+                                className="font-extrabold text-[11px]"
+                                style={{ color: "#FF2D55" }}
+                              >
+                                • --Unallocated--
+                              </Text>
+                            )}
+                          </View>
                         </View>
                       </View>
 
@@ -784,6 +842,108 @@ export default function WelcomeToQC({
         navigation={navigation}
         positionText="QC Position"
       />
+
+      {/* Missing / Unallocated Items Popup Modal */}
+      <Modal
+        visible={missingModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMissingModalVisible(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-6">
+          <View className="bg-white rounded-3xl w-full max-w-[420px] p-6 shadow-2xl">
+            {/* Header */}
+            <View className="flex-row items-center justify-between pb-3 border-b border-gray-100">
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-[#FFE2E6] items-center justify-center mr-3">
+                  <Feather name="alert-triangle" size={20} color="#FF2D55" />
+                </View>
+                <View>
+                  <Text className="text-slate-950 font-extrabold text-base">
+                    {t("Packing.Unallocated Items", "Unallocated Items")}
+                  </Text>
+                  <Text className="text-[#FF2D55] font-bold text-xs mt-0.5">
+                    {qcItems.filter((i) => !i.isPackedByPacker).length}{" "}
+                    {t(
+                      "Packing.items missed by packers",
+                      "items missed by packers"
+                    )}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => setMissingModalVisible(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
+              >
+                <Ionicons name="close" size={18} color="#030E25" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Explanatory Message */}
+            <Text className="text-[#54617D] text-xs font-medium my-3.5 leading-4">
+              {t(
+                "Packing.Missing Items Notice",
+                "The following items were not packed by any packing stations in this row. Please ensure they are verified and included in this box:"
+              )}
+            </Text>
+
+            {/* List of unallocated items */}
+            <ScrollView className="max-h-64 my-1">
+              {qcItems
+                .filter((i) => !i.isPackedByPacker)
+                .map((item, idx) => (
+                  <View
+                    key={`missing_${item.id}_${idx}`}
+                    className="flex-row items-center justify-between bg-[#FFF7F8] border border-[#FFDEE3] rounded-2xl p-3 mb-2"
+                  >
+                    <View className="flex-row items-center flex-1 mr-2">
+                      <View className="w-11 h-11 rounded-xl overflow-hidden items-center justify-center mr-3 bg-white border border-[#FFDEE3]">
+                        {item.image ? (
+                          <Image
+                            source={{ uri: item.image }}
+                            className="w-full h-full"
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="sprout"
+                            size={20}
+                            color="#FF2D55"
+                          />
+                        )}
+                      </View>
+                      <View className="flex-1">
+                        <Text
+                          className="text-slate-950 font-bold text-xs"
+                          numberOfLines={1}
+                        >
+                          {item.name}
+                        </Text>
+                        <Text className="text-[#54617D] text-[11px] font-semibold mt-0.5">
+                          {item.weight}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text className="font-extrabold text-[11px] text-[#FF2D55]">
+                      --Unallocated--
+                    </Text>
+                  </View>
+                ))}
+            </ScrollView>
+
+            {/* Dismiss Button */}
+            <TouchableOpacity
+              onPress={() => setMissingModalVisible(false)}
+              className="w-full h-12 bg-black rounded-full items-center justify-center mt-4 shadow-md"
+              activeOpacity={0.8}
+            >
+              <Text className="text-white font-extrabold text-sm">
+                {t("Packing.Understood / Close", "Understood / Close")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <AlertModal
         visible={alertVisible}
