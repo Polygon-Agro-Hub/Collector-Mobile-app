@@ -1707,7 +1707,13 @@
     "End Shift Confirmation": "Are you sure you want to end the shift for {{pos}} in {{row}}?",
     "End": "End",
     "Position already occupied today": "This position is already occupied by another officer today.",
-    "Selected position not found": "Selected packing position not found."
+    "Selected position not found": "Selected packing position not found.",
+     "Warning Missing Items_one": "Warning: {{count}} Unallocated Item",
+    "Warning Missing Items_other": "Warning: {{count}} Unallocated Items",
+    "Tap to View List": "Tap to View List",
+    "Unallocated":"Unallocated",
+    "Unallocated Items":"Unallocated Items",
+    "Missing Items Notice":"The following items have not been assigned packing positions. Please inform the DCM as soon as possible and pack them yourself for now to complete the order."
   },
   "QRHandling": {
     "QR Handling": "QR Handling",

@@ -1707,7 +1707,13 @@
     "End Shift Confirmation": "{{row}} හි {{pos}} සඳහා සේවා මුරය අවසන් කිරීමට ඔබට විශ්වාසද?",
     "End": "අවසන් කරන්න",
     "Position already occupied today": "මෙම ස්ථානය අද දින වෙනත් නිලධාරියෙකු විසින් දැනටමත් භාවිත කරමින් සිටී.",
-    "Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය."
+    "Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය.",
+     "Warning Missing Items_one": "අවවාදයයි: වෙන් නොකළ අයිතම {{count}}ක්",
+    "Warning Missing Items_other": "අවවාදයයි: වෙන් නොකළ අයිතම {{count}}ක්",
+    "Tap to View List": "ලැයිස්තුව බලන්න",
+    "Unallocated":"ස්ථාන ගත කර නැත",
+    "Unallocated Items":"ස්ථාන ගත නොකළ අයිතම",
+     "Missing Items Notice":"පහත අයිතම සඳහා ඇසුරුම් ස්ථාන වෙන් කර නොමැත. කරුණාකර හැකි ඉක්මනින් කළමනාකාර මහතා වෙත ඒ බව දැනුම් දෙන්න. එමෙන්ම ඇණවුම සම්පූර්ණ කිරීම සඳහා දැනට එම අයිතම ඔබ විසින්ම ඇසුරුම් කරන්න."
   },
   "QRHandling": {
     "QR Handling": "QR හැසිරවීම",

@@ -321,7 +321,11 @@ export default function OrderDetails({
                                     className="font-extrabold text-xs mt-0.5"
                                     style={{ color: "#FF2D55" }}
                                   >
-                                    {t("DistributionCenterTarget.Unallocated", "--Unallocated--")}
+                                    --
+                          {t("Packing.Unallocated", {
+                            defaultValue: "Unallocated",
+                          })}
+                          --
                                   </Text>
                                 ) : (
                                   <Text className="text-slate-950 font-extrabold text-xs mt-0.5">
@@ -332,7 +336,7 @@ export default function OrderDetails({
                             </View>
 
                             <Text className="text-[#54617D] text-xs font-medium">
-                              {isMissedByPacker ? "-" : formatTimeSlot(item.packedTime, t)}
+                              {formatTimeSlot(item.packedTime, t)}
                             </Text>
                           </View>
                         );

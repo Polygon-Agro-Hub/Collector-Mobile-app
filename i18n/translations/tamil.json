@@ -1707,7 +1707,13 @@
     "End Shift Confirmation": "{{row}} வரிசையில் உள்ள {{pos}} பணியிடத்திற்கான பணியை முடிக்க விரும்புகிறீர்களா?",
     "End": "முடிக்கவும்",
     "Position already occupied today": "இந்தப் பணியிடத்தில் இன்று ஏற்கனவே மற்றொரு அதிகாரி பணியில் உள்ளார்.",
-    "Selected position not found": "தேர்ந்தெடுக்கப்பட்ட பொதியிடும் பணியிடத்தைக் கண்டறிய முடியவில்லை."
+    "Selected position not found": "தேர்ந்தெடுக்கப்பட்ட பொதியிடும் பணியிடத்தைக் கண்டறிய முடியவில்லை.",
+     "Warning Missing Items_one": "Warning: {{count}} Unallocated Item",
+    "Warning Missing Items_other": "Warning: {{count}} Unallocated Items",
+    "Tap to View List": "Tap to View List",
+    "Unallocated":"Unallocated",
+    "Unallocated Items":"Unallocated Items",
+     "Missing Items Notice":"The following items have not been assigned packing positions. Please inform the DCM as soon as possible and pack them yourself for now to complete the order."
   },
   "QRHandling": {
     "QR Handling": "QR குறியீட்டைக் கையாளுதல்",
