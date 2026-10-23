@@ -11,10 +11,19 @@ import {
   BackHandler,
   ActivityIndicator,
   RefreshControl,
+  Modal,
 } from "react-native";
-import { Ionicons, Feather, FontAwesome6, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  Feather,
+  FontAwesome6,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import { EndShiftHeaderRight, EndShiftModal } from "@/component/components/navigations/EndShiftModal";
+import {
+  EndShiftHeaderRight,
+  EndShiftModal,
+} from "@/component/components/navigations/EndShiftModal";
 import LottieView from "lottie-react-native";
 import axios from "axios";
 import environment from "@/environment/environment";
@@ -37,9 +46,13 @@ interface QCItem {
   categoryType: string;
   checked: boolean;
   image: string;
+  isPackedByPacker?: boolean;
 }
 
-import { formatTimeSlot, formatOrderTitle } from "@/constants/packing/time-slots";
+import {
+  formatTimeSlot,
+  formatOrderTitle,
+} from "@/constants/packing/time-slots";
 
 const formatWeightDisplay = (weightStr: string) => {
   if (!weightStr) return weightStr;
@@ -81,10 +94,10 @@ export default function WelcomeToQC({
   const [isAlacarteActive, setIsAlacarteActive] = useState<boolean>(false);
   const [isMainContainer, setIsMainContainer] = useState<boolean>(false);
   const [displayOrderTitle, setDisplayOrderTitle] = useState<string>(
-    initialOrderNumber || ""
+    initialOrderNumber || "",
   );
   const [scheduledTime, setScheduledTime] = useState<string>(
-    "08:00 AM - 12:00 PM"
+    "08:00 AM - 12:00 PM",
   );
 
   const [status, setStatus] = useState<QCStatus>("no_target");
@@ -96,10 +109,14 @@ export default function WelcomeToQC({
   const [loading, setLoading] = useState<boolean>(true);
 
   const [qcItems, setQcItems] = useState<QCItem[]>([]);
-  const [currentPackName, setCurrentPackName] = useState<string>("Daily Veggie Pack");
+  const [currentPackName, setCurrentPackName] =
+    useState<string>("Daily Veggie Pack");
   const [officerPosIndex, setOfficerPosIndex] = useState<number>(3);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [endShiftModalVisible, setEndShiftModalVisible] = useState<boolean>(false);
+  const [endShiftModalVisible, setEndShiftModalVisible] =
+    useState<boolean>(false);
+  const [missingModalVisible, setMissingModalVisible] =
+    useState<boolean>(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -117,7 +134,7 @@ export default function WelcomeToQC({
     };
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      onBackPress
+      onBackPress,
     );
 
     const socket = getSocket();
@@ -135,18 +152,22 @@ export default function WelcomeToQC({
 
     const handlePositionFreed = async (payload: { positionId: number }) => {
       try {
-        const activeAssignmentStr = (store.getState().auth.activeAssignment ? JSON.stringify(store.getState().auth.activeAssignment) : null);
+        const activeAssignmentStr = store.getState().auth.activeAssignment
+          ? JSON.stringify(store.getState().auth.activeAssignment)
+          : null;
         if (activeAssignmentStr) {
           const activeAssignment = JSON.parse(activeAssignmentStr);
-          if (Number(activeAssignment.positionId) === Number(payload.positionId)) {
+          if (
+            Number(activeAssignment.positionId) === Number(payload.positionId)
+          ) {
             store.dispatch(clearActiveAssignment());
             dispatch(clearActiveAssignment());
             Alert.alert(
               t("Packing.Position Released", "Position Released"),
               t(
                 "Packing.Your position has been released by the manager.",
-                "Your position has been released by the manager."
-              )
+                "Your position has been released by the manager.",
+              ),
             );
             navigation.reset({ index: 0, routes: [{ name: "SelectRow" }] });
           }
@@ -174,7 +195,7 @@ export default function WelcomeToQC({
 
       const activeRes = await axios.get(
         `${environment.API_BASE_URL}api/packing/qc/active-order`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (activeRes.data && activeRes.data.success && activeRes.data.data) {
@@ -211,7 +232,9 @@ export default function WelcomeToQC({
             setActiveProcessOrderId(activeData.processOrderId);
           }
           setActiveOrderPackageId(activeData.activeOrderPackageId || null);
-          setActiveTrackingId(activeData.trackingId ? Number(activeData.trackingId) : null);
+          setActiveTrackingId(
+            activeData.trackingId ? Number(activeData.trackingId) : null,
+          );
           setPackagesList(activeData.packagesList || []);
           setAlacarteCount(activeData.alacarteCount || 0);
           setIsAlacarteActive(!!activeData.isAlacarteActive);
@@ -220,8 +243,8 @@ export default function WelcomeToQC({
               activeData.isMainContainerBox ||
               Number(activeData.isMainContainerActive) === 1 ||
               activeData.activeOrderPackageId === -1 ||
-              activeData.isMainContainer
-            )
+              activeData.isMainContainer,
+            ),
           );
           setTrackingRows(activeData.trackingRows || []);
           if (activeData.timeSlot) {
@@ -237,9 +260,17 @@ export default function WelcomeToQC({
               : 3;
           setOfficerPosIndex(resolvedOfficerPosIndex);
 
-          if (orderStatus === "Pending" || orderStatus === "Completed" || pIndex < resolvedOfficerPosIndex || pIndex > resolvedOfficerPosIndex) {
+          if (
+            orderStatus === "Pending" ||
+            orderStatus === "Completed" ||
+            pIndex < resolvedOfficerPosIndex ||
+            pIndex > resolvedOfficerPosIndex
+          ) {
             setStatus("waiting");
-          } else if (orderStatus === "Opened" && pIndex === resolvedOfficerPosIndex) {
+          } else if (
+            orderStatus === "Opened" &&
+            pIndex === resolvedOfficerPosIndex
+          ) {
             const orderItems = activeData.orderItems || [];
 
             if (orderItems.length > 0) {
@@ -259,11 +290,17 @@ export default function WelcomeToQC({
                   categoryType: isAlacarte ? "alacarte" : "package",
                   checked: false,
                   image: item.image || "",
+                  isPackedByPacker:
+                    item.isPackedByPacker !== undefined
+                      ? Boolean(item.isPackedByPacker)
+                      : true,
                 };
               });
 
               setQcItems(mappedItems);
-              setCurrentPackName(mappedItems[0]?.packName || "Daily Veggie Pack");
+              setCurrentPackName(
+                mappedItems[0]?.packName || "Daily Veggie Pack",
+              );
               setStatus("qc_checklist");
             } else {
               setQcItems([]);
@@ -288,8 +325,8 @@ export default function WelcomeToQC({
   const handleToggleCheck = (itemId: number) => {
     setQcItems((prev) =>
       prev.map((item) =>
-        item.id === itemId ? { ...item, checked: !item.checked } : item
-      )
+        item.id === itemId ? { ...item, checked: !item.checked } : item,
+      ),
     );
   };
 
@@ -313,15 +350,17 @@ export default function WelcomeToQC({
           rowId: rowId,
           trackingId: activeTrackingId || null,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       if (advanceRes.data && advanceRes.data.success) {
-        await axios.post(
-          `${environment.API_BASE_URL}api/packing/qc-completed`,
-          { orderId: targetOrderId, rowId: rowId },
-          { headers: { Authorization: `Bearer ${token}` } }
-        ).catch(() => { });
+        await axios
+          .post(
+            `${environment.API_BASE_URL}api/packing/qc-completed`,
+            { orderId: targetOrderId, rowId: rowId },
+            { headers: { Authorization: `Bearer ${token}` } },
+          )
+          .catch(() => {});
 
         setAlertType("success");
         setAlertTitle(t("Packing.Success", "Success"));
@@ -329,40 +368,53 @@ export default function WelcomeToQC({
           const isMainFromTracking = trackingRows.some(
             (r: any) =>
               Number(r.id) === Number(activeTrackingId) &&
-              (Number(r.isMainContainer) === 1 || r.isMainContainer === true)
+              (Number(r.isMainContainer) === 1 || r.isMainContainer === true),
           );
-          const isMainOrder = isMainContainer || isMainFromTracking || activeOrderPackageId === -1;
+          const isMainOrder =
+            isMainContainer ||
+            isMainFromTracking ||
+            activeOrderPackageId === -1;
 
           if (isMainOrder) {
             setAlertMessage(
               t(
                 "Packing.Main Container has been received.",
-                "Main Container has been received."
-              )
+                "Main Container has been received.",
+              ),
             );
           } else {
             setAlertMessage(
               t(
                 "Packing.Packing has been moved to the next position.",
-                "Packing has been moved to the next position."
-              )
+                "Packing has been moved to the next position.",
+              ),
             );
           }
         } else {
           setAlertMessage(
             t(
               "Packing.Packing has been completed successfully.",
-              "Packing has been completed successfully."
-            )
+              "Packing has been completed successfully.",
+            ),
           );
         }
         setAlertVisible(true);
       } else if (advanceRes.data && !advanceRes.data.success) {
         const code = advanceRes.data.code || advanceRes.data.data?.code;
-        const targetPos = advanceRes.data.targetPosition || advanceRes.data.data?.targetPosition || (officerPosIndex ? officerPosIndex + 1 : 2);
-        const targetStationName = advanceRes.data.targetStationName || advanceRes.data.data?.targetStationName || "";
-        const occupiedInv = advanceRes.data.occupiedInvoice || advanceRes.data.data?.occupiedInvoice || "";
-        const msg = advanceRes.data.message || advanceRes.data.data?.message || "";
+        const targetPos =
+          advanceRes.data.targetPosition ||
+          advanceRes.data.data?.targetPosition ||
+          (officerPosIndex ? officerPosIndex + 1 : 2);
+        const targetStationName =
+          advanceRes.data.targetStationName ||
+          advanceRes.data.data?.targetStationName ||
+          "";
+        const occupiedInv =
+          advanceRes.data.occupiedInvoice ||
+          advanceRes.data.data?.occupiedInvoice ||
+          "";
+        const msg =
+          advanceRes.data.message || advanceRes.data.data?.message || "";
 
         const isBusy =
           code === PACKING_ERROR_CODES.STATION_OCCUPIED ||
@@ -377,13 +429,17 @@ export default function WelcomeToQC({
         const isNoOfficer =
           code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
           code === "NO_OFFICER_ASSIGNED" ||
-          String(msg).toLowerCase().includes("no packing position user assigned") ||
+          String(msg)
+            .toLowerCase()
+            .includes("no packing position user assigned") ||
           String(msg).toLowerCase().includes("no officer assigned");
 
-        const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+        const isQc =
+          targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
         const posLabel = isQc
           ? t("Packing.QC Position", "QC Station")
-          : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+          : targetStationName ||
+            `${t("Packing.Position", "Position")} ${targetPos}`;
 
         setAlertType("error");
         if (isBusy) {
@@ -392,21 +448,27 @@ export default function WelcomeToQC({
             t("Packing.Position Busy Message", {
               position: isQc ? "QC" : targetPos,
               invoice: occupiedInv,
-              defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
-            })
+              defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`,
+            }),
           );
         } else if (isNoOfficer) {
-          setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+          setAlertTitle(
+            t("Packing.Position Not Available", "Position Not Available"),
+          );
           setAlertMessage(
             t("Packing.No Officer Assigned Message", {
               position: isQc ? "QC" : targetPos,
-              defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
-            })
+              defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`,
+            }),
           );
         } else {
           setAlertTitle(t("Packing.Error", "Error"));
           setAlertMessage(
-            msg || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
+            msg ||
+              t(
+                "Packing.Failed to advance QC position.",
+                "Failed to advance QC position.",
+              ),
           );
         }
         setAlertVisible(true);
@@ -418,9 +480,14 @@ export default function WelcomeToQC({
       console.error("Error advancing QC box:", err);
       const data = err?.response?.data;
       const code = data?.code || data?.data?.code;
-      const targetPos = data?.targetPosition || data?.data?.targetPosition || (officerPosIndex ? officerPosIndex + 1 : 2);
-      const targetStationName = data?.targetStationName || data?.data?.targetStationName || "";
-      const occupiedInv = data?.occupiedInvoice || data?.data?.occupiedInvoice || "";
+      const targetPos =
+        data?.targetPosition ||
+        data?.data?.targetPosition ||
+        (officerPosIndex ? officerPosIndex + 1 : 2);
+      const targetStationName =
+        data?.targetStationName || data?.data?.targetStationName || "";
+      const occupiedInv =
+        data?.occupiedInvoice || data?.data?.occupiedInvoice || "";
       const msg = data?.message || data?.data?.message || err?.message || "";
 
       const isBusy =
@@ -436,13 +503,17 @@ export default function WelcomeToQC({
       const isNoOfficer =
         code === PACKING_ERROR_CODES.NO_OFFICER_ASSIGNED ||
         code === "NO_OFFICER_ASSIGNED" ||
-        String(msg).toLowerCase().includes("no packing position user assigned") ||
+        String(msg)
+          .toLowerCase()
+          .includes("no packing position user assigned") ||
         String(msg).toLowerCase().includes("no officer assigned");
 
-      const isQc = targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
+      const isQc =
+        targetStationName?.toLowerCase().includes("qc") || targetPos === "QC";
       const posLabel = isQc
         ? t("Packing.QC Position", "QC Station")
-        : (targetStationName || `${t("Packing.Position", "Position")} ${targetPos}`);
+        : targetStationName ||
+          `${t("Packing.Position", "Position")} ${targetPos}`;
 
       setAlertType("error");
       if (isBusy) {
@@ -451,21 +522,27 @@ export default function WelcomeToQC({
           t("Packing.Position Busy Message", {
             position: isQc ? "QC" : targetPos,
             invoice: occupiedInv,
-            defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`
-          })
+            defaultValue: `${posLabel} is currently busy with Invoice ${occupiedInv}. Please wait until ${posLabel} clears before passing the next box.`,
+          }),
         );
       } else if (isNoOfficer) {
-        setAlertTitle(t("Packing.Position Not Available", "Position Not Available"));
+        setAlertTitle(
+          t("Packing.Position Not Available", "Position Not Available"),
+        );
         setAlertMessage(
           t("Packing.No Officer Assigned Message", {
             position: isQc ? "QC" : targetPos,
-            defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`
-          })
+            defaultValue: `No packing position user assigned for ${posLabel}. Please assign an officer to this position first.`,
+          }),
         );
       } else {
         setAlertTitle(t("Packing.Error", "Error"));
         setAlertMessage(
-          msg || t("Packing.Failed to advance QC position.", "Failed to advance QC position.")
+          msg ||
+            t(
+              "Packing.Failed to advance QC position.",
+              "Failed to advance QC position.",
+            ),
         );
       }
       setAlertVisible(true);
@@ -477,7 +554,7 @@ export default function WelcomeToQC({
 
   const totalPhysicalPackages = packagesList.reduce(
     (acc, pkg) => acc + Math.max(1, Number(pkg.qty || 1)),
-    0
+    0,
   );
   const totalBoxes = totalPhysicalPackages + (alacarteCount > 0 ? 1 : 0);
 
@@ -515,10 +592,15 @@ export default function WelcomeToQC({
   const pkgMatchedCounts = new Map<number, number>();
   let alacarteMatchedCount = 0;
 
-  const isMain = (row: any) => Number(row.isMainContainer) === 1 || row.isMainContainer === true;
+  const isMain = (row: any) =>
+    Number(row.isMainContainer) === 1 || row.isMainContainer === true;
   const mainTrackingRows = trackingRows.filter((row) => isMain(row));
-  const pkgTrackingRows = trackingRows.filter((row) => !isMain(row) && row.orderpackageId);
-  const alacarteTrackingRows = trackingRows.filter((row) => !isMain(row) && !row.orderpackageId);
+  const pkgTrackingRows = trackingRows.filter(
+    (row) => !isMain(row) && row.orderpackageId,
+  );
+  const alacarteTrackingRows = trackingRows.filter(
+    (row) => !isMain(row) && !row.orderpackageId,
+  );
 
   steps.forEach((step) => {
     let matchedRow: any = null;
@@ -527,7 +609,9 @@ export default function WelcomeToQC({
       matchedRow = mainTrackingRows[mainMatchedCount];
       mainMatchedCount++;
     } else if (step.type === "package") {
-      const matchedPkgRows = pkgTrackingRows.filter((row) => Number(row.orderpackageId) === Number(step.packageId));
+      const matchedPkgRows = pkgTrackingRows.filter(
+        (row) => Number(row.orderpackageId) === Number(step.packageId),
+      );
       const currentMatched = pkgMatchedCounts.get(step.packageId) || 0;
       matchedRow = matchedPkgRows[currentMatched];
       pkgMatchedCounts.set(step.packageId, currentMatched + 1);
@@ -544,15 +628,28 @@ export default function WelcomeToQC({
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
       <CustomHeader
-        title={status === "no_target" || loading ? "" : formatOrderTitle(displayOrderTitle, t)}
+        title={
+          status === "no_target" || loading
+            ? ""
+            : formatOrderTitle(displayOrderTitle, t)
+        }
         navigation={navigation}
-        onBackPress={() => navigation.navigate("Main", { screen: "DistridutionaDashboard" })}
-        rightComponent={<EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />}
+        onBackPress={() =>
+          navigation.navigate("Main", { screen: "DistridutionaDashboard" })
+        }
+        rightComponent={
+          <EndShiftHeaderRight onPress={() => setEndShiftModalVisible(true)} />
+        }
       />
 
       {loading ? (
         <View className="flex-1 bg-white">
-          <LoadingPage message={t("Packing.Loading", t("ManagerTransactions.Loading", "Loading..."))} />
+          <LoadingPage
+            message={t(
+              "Packing.Loading",
+              t("ManagerTransactions.Loading", "Loading..."),
+            )}
+          />
         </View>
       ) : (
         <>
@@ -582,14 +679,21 @@ export default function WelcomeToQC({
             {status !== "no_target" && steps.length > 1 && (
               <View className="flex-row justify-between items-center gap-2 px-2 mb-8 w-full">
                 {steps.map((s, idx) => {
-                  const hasReachedQC = s.pIndex > 0 && s.pIndex >= officerPosIndex;
-                  const hasLaterReachedQC = steps.slice(idx + 1).some((later) => later.pIndex > 0 && later.pIndex >= officerPosIndex);
+                  const hasReachedQC =
+                    s.pIndex > 0 && s.pIndex >= officerPosIndex;
+                  const hasLaterReachedQC = steps
+                    .slice(idx + 1)
+                    .some(
+                      (later) =>
+                        later.pIndex > 0 && later.pIndex >= officerPosIndex,
+                    );
                   const isFilled = hasReachedQC || hasLaterReachedQC;
                   return (
                     <View key={s.id} className="flex-1 items-center">
                       <View
-                        className={`w-full h-1.5 rounded-full mb-1 ${isFilled ? "bg-[#030E25]" : "bg-gray-200"
-                          }`}
+                        className={`w-full h-1.5 rounded-full mb-1 ${
+                          isFilled ? "bg-[#030E25]" : "bg-gray-200"
+                        }`}
                       />
                     </View>
                   );
@@ -601,10 +705,16 @@ export default function WelcomeToQC({
               <View className="flex-1">
                 <View className="items-center mt-4 mb-2">
                   <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2">
-                    {t("Packing.Welcome to QC Position", "Welcome to QC Position")}
+                    {t(
+                      "Packing.Welcome to QC Position",
+                      "Welcome to QC Position",
+                    )}
                   </Text>
                   <Text className="text-[#54617D] text-sm text-center px-4 font-medium leading-5">
-                    {t("Packing.No daily target for row", "Please wait and check again.\nThis row doesn't have a daily target yet.")}
+                    {t(
+                      "Packing.No daily target for row",
+                      "Please wait and check again.\nThis row doesn't have a daily target yet.",
+                    )}
                   </Text>
                 </View>
 
@@ -632,10 +742,16 @@ export default function WelcomeToQC({
                   />
                 </View>
                 <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
-                  {t("Packing.Order with previous position", "This order is still with the\nprevious position")}
+                  {t(
+                    "Packing.Order with previous position",
+                    "This order is still with the\nprevious position",
+                  )}
                 </Text>
                 <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
-                  {t("Packing.Please try reloading the page in a few seconds.", "Please try reloading the page in a few seconds.")}
+                  {t(
+                    "Packing.Please try reloading the page in a few seconds.",
+                    "Please try reloading the page in a few seconds.",
+                  )}
                 </Text>
               </View>
             )}
@@ -654,10 +770,16 @@ export default function WelcomeToQC({
                 </View>
                 <View className="items-center mt-4 mb-2">
                   <Text className="text-[#030E25] font-extrabold text-xl text-center mb-2 leading-7 px-4">
-                    {t("Packing.No items to pack for this order at your position", "No items to pack for this order\nat your position")}
+                    {t(
+                      "Packing.No items to pack for this order at your position",
+                      "No items to pack for this order\nat your position",
+                    )}
                   </Text>
                   <Text className="text-[#54617D] text-sm text-center px-6 font-medium leading-5">
-                    {t("Packing.No items assigned sequence message", "There are no items assigned to the position\nin the current packing sequence.")}
+                    {t(
+                      "Packing.No items assigned sequence message",
+                      "There are no items assigned to the position\nin the current packing sequence.",
+                    )}
                   </Text>
                 </View>
               </View>
@@ -665,11 +787,55 @@ export default function WelcomeToQC({
 
             {status === "qc_checklist" && qcItems.length > 0 && (
               <View className="flex-1">
+                {/* Warning Bar for Missing / Unallocated Items from Packers */}
+                {(() => {
+                  const unallocated = qcItems.filter(
+                    (i) => !i.isPackedByPacker,
+                  );
+                  if (unallocated.length === 0) return null;
+                  return (
+                    <TouchableOpacity
+                      onPress={() => setMissingModalVisible(true)}
+                      activeOpacity={0.8}
+                      className="flex-row items-center h-[65px] justify-between bg-[#FFFCFC] border border-[#FF0000] rounded-2xl px-4 py-3.5 mb-4 shadow-sm"
+                    >
+                      <View className="flex-row items-center flex-1 pr-2">
+                        <View className="w-9 h-9 items-center justify-center mr-3">
+                          <FontAwesome6
+                            name="triangle-exclamation"
+                            size={20}
+                            color="#FF2D55"
+                          />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-[#FF0000] font-extrabold text-[14px]">
+                            {t("Packing.Warning Missing Items", {
+                              count: unallocated.length,
+                              defaultValue: `Warning: ${unallocated.length} Unallocated Item${unallocated.length > 1 ? "s" : ""}`,
+                            })}
+                          </Text>
+                          <Text className="text-[#000000] text-[10px] font-semibold mt-0.5">
+                            {t("Packing.Tap to View List")}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="flex-row justify-center items-center">
+                        <View className="bg-[#FF0000] w-7 h-7 items-center justify-center px-2.5 py-0.5 rounded-full mr-1.5">
+                          <Text className="text-white font-extrabold text-[12px]">
+                            {unallocated.length}
+                          </Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })()}
+
                 <Text
-                  className={`font-extrabold text-sm mb-4 ${currentPackName === "À la carte"
+                  className={`font-extrabold text-sm mb-4 ${
+                    currentPackName === "À la carte"
                       ? "text-[#AC7F5E]"
                       : "text-[#980775]"
-                    }`}
+                  }`}
                 >
                   {currentPackName} ({String(qcItems.length).padStart(2, "0")})
                 </Text>
@@ -683,12 +849,12 @@ export default function WelcomeToQC({
                       activeOpacity={0.8}
                     >
                       <View className="flex-row items-center flex-1 mr-3">
-                        <View className="w-14 h-14 rounded-full overflow-hidden items-center justify-center mr-4 bg-gray-100">
+                        <View className="w-16 h-16 items-center justify-center mr-3.5 overflow-hidden ">
                           {item.image ? (
                             <Image
                               source={{ uri: item.image }}
                               className="w-full h-full"
-                              resizeMode="cover"
+                              resizeMode="contain"
                             />
                           ) : (
                             <MaterialCommunityIcons
@@ -703,17 +869,30 @@ export default function WelcomeToQC({
                           <Text className="text-[#030E25] font-bold text-sm leading-5 mb-0.5">
                             {item.name}
                           </Text>
-                          <Text className="text-[#54617D] font-extrabold text-xs">
+                          <Text className="text-[#54617D] font-extrabold text-xs mt-0.5">
                             {item.weight}
                           </Text>
+                          {!item.isPackedByPacker && (
+                            <Text
+                              className="font-extrabold text-[11px] mt-0.5"
+                              style={{ color: "#FF2D55" }}
+                            >
+                              --
+                              {t("Packing.Unallocated", {
+                                defaultValue: "Unallocated",
+                              })}
+                              --
+                            </Text>
+                          )}
                         </View>
                       </View>
 
                       <View
-                        className={`w-6 h-6 rounded-md items-center justify-center border-2 ${item.checked
+                        className={`w-6 h-6 rounded-md items-center justify-center border-2 ${
+                          item.checked
                             ? "bg-[#980775] border-[#980775]"
                             : "border-[#030E25] bg-white"
-                          }`}
+                        }`}
                       >
                         {item.checked && (
                           <Ionicons name="checkmark" size={16} color="white" />
@@ -727,7 +906,10 @@ export default function WelcomeToQC({
           </ScrollView>
 
           {status === "no_items" && (
-            <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
+            <View
+              className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0"
+              style={{ paddingBottom: insets.bottom + 16 }}
+            >
               <TouchableOpacity
                 onPress={handleAdvanceQCBox}
                 disabled={isAdvancing || loading}
@@ -744,14 +926,19 @@ export default function WelcomeToQC({
                 {isAdvancing ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  <Text className="text-white font-extrabold text-base">{t("Packing.Skip", "Skip")}</Text>
+                  <Text className="text-white font-extrabold text-base">
+                    {t("Packing.Skip", "Skip")}
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
           )}
 
           {status === "qc_checklist" && allItemsChecked && (
-            <View className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0" style={{ paddingBottom: insets.bottom + 16 }}>
+            <View
+              className="px-6 pt-3 bg-white absolute bottom-0 left-0 right-0"
+              style={{ paddingBottom: insets.bottom + 16 }}
+            >
               <TouchableOpacity
                 onPress={handleAdvanceQCBox}
                 disabled={isAdvancing || loading}
@@ -784,6 +971,111 @@ export default function WelcomeToQC({
         navigation={navigation}
         positionText="QC Position"
       />
+
+      {/* Missing / Unallocated Items Popup Modal */}
+      <Modal
+        visible={missingModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMissingModalVisible(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-6">
+          <View className="bg-white rounded-3xl w-full max-w-[420px] p-6 shadow-2xl">
+            {/* Header */}
+            <View className="flex-row items-center justify-between pb-3 ">
+              <View className="flex-row items-center">
+                <View className="w-10 h-10  items-center justify-center mr-3">
+                  <FontAwesome6
+                    name="triangle-exclamation"
+                    size={20}
+                    color="#000000"
+                  />
+                </View>
+                <View>
+                  <Text className=" text-[15px] font-bold ">
+                    {t("Packing.Unallocated Items", "Unallocated Items")}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Explanatory Message */}
+            <Text className="text-[#54617D] text-[12px]  my-3 ">
+              {t(
+                "Packing.Missing Items Notice",
+                "The following items have not been assigned packing positions. Please inform the DCM as soon as possible and pack them yourself for now to complete the order.",
+              )}
+            </Text>
+
+            {/* List of unallocated items */}
+            <ScrollView className="max-h-64 my-1">
+              {qcItems
+                .filter((i) => !i.isPackedByPacker)
+                .map((item, idx) => (
+                  <View
+                    key={`missing_${item.id}_${idx}`}
+                    className="flex-row items-center justify-between  border border-[#C4CCD5] rounded-2xl p-3 mb-2"
+                  >
+                    <View className="flex-row items-center flex-1 mr-2">
+                      <View className="w-16 h-16 items-center justify-center mr-3.5 overflow-hidden ">
+                        {item.image ? (
+                          <Image
+                            source={{ uri: item.image }}
+                            className="w-full h-full"
+                            resizeMode="contain"
+                          />
+                        ) : (
+                          <MaterialCommunityIcons
+                            name="sprout"
+                            size={20}
+                            color="#FF2D55"
+                          />
+                        )}
+                      </View>
+                      <View className="flex-1">
+                        <Text
+                          className="text-[13px] font-semibold "
+                          numberOfLines={1}
+                        >
+                          {item.name}
+                        </Text>
+                        <Text className="text-[#576879] text-[13px] mt-0.5">
+                          {item.weight}
+                        </Text>
+                        <Text className="text-[13px] text-[#FF2D55] mt-0.5">
+                          --
+                          {t("Packing.Unallocated", {
+                            defaultValue: "Unallocated",
+                          })}
+                          --
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+            </ScrollView>
+
+            {/* Dismiss Button */}
+            <TouchableOpacity
+              onPress={() => setMissingModalVisible(false)}
+              className="w-full h-12 bg-black rounded-full items-center justify-center mt-4 shadow-md"
+              activeOpacity={0.8}
+              style={{
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 6,
+
+                elevation: 8,
+              }}
+            >
+              <Text className="text-white text-[13px] font-extrabold ">
+                {t("Error.Ok")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <AlertModal
         visible={alertVisible}
