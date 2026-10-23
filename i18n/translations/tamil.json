@@ -528,18 +528,9 @@
     "Processing...": "செயலாக்கப்படுகிறது...",
     "Cancel": "ரத்துசெய்யவும்",
     "Delete": "நீக்கவும்",
-    "Please upload image for Grade": "தரத்திற்கான {{grade}} அளவை உள்ளிடுவதற்கு முன், தரத்திற்கான {{gradesWithQuantityButNoImage}} படத்தைப் பதிவேற்றவும்.",
-    "Images Required": "படங்கள் தேவை",
-    "Please upload images for": "இந்தப் பயிரைச் சேர்ப்பதற்கு முன், {{missingImages}} க்கான படங்களை பதிவேற்றவும்.",
-    "Add Quantity First": "முதலில் அளவை உள்ளிடவும்",
-    "Please enter quantity": "அளவை உள்ளிடவும்",
-    "Incomplete Selection": "தேர்வு முழுமையடையவில்லை",
     "Please select both a crop and a variety before adding": "சேர்ப்பதற்கு முன் பயிரையும் அதன் வகையையும் தேர்ந்தெடுக்கவும்.",
     "Are you sure you want to delete previously added": "முன்பு சேர்க்கப்பட்ட {{varietyName}} ஐ நீக்க விரும்புகிறீர்களா?",
     "Are you sure you want to delete grade": "முன்பு சேர்க்கப்பட்ட {{varietyName}} பயிரின் தரத்தை நீக்க விரும்புகிறீர்களா?",
-    "UnsavedChanges": "சேமிக்கப்படாத மாற்றங்கள்",
-    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "இதுவரை சேர்க்கப்படாத பயிர் விவரங்களை நீங்கள் உள்ளிட்டுள்ளீர்கள். அவற்றைச் சேர்க்க 'Add' என்பதைக் கிளிக் செய்யவும் அல்லது தொடர படிவத்தை (form) அழிக்கவும்.",
-    "DeleteGradeConfirmation": "{{varietyName}} இன் {{grade}} ஐ நீக்க விரும்புகிறீர்களா?",
     "DeleteVarietyConfirmation": "சேர்க்கப்பட்ட {{varietyName}} தரத்தை நீக்க விரும்புகிறீர்களா?",
     "GradeA_Rs": "தரம் A (ரூ.)",
     "GradeB_Rs": "தரம் B (ரூ.)",
@@ -547,7 +538,12 @@
     "GrandTotal_Rs": "மொத்தத் தொகை (ரூ.)",
     "Auto Fill": "--தானாக நிரப்பவும்--",
     "AddMore": "மேலும் சேர்க்கவும்",
-    "FinishCollection": "சேகரிப்பை முடிக்கவும்"
+    "FinishCollection": "சேகரிப்பை முடிக்கவும்",
+    "Select": "Select Crop",
+    "GradeA": "Grade A",
+    "GradeB": "Grade B",
+    "GradeC": "Grade C",
+    "DeleteVariety": "Delete Variety"
   },
   "GoodsReceivedNote": {
     "LNG": "en",
@@ -1634,9 +1630,7 @@
     "Positions": "பணியிடங்கள்",
     "Position": "பணியிடம்",
     "PositionsAvailableCount": "{{count}} பணியிடங்கள் உள்ளன",
-    "PositionsAvailableCount_one": "1 பணியிடம் உள்ளது",
     "PositionsCount": "{{count}} நிலைகள்",
-    "PositionsCount_one": "1பணியிடம்",
     "Row": "வரிசை",
     "Rows": "வரிசைகள்",
     "Row {{number}}": "வரிசை {{number}}",
@@ -1974,8 +1968,7 @@
     "Title": "விநியோக மையத்தைத் தேர்ந்தெடுக்கவும்",
     "NoCentresFound": "- விநியோக மையங்கள் எதுவும் இல்லை -",
     "SelectAndContinue": "தேர்ந்தெடுத்து தொடரவும்",
-    "CentreSelectedTitle": "மையம் தேர்ந்தெடுக்கப்பட்டது",
-    "Centre": "மையம்"
+    "CentreSelectedTitle": "மையம் தேர்ந்தெடுக்கப்பட்டது"
   },
   "LoadingToVehicle": {
     "Variety": "வகை",
