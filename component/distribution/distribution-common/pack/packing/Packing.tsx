@@ -573,7 +573,7 @@ export default function Packing({
                         elevation: 1,
                       }}
                     >
-                      <View className="w-16 h-16 rounded-xl items-center justify-center mr-3.5 overflow-hidden bg-gray-100">
+                      <View className="w-16 h-16 items-center justify-center mr-3.5 overflow-hidden ">
                         {item.image ? (
                           <Image
                             source={{ uri: item.image }}

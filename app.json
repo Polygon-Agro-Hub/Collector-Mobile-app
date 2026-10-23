@@ -2,7 +2,7 @@
   "expo": {
     "name": "CoDi-Net",
     "slug": "CoDi-Net",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
@@ -55,7 +55,6 @@
     "ios": {
       "icon": "./assets/images/app/adaptive-icon.png",
       "bundleIdentifier": "com.polygonagro.Collector",
-      "buildNumber": "1.0.0",
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -147,7 +146,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "9509218e-656f-4358-9d1e-3b6784e9bd91"
+        "projectId": ""
       }
     }
   }
