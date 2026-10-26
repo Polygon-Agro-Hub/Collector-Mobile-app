@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
   Animated,
   ActivityIndicator,
   StyleSheet,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -14,7 +15,7 @@ import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
@@ -64,9 +65,43 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
 
   const verifiedLoadRef = useRef<VerifiedLoadData | null>(null);
   const isFocusedRef = useRef(true);
+  const isFocused = useIsFocused();
+
+  const clearScanTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const startTimeoutTimer = useCallback(() => {
+    clearScanTimer();
+
+    timerRef.current = setTimeout(() => {
+      if (!isFocusedRef.current) {
+        return;
+      }
+      setModalTitle(t("qrcode.ScanTimeout", "Scan Timeout"));
+      setModalMessage(
+        t(
+          "qrcode.ScanTimeoutMessage",
+          "The QR code could not be detected within the time limit. Please check and try again."
+        )
+      );
+      setShowRescanButton(true);
+      setModalType("error");
+      setShowTimeoutModal(true);
+    }, 15000);
+  }, [clearScanTimer, t]);
+
+  const handleBackToReceivedProductsToday = useCallback(() => {
+    clearScanTimer();
+    setShowTimeoutModal(false);
+    navigation.navigate("ReceivedProductsToday");
+  }, [clearScanTimer, navigation]);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       isFocusedRef.current = true;
 
       setScanned(false);
@@ -81,16 +116,33 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         startTimeoutTimer();
       }
 
+      const onBackPress = () => {
+        handleBackToReceivedProductsToday();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
       return () => {
         isFocusedRef.current = false;
-
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
-        }
+        clearScanTimer();
+        setShowTimeoutModal(false);
+        subscription.remove();
       };
-    }, [permission?.granted])
+    }, [permission?.granted, startTimeoutTimer, clearScanTimer, handleBackToReceivedProductsToday])
   );
+
+  useEffect(() => {
+    if (!isFocused) {
+      clearScanTimer();
+      setShowTimeoutModal(false);
+      setShowErrorModal(false);
+      setShowSuccessModal(false);
+    }
+  }, [isFocused, clearScanTimer]);
 
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
@@ -100,49 +152,12 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
     startScanAnimation();
 
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
+      clearScanTimer();
     };
-  }, []);
-
-  useEffect(() => {
-    if (permission?.granted && !scanned && !loading && isFocusedRef.current) {
-      startTimeoutTimer();
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [permission?.granted, scanned, loading]);
-
-  const startTimeoutTimer = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-
-    timerRef.current = setTimeout(() => {
-      if (!scanned && !loading && isFocusedRef.current) {
-        setModalTitle(t("qrcode.ScanTimeout", "Scan Timeout"));
-        setModalMessage(
-          t(
-            "qrcode.ScanTimeoutMessage",
-            "The QR code could not be detected within the time limit. Please check and try again."
-          )
-        );
-        setShowRescanButton(true);
-        setModalType("error");
-        setShowTimeoutModal(true);
-      }
-    }, 15000);
-  };
+  }, [clearScanTimer]);
 
   const resetScanning = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
+    clearScanTimer();
 
     verifiedLoadRef.current = null;
     setScanned(false);
@@ -394,8 +409,8 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
   };
 
   const handleSuccessModalClose = () => {
+    clearScanTimer();
     setShowSuccessModal(false);
-    setScanned(false);
 
     const load = verifiedLoadRef.current;
     verifiedLoadRef.current = null;
@@ -448,7 +463,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       <CameraAccess
         navigation={navigation as any}
         onPermissionGranted={requestPermission}
-        onClose={() => navigation.goBack()}
+        onClose={handleBackToReceivedProductsToday}
       />
     );
   }
@@ -474,7 +489,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
 
       {/* Timeout Modal */}
       <AlertModal
-        visible={showTimeoutModal}
+        visible={showTimeoutModal && isFocused}
         title={t("qrcode.ScanTimeout", "Scan Timeout")}
         message={t(
           "qrcode.ScanTimeoutMessage",
@@ -490,7 +505,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
 
       {/* Error Modal */}
       <AlertModal
-        visible={showErrorModal}
+        visible={showErrorModal && isFocused}
         title={modalTitle}
         message={modalMessage}
         type={modalType}
@@ -504,7 +519,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
 
       {/* Success Modal */}
       <AlertModal
-        visible={showSuccessModal}
+        visible={showSuccessModal && isFocused}
         title={modalTitle}
         message={modalMessage}
         type={modalType}
@@ -515,16 +530,20 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       />
 
       {/* Full-Screen Camera View */}
-      <CameraView
-        style={StyleSheet.absoluteFill}
-        facing="back"
-        barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
-        }}
-        onBarcodeScanned={
-          scanned || loading ? undefined : handleBarCodeScanned
-        }
-      />
+      {isFocused && !scanned && !loading ? (
+        <CameraView
+          style={StyleSheet.absoluteFill}
+          facing="back"
+          barcodeScannerSettings={{
+            barcodeTypes: ["qr"],
+          }}
+          onBarcodeScanned={
+            scanned || loading ? undefined : handleBarCodeScanned
+          }
+        />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: "#000" }]} />
+      )}
 
       {/* Dark overlay with clear scan frame in center */}
       <View className="flex-1 bg-black/35">
@@ -532,6 +551,7 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
         <CustomHeader
           title={t("ScanLoadQR.Title", t("qrcode.ScanLoadQR"))}
           navigation={navigation}
+          onBackPress={handleBackToReceivedProductsToday}
           iconBgColor="#F7FAFF"
           bgColor="#FFFFFF"
           titleStyle={

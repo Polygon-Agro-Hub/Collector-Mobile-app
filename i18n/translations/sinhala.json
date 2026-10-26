@@ -528,18 +528,9 @@
     "Processing...": "සකසමින්...",
     "Cancel": "අවලංගු කරන්න",
     "Delete": "මකන්න",
-    "Please upload image for Grade": "{{grade}} ශ්‍රේණිය සඳහා ප්‍රමාණය ඇතුළත් කිරීමට පෙර {{gradesWithQuantityButNoImage}} ශ්‍රේණිය සඳහා ඡායාරූපක් ඇතුලත් කරන්න.",
-    "Images Required": "ඡායාරූප අවශ්‍යයි",
-    "Please upload images for": "මෙම කප්පාදුව එකතු කිරීමට පෙර කරුණාකර: {{missingImages}} සඳහා පින්තූර උඩුගත කරන්න.",
-    "Add Quantity First": "පළමුව ප්‍රමාණය එකතු කරන්න",
-    "Please enter quantity": "රූපයක් එක් කිරීමට පෙර කරුණාකර {{ශ්‍රේණිය}} ශ්‍රේණිය සඳහා ප්‍රමාණය ඇතුළත් කරන්න.",
-    "Incomplete Selection": "අසම්පූර්ණ තේරීමකි",
     "Please select both a crop and a variety before adding": "එකතු කිරීමට පෙර කරුණාකර බෝගයක් සහ ප්‍රභේදයක් යන දෙකම තෝරන්න.",
     "Are you sure you want to delete previously added": "කලින් එකතු කළ {{varietyName}} මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
     "Are you sure you want to delete grade": "කලින් එකතු කළ {{varietyName}} - ශ්‍රේණිය {{grade}} මැකීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
-    "UnsavedChanges": "සුරැක නොමැති වෙනස්කම්",
-    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "ඔබ තවමත් එකතු කර නොමැති බෝග විස්තර ඇතුළත් කර ඇත. ඒවා ඇතුළත් කිරීමට 'Add' (එකතු කරන්න) ක්ලික් කරන්න, නැතහොත් ඉදිරියට යාම සඳහා පෝරමය හිස් කරන්න.",
-    "DeleteGradeConfirmation": "{{varietyName}} හි {{grade}} මකා දැමීමට ඔබට විශ්වාසද?",
     "DeleteVarietyConfirmation": "එක් කල {{varietyName}} ශ්‍රේණිය මකා දැමීමට ඔබට විශ්වාසද?",
     "GradeA_Rs": "A ශ්‍රේණිය (රු.)",
     "GradeB_Rs": "B ශ්‍රේණිය (රු.)",
@@ -547,7 +538,40 @@
     "GrandTotal_Rs": "මුළු එකතුව (රු.)",
     "Auto Fill": "--ස්වයංක්‍රීයව පුරවන්න--",
     "AddMore": "තවත් එකතු කරන්න",
-    "FinishCollection": "එකතු කිරීම අවසන් කරන්න"
+    "FinishCollection": "එකතු කිරීම අවසන් කරන්න",
+    "Select": "Select Crop",
+    "GradeA": "Grade A",
+    "GradeB": "Grade B",
+    "GradeC": "Grade C",
+    "DeleteVariety": "Delete Variety"
+  },
+    "GoodsReceivedNote": {
+    "LNG": "en",
+    "Download": "Download",
+    "GRN": "Goods Received Note",
+    "Date": "Date",
+    "FarmerName": "Farmer Name",
+    "FarmerNIC": "Farmer NIC",
+    "OfficerName": "Officer Name",
+    "OfficerID": "Officer ID",
+    "CenterName": "Center Name",
+    "CenterID": "Center ID",
+    "Crop": "Crop",
+    "Select Variety": "Select Variety",
+    "Processing...": "Processing...",
+    "Cancel": "Cancel",
+    "Delete": "Delete",
+    "Please upload image for Grade": "Please upload image for Grade {{gradesWithQuantityButNoImage}} before entering quantity for Grade {{grade}}",
+    "Images Required": "Images Required",
+    "Please upload images for": "Please upload images for: {{missingImages}} before adding this crop.",
+    "Add Quantity First": "Add Quantity First",
+    "Please enter quantity": "Please enter quantity for Grade {{grade}} before adding an image.",
+    "Incomplete Selection": "Incomplete Selection",
+    "Please select both a crop and a variety before adding": "Please select both a crop and a variety before adding.",
+    "Are you sure you want to delete previously added": "Are you sure you want to delete previously added {{varietyName}}?",
+    "Are you sure you want to delete grade": "Are you sure you want to delete previously added {{varietyName}} - Grade {{grade}}?",
+    "UnsavedChanges": "Unsaved Changes",
+    "YouHaveEnteredCropDetailsThatHavenBeenAddedYet": "You have entered crop details that haven't been added yet. Please click 'Add' to include them, or clear the form to proceed."
   },
   "ReportPage": {
     "LNG": "si",
@@ -1077,8 +1101,9 @@
     "ReceiveProducts": "නිෂ්පාදන ලබා ගැනීම"
   },
   "ReceivedProductsToday": {
-    "Title": "අද ලැබුණු නිෂ්පාදන",
-    "NoProductsReceivedToday": "- අද නිෂ්පාදන ලැබී නැත -",
+    "Title": "ලැබුණු නිෂ්පාදන",
+    "NoProductsReceivedToday": "- නිෂ්පාදන ලැබී නැත -",
+    "FilterByUnloadedDate": "බාන ලද දිනය",
     "Crates": "පෙට්ටි",
     "Containers": "පෙට්ටි"
   },
@@ -1103,6 +1128,7 @@
     "Weighed": "බර කිරන ලද",
     "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
     "ReportMismatch": "වෙනස වාර්තා කරන්න",
+    "MismatchReportedButton": "වෙනස වාර්තා කරන ලදි",
     "ReportedMismatch": "වෙනස වාර්තා කර ඇත",
     "FinishUnloading": "බෑම අවසන් කරන්න",
     "FinalizeMessage": "අවසන් කිරීමට පෙර කරුණාකර ඔබගේ බෑමේ විස්තර නැවත සමාලෝචනය කරන්න.",
@@ -1144,9 +1170,11 @@
     "MarkAsUnloaded": "බාන ලද බව සලකුණු කරන්න",
     "SuccessTitle": "සාර්ථකව බාන ලදී!",
     "MismatchDetected": "වෙනසක් හඳුනාගෙන ඇත",
-    "GoBackConfirmation": "ඔබට ආපසු යාමට අවශ්‍ය බව සහතිකද?",
+    "GoBackConfirmation": "ඔබට ආපසු යාමට අවශ්‍ය බව සහතිකද?\nඔබ විසින් සිදු කරන ලද සියලු වෙනස්කම් ඉවතලනු ඇත.",
     "GoBack": "ආපසු යන්න",
-    "Cancel": "අවලංගු කරන්න"
+    "Cancel": "අවලංගු කරන්න",
+    "DeleteGradeConfirmation": "ඔබ එක් කළ\n{{item}} - {{grade}} මකා දැමීමට අවශ්‍ය බව විශ්වාසද?",
+    "Delete": "ඉවත් කරන්න"
   },
   "WeighGrade": {
     "Title": "බර කිරන්න",
@@ -1595,6 +1623,7 @@
     "Close": "වසා දමන්න"
   },
   "Packing": {
+    "Select the row you work with": "ඔබ වැඩ කරන පේළිය තෝරන්න.",
     "Select a Row": "පේළියක් තෝරන්න",
     "Choose the packing row you will be working at.": "ඔබ වැඩ කරන ඇසුරුම් පේළිය තෝරන්න.",
     "Packing Positions": "ඇසුරුම් ස්ථාන",
@@ -1678,7 +1707,13 @@
     "End Shift Confirmation": "{{row}} හි {{pos}} සඳහා සේවා මුරය අවසන් කිරීමට ඔබට විශ්වාසද?",
     "End": "අවසන් කරන්න",
     "Position already occupied today": "මෙම ස්ථානය අද දින වෙනත් නිලධාරියෙකු විසින් දැනටමත් භාවිත කරමින් සිටී.",
-    "Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය."
+    "Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය.",
+     "Warning Missing Items_one": "අවවාදයයි: වෙන් නොකළ අයිතම {{count}}ක්",
+    "Warning Missing Items_other": "අවවාදයයි: වෙන් නොකළ අයිතම {{count}}ක්",
+    "Tap to View List": "ලැයිස්තුව බලන්න",
+    "Unallocated":"ස්ථාන ගත කර නැත",
+    "Unallocated Items":"ස්ථාන ගත නොකළ අයිතම",
+     "Missing Items Notice":"පහත අයිතම සඳහා ඇසුරුම් ස්ථාන වෙන් කර නොමැත. කරුණාකර හැකි ඉක්මනින් කළමනාකාර මහතා වෙත ඒ බව දැනුම් දෙන්න. එමෙන්ම ඇණවුම සම්පූර්ණ කිරීම සඳහා දැනට එම අයිතම ඔබ විසින්ම ඇසුරුම් කරන්න."
   },
   "QRHandling": {
     "QR Handling": "QR හැසිරවීම",
@@ -1911,8 +1946,9 @@
     "Continue": "ඉදිරියට යන්න"
   },
   "SentProductsToday": {
-    "Title": "අද යවන ලද තොග",
-    "NoLoadsToday": "අද තොග ප්‍රවාහනයන් කර නොමැත",
+    "Title": "යවන ලද තොග",
+    "NoLoadsToday": "- තොග හමු නොවීය -",
+    "FilterByLoadedDate": "යවන ලද දිනය",
     "Crates": "පෙට්ටි",
     "Containers": "පෙට්ටි",
     "AddLoadTitle": "නව තොග එක් කරන්න",
@@ -1938,8 +1974,7 @@
     "Title": "අදාළ මධ්‍යස්ථානය",
     "NoCentresFound": "- බෙදාහැරීමේ මධ්යස්ථාන හමු නොවීය -",
     "SelectAndContinue": "ඉදිරියට යන්න",
-    "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී",
-    "Centre": "මධ්‍යස්ථානය"
+    "CentreSelectedTitle": "මධ්‍යස්ථානය තෝරා ගන්නා ලදී"
   },
   "LoadingToVehicle": {
     "Variety": "ප්‍රභේදය",

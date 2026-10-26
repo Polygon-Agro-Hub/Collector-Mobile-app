@@ -11,12 +11,10 @@ import { ROLES } from "@/constants/user-roles";
 const AUTH_STORAGE_KEY = "@auth_state";
 
 type NotificationCallback = (notification: DCMNotificationItem) => void;
-type OfficerStatusCallback = (data: any) => void;
 
 class SocketService {
   private socket: Socket | null = null;
   private notificationListeners: Set<NotificationCallback> = new Set();
-  private officerStatusListeners: Set<OfficerStatusCallback> = new Set();
   private isConnecting: boolean = false;
   private currentUserId: number | null = null;
 
@@ -200,19 +198,6 @@ class SocketService {
       this.socket.on("handover_return_otp", handleSocketNotification);
       this.socket.on("newNotification", handleSocketNotification);
 
-      // Real-time officer and account status listeners
-      const handleOfficerStatusChange = (data: any) => {
-        console.log("[SocketService] Real-time officer status event received:", JSON.stringify(data));
-        this.dispatchOfficerStatusToListeners(data);
-      };
-
-      this.socket.on("officer_status_changed", handleOfficerStatusChange);
-      this.socket.on("account_status_changed", handleOfficerStatusChange);
-      this.socket.on("user_status_changed", handleOfficerStatusChange);
-      this.socket.on("force_logout", handleOfficerStatusChange);
-      this.socket.on("session_expired", handleOfficerStatusChange);
-      this.socket.on("officer_banned", handleOfficerStatusChange);
-      this.socket.on("officer_rejected", handleOfficerStatusChange);
 
       this.socket.on("connect_error", (err) => {
         this.isConnecting = false;
@@ -301,22 +286,6 @@ class SocketService {
     }
   }
 
-  private dispatchOfficerStatusToListeners(data: any) {
-    this.officerStatusListeners.forEach((listener) => {
-      try {
-        listener(data);
-      } catch (e) {
-        console.error("[SocketService] Error in officer status listener:", e);
-      }
-    });
-  }
-
-  onOfficerStatusChanged(callback: OfficerStatusCallback): () => void {
-    this.officerStatusListeners.add(callback);
-    return () => {
-      this.officerStatusListeners.delete(callback);
-    };
-  }
 
   onNewNotification(callback: NotificationCallback): () => void {
     this.notificationListeners.add(callback);

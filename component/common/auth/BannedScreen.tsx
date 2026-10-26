@@ -1,5 +1,6 @@
 import { logoutUser } from "@/store/authSlice";
 import store from "@/services/reducxStore";
+import { doLogout } from "@/services/apiInterceptor";
 import React, { useCallback } from "react";
 import {
   View,
@@ -43,7 +44,7 @@ const BannedScreen: React.FC<BannedScreenProps> = ({ route, navigation }) => {
 
   const handleBackToLogin = async () => {
     try {
-      store.dispatch(logoutUser());
+      doLogout();
       navigation.reset({
         index: 0,
         routes: [{ name: "Login" }],

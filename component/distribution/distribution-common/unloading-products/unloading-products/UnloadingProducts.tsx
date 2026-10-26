@@ -27,10 +27,15 @@ import environment from "@/environment/environment";
 import {
   initUnloadTransfer,
   clearUnloadState,
+  resetVarietyWeighed,
   UnloadVarietyItem,
   UnloadedGradeItem,
 } from "@/store/unloadSlice";
-import { extractGradeLetter } from "../weigh-the-load/WeighTheLoad";
+import {
+  extractGradeLetter,
+  getLocalizedProductName,
+} from "@/utils/productLocalization";
+export { getLocalizedProductName };
 
 type UnloadingProductsNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -60,74 +65,24 @@ export interface MismatchItem {
   hasCrateMismatch: boolean;
 }
 
-export const getLocalizedProductName = (
-  item?: {
-    displayName?: string;
-    name?: string;
-    cropName?: string;
-    varietyLabel?: string;
-    cropLabel?: string;
-    varietyNameEnglish?: string;
-    varietyNameSinhala?: string;
-    varietyNameTamil?: string;
-    cropNameEnglish?: string;
-    cropNameSinhala?: string;
-    cropNameTamil?: string;
-  } | null,
-  lang?: string
-): string => {
-  if (!item) return "";
-  if (item.displayName) {
-    return item.displayName;
-  }
-  const currentLang = (lang || "").toLowerCase();
-  if (currentLang.startsWith("si")) {
-    return (
-      item.varietyNameSinhala ||
-      item.cropNameSinhala ||
-      item.name ||
-      item.cropName ||
-      item.varietyNameEnglish ||
-      item.cropNameEnglish ||
-      item.varietyLabel ||
-      item.cropLabel ||
-      ""
-    );
-  }
-  if (currentLang.startsWith("ta")) {
-    return (
-      item.varietyNameTamil ||
-      item.cropNameTamil ||
-      item.name ||
-      item.cropName ||
-      item.varietyNameEnglish ||
-      item.cropNameEnglish ||
-      item.varietyLabel ||
-      item.cropLabel ||
-      ""
-    );
-  }
-  return (
-    item.varietyNameEnglish ||
-    item.cropNameEnglish ||
-    item.name ||
-    item.cropName ||
-    item.varietyLabel ||
-    item.cropLabel ||
-    ""
-  );
-};
-
 const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
-  return (rawItems || []).map((item, idx) => {
+  const mapped: UnloadVarietyItem[] = (rawItems || []).map((item, idx) => {
     const gradesMap: Record<
       string,
-      { gradeTitle: string; gradeKey: string; loadedWeightKg: number; loadedCrates: number }
+      {
+        gradeTitle: string;
+        gradeKey: string;
+        loadedWeightKg: number;
+        loadedCrates: number;
+      }
     > = {};
 
     if (Array.isArray(item.gradeSets) && item.gradeSets.length > 0) {
       item.gradeSets.forEach((gs: any) => {
-        const gKey = (gs.gradeKey || gs.grade || "A").replace(/^Grade\s*/i, "").trim().toUpperCase();
+        const gKey = (gs.gradeKey || gs.grade || "A")
+          .replace(/^Grade\s*/i, "")
+          .trim()
+          .toUpperCase();
         const gTitle = gs.grade || `Grade ${gKey}`;
         if (!gradesMap[gTitle]) {
           gradesMap[gTitle] = {
@@ -139,8 +94,7 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
         }
         gradesMap[gTitle].loadedWeightKg +=
           parseFloat(gs.weightKg ?? gs.weight) || 0;
-        gradesMap[gTitle].loadedCrates +=
-          parseInt(gs.crates, 10) || 0;
+        gradesMap[gTitle].loadedCrates += parseInt(gs.crates, 10) || 0;
       });
     }
 
@@ -153,7 +107,7 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
         loadedCrates: gradesMap[key].loadedCrates,
         unloadedWeightKg: null,
         unloadedCrates: null,
-      })
+      }),
     );
 
     return {
@@ -167,7 +121,8 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
         item.varietyLabel ||
         item.cropLabel ||
         "Crop Item",
-      varietyNameEnglish: item.displayName || item.varietyNameEnglish || item.varietyLabel,
+      varietyNameEnglish:
+        item.displayName || item.varietyNameEnglish || item.varietyLabel,
       varietyNameSinhala: item.varietyNameSinhala,
       varietyNameTamil: item.varietyNameTamil,
       cropNameEnglish: item.cropNameEnglish || item.cropLabel,
@@ -195,6 +150,12 @@ const mapRawItemsToProducts = (rawItems: any[]): UnloadVarietyItem[] => {
             ],
       hasMismatch: false,
     };
+  });
+
+  return mapped.sort((a, b) => {
+    const nameA = (a.displayName || a.name || "").trim();
+    const nameB = (b.displayName || b.name || "").trim();
+    return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
   });
 };
 
@@ -224,41 +185,158 @@ export default function UnloadingProducts({
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showFinalizeModal, setShowFinalizeModal] = useState<boolean>(false);
 
+  const [lastVarietyId, setLastVarietyId] = useState<string | null>(
+    route.params?.lastVarietyId ? String(route.params.lastVarietyId) : null,
+  );
+
+  useEffect(() => {
+    if (route.params?.lastVarietyId) {
+      setLastVarietyId(String(route.params.lastVarietyId));
+    }
+  }, [route.params?.lastVarietyId]);
+
   // Sync with Redux state on every screen focus
   useFocusEffect(
     useCallback(() => {
+      const isFromGoBack = Boolean(
+        route.params?.isGoBack ?? route.params?.isgoback,
+      );
+      const targetId = route.params?.lastVarietyId || lastVarietyId;
+      if (isFromGoBack && targetId) {
+        store.dispatch(resetVarietyWeighed(String(targetId)));
+      }
       const reduxVarieties = store.getState().unload.varieties;
       if (reduxVarieties && reduxVarieties.length > 0) {
-        setProducts(reduxVarieties);
+        setProducts([...reduxVarieties]);
       }
-    }, [])
+    }, [
+      route.params?.isGoBack,
+      route.params?.isgoback,
+      route.params?.lastVarietyId,
+      lastVarietyId,
+    ]),
   );
 
   const handleBackToSummary = useCallback(() => {
     const currentUnload = store.getState().unload;
-    const finalTransportId = transportId || currentUnload.transportId || undefined;
+    const finalTransportId =
+      transportId || currentUnload.transportId || undefined;
     const finalLoadCode = loadCode || currentUnload.loadCode || undefined;
+    const finalVehicleNo =
+      route.params?.vehicleNo || currentUnload.vehicleNo || undefined;
+
+    // Reset Redux unload state and clear local products state
+    store.dispatch(clearUnloadState());
+    setProducts([]);
+
     navigation.navigate("ReceivedProductsSummary", {
       transportId: finalTransportId,
       loadCode: finalLoadCode,
-      vehicleNo: route.params?.vehicleNo || undefined,
+      vehicleNo: finalVehicleNo,
     });
   }, [navigation, transportId, loadCode, route.params?.vehicleNo]);
+
+  const handleProductPress = useCallback(
+    (item: UnloadVarietyItem) => {
+      setLastVarietyId(String(item.id));
+      const currentUnload = store.getState().unload;
+      const finalTransportId = transportId || currentUnload.transportId;
+      const finalLoadCode = loadCode || currentUnload.loadCode;
+
+      navigation.navigate("WeighTheLoad", {
+        transportId: finalTransportId,
+        loadCode: finalLoadCode,
+        vehicleNo: route.params?.vehicleNo,
+        varietyId: item.id,
+        productId: item.id,
+        product: {
+          id: item.id,
+          name: item.name,
+          displayName: item.displayName,
+          varietyNameEnglish: item.varietyNameEnglish,
+          varietyNameSinhala: item.varietyNameSinhala,
+          varietyNameTamil: item.varietyNameTamil,
+          cropNameEnglish: item.cropNameEnglish,
+          cropNameSinhala: item.cropNameSinhala,
+          cropNameTamil: item.cropNameTamil,
+          image: item.image,
+          totalWeightKg: item.expectedKg || 0,
+          totalCrates: item.expectedCrates || 0,
+          grades: item.grades || [
+            {
+              id: "g-1",
+              gradeTitle: "Grade A",
+              loadedWeightKg: item.expectedKg || 0,
+              loadedCrates: item.expectedCrates || 0,
+              unloadedWeightKg: null,
+              unloadedCrates: null,
+            },
+          ],
+        },
+      });
+    },
+    [navigation, transportId, loadCode, route.params?.vehicleNo],
+  );
+
+  const handleBackPress = useCallback(() => {
+    const reduxVarieties = store.getState().unload.varieties;
+    const currentProducts =
+      reduxVarieties && reduxVarieties.length > 0 ? reduxVarieties : products;
+
+    const hasWeighedProducts = currentProducts.some((p) => p.weighed);
+    const isFromGoBack = Boolean(
+      route.params?.isGoBack ?? route.params?.isgoback,
+    );
+
+    if (isFromGoBack || !hasWeighedProducts) {
+      // Initial unloading products screen or when returning via Go Back from WeighTheLoad: navigates to summary screen
+      handleBackToSummary();
+    } else {
+      // After weigh the load screen with data: normally navigate to weigh the load screen
+      const targetId = route.params?.lastVarietyId || lastVarietyId;
+      let targetItem: UnloadVarietyItem | undefined;
+
+      if (targetId) {
+        targetItem = currentProducts.find(
+          (p) => String(p.id) === String(targetId),
+        );
+      }
+
+      if (!targetItem) {
+        const weighedList = currentProducts.filter((p) => p.weighed);
+        targetItem = weighedList[weighedList.length - 1] || currentProducts[0];
+      }
+
+      if (targetItem) {
+        handleProductPress(targetItem);
+      } else {
+        handleBackToSummary();
+      }
+    }
+  }, [
+    products,
+    route.params?.isGoBack,
+    route.params?.isgoback,
+    route.params?.lastVarietyId,
+    lastVarietyId,
+    handleBackToSummary,
+    handleProductPress,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        handleBackToSummary();
+        handleBackPress();
         return true;
       };
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress
+        onBackPress,
       );
 
       return () => subscription.remove();
-    }, [handleBackToSummary])
+    }, [handleBackPress]),
   );
 
   const fetchLoadDetails = useCallback(async () => {
@@ -270,12 +348,12 @@ export default function UnloadingProducts({
       const authToken = store.getState().auth.token;
 
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/transport/load/${identifier}`,
+        `${environment.API_BASE_URL}api/transport/load/${identifier}?sortBy=display`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
-        }
+        },
       );
 
       if (response.data.success && response.data.data) {
@@ -290,7 +368,7 @@ export default function UnloadingProducts({
               driverEmpId: data.driverEmpId,
               driverName: data.driverName,
               varieties: mapped,
-            })
+            }),
           );
           setProducts(store.getState().unload.varieties);
         }
@@ -307,7 +385,8 @@ export default function UnloadingProducts({
     const isAlreadyInitialized =
       reduxState.varieties &&
       reduxState.varieties.length > 0 &&
-      ((transportId && String(reduxState.transportId) === String(transportId)) ||
+      ((transportId &&
+        String(reduxState.transportId) === String(transportId)) ||
         (loadCode && reduxState.loadCode === loadCode));
 
     if (!isAlreadyInitialized) {
@@ -319,30 +398,40 @@ export default function UnloadingProducts({
             loadCode,
             vehicleNo: route.params?.vehicleNo,
             varieties: mapped,
-          })
+          }),
         );
         setProducts(store.getState().unload.varieties);
       } else if (transportId || loadCode) {
         fetchLoadDetails();
       }
     }
-  }, [passedItems, transportId, loadCode, route.params?.vehicleNo, fetchLoadDetails]);
+  }, [
+    passedItems,
+    transportId,
+    loadCode,
+    route.params?.vehicleNo,
+    fetchLoadDetails,
+  ]);
 
-  // Split and sort alphabetically in A to Z order
+  // Split and sort alphabetically in A to Z order under display name
   const toWeighProducts = useMemo(() => {
     return [...products]
       .filter((p) => !p.weighed)
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-      );
+      .sort((a, b) => {
+        const nameA = (a.displayName || a.name || "").trim();
+        const nameB = (b.displayName || b.name || "").trim();
+        return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+      });
   }, [products]);
 
   const weighedProducts = useMemo(() => {
     return [...products]
       .filter((p) => p.weighed)
-      .sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-      );
+      .sort((a, b) => {
+        const nameA = (a.displayName || a.name || "").trim();
+        const nameB = (b.displayName || b.name || "").trim();
+        return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+      });
   }, [products]);
 
   // Check if mismatches exist among weighed products
@@ -382,49 +471,13 @@ export default function UnloadingProducts({
 
   // Track if mismatch has been reported
   const [mismatchReported, setMismatchReported] = useState(false);
-  const [showMismatchSuccessModal, setShowMismatchSuccessModal] = useState(false);
+  const [showMismatchSuccessModal, setShowMismatchSuccessModal] =
+    useState(false);
 
   // Report mismatch button clicked
   const handleReportMismatch = () => {
     setMismatchReported(true);
     setShowMismatchSuccessModal(true);
-  };
-
-  const handleProductPress = (item: UnloadVarietyItem) => {
-    const currentUnload = store.getState().unload;
-    const finalTransportId = transportId || currentUnload.transportId;
-    const finalLoadCode = loadCode || currentUnload.loadCode;
-
-    navigation.navigate("WeighTheLoad", {
-      transportId: finalTransportId,
-      loadCode: finalLoadCode,
-      vehicleNo: route.params?.vehicleNo,
-      varietyId: item.id,
-      productId: item.id,
-      product: {
-        id: item.id,
-        name: item.name,
-        varietyNameEnglish: item.varietyNameEnglish,
-        varietyNameSinhala: item.varietyNameSinhala,
-        varietyNameTamil: item.varietyNameTamil,
-        cropNameEnglish: item.cropNameEnglish,
-        cropNameSinhala: item.cropNameSinhala,
-        cropNameTamil: item.cropNameTamil,
-        image: item.image,
-        totalWeightKg: item.expectedKg || 0,
-        totalCrates: item.expectedCrates || 0,
-        grades: item.grades || [
-          {
-            id: "g-1",
-            gradeTitle: "Grade A",
-            loadedWeightKg: item.expectedKg || 0,
-            loadedCrates: item.expectedCrates || 0,
-            unloadedWeightKg: null,
-            unloadedCrates: null,
-          },
-        ],
-      },
-    });
   };
 
   const allWeighed = useMemo(() => {
@@ -445,16 +498,16 @@ export default function UnloadingProducts({
           t("Warning", "Warning"),
           t(
             "UnloadingProducts.PleaseWeighAllProducts",
-            "Please weigh all products before finishing unloading."
-          )
+            "Please weigh all products before finishing unloading.",
+          ),
         );
       } else {
         Alert.alert(
           t("Warning", "Warning"),
           t(
             "UnloadingProducts.PleaseReportMismatch",
-            "Please report the mismatch before finishing unloading."
-          )
+            "Please report the mismatch before finishing unloading.",
+          ),
         );
       }
       return;
@@ -467,7 +520,10 @@ export default function UnloadingProducts({
     if (!finalTransportId && !finalLoadCode) {
       Alert.alert(
         t("Error.error", "Error"),
-        t("Error.TransportID or Load Code is required", "Transport ID or Load Code is required.")
+        t(
+          "Error.TransportID or Load Code is required",
+          "Transport ID or Load Code is required.",
+        ),
       );
       return;
     }
@@ -530,7 +586,7 @@ export default function UnloadingProducts({
             headers: {
               Authorization: `Bearer ${authToken}`,
             },
-          }
+          },
         );
         if (response.data.success) {
           success = true;
@@ -551,7 +607,7 @@ export default function UnloadingProducts({
               headers: {
                 Authorization: `Bearer ${authToken}`,
               },
-            }
+            },
           );
           if (resp2.data.success) {
             success = true;
@@ -573,14 +629,14 @@ export default function UnloadingProducts({
       } else {
         Alert.alert(
           t("Error.error", "Error"),
-          t("Error.FailedToFinishUnloading", "Failed to finish unloading.")
+          t("Error.FailedToFinishUnloading", "Failed to finish unloading."),
         );
       }
     } catch (err: any) {
       console.error("Error finishing unloading:", err);
       Alert.alert(
         t("Error.error", "Error"),
-        t("Error.FailedToFinishUnloading", "Failed to finish unloading.")
+        t("Error.FailedToFinishUnloading", "Failed to finish unloading."),
       );
     } finally {
       setSubmitting(false);
@@ -662,14 +718,17 @@ export default function UnloadingProducts({
       <CustomHeader
         title={t("UnloadingProducts.Title", "Unloading Products")}
         navigation={navigation}
-        onBackPress={handleBackToSummary}
+        onBackPress={handleBackPress}
       />
 
       {loading ? (
         <LoadingPage message={t("Loading", "Loading...")} />
       ) : products.length === 0 ? (
         <NoDataScreen
-          message={t("UnloadingProducts.NoItems", "- No items found for this transfer -")}
+          message={t(
+            "UnloadingProducts.NoItems",
+            "- No items found for this transfer -",
+          )}
         />
       ) : (
         <View className="flex-1 justify-between">
@@ -685,7 +744,7 @@ export default function UnloadingProducts({
             <Text className="text-center text-[#79747E] text-xs mb-4">
               {t(
                 "UnloadingProducts.Subtitle",
-                "Click on the product you want to unload."
+                "Click on the product you want to unload.",
               )}
             </Text>
 
@@ -705,7 +764,9 @@ export default function UnloadingProducts({
                 </View>
 
                 <View className="flex-row flex-wrap justify-between pt-1">
-                  {toWeighProducts.map((item) => renderProductCard(item, false))}
+                  {toWeighProducts.map((item) =>
+                    renderProductCard(item, false),
+                  )}
                 </View>
               </View>
             )}
@@ -749,14 +810,15 @@ export default function UnloadingProducts({
                       <Text className="ml-1.5 font-bold text-sm text-[#FF3B30]">
                         {t(
                           "UnloadingProducts.MismatchDetected",
-                          "Mismatch Detected"
+                          "Mismatch Detected",
                         )}
                       </Text>
                     </View>
 
                     {/* Details */}
                     <Text className="text-xs text-black mb-1 font-bold">
-                      {t("Mismatch.Product", "Product")} : {mismatch.productName}
+                      {t("Mismatch.Product", "Product")} :{" "}
+                      {mismatch.productName}
                     </Text>
                     <Text className="text-xs text-black mb-2 font-bold">
                       {t("Mismatch.Quality", "Quality")} : {mismatch.grade}
@@ -765,13 +827,17 @@ export default function UnloadingProducts({
                     {/* Numbered Difference Points */}
                     {mismatch.hasWeightMismatch && (
                       <Text className="text-xs text-black leading-5">
-                        {mismatch.hasCrateMismatch ? `${t("Mismatch.Point1", "1.")} ` : ""}
+                        {mismatch.hasCrateMismatch
+                          ? `${t("Mismatch.Point1", "1.")} `
+                          : ""}
                         {t("Mismatch.Expected", "Expected")}{" "}
                         <Text className="font-bold">
                           {mismatch.expectedKg.toFixed(2)}{" "}
                           <Text
                             style={{
-                              fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5,
+                              fontSize: i18n.language?.startsWith("si")
+                                ? 9.5
+                                : 10.5,
                               fontWeight: "normal",
                             }}
                           >
@@ -783,7 +849,9 @@ export default function UnloadingProducts({
                           {mismatch.measuredKg.toFixed(2)}{" "}
                           <Text
                             style={{
-                              fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5,
+                              fontSize: i18n.language?.startsWith("si")
+                                ? 9.5
+                                : 10.5,
                               fontWeight: "normal",
                             }}
                           >
@@ -795,7 +863,9 @@ export default function UnloadingProducts({
                           {mismatch.differenceKg.toFixed(2)}{" "}
                           <Text
                             style={{
-                              fontSize: i18n.language?.startsWith("si") ? 9.5 : 10.5,
+                              fontSize: i18n.language?.startsWith("si")
+                                ? 9.5
+                                : 10.5,
                               fontWeight: "normal",
                             }}
                           >
@@ -814,17 +884,19 @@ export default function UnloadingProducts({
                             mismatch.hasWeightMismatch ? "mt-1" : ""
                           }`}
                         >
-                          {mismatch.hasWeightMismatch ? `${t("Mismatch.Point2", "2.")} ` : ""}
+                          {mismatch.hasWeightMismatch
+                            ? `${t("Mismatch.Point2", "2.")} `
+                            : ""}
                           {t(
                             "Mismatch.ExpectedContainersCountIs",
-                            "Expected containers count is"
+                            "Expected containers count is",
                           )}{" "}
                           <Text className="font-bold">
                             {mismatch.expectedCrates}
                           </Text>{" "}
                           {t(
                             "Mismatch.ButReceivedContainerCountIs",
-                            ", but received container count is"
+                            ", but received container count is",
                           )}{" "}
                           <Text className="font-bold">
                             {mismatch.receivedCrates}
@@ -863,11 +935,19 @@ export default function UnloadingProducts({
                 }}
               >
                 <Text
-                  className={`font-bold text-sm ${
-                    mismatchReported ? "text-[#FF3B30]" : "text-white"
-                  }`}
+                  style={{
+                    fontWeight: "700",
+                    fontSize: 14,
+                    color: mismatchReported ? "#FF3B30" : "#FFFFFF",
+                    includeFontPadding: false,
+                  }}
                 >
-                  {t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
+                  {mismatchReported
+                    ? t(
+                        "UnloadingProducts.MismatchReportedButton",
+                        "Mismatch Reported",
+                      )
+                    : t("UnloadingProducts.ReportMismatch", "Report Mismatch")}
                 </Text>
               </TouchableOpacity>
             )}
@@ -905,10 +985,13 @@ export default function UnloadingProducts({
       {/* AlertModal for Mismatch Reported Success */}
       <AlertModal
         visible={showMismatchSuccessModal}
-        title={t("UnloadingProducts.MismatchReportedTitle", "Mismatch Reported!")}
+        title={t(
+          "UnloadingProducts.MismatchReportedTitle",
+          "Mismatch Reported!",
+        )}
         message={t(
           "UnloadingProducts.MismatchReportedMessage",
-          "Load mismatch has been successfully reported."
+          "Load mismatch has been successfully reported.",
         )}
         type="success"
         onClose={() => setShowMismatchSuccessModal(false)}
@@ -925,7 +1008,7 @@ export default function UnloadingProducts({
             <Text className="text-center text-[#4E5273] text-sm mb-1">
               {t(
                 "UnloadingProducts.SuccessMessage",
-                "Products unloaded successfully."
+                "Products unloaded successfully.",
               )}
             </Text>
             {loadCode ? (
@@ -947,9 +1030,12 @@ export default function UnloadingProducts({
         title={t("Common.ReadyToFinalize", "Ready to Finalize?")}
         message={t(
           "UnloadingProducts.FinalizeMessage",
-          "Please review your unloading details again before finalize."
+          "Please review your unloading details again before finalize.",
         )}
-        confirmText={t("UnloadingProducts.ConfirmUnloading", "Confirm Unloading")}
+        confirmText={t(
+          "UnloadingProducts.ConfirmUnloading",
+          "Confirm Unloading",
+        )}
         cancelText={t("Common.NoGoBack", "No, Go back")}
         onConfirm={() => {
           setShowFinalizeModal(false);

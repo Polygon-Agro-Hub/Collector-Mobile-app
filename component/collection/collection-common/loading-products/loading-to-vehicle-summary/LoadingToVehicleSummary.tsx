@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
 import { clearTransportLoad } from "@/store/transportSlice";
-import { getLocalizedProductName } from "@/component/distribution/distribution-common/unloading-products/unloading-products/UnloadingProducts";
+import { getLocalizedProductName } from "@/utils/productLocalization";
 import { getLocalizedDriverName } from "@/utils/driverLocalization";
 
 type LoadingToVehicleSummaryNavigationProp = StackNavigationProp<
@@ -102,6 +102,45 @@ export default function LoadingToVehicleSummary({
     Array.isArray(passedItems) ? passedItems : []
   );
 
+  const getVarietyTitle = useCallback(
+    (crop: CropLoadData) => {
+      const lang = (i18n.language || "en").toLowerCase();
+      if (lang.startsWith("si") && crop.varietyNameSinhala) {
+        return crop.varietyNameSinhala;
+      }
+      if (lang.startsWith("ta") && crop.varietyNameTamil) {
+        return crop.varietyNameTamil;
+      }
+      return (
+        crop.varietyNameEnglish ||
+        crop.varietyLabel ||
+        crop.cropName ||
+        getLocalizedProductName(crop, i18n.language) ||
+        ""
+      );
+    },
+    [i18n.language]
+  );
+
+  // Sort items alphabetically from A to Z under Variety name
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      const nameA = (
+        getVarietyTitle(a) ||
+        a.varietyNameEnglish ||
+        a.varietyLabel ||
+        ""
+      ).trim();
+      const nameB = (
+        getVarietyTitle(b) ||
+        b.varietyNameEnglish ||
+        b.varietyLabel ||
+        ""
+      ).trim();
+      return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+    });
+  }, [items, getVarietyTitle]);
+
   const fetchLoadDetails = useCallback(async () => {
     if (!transportId) return;
 
@@ -110,7 +149,7 @@ export default function LoadingToVehicleSummary({
       const authToken = store.getState().auth.token;
 
       const response = await axios.get(
-        `${environment.API_BASE_URL}api/transport/load/${transportId}`,
+        `${environment.API_BASE_URL}api/transport/load/${transportId}?sortBy=variety`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -146,7 +185,7 @@ export default function LoadingToVehicleSummary({
     } finally {
       setLoading(false);
     }
-  }, [transportId, t]);
+  }, [transportId, t, i18n.language]);
 
   useEffect(() => {
     if (isViewOnly && transportId) {
@@ -178,7 +217,7 @@ export default function LoadingToVehicleSummary({
 
       // Build items payload
       const reduxItems = transportState.loadedVarieties;
-      const sourceItems = items.length > 0 ? items : (reduxItems as any[]);
+      const sourceItems = sortedItems.length > 0 ? sortedItems : (items.length > 0 ? items : (reduxItems as any[]));
       const finalItems = sourceItems.map((item: any) => ({
         varietyId: item.varietyId || item.id,
         gradeSets: item.gradeSets || [],
@@ -300,7 +339,7 @@ export default function LoadingToVehicleSummary({
           showsVerticalScrollIndicator={false}
         >
           <View>
-            {items.map((crop) => (
+            {sortedItems.map((crop) => (
               <View
                 key={crop.id}
                 className="bg-white rounded-3xl p-4 mb-5"
@@ -329,7 +368,7 @@ export default function LoadingToVehicleSummary({
                   )}
                   <View className="flex-1 justify-center">
                     <Text className="text-base font-bold text-black flex-wrap">
-                      {getLocalizedProductName(crop, i18n.language) || crop.cropName}
+                      {getVarietyTitle(crop)}
                     </Text>
                   </View>
                 </View>

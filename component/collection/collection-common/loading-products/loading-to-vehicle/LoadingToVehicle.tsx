@@ -94,6 +94,12 @@ interface SavedVariety {
   cropLabel: string;
   varietyId?: string;
   varietyLabel: string;
+  varietyNameEnglish?: string;
+  varietyNameSinhala?: string;
+  varietyNameTamil?: string;
+  cropNameEnglish?: string;
+  cropNameSinhala?: string;
+  cropNameTamil?: string;
   imageUri?: string;
   sets: SavedSet[];
 }
@@ -766,6 +772,14 @@ export default function LoadingToVehicle({
       selectedCrop?.image ||
       "";
 
+    const allVarieties = Object.values(rawVarieties).flat();
+    const varietyObj = allVarieties.find(
+      (item: any) => String(item.varietyId || item.value || item.id) === String(selectedVariety?.value)
+    );
+    const cropObj = rawCrops.find(
+      (item: any) => String(item.cropId || item.value || item.id) === String(selectedCrop?.value)
+    );
+
     const newSavedVariety: SavedVariety = {
       id: `variety-${Date.now()}`,
       varietyNumber: varietyIndex,
@@ -776,6 +790,12 @@ export default function LoadingToVehicle({
         selectedVariety?.label ||
         selectedCrop?.label ||
         `Variety ${varietyIndex}`,
+      varietyNameEnglish: varietyObj?.varietyNameEnglish || selectedVariety?.label || "",
+      varietyNameSinhala: varietyObj?.varietyNameSinhala || "",
+      varietyNameTamil: varietyObj?.varietyNameTamil || "",
+      cropNameEnglish: cropObj?.cropNameEnglish || selectedCrop?.label || "",
+      cropNameSinhala: cropObj?.cropNameSinhala || "",
+      cropNameTamil: cropObj?.cropNameTamil || "",
       imageUri,
       sets: completedSets,
     };
@@ -1006,6 +1026,12 @@ export default function LoadingToVehicle({
         cropLabel: v.cropLabel,
         varietyId: v.varietyId,
         varietyLabel: v.varietyLabel,
+        varietyNameEnglish: v.varietyNameEnglish,
+        varietyNameSinhala: v.varietyNameSinhala,
+        varietyNameTamil: v.varietyNameTamil,
+        cropNameEnglish: v.cropNameEnglish,
+        cropNameSinhala: v.cropNameSinhala,
+        cropNameTamil: v.cropNameTamil,
         cropName: v.varietyLabel || v.cropLabel,
         imageUri: finalImageUri,
         totalWeightKg: totalWeight,
@@ -1049,6 +1075,14 @@ export default function LoadingToVehicle({
         selectedVariety?.image || selectedCrop?.image
       );
 
+      const allVarieties = Object.values(rawVarieties).flat();
+      const varietyObj = allVarieties.find(
+        (item: any) => String(item.varietyId || item.value || item.id) === String(selectedVariety?.value)
+      );
+      const cropObj = rawCrops.find(
+        (item: any) => String(item.cropId || item.value || item.id) === String(selectedCrop?.value)
+      );
+
       summaryList.push({
         id: `current-variety-${Date.now()}`,
         varietyNumber: varietyIndex,
@@ -1059,6 +1093,12 @@ export default function LoadingToVehicle({
           selectedVariety?.label ||
           selectedCrop?.label ||
           `Variety ${varietyIndex}`,
+        varietyNameEnglish: varietyObj?.varietyNameEnglish || selectedVariety?.label || "",
+        varietyNameSinhala: varietyObj?.varietyNameSinhala || "",
+        varietyNameTamil: varietyObj?.varietyNameTamil || "",
+        cropNameEnglish: cropObj?.cropNameEnglish || selectedCrop?.label || "",
+        cropNameSinhala: cropObj?.cropNameSinhala || "",
+        cropNameTamil: cropObj?.cropNameTamil || "",
         cropName:
           selectedVariety?.label ||
           selectedCrop?.label ||
@@ -1069,6 +1109,13 @@ export default function LoadingToVehicle({
         gradeSets: currentGradeSets,
       });
     }
+
+    // Sort summaryList A - Z by variety name
+    summaryList.sort((a, b) => {
+      const nameA = (a.varietyNameEnglish || a.varietyLabel || a.cropName || "").trim();
+      const nameB = (b.varietyNameEnglish || b.varietyLabel || b.cropName || "").trim();
+      return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+    });
 
     // Save to Redux store
     store.dispatch({
@@ -2219,8 +2266,8 @@ export default function LoadingToVehicle({
       <WarningConfirmation
         visible={varietyToDelete !== null}
         message={t(
-          "UnregisteredCropDetails.Are you sure you want to delete previously added",
-          "Are you sure you want to delete previously added {{varietyName}} ?",
+          "UnregisteredCropDetails.DeleteVarietyConfirmation",
+          "Are you sure you want to delete previously added {{varietyName}} ?",  
           {
             varietyName: varietyToDelete?.varietyLabel || "",
           }

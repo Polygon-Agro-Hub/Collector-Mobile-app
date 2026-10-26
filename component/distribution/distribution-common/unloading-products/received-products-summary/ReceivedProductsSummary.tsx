@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,10 @@ import {
   Image,
   StatusBar,
   Alert,
+  BackHandler,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/types";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import LoadingPage from "@/component/components/loading/LoadingPage";
@@ -20,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
 import environment from "@/environment/environment";
-import { getLocalizedProductName } from "../unloading-products/UnloadingProducts";
+import { getLocalizedProductName } from "@/utils/productLocalization";
 
 type ReceivedProductsSummaryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -46,6 +47,8 @@ export interface GradeSetItem {
 
 export interface CropLoadData {
   id: string;
+  displayName?: string;
+  varietyLabel?: string;
   varietyNameEnglish?: string;
   varietyNameSinhala?: string;
   varietyNameTamil?: string;
@@ -90,6 +93,28 @@ export default function ReceivedProductsSummary({
   );
   const [loading, setLoading] = useState<boolean>(!!transportId);
 
+  const getDisplayNameForSort = useCallback(
+    (crop: CropLoadData) => {
+      return (
+        crop.displayName ||
+        getLocalizedProductName(crop, i18n.language) ||
+        crop.cropName ||
+        crop.varietyNameEnglish ||
+        ""
+      ).trim();
+    },
+    [i18n.language]
+  );
+
+  // Sort items alphabetically from A to Z under display name
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      const nameA = getDisplayNameForSort(a);
+      const nameB = getDisplayNameForSort(b);
+      return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+    });
+  }, [items, getDisplayNameForSort]);
+
   const fetchLoadDetails = useCallback(async () => {
     if (!transportId) return;
 
@@ -97,7 +122,7 @@ export default function ReceivedProductsSummary({
       setLoading(true);
       const authToken = store.getState().auth.token;
 
-      const queryParam = isUnloadedParam ? "?type=unloaded" : "";
+      const queryParam = isUnloadedParam ? "?type=unloaded&sortBy=display" : "?sortBy=display";
       const response = await axios.get(
         `${environment.API_BASE_URL}api/transport/load/${transportId}${queryParam}`,
         {
@@ -142,12 +167,40 @@ export default function ReceivedProductsSummary({
     fetchLoadDetails();
   }, [fetchLoadDetails]);
 
+  const handleBackPress = useCallback(() => {
+    if (isUnloaded) {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.navigate("ReceivedProductsToday");
+      }
+    } else {
+      navigation.navigate("ScanLoadQR");
+    }
+  }, [isUnloaded, navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        handleBackPress();
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [handleBackPress])
+  );
+
   const handleStartUnloading = () => {
     navigation.navigate("UnloadingProducts", {
       transportId,
       loadCode,
       vehicleNo,
-      items,
+      items: sortedItems,
     });
   };
 
@@ -163,6 +216,7 @@ export default function ReceivedProductsSummary({
             : t("ReceivedProductsSummary.Title", "Summery")
         }
         navigation={navigation}
+        onBackPress={handleBackPress}
       />
 
       {loading ? (
@@ -253,7 +307,7 @@ export default function ReceivedProductsSummary({
                 </View>
               </View>
             </View>
-            {items.map((crop) => (
+            {sortedItems.map((crop) => (
               <View
                 key={crop.id}
                 className="bg-white rounded-3xl p-4 mb-5"

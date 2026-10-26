@@ -194,6 +194,15 @@ export default function OrderDetails({
 
                 const statusDisplay = `(${formatRowTitle(rName, t)}) ${sTranslated}`;
 
+                const rawCategory = String(details.category || params.category || "").trim();
+                const isPickup =
+                  rawCategory.toLowerCase().includes("pickup") ||
+                  rawCategory.includes("රැගෙන") ||
+                  rawCategory.includes("பிக்அப்");
+                const categoryDisplay = isPickup
+                  ? t("DistributionCenterTarget.Pickup Orders", "Pickup Orders")
+                  : t("DistributionCenterTarget.Delivery", "Delivery");
+
                 return (
                   <View className="bg-white rounded-2xl p-4 mb-5 border border-[#000000] items-center shadow-sm">
                     <Text className="font-extrabold text-slate-950 text-base text-center">
@@ -207,7 +216,7 @@ export default function OrderDetails({
                       {formatTimeSlot(details.timeSlotLabel || params.timeSlotLabel, t)}
                     </Text>
                     <Text className="text-xs text-[#54617D] mt-0.5 font-medium text-center">
-                      {formatOrderCategory(details.category || params.category, t)}
+                      {categoryDisplay}
                     </Text>
                     <Text className="text-xs font-extrabold mt-0.5 text-[#980775] text-center">
                       {statusDisplay}
@@ -262,52 +271,76 @@ export default function OrderDetails({
                     </Text>
 
                     <View className="gap-2.5">
-                      {group.items.map((item, idx) => (
-                        <View
-                          key={`${group.id}_${item.id}_${idx}`}
-                          className="bg-white rounded-2xl p-3 border border-slate-200 flex-row items-center justify-between shadow-sm"
-                        >
-                          <View className="flex-row items-center flex-1 pr-2">
-                            {item.image ? (
-                              <Image
-                                source={{ uri: item.image }}
-                                className="w-14 h-14 rounded-xl mr-3"
-                                resizeMode="contain"
-                              />
-                            ) : (
-                              <View
-                                className="w-14 h-14 rounded-xl mr-3 items-center justify-center"
-                                style={{ backgroundColor: isAlacarte ? "#FDF3E7" : "#F9EEF6" }}
-                              >
-                                <Text
-                                  className="font-extrabold text-sm"
-                                  style={{ color: isAlacarte ? "#AC7F5E" : "#980775" }}
-                                >
-                                  {(item.name || "?")[0].toUpperCase()}
-                                </Text>
-                              </View>
-                            )}
-                            <View className="flex-1">
-                              <Text className="text-slate-900 font-bold text-xs" numberOfLines={1}>
-                                {item.name}
-                              </Text>
-                              <Text className="text-[#54617D] text-[11px] font-medium mt-0.5">
-                                {formatWeight(item.weight)}
-                              </Text>
-                              <Text className="text-[#54617D] text-[11px] font-semibold mt-0.5">
-                                {t("DistributionCenterTarget.Packed By", "Packed By")}
-                              </Text>
-                              <Text className="text-slate-950 font-extrabold text-xs mt-0.5">
-                                {item.packedByEmpId}
-                              </Text>
-                            </View>
-                          </View>
+                      {group.items.map((item, idx) => {
+                        const isMissedByPacker =
+                          !item.packedByEmpId ||
+                          item.packedByEmpId === "-" ||
+                          item.packedByEmpId.toLowerCase() === "null" ||
+                          item.packedByEmpId.toLowerCase() === "undefined" ||
+                          (Boolean(details.qcDoneByEmpId) &&
+                            details.qcDoneByEmpId !== "-" &&
+                            item.packedByEmpId === details.qcDoneByEmpId);
 
-                          <Text className="text-[#54617D] text-xs font-medium">
-                            {formatTimeSlot(item.packedTime, t)}
-                          </Text>
-                        </View>
-                      ))}
+                        return (
+                          <View
+                            key={`${group.id}_${item.id}_${idx}`}
+                            className="bg-white rounded-2xl p-3 border border-slate-200 flex-row items-center justify-between shadow-sm"
+                          >
+                            <View className="flex-row items-center flex-1 pr-2">
+                              {item.image ? (
+                                <Image
+                                  source={{ uri: item.image }}
+                                  className="w-14 h-14 rounded-xl mr-3"
+                                  resizeMode="contain"
+                                />
+                              ) : (
+                                <View
+                                  className="w-14 h-14 rounded-xl mr-3 items-center justify-center"
+                                  style={{ backgroundColor: isAlacarte ? "#FDF3E7" : "#F9EEF6" }}
+                                >
+                                  <Text
+                                    className="font-extrabold text-sm"
+                                    style={{ color: isAlacarte ? "#AC7F5E" : "#980775" }}
+                                  >
+                                    {(item.name || "?")[0].toUpperCase()}
+                                  </Text>
+                                </View>
+                              )}
+                              <View className="flex-1">
+                                <Text className="text-slate-900 font-bold text-xs" numberOfLines={1}>
+                                  {item.name}
+                                </Text>
+                                <Text className="text-[#54617D] text-[11px] font-medium mt-0.5">
+                                  {formatWeight(item.weight)}
+                                </Text>
+                                <Text className="text-[#54617D] text-[11px] font-semibold mt-0.5">
+                                  {t("DistributionCenterTarget.Packed By", "Packed By")}
+                                </Text>
+                                {isMissedByPacker ? (
+                                  <Text
+                                    className="font-extrabold text-xs mt-0.5"
+                                    style={{ color: "#FF2D55" }}
+                                  >
+                                    --
+                          {t("Packing.Unallocated", {
+                            defaultValue: "Unallocated",
+                          })}
+                          --
+                                  </Text>
+                                ) : (
+                                  <Text className="text-slate-950 font-extrabold text-xs mt-0.5">
+                                    {item.packedByEmpId}
+                                  </Text>
+                                )}
+                              </View>
+                            </View>
+
+                            <Text className="text-[#54617D] text-xs font-medium">
+                              {formatTimeSlot(item.packedTime, t)}
+                            </Text>
+                          </View>
+                        );
+                      })}
                     </View>
                   </View>
                 );

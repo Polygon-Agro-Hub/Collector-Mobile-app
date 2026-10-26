@@ -233,6 +233,71 @@ export default function PrintingConfirmation({
     if (isPrinting || isProcessing) return;
     setIsProcessing(true);
 
+    const isReprint = Boolean(route.params?.isReprint);
+    if (isReprint) {
+      try {
+        const labelData: LabelThemeData = {
+          qrValue: qrValue,
+          orderNumber: cleanInv,
+          category: categoryEn,
+          orderType: isWholesale ? "Wholesale" : "Retail",
+          date: activeDate,
+          timeSlot: activeTimeSlot,
+          stepLabel: activeStepLabel,
+          stepIndex: activeStepIndex,
+        };
+
+        const tspl = buildTheme2TSPL(labelData);
+        await printTSPL(tspl);
+
+        setIsPrintSuccess(true);
+        setAlertType("success");
+        setAlertTitle(t("QRHandling.Success", "Success!"));
+        setAlertMessage(
+          t(
+            "QRHandling.QR code printed successfully!",
+            "QR code printed successfully!",
+          ),
+        );
+        setAlertVisible(true);
+        setIsProcessing(false);
+      } catch (printErr: any) {
+        console.error("Physical reprint failed:", printErr);
+        const errMsg = String(printErr?.message || "");
+        let localizedMsg = t(
+          "QRHandling.Failed to print sticker message",
+          "Failed to print sticker on thermal printer. Please check your printer connection and try again.",
+        );
+
+        if (
+          errMsg.includes("data channel") ||
+          errMsg.includes("disconnect and reconnect")
+        ) {
+          localizedMsg = t(
+            "QRHandling.Printer data channel not open",
+            "Printer connected but data channel is not open. Please disconnect and reconnect your printer.",
+          );
+        } else if (errMsg.includes("No printer connected")) {
+          localizedMsg = t(
+            "QRHandling.No printer connected message",
+            "No printer connected. Please connect to a printer first.",
+          );
+        } else if (errMsg.includes("No writable BLE data channel")) {
+          localizedMsg = t(
+            "QRHandling.No writable data channel message",
+            "No writable BLE data channel found on printer. Please power cycle printer and retry.",
+          );
+        }
+
+        setAlertType("error");
+        setAlertTitle(t("QRHandling.Printer Error", "Printer Error"));
+        setAlertMessage(localizedMsg);
+        setAlertVisible(true);
+        setIsProcessing(false);
+      }
+      return;
+    }
+
     let backendOpenedSuccessfully = false;
     let isMainContainerStep = activeStep.type === "main";
     let targetOrderPackageId = isMainContainerStep

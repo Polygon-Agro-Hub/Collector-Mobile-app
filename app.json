@@ -2,14 +2,14 @@
   "expo": {
     "name": "CoDi-Net",
     "slug": "CoDi-Net",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
     "android": {
       "package": "com.polygonagro.Collector",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 16,
+      "versionCode": 18,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
@@ -55,7 +55,6 @@
     "ios": {
       "icon": "./assets/images/app/adaptive-icon.png",
       "bundleIdentifier": "com.polygonagro.Collector",
-      "buildNumber": "1.0.0",
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -79,6 +78,7 @@
       "favicon": "./assets/images/app/favicon.png"
     },
     "plugins": [
+      "./plugins/withCustomAndroidPermissions",
       [
         "expo-build-properties",
         {
@@ -142,8 +142,7 @@
           "defaultChannel": "dcm-otp-notifications",
           "enableBackgroundRemoteNotifications": true
         }
-      ],
-      "./plugins/withCustomAndroidPermissions"
+      ]
     ],
     "extra": {
       "eas": {

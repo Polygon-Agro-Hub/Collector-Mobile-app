@@ -13,9 +13,9 @@ import environment from "../environment/environment";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AlertModal, setGlobalAlertListener } from "@/component/components/popup/AlertModal";
 import {
-  verifyOfficerStatus,
   setupGlobalApiInterceptors,
   handleAuthError,
+  verifyOfficerStatus,
 } from "@/services/apiInterceptor";
 import {
   SafeAreaProvider,
@@ -102,34 +102,9 @@ function AppContent() {
       pushNotificationService.displayLocalNotification(item, bodyText);
     });
 
-    // When officer/account status changes via socket, handle immediately (push-based, no polling)
-    const unsubscribeOfficerStatus = socketService.onOfficerStatusChanged(async (data: any) => {
-      console.log("🔒 [App.tsx] Officer status changed via socket:", data);
-      const accStatus = (
-        data?.accountStatus ||
-        (typeof data?.status === "string" ? data.status : "")
-      ).toLowerCase();
-      const isRejected =
-        accStatus === "rejected" ||
-        accStatus === "banned" ||
-        accStatus === "not approved" ||
-        accStatus === "not_approved";
-      const isForceLogout =
-        data?.type === "force_logout" ||
-        data?.code === "FORCE_LOGOUT" ||
-        data?.action === "logout";
-
-      if (isRejected || isForceLogout) {
-        handleAuthError(isRejected ? 403 : 401, data);
-      } else {
-        await verifyOfficerStatus(true);
-      }
-    });
-
     return () => {
       unsubscribeStore();
       unsubscribeNotif();
-      unsubscribeOfficerStatus();
     };
   }, []);
 
@@ -196,6 +171,9 @@ function AppContent() {
         if (storedEmpId) {
           await status(storedEmpId, true);
         }
+        if (store.getState().auth.token) {
+          verifyOfficerStatus(true);
+        }
       } else if (nextAppState === "background") {
         if (storedEmpId) {
           await status(storedEmpId, false);
@@ -255,7 +233,9 @@ function AppContent() {
           }}
           onStateChange={() => {
             const routeName = (navigationRef.getCurrentRoute() as any)?.name;
-            if (routeName) setCurrentRoute(routeName);
+            if (routeName) {
+              setCurrentRoute(routeName);
+            }
           }}
         >
           <RootStackNavigator />
