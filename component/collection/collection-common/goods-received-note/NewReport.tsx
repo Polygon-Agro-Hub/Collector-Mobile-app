@@ -702,12 +702,9 @@ const generatePDF = async () => {
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const isSinhala = activeLang === "si";
-      const isTamil = activeLang === "ta";
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "GRN";
       const cleanGrn = (crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA").replace(/[^a-zA-Z0-9_-]/g, "_");
       const date = new Date().toISOString().slice(0, 10);
-      const fileName = `${prefix}_${cleanGrn}_${date}.pdf`;
+      const fileName = `GRN_${cleanGrn}_${date}.pdf`;
 
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
