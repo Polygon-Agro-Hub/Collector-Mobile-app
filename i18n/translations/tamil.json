@@ -359,9 +359,9 @@
     "Grade": "தரம்",
     "Target": "இலக்கு (kg)",
     "Todo()": "செய்ய வேண்டியவை(kg)",
-    "Completedkg": "பூர்த்தி செய்யப்பட்டவை (kg)",
+    "Completedkg": "முடித்தவை (kg)",
     "noCompletedTargets": "பூர்த்தி செய்யப்பட்ட இலக்குகள் எதுவும் இல்லை.",
-    "NoTodoItems": "செய்ய வேண்டிய இலக்கு எதுவும் இல்லை.",
+    "NoTodoItems": "இலக்கை அடையவில்லை",
     "Out": "வெளியே",
     "MyDailyTarget": "எனது தினசரி இலக்கு"
   },
@@ -805,7 +805,7 @@
     "Drivers List": "சாரதிகளின் பட்டியல்",
     "Officers / Drivers List": "அதிகாரிகளின் பட்டியல்",
     "Drivers": "சாரதிகள்",
-    "Not Approved": "அங்கீகரிக்கப்படாதவை",
+    "Not Approved": "அனுமதி இல்லை",
     "No officers found": "- அதிகாரிகள் எவரும் கண்டறியப்படவில்லை -",
     "No drivers found": "- சாரதிகள் எவரும் கண்டறியப்படவில்லை -",
     "EMPID": "ஊழியர் அடையாள எண் :"
@@ -844,7 +844,7 @@
     "From": "இருந்து",
     "Today": "இன்று",
     "Target Coverage": "அடையப்பட்ட இலக்கின் அளவு",
-    "OpenTarget": "இலக்குப் பட்டியலைப் பார்க்கவும்"
+    "OpenTarget": "வேலைப் பட்டியல்"
   },
   "PassTargetBetweenOfficers": {
     "LNG": "ta",
