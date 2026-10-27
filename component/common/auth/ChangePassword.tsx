@@ -284,11 +284,17 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({ navigation }) => {
             />
           </View>
 
-          <View className="items-center pt-[5%]">
-            <Text className="font-bold text-2xl">
+          <View className="items-center pt-[5%] w-full px-4">
+            <Text
+              className="font-bold text-2xl text-center text-[#000000] w-full"
+              style={{ textAlign: "center" }}
+            >
               {t("ChangePassword.ChoosePassword")}
             </Text>
-            <Text className="text-center font-light pt-3">
+            <Text
+              className="text-center font-light pt-3 text-[#4B5563] w-full"
+              style={{ textAlign: "center" }}
+            >
               {t("ChangePassword.Changepassword")}
             </Text>
           </View>

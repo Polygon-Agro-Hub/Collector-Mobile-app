@@ -265,14 +265,18 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                 }}
               >
                 <View className="w-full items-center mt-10">
-                  <View className="flex-row">
-                    <Text className="text-2xl font-semibold text-center mb-4 text-[#424242]">
-                      {t("ReportComplaint.Tellus")}
-                    </Text>
-                    <Text className="text-2xl font-semibold text-center mb-4 pl-2 text-[#D72C62]">
-                      {t("ReportComplaint.Problem")}
-                    </Text>
-                  </View>
+                  <Text
+                    className="text-2xl font-semibold text-center mb-4 text-[#424242] w-full px-2"
+                    style={{ textAlign: "center" }}
+                  >
+                    {t("ReportComplaint.Tellus")}
+                    {t("ReportComplaint.Problem") ? (
+                      <Text className="text-[#D72C62]">
+                        {" "}
+                        {t("ReportComplaint.Problem")}
+                      </Text>
+                    ) : null}
+                  </Text>
 
                   {/* Category Selector */}
                   <View className="w-full mb-4">
@@ -299,7 +303,10 @@ const ComplainPage: React.FC<ComplainPageProps> = () => {
                     </TouchableOpacity>
                   </View>
 
-                  <Text className="text-sm text-gray-600 text-center mb-4">
+                  <Text
+                    className="text-sm text-gray-600 text-center mb-4 w-full px-2"
+                    style={{ textAlign: "center" }}
+                  >
                     {t("ReportComplaint.WewilRespond")}
                   </Text>
 
