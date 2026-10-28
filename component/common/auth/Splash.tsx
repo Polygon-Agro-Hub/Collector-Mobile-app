@@ -214,7 +214,7 @@ const Splash: React.FC<SplashProps> = ({ navigation }) => {
             width={null}
             color="#8C0876"
             borderWidth={0}
-            style={{ height: 10, marginTop: 20 }}
+            height={10}
           />
         </View>
       </View>
