@@ -83,7 +83,7 @@
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 36,
+            "compileSdkVersion": 37,
             "targetSdkVersion": 36,
             "minSdkVersion": 24,
             "enableProguardInReleaseBuilds": true,
@@ -146,7 +146,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "0f16734d-6e32-4d5b-92b9-d02b9edd3b54"
       }
     }
   }
