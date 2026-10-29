@@ -6,8 +6,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   ScrollView,
-  Modal,
-  Platform,
   Alert,
   BackHandler,
 } from "react-native";
@@ -19,8 +17,8 @@ import { RootStackParamList } from "@/types/types";
 import axios from "axios";
 import environment from "@/environment/environment";
 import LottieView from "lottie-react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import CustomCalendar from "@/component/components/popup/CustomcalendarModal";
 
 type ReceivedCashNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -59,7 +57,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
-  const totalCash = transactions.reduce((sum, t) => sum + t.cash, 0);
+  const totalCash = transactions.reduce((sum, tx) => sum + tx.cash, 0);
 
   const hasTransactions = transactions.length > 0;
 
@@ -77,23 +75,33 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
     return `${year}-${month}-${day}`;
   };
 
+  const getLanguageFlags = () => {
+    const am = t("Time.AM", { defaultValue: "AM" });
+    const currentLang =
+      (t && t("SignIn.LNG")) ||
+      (t && t("LNG")) ||
+      (t && t("DistridutionaDashboard.LNG")) ||
+      (t && t("AddOfficerBasicDetails.LNG")) ||
+      "en";
+
+    const lang = String(currentLang).toLowerCase();
+    const isSinhala = am === "පෙ.ව." || lang.startsWith("si");
+    const isTamil = am === "முற்பகல்" || lang.startsWith("ta");
+    return { isSinhala, isTamil };
+  };
+
   const formatDateTime = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      const am = t("Time.AM", { defaultValue: "AM" });
-      const currentLang =
-        (t && t("SignIn.LNG")) ||
-        (t && t("LNG")) ||
-        (t && t("DistridutionaDashboard.LNG")) ||
-        (t && t("AddOfficerBasicDetails.LNG")) ||
-        "en";
-      const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
-      const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
+    const { isSinhala, isTamil } = getLanguageFlags();
 
-      let cleaned = dateString
-        .replace(/පෙ\.ව\.|මුற்பகல்/gi, "AM")
-        .replace(/ප\.ව\.|பிற்பகல்/gi, "PM");
+    // Not a parsable date string -> only translate the AM/PM text
+    if (isNaN(date.getTime())) {
+      const cleaned = dateString
+        .replace(/පෙ\.ව\./g, "AM")
+        .replace(/ප\.ව\./g, "PM")
+        .replace(/முற்பகல்/g, "AM")
+        .replace(/பிற்பகல்/g, "PM");
 
       if (isSinhala) {
         return cleaned
@@ -120,31 +128,19 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
     const isPM = hours >= 12;
     hours = hours % 12;
     if (hours === 0) hours = 12;
-    const displayHours = hours;
-
-    const am = t("Time.AM", { defaultValue: "AM" });
-    const currentLang =
-      (t && t("SignIn.LNG")) ||
-      (t && t("LNG")) ||
-      (t && t("DistridutionaDashboard.LNG")) ||
-      (t && t("AddOfficerBasicDetails.LNG")) ||
-      "en";
-
-    const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
-    const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
 
     if (isSinhala) {
       const period = isPM ? "ප.ව." : "පෙ.ව.";
-      return `${year}/${month}/${day} ${period} ${displayHours}:${minutes}`;
+      return `${year}/${month}/${day} ${period} ${hours}:${minutes}`;
     }
 
     if (isTamil) {
       const period = isPM ? "பிற்பகல்" : "முற்பகல்";
-      return `${year}/${month}/${day} ${period} ${displayHours}:${minutes}`;
+      return `${year}/${month}/${day} ${period} ${hours}:${minutes}`;
     }
 
     const ampm = isPM ? "PM" : "AM";
-    return `${year}/${month}/${day} ${displayHours}:${minutes} ${ampm}`;
+    return `${year}/${month}/${day} ${hours}:${minutes} ${ampm}`;
   };
 
   const extractDate = (dateString: string) => {
@@ -180,7 +176,8 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
             const rawTime = item.handOverTime || item.pickupCreatedAt;
             return {
               id:
-                item.pickupOrderId?.toString() || item.processOrderId?.toString(),
+                item.pickupOrderId?.toString() ||
+                item.processOrderId?.toString(),
               orderId:
                 item.processOrderOrderId || item.pickupOrderOrderId || "N/A",
               cash: parseFloat(item.handOverPrice) || 0,
@@ -216,54 +213,35 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
   const filterTransactionsByDate = useCallback(() => {
     setFilterLoading(true);
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const selectedDateStr = formatDateForComparison(selectedDate);
       const filtered = allTransactions.filter(
         (transaction) => transaction.date === selectedDateStr,
       );
       setTransactions(filtered);
-
       setFilterLoading(false);
     }, 300);
+
+    return () => clearTimeout(timer);
   }, [selectedDate, allTransactions]);
 
   useEffect(() => {
-    filterTransactionsByDate();
+    const cleanup = filterTransactionsByDate();
+    return cleanup;
   }, [filterTransactionsByDate]);
 
-  useEffect(() => {
-    fetchReceivedCash();
-  }, []);
-
+  // Runs on mount and every time the screen gains focus
   useFocusEffect(
     useCallback(() => {
       setSelectedDate(new Date());
-
       fetchReceivedCash();
     }, []),
   );
 
-  const onDateChange = (event: any, date?: Date) => {
-    if (Platform.OS === "android") {
-      setShowDatePicker(false);
-    }
-
-    if (date) {
-      setSelectedDate(date);
-    }
-  };
-
-  const handleCalendarPress = () => {
-    setShowDatePicker(true);
-  };
-
-  const handleCalendarClose = () => {
-    setShowDatePicker(false);
-  };
-
-  const handleDateConfirm = () => {
-    setShowDatePicker(false);
-  };
+  // Calendar handlers
+  const handleCalendarPress = () => setShowDatePicker(true);
+  const handleCalendarClose = () => setShowDatePicker(false);
+  const handleDateConfirm = (date: Date) => setSelectedDate(date);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -314,6 +292,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
           <Ionicons name="calendar-clear" size={26} color="black" />
         </TouchableOpacity>
       </View>
+
       <View className="flex-1 w-full max-w-[500px] mx-auto">
         <View className="bg-white px-4 py-3 flex-row items-center ">
           <Text className="text-sm font-medium text-gray-900">
@@ -409,7 +388,8 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
                     </Text>
                   </View>
                   <Text className="text-xs text-[#848484]">
-                    {t("ReceivedCash.Received Time")} : {formatDateTime(item.rawTime || item.receivedTime)}
+                    {t("ReceivedCash.Received Time")} :{" "}
+                    {formatDateTime(item.rawTime || item.receivedTime)}
                   </Text>
                 </View>
               ))}
@@ -427,7 +407,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
                   navigation.navigate("ReceivedCashTransfer", {
                     totalCash,
                     selectedDate: formatDate(selectedDate),
-                    pickupOrderIds: transactions.map((t) => t.pickupOrderId),
+                    pickupOrderIds: transactions.map((tx) => tx.pickupOrderId),
                   })
                 }
                 activeOpacity={0.85}
@@ -501,55 +481,14 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
         )}
       </View>
 
-      {/* Date Picker */}
-      {showDatePicker && (
-        <>
-          {Platform.OS === "ios" ? (
-            <Modal
-              transparent={true}
-              animationType="slide"
-              visible={showDatePicker}
-              onRequestClose={handleCalendarClose}
-            >
-              <View className="flex-1 justify-end bg-black/50">
-                <View className="bg-white rounded-t-3xl">
-                  <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
-                    <TouchableOpacity onPress={handleCalendarClose}>
-                      <Text className="text-red-600 text-base font-medium">
-                        {t("ReceivedCash.Cancel")}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text className="text-base font-semibold text-gray-900">
-                      {t("ReceivedCash.Select Date")}
-                    </Text>
-                    <TouchableOpacity onPress={handleDateConfirm}>
-                      <Text className="text-blue-600 text-base font-medium">
-                        {t("ReceivedCash.Done")}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="spinner"
-                    onChange={onDateChange}
-                    maximumDate={new Date()}
-                    textColor="#000"
-                  />
-                </View>
-              </View>
-            </Modal>
-          ) : (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="default"
-              onChange={onDateChange}
-              maximumDate={new Date()}
-            />
-          )}
-        </>
-      )}
+      {/* Translated custom calendar (replaces native DateTimePicker) */}
+      <CustomCalendar
+        visible={showDatePicker}
+        value={selectedDate}
+        maximumDate={new Date()}
+        onClose={handleCalendarClose}
+        onConfirm={handleDateConfirm}
+      />
     </View>
   );
 };

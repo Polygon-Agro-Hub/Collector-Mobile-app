@@ -8,12 +8,10 @@ import {
   Image,
   Alert,
   Keyboard,
-  Modal,
   ActivityIndicator,
   BackHandler,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import {
@@ -27,6 +25,10 @@ import i18n from "@/i18n/i18n";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import WarningConfirmation from "@/component/components/popup/WarningConfirmation";
+
+// Roles stored in the collectionofficer table
+const DRIVER_ROLES = ["Heavy Weight Driver", "Light Weight Driver"];
+const OFFICER_ROLES = ["Distribution Officer"];
 
 interface OfficerDetails {
   id: number;
@@ -63,10 +65,12 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
   const activeTab = route.params?.activeTab;
   const isDriver = activeTab === "Drivers";
 
-  const [jobRole, setJobRole] = useState(
-    isDriver ? "Driver" : "Distribution Officer",
-  );
-  const [empPrefix, setEmpPrefix] = useState(isDriver ? "DRV" : "DIO");
+  // Derived from the tab: no state needed
+  const jobRoles = isDriver ? DRIVER_ROLES : OFFICER_ROLES;
+  const empPrefix = isDriver ? "DRV" : "DIO";
+
+  console.log(jobRoles)
+
   const [empID, setEmpID] = useState("");
   const [officerFound, setOfficerFound] = useState(false);
   const [officerDetails, setOfficerDetails] = useState<OfficerDetails | null>(
@@ -79,21 +83,23 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
   const [hasSearched, setHasSearched] = useState(false);
 
   const resetState = useCallback(() => {
-    const currentTab = route.params?.activeTab;
-    const currentIsDriver = currentTab === "Drivers";
-    setJobRole(currentIsDriver ? "Driver" : "Distribution Officer");
-    setEmpPrefix(currentIsDriver ? "DRV" : "DIO");
     setEmpID("");
     setOfficerFound(false);
     setOfficerDetails(null);
     setHasSearched(false);
-  }, [route.params?.activeTab]);
+  }, []);
 
   const handleEmpIDChange = (text: string) => {
     const numericOnly = text.replace(/[^0-9]/g, "");
     setEmpID(numericOnly);
     setOfficerFound(false);
     setHasSearched(false);
+  };
+
+  // Translated role label, falls back to the raw DB role
+  const getRoleLabel = (role?: string) => {
+    if (!role) return "";
+    return t(`ClaimOfficer.${role}`, { defaultValue: role });
   };
 
   const handleSearch = async () => {
@@ -124,9 +130,14 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${userToken}`,
           },
-          body: JSON.stringify({ empID: `${empPrefix}${empID}`, jobRole }),
+          body: JSON.stringify({
+            empID: `${empPrefix}${empID}`,
+            jobRoles, // array of real DB roles
+          }),
+          
         },
       );
+      
 
       const data = await response.json();
 
@@ -231,8 +242,6 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
     }, [navigation, resetState]),
   );
 
-
-
   return (
     <ScrollView
       className="flex-1 bg-white"
@@ -279,7 +288,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
             shadowRadius: 3.84,
             elevation: 5,
           }}
-          disabled={!empID || officerFound}
+          disabled={!empID || officerFound || searchLoading}
           onPress={handleSearch}
         >
           {searchLoading ? (
@@ -335,7 +344,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
                 {officerDetails?.lastNameSinhala}
               </Text>
               <Text className="text-sm mb-1 text-gray-500">
-                {t(`ClaimOfficer.${officerDetails?.jobRole}`)} -{" "}
+                {getRoleLabel(officerDetails?.jobRole)} -{" "}
                 <Text className="font-bold text-black">
                   {officerDetails?.empId}
                 </Text>
@@ -350,7 +359,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
                 {officerDetails?.firstNameTamil} {officerDetails?.lastNameTamil}
               </Text>
               <Text className="text-sm text-gray-500">
-                {t(`ClaimOfficer.${officerDetails?.jobRole}`)} -{" "}
+                {getRoleLabel(officerDetails?.jobRole)} -{" "}
                 <Text className="font-bold text-black">
                   {officerDetails?.empId}
                 </Text>
@@ -366,7 +375,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
                 {officerDetails?.lastNameEnglish}
               </Text>
               <Text className="text-lg text-[#627189]">
-                {t(`ClaimOfficer.${officerDetails?.jobRole}`)} -{" "}
+                {getRoleLabel(officerDetails?.jobRole)} -{" "}
                 <Text className="font-bold text-black">
                   {officerDetails?.empId}
                 </Text>
@@ -380,6 +389,7 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
           <TouchableOpacity
             className="mt-6 mb-10 bg-[#000000] py-4 rounded-full mx-6"
             onPress={() => setModalVisible(true)}
+            disabled={loading}
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 2 },
@@ -400,7 +410,10 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
 
       <WarningConfirmation
         visible={modalVisible}
-        message={t("ClaimOfficer.Are you sure you want to claim this employee?") || "Are you sure you want to claim this officer?"}
+        message={
+          t("ClaimOfficer.Are you sure you want to claim this employee?") ||
+          "Are you sure you want to claim this officer?"
+        }
         confirmText={t("ClaimOfficer.Claim") || "Claim"}
         cancelText={t("ClaimOfficer.Cancel") || "Cancel"}
         confirmButtonBgClass="bg-black active:bg-gray-800"
