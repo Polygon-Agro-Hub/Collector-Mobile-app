@@ -16,13 +16,20 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [language, setLanguage] = useState("en");
+  const [ready, setReady] = useState(false); // Fix 1: wait for saved language
 
   useEffect(() => {
     const loadLanguage = async () => {
-      const storedLanguage = await AsyncStorage.getItem("@user_language");
-      if (storedLanguage) {
-        setLanguage(storedLanguage);
-        i18n.changeLanguage(storedLanguage);
+      try {
+        const storedLanguage = await AsyncStorage.getItem("@user_language");
+        if (storedLanguage) {
+          setLanguage(storedLanguage);
+          await i18n.changeLanguage(storedLanguage);
+        }
+      } catch (err) {
+        console.warn("Failed to load saved language:", err);
+      } finally {
+        setReady(true); // set only AFTER the language is applied
       }
     };
 
@@ -34,6 +41,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({
     i18n.changeLanguage(lng);
     AsyncStorage.setItem("@user_language", lng);
   };
+
+  if (!ready) return null;
 
   return (
     <LanguageContext.Provider value={{ language, changeLanguage }}>

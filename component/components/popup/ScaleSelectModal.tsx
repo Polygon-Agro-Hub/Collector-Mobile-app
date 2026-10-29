@@ -199,7 +199,6 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
             borderTopRightRadius: 24,
             paddingTop: 24,
             paddingHorizontal: 24,
-            paddingBottom: bottomInset + 8,
             minHeight: 440,
             maxHeight: "90%",
           }}
