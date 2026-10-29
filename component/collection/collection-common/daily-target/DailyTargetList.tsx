@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   BackHandler,
-  Animated,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import axios from "axios";
@@ -230,100 +229,54 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
       />
 
       {/* Toggle Buttons */}
-      <View className="flex-row justify-center items-center py-4 bg-[#282828]">
-        <Animated.View
-          style={{
-            transform: [{ scale: selectedToggle === "ToDo" ? 1.05 : 1 }],
-          }}
+      <View className="flex-row justify-center items-center pb-4 bg-[#282828]">
+        <TouchableOpacity
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
+            selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+          }`}
+          style={{ height: 40 }}
+          onPress={() => setSelectedToggle("ToDo")}
         >
-          <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center justify-center ${
-              selectedToggle === "ToDo" ? "bg-[#980775]" : "bg-white"
+          <Text
+            className={`font-bold mr-2 ${
+              selectedToggle === "ToDo" ? "text-white" : "text-black"
             }`}
-            style={{
-              height: 40,
-              shadowColor:
-                selectedToggle === "ToDo" ? "#980775" : "transparent",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: selectedToggle === "ToDo" ? 0.3 : 0,
-              shadowRadius: 4,
-              elevation: selectedToggle === "ToDo" ? 4 : 0,
-            }}
-            onPress={() => setSelectedToggle("ToDo")}
           >
-            <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "ToDo" ? "text-white" : "text-black"
-              } ${selectedToggle === "ToDo" ? "mr-2" : ""}`}
-              style={{
-                opacity: selectedToggle === "ToDo" ? 1 : 0.7,
-              }}
-            >
-              {t("DailyTarget.Todo")}
-            </Animated.Text>
+            {t("DailyTarget.Todo")}
+          </Text>
+          {/* Only show count badge when ToDo tab is active */}
+          {selectedToggle === "ToDo" && (
+            <View className="bg-white rounded-full px-2 py-1">
+              <Text className="text-black font-bold text-xs">
+                {todoData.length}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
-            {selectedToggle === "ToDo" && (
-              <Animated.View
-                className="bg-white rounded-full px-2 overflow-hidden"
-                style={{
-                  opacity: 1,
-                  transform: [{ scaleX: 1 }, { scaleY: 1 }],
-                }}
-              >
-                <Text className="text-black font-bold text-xs py-1">
-                  {todoData.length}
-                </Text>
-              </Animated.View>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
-
-        <Animated.View
-          style={{
-            transform: [{ scale: selectedToggle === "Completed" ? 1.05 : 1 }],
-          }}
+        <TouchableOpacity
+          className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
+            selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+          }`}
+          style={{ height: 40 }}
+          onPress={() => setSelectedToggle("Completed")}
         >
-          <TouchableOpacity
-            className={`px-4 py-2 rounded-full mx-2 flex-row items-center ${
-              selectedToggle === "Completed" ? "bg-[#980775]" : "bg-white"
+          <Text
+            className={`font-bold ${
+              selectedToggle === "Completed" ? "text-white" : "text-black"
             }`}
-            style={{
-              height: 40,
-              shadowColor:
-                selectedToggle === "Completed" ? "#980775" : "transparent",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: selectedToggle === "Completed" ? 0.3 : 0,
-              shadowRadius: 4,
-              elevation: selectedToggle === "Completed" ? 4 : 0,
-            }}
-            onPress={() => setSelectedToggle("Completed")}
           >
-            <Animated.Text
-              className={`font-bold ${
-                selectedToggle === "Completed" ? "text-white" : "text-black"
-              }`}
-              style={{
-                opacity: selectedToggle === "Completed" ? 1 : 0.7,
-              }}
-            >
-              {t("DailyTarget.Completed")}
-            </Animated.Text>
-
-            {selectedToggle === "Completed" && (
-              <Animated.View
-                className="bg-white rounded-full px-2 ml-2 overflow-hidden"
-                style={{
-                  opacity: 1,
-                  transform: [{ scaleX: 1 }, { scaleY: 1 }],
-                }}
-              >
-                <Text className="text-black font-bold text-xs py-1">
-                  {completedData.length}
-                </Text>
-              </Animated.View>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
+            {t("DailyTarget.Completed")}
+          </Text>
+          {/* Only show count badge when Completed tab is active */}
+          {selectedToggle === "Completed" && (
+            <View className="bg-white rounded-full px-2 py-1 ml-2">
+              <Text className="text-black font-bold text-xs">
+                {completedData.length}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Table */}
