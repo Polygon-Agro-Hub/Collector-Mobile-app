@@ -181,9 +181,11 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
     const appLang = (i18n.language || selectedLanguage || "en").toLowerCase();
 
     if (appLang.startsWith("si")) {
-      return complain.companyNameSinhala || complain.companyNameEnglish || complain.companyName || "";
+      const name = complain.companyNameSinhala || complain.companyNameEnglish || complain.companyName || "";
+      return name.replace(/\bPolygon\b/gi, "පොලිගන්");
     } else if (appLang.startsWith("ta")) {
-      return complain.companyNameTamil || complain.companyNameEnglish || complain.companyName || "";
+      const name = complain.companyNameTamil || complain.companyNameEnglish || complain.companyName || "";
+      return name.replace(/\bPolygon\b/gi, "பொலிகன்");
     } else {
       return complain.companyNameEnglish || complain.companyName || "";
     }
@@ -229,7 +231,7 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
       const teamName = isSi
         ? "පොලිගන් පාරිභෝගික සහාය කණ්ඩායම"
         : isTa
-          ? "Polygon வாடிக்கையாளர் ஆதரவு குழு"
+          ? "பொலிகன் வாடிக்கையாளர் ஆதரவு குழு"
           : "Polygon Customer Support Team";
 
       return `${closingWord},\n${teamName}`;
