@@ -222,7 +222,7 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   const [containerTypes, setContainerTypes] = useState<ContainerTypeItem[]>([]);
   const [containerSectionWidth, setContainerSectionWidth] = useState(300);
- const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
+  const [focusedSetId, setFocusedSetId] = useState<string | null>(null);
   const [setToDelete, setSetToDelete] = useState<{
     id: string;
     gradeKey: "A" | "B" | "C";
@@ -280,7 +280,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
 
   useEffect(() => {
     const checkWifi = (state: any) => {
-      const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+      const isWifi =
+        state.type === "wifi" ||
+        (state.isWifiEnabled === true && state.isConnected === true);
       setIsWifiOff(!isWifi);
     };
 
@@ -337,7 +339,9 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
       const timer = setTimeout(() => setResetImage(false), 100);
 
       NetInfo.fetch().then((state) => {
-        const isWifi = state.type === "wifi" || (state.isWifiEnabled === true && state.isConnected === true);
+        const isWifi =
+          state.type === "wifi" ||
+          (state.isWifiEnabled === true && state.isConnected === true);
         setIsWifiOff(!isWifi);
       });
       setScaleStatus(wifiScaleService.getStatus());
@@ -401,27 +405,27 @@ const UnregisteredCropDetails: React.FC<UnregisteredCropDetailsProps> = ({
     }, []),
   );
 
-// Crops whose varieties are ALL already added -> hide from crop list
-const fullyUsedCropIds = crops.reduce((acc: string[], c: any) => {
-  if (acc.includes(c.cropId)) return acc;
-  const allVarieties: { id: string }[] = c.varietiesList || [];
-  if (allVarieties.length === 0) return acc;
-  const allUsed = allVarieties.every((v) => usedVarietyIds.includes(v.id));
-  if (allUsed) acc.push(c.cropId);
-  return acc;
-}, []);
+  // Crops whose varieties are ALL already added -> hide from crop list
+  const fullyUsedCropIds = crops.reduce((acc: string[], c: any) => {
+    if (acc.includes(c.cropId)) return acc;
+    const allVarieties: { id: string }[] = c.varietiesList || [];
+    if (allVarieties.length === 0) return acc;
+    const allUsed = allVarieties.every((v) => usedVarietyIds.includes(v.id));
+    if (allUsed) acc.push(c.cropId);
+    return acc;
+  }, []);
 
-const cropModalData = cropNames
-  .filter((crop) => !fullyUsedCropIds.includes(crop.id))
-  .map((crop) => ({
-    label:
-      selectedLanguage === "si"
-        ? crop.cropNameSinhala
-        : selectedLanguage === "ta"
-          ? crop.cropNameTamil
-          : crop.cropNameEnglish,
-    value: crop.id,
-  }));
+  const cropModalData = cropNames
+    .filter((crop) => !fullyUsedCropIds.includes(crop.id))
+    .map((crop) => ({
+      label:
+        selectedLanguage === "si"
+          ? crop.cropNameSinhala
+          : selectedLanguage === "ta"
+            ? crop.cropNameTamil
+            : crop.cropNameEnglish,
+      value: crop.id,
+    }));
 
   const varietyModalData = varieties
     .filter((v) => !usedVarietyIds.includes(v.id))
@@ -652,7 +656,6 @@ const cropModalData = cropNames
       });
     });
   };
-  
 
   // Delete a set from a grade
   const handleDeleteSet = (gradeKey: "A" | "B" | "C", setId: string) => {
@@ -1353,206 +1356,196 @@ const cropModalData = cropNames
           <View className="px-6 ">
             {/* ── Scale Status Card ── */}
             {/* State 1: Mobile Wi-Fi Off - #FDF0F1 background, #E91233 text/icon */}
-            {
-              isWifiOff ? (
-                /* State 1: Mobile Wi-Fi Off - #E91233 background, white text/icon */
-                <TouchableOpacity
-                  activeOpacity={0.88}
-                  onPress={() => {
-                    Alert.alert(
-                      "Wi-Fi is not enabled!",
-                      "Please enable the Wi-Fi to connect with the Scale.",
-                      [{ text: "OK" }],
-                      { type: "error", autoClose: false, showOkButton: true } as any
-                    );
-                  }}
+            {isWifiOff ? (
+              /* State 1: Mobile Wi-Fi Off - #E91233 background, white text/icon */
+              <TouchableOpacity
+                activeOpacity={0.88}
+                onPress={() => {
+                  Alert.alert(
+                    "Wi-Fi is not enabled!",
+                    "Please enable the Wi-Fi to connect with the Scale.",
+                    [{ text: "OK" }],
+                    {
+                      type: "error",
+                      autoClose: false,
+                      showOkButton: true,
+                    } as any,
+                  );
+                }}
+                style={{
+                  marginTop: 8,
+                  marginBottom: 10,
+                  backgroundColor: "#E91233",
+                  borderRadius: 28,
+                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
                   style={{
-                    marginTop: 8,
-                    marginBottom: 10,
-                    backgroundColor: "#E91233",
-                    borderRadius: 28,
-                    paddingVertical: 10,
-                    paddingHorizontal: 14,
-                    flexDirection: "row",
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: "#FFFFFF",
                     alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
                   }}
                 >
-                  <View
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: "#FFFFFF",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 12,
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name="wifi"
-                      size={24}
-                      color="#E91233"
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: "bold",
-                        color: "#FFFFFF",
-                        letterSpacing: -0.2,
-                      }}
-                    >
-                      {selectedLanguage === "si"
-                        ? "Wi-Fi අක්‍රියයි"
-                        : selectedLanguage === "ta"
-                          ? "Wi-Fi முடக்கப்பட்டுள்ளது"
-                          : "Wi-Fi is Off"}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        color: "#FFFFFF",
-                        fontWeight: "500",
-                        marginTop: 1,
-                        lineHeight: 16,
-                        opacity: 0.9,
-                      }}
-                    >
-                      {selectedLanguage === "si"
-                        ? "ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න."
-                        : selectedLanguage === "ta"
-                          ? "உங்கள் தொலைபேசியில் Wi-Fi இயக்கவும்."
-                          : "Please turn on Wi-Fi on your phone to connect to the scale."}
-                    </Text>
-                  </View>
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={26}
-                    color="#FFFFFF"
+                  <MaterialCommunityIcons
+                    name="wifi"
+                    size={24}
+                    color="#E91233"
                   />
-                </TouchableOpacity>
-              ) : !scaleStatus.connected ? (
-                /* State 2: WiFi ON but scale not connected — show blue connect card */
-                <TouchableOpacity
-                  activeOpacity={0.88}
-                  onPress={() => setIsScaleConfigModalVisible(true)}
-                  style={{
-                    marginTop: 8,
-                    marginBottom: 10,
-                    backgroundColor: "#1266FD",
-                    borderRadius: 28,
-                    paddingVertical: 10,
-                    paddingHorizontal: 14,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: "#FFFFFF",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 12,
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name="wifi"
-                      size={24}
-                      color="#1266FD"
-                    />
-                  </View>
-
+                </View>
+                <View style={{ flex: 1 }}>
                   <Text
                     style={{
-                      flex: 1,
-                      fontSize: 17,
+                      fontSize: 16,
                       fontWeight: "bold",
                       color: "#FFFFFF",
                       letterSpacing: -0.2,
                     }}
                   >
                     {selectedLanguage === "si"
-                      ? "තරාදිය සම්බන්ධ කරන්න"
+                      ? "Wi-Fi අක්‍රියයි"
                       : selectedLanguage === "ta"
-                        ? "அளவுகோலை இணைக்கவும்"
-                        : "Connect Scale"}
+                        ? "Wi-Fi முடக்கப்பட்டுள்ளது"
+                        : "Wi-Fi is Off"}
                   </Text>
-
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={26}
-                    color="#FFFFFF"
-                  />
-                </TouchableOpacity>
-              ) : scaleStatus.connected && scaleStatus.scale ? (
-                /* State 3: Scale Connected - #FAE432 background, black text/icon */
-                <TouchableOpacity
-                  activeOpacity={0.88}
-                  onPress={() => setIsScaleConfigModalVisible(true)}
-                  style={{
-                    marginTop: 8,
-                    marginBottom: 10,
-                    backgroundColor: "#FAE432",
-                    borderRadius: 28,
-                    paddingVertical: 10,
-                    paddingHorizontal: 14,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <View
+                  <Text
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: "#000000",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 12,
+                      fontSize: 12,
+                      color: "#FFFFFF",
+                      fontWeight: "500",
+                      marginTop: 1,
+                      lineHeight: 16,
+                      opacity: 0.9,
                     }}
                   >
-                    <MaterialCommunityIcons
-                      name="wifi"
-                      size={24}
-                      color="#FFFFFF"
-                    />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        fontSize: 17,
-                        fontWeight: "bold",
-                        color: "#000000",
-                        letterSpacing: -0.3,
-                      }}
-                    >
-                      {t("ScaleSelectModal.ScaleConnected", "Scale Connected")}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        fontWeight: "500",
-                        color: "#000000",
-                        marginTop: 1,
-                      }}
-                    >
-                      {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
-                    </Text>
-                  </View>
-
-                  <MaterialIcons
-                    name="chevron-right"
-                    size={26}
-                    color="#000000"
+                    {selectedLanguage === "si"
+                      ? "ඔබගේ දුරකථනයේ Wi-Fi ක්‍රියාත්මක කරන්න."
+                      : selectedLanguage === "ta"
+                        ? "உங்கள் தொலைபேசியில் Wi-Fi இயக்கவும்."
+                        : "Please turn on Wi-Fi on your phone to connect to the scale."}
+                  </Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+              </TouchableOpacity>
+            ) : !scaleStatus.connected ? (
+              /* State 2: WiFi ON but scale not connected — show blue connect card */
+              <TouchableOpacity
+                activeOpacity={0.88}
+                onPress={() => setIsScaleConfigModalVisible(true)}
+                style={{
+                  marginTop: 8,
+                  marginBottom: 10,
+                  backgroundColor: "#1266FD",
+                  borderRadius: 28,
+                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: "#FFFFFF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="wifi"
+                    size={24}
+                    color="#1266FD"
                   />
-                </TouchableOpacity>
-              ) : null
-            }
+                </View>
+
+                <Text
+                  style={{
+                    flex: 1,
+                    fontSize: 17,
+                    fontWeight: "bold",
+                    color: "#FFFFFF",
+                    letterSpacing: -0.2,
+                  }}
+                >
+                  {selectedLanguage === "si"
+                    ? "තරාදිය සම්බන්ධ කරන්න"
+                    : selectedLanguage === "ta"
+                      ? "அளவுகோலை இணைக்கவும்"
+                      : "Connect Scale"}
+                </Text>
+
+                <MaterialIcons name="chevron-right" size={26} color="#FFFFFF" />
+              </TouchableOpacity>
+            ) : scaleStatus.connected && scaleStatus.scale ? (
+              /* State 3: Scale Connected - #FAE432 background, black text/icon */
+              <TouchableOpacity
+                activeOpacity={0.88}
+                onPress={() => setIsScaleConfigModalVisible(true)}
+                style={{
+                  marginTop: 8,
+                  marginBottom: 10,
+                  backgroundColor: "#FAE432",
+                  borderRadius: 28,
+                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 22,
+                    backgroundColor: "#000000",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="wifi"
+                    size={24}
+                    color="#FFFFFF"
+                  />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 17,
+                      fontWeight: "bold",
+                      color: "#000000",
+                      letterSpacing: -0.3,
+                    }}
+                  >
+                    {t("ScaleSelectModal.ScaleConnected", "Scale Connected")}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "500",
+                      color: "#000000",
+                      marginTop: 1,
+                    }}
+                  >
+                    {scaleStatus.scale.name || "Wi-Fi Scale Pro"}
+                  </Text>
+                </View>
+
+                <MaterialIcons name="chevron-right" size={26} color="#000000" />
+              </TouchableOpacity>
+            ) : null}
 
             {/* ── Added-crops carousel ── */}
             {crops.length > 0 && (
@@ -2046,8 +2039,8 @@ const cropModalData = cropNames
                                     {Number(price).toLocaleString("en-US", {
                                       minimumFractionDigits: 2,
                                       maximumFractionDigits: 2,
-                                    })}/
-                                    {t("PassTargetBetweenOfficers.kg", "kg")})
+                                    })}
+                                    /{t("PassTargetBetweenOfficers.kg", "kg")})
                                   </Text>
                                 ) : null}
                               </View>
@@ -2055,7 +2048,10 @@ const cropModalData = cropNames
                               {quantities[grade.gradeKey] ? (
                                 <View
                                   className="bg-[#FEF08A] px-3 py-1 rounded-full"
-                                  style={{ alignSelf: "flex-start", marginTop: 6 }}
+                                  style={{
+                                    alignSelf: "flex-start",
+                                    marginTop: 6,
+                                  }}
                                 >
                                   <Text className="text-xs font-bold text-[#000000]">
                                     {Number(
@@ -2216,63 +2212,68 @@ const cropModalData = cropNames
                                                     width: "100%",
                                                   }}
                                                 >
-                                                  {containerTypes.map((cType) => {
-                                                    const isSelected =
-                                                      set.containerTypeId ===
-                                                        cType.id ||
-                                                      (!set.containerTypeId &&
-                                                        cType.id ===
-                                                          containerTypes[0]?.id);
+                                                  {containerTypes.map(
+                                                    (cType) => {
+                                                      const isSelected =
+                                                        set.containerTypeId ===
+                                                          cType.id ||
+                                                        (!set.containerTypeId &&
+                                                          cType.id ===
+                                                            containerTypes[0]
+                                                              ?.id);
 
-                                                    return (
-                                                      <TouchableOpacity
-                                                        key={cType.id}
-                                                        activeOpacity={0.75}
-                                                        onPress={() =>
-                                                          handleSelectContainerType(
-                                                            grade.gradeKey,
-                                                            set.id,
-                                                            cType,
-                                                          )
-                                                        }
-                                                        style={{
-                                                          flex: 1,
-                                                          height: 52,
-                                                          borderRadius: 9999,
-                                                          backgroundColor:
-                                                            isSelected
-                                                              ? "#FFFFFF"
-                                                              : "transparent",
-                                                          justifyContent:
-                                                            "center",
-                                                          alignItems: "center",
-                                                        }}
-                                                      >
-                                                        <Text
+                                                      return (
+                                                        <TouchableOpacity
+                                                          key={cType.id}
+                                                          activeOpacity={0.75}
+                                                          onPress={() =>
+                                                            handleSelectContainerType(
+                                                              grade.gradeKey,
+                                                              set.id,
+                                                              cType,
+                                                            )
+                                                          }
                                                           style={{
-                                                            fontSize: 14,
-                                                            fontWeight: "700",
-                                                            color: "#0F172A",
+                                                            flex: 1,
+                                                            height: 52,
+                                                            borderRadius: 9999,
+                                                            backgroundColor:
+                                                              isSelected
+                                                                ? "#FFFFFF"
+                                                                : "transparent",
+                                                            justifyContent:
+                                                              "center",
+                                                            alignItems:
+                                                              "center",
                                                           }}
-                                                          numberOfLines={1}
                                                         >
-                                                          {cType.labelName}
-                                                        </Text>
-                                                        <Text
-                                                          style={{
-                                                            fontSize: 11,
-                                                            color: "#64748B",
-                                                            marginTop: 2,
-                                                          }}
-                                                          numberOfLines={1}
-                                                        >
-                                                          {cType.weight != null
-                                                            ? `${cType.weight} ${t("Common.kg", "kg")}`
-                                                            : ""}
-                                                        </Text>
-                                                      </TouchableOpacity>
-                                                    );
-                                                  })}
+                                                          <Text
+                                                            style={{
+                                                              fontSize: 14,
+                                                              fontWeight: "700",
+                                                              color: "#0F172A",
+                                                            }}
+                                                            numberOfLines={1}
+                                                          >
+                                                            {cType.labelName}
+                                                          </Text>
+                                                          <Text
+                                                            style={{
+                                                              fontSize: 11,
+                                                              color: "#64748B",
+                                                              marginTop: 2,
+                                                            }}
+                                                            numberOfLines={1}
+                                                          >
+                                                            {cType.weight !=
+                                                            null
+                                                              ? `${cType.weight} ${t("Common.kg", "kg")}`
+                                                              : ""}
+                                                          </Text>
+                                                        </TouchableOpacity>
+                                                      );
+                                                    },
+                                                  )}
                                                 </View>
                                               ) : (
                                                 <ScrollView
@@ -2289,101 +2290,136 @@ const cropModalData = cropNames
                                                     alignItems: "center",
                                                   }}
                                                 >
-                                                  {containerTypes.map((cType) => {
-                                                    const isSelected =
-                                                      set.containerTypeId ===
-                                                        cType.id ||
-                                                      (!set.containerTypeId &&
-                                                        cType.id ===
-                                                          containerTypes[0]?.id);
+                                                  {containerTypes.map(
+                                                    (cType) => {
+                                                      const isSelected =
+                                                        set.containerTypeId ===
+                                                          cType.id ||
+                                                        (!set.containerTypeId &&
+                                                          cType.id ===
+                                                            containerTypes[0]
+                                                              ?.id);
 
-                                                    const pillWidth = Math.max(
-                                                      80,
-                                                      Math.floor(
-                                                        (containerSectionWidth -
-                                                          8) /
-                                                          3,
-                                                      ),
-                                                    );
+                                                      const pillWidth =
+                                                        Math.max(
+                                                          80,
+                                                          Math.floor(
+                                                            (containerSectionWidth -
+                                                              8) /
+                                                              3,
+                                                          ),
+                                                        );
 
-                                                    return (
-                                                      <TouchableOpacity
-                                                        key={cType.id}
-                                                        activeOpacity={0.75}
-                                                        onPress={() =>
-                                                          handleSelectContainerType(
-                                                            grade.gradeKey,
-                                                            set.id,
-                                                            cType,
-                                                          )
-                                                        }
-                                                        style={{
-                                                          width: pillWidth,
-                                                          height: 52,
-                                                          borderRadius: 9999,
-                                                          backgroundColor:
-                                                            isSelected
-                                                              ? "#FFFFFF"
-                                                              : "transparent",
-                                                          justifyContent:
-                                                            "center",
-                                                          alignItems: "center",
-                                                        }}
-                                                      >
-                                                        <Text
+                                                      return (
+                                                        <TouchableOpacity
+                                                          key={cType.id}
+                                                          activeOpacity={0.75}
+                                                          onPress={() =>
+                                                            handleSelectContainerType(
+                                                              grade.gradeKey,
+                                                              set.id,
+                                                              cType,
+                                                            )
+                                                          }
                                                           style={{
-                                                            fontSize: 14,
-                                                            fontWeight: "700",
-                                                            color: "#0F172A",
+                                                            width: pillWidth,
+                                                            height: 52,
+                                                            borderRadius: 9999,
+                                                            backgroundColor:
+                                                              isSelected
+                                                                ? "#FFFFFF"
+                                                                : "transparent",
+                                                            justifyContent:
+                                                              "center",
+                                                            alignItems:
+                                                              "center",
                                                           }}
-                                                          numberOfLines={1}
                                                         >
-                                                          {cType.labelName}
-                                                        </Text>
-                                                        <Text
-                                                          style={{
-                                                            fontSize: 11,
-                                                            color: "#64748B",
-                                                            marginTop: 2,
-                                                          }}
-                                                          numberOfLines={1}
-                                                        >
-                                                          {cType.weight != null
-                                                            ? `${cType.weight} ${t("Common.kg", "kg")}`
-                                                            : ""}
-                                                        </Text>
-                                                      </TouchableOpacity>
-                                                    );
-                                                  })}
+                                                          <Text
+                                                            style={{
+                                                              fontSize: 14,
+                                                              fontWeight: "700",
+                                                              color: "#0F172A",
+                                                            }}
+                                                            numberOfLines={1}
+                                                          >
+                                                            {cType.labelName}
+                                                          </Text>
+                                                          <Text
+                                                            style={{
+                                                              fontSize: 11,
+                                                              color: "#64748B",
+                                                              marginTop: 2,
+                                                            }}
+                                                            numberOfLines={1}
+                                                          >
+                                                            {cType.weight !=
+                                                            null
+                                                              ? `${cType.weight} ${t("Common.kg", "kg")}`
+                                                              : ""}
+                                                          </Text>
+                                                        </TouchableOpacity>
+                                                      );
+                                                    },
+                                                  )}
                                                 </ScrollView>
                                               )}
                                             </View>
                                           </View>
                                         )}
 
-                                    
-                                      {/* Crates Count Input */}
-                                       <TextInput
-                                         placeholder={`--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`}
-                                         placeholderTextColor="#94A3B8"
-                                         value={set.crates}
-                                         onChangeText={(val) =>
-                                           handleCratesChange(grade.gradeKey, set.id, val)
-                                         }
-                                         onFocus={() => setFocusedSetId(set.id)}
-                                         onBlur={() => setFocusedSetId(null)}
-                                         keyboardType="numeric"
-                                         textAlign="center"
-                                         cursorColor="#000000"
-                                         selectionColor="rgba(0, 0, 0, 0.3)"
-                                         className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#000000] mb-3"
-                                         style={{
-                                           textAlign: "center",
-                                           textAlignVertical: "center",
-                                           includeFontPadding: false,
-                                           paddingVertical: 0,
-                                         }}
-                                       />
+                                        {/* Crates Count Input */}
+
+                                        <View
+                                          className="bg-[#EEF2F6] rounded-full h-[50px] justify-center mb-3"
+                                          style={{ overflow: "hidden" }}
+                                        >
+                                          {set.crates.length === 0 && (
+                                            <Text
+                                              pointerEvents="none"
+                                              numberOfLines={1}
+                                              style={{
+                                                position: "absolute",
+                                                left: 16,
+                                                right: 16,
+                                                textAlign: "center",
+                                                fontWeight: "bold",
+                                                fontSize: 16,
+                                                color: "#94A3B8",
+                                              }}
+                                            >
+                                              {`--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`}
+                                            </Text>
+                                          )}
+
+                                          <TextInput
+                                            value={set.crates}
+                                            onChangeText={(val) =>
+                                              handleCratesChange(
+                                                grade.gradeKey,
+                                                set.id,
+                                                val,
+                                              )
+                                            }
+                                            onFocus={() =>
+                                              setFocusedSetId(set.id)
+                                            }
+                                            onBlur={() => setFocusedSetId(null)}
+                                            keyboardType="numeric"
+                                            textAlign="center"
+                                            cursorColor="#000000"
+                                            selectionColor="rgba(0, 0, 0, 0.3)"
+                                            className="h-[50px] font-bold text-base text-[#000000]"
+                                            style={{
+                                              textAlign: "center",
+                                              textAlignVertical: "center",
+                                              includeFontPadding: false,
+                                              paddingVertical: 0,
+                                              paddingHorizontal: 16,
+                                              backgroundColor: "transparent",
+                                            }}
+                                          />
+                                        </View>
 
                                         {/* Weight Row */}
                                         {(() => {
@@ -3039,9 +3075,12 @@ const cropModalData = cropNames
         title={t("Common.ReadyToFinalize", "Ready to Finalize?")}
         message={t(
           "UnregisteredCropDetails.FinalizeMessage",
-          "Please review your collection details again before finalize."
+          "Please review your collection details again before finalize.",
         )}
-        confirmText={t("UnregisteredCropDetails.ConfirmCollection", "Confirm Collection")}
+        confirmText={t(
+          "UnregisteredCropDetails.ConfirmCollection",
+          "Confirm Collection",
+        )}
         cancelText={t("Common.NoGoBack", "No, Go back")}
         onConfirm={() => {
           setShowFinalizeModal(false);

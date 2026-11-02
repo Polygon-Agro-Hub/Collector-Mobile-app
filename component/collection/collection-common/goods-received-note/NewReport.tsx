@@ -699,39 +699,41 @@ const generatePDF = async () => {
     }
   };
 
-  const handleSharePDF = async () => {
-    const uri = await generatePDF();
-    if (uri && (await Sharing.isAvailableAsync())) {
-      const cleanGrn = (crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA").replace(/[^a-zA-Z0-9_-]/g, "_");
-      const date = new Date().toISOString().slice(0, 10);
-      const fileName = `GRN_${cleanGrn}_${date}.pdf`;
+ const handleSharePDF = async () => {
+  const uri = await generatePDF();
+  if (uri && (await Sharing.isAvailableAsync())) {
+    const prefix =
+      activeLang === "si" ? "වාර්තා" : activeLang === "ta" ? "அறிக்கை" : "GRN";
 
-      const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
+    // Only sanitize the invoice number, not the translated prefix
+    const cleanGrn = (
+      crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA"
+    ).replace(/[^a-zA-Z0-9_-]/g, "_");
 
-      try {
-        await FileSystem.copyAsync({
-          from: uri,
-          to: newUri,
-        });
+    const date = new Date().toISOString().slice(0, 10);
+    const fileName = `${prefix}_${cleanGrn}_${date}.pdf`;
+    const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
-        await Sharing.shareAsync(newUri, {
-          mimeType: "application/pdf",
-          dialogTitle: "Share Purchase Report",
-          UTI: "com.adobe.pdf",
-        });
-      } catch (error) {
-        console.error("Error sharing PDF with custom name:", error);
+    try {
+      await FileSystem.copyAsync({ from: uri, to: newUri });
 
-        await Sharing.shareAsync(uri, {
-          mimeType: "application/pdf",
-          dialogTitle: "Share Purchase Report",
-          UTI: "com.adobe.pdf",
-        });
-      }
-    } else {
-      Alert.alert(t("Error.error"), t("NewReport.Failed to share PDF file"));
+      await Sharing.shareAsync(newUri, {
+        mimeType: "application/pdf",
+        dialogTitle: t("NewReport.Share GRN Report"),
+        UTI: "com.adobe.pdf",
+      });
+    } catch (error) {
+      console.error("Error sharing PDF with custom name:", error);
+      await Sharing.shareAsync(uri, {
+        mimeType: "application/pdf",
+        dialogTitle: t("NewReport.Share GRN Report"),
+        UTI: "com.adobe.pdf",
+      });
     }
-  };
+  } else {
+    Alert.alert(t("Error.error"), t("NewReport.Failed to share PDF file"));
+  }
+};
 
   return (
     <View style={{ flex: 1 }}>

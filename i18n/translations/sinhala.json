@@ -71,8 +71,8 @@
     "FailedToFinishUnloading": "බෑම අවසන් කිරීමට නොහැකි විය.",
     "Failed to fetch empid.": "සේවක හැඳුනුම්පත සොයා ගැනීමට අසමත් විය.",
     "You cannot transfer the maximum amount of": "ඔබට උපරිම මුදල මාරු කළ නොහැක",
-    "This EMP ID is not approved.": "මෙම වැරදි සේවක අනුමත කර නැත.",
-    "This EMP ID is Rejected": "මෙම වැරදි සේවක ප්‍රතික්ෂේප කර ඇත.",
+    "This EMP ID is not approved.": "සේවක හැඳුනුම් අංකය අනුමත කර නොමැත.",
+    "This EMP ID is Rejected": "සේවක හැඳුනුම් අංකය ප්‍රතික්ෂේප කර ඇත.",
     "New password and confirm password do not match.": "නව මුරපදය සහ එය තහවුරු කිරීමේ මුරපදය එකිනෙකට නොගැලපේ.",
     "New password must be at least 6 characters long.": "නව මුරපදයට අවම වශයෙන් අක්ෂර 6 ක් තිබිය යුතුය.",
     "Failed to update password.": "මුරපදය යාවත්කාලීන කිරීම අසාර්ථකයි.",
@@ -327,7 +327,8 @@
     "Report Complaint": "පැමිණිල්ලක් වාර්තා කරන්න",
     "View Complaint History": "පැමිණිලි ඉතිහාසය බලන්න",
     "Logout": "පිටවීම",
-    "Logging out": "ඉවත් වෙමින්..."
+    "Logging out": "ඉවත් වෙමින්...",
+    "ScaleConnectionGuide": "තරාදිය සම්බන්ධ කිරීමේ උපදෙස්"
   },
   "Profile": {
     "LNG": "si",
@@ -545,7 +546,7 @@
     "GradeC": "Grade C",
     "DeleteVariety": "Delete Variety"
   },
-    "GoodsReceivedNote": {
+  "GoodsReceivedNote": {
     "LNG": "en",
     "Download": "Download",
     "GRN": "Goods Received Note",
@@ -1708,12 +1709,12 @@
     "End": "අවසන් කරන්න",
     "Position already occupied today": "මෙම ස්ථානය අද දින වෙනත් නිලධාරියෙකු විසින් දැනටමත් භාවිත කරමින් සිටී.",
     "Selected position not found": "තෝරාගත් ඇසුරුම් ස්ථානය හමු නොවීය.",
-     "Warning Missing Items_one": "අවවාදයයි: වෙන් නොකළ අයිතම {{count}}ක්",
+    "Warning Missing Items_one": "අවවාදයයි: වෙන් නොකළ අයිතම {{count}}ක්",
     "Warning Missing Items_other": "අවවාදයයි: වෙන් නොකළ අයිතම {{count}}ක්",
     "Tap to View List": "ලැයිස්තුව බලන්න",
-    "Unallocated":"ස්ථාන ගත කර නැත",
-    "Unallocated Items":"ස්ථාන ගත නොකළ අයිතම",
-     "Missing Items Notice":"පහත අයිතම සඳහා ඇසුරුම් ස්ථාන වෙන් කර නොමැත. කරුණාකර හැකි ඉක්මනින් කළමනාකාර මහතා වෙත ඒ බව දැනුම් දෙන්න. එමෙන්ම ඇණවුම සම්පූර්ණ කිරීම සඳහා දැනට එම අයිතම ඔබ විසින්ම ඇසුරුම් කරන්න."
+    "Unallocated": "ස්ථාන ගත කර නැත",
+    "Unallocated Items": "ස්ථාන ගත නොකළ අයිතම",
+    "Missing Items Notice": "පහත අයිතම සඳහා ඇසුරුම් ස්ථාන වෙන් කර නොමැත. කරුණාකර හැකි ඉක්මනින් කළමනාකාර මහතා වෙත ඒ බව දැනුම් දෙන්න. එමෙන්ම ඇණවුම සම්පූර්ණ කිරීම සඳහා දැනට එම අයිතම ඔබ විසින්ම ඇසුරුම් කරන්න."
   },
   "QRHandling": {
     "QR Handling": "QR හැසිරවීම",
@@ -2153,5 +2154,32 @@
     "LaterButton": "පසුව යාවත්කාලීන කරන්න",
     "Feature1": "වැඩිදියුණු කළ බෙදාහැරීමේ කාර්ය ප්රවාහය සහ වේගය",
     "Feature2": "වැදගත් දෝෂ නිවැරදි කිරීම් සහ පද්ධති වැඩිදියුණු කිරීම්"
+  },
+  "ScaleConnectionGuide": {
+    "Title": "12.2 තරාදිය ඔබේ Wi-Fi රවුටරයට සම්බන්ධ කිරීම",
+    "SectionTitle": "Wi-Fi රවුටර සම්බන්ධතාවය",
+    "Prerequisite": "ඉහත උපදෙස් පරිදි තරාදිය Wi-Fi මාදිලියේ (WiFi Mode) ඇති බවට තහවුරු කරගන්න.",
+    "Step1": "[Mode] බොත්තම ඔබන්න.",
+    "Step2": "42 ඇතුළත් කරන්න. තිරය මත \"Wi-Fi\" දිස්වනු ඇත.",
+    "Step3": "[F-Prog] සහ [Amend] බොත්තම් දෙක එකවර ඔබන්න.",
+    "Step4": "තිරයේ \"Please Wait\" දිස්වනු ඇත. තරාදිය අවට ඇති Wi-Fi රවුටර scan කර මුද්‍රණය කරන තෙක් රැඳී සිටින්න.",
+    "Step5": "[→] බොත්තම භාවිතයෙන් නිවැරදි Wi-Fi රවුටරය තෝරන්න.",
+    "Step6": "[Accu/Confirm] බොත්තම ඔබන්න.",
+    "Step7": "Wi-Fi මුරපදය (password) ඇතුළත් කරන්න.",
+    "Step8": "[Amend] බොත්තම ඔබන්න.",
+    "Step9": "උපකරණයේ IP ලිපිනයක් දිස්වන තුරු තත්පර 30-60ක් පමණ රැඳී සිටින්න. කරුණාකර මෙම IP ලිපිනය සටහන් කරගන්න.",
+    "IpNoteTitle": "විශේෂ සටහන",
+    "IpNote": "කරුණාකර මෙම IP ලිපිනය සටහන් කරගන්න. ඇප් එක තුළ තරාදිය සම්බන්ධ කිරීමට මෙය අවශ්‍ය වේ.",
+    "ConnectScaleNow": "ඇප් එක තුළ තරාදිය සම්බන්ධ කරන්න",
+    "HowToGetIp": "තරාදියේ IP ලිපිනය ලබාගන්නේ කෙසේද?",
+    "ModalTitle": "තරාදිය පිහිටුවීමේ උපදෙස්",
+    "HeaderTitle": "තරාදිය සම්බන්ධ කිරීමේ උපදෙස්",
+    "ImeTitle": "විශාල අකුරු (Uppercase) සහ සංකේත ටයිප් කිරීම ([IME] බොත්තම)",
+    "ImeDescription": "විශාල අකුරු (Uppercase) ටයිප් කිරීමට අවශ්‍ය නම් [IME] බොත්තම ඔබන්න. [IME] බොත්තම එබීමෙන් පහත පරිදි මාරු වේ:",
+    "ImeLowercase": "lowercase (කුඩා අකුරු)",
+    "ImeUppercase": "uppercase (විශාල අකුරු)",
+    "ImeUtf8": "UTF-8",
+    "ImeIsn": "ISN code",
+    "ImeTip": "අවශ්‍ය අකුරු වර්ගය (lowercase, uppercase, UTF-8 හෝ ISN code) ලැබෙන තෙක් [IME] බොත්තම නැවත නැවත ඔබන්න."
   }
 }

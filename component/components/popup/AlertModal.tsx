@@ -90,7 +90,12 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   const renderMessage = () => {
     if (typeof message === "string") {
       return (
-        <Text className="text-center text-[#4E4E4E] mb-5 mt-2">{message}</Text>
+        <Text
+          className="text-center text-[#4E4E4E] mb-5 mt-2 w-full"
+          style={{ textAlign: "center", alignSelf: "stretch" }}
+        >
+          {message}
+        </Text>
       );
     }
     return message;
@@ -146,8 +151,8 @@ export const AlertModal: React.FC<AlertModalProps> = ({
           </TouchableOpacity>
 
           <Text
-            className="font-bold text-lg mb-4 text-center text-black"
-            style={{ paddingHorizontal: 36 }}
+            className="font-bold text-lg mb-4 text-center text-black w-full"
+            style={{ paddingHorizontal: 36, textAlign: "center", alignSelf: "stretch" }}
           >
             {getModalTitle()}
           </Text>
@@ -164,7 +169,10 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
                 <FontAwesome5 name="undo" size={18} color="white" />
-                <Text className="text-white font-bold text-base">
+                <Text
+                  className="text-white font-bold text-base text-center"
+                  style={{ textAlign: "center" }}
+                >
                   {t("AlertModal.Re-Scan", "Re-Scan")}
                 </Text>
               </TouchableOpacity>
@@ -177,7 +185,10 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 activeOpacity={0.8}
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
-                <Text className="text-white font-bold text-base">
+                <Text
+                  className="text-white font-bold text-base text-center"
+                  style={{ textAlign: "center" }}
+                >
                   {t("AlertModal.Open Ongoing Activity", "Open Ongoing Activity")}
                 </Text>
               </TouchableOpacity>
@@ -189,7 +200,10 @@ export const AlertModal: React.FC<AlertModalProps> = ({
                 activeOpacity={0.8}
                 className="bg-[#980775] py-3 px-6 rounded-full flex-row items-center justify-center gap-x-2 shadow-md"
               >
-                <Text className="text-white font-bold text-base">
+                <Text
+                  className="text-white font-bold text-base text-center"
+                  style={{ textAlign: "center" }}
+                >
                   {t("AlertModal.OK", "OK")}
                 </Text>
               </TouchableOpacity>
