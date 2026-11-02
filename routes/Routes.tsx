@@ -21,6 +21,7 @@ import Lanuage from "@/component/common/lanuage/Lanuage";
 import OfficerQr from "@/component/common/auth/OfficerQrCode";
 import SideMenu from "@/component/components/navigations/SideMenu";
 import PrivacyPolicy from "@/component/common/privacy-policy/PrivacyPolicy";
+import ScaleConnectionGuideScreen from "@/component/common/scale-guide/ScaleConnectionGuideScreen";
 import LoadingPage from "@/component/components/loading/LoadingPage";
 import ComplainPage from "@/component/common/complain/ComplainPage";
 import ComplainHistory from "@/component/common/complain/ComplainHistory";
@@ -252,6 +253,7 @@ const PUBLIC_STACK_SCREENS: StackRouteConfig[] = [
   { name: "Lanuage", component: Lanuage, allowedRoles: "PUBLIC" },
   { name: "Profile", component: Profile, allowedRoles: "PUBLIC" },
   { name: "PrivacyPolicy", component: PrivacyPolicy, allowedRoles: "PUBLIC" },
+  { name: "ScaleConnectionGuide", component: ScaleConnectionGuideScreen as any, allowedRoles: "PUBLIC" },
   { name: "ChangePassword", component: ChangePassword as any, allowedRoles: "PUBLIC" },
   { name: "LoadingPage", component: LoadingPage as any, allowedRoles: "PUBLIC" },
   {

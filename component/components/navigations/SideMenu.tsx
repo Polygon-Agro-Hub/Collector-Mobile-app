@@ -26,6 +26,7 @@ import LottieView from "lottie-react-native";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { ROLES } from "@/constants/user-roles";
+import { ScaleSelectModal } from "@/component/components/popup/ScaleSelectModal";
 import {
   isQuickAccessScaleEnabled,
   setQuickAccessScaleEnabled,
@@ -77,6 +78,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [jobRole, setJobRole] = useState<string | null>(null);
   const [isQuickAccessEnabled, setIsQuickAccessEnabled] = useState<boolean>(true);
+  const [isScaleSelectModalVisible, setIsScaleSelectModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
     isQuickAccessScaleEnabled().then((val) => {
@@ -440,6 +442,19 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
 
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 
+          {/* Scale Connection Guide */}
+          <TouchableOpacity
+            className="flex-row items-center py-3"
+            onPress={() => navigation.navigate("ScaleConnectionGuide")}
+          >
+            <MaterialCommunityIcons name="book-open-outline" size={22} color="black" />
+            <Text className="flex-1 text-lg ml-2">
+              {t("SideMenu.ScaleConnectionGuide", "Scale Connection Guide")}
+            </Text>
+          </TouchableOpacity>
+
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
           <TouchableOpacity
             className="flex-row items-center py-3"
             onPress={() => navigation.navigate("PrivacyPolicy")}
@@ -510,7 +525,13 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    
+      {/* Scale Select Modal */}
+      <ScaleSelectModal
+        visible={isScaleSelectModalVisible}
+        onClose={() => setIsScaleSelectModalVisible(false)}
+      />
+</View>
   );
 };
 
