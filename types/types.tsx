@@ -180,6 +180,7 @@ export type RootStackParamList = {
   TamProfile: undefined;
   SearchPriceScreen: undefined;
   PrivacyPolicy: undefined;
+  ScaleConnectionGuide: undefined;
   CollectionOfficersList: undefined;
   RegisterDriver: undefined;
   DailyTargetList: undefined;

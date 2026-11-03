@@ -2,7 +2,7 @@
   "expo": {
     "name": "CoDi-Net",
     "slug": "CoDi-Net",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",

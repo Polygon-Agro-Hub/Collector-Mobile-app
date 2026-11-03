@@ -17,6 +17,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { wifiScaleService, ScaleStatus } from "@/services/scale/wifiScaleService";
+import { ScaleConnectionGuideModal } from "@/component/components/popup/ScaleConnectionGuideModal";
 
 interface ScaleSelectModalProps {
   visible: boolean;
@@ -44,6 +45,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
   const [port, setPort] = useState<string>(DEFAULT_PORT);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [isWifiEnabled, setIsWifiEnabled] = useState<boolean>(true);
+  const [isGuideVisible, setIsGuideVisible] = useState<boolean>(false);
 
   const fetchCurrentNetworkIp = async () => {
     try {
@@ -354,9 +356,21 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
             {/* Manual IP / Port Input */}
             <View style={{ gap: 12, marginBottom: 20 }}>
               <View>
-                <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155", marginBottom: 4 }}>
-                  {t("ScaleSelectModal.ScaleIpAddress")}
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                  <Text style={{ fontSize: 12, fontWeight: "600", color: "#334155" }}>
+                    {t("ScaleSelectModal.ScaleIpAddress")}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setIsGuideVisible(true)}
+                    activeOpacity={0.7}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+                  >
+                    <Ionicons name="help-circle-outline" size={15} color="#0284c7" />
+                    <Text style={{ fontSize: 12, color: "#0284c7", fontWeight: "600" }}>
+                      {t("ScaleConnectionGuide.HowToGetIp", "How to get IP?")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
                 <View
                   style={{
                     backgroundColor: "#ffffff",
@@ -457,6 +471,10 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
         </View>
       </View>
       </KeyboardAvoidingView>
+      <ScaleConnectionGuideModal
+        visible={isGuideVisible}
+        onClose={() => setIsGuideVisible(false)}
+      />
     </Modal>
   );
 };
