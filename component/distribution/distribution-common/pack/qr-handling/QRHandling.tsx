@@ -349,11 +349,17 @@ export default function QRHandling({ navigation }: { navigation: any }) {
         /* SCREEN 2 & 3: List State */
         <View className="flex-1 bg-white">
           {/* Header Title section */}
-          <View className="items-center mt-5 mb-5 px-4">
-            <Text className="text-xl font-bold text-slate-950">
+          <View className="w-full items-center justify-center mt-5 mb-5 px-4">
+            <Text
+              className="text-xl font-bold text-slate-950 text-center"
+              style={{ textAlign: "center" }}
+            >
               {t("QRHandling.QR Handling", "Welcome to QR Handling")}
             </Text>
-            <Text className="text-[#54617D] text-sm mt-1">
+            <Text
+              className="text-[#54617D] text-sm mt-1 text-center"
+              style={{ textAlign: "center" }}
+            >
               {t("QRHandling.Tap the order to print it.", "Tap the order to print it.")}
             </Text>
           </View>
