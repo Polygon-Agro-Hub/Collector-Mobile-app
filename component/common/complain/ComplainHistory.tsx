@@ -270,27 +270,28 @@ const ComplainHistory: React.FC<ComplainHistoryProps> = ({
         return `${closingWord}, ${replierName}\n${headTitle}`;
       }
     } else if (complain.complainAssign === "CCM") {
-      const managerTitle = t(
-        "Roles.Collection Centre Manager",
-        "Collection Centre Manager",
-      );
-      const ofWord = t("Roles.of", "of");
+  const managerTitle = t(
+    "Roles.Collection Centre Manager",
+    "Collection Centre Manager",
+  );
+  const ofWord = t("Roles.of", "of");
 
-      const closingWord = isSi ? "මෙයට" : isTa ? "இதற்கு" : "Sincerely";
+  const closingWord = isSi ? "මෙයට" : isTa ? "இதற்கு" : "Sincerely";
 
-      const line1 = `${closingWord}, ${replierName}`;
-      const line2 = centerRegCode
-        ? isSi || isTa
-          ? `${centerRegCode} ${ofWord} ${managerTitle}`
-          : `${managerTitle} ${ofWord} ${centerRegCode}`
-        : `${managerTitle}`;
+  // closing word on line 1, name on line 2
+  const line1 = `${closingWord},\n${replierName}`;
+  const line2 = centerRegCode
+    ? isSi || isTa
+      ? `${centerRegCode} ${ofWord} ${managerTitle}`
+      : `${managerTitle} ${ofWord} ${centerRegCode}`
+    : `${managerTitle}`;
 
-      if (companyName) {
-        return `${line1}\n${line2}\n${companyName}`;
-      } else {
-        return `${line1}\n${line2}`;
-      }
-    } else {
+  if (companyName) {
+    return `${line1}\n${line2}\n${companyName}`;
+  } else {
+    return `${line1}\n${line2}`;
+  }
+} else {
       const managerTitle = t(
         "Roles.Distribution Centre Manager",
         "Distribution Centre Manager",
