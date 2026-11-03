@@ -339,7 +339,7 @@ const DailyTargetListForOfficers: React.FC<DailyTargetListForOfficersProps> = ({
                   className="justify-center items-center border-r border-white/20 px-1 py-2"
                 >
                   <Text className="text-center text-white font-bold text-xs">
-                    {selectedToggle === "ToDo" ? t("CenterTarget.No") : ""}
+                    {t("CenterTarget.No")}
                   </Text>
                 </View>
 

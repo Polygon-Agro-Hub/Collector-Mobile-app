@@ -441,6 +441,7 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
               style={{
                 backgroundColor: "#FAE432",
                 paddingVertical: 14,
+                paddingHorizontal: 20,
                 borderRadius: 32,
                 flexDirection: "row",
                 alignItems: "center",
@@ -459,7 +460,15 @@ export const ScaleSelectModal: React.FC<ScaleSelectModalProps> = ({
               ) : (
                 <>
                   <MaterialIcons name="wifi" size={20} color="#000000" />
-                  <Text style={{ fontSize: 16, fontWeight: "bold", color: "#000000" }}>
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      color: "#000000",
+                      textAlign: "center",
+                      flexShrink: 1,
+                    }}
+                  >
                     {scaleStatus.connected
                       ? t("ScaleSelectModal.ReconnectScale")
                       : t("ScaleSelectModal.ConnectScale")}

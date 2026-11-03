@@ -302,15 +302,26 @@ const ClaimOfficer: React.FC = () => {
       )}
 
       {!officerFound && searchPerformed && !searchLoading && (
-        <View className="flex items-center justify-center mt-24 px-4 w-full">
+        <View
+          className="items-center justify-center mt-24 px-8 w-full"
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            paddingHorizontal: 32,
+          }}
+        >
           <Image
             source={require("../../../../assets/images/collection-manager/delete-icon.webp")}
             className="w-28 h-28"
             resizeMode="contain"
           />
           <Text
-            className="text-gray-500 mt-2 italic text-center w-full"
-            style={{ textAlign: "center" }}
+            className="text-gray-500 mt-2 italic text-center"
+            style={{
+              textAlign: "center",
+              alignSelf: "center",
+            }}
           >
             {t("ClaimOfficer.No Disclaimed")}
           </Text>
