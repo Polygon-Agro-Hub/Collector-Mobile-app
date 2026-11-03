@@ -206,7 +206,7 @@ export default function Packing({
           setActiveOrderPackageId(activeData.activeOrderPackageId || null);
           setActiveTrackingId(activeData.trackingId ? Number(activeData.trackingId) : null);
           if (activeData.timeSlot) {
-            setScheduledTime(formatTimeSlot(activeData.timeSlot));
+            setScheduledTime(formatTimeSlot(activeData.timeSlot, t));
           }
 
           const orderStatus = activeData.orderStatus;

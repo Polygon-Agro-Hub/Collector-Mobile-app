@@ -179,8 +179,8 @@ export default function SentProductsToday({
         .replace(/P\.?M\.?/gi, "ප.ව.");
     } else if (lang.startsWith("ta")) {
       str = str
-        .replace(/A\.?M\.?/gi, "முற்பகல்")
-        .replace(/P\.?M\.?/gi, "பிற்பகல்");
+        .replace(/A\.?M\.?/gi, "மு.ப.")
+        .replace(/P\.?M\.?/gi, "பி.ப.");
     }
     return str;
   };
