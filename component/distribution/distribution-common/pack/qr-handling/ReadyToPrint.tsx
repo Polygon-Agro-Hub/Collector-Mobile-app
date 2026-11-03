@@ -98,8 +98,11 @@ export default function ReadyToPrint({
 
       <ScrollView className="flex-1 bg-white px-6" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {/* Header Title section matching QRHandling design */}
-        <View className="items-center mb-6">
-          <Text className="text-xl font-bold text-slate-950">
+        <View className="w-full items-center justify-center mb-6">
+          <Text
+            className="text-xl font-bold text-slate-950 text-center"
+            style={{ textAlign: "center" }}
+          >
             {t("QRHandling.Ready to Print", "Ready to Print")}
           </Text>
         </View>

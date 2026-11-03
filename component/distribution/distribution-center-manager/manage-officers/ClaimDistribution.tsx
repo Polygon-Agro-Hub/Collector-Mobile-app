@@ -314,13 +314,16 @@ const ClaimDistribution: React.FC<Props> = ({ route }) => {
 
       {/* No Officer Found */}
       {!officerFound && hasSearched && empID && (
-        <View className="flex items-center justify-center mt-24">
+        <View className="flex items-center justify-center mt-24 px-4 w-full">
           <Image
             source={require("../../../../assets/images/collection-manager/delete-icon.webp")}
             className="w-28 h-28"
             resizeMode="contain"
           />
-          <Text className="text-gray-500 mt-2">
+          <Text
+            className="text-gray-500 mt-2 text-center w-full"
+            style={{ textAlign: "center" }}
+          >
             {t("ClaimOfficer.No Disclaimed")}
           </Text>
         </View>
