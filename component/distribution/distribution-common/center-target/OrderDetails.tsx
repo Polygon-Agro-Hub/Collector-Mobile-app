@@ -320,12 +320,13 @@ export default function OrderDetails({
                                   <Text
                                     className="font-extrabold text-xs mt-0.5"
                                     style={{ color: "#FF2D55" }}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.8}
                                   >
-                                    --
-                          {t("Packing.Unallocated", {
-                            defaultValue: "Unallocated",
-                          })}
-                          --
+                                    {`--${t("Packing.Unallocated", {
+                                      defaultValue: "Unallocated",
+                                    })}--`}
                                   </Text>
                                 ) : (
                                   <Text className="text-slate-950 font-extrabold text-xs mt-0.5">

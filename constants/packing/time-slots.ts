@@ -116,7 +116,10 @@ export const formatTimeSlot = (
       .replace(/(\d{1,2}:\d{2})\s*AM/gi, "மு.ப. $1")
       .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பி.ப. $1")
       .replace(/\bAM\b/gi, "மு.ப.")
-      .replace(/\bPM\b/gi, "பி.ப.");
+      .replace(/\bPM\b/gi, "பி.ப.")
+      .replace(/முற்பகல்/g, "மு.ப.")
+      .replace(/பிற்பகல்/g, "பி.ப.")
+      .replace(/மணிக்கு/g, "மணி.");
   }
 
   return standard
@@ -129,7 +132,7 @@ export const formatTimeSlot = (
 /**
  * Formats Ready Time according to language:
  * Sinhala: "[පෙ.ව./ප.ව.] [H:MM] ට [YYYY/MM/DD] දින" -> e.g. "ප.ව. 1:00 ට 2026/09/12 දින"
- * Tamil: "[முற்பகல்/பிற்பகல்] [H:MM] மணிக்கு [YYYY/MM/DD] அன்று" -> e.g. "பிற்பகல் 1:00 மணிக்கு 2026/09/12 அன்று"
+ * Tamil: "[மு.ப./பி.ப.] [H:MM] மணி. [YYYY/MM/DD] அன்று" -> e.g. "பி.ப. 1:00 மணி. 2026/09/12 அன்று"
  * English: "At [H:MM AM/PM] on [YYYY/MM/DD]" -> e.g. "At 1:00 PM on 2026/09/12"
  */
 export const formatReadyDateTime = (
@@ -138,7 +141,12 @@ export const formatReadyDateTime = (
 ): string => {
   if (!packTimeInput) return "";
   const date = new Date(packTimeInput);
-  if (isNaN(date.getTime())) return String(packTimeInput);
+  if (isNaN(date.getTime())) {
+    return String(packTimeInput)
+      .replace(/முற்பகல்/g, "மு.ப.")
+      .replace(/பிற்பகல்/g, "பி.ப.")
+      .replace(/மணிக்கு/g, "மணி.");
+  }
 
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -153,8 +161,16 @@ export const formatReadyDateTime = (
   const time12 = `${hours}:${minutes}`;
 
   const am = t ? t("Time.AM", { defaultValue: "AM" }) : i18n.t("Time.AM", { defaultValue: "AM" });
-  const isSinhala = am === "පෙ.ව." || (t && t("AddOfficerBasicDetails.LNG") === "si");
-  const isTamil = am === "மு.ப." || am === "மு.ப" || am === "முற்பகல்" || (t && t("AddOfficerBasicDetails.LNG") === "ta");
+  const currentLang =
+    (t && (t("SignIn.LNG") || t("LNG") || t("AddOfficerBasicDetails.LNG"))) ||
+    i18n.language ||
+    "en";
+  const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
+  const isTamil =
+    am === "மு.ப." ||
+    am === "மு.ப" ||
+    am === "முற்பகல்" ||
+    currentLang.toLowerCase().startsWith("ta");
 
   if (isSinhala) {
     const period = isPM ? "ප.ව." : "පෙ.ව.";
@@ -163,7 +179,7 @@ export const formatReadyDateTime = (
 
   if (isTamil) {
     const period = isPM ? "பி.ப." : "மு.ப.";
-    return `${period} ${time12} மணிக்கு ${formattedDate} அன்று`;
+    return `${period} ${time12} மணி. ${formattedDate} அன்று`;
   }
 
   const ampm = isPM ? "PM" : "AM";

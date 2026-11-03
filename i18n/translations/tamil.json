@@ -1297,7 +1297,7 @@
     "Please check your internet connection and try again.": "உங்கள் இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்."
   },
   "ViewPickupOrders": {
-    "ID": "எண்:",
+    "ID": "எண்",
     "Order Details": "ஆர்டர் விவரங்கள்",
     "Ready": "தயார்",
     "Already Paid": "ஏற்கனவே பணம் செலுத்தப்பட்டுள்ளது!",
@@ -1709,8 +1709,8 @@
     "End": "முடிக்கவும்",
     "Position already occupied today": "இந்தப் பணியிடத்தில் இன்று ஏற்கனவே மற்றொரு அதிகாரி பணியில் உள்ளார்.",
     "Selected position not found": "தேர்ந்தெடுக்கப்பட்ட பொதியிடும் பணியிடத்தைக் கண்டறிய முடியவில்லை.",
-    "Warning Missing Items_one": "எச்சரிக்கை: {{count}} பொருள் ஒதுக்கப்படவில்லை",
-    "Warning Missing Items_other": "எச்சரிக்கை: {{count}} பொருட்கள் ஒதுக்கப்படவில்லை",
+    "Warning Missing Items_one": "எச்சரிக்கை: {{count}} ஒதுக்கப்படாத பொருள்",
+    "Warning Missing Items_other": "எச்சரிக்கை: {{count}} ஒதுக்கப்படாத பொருட்கள்",
     "Tap to View List": "பட்டியலைப் பார்க்கத் தட்டவும்",
     "Unallocated": "ஒதுக்கப்படாதது",
     "Unallocated Items": "ஒதுக்கப்படாத பொருட்கள்",
