@@ -86,7 +86,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
 
     const lang = String(currentLang).toLowerCase();
     const isSinhala = am === "පෙ.ව." || lang.startsWith("si");
-    const isTamil = am === "முற்பகல்" || lang.startsWith("ta");
+    const isTamil = am === "மு.ப." || am === "மு.ப" || am === "முற்பகல்" || lang.startsWith("ta");
     return { isSinhala, isTamil };
   };
 
@@ -100,8 +100,8 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
       const cleaned = dateString
         .replace(/පෙ\.ව\./g, "AM")
         .replace(/ප\.ව\./g, "PM")
-        .replace(/முற்பகல்/g, "AM")
-        .replace(/பிற்பகல்/g, "PM");
+        .replace(/முற்பகல்|மு\.ப\.?/g, "AM")
+        .replace(/பிற்பகல்|பி\.ப\.?/g, "PM");
 
       if (isSinhala) {
         return cleaned
@@ -112,10 +112,10 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
       }
       if (isTamil) {
         return cleaned
-          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "முற்பகல் $1")
-          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பிற்பகல் $1")
-          .replace(/\bAM\b/gi, "முற்பகல்")
-          .replace(/\bPM\b/gi, "பிற்பகல்");
+          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "மு.ப. $1")
+          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பி.ப. $1")
+          .replace(/\bAM\b/gi, "மு.ப.")
+          .replace(/\bPM\b/gi, "பி.ப.");
       }
       return cleaned;
     }
@@ -135,7 +135,7 @@ const ReceivedCash: React.FC<ReceivedCashProps> = ({ route, navigation }) => {
     }
 
     if (isTamil) {
-      const period = isPM ? "பிற்பகல்" : "முற்பகல்";
+      const period = isPM ? "பி.ப." : "மு.ப.";
       return `${year}/${month}/${day} ${period} ${hours}:${minutes}`;
     }
 

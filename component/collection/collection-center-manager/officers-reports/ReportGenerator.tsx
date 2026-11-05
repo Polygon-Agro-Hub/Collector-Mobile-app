@@ -66,9 +66,11 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   // "ta-IN", etc. depending on device locale) down to the "en" | "si" | "ta"
   // union that ReportPDFGenerator expects, with a safe fallback to "en".
   const getCurrentReportLanguage = (): ReportLanguage => {
-    const base = i18nInstance.language?.split("-")[0];
+    const base = (i18n.language || i18nInstance.language || "en")
+      .toLowerCase()
+      .slice(0, 2);
     if (base === "si" || base === "ta" || base === "en") {
-      return base;
+      return base as ReportLanguage;
     }
     return "en";
   };
@@ -307,7 +309,11 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       getCurrentReportLanguage(),
     );
     if (fileUri && (await Sharing.isAvailableAsync())) {
-      await Sharing.shareAsync(fileUri, { mimeType: "application/pdf" });
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "application/pdf",
+        dialogTitle: t("ReportGenerator.Share"),
+        UTI: "com.adobe.pdf",
+      });
     } else {
       Alert.alert(
         t("Error.error"),
@@ -509,7 +515,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       </View>
 
       {reportGenerated ? (
-        <View className="items-center justify-center flex-1">
+        <View className="items-center justify-center flex-1 px-8">
           <View className="w-24 h-24 bg-[#FFE6CB66] rounded-full items-center justify-center mb-4">
             <Image
               source={require("../../../../assets/images/collection-manager/document.webp")}
@@ -517,7 +523,10 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             />
           </View>
 
-          <Text className="text-sm text-gray-500 italic mb-6">
+          <Text
+            className="text-sm text-gray-500 italic mb-6 text-center"
+            style={{ textAlign: "center" }}
+          >
             {t("ReportGenerator.Report has been generated")}
           </Text>
 
@@ -540,13 +549,16 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           />
         </View>
       ) : (
-        <View className="items-center justify-center flex-1">
+        <View className="items-center justify-center flex-1 px-8">
           <Image
             source={require("../../../../assets/images/collection-manager/empty.webp")}
             className="w-20 h-20 mb-4"
             resizeMode="contain"
           />
-          <Text className="text-gray-500 italic">
+          <Text
+            className="text-gray-500 italic text-center"
+            style={{ textAlign: "center" }}
+          >
             {t("ReportGenerator.Time Duration first")}
           </Text>
         </View>

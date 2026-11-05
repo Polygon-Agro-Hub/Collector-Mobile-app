@@ -3,6 +3,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import axios from "axios";
 import environment from "@/environment/environment";
 import i18n from "@/i18n/i18n";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type ReportLanguage = "en" | "si" | "ta";
 
@@ -61,6 +62,49 @@ const validateAndFormatDate = (dateString: string): string | null => {
 
 const reportCounters: { [key: string]: number } = {};
 
+
+const getTranslatedJobRole = (role: string, lang: ReportLanguage): string => {
+  if (!role) return "";
+  const normalized = role.trim().toLowerCase();
+  if (lang === "ta") {
+    switch (normalized) {
+      case "collection officer":
+        return "சேகரிப்பு அதிகாரி";
+      case "customer officer":
+        return "வாடிக்கையாளர் அதிகாரி";
+      case "distribution officer":
+        return "விநியோகிப்பதற்கான அதிகாரி";
+      case "driver":
+        return "சாரதி";
+      case "collection manager":
+      case "center manager":
+      case "manager":
+        return "சேகரிப்பு முகாமையாளர்";
+      default:
+        return role;
+    }
+  }
+  if (lang === "si") {
+    switch (normalized) {
+      case "collection officer":
+        return "එක්රැස් කිරීමේ නිලධාරී";
+      case "customer officer":
+        return "පාරිභෝගික නිලධාරී";
+      case "distribution officer":
+        return "බෙදාහැරීමේ නිලධාරී";
+      case "driver":
+        return "රියදුරු";
+      case "collection manager":
+      case "center manager":
+      case "manager":
+        return "කළමනාකරු";
+      default:
+        return role;
+    }
+  }
+  return role;
+};
+
 const generateReportId = (officerId: string): string => {
   if (!reportCounters[officerId]) {
     reportCounters[officerId] = 1;
@@ -80,7 +124,24 @@ export const handleGeneratePDF = async (
   language?: string,
 ) => {
   try {
-    const t = getPdfTranslator((language as ReportLanguage) || "en");
+    let resolvedLang: ReportLanguage = (language as ReportLanguage);
+    if (!resolvedLang || !["en", "si", "ta"].includes(resolvedLang)) {
+      try {
+        const stored = await AsyncStorage.getItem("@user_language");
+        const storedBase = stored?.toLowerCase().slice(0, 2);
+        if (storedBase === "si" || storedBase === "ta" || storedBase === "en") {
+          resolvedLang = storedBase as ReportLanguage;
+        }
+      } catch (e) {}
+    }
+    if (!resolvedLang || !["en", "si", "ta"].includes(resolvedLang)) {
+      const current = (i18n.language || "").toLowerCase().slice(0, 2);
+      resolvedLang = (["en", "si", "ta"].includes(current) ? current : "en") as ReportLanguage;
+    }
+
+    const t = getPdfTranslator(resolvedLang);
+    const isSinhala = resolvedLang === "si";
+    const isTamil = resolvedLang === "ta";
 
     const formattedFromDate = validateAndFormatDate(fromDate);
     const formattedToDate = validateAndFormatDate(toDate);
@@ -94,7 +155,7 @@ export const handleGeneratePDF = async (
 
     const officerResponse = await axios.get(
       `${environment.API_BASE_URL}api/collection-manager/employee/${officerId}`,
-      { params: { language: language || "en" } },
+      { params: { language: resolvedLang } },
     );
     if (officerResponse.data.status !== "success") {
       console.error(
@@ -104,6 +165,7 @@ export const handleGeneratePDF = async (
       return null;
     }
     const { firstName, lastName, jobRole } = officerResponse.data.data;
+    const translatedJobRole = getTranslatedJobRole(jobRole, resolvedLang);
 
     const farmerPaymentsResponse = await axios.get(
       `${environment.API_BASE_URL}api/collection-manager/farmer-payments-summary`,
@@ -161,15 +223,22 @@ export const handleGeneratePDF = async (
           { from: fromDate, to: toDate },
         )}</td></tr>`;
 
-    const generatedDate = new Date().toLocaleDateString();
+    const now = new Date();
+    const generatedDate = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")}`;
     const generatedTime = formatDisplayTime(
-      new Date().toLocaleTimeString(),
-      (language! as ReportLanguage) || "en",
+      now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }),
+      resolvedLang,
     );
+
+    const fontFamily = isSinhala
+      ? "'Noto Sans Sinhala', 'Iskoola Pota', 'Sinhala Sangam MN', Arial, sans-serif"
+      : isTamil
+        ? "'Noto Sans Tamil', 'Latha', 'Tamil Sangam MN', Arial, sans-serif"
+        : "Arial, sans-serif";
 
     const htmlContent = `
       <!DOCTYPE html>
-      <html lang="${language}">
+      <html lang="${resolvedLang}">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -179,7 +248,7 @@ export const handleGeneratePDF = async (
             box-sizing: border-box;
           }
           body {
-            font-family: Arial, sans-serif;
+            font-family: ${fontFamily};
             margin: 0;
             padding: 0;
             color: #333;
@@ -267,7 +336,7 @@ export const handleGeneratePDF = async (
               <td class="header-label">${t("empId")}</td>
               <td class="header-value">${officerId}</td>
               <td class="header-label">${t("role")}</td>
-              <td class="header-value">${jobRole}</td>
+              <td class="header-value">${translatedJobRole}</td>
             </tr>
             <tr>
               <td class="header-label">${t("firstName")}</td>
@@ -306,13 +375,20 @@ export const handleGeneratePDF = async (
       base64: true,
     });
 
-    const isSinhala = (language || "en").toLowerCase().startsWith("si");
-    const isTamil = (language || "en").toLowerCase().startsWith("ta");
+
 
     const cleanOfficerId = (officerId || "all").replace(/[^a-zA-Z0-9_-]/g, "_");
-    const cleanFromDate = (formattedFromDate || "").replace(/[^a-zA-Z0-9_-]/g, "_");
-    const cleanToDate = (formattedToDate || "").replace(/[^a-zA-Z0-9_-]/g, "_");
-    const fileUri = `${(FileSystem as any).cacheDirectory}Report_${cleanOfficerId}_${cleanFromDate}_to_${cleanToDate}.pdf`;
+    const cleanFromDate = (formattedFromDate || "").replace(/[^a-zA-Z0-9_-]/g, "-");
+    const cleanToDate = (formattedToDate || "").replace(/[^a-zA-Z0-9_-]/g, "-");
+
+    let fileName = `Report_${cleanOfficerId}_From_${cleanFromDate}_To_${cleanToDate}.pdf`;
+    if (isSinhala) {
+      fileName = `වාර්තාව_${cleanOfficerId}_${cleanFromDate}_සිට_${cleanToDate}_දක්වා.pdf`;
+    } else if (isTamil) {
+      fileName = `அறிக்கை_${cleanOfficerId}_${cleanFromDate}_இருந்து_${cleanToDate}_வரை.pdf`;
+    }
+
+    const fileUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
     if (base64) {
       try {
         await FileSystem.writeAsStringAsync(fileUri, base64, {

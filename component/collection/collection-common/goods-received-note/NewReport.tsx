@@ -84,7 +84,7 @@ const getLocalizedTime = (date: Date, lang: "en" | "si" | "ta"): string => {
   if (lang === "si") {
     period = isPM ? "ප.ව." : "පෙ.ව.";
   } else if (lang === "ta") {
-    period = isPM ? "பிற்பகல்" : "முற்பகல்";
+    period = isPM ? "பி.ப." : "மு.ப.";
   } else {
     period = isPM ? "PM" : "AM";
   }

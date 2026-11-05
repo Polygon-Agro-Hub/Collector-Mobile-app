@@ -99,11 +99,11 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
         (t && t("AddOfficerBasicDetails.LNG")) ||
         "en";
       const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
-      const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
+      const isTamil = am === "மு.ப." || am === "மு.ப" || am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
 
       let cleaned = dateString
-        .replace(/පෙ\.ව\.|මුற்பகல்/gi, "AM")
-        .replace(/ප\.ව\.|பிற்பகல்/gi, "PM");
+        .replace(/(?:පෙ\.ව\.|මුற்பகல்|மு\.ப\.?)/gi, "AM")
+        .replace(/(?:ප\.ව\.|பிற்பகல்|பி\.ப\.?)/gi, "PM");
 
       let timeStr = cleaned;
       if (isSinhala) {
@@ -114,10 +114,10 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
           .replace(/\bPM\b/gi, "ප.ව.");
       } else if (isTamil) {
         timeStr = cleaned
-          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "முற்பகல் $1")
-          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பிற்பகல் $1")
-          .replace(/\bAM\b/gi, "முற்பகல்")
-          .replace(/\bPM\b/gi, "பிற்பகல்");
+          .replace(/(\d{1,2}:\d{2})\s*AM/gi, "மு.ப. $1")
+          .replace(/(\d{1,2}:\d{2})\s*PM/gi, "பி.ப. $1")
+          .replace(/\bAM\b/gi, "மு.ப.")
+          .replace(/\bPM\b/gi, "பி.ப.");
       }
       return { date: dateString, time: timeStr };
     }
@@ -141,14 +141,14 @@ const ReceivedCashOfficer: React.FC<ReceivedCashOfficerProps> = ({
       "en";
 
     const isSinhala = am === "පෙ.ව." || currentLang.toLowerCase().startsWith("si");
-    const isTamil = am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
+    const isTamil = am === "மு.ப." || am === "மு.ப" || am === "முற்பகல்" || currentLang.toLowerCase().startsWith("ta");
 
     let timeStr = "";
     if (isSinhala) {
       const period = isPM ? "ප.ව." : "පෙ.ව.";
       timeStr = `${year}/${month}/${day} ${period} ${formattedHours}:${minutes}`;
     } else if (isTamil) {
-      const period = isPM ? "பிற்பகல்" : "முற்பகல்";
+      const period = isPM ? "பி.ப." : "மு.ப.";
       timeStr = `${year}/${month}/${day} ${period} ${formattedHours}:${minutes}`;
     } else {
       const ampm = isPM ? "PM" : "AM";
