@@ -13,7 +13,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -49,6 +49,12 @@ const ALLOWED_ROLES = [
   ROLES.DISTRIBUTION_MANAGER.toLowerCase(),
 ];
 
+// Generic label that is correct for Face ID, Face Unlock and fingerprint devices
+const BIOMETRIC_LABEL = "Face ID / Fingerprint";
+
+const normalizeId = (id?: string | null): string =>
+  (id ?? "").trim().toUpperCase();
+
 const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [empid, setEmpid] = useState("");
   const [password, setPassword] = useState("");
@@ -60,57 +66,20 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   // Biometrics state
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
   const [hasStoredBiometrics, setHasStoredBiometrics] = useState(false);
-  const [storedBiometricEmpId, setStoredBiometricEmpId] = useState<string | null>(null);
-  const [biometricLabel, setBiometricLabel] = useState("Fingerprint");
+  const [storedBiometricEmpId, setStoredBiometricEmpId] = useState<
+    string | null
+  >(null);
   const [isBiometricModalVisible, setIsBiometricModalVisible] = useState(false);
-  const [biometricModalStatus, setBiometricModalStatus] = useState<"scanning" | "success" | "error">("scanning");
-  const [biometricModalMode, setBiometricModalMode] = useState<"login" | "enable">("login");
+  const [biometricModalStatus, setBiometricModalStatus] = useState<
+    "scanning" | "success" | "error"
+  >("scanning");
+  const [biometricModalMode, setBiometricModalMode] = useState<
+    "login" | "enable"
+  >("login");
 
   const passwordInputRef = useRef<TextInput>(null);
   const { t } = useTranslation();
   const dispatch = useDispatch();
-
-  // Initial load: check Remember Me and Biometrics
-  useEffect(() => {
-    let isMounted = true;
-
-    const initialize = async () => {
-      try {
-        const avail = await biometricService.checkBiometricAvailability();
-        if (isMounted) {
-          setIsBiometricAvailable(avail.hasHardware && avail.isEnrolled);
-        }
-
-        const label = await biometricService.getBiometricTypeLabel();
-        if (isMounted) {
-          setBiometricLabel(label);
-        }
-
-        const bioCreds = await biometricService.getBiometricCredentials();
-        const bioEnabled = await biometricService.isBiometricEnabled();
-        if (isMounted) {
-          const hasBio = Boolean(bioEnabled && bioCreds?.empId && bioCreds?.password);
-          setHasStoredBiometrics(hasBio);
-          setStoredBiometricEmpId(hasBio && bioCreds?.empId ? bioCreds.empId.trim().toUpperCase() : null);
-        }
-
-        const remembered = await biometricService.getRememberMeCredentials();
-        if (isMounted && remembered && remembered.empId && remembered.password) {
-          setEmpid(remembered.empId);
-          setPassword(remembered.password);
-          setRememberMe(true);
-        }
-      } catch (err) {
-        console.warn("Initialization error in Login:", err);
-      }
-    };
-
-    initialize();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const validateEmpIdFormat = (empId: string) => {
     const trimmedEmpId = empId.trim();
@@ -124,8 +93,52 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     return true;
   };
 
+  // On every focus (first open AND after logout): load Remember Me + Biometrics
+  // and pre-fill the Employee ID. Also handles the hardware back button.
   useFocusEffect(
     useCallback(() => {
+      let isActive = true;
+
+      const initScreen = async () => {
+        try {
+          const avail = await biometricService.checkBiometricAvailability();
+
+          const bioCreds = await biometricService.getBiometricCredentials();
+          const bioEnabled = await biometricService.isBiometricEnabled();
+          const storedId = normalizeId(bioCreds?.empId);
+          const hasBio = Boolean(
+            bioEnabled && storedId && bioCreds?.password,
+          );
+
+          const remembered = await biometricService.getRememberMeCredentials();
+
+          if (!isActive) return;
+
+          setIsBiometricAvailable(
+            Boolean(avail.hasHardware && avail.isEnrolled),
+          );
+          setHasStoredBiometrics(hasBio);
+          setStoredBiometricEmpId(hasBio ? storedId : null);
+
+          // Pre-fill the form: Remember Me wins, otherwise show the
+          // biometric user's Employee ID (e.g. after logout).
+          if (remembered && remembered.empId && remembered.password) {
+            setRememberMe(true);
+            setEmpid(normalizeId(remembered.empId));
+            setPassword(remembered.password);
+          } else {
+            setRememberMe(false);
+            setEmpid(hasBio ? storedId : "");
+            setPassword("");
+          }
+          setEmpIdError("");
+        } catch (err) {
+          console.warn("Initialization error in Login:", err);
+        }
+      };
+
+      initScreen();
+
       const onBackPress = () => {
         navigation.navigate("Lanuage");
         return true;
@@ -136,7 +149,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         onBackPress,
       );
 
-      return () => subscription.remove();
+      return () => {
+        isActive = false;
+        subscription.remove();
+      };
     }, [navigation]),
   );
 
@@ -200,8 +216,13 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         const isRejected = rawStatus === "rejected" || rawStatus === "banned";
         const statusType = isRejected ? "rejected" : "not_approved";
         const errorMessage = isRejected
-          ? (data.message || t("Error.This EMP ID is Rejected", "This EMP ID is Rejected"))
-          : (data.message || t("Error.This EMP ID is not approved.", "This EMP ID is not approved."));
+          ? data.message ||
+            t("Error.This EMP ID is Rejected", "This EMP ID is Rejected")
+          : data.message ||
+            t(
+              "Error.This EMP ID is not approved.",
+              "This EMP ID is not approved.",
+            );
 
         navigation.navigate("BannedScreen", {
           statusType,
@@ -220,7 +241,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             t("Error.Invalid Password. Please try again."),
           );
         } else if (data.status === "error") {
-          Alert.alert(t("Error.error"), data.message || t("Error.Invalid EMP ID"));
+          Alert.alert(
+            t("Error.error"),
+            data.message || t("Error.Invalid EMP ID"),
+          );
         } else {
           Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
         }
@@ -244,7 +268,9 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       }
 
       const timestamp = new Date();
-      const expirationTime = new Date(timestamp.getTime() + 12 * 60 * 60 * 1000); // 12h matching JWT
+      const expirationTime = new Date(
+        timestamp.getTime() + 12 * 60 * 60 * 1000,
+      ); // 12h matching JWT
 
       const authPayload = {
         token,
@@ -269,16 +295,25 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
       // 4. Save Remember Me credentials
       if (rememberMe) {
-        await biometricService.saveRememberMeCredentials(trimmedEmpId, loginPassword);
+        await biometricService.saveRememberMeCredentials(
+          trimmedEmpId,
+          loginPassword,
+        );
       } else {
         await biometricService.clearRememberMeCredentials();
       }
 
-      // 5. Save Biometric credentials if this flow requested it (e.g. Enable Biometrics)
+      // 5. Save Biometric credentials ONLY after a successful login and only
+      //    if this flow requested it (Enable Biometrics). This replaces any
+      //    previously saved biometric user.
       if (options.saveBiometricsOnSuccess) {
-        await biometricService.saveBiometricCredentials(trimmedEmpId, loginPassword);
+        const cleanId = normalizeId(trimmedEmpId);
+        await biometricService.saveBiometricCredentials(
+          cleanId,
+          loginPassword,
+        );
         setHasStoredBiometrics(true);
-        setStoredBiometricEmpId(trimmedEmpId.toUpperCase());
+        setStoredBiometricEmpId(cleanId);
       }
 
       // 6. Navigate to next screen without delay
@@ -354,7 +389,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     if (!trimmedEmpId || !password) {
       Alert.alert(
         t("Biometric.CredentialsRequiredTitle", "Credentials Required"),
-        t("Biometric.CredentialsRequiredMessage", "Please enter your Employee ID and Password to enable biometric login."),
+        t(
+          "Biometric.CredentialsRequiredMessage",
+          "Please enter your Employee ID and Password to enable biometric login.",
+        ),
       );
       return;
     }
@@ -368,7 +406,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     if (!avail.hasHardware || !avail.isEnrolled) {
       Alert.alert(
         t("Biometric.NotAvailableTitle", "Biometrics Not Available"),
-        t("Biometric.NotAvailableMessage", "Biometric authentication is not supported or no biometrics are enrolled on this device."),
+        t(
+          "Biometric.NotAvailableMessage",
+          "Biometric authentication is not supported or no Face ID / Fingerprint is enrolled on this device.",
+        ),
       );
       return;
     }
@@ -382,8 +423,14 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
     const verified = await biometricService.authenticateWithBiometrics(
       Platform.OS === "ios"
-        ? t("Biometric.TouchToEnable", "Verify identity to enable biometric sign-in")
-        : t("Biometric.TouchToEnable", "Confirm fingerprint to enable biometric login"),
+        ? t(
+            "Biometric.TouchToEnable",
+            "Verify identity to enable biometric sign-in",
+          )
+        : t(
+            "Biometric.TouchToEnable",
+            "Confirm Face ID / Fingerprint to enable biometric login",
+          ),
     );
 
     if (verified) {
@@ -412,10 +459,15 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     Keyboard.dismiss();
 
     const creds = await biometricService.getBiometricCredentials();
-    if (!creds || !creds.empId || !creds.password) {
+    const credId = normalizeId(creds?.empId);
+
+    if (!creds || !credId || !creds.password) {
       Alert.alert(
         t("Biometric.NotFoundTitle", "Biometrics Not Found"),
-        t("Biometric.NotFoundMessage", "No saved credentials found. Please sign in with your password to re-enable biometrics."),
+        t(
+          "Biometric.NotFoundMessage",
+          "No saved credentials found. Please sign in with your password to re-enable biometrics.",
+        ),
       );
       setHasStoredBiometrics(false);
       setStoredBiometricEmpId(null);
@@ -432,23 +484,24 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     const verified = await biometricService.authenticateWithBiometrics(
       Platform.OS === "ios"
         ? "Sign in with Face ID / Touch ID"
-        : "Scan your fingerprint to sign in",
+        : "Confirm your Face ID / Fingerprint to Sign in",
     );
 
     if (verified) {
-      setEmpid(creds.empId);
+      setEmpid(credId);
       setPassword(creds.password);
+      setStoredBiometricEmpId(credId);
 
       if (Platform.OS === "android") {
         setBiometricModalStatus("success");
         setTimeout(async () => {
           setIsBiometricModalVisible(false);
-          await executeLogin(creds.empId, creds.password, {
+          await executeLogin(credId, creds.password, {
             saveBiometricsOnSuccess: false,
           });
         }, 650);
       } else {
-        await executeLogin(creds.empId, creds.password, {
+        await executeLogin(credId, creds.password, {
           saveBiometricsOnSuccess: false,
         });
       }
@@ -459,12 +512,13 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     }
   };
 
-  // Biometrics is usable ONLY if credentials exist AND the current input matches the stored biometric user (or input is empty)
+  // "Use Biometrics" only when stored biometrics exist AND the typed ID is empty
+  // or exactly equals the stored biometric user. Any other ID => "Enable Biometrics".
+  const typedId = normalizeId(empid);
   const isMatchingBiometricUser = Boolean(
     hasStoredBiometrics &&
       storedBiometricEmpId &&
-      (empid.trim() === "" ||
-        empid.trim().toUpperCase() === storedBiometricEmpId.toUpperCase()),
+      (typedId === "" || typedId === storedBiometricEmpId),
   );
 
   const status = async (empId: string, onlineState: boolean) => {
@@ -690,7 +744,9 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
                   marginVertical: 14,
                 }}
               >
-                <View style={{ flex: 1, height: 1, backgroundColor: "#E5E7EB" }} />
+                <View
+                  style={{ flex: 1, height: 1, backgroundColor: "#E5E7EB" }}
+                />
                 <Text
                   style={{
                     marginHorizontal: 12,
@@ -702,7 +758,9 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
                 >
                   {t("Biometric.OrAuthenticateWith", "OR AUTHENTICATE WITH")}
                 </Text>
-                <View style={{ flex: 1, height: 1, backgroundColor: "#E5E7EB" }} />
+                <View
+                  style={{ flex: 1, height: 1, backgroundColor: "#E5E7EB" }}
+                />
               </View>
 
               {/* Biometrics Secondary Pill Button */}
@@ -763,7 +821,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           visible={isBiometricModalVisible}
           status={biometricModalStatus}
           mode={biometricModalMode}
-          biometricLabel={biometricLabel}
+          biometricLabel={BIOMETRIC_LABEL}
           onCancel={() => setIsBiometricModalVisible(false)}
         />
       )}
