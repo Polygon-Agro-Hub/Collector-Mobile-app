@@ -101,7 +101,7 @@ export const clearBiometricCredentials = async (): Promise<void> => {
 };
 
 export const authenticateWithBiometrics = async (
-  promptMessage = "Log in with Biometrics",
+  promptMessage = "Verify your identity to sign in",
 ): Promise<boolean> => {
   try {
     const { hasHardware, isEnrolled } = await checkBiometricAvailability();

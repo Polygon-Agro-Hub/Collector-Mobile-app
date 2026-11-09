@@ -31,6 +31,7 @@ import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { ROLES } from "@/constants/user-roles";
 import biometricService from "@/services/biometric/biometric.service";
 import BiometricAuthModal from "@/component/components/popup/BiometricAuthModal";
+import * as ScreenCapture from "expo-screen-capture";
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -51,6 +52,7 @@ const ALLOWED_ROLES = [
 
 // Generic label that is correct for Face ID, Face Unlock and fingerprint devices
 const BIOMETRIC_LABEL = "Face ID / Fingerprint";
+const BIOMETRIC_SUCCESS_DURATION_MS = 2000;
 
 const normalizeId = (id?: string | null): string =>
   (id ?? "").trim().toUpperCase();
@@ -92,6 +94,21 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
     setEmpIdError("");
     return true;
   };
+
+  // Prevent screenshots and screen recording while on Login screen
+  useFocusEffect(
+    useCallback(() => {
+      ScreenCapture.preventScreenCaptureAsync().catch((err) => {
+        console.warn("Failed to prevent screen capture in Login:", err);
+      });
+
+      return () => {
+        ScreenCapture.allowScreenCaptureAsync().catch((err) => {
+          console.warn("Failed to allow screen capture:", err);
+        });
+      };
+    }, []),
+  );
 
   // On every focus (first open AND after logout): load Remember Me + Biometrics
   // and pre-fill the Employee ID. Also handles the hardware back button.
@@ -174,7 +191,11 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const executeLogin = async (
     loginEmpId: string,
     loginPassword: string,
-    options: { saveBiometricsOnSuccess?: boolean } = {},
+    options: {
+      saveBiometricsOnSuccess?: boolean;
+      showBiometricSuccessModal?: boolean;
+      biometricModalMode?: "login" | "enable";
+    } = {},
   ): Promise<boolean> => {
     setLoading(true);
     store.dispatch(logoutUser());
@@ -217,12 +238,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         const statusType = isRejected ? "rejected" : "not_approved";
         const errorMessage = isRejected
           ? data.message ||
-            t("Error.This EMP ID is Rejected", "This EMP ID is Rejected")
+          t("Error.This EMP ID is Rejected", "This EMP ID is Rejected")
           : data.message ||
-            t(
-              "Error.This EMP ID is not approved.",
-              "This EMP ID is not approved.",
-            );
+          t(
+            "Error.This EMP ID is not approved.",
+            "This EMP ID is not approved.",
+          );
 
         navigation.navigate("BannedScreen", {
           statusType,
@@ -316,9 +337,23 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         setStoredBiometricEmpId(cleanId);
       }
 
-      // 6. Navigate to next screen without delay
+      // 6. Stop loading spinner before showing success modal or navigating
       setLoading(false);
 
+      // 7. If biometric flow, display the verified modal ONLY after credentials are confirmed valid
+      if (options.showBiometricSuccessModal) {
+        setBiometricModalMode(options.biometricModalMode || "login");
+        setBiometricModalStatus("success");
+        setIsBiometricModalVisible(true);
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, BIOMETRIC_SUCCESS_DURATION_MS),
+        );
+
+        setIsBiometricModalVisible(false);
+      }
+
+      // 8. Navigate to next screen
       if (passwordUpdateRequired) {
         navigation.navigate("ChangePassword");
       } else {
@@ -414,43 +449,17 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       return;
     }
 
-    // Show verifying modal on Android only (iOS has native system Face ID / Touch ID UI)
-    if (Platform.OS === "android") {
-      setIsBiometricModalVisible(true);
-      setBiometricModalStatus("scanning");
-      setBiometricModalMode("enable");
-    }
-
+    // Only show system biometric popup during authentication
     const verified = await biometricService.authenticateWithBiometrics(
-      Platform.OS === "ios"
-        ? t(
-            "Biometric.TouchToEnable",
-            "Verify identity to enable biometric sign-in",
-          )
-        : t(
-            "Biometric.TouchToEnable",
-            "Confirm Face ID / Fingerprint to enable biometric login",
-          ),
+      t("Biometric.VerifyIdentityToSignIn", "Verify your identity to sign in"),
     );
 
     if (verified) {
-      if (Platform.OS === "android") {
-        setBiometricModalStatus("success");
-        setTimeout(async () => {
-          setIsBiometricModalVisible(false);
-          await executeLogin(trimmedEmpId, password, {
-            saveBiometricsOnSuccess: true,
-          });
-        }, 650);
-      } else {
-        await executeLogin(trimmedEmpId, password, {
-          saveBiometricsOnSuccess: true,
-        });
-      }
-    } else {
-      if (Platform.OS === "android") {
-        setIsBiometricModalVisible(false);
-      }
+      await executeLogin(trimmedEmpId, password, {
+        saveBiometricsOnSuccess: true,
+        showBiometricSuccessModal: true,
+        biometricModalMode: "enable",
+      });
     }
   };
 
@@ -474,17 +483,9 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       return;
     }
 
-    // Show verifying modal on Android only (iOS has native system Face ID / Touch ID UI)
-    if (Platform.OS === "android") {
-      setIsBiometricModalVisible(true);
-      setBiometricModalStatus("scanning");
-      setBiometricModalMode("login");
-    }
-
+    // Only show system biometric popup during authentication
     const verified = await biometricService.authenticateWithBiometrics(
-      Platform.OS === "ios"
-        ? "Sign in with Face ID / Touch ID"
-        : "Confirm your Face ID / Fingerprint to Sign in",
+      t("Biometric.VerifyIdentityToSignIn", "Verify your identity to sign in"),
     );
 
     if (verified) {
@@ -492,23 +493,11 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       setPassword(creds.password);
       setStoredBiometricEmpId(credId);
 
-      if (Platform.OS === "android") {
-        setBiometricModalStatus("success");
-        setTimeout(async () => {
-          setIsBiometricModalVisible(false);
-          await executeLogin(credId, creds.password, {
-            saveBiometricsOnSuccess: false,
-          });
-        }, 650);
-      } else {
-        await executeLogin(credId, creds.password, {
-          saveBiometricsOnSuccess: false,
-        });
-      }
-    } else {
-      if (Platform.OS === "android") {
-        setIsBiometricModalVisible(false);
-      }
+      await executeLogin(credId, creds.password, {
+        saveBiometricsOnSuccess: false,
+        showBiometricSuccessModal: true,
+        biometricModalMode: "login",
+      });
     }
   };
 
@@ -517,8 +506,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const typedId = normalizeId(empid);
   const isMatchingBiometricUser = Boolean(
     hasStoredBiometrics &&
-      storedBiometricEmpId &&
-      (typedId === "" || typedId === storedBiometricEmpId),
+    storedBiometricEmpId &&
+    (typedId === "" || typedId === storedBiometricEmpId),
   );
 
   const status = async (empId: string, onlineState: boolean) => {
@@ -599,9 +588,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             {t("SignIn.Employee")}
           </Text>
           <View
-            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${
-              empIdError ? "border-red-500" : "border-[#F4F4F4]"
-            }`}
+            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
+              }`}
           >
             <Image
               source={user}
@@ -815,16 +803,18 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Biometric Verification Modal (Android Only - Apple Pay Style) */}
-      {Platform.OS === "android" && (
-        <BiometricAuthModal
-          visible={isBiometricModalVisible}
-          status={biometricModalStatus}
-          mode={biometricModalMode}
-          biometricLabel={BIOMETRIC_LABEL}
-          onCancel={() => setIsBiometricModalVisible(false)}
-        />
-      )}
+      {/* App Designed Biometric Modal - Displayed only on verify success */}
+      <BiometricAuthModal
+        visible={isBiometricModalVisible}
+        status={biometricModalStatus}
+        mode={biometricModalMode}
+        biometricLabel={BIOMETRIC_LABEL}
+        title={t(
+          "Biometric.VerifyIdentityToSignIn",
+          "Verify your identity to sign in",
+        )}
+        onCancel={() => setIsBiometricModalVisible(false)}
+      />
     </KeyboardAwareScrollView>
   );
 };
