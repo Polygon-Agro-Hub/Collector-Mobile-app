@@ -18,6 +18,7 @@ interface BiometricAuthModalProps {
   onCancel: () => void;
   biometricLabel?: string;
   mode?: "login" | "enable";
+  title?: string;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -28,6 +29,7 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
   onCancel,
   biometricLabel = "Fingerprint",
   mode = "login",
+  title,
 }) => {
   const { t } = useTranslation();
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -87,7 +89,7 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
 
   // Spring bounce checkmark animation on success
   useEffect(() => {
-    if (status === "success") {
+    if (visible && status === "success") {
       scaleSuccessAnim.setValue(0);
       Animated.spring(scaleSuccessAnim, {
         toValue: 1,
@@ -96,7 +98,7 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [status]);
+  }, [visible, status]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -291,7 +293,11 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
                     textAlign: "center",
                   }}
                 >
-                  {t("Biometric.Scanning", { label: biometricLabel, defaultValue: `Scanning ${biometricLabel}...` })}
+                  {title ||
+                    t(
+                      "Biometric.VerifyIdentityToSignIn",
+                      "Verify your identity to sign in",
+                    )}
                 </Text>
               </View>
               <Text
@@ -331,8 +337,8 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
                 }}
               >
                 {mode === "enable"
-                  ? t("Biometric.EnabledSigningIn", "Biometrics enabled. Signing in...")
-                  : t("Biometric.WelcomeSigningIn", "Welcome back. Signing in...")}
+                  ? t("Biometric.EnabledSigningIn", "Biometrics enabled. Redirecting to Dashboard...")
+                  : t("Biometric.WelcomeSigningIn", "Welcome back. Redirecting to Dashboard...")}
               </Text>
             </>
           )}
