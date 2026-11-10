@@ -13,7 +13,7 @@ import {
   Platform,
   Switch,
 } from "react-native";
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -63,6 +63,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [loading, setLoading] = useState(false);
   const [empIdError, setEmpIdError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
   // Biometrics state
@@ -83,16 +84,49 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
-  const validateEmpIdFormat = (empId: string) => {
-    const trimmedEmpId = empId.trim();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-    if (trimmedEmpId !== trimmedEmpId.toUpperCase()) {
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => setIsKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setIsKeyboardVisible(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const validateCredentials = (
+    targetEmpId: string,
+    targetPassword: string,
+  ): boolean => {
+    let isValid = true;
+    const trimmedId = targetEmpId.trim();
+
+    if (!trimmedId) {
+      setEmpIdError(t("Error.Employee ID is not allowed to be empty"));
+      isValid = false;
+    } else if (trimmedId !== trimmedId.toUpperCase()) {
       setEmpIdError(t("Error.Please enter Employee ID in uppercase letters"));
-      return false;
+      isValid = false;
+    } else {
+      setEmpIdError("");
     }
 
-    setEmpIdError("");
-    return true;
+    if (!targetPassword) {
+      setPasswordError(t("Error.Password is not allowed to be empty"));
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    return isValid;
   };
 
   // Prevent screenshots and screen recording while on Login screen
@@ -149,6 +183,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             setPassword("");
           }
           setEmpIdError("");
+          setPasswordError("");
         } catch (err) {
           console.warn("Initialization error in Login:", err);
         }
@@ -182,8 +217,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
   const handlePasswordChange = (text: string) => {
     setPassword(text);
-    if (empIdError) {
-      setEmpIdError("");
+    if (passwordError) {
+      setPasswordError("");
     }
   };
 
@@ -382,33 +417,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   // Normal Sign In
   const handleLogin = async () => {
     Keyboard.dismiss();
-    setEmpIdError("");
 
-    if (!empid && !password) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Password & Employee ID are not allowed to be empty"),
-      );
-      return false;
-    }
-
-    if (empid && !password) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Password is not allowed to be empty"),
-      );
-      return false;
-    }
-
-    if (!empid && password) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Employee ID is not allowed to be empty"),
-      );
-      return false;
-    }
-
-    if (!validateEmpIdFormat(empid)) {
+    if (!validateCredentials(empid, password)) {
       return false;
     }
 
@@ -418,23 +428,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   // "Enable Biometrics" Button Handler
   const handleEnableBiometrics = async () => {
     Keyboard.dismiss();
-    setEmpIdError("");
+
+    if (!validateCredentials(empid, password)) {
+      return;
+    }
 
     const trimmedEmpId = empid.trim();
-    if (!trimmedEmpId || !password) {
-      Alert.alert(
-        t("Biometric.CredentialsRequiredTitle", "Credentials Required"),
-        t(
-          "Biometric.CredentialsRequiredMessage",
-          "Please enter your Employee ID and Password to enable biometric login.",
-        ),
-      );
-      return;
-    }
-
-    if (!validateEmpIdFormat(trimmedEmpId)) {
-      return;
-    }
 
     // Check hardware availability
     const avail = await biometricService.checkBiometricAvailability();
@@ -466,6 +465,8 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   // "Use Biometrics" Button Handler
   const handleUseBiometrics = async () => {
     Keyboard.dismiss();
+    setEmpIdError("");
+    setPasswordError("");
 
     const creds = await biometricService.getBiometricCredentials();
     const credId = normalizeId(creds?.empId);
@@ -544,12 +545,16 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   return (
     <KeyboardAwareScrollView
       style={{ backgroundColor: "white" }}
-      contentContainerStyle={{ flexGrow: 1, backgroundColor: "white" }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        backgroundColor: "white",
+        paddingBottom: isKeyboardVisible ? 60 : 20,
+      }}
       enableOnAndroid={true}
       enableAutomaticScroll={true}
       keyboardOpeningTime={0}
-      extraScrollHeight={Platform.OS === "ios" ? 0 : 20}
-      extraHeight={Platform.OS === "ios" ? 0 : 20}
+      extraScrollHeight={Platform.OS === "ios" ? 120 : 160}
+      extraHeight={Platform.OS === "ios" ? 120 : 160}
       keyboardShouldPersistTaps="handled"
       bounces={false}
       showsVerticalScrollIndicator={false}
@@ -566,24 +571,37 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           <Image
             source={loginImage}
             style={{
-              width: 270,
-              height: 270,
+              width: isKeyboardVisible ? 70 : 190,
+              height: isKeyboardVisible ? 70 : 190,
               maxWidth: "100%",
               alignSelf: "center",
+              marginTop: isKeyboardVisible ? 2 : 8,
             }}
-            className="w-[270px] h-[270px]"
             resizeMode="contain"
           />
-          <Text className="font-bold text-2xl pt-[7%]">
-            {t("SignIn.Wellcome")}
-          </Text>
+          {!isKeyboardVisible && (
+            <Text className="font-bold text-2xl pt-2">
+              {t("SignIn.Wellcome")}
+            </Text>
+          )}
         </View>
 
-        <View className="mt-2 items-center">
-          <Text>{t("SignIn.SigntoLogin")}</Text>
-        </View>
+        {!isKeyboardVisible && (
+          <View className="mt-1 items-center">
+            <Text>{t("SignIn.SigntoLogin")}</Text>
+          </View>
+        )}
 
-        <View className="px-4 py-6 max-w-[500px] w-full mx-auto ">
+        <View
+          style={{
+            maxWidth: 500,
+            width: "100%",
+            alignSelf: "center",
+            paddingHorizontal: 16,
+            paddingTop: isKeyboardVisible ? 4 : 16,
+            paddingBottom: isKeyboardVisible ? 4 : 16,
+          }}
+        >
           <Text className="text-base pb-[2%] font-light">
             {t("SignIn.Employee")}
           </Text>
@@ -616,17 +634,21 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           </View>
 
           {empIdError ? (
-            <View className="mb-4">
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 14 }}>
               <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>
             </View>
           ) : (
-            <View className="mb-6" />
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 18 }} />
           )}
 
           <Text className="text-base pb-[2%] font-light">
             {t("SignIn.Password")}
           </Text>
-          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-4 px-3 h-[50px]">
+          <View
+            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${
+              passwordError ? "border-red-500" : "border-[#F4F4F4]"
+            }`}
+          >
             <Image
               source={passwordicon}
               style={{ width: 24, height: 24 }}
@@ -661,12 +683,20 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
+          {passwordError ? (
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 14 }}>
+              <Text className="text-red-500 text-sm pl-3">{passwordError}</Text>
+            </View>
+          ) : (
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 16 }} />
+          )}
+
           {/* Remember Me switch */}
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginBottom: 20,
+              marginBottom: isKeyboardVisible ? 10 : 20,
               paddingHorizontal: 4,
             }}
           >
@@ -702,13 +732,14 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
           {/* Normal Sign in button */}
           <TouchableOpacity
-            className="bg-black w-full rounded-3xl items-center justify-center mb-5 h-[50px]"
+            className="bg-black w-full rounded-3xl items-center justify-center h-[50px]"
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.25,
               shadowRadius: 10,
               elevation: 6,
+              marginBottom: isKeyboardVisible ? 10 : 20,
             }}
             onPress={handleLogin}
             disabled={loading}
@@ -729,7 +760,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  marginVertical: 14,
+                  marginVertical: isKeyboardVisible ? 6 : 14,
                 }}
               >
                 <View
@@ -771,7 +802,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
                   borderRadius: 999,
                   paddingVertical: 12,
                   paddingHorizontal: 26,
-                  marginBottom: 36,
+                  marginBottom: isKeyboardVisible ? 16 : 36,
                   opacity: loading ? 0.45 : 1,
                   shadowColor: "#000",
                   shadowOffset: { width: 0, height: 2 },

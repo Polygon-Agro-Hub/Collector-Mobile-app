@@ -57,6 +57,36 @@ export const isBiometricEnabled = async (): Promise<boolean> => {
   }
 };
 
+export const setBiometricEnabled = async (enabled: boolean): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(BIOMETRIC_ENABLED_KEY, enabled ? "true" : "false");
+  } catch (error) {
+    console.warn("Error setting biometric enabled state:", error);
+  }
+};
+
+export const isBiometricEnabledForUser = async (
+  empId?: string | null,
+): Promise<boolean> => {
+  try {
+    const enabled = await AsyncStorage.getItem(BIOMETRIC_ENABLED_KEY);
+    if (enabled !== "true") return false;
+    const storedEmpId = await SecureStore.getItemAsync(SECURE_EMP_ID_KEY);
+    const password = await SecureStore.getItemAsync(SECURE_PASSWORD_KEY);
+    if (!storedEmpId || !password) return false;
+    if (
+      empId &&
+      storedEmpId.trim().toUpperCase() !== empId.trim().toUpperCase()
+    ) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.warn("Error checking if biometric is enabled for user:", error);
+    return false;
+  }
+};
+
 export const saveBiometricCredentials = async (
   empId: string,
   password: string,
@@ -172,6 +202,8 @@ export default {
   checkBiometricAvailability,
   getBiometricTypeLabel,
   isBiometricEnabled,
+  isBiometricEnabledForUser,
+  setBiometricEnabled,
   saveBiometricCredentials,
   getBiometricCredentials,
   clearBiometricCredentials,
