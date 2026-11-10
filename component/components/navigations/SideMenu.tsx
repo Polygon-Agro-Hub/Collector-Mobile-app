@@ -10,6 +10,8 @@ import {
   BackHandler,
   Modal,
   Switch,
+  TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -31,6 +33,7 @@ import {
   isQuickAccessScaleEnabled,
   setQuickAccessScaleEnabled,
 } from "@/utils/scale/scale-storage";
+import biometricService from "@/services/biometric/biometric.service";
 
 type SideMenuNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -80,6 +83,14 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const [isQuickAccessEnabled, setIsQuickAccessEnabled] = useState<boolean>(true);
   const [isScaleSelectModalVisible, setIsScaleSelectModalVisible] = useState<boolean>(false);
 
+  // Biometrics state
+  const [isBiometricsEnabled, setIsBiometricsEnabled] = useState<boolean>(false);
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState<boolean>(false);
+  const [passwordModalInput, setPasswordModalInput] = useState<string>("");
+  const [passwordModalError, setPasswordModalError] = useState<string>("");
+  const [modalSecureTextEntry, setModalSecureTextEntry] = useState<boolean>(true);
+  const [isPasswordVerifying, setIsPasswordVerifying] = useState<boolean>(false);
+
   useEffect(() => {
     isQuickAccessScaleEnabled().then((val) => {
       setIsQuickAccessEnabled(val);
@@ -89,6 +100,131 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
   const handleToggleQuickAccess = async (val: boolean) => {
     setIsQuickAccessEnabled(val);
     await setQuickAccessScaleEnabled(val);
+  };
+
+  const handleToggleBiometrics = async (val: boolean) => {
+    if (!val) {
+      await biometricService.setBiometricEnabled(false);
+      setIsBiometricsEnabled(false);
+      Alert.alert(
+        t("Error.Success", "Success"),
+        t("Biometric.BiometricsDisabledSuccess", "Biometric sign-in has been disabled."),
+      );
+      return;
+    }
+
+    const avail = await biometricService.checkBiometricAvailability();
+    if (!avail.hasHardware || !avail.isEnrolled) {
+      Alert.alert(
+        t("Biometric.NotAvailableTitle", "Biometrics Not Available"),
+        t(
+          "Biometric.NotAvailableMessage",
+          "Biometric authentication is not supported or no Face ID / Fingerprint is enrolled on this device.",
+        ),
+      );
+      return;
+    }
+
+    const currentEmpId = profile?.empId || store.getState().auth.empId || "";
+    const storedCreds = await biometricService.getBiometricCredentials();
+    const rememberCreds = await biometricService.getRememberMeCredentials();
+
+    let existingPassword = "";
+    if (
+      storedCreds &&
+      storedCreds.empId.trim().toUpperCase() === currentEmpId.trim().toUpperCase() &&
+      storedCreds.password
+    ) {
+      existingPassword = storedCreds.password;
+    } else if (
+      rememberCreds &&
+      rememberCreds.empId.trim().toUpperCase() === currentEmpId.trim().toUpperCase() &&
+      rememberCreds.password
+    ) {
+      existingPassword = rememberCreds.password;
+    }
+
+    if (existingPassword) {
+      const verified = await biometricService.authenticateWithBiometrics(
+        t("Biometric.VerifyIdentityToSignIn", "Verify your identity to sign in"),
+      );
+      if (verified) {
+        await biometricService.saveBiometricCredentials(currentEmpId, existingPassword);
+        setIsBiometricsEnabled(true);
+        Alert.alert(
+          t("Error.Success", "Success"),
+          t("Biometric.BiometricsEnabledSuccess", "Biometric sign-in has been enabled successfully."),
+        );
+      }
+    } else {
+      setPasswordModalInput("");
+      setPasswordModalError("");
+      setModalSecureTextEntry(true);
+      setIsPasswordModalVisible(true);
+    }
+  };
+
+  const handleConfirmPasswordAndEnable = async () => {
+    if (!passwordModalInput.trim()) {
+      setPasswordModalError(
+        t("Error.Password is not allowed to be empty", "Password is not allowed to be empty"),
+      );
+      return;
+    }
+
+    const currentEmpId = profile?.empId || store.getState().auth.empId || "";
+    if (!currentEmpId) {
+      setPasswordModalError(t("Error.Invalid EMP ID", "Invalid EMP ID"));
+      return;
+    }
+
+    setIsPasswordVerifying(true);
+    setPasswordModalError("");
+
+    try {
+      const response = await fetch(
+        `${environment.API_BASE_URL}api/collection-officer/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            empId: currentEmpId.trim(),
+            password: passwordModalInput,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        setIsPasswordVerifying(false);
+        setPasswordModalError(
+          t("Error.Invalid Password. Please try again.", "Invalid Password. Please try again."),
+        );
+        return;
+      }
+
+      setIsPasswordVerifying(false);
+      setIsPasswordModalVisible(false);
+
+      const verified = await biometricService.authenticateWithBiometrics(
+        t("Biometric.VerifyIdentityToSignIn", "Verify your identity to sign in"),
+      );
+
+      if (verified) {
+        await biometricService.saveBiometricCredentials(currentEmpId, passwordModalInput);
+        setIsBiometricsEnabled(true);
+        setPasswordModalInput("");
+        Alert.alert(
+          t("Error.Success", "Success"),
+          t("Biometric.BiometricsEnabledSuccess", "Biometric sign-in has been enabled successfully."),
+        );
+      }
+    } catch (error) {
+      setIsPasswordVerifying(false);
+      console.error("Error verifying password:", error);
+      setPasswordModalError(
+        t("Error.somethingWentWrong", "Something went wrong. Please try again later."),
+      );
+    }
   };
 
   useEffect(() => {
@@ -174,9 +310,9 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
         if (token) {
           const endpoint =
             role === ROLES.DISTRIBUTION_OFFICER ||
-            role === ROLES.DISTRIBUTION_MANAGER ||
-            role === "Distribution Officer" ||
-            role === "Distribution Centre Manager"
+              role === ROLES.DISTRIBUTION_MANAGER ||
+              role === "Distribution Officer" ||
+              role === "Distribution Centre Manager"
               ? "api/distribution-manager/user-profile"
               : "api/collection-officer/user-profile";
 
@@ -214,7 +350,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
     try {
       await AsyncStorage.setItem("@user_language", language);
       changeLanguage(language);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleLanguageSelect = (language: string) => {
@@ -225,7 +361,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
       AsyncStorage.setItem("@user_language", code);
       changeLanguage(code);
       i18n.changeLanguage(code);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleLogout = () => {
@@ -287,6 +423,17 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
         "hardwareBackPress",
         handleBackPress,
       );
+
+      const checkBioStatus = async () => {
+        try {
+          const currentEmpId = profile?.empId || store.getState().auth.empId;
+          const enabled = await biometricService.isBiometricEnabledForUser(currentEmpId);
+          setIsBiometricsEnabled(enabled);
+        } catch (e) {
+          console.warn("Error checking biometric status:", e);
+        }
+      };
+      checkBioStatus();
 
       return () => subscription.remove();
     }, [navigation, jobRole, profile, currentScreen]),
@@ -368,18 +515,16 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                   <TouchableOpacity
                     key={language}
                     onPress={() => handleLanguageSelect(language)}
-                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
-                      selectedLanguage === language
+                    className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedLanguage === language
                         ? "bg-[#FFDFF7]"
                         : "bg-transparent"
-                    }`}
+                      }`}
                   >
                     <Text
-                      className={`text-base ${
-                        selectedLanguage === language
+                      className={`text-base ${selectedLanguage === language
                           ? "text-black"
                           : "text-[#434343]"
-                      }`}
+                        }`}
                     >
                       {displayLanguage}
                     </Text>
@@ -420,6 +565,37 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
               {t("SideMenu.ChangePassword")}
             </Text>
           </TouchableOpacity>
+
+          <View className="h-0.5 bg-[#D2D2D2] my-4" />
+
+          {/* Use Biometrics */}
+          <View className="flex-row items-center justify-between py-2">
+            <View className="flex-row items-center flex-1 pr-2">
+              <View
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 17,
+                  backgroundColor: "#F3F4F6",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginRight: 10,
+                }}
+              >
+                <Ionicons name="finger-print" size={20} color="#374151" />
+              </View>
+              <Text className="text-lg font-normal text-black">
+                {t("Biometric.UseBiometrics", "Use Biometrics")}
+              </Text>
+            </View>
+            <Switch
+              value={isBiometricsEnabled}
+              onValueChange={handleToggleBiometrics}
+              trackColor={{ false: "#E2E8F0", true: "#007AFF" }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor="#E2E8F0"
+            />
+          </View>
 
           <View className="h-0.5 bg-[#D2D2D2] my-4" />
 
@@ -490,14 +666,12 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
                 <TouchableOpacity
                   key={complaint}
                   onPress={() => handleComplaintSelect(complaint)}
-                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${
-                    selectedComplaint === complaint ? "bg-green-200" : ""
-                  }`}
+                  className={`flex-row items-center py-2 px-4 rounded-lg my-1 ${selectedComplaint === complaint ? "bg-green-200" : ""
+                    }`}
                 >
                   <Text
-                    className={`text-base ${
-                      selectedComplaint === complaint ? "text-black" : "#434343"
-                    }`}
+                    className={`text-base ${selectedComplaint === complaint ? "text-black" : "#434343"
+                      }`}
                   >
                     {complaint}
                   </Text>
@@ -525,13 +699,209 @@ const SideMenu: React.FC<SideMenuProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    
+
       {/* Scale Select Modal */}
       <ScaleSelectModal
         visible={isScaleSelectModalVisible}
         onClose={() => setIsScaleSelectModalVisible(false)}
       />
-</View>
+
+      {/* Enable Biometrics Password Modal */}
+      <Modal
+        visible={isPasswordModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setIsPasswordModalVisible(false);
+          setPasswordModalInput("");
+          setPasswordModalError("");
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 24,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 24,
+              padding: 24,
+              width: "100%",
+              maxWidth: 360,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 12,
+              elevation: 8,
+            }}
+          >
+            <View style={{ alignItems: "center", marginBottom: 16 }}>
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 26,
+                  backgroundColor: "#F3E8FF",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
+              >
+                <Ionicons name="finger-print" size={28} color="#7C3AED" />
+              </View>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "700",
+                  color: "#111827",
+                  textAlign: "center",
+                  marginBottom: 6,
+                }}
+              >
+                {t("Biometric.EnableBiometrics", "Enable Biometrics")}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: "#6B7280",
+                  textAlign: "center",
+                  lineHeight: 18,
+                }}
+              >
+                {t(
+                  "Biometric.EnterPasswordToEnableBiometrics",
+                  "Enter your password to enable biometric sign-in",
+                )}
+              </Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#F4F4F4",
+                borderWidth: 1,
+                borderColor: passwordModalError ? "#EF4444" : "#E5E7EB",
+                borderRadius: 16,
+                paddingHorizontal: 12,
+                height: 48,
+                marginBottom: passwordModalError ? 4 : 16,
+              }}
+            >
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#6B7280"
+                style={{ marginRight: 8 }}
+              />
+              <TextInput
+                secureTextEntry={modalSecureTextEntry}
+                value={passwordModalInput}
+                onChangeText={(text) => {
+                  setPasswordModalInput(text);
+                  if (passwordModalError) setPasswordModalError("");
+                }}
+                placeholder={t("SignIn.Password", "Password")}
+                placeholderTextColor="#9CA3AF"
+                style={{
+                  flex: 1,
+                  fontSize: 15,
+                  color: "#111827",
+                  paddingVertical: 0,
+                }}
+              />
+              <TouchableOpacity
+                onPress={() => setModalSecureTextEntry(!modalSecureTextEntry)}
+              >
+                <Ionicons
+                  name={modalSecureTextEntry ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {passwordModalError ? (
+              <Text
+                style={{
+                  color: "#EF4444",
+                  fontSize: 12,
+                  marginBottom: 14,
+                  paddingHorizontal: 4,
+                }}
+              >
+                {passwordModalError}
+              </Text>
+            ) : null}
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setIsPasswordModalVisible(false);
+                  setPasswordModalInput("");
+                  setPasswordModalError("");
+                }}
+                disabled={isPasswordVerifying}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 999,
+                  backgroundColor: "#F3F4F6",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#4B5563",
+                    fontSize: 15,
+                    fontWeight: "600",
+                  }}
+                >
+                  {t("Biometric.Cancel", "Cancel")}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleConfirmPasswordAndEnable}
+                disabled={isPasswordVerifying}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 999,
+                  backgroundColor: "#000000",
+                  alignItems: "center",
+                }}
+              >
+                {isPasswordVerifying ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 15,
+                      fontWeight: "600",
+                    }}
+                  >
+                    {t("Ok", "OK")}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
