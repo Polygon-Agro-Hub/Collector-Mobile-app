@@ -2,7 +2,7 @@
   "expo": {
     "name": "CoDi-Net",
     "slug": "CoDi-Net",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
@@ -155,7 +155,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "0f16734d-6e32-4d5b-92b9-d02b9edd3b54"
+        "projectId": ""
       }
     }
   }
