@@ -98,7 +98,14 @@ export const AlertModal: React.FC<AlertModalProps> = ({
         </Text>
       );
     }
-    return message;
+    return (
+      <View
+        className="w-full items-center my-2"
+        style={{ alignSelf: "stretch", width: "100%" }}
+      >
+        {message}
+      </View>
+    );
   };
 
   const getModalTitle = () => {

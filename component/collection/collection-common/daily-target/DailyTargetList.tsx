@@ -295,7 +295,7 @@ const DailyTargetList: React.FC<DailyTargetListProps> = ({ navigation }) => {
                 className="justify-center items-center border-r border-white/20 px-1 py-2"
               >
                 <Text className="text-center text-white font-bold text-xs">
-                  {selectedToggle === "ToDo" ? t("DailyTarget.No") : ""}
+                  {t("DailyTarget.No")}
                 </Text>
               </View>
 

@@ -729,8 +729,11 @@ export default function PrintingConfirmation({
       {/* Main Scrollable Content Area */}
       <ScrollView className="flex-1 bg-white px-6">
         {/* Header Title */}
-        <View className="items-center mb-4 mt-2">
-          <Text className="text-xl font-bold text-slate-950">
+        <View className="w-full items-center justify-center mb-4 mt-2">
+          <Text
+            className="text-xl font-bold text-slate-950 text-center"
+            style={{ textAlign: "center" }}
+          >
             {t("QRHandling.Printing Confirmation", "Printing Confirmation")}
           </Text>
         </View>

@@ -2181,5 +2181,27 @@
     "ImeUtf8": "UTF-8",
     "ImeIsn": "ISN code",
     "ImeTip": "Press [IME] repeatedly until you reach the desired case or character mode."
+  },
+  "Biometric": {
+    "RememberMe": "Remember me",
+    "OrAuthenticateWith": "OR AUTHENTICATE WITH",
+    "UseBiometrics": "Use Biometrics",
+    "EnableBiometrics": "Enable Biometrics",
+    "VerifyIdentityToSignIn": "Verify your identity to sign in",
+    "Scanning": "Scanning {{label}}...",
+    "TouchToEnable": "Touch the sensor to verify and enable biometrics",
+    "TouchToSignIn": "Touch the fingerprint sensor or hold your finger to sign in",
+    "Verified": "Verified!",
+    "EnabledSigningIn": "Biometrics enabled. Redirecting to Dashboard...",
+    "WelcomeSigningIn": "Welcome back. Redirecting to Dashboard...",
+    "VerificationFailed": "Verification Failed",
+    "VerificationFailedMessage": "Could not verify your identity. Please try again or use your password.",
+    "Cancel": "Cancel",
+    "NotAvailableTitle": "Biometrics Not Available",
+    "NotAvailableMessage": "Biometric authentication is not supported or no biometrics are enrolled on this device.",
+    "NotFoundTitle": "Biometrics Not Found",
+    "NotFoundMessage": "No saved credentials found. Please sign in with your password to re-enable biometrics.",
+    "CredentialsRequiredTitle": "Credentials Required",
+    "CredentialsRequiredMessage": "Please enter your Employee ID and Password to enable biometric login."
   }
 }
