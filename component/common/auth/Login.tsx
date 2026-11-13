@@ -11,11 +11,13 @@ import {
   Keyboard,
   BackHandler,
   Platform,
+  Switch,
 } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/types";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import environment from "@/environment/environment";
@@ -27,6 +29,9 @@ import { useDispatch } from "react-redux";
 import NetInfo from "@react-native-community/netinfo";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import { ROLES } from "@/constants/user-roles";
+import biometricService from "@/services/biometric/biometric.service";
+import BiometricAuthModal from "@/component/components/popup/BiometricAuthModal";
+import * as ScreenCapture from "expo-screen-capture";
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, "Login">;
 
@@ -45,29 +50,147 @@ const ALLOWED_ROLES = [
   ROLES.DISTRIBUTION_MANAGER.toLowerCase(),
 ];
 
+// Generic label that is correct for Face ID, Face Unlock and fingerprint devices
+const BIOMETRIC_LABEL = "Face ID / Fingerprint";
+const BIOMETRIC_SUCCESS_DURATION_MS = 2000;
+
+const normalizeId = (id?: string | null): string =>
+  (id ?? "").trim().toUpperCase();
+
 const Login: React.FC<LoginProps> = ({ navigation }) => {
   const [empid, setEmpid] = useState("");
   const [password, setPassword] = useState("");
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [loading, setLoading] = useState(false);
   const [empIdError, setEmpIdError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Biometrics state
+  const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
+  const [hasStoredBiometrics, setHasStoredBiometrics] = useState(false);
+  const [storedBiometricEmpId, setStoredBiometricEmpId] = useState<
+    string | null
+  >(null);
+  const [isBiometricModalVisible, setIsBiometricModalVisible] = useState(false);
+  const [biometricModalStatus, setBiometricModalStatus] = useState<
+    "scanning" | "success" | "error"
+  >("scanning");
+  const [biometricModalMode, setBiometricModalMode] = useState<
+    "login" | "enable"
+  >("login");
+
+  const passwordInputRef = useRef<TextInput>(null);
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
-  const validateEmpIdFormat = (empId: string) => {
-    const trimmedEmpId = empId.trim();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
-    if (trimmedEmpId !== trimmedEmpId.toUpperCase()) {
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => setIsKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => setIsKeyboardVisible(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const validateCredentials = (
+    targetEmpId: string,
+    targetPassword: string,
+  ): boolean => {
+    let isValid = true;
+    const trimmedId = targetEmpId.trim();
+
+    if (!trimmedId) {
+      setEmpIdError(t("Error.Employee ID is not allowed to be empty"));
+      isValid = false;
+    } else if (trimmedId !== trimmedId.toUpperCase()) {
       setEmpIdError(t("Error.Please enter Employee ID in uppercase letters"));
-      return false;
+      isValid = false;
+    } else {
+      setEmpIdError("");
     }
 
-    setEmpIdError("");
-    return true;
+    if (!targetPassword) {
+      setPasswordError(t("Error.Password is not allowed to be empty"));
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    return isValid;
   };
 
+  // Prevent screenshots and screen recording while on Login screen
   useFocusEffect(
     useCallback(() => {
+      ScreenCapture.preventScreenCaptureAsync().catch((err) => {
+        console.warn("Failed to prevent screen capture in Login:", err);
+      });
+
+      return () => {
+        ScreenCapture.allowScreenCaptureAsync().catch((err) => {
+          console.warn("Failed to allow screen capture:", err);
+        });
+      };
+    }, []),
+  );
+
+  // On every focus (first open AND after logout): load Remember Me + Biometrics
+  // and pre-fill the Employee ID. Also handles the hardware back button.
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const initScreen = async () => {
+        try {
+          const avail = await biometricService.checkBiometricAvailability();
+
+          const bioCreds = await biometricService.getBiometricCredentials();
+          const bioEnabled = await biometricService.isBiometricEnabled();
+          const storedId = normalizeId(bioCreds?.empId);
+          const hasBio = Boolean(
+            bioEnabled && storedId && bioCreds?.password,
+          );
+
+          const remembered = await biometricService.getRememberMeCredentials();
+
+          if (!isActive) return;
+
+          setIsBiometricAvailable(
+            Boolean(avail.hasHardware && avail.isEnrolled),
+          );
+          setHasStoredBiometrics(hasBio);
+          setStoredBiometricEmpId(hasBio ? storedId : null);
+
+          // Pre-fill the form: Remember Me wins, otherwise show the
+          // biometric user's Employee ID (e.g. after logout).
+          if (remembered && remembered.empId && remembered.password) {
+            setRememberMe(true);
+            setEmpid(normalizeId(remembered.empId));
+            setPassword(remembered.password);
+          } else {
+            setRememberMe(false);
+            setEmpid(hasBio ? storedId : "");
+            setPassword("");
+          }
+          setEmpIdError("");
+          setPasswordError("");
+        } catch (err) {
+          console.warn("Initialization error in Login:", err);
+        }
+      };
+
+      initScreen();
+
       const onBackPress = () => {
         navigation.navigate("Lanuage");
         return true;
@@ -78,53 +201,15 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
         onBackPress,
       );
 
-      return () => subscription.remove();
+      return () => {
+        isActive = false;
+        subscription.remove();
+      };
     }, [navigation]),
   );
 
-  const checkDCMAccess = async (empId: string, pass: string) => {
-    if (!empId.trim() || !pass.trim()) return;
-
-    const trimmedEmpId = empId.trim();
-
-    if (trimmedEmpId !== trimmedEmpId.toUpperCase()) {
-      setEmpIdError(t("Error.Please enter Employee ID in uppercase letters"));
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${environment.API_BASE_URL}api/collection-officer/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            empId: trimmedEmpId,
-            password: pass,
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (response.ok && data.jobRole) {
-        if (!ALLOWED_ROLES.includes(data.jobRole.toLowerCase())) {
-          setEmpIdError(t("Error.Access Denied"));
-          return;
-        } else {
-          setEmpIdError("");
-        }
-      }
-    } catch (error) {
-      console.log("Validation check error:", error);
-    }
-  };
-
   const handleEmpIdChange = (text: string) => {
     setEmpid(text);
-
     if (empIdError) {
       setEmpIdError("");
     }
@@ -132,56 +217,32 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
   const handlePasswordChange = (text: string) => {
     setPassword(text);
-
-    if (empIdError) {
-      setEmpIdError("");
+    if (passwordError) {
+      setPasswordError("");
     }
   };
 
-  const handleLogin = async () => {
-    Keyboard.dismiss();
-
-    setEmpIdError("");
-
-    if (!empid && !password) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Password & Employee ID are not allowed to be empty"),
-      );
-      return false;
-    }
-
-    if (empid && !password) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Password is not allowed to be empty"),
-      );
-      return false;
-    }
-
-    if (!empid && password) {
-      Alert.alert(
-        t("Error.error"),
-        t("Error.Employee ID is not allowed to be empty"),
-      );
-      return false;
-    }
-
-    if (!validateEmpIdFormat(empid)) {
-      return false;
-    }
-
+  // Core login execution
+  const executeLogin = async (
+    loginEmpId: string,
+    loginPassword: string,
+    options: {
+      saveBiometricsOnSuccess?: boolean;
+      showBiometricSuccessModal?: boolean;
+      biometricModalMode?: "login" | "enable";
+    } = {},
+  ): Promise<boolean> => {
     setLoading(true);
     store.dispatch(logoutUser());
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
       setLoading(false);
       Alert.alert(t("Error.error"), "No internet connection");
-      return;
+      return false;
     }
 
     try {
-      const trimmedEmpId = empid.trim();
+      const trimmedEmpId = loginEmpId.trim();
 
       const response = await fetch(
         `${environment.API_BASE_URL}api/collection-officer/login`,
@@ -192,7 +253,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           },
           body: JSON.stringify({
             empId: trimmedEmpId,
-            password,
+            password: loginPassword,
           }),
         },
       );
@@ -204,21 +265,26 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
         if (data.reason === "role_not_allowed") {
           Alert.alert(t("Error.error"), t("Error.Access Denied"));
-          return;
+          return false;
         }
 
         const rawStatus = (data.accountStatus || "").toLowerCase();
         const isRejected = rawStatus === "rejected" || rawStatus === "banned";
         const statusType = isRejected ? "rejected" : "not_approved";
         const errorMessage = isRejected
-          ? (data.message || t("Error.This EMP ID is Rejected", "This EMP ID is Rejected"))
-          : (data.message || t("Error.This EMP ID is not approved.", "This EMP ID is not approved."));
+          ? data.message ||
+          t("Error.This EMP ID is Rejected", "This EMP ID is Rejected")
+          : data.message ||
+          t(
+            "Error.This EMP ID is not approved.",
+            "This EMP ID is not approved.",
+          );
 
         navigation.navigate("BannedScreen", {
           statusType,
           message: errorMessage,
         });
-        return;
+        return false;
       }
 
       if (!response.ok) {
@@ -231,18 +297,21 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             t("Error.Invalid Password. Please try again."),
           );
         } else if (data.status === "error") {
-          Alert.alert(t("Error.error"), data.message || t("Error.Invalid EMP ID"));
+          Alert.alert(
+            t("Error.error"),
+            data.message || t("Error.Invalid EMP ID"),
+          );
         } else {
           Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
         }
-        return;
+        return false;
       }
 
       const {
         token,
         passwordUpdateRequired,
         jobRole,
-        empId,
+        empId: returnedEmpId,
         companyNameEnglish,
         companyNameSinhala,
         companyNameTamil,
@@ -251,16 +320,18 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       if (!jobRole || !ALLOWED_ROLES.includes(jobRole.toLowerCase())) {
         setLoading(false);
         Alert.alert(t("Error.error"), t("Error.Access Denied"));
-        return;
+        return false;
       }
 
       const timestamp = new Date();
-      const expirationTime = new Date(timestamp.getTime() + 10 * 60 * 60 * 1000);
+      const expirationTime = new Date(
+        timestamp.getTime() + 12 * 60 * 60 * 1000,
+      ); // 12h matching JWT
 
       const authPayload = {
         token,
         jobRole,
-        empId: empId.toString(),
+        empId: (returnedEmpId || trimmedEmpId).toString(),
         id: data.userId || data.officer?.id || data.id,
         companyNameEnglish: companyNameEnglish || null,
         companyNameSinhala: companyNameSinhala || null,
@@ -276,11 +347,48 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
       dispatch(setUser(authPayload));
 
       // 3. Mark user online (fire and forget)
-      status(empId, true);
+      status((returnedEmpId || trimmedEmpId).toString(), true);
 
-      // 4. Navigate to next screen without delay
+      // 4. Save Remember Me credentials
+      if (rememberMe) {
+        await biometricService.saveRememberMeCredentials(
+          trimmedEmpId,
+          loginPassword,
+        );
+      } else {
+        await biometricService.clearRememberMeCredentials();
+      }
+
+      // 5. Save Biometric credentials ONLY after a successful login and only
+      //    if this flow requested it (Enable Biometrics). This replaces any
+      //    previously saved biometric user.
+      if (options.saveBiometricsOnSuccess) {
+        const cleanId = normalizeId(trimmedEmpId);
+        await biometricService.saveBiometricCredentials(
+          cleanId,
+          loginPassword,
+        );
+        setHasStoredBiometrics(true);
+        setStoredBiometricEmpId(cleanId);
+      }
+
+      // 6. Stop loading spinner before showing success modal or navigating
       setLoading(false);
 
+      // 7. If biometric flow, display the verified modal ONLY after credentials are confirmed valid
+      if (options.showBiometricSuccessModal) {
+        setBiometricModalMode(options.biometricModalMode || "login");
+        setBiometricModalStatus("success");
+        setIsBiometricModalVisible(true);
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, BIOMETRIC_SUCCESS_DURATION_MS),
+        );
+
+        setIsBiometricModalVisible(false);
+      }
+
+      // 8. Navigate to next screen
       if (passwordUpdateRequired) {
         navigation.navigate("ChangePassword");
       } else {
@@ -296,22 +404,121 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           navigation.navigate("Main", { screen: "CollectionDashboard" });
         }
       }
+
+      return true;
     } catch (error) {
       setLoading(false);
       console.error("Login error:", error);
       Alert.alert(t("Error.error"), t("Error.somethingWentWrong"));
+      return false;
     }
   };
 
-  const status = async (empId: string, status: boolean) => {
+  // Normal Sign In
+  const handleLogin = async () => {
+    Keyboard.dismiss();
+
+    if (!validateCredentials(empid, password)) {
+      return false;
+    }
+
+    await executeLogin(empid, password, { saveBiometricsOnSuccess: false });
+  };
+
+  // "Enable Biometrics" Button Handler
+  const handleEnableBiometrics = async () => {
+    Keyboard.dismiss();
+
+    if (!validateCredentials(empid, password)) {
+      return;
+    }
+
+    const trimmedEmpId = empid.trim();
+
+    // Check hardware availability
+    const avail = await biometricService.checkBiometricAvailability();
+    if (!avail.hasHardware || !avail.isEnrolled) {
+      Alert.alert(
+        t("Biometric.NotAvailableTitle", "Biometrics Not Available"),
+        t(
+          "Biometric.NotAvailableMessage",
+          "Biometric authentication is not supported or no Face ID / Fingerprint is enrolled on this device.",
+        ),
+      );
+      return;
+    }
+
+    // Only show system biometric popup during authentication
+    const verified = await biometricService.authenticateWithBiometrics(
+      t("Biometric.VerifyIdentityToSignIn", "Verify your identity to sign in"),
+    );
+
+    if (verified) {
+      await executeLogin(trimmedEmpId, password, {
+        saveBiometricsOnSuccess: true,
+        showBiometricSuccessModal: true,
+        biometricModalMode: "enable",
+      });
+    }
+  };
+
+  // "Use Biometrics" Button Handler
+  const handleUseBiometrics = async () => {
+    Keyboard.dismiss();
+    setEmpIdError("");
+    setPasswordError("");
+
+    const creds = await biometricService.getBiometricCredentials();
+    const credId = normalizeId(creds?.empId);
+
+    if (!creds || !credId || !creds.password) {
+      Alert.alert(
+        t("Biometric.NotFoundTitle", "Biometrics Not Found"),
+        t(
+          "Biometric.NotFoundMessage",
+          "No saved credentials found. Please sign in with your password to re-enable biometrics.",
+        ),
+      );
+      setHasStoredBiometrics(false);
+      setStoredBiometricEmpId(null);
+      return;
+    }
+
+    // Only show system biometric popup during authentication
+    const verified = await biometricService.authenticateWithBiometrics(
+      t("Biometric.VerifyIdentityToSignIn", "Verify your identity to sign in"),
+    );
+
+    if (verified) {
+      setEmpid(credId);
+      setPassword(creds.password);
+      setStoredBiometricEmpId(credId);
+
+      await executeLogin(credId, creds.password, {
+        saveBiometricsOnSuccess: false,
+        showBiometricSuccessModal: true,
+        biometricModalMode: "login",
+      });
+    }
+  };
+
+  // "Use Biometrics" only when stored biometrics exist AND the typed ID is empty
+  // or exactly equals the stored biometric user. Any other ID => "Enable Biometrics".
+  const typedId = normalizeId(empid);
+  const isMatchingBiometricUser = Boolean(
+    hasStoredBiometrics &&
+    storedBiometricEmpId &&
+    (typedId === "" || typedId === storedBiometricEmpId),
+  );
+
+  const status = async (empId: string, onlineState: boolean) => {
     try {
       const token = store.getState().auth.token;
       if (!token) {
-        console.error("Token not found");
         return;
       }
 
-      const response = await fetch(
+      await fetch(
         `${environment.API_BASE_URL}api/collection-officer/online-status`,
         {
           method: "POST",
@@ -321,16 +528,10 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           },
           body: JSON.stringify({
             empId: empId,
-            status: status,
+            status: onlineState,
           }),
         },
       );
-
-      if (response) {
-        console.log("User is marked as online");
-      } else {
-        console.log("Failed to update online status");
-      }
     } catch (error) {
       console.error("Online status error:", error);
     }
@@ -344,12 +545,16 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
   return (
     <KeyboardAwareScrollView
       style={{ backgroundColor: "white" }}
-      contentContainerStyle={{ flexGrow: 1, backgroundColor: "white" }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        backgroundColor: "white",
+        paddingBottom: isKeyboardVisible ? 60 : 20,
+      }}
       enableOnAndroid={true}
       enableAutomaticScroll={true}
       keyboardOpeningTime={0}
-      extraScrollHeight={Platform.OS === "ios" ? 0 : 20}
-      extraHeight={Platform.OS === "ios" ? 0 : 20}
+      extraScrollHeight={Platform.OS === "ios" ? 120 : 160}
+      extraHeight={Platform.OS === "ios" ? 120 : 160}
       keyboardShouldPersistTaps="handled"
       bounces={false}
       showsVerticalScrollIndicator={false}
@@ -366,31 +571,43 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           <Image
             source={loginImage}
             style={{
-              width: 270,
-              height: 270,
+              width: isKeyboardVisible ? 70 : 190,
+              height: isKeyboardVisible ? 70 : 190,
               maxWidth: "100%",
               alignSelf: "center",
+              marginTop: isKeyboardVisible ? 2 : 8,
             }}
-            className="w-[270px] h-[270px]"
             resizeMode="contain"
           />
-          <Text className="font-bold text-2xl pt-[7%]">
-            {t("SignIn.Wellcome")}
-          </Text>
+          {!isKeyboardVisible && (
+            <Text className="font-bold text-2xl pt-2">
+              {t("SignIn.Wellcome")}
+            </Text>
+          )}
         </View>
 
-        <View className="mt-2 items-center">
-          <Text>{t("SignIn.SigntoLogin")}</Text>
-        </View>
+        {!isKeyboardVisible && (
+          <View className="mt-1 items-center">
+            <Text>{t("SignIn.SigntoLogin")}</Text>
+          </View>
+        )}
 
-        <View className="px-4 py-6 max-w-[500px] w-full mx-auto ">
+        <View
+          style={{
+            maxWidth: 500,
+            width: "100%",
+            alignSelf: "center",
+            paddingHorizontal: 16,
+            paddingTop: isKeyboardVisible ? 4 : 16,
+            paddingBottom: isKeyboardVisible ? 4 : 16,
+          }}
+        >
           <Text className="text-base pb-[2%] font-light">
             {t("SignIn.Employee")}
           </Text>
           <View
-            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${
-              empIdError ? "border-red-500" : "border-[#F4F4F4]"
-            }`}
+            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${empIdError ? "border-red-500" : "border-[#F4F4F4]"
+              }`}
           >
             <Image
               source={user}
@@ -399,10 +616,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               resizeMode="contain"
             />
             <TextInput
-              className="px-2   text-black"
+              className="px-2 text-black"
               onChangeText={handleEmpIdChange}
               autoCapitalize="characters"
               value={empid}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
               style={{
                 flex: 1,
                 minWidth: 0,
@@ -415,17 +634,21 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
           </View>
 
           {empIdError ? (
-            <View className="mb-4">
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 14 }}>
               <Text className="text-red-500 text-sm pl-3">{empIdError}</Text>
             </View>
           ) : (
-            <View className="mb-6" />
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 18 }} />
           )}
 
           <Text className="text-base pb-[2%] font-light">
             {t("SignIn.Password")}
           </Text>
-          <View className="flex-row items-center bg-[#F4F4F4] border border-[#F4F4F4] rounded-3xl mb-8 px-3 h-[50px]">
+          <View
+            className={`flex-row items-center bg-[#F4F4F4] border rounded-3xl mb-2 px-3 h-[50px] ${
+              passwordError ? "border-red-500" : "border-[#F4F4F4]"
+            }`}
+          >
             <Image
               source={passwordicon}
               style={{ width: 24, height: 24 }}
@@ -433,10 +656,13 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               resizeMode="contain"
             />
             <TextInput
-              className="px-2   text-black"
+              ref={passwordInputRef}
+              className="px-2 text-black"
               secureTextEntry={secureTextEntry}
               onChangeText={handlePasswordChange}
               value={password}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
               style={{
                 flex: 1,
                 minWidth: 0,
@@ -457,14 +683,63 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
+          {passwordError ? (
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 14 }}>
+              <Text className="text-red-500 text-sm pl-3">{passwordError}</Text>
+            </View>
+          ) : (
+            <View style={{ marginBottom: isKeyboardVisible ? 6 : 16 }} />
+          )}
+
+          {/* Remember Me switch */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: isKeyboardVisible ? 10 : 20,
+              paddingHorizontal: 4,
+            }}
+          >
+            <Switch
+              value={rememberMe}
+              onValueChange={setRememberMe}
+              trackColor={{ false: "#E5E7EB", true: "#FAE432" }}
+              thumbColor={rememberMe ? "#000000" : "#9CA3AF"}
+              ios_backgroundColor="#E5E7EB"
+              style={{
+                transform:
+                  Platform.OS === "ios"
+                    ? [{ scaleX: 0.8 }, { scaleY: 0.8 }]
+                    : [{ scaleX: 0.95 }, { scaleY: 0.95 }],
+              }}
+            />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setRememberMe(!rememberMe)}
+              style={{ marginLeft: 8 }}
+            >
+              <Text
+                style={{
+                  color: "#4B5563",
+                  fontSize: 14,
+                  fontWeight: "500",
+                }}
+              >
+                {t("Biometric.RememberMe", "Remember me")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Normal Sign in button */}
           <TouchableOpacity
-            className="bg-black w-full  rounded-3xl items-center justify-center mb-[20%] h-[50px]"
+            className="bg-black w-full rounded-3xl items-center justify-center h-[50px]"
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.25,
               shadowRadius: 10,
               elevation: 6,
+              marginBottom: isKeyboardVisible ? 10 : 20,
             }}
             onPress={handleLogin}
             disabled={loading}
@@ -477,8 +752,100 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
               </Text>
             )}
           </TouchableOpacity>
+
+          {/* OR AUTHENTICATE WITH divider & Biometrics button (shown if hardware is available) */}
+          {isBiometricAvailable && (
+            <>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginVertical: isKeyboardVisible ? 6 : 14,
+                }}
+              >
+                <View
+                  style={{ flex: 1, height: 1, backgroundColor: "#E5E7EB" }}
+                />
+                <Text
+                  style={{
+                    marginHorizontal: 12,
+                    fontSize: 11,
+                    fontWeight: "700",
+                    color: "#9CA3AF",
+                    letterSpacing: 0.8,
+                  }}
+                >
+                  {t("Biometric.OrAuthenticateWith", "OR AUTHENTICATE WITH")}
+                </Text>
+                <View
+                  style={{ flex: 1, height: 1, backgroundColor: "#E5E7EB" }}
+                />
+              </View>
+
+              {/* Biometrics Secondary Pill Button */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={
+                  isMatchingBiometricUser
+                    ? handleUseBiometrics
+                    : handleEnableBiometrics
+                }
+                disabled={loading}
+                style={{
+                  alignSelf: "center",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#FFFFFF",
+                  borderWidth: 1.5,
+                  borderColor: "#000000",
+                  borderRadius: 999,
+                  paddingVertical: 12,
+                  paddingHorizontal: 26,
+                  marginBottom: isKeyboardVisible ? 16 : 36,
+                  opacity: loading ? 0.45 : 1,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                <FontAwesome5
+                  name="fingerprint"
+                  size={20}
+                  color="#000000"
+                  style={{ marginRight: 10 }}
+                />
+                <Text
+                  style={{
+                    color: "#000000",
+                    fontSize: 15,
+                    fontWeight: "700",
+                  }}
+                >
+                  {isMatchingBiometricUser
+                    ? t("Biometric.UseBiometrics", "Use Biometrics")
+                    : t("Biometric.EnableBiometrics", "Enable Biometrics")}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
+
+      {/* App Designed Biometric Modal - Displayed only on verify success */}
+      <BiometricAuthModal
+        visible={isBiometricModalVisible}
+        status={biometricModalStatus}
+        mode={biometricModalMode}
+        biometricLabel={BIOMETRIC_LABEL}
+        title={t(
+          "Biometric.VerifyIdentityToSignIn",
+          "Verify your identity to sign in",
+        )}
+        onCancel={() => setIsBiometricModalVisible(false)}
+      />
     </KeyboardAwareScrollView>
   );
 };

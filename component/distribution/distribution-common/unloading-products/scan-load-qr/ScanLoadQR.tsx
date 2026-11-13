@@ -530,16 +530,20 @@ const ScanLoadQR: React.FC<ScanLoadQRProps> = ({ navigation }) => {
       />
 
       {/* Full-Screen Camera View */}
-      <CameraView
-        style={StyleSheet.absoluteFill}
-        facing="back"
-        barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
-        }}
-        onBarcodeScanned={
-          scanned || loading ? undefined : handleBarCodeScanned
-        }
-      />
+      {isFocused && !scanned && !loading ? (
+        <CameraView
+          style={StyleSheet.absoluteFill}
+          facing="back"
+          barcodeScannerSettings={{
+            barcodeTypes: ["qr"],
+          }}
+          onBarcodeScanned={
+            scanned || loading ? undefined : handleBarCodeScanned
+          }
+        />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: "#000" }]} />
+      )}
 
       {/* Dark overlay with clear scan frame in center */}
       <View className="flex-1 bg-black/35">

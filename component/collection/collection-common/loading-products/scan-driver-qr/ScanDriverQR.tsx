@@ -15,7 +15,7 @@ import { widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 import CameraAccess from "@/component/common/permission/CameraAccess";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import store from "@/services/reducxStore";
@@ -37,6 +37,7 @@ const PRIMARY_OUTLINE_COLOR = "#980775";
 const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
+  const isFocused = useIsFocused();
   const [scanned, setScanned] = useState(false);
   const [scanLineAnim] = useState(new Animated.Value(0));
   const [loading, setLoading] = useState(false);
@@ -490,16 +491,20 @@ const ScanDriverQR: React.FC<ScanDriverQRProps> = ({ navigation }) => {
       />
 
       {/* Full-Screen Camera View */}
-      <CameraView
-        style={StyleSheet.absoluteFill}
-        facing="back"
-        barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
-        }}
-        onBarcodeScanned={
-          scanned || loading ? undefined : handleBarCodeScanned
-        }
-      />
+      {isFocused && !scanned && !loading ? (
+        <CameraView
+          style={StyleSheet.absoluteFill}
+          facing="back"
+          barcodeScannerSettings={{
+            barcodeTypes: ["qr"],
+          }}
+          onBarcodeScanned={
+            scanned || loading ? undefined : handleBarCodeScanned
+          }
+        />
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: "#000" }]} />
+      )}
 
       {/* Dark overlay with clear scan frame in center */}
       <View className="flex-1 bg-black/35">

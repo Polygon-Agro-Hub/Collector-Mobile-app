@@ -13,7 +13,7 @@ import { CameraView, Camera } from "expo-camera";
 import { useTranslation } from "react-i18next";
 import CustomHeader from "@/component/components/navigations/CustomHeader";
 import CameraAccess from "@/component/common/permission/CameraAccess";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { AlertModal } from "@/component/components/popup/AlertModal";
 
 type QRScannerNavigationProp = StackNavigationProp<
@@ -32,6 +32,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState<boolean>(false);
   const [showCameraAccess, setShowCameraAccess] = useState<boolean>(false);
+  const isFocused = useIsFocused();
 
   const { t } = useTranslation();
 
@@ -70,12 +71,19 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
 
     checkCameraPermissions();
 
-    const unsubscribe = navigation.addListener("focus", () => {
+    const unsubscribeFocus = navigation.addListener("focus", () => {
       setScanned(false);
       setIsUnsuccessfulModalVisible(false);
     });
 
-    return unsubscribe;
+    const unsubscribeBlur = navigation.addListener("blur", () => {
+      setScanned(true);
+    });
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+    };
   }, [navigation]);
 
   const handlePermissionGranted = () => {
@@ -123,6 +131,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
     type: string;
     data: string;
   }) => {
+    if (scanned || !isFocused) return;
     setScanned(true);
 
     try {
@@ -171,14 +180,18 @@ const QRScanner: React.FC<QRScannerProps> = ({ navigation }) => {
           navigation={navigation}
           onBackPress={handleBackPress}
         />
-        <CameraView
-          className="flex-1 "
-          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ["qr", "pdf417"],
-          }}
-          style={{ flex: 1 }}
-        />
+        {isFocused && !scanned ? (
+          <CameraView
+            className="flex-1 "
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr", "pdf417"],
+            }}
+            style={{ flex: 1 }}
+          />
+        ) : (
+          <View style={{ flex: 1, backgroundColor: "#000" }} />
+        )}
 
         <View
           style={{

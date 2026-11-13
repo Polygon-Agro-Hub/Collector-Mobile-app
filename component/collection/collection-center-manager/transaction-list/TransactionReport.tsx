@@ -143,9 +143,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
         );
       default:
         return (
-          details?.companyNameEnglish ||
-          authState?.companyNameEnglish ||
-          ""
+          details?.companyNameEnglish || authState?.companyNameEnglish || ""
         );
     }
   };
@@ -385,8 +383,12 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
       return "";
     }
 
-    const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-    const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
+    const isSinhala = (i18n.language || selectedLanguage || "en")
+      .toLowerCase()
+      .startsWith("si");
+    const isTamil = (i18n.language || selectedLanguage || "en")
+      .toLowerCase()
+      .startsWith("ta");
     const currencyPrefix = isSinhala ? "රු." : isTamil ? "ரூ." : "Rs.";
 
     const totalSum = crops.reduce((sum: number, crop: Crop) => {
@@ -641,10 +643,21 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
     </html>
     `;
     try {
-      const { uri, base64 } = await Print.printToFileAsync({ html, base64: true });
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const { uri, base64 } = await Print.printToFileAsync({
+        html,
+        base64: true,
+      });
+      const isSinhala = (i18n.language || selectedLanguage || "en")
+        .toLowerCase()
+        .startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en")
+        .toLowerCase()
+        .startsWith("ta");
+      const prefix = isSinhala
+        ? "වාර්තා"
+        : isTamil
+          ? "அறிக்கை"
+          : "PurchaseReport";
       const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const fileUri = `${(FileSystem as any).documentDirectory}${prefix}_${grnNumber}_${selectedDate}.pdf`;
 
@@ -655,7 +668,10 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
           });
           return fileUri;
         } catch (writeErr) {
-          console.warn("writeAsStringAsync failed in TransactionReport:", writeErr);
+          console.warn(
+            "writeAsStringAsync failed in TransactionReport:",
+            writeErr,
+          );
         }
       }
 
@@ -667,7 +683,7 @@ const TransactionReport: React.FC<TransactionReportProps> = ({
     }
   };
 
-const handleDownloadPDF = async () => {
+  const handleDownloadPDF = async () => {
     try {
       const uri = await generatePDF();
 
@@ -676,17 +692,26 @@ const handleDownloadPDF = async () => {
         return;
       }
 
-      const isSinhala = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("si");
-      const isTamil = (i18n.language || selectedLanguage || "en").toLowerCase().startsWith("ta");
-      const prefix = isSinhala ? "වාර්තා" : isTamil ? "அறிக்கை" : "PurchaseReport";
+      const isSinhala = (i18n.language || selectedLanguage || "en")
+        .toLowerCase()
+        .startsWith("si");
+      const isTamil = (i18n.language || selectedLanguage || "en")
+        .toLowerCase()
+        .startsWith("ta");
+      const prefix = isSinhala
+        ? "වාර්තා"
+        : isTamil
+          ? "அறிக்கை"
+          : "PurchaseReport";
       const grnNumber = crops.length > 0 ? crops[0].invoiceNumber : "N/A";
       const fileName = `${prefix}_${grnNumber}_${selectedDate}.pdf`;
 
       if (Platform.OS === "android") {
         let directoryUri = await AsyncStorage.getItem("download_directory_uri");
-        
+
         if (!directoryUri) {
-          const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          const permissions =
+            await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
           if (permissions.granted) {
             directoryUri = permissions.directoryUri;
             await AsyncStorage.setItem("download_directory_uri", directoryUri);
@@ -698,11 +723,12 @@ const handleDownloadPDF = async () => {
             const base64 = await FileSystem.readAsStringAsync(uri, {
               encoding: FileSystem.EncodingType.Base64,
             });
-            const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
-              directoryUri,
-              fileName,
-              "application/pdf"
-            );
+            const fileUri =
+              await FileSystem.StorageAccessFramework.createFileAsync(
+                directoryUri,
+                fileName,
+                "application/pdf",
+              );
             await FileSystem.writeAsStringAsync(fileUri, base64, {
               encoding: FileSystem.EncodingType.Base64,
             });
@@ -714,19 +740,24 @@ const handleDownloadPDF = async () => {
           } catch (e) {
             // Permission might have been revoked, try to request again
             await AsyncStorage.removeItem("download_directory_uri");
-            const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+            const permissions =
+              await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
             if (permissions.granted && permissions.directoryUri) {
               const newDirectoryUri = permissions.directoryUri;
-              await AsyncStorage.setItem("download_directory_uri", newDirectoryUri);
+              await AsyncStorage.setItem(
+                "download_directory_uri",
+                newDirectoryUri,
+              );
 
               const base64 = await FileSystem.readAsStringAsync(uri, {
                 encoding: FileSystem.EncodingType.Base64,
               });
-              const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
-                newDirectoryUri,
-                fileName,
-                "application/pdf"
-              );
+              const fileUri =
+                await FileSystem.StorageAccessFramework.createFileAsync(
+                  newDirectoryUri,
+                  fileName,
+                  "application/pdf",
+                );
               await FileSystem.writeAsStringAsync(fileUri, base64, {
                 encoding: FileSystem.EncodingType.Base64,
               });
@@ -738,14 +769,14 @@ const handleDownloadPDF = async () => {
             } else {
               Alert.alert(
                 t("Error.Permission Denied") || "Permission Denied",
-                "Storage permission is required to save the PDF."
+                "Storage permission is required to save the PDF.",
               );
             }
           }
         } else {
           Alert.alert(
             t("Error.Permission Denied") || "Permission Denied",
-            "Storage permission is required to save the PDF."
+            "Storage permission is required to save the PDF.",
           );
         }
       } else if (Platform.OS === "ios") {
@@ -767,41 +798,62 @@ const handleDownloadPDF = async () => {
             });
           }
         } else {
-          Alert.alert(t("Error.error"), t("Error.Sharing is not available on this device"));
+          Alert.alert(
+            t("Error.error"),
+            t("Error.Sharing is not available on this device"),
+          );
         }
       }
     } catch (error) {
       console.error("Download error:", error);
-      Alert.alert(t("Error.error"), t("Error.Failed to prepare PDF for download."));
+      Alert.alert(
+        t("Error.error"),
+        t("Error.Failed to prepare PDF for download."),
+      );
     }
   };
+
+  const activeLang: "en" | "si" | "ta" = (() => {
+    const lang = (i18n.language || selectedLanguage || "en").toLowerCase();
+    if (lang.startsWith("si")) return "si";
+    if (lang.startsWith("ta")) return "ta";
+    return "en";
+  })();
+
+  const getFilePrefix = () =>
+    activeLang === "si"
+      ? "වාර්තා"
+      : activeLang === "ta"
+        ? "அறிக்கை"
+        : "PurchaseReport";
 
   const handleSharePDF = async () => {
     const uri = await generatePDF();
     if (uri && (await Sharing.isAvailableAsync())) {
-      const cleanGrn = (crops.length > 0 && crops[0].invoiceNumber ? crops[0].invoiceNumber : "NA").replace(/[^a-zA-Z0-9_-]/g, "_");
-      const cleanDate = (selectedDate || new Date().toISOString().slice(0, 10)).replace(/[^a-zA-Z0-9_-]/g, "_");
-      const fileName = `PurchaseReport_${cleanGrn}_${cleanDate}.pdf`;
-
+      // Sanitize only the invoice number and date, not the translated prefix
+      const cleanGrn = (
+        crops.length > 0 && crops[0].invoiceNumber
+          ? crops[0].invoiceNumber
+          : "NA"
+      ).replace(/[^a-zA-Z0-9_-]/g, "_");
+      const cleanDate = (
+        selectedDate || new Date().toISOString().slice(0, 10)
+      ).replace(/[^a-zA-Z0-9_-]/g, "_");
+      const fileName = `${getFilePrefix()}_${cleanGrn}_${cleanDate}.pdf`;
       const newUri = `${(FileSystem as any).cacheDirectory}${fileName}`;
 
       try {
-        await FileSystem.copyAsync({
-          from: uri,
-          to: newUri,
-        });
-
+        await FileSystem.copyAsync({ from: uri, to: newUri });
         await Sharing.shareAsync(newUri, {
           mimeType: "application/pdf",
-          dialogTitle: "Share Purchase Report",
+          dialogTitle: t("NewReport.Share GRN Report"),
           UTI: "com.adobe.pdf",
         });
       } catch (error) {
         console.error("Error sharing PDF with custom name:", error);
-
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
-          dialogTitle: "Share Purchase Report",
+          dialogTitle: t("NewReport.Share GRN Report"),
           UTI: "com.adobe.pdf",
         });
       }
@@ -834,7 +886,8 @@ const handleDownloadPDF = async () => {
             {crops.length > 0 ? crops[0].invoiceNumber : "N/A"}
           </Text>
           <Text className="text-sm">
-            {t("NewReport.Date")} {formattedDate} {formatDisplayTime(selectedTime)}
+            {t("NewReport.Date")} {formattedDate}{" "}
+            {formatDisplayTime(selectedTime)}
           </Text>
         </View>
 
@@ -881,69 +934,105 @@ const handleDownloadPDF = async () => {
             {t("NewReport.Received Items")} :
           </Text>
           {(() => {
-              const tableContent = (
-                <View style={isTablet ? undefined : { width: 600 }}>
-                  {/* Table Header */}
-                  <View className="flex-row bg-gray-200">
-                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 2 }}>
-                      {t("NewReport.Crop Name")}
+            const tableContent = (
+              <View style={isTablet ? undefined : { width: 600 }}>
+                {/* Table Header */}
+                <View className="flex-row bg-gray-200">
+                  <Text
+                    className="p-2 font-bold border-r border-gray-300 text-center"
+                    style={{ flex: 2 }}
+                  >
+                    {t("NewReport.Crop Name")}
+                  </Text>
+                  <Text
+                    className="p-2 font-bold border-r border-gray-300 text-center"
+                    style={{ flex: 2 }}
+                  >
+                    {t("NewReport.Variety")}
+                  </Text>
+                  <Text
+                    className="p-2 font-bold border-r border-gray-300 text-center"
+                    style={{ flex: 1 }}
+                  >
+                    {t("NewReport.Grade")}
+                  </Text>
+                  <Text
+                    className="p-2 font-bold border-r border-gray-300 text-center"
+                    style={{ flex: 1.5 }}
+                  >
+                    {t("NewReport.Unit Price(Rs.)")}
+                  </Text>
+                  <Text
+                    className="p-2 font-bold border-r border-gray-300 text-center"
+                    style={{ flex: 1.5 }}
+                  >
+                    {t("NewReport.Quantity(kg)")}
+                  </Text>
+                  <Text
+                    className="p-2 font-bold text-center"
+                    style={{ flex: 2 }}
+                  >
+                    {t("NewReport.Sub Total(Rs.)")}
+                  </Text>
+                </View>
+
+                {/* Table Rows */}
+                {crops.map((crop, index) => (
+                  <View key={`${crop.id}-${index}`} className="flex-row">
+                    <Text
+                      className="p-2 border-b border-gray-300 text-left"
+                      style={{ flex: 2, flexWrap: "wrap" }}
+                    >
+                      {getCropName(crop)}
                     </Text>
-                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 2 }}>
-                      {t("NewReport.Variety")}
+                    <Text
+                      className="p-2 border-b border-gray-300"
+                      style={{ flex: 2, flexWrap: "wrap" }}
+                    >
+                      {getVarietyName(crop)}
                     </Text>
-                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1 }}>
-                      {t("NewReport.Grade")}
+                    <Text
+                      className="p-2 border-b border-gray-300 text-center"
+                      style={{ flex: 1 }}
+                    >
+                      {crop.grade || "-"}
                     </Text>
-                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1.5 }}>
-                      {t("NewReport.Unit Price(Rs.)")}
+                    <Text
+                      className="p-2 border-b border-gray-300 text-right"
+                      style={{ flex: 1.5 }}
+                    >
+                      {formatNumber(crop.unitPrice)}
                     </Text>
-                    <Text className="p-2 font-bold border-r border-gray-300 text-center" style={{ flex: 1.5 }}>
-                      {t("NewReport.Quantity(kg)")}
+                    <Text
+                      className="p-2 border-b border-gray-300 text-right"
+                      style={{ flex: 1.5 }}
+                    >
+                      {formatNumber(crop.quantity)}
                     </Text>
-                    <Text className="p-2 font-bold text-center" style={{ flex: 2 }}>
-                      {t("NewReport.Sub Total(Rs.)")}
+                    <Text
+                      className="p-2 border-b border-gray-300 text-right"
+                      style={{ flex: 2 }}
+                    >
+                      {formatNumberWithCommas(crop.subTotal)}
                     </Text>
                   </View>
+                ))}
+              </View>
+            );
 
-                  {/* Table Rows */}
-                  {crops.map((crop, index) => (
-                    <View key={`${crop.id}-${index}`} className="flex-row">
-                      <Text
-                        className="p-2 border-b border-gray-300 text-left"
-                        style={{ flex: 2, flexWrap: "wrap" }}
-                      >
-                        {getCropName(crop)}
-                      </Text>
-                      <Text className="p-2 border-b border-gray-300" style={{ flex: 2, flexWrap: "wrap" }}>
-                        {getVarietyName(crop)}
-                      </Text>
-                      <Text className="p-2 border-b border-gray-300 text-center" style={{ flex: 1 }}>
-                        {crop.grade || "-"}
-                      </Text>
-                      <Text className="p-2 border-b border-gray-300 text-right" style={{ flex: 1.5 }}>
-                        {formatNumber(crop.unitPrice)}
-                      </Text>
-                      <Text className="p-2 border-b border-gray-300 text-right" style={{ flex: 1.5 }}>
-                        {formatNumber(crop.quantity)}
-                      </Text>
-                      <Text className="p-2 border-b border-gray-300 text-right" style={{ flex: 2 }}>
-                        {formatNumberWithCommas(crop.subTotal)}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              );
-
-              return isTablet ? (
-                <View className="w-full border border-gray-300 rounded-lg">
-                  {tableContent}
-                </View>
-              ) : (
-                <ScrollView horizontal className="border border-gray-300 rounded-lg">
-                  {tableContent}
-                </ScrollView>
-              );
-            })()}
+            return isTablet ? (
+              <View className="w-full border border-gray-300 rounded-lg">
+                {tableContent}
+              </View>
+            ) : (
+              <ScrollView
+                horizontal
+                className="border border-gray-300 rounded-lg"
+              >
+                {tableContent}
+              </ScrollView>
+            );
+          })()}
         </View>
 
         {/* Divider */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -47,6 +47,8 @@ export interface GradeSetItem {
 
 export interface CropLoadData {
   id: string;
+  displayName?: string;
+  varietyLabel?: string;
   varietyNameEnglish?: string;
   varietyNameSinhala?: string;
   varietyNameTamil?: string;
@@ -91,6 +93,28 @@ export default function ReceivedProductsSummary({
   );
   const [loading, setLoading] = useState<boolean>(!!transportId);
 
+  const getDisplayNameForSort = useCallback(
+    (crop: CropLoadData) => {
+      return (
+        crop.displayName ||
+        getLocalizedProductName(crop, i18n.language) ||
+        crop.cropName ||
+        crop.varietyNameEnglish ||
+        ""
+      ).trim();
+    },
+    [i18n.language]
+  );
+
+  // Sort items alphabetically from A to Z under display name
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      const nameA = getDisplayNameForSort(a);
+      const nameB = getDisplayNameForSort(b);
+      return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+    });
+  }, [items, getDisplayNameForSort]);
+
   const fetchLoadDetails = useCallback(async () => {
     if (!transportId) return;
 
@@ -98,7 +122,7 @@ export default function ReceivedProductsSummary({
       setLoading(true);
       const authToken = store.getState().auth.token;
 
-      const queryParam = isUnloadedParam ? "?type=unloaded" : "";
+      const queryParam = isUnloadedParam ? "?type=unloaded&sortBy=display" : "?sortBy=display";
       const response = await axios.get(
         `${environment.API_BASE_URL}api/transport/load/${transportId}${queryParam}`,
         {
@@ -176,7 +200,7 @@ export default function ReceivedProductsSummary({
       transportId,
       loadCode,
       vehicleNo,
-      items,
+      items: sortedItems,
     });
   };
 
@@ -283,7 +307,7 @@ export default function ReceivedProductsSummary({
                 </View>
               </View>
             </View>
-            {items.map((crop) => (
+            {sortedItems.map((crop) => (
               <View
                 key={crop.id}
                 className="bg-white rounded-3xl p-4 mb-5"

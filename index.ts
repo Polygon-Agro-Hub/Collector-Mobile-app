@@ -1,3 +1,4 @@
+import '@/utils/fontScaling';
 import './global.css';
 import '@/services/apiInterceptor';
 import { registerRootComponent } from 'expo';

@@ -148,7 +148,7 @@ const Logout: React.FC<LogoutProps> = ({ navigation }) => {
             width={null}
             color="#8C0876"
             borderWidth={0}
-            style={{ height: 10 }}
+            height={10}
           />
         </View>
       </View>

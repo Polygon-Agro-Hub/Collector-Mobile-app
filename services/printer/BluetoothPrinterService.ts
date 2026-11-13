@@ -1,5 +1,7 @@
 import { Platform, PermissionsAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { encode as encodeBase64 } from "base64-arraybuffer";
+import environment from "@/environment/environment";
 
 export interface PrinterDevice {
   id: string;
@@ -58,8 +60,6 @@ export const requestBluetoothPermissions = async (): Promise<boolean> => {
   return true;
 };
 
-import { encode as encodeBase64 } from "base64-arraybuffer";
-
 // Convert string to base64 for BLE binary transfer
 const stringToBase64 = (str: string): string => {
   const bytes = new Uint8Array(str.length);
@@ -78,9 +78,17 @@ export class BluetoothPrinterService {
       const json = await AsyncStorage.getItem(SAVED_PRINTER_KEY);
       if (json) {
         const device: PrinterDevice = JSON.parse(json);
+        const isDev = device.id === "DEV_PRINTER" || device.name?.includes("Dev Printer");
+
+        // If dev mode is disabled in environment, do not restore Dev Printer
+        if (isDev && !environment.isDeveloper) {
+          await AsyncStorage.removeItem(SAVED_PRINTER_KEY);
+          return null;
+        }
+
         this.connectedDevice = device;
-        if (device.id === "EXPO_GO_VIRTUAL_PRINTER" || !getBleManager()) {
-          this.targetCharacteristic = { isVirtual: true };
+        if (isDev || !getBleManager() || !device.nativeDevice) {
+          this.targetCharacteristic = { isVirtual: true, isDevPrinter: isDev };
         }
         return device;
       }
@@ -94,19 +102,21 @@ export class BluetoothPrinterService {
     onDeviceFound: (device: PrinterDevice) => void,
     onError?: (error: any) => void
   ): Promise<void> {
+    // Only surface Dev Printer if isDeveloper is explicitly true in environment
+    if (environment.isDeveloper) {
+      onDeviceFound({
+        id: "DEV_PRINTER",
+        name: "Dev Printer",
+        displayName: "Dev Printer (Virtual / No Print)",
+        address: "Internal Dev Simulator",
+        rssi: -10,
+        nativeDevice: null,
+      });
+    }
+
     const manager = getBleManager();
     if (!manager) {
-      // Running in Expo Go: Provide a Virtual TSPL Thermal Printer for testing
-      setTimeout(() => {
-        onDeviceFound({
-          id: "EXPO_GO_VIRTUAL_PRINTER",
-          name: "Virtual TSPL Printer (Expo Go)",
-          displayName: "Virtual TSPL Printer (Expo Go)",
-          address: "Virtual BLE Channel (Simulated)",
-          rssi: -45,
-          nativeDevice: null,
-        });
-      }, 300);
+      // Running in Expo Go
       return;
     }
 
@@ -116,7 +126,7 @@ export class BluetoothPrinterService {
       return;
     }
 
-    const discoveredIds = new Set<string>();
+    const discoveredIds = new Set<string>(environment.isDeveloper ? ["DEV_PRINTER"] : []);
 
     manager.startDeviceScan(null, null, (error: any, device: any) => {
       if (error) {
@@ -152,36 +162,64 @@ export class BluetoothPrinterService {
 
   public async connectToPrinter(device: PrinterDevice): Promise<boolean> {
     const manager = getBleManager();
+    const isDev = device.id === "DEV_PRINTER" || device.name?.includes("Dev Printer");
 
     try {
       this.stopScan();
 
-      if (device.id === "EXPO_GO_VIRTUAL_PRINTER" || !manager) {
-        // Virtual connection for Expo Go environment
+      // Dev Printer connects virtually - only allowed if isDeveloper is true
+      if (isDev) {
+        if (!environment.isDeveloper) {
+          throw new Error("Dev Printer is disabled in production environment.");
+        }
         this.connectedDevice = device;
-        this.targetCharacteristic = { isVirtual: true };
+        this.targetCharacteristic = { isVirtual: true, isDevPrinter: true };
         await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
         return true;
       }
 
-      if (manager && device.nativeDevice) {
-        let connected = device.nativeDevice;
-        const isConn = await connected.isConnected();
-        if (!isConn) {
-          connected = await connected.connect();
+      if (!manager || !device.nativeDevice) {
+        throw new Error("Cannot connect: Hardware Bluetooth module not found.");
+      }
+
+      // Real Physical Bluetooth Thermal Printer
+      let connected = device.nativeDevice;
+      const isConn = await connected.isConnected();
+      if (!isConn) {
+        connected = await connected.connect();
+      }
+
+      try {
+        await connected.requestMTU(512);
+      } catch (e) {
+        // MTU request is optional
+      }
+
+      await connected.discoverAllServicesAndCharacteristics();
+      const services = await connected.services();
+
+      // Valid Thermal Printer UUIDs: ISSC UART (XP-365B: 49535343) or Standard FFE1/FFE0
+      const PRINTER_UUID_PATTERNS = ["49535343", "ffe1", "ff02", "e7cf"];
+      let writeChar: any = null;
+
+      // Pass 1: Find dedicated printer UART characteristic
+      for (const service of services) {
+        const characteristics = await service.characteristics();
+        for (const char of characteristics) {
+          const u = char.uuid.toLowerCase();
+          if (
+            PRINTER_UUID_PATTERNS.some((p) => u.includes(p)) &&
+            (char.isWritableWithResponse || char.isWritableWithoutResponse)
+          ) {
+            writeChar = char;
+            break;
+          }
         }
+        if (writeChar) break;
+      }
 
-        try {
-          await connected.requestMTU(512);
-        } catch (e) {
-          // MTU request is optional
-        }
-
-        await connected.discoverAllServicesAndCharacteristics();
-        const services = await connected.services();
-
-        let writeChar: any = null;
-
+      // Pass 2: Fallback to any writable characteristic if not matched
+      if (!writeChar) {
         for (const service of services) {
           const characteristics = await service.characteristics();
           for (const char of characteristics) {
@@ -192,14 +230,14 @@ export class BluetoothPrinterService {
           }
           if (writeChar) break;
         }
-
-        if (!writeChar) {
-          throw new Error("No writable BLE data channel found on printer. Please power cycle printer and retry.");
-        }
-
-        this.targetCharacteristic = writeChar;
       }
 
+      // STRICT VALIDATION: Non-printer devices (headphones, TVs, smartwatches) rejected
+      if (!writeChar) {
+        throw new Error("No writable BLE data channel found on printer. Please power cycle printer and retry.");
+      }
+
+      this.targetCharacteristic = writeChar;
       this.connectedDevice = device;
       await AsyncStorage.setItem(SAVED_PRINTER_KEY, JSON.stringify(device));
       return true;
@@ -216,10 +254,16 @@ export class BluetoothPrinterService {
       throw new Error("No printer connected. Please connect to a printer first.");
     }
 
-    if (this.targetCharacteristic?.isVirtual || this.connectedDevice.id === "EXPO_GO_VIRTUAL_PRINTER") {
-      // Simulate physical printer output in Expo Go
-      console.log("🖨️ [Expo Go Virtual Printer] Successfully simulated TSPL print (50x30mm):\n", tsplCommand.slice(0, 150) + "...");
-      await new Promise((resolve) => setTimeout(resolve, 600));
+    const isDev =
+      this.connectedDevice.id === "DEV_PRINTER" ||
+      this.targetCharacteristic?.isDevPrinter ||
+      Boolean(this.connectedDevice.name && this.connectedDevice.name.toLowerCase().includes("dev printer")) ||
+      Boolean(this.connectedDevice.displayName && this.connectedDevice.displayName.toLowerCase().includes("dev printer"));
+
+    // DEV PRINTER: Simulates successful packing confirmation without printing physical sticker
+    if (isDev || this.targetCharacteristic?.isVirtual) {
+      console.log(`🖨️ [Dev Printer] Order packing confirmed (Simulated - No physical sticker printed):\n`, tsplCommand.slice(0, 150) + "...");
+      await new Promise((resolve) => setTimeout(resolve, 350));
       return true;
     }
 
@@ -227,8 +271,9 @@ export class BluetoothPrinterService {
       throw new Error("Printer connected but data channel is not open. Please disconnect and reconnect your printer.");
     }
 
+    // REAL PHYSICAL PRINTER: Strictly transmit to physical printer with safe 20-byte chunks!
     try {
-      const CHUNK_SIZE = 100;
+      const CHUNK_SIZE = 20;
       for (let i = 0; i < tsplCommand.length; i += CHUNK_SIZE) {
         const chunk = tsplCommand.slice(i, i + CHUNK_SIZE);
         const base64Data = stringToBase64(chunk);
@@ -238,12 +283,13 @@ export class BluetoothPrinterService {
         } else {
           await this.targetCharacteristic.writeWithResponse(base64Data);
         }
-        await new Promise((resolve) => setTimeout(() => resolve(true), 20));
+        await new Promise((resolve) => setTimeout(() => resolve(true), 15));
       }
+      console.log(`🖨️ [${this.connectedDevice.displayName || this.connectedDevice.name}] Physical print delivered successfully!`);
       return true;
-    } catch (err: any) {
-      console.error("Failed to write TSPL command to BLE printer:", err);
-      throw new Error(err?.message || "Failed to transmit TSPL label data to Bluetooth printer.");
+    } catch (bleErr: any) {
+      console.error(`🖨️ [${this.connectedDevice.displayName || this.connectedDevice.name}] Physical print failed:`, bleErr);
+      throw new Error(bleErr?.message || "Failed to transmit TSPL label data to Bluetooth printer.");
     }
   }
 

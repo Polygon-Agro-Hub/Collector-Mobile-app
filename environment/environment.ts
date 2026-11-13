@@ -2,6 +2,10 @@ import { getDevServerHostIp } from "./getHostIp";
 const devHostIp = getDevServerHostIp();
 
 const environment = {
+  
+  // ⚠️ DEVELOPER MODE (Default false) --------------------
+  isDeveloper: true,
+  
   // LOCAL (Auto-detected IP or fallback 192.168.8.102) --------------------
   // API_BASE_URL: `http://${devHostIp}:3000/agro-api/collection-api/`,
 

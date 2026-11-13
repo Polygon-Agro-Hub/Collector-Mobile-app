@@ -966,16 +966,23 @@ export default function WeighTheLoad({
       </View>
 
       {/* Warning Confirmation Modal for Delete Grade Unloaded Weight */}
-      <WarningConfirmation
-        visible={gradeToDelete !== null}
-        message={`Are you sure you want to delete added\n${getLocalizedProductName(cropData, i18n.language) || cropData.name} - ${t("WeighTheLoad.Grade", "Grade")} ${extractGradeLetter(gradeToDelete?.gradeTitle)} ?`}
-        onConfirm={handleConfirmDeleteGrade}
-        onCancel={() => setGradeToDelete(null)}
-        confirmText={t("WeighTheLoad.Delete", "Delete")}
-        cancelText={t("WeighTheLoad.Cancel", "Cancel")}
-        confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
-      />
-
+    <WarningConfirmation
+  visible={gradeToDelete !== null}
+  message={t(
+    "WeighTheLoad.DeleteGradeConfirmation",
+    "Are you sure you want to delete added\n{{item}} - {{grade}}?",
+    {
+      item:
+        getLocalizedProductName(cropData, i18n.language) || cropData.name,
+      grade: `${t("WeighTheLoad.Grade", "Grade")}\u00A0${extractGradeLetter(gradeToDelete?.gradeTitle)}`,
+    }
+  )}
+  onConfirm={handleConfirmDeleteGrade}
+  onCancel={() => setGradeToDelete(null)}
+  confirmText={t("WeighTheLoad.Delete", "Delete")}
+  cancelText={t("WeighTheLoad.Cancel", "Cancel")}
+  confirmButtonBgClass="bg-[#FF0700] active:bg-red-700"
+/>
       {/* Go Back Warning Confirmation Modal */}
       <WarningConfirmation
         visible={showBackConfirmModal}

@@ -247,7 +247,22 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
     fetchData();
   }, []);
 
+  const isDriver = (role?: string) => {
+    if (!role) return false;
+    return role.toLowerCase().includes("driver");
+  };
+
   const getOfficerName = (officer: Officer) => {
+    // Drivers only have an English name, so always show it
+    if (isDriver(officer.jobRole)) {
+      return (
+        officer.fullNameEnglish ||
+        officer.fullNameSinhala ||
+        officer.fullNameTamil ||
+        ""
+      );
+    }
+
     const lang = i18n.language || selectedLanguage || "en";
     if (lang.startsWith("si") && officer.fullNameSinhala) {
       return officer.fullNameSinhala;
@@ -261,12 +276,6 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
       officer.fullNameTamil ||
       ""
     );
-  };
-
-  const isDriver = (role?: string) => {
-    if (!role) return false;
-    const r = role.toLowerCase();
-    return r.includes("driver");
   };
 
   const officersList = officers.filter((o) => !isDriver(o.jobRole));
@@ -397,7 +406,13 @@ const DistributionOfficersList: React.FC<CollectionOfficersListProps> = ({
         {/* Body */}
         <View className="flex-1 w-full bg-white">
           {loading || tabLoading ? (
-            <LoadingPage fullScreen message={t("ManagerTransactions.Loading") || t("ManagerTransactions.Loading")} />
+            <LoadingPage
+              fullScreen
+              message={
+                t("ManagerTransactions.Loading") ||
+                t("ManagerTransactions.Loading")
+              }
+            />
           ) : errorMessage ? (
             <View
               style={{ flex: 1, height: scale(300), justifyContent: "center" }}
