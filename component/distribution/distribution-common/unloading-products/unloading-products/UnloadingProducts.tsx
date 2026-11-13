@@ -1004,15 +1004,35 @@ export default function UnloadingProducts({
         visible={showSuccessModal}
         title={t("UnloadingProducts.SuccessTitle", "Success!")}
         message={
-          <View className="items-center">
-            <Text className="text-center text-[#4E5273] text-sm mb-1">
+          <View
+            className="items-center w-full px-2 mb-3 mt-1"
+            style={{ width: "100%", alignSelf: "stretch" }}
+          >
+            <Text
+              className="text-center text-[#4E5273] text-sm mb-1 w-full"
+              style={{
+                textAlign: "center",
+                alignSelf: "stretch",
+                width: "100%",
+                lineHeight: 22,
+                flexWrap: "wrap",
+              }}
+            >
               {t(
                 "UnloadingProducts.SuccessMessage",
                 "Products unloaded successfully.",
               )}
             </Text>
             {loadCode ? (
-              <Text className="text-center font-bold text-sm text-[#17262C]">
+              <Text
+                className="text-center font-bold text-sm text-[#17262C] w-full"
+                style={{
+                  textAlign: "center",
+                  alignSelf: "stretch",
+                  width: "100%",
+                  lineHeight: 20,
+                }}
+              >
                 {loadCode}.
               </Text>
             ) : null}

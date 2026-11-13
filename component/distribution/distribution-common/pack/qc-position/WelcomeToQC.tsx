@@ -248,7 +248,7 @@ export default function WelcomeToQC({
           );
           setTrackingRows(activeData.trackingRows || []);
           if (activeData.timeSlot) {
-            setScheduledTime(formatTimeSlot(activeData.timeSlot));
+            setScheduledTime(formatTimeSlot(activeData.timeSlot, t));
           }
 
           const orderStatus = activeData.orderStatus;
@@ -797,18 +797,21 @@ export default function WelcomeToQC({
                     <TouchableOpacity
                       onPress={() => setMissingModalVisible(true)}
                       activeOpacity={0.8}
-                      className="flex-row items-center h-[65px] justify-between bg-[#FFFCFC] border border-[#FF0000] rounded-2xl px-4 py-3.5 mb-4 shadow-sm"
+                      className="flex-row items-center min-h-[64px] justify-between bg-[#FFFCFC] border border-[#FF0000] rounded-2xl px-4 py-2.5 mb-4 shadow-sm"
                     >
                       <View className="flex-row items-center flex-1 pr-2">
-                        <View className="w-9 h-9 items-center justify-center mr-3">
+                        <View className="w-8 h-8 items-center justify-center mr-2.5">
                           <FontAwesome6
                             name="triangle-exclamation"
-                            size={20}
+                            size={18}
                             color="#FF2D55"
                           />
                         </View>
-                        <View className="flex-1">
-                          <Text className="text-[#FF0000] font-extrabold text-[14px]">
+                        <View className="flex-1 justify-center">
+                          <Text
+                            className="text-[#FF0000] font-extrabold text-[13px] leading-snug"
+                            style={{ flexShrink: 1 }}
+                          >
                             {t("Packing.Warning Missing Items", {
                               count: unallocated.length,
                               defaultValue: `Warning: ${unallocated.length} Unallocated Item${unallocated.length > 1 ? "s" : ""}`,
@@ -820,7 +823,7 @@ export default function WelcomeToQC({
                         </View>
                       </View>
                       <View className="flex-row justify-center items-center">
-                        <View className="bg-[#FF0000] w-7 h-7 items-center justify-center px-2.5 py-0.5 rounded-full mr-1.5">
+                        <View className="bg-[#FF0000] w-7 h-7 items-center justify-center px-2 py-0.5 rounded-full">
                           <Text className="text-white font-extrabold text-[12px]">
                             {unallocated.length}
                           </Text>
@@ -876,12 +879,13 @@ export default function WelcomeToQC({
                             <Text
                               className="font-extrabold text-[11px] mt-0.5"
                               style={{ color: "#FF2D55" }}
+                              numberOfLines={1}
+                              adjustsFontSizeToFit
+                              minimumFontScale={0.8}
                             >
-                              --
-                              {t("Packing.Unallocated", {
+                              {`--${t("Packing.Unallocated", {
                                 defaultValue: "Unallocated",
-                              })}
-                              --
+                              })}--`}
                             </Text>
                           )}
                         </View>
@@ -982,20 +986,22 @@ export default function WelcomeToQC({
         <View className="flex-1 bg-black/50 justify-center items-center px-6">
           <View className="bg-white rounded-3xl w-full max-w-[420px] p-6 shadow-2xl">
             {/* Header */}
-            <View className="flex-row items-center justify-between pb-3 ">
-              <View className="flex-row items-center">
-                <View className="w-10 h-10  items-center justify-center mr-3">
-                  <FontAwesome6
-                    name="triangle-exclamation"
-                    size={20}
-                    color="#000000"
-                  />
-                </View>
-                <View>
-                  <Text className=" text-[15px] font-bold ">
-                    {t("Packing.Unallocated Items", "Unallocated Items")}
-                  </Text>
-                </View>
+            <View className="flex-row items-center pb-3">
+              <View className="w-8 h-8 items-center justify-center mr-2.5">
+                <FontAwesome6
+                  name="triangle-exclamation"
+                  size={20}
+                  color="#000000"
+                />
+              </View>
+              <View className="flex-1">
+                <Text
+                  className="text-[15px] font-bold text-gray-900"
+                  numberOfLines={2}
+                  style={{ flexShrink: 1 }}
+                >
+                  {t("Packing.Unallocated Items", "Unallocated Items")}
+                </Text>
               </View>
             </View>
 
@@ -1042,12 +1048,15 @@ export default function WelcomeToQC({
                         <Text className="text-[#576879] text-[13px] mt-0.5">
                           {item.weight}
                         </Text>
-                        <Text className="text-[13px] text-[#FF2D55] mt-0.5">
-                          --
-                          {t("Packing.Unallocated", {
+                        <Text
+                          className="text-[13px] text-[#FF2D55] mt-0.5"
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.8}
+                        >
+                          {`--${t("Packing.Unallocated", {
                             defaultValue: "Unallocated",
-                          })}
-                          --
+                          })}--`}
                         </Text>
                       </View>
                     </View>
