@@ -2,7 +2,7 @@
   "expo": {
     "name": "CoDi-Net",
     "slug": "CoDi-Net",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
@@ -81,7 +81,6 @@
       "favicon": "./assets/images/app/favicon.png"
     },
     "plugins": [
-      "./plugins/withCustomAndroidPermissions",
       [
         "expo-build-properties",
         {
@@ -151,7 +150,8 @@
           "defaultChannel": "dcm-otp-notifications",
           "enableBackgroundRemoteNotifications": true
         }
-      ]
+      ],
+      "./plugins/withCustomAndroidPermissions"
     ],
     "extra": {
       "eas": {

@@ -66,6 +66,9 @@ export interface SetWeighItem {
   isExpanded: boolean;
 }
 
+// Single source of truth for the card radius so border, clipping and shadow always match
+const CARD_RADIUS = 16;
+
 export default function WeighGrade({
   navigation,
   route,
@@ -528,10 +531,13 @@ export default function WeighGrade({
         {/* Set Cards List */}
         <View className="gap-6 my-4">
           {sets.map((item) => (
+            /* OUTER: shadow + floating add button only (NO overflow hidden here) */
             <View
               key={item.id}
-              className="bg-white rounded-2xl border border-[#C4C7C5] relative"
+              className="relative"
               style={{
+                borderRadius: CARD_RADIUS,
+                backgroundColor: "#FFFFFF",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.05,
@@ -539,283 +545,301 @@ export default function WeighGrade({
                 elevation: 2,
               }}
             >
-              {/* Set Header Accordion (50px height, #E9ECF1 bg) */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => handleToggleExpand(item.id)}
-                className="flex-row items-center justify-between px-4 h-[50px] bg-[#E9ECF1] rounded-t-2xl border-b border-[#E5E7EB]"
+              {/* INNER: border + radius + clipping. Everything inside is cut to the rounded border */}
+              <View
+                style={{
+                  borderRadius: CARD_RADIUS,
+                  borderWidth: 1,
+                  borderColor: "#C4C7C5",
+                  backgroundColor: "#FFFFFF",
+                  overflow: "hidden",
+                }}
               >
-                <View className="bg-[#FEF08A] rounded-full px-4 py-1">
-                  <Text className="font-bold text-xs text-[#000000]">
-                    {t("WeighGrade.Set", "Set")} : {item.setNumber}
-                  </Text>
-                </View>
-
-                <View className="flex-row items-center gap-3">
-                  <Ionicons
-                    name={item.isExpanded ? "chevron-up" : "chevron-down"}
-                    size={20}
-                    color="#17262C"
-                  />
-                </View>
-              </TouchableOpacity>
-
-              {/* Set Body */}
-              {item.isExpanded && (
-                <View className="p-4 pt-3 pb-8">
-                  {/* Number of Containers Label & Delete Button (for 2nd card onward) */}
-                  <View className="flex-row items-center justify-center relative mb-1.5 min-h-[28px]">
-                    <Text className="text-center text-[#79747E] text-xs font-medium">
-                      {t("WeighGrade.NoOfContainers", "--No. of Containers--")}
+                {/* Set Header Accordion (50px height, #E9ECF1 bg, no own radius) */}
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => handleToggleExpand(item.id)}
+                  className="flex-row items-center justify-between px-4 h-[50px] bg-[#E9ECF1]"
+                  style={{
+                    borderBottomWidth: item.isExpanded ? 1 : 0,
+                    borderBottomColor: "#E5E7EB",
+                  }}
+                >
+                  <View className="bg-[#FEF08A] rounded-full px-4 py-1">
+                    <Text className="font-bold text-xs text-[#000000]">
+                      {t("WeighGrade.Set", "Set")} : {item.setNumber}
                     </Text>
-                    {item.setNumber > 1 && (
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => setSetToDelete(item)}
-                        className="w-8 h-8 rounded-full bg-[#EF4444] items-center justify-center absolute right-0"
-                        style={{
-                          shadowColor: "#EF4444",
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.2,
-                          shadowRadius: 2,
-                          elevation: 2,
-                        }}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      >
-                        <MaterialIcons name="delete" size={16} color="#FFFFFF" />
-                      </TouchableOpacity>
-                    )}
                   </View>
 
-                  {/* Container Type Section (only shown when container types data exists) */}
-                  {containerTypes.length > 0 && (
-                  <View
-                    className="mb-4"
-                    onLayout={(e) => {
-                      const w = e.nativeEvent.layout.width;
-                      if (w > 0) setContainerSectionWidth(w);
-                    }}
-                  >
-                    {/* Header Row */}
-                    <View className="flex-row items-center justify-between mb-2 px-1">
-                      <View className="flex-row items-center gap-1.5">
-                        <MaterialCommunityIcons
-                          name="view-column-outline"
-                          size={18}
-                          color="#475569"
-                        />
-                        <Text className="text-sm font-semibold text-[#334155]">
-                          {t("LoadingToVehicle.ContainerType", "Container Type")}
-                        </Text>
-                      </View>
-                      <Text className="text-xs text-[#64748B]">
-                        {t("LoadingToVehicle.SelectSize", "Select size")}
-                      </Text>
-                    </View>
+                  <View className="flex-row items-center gap-3">
+                    <Ionicons
+                      name={item.isExpanded ? "chevron-up" : "chevron-down"}
+                      size={20}
+                      color="#17262C"
+                    />
+                  </View>
+                </TouchableOpacity>
 
-                    {/* Pill Selector Box (max 3 visible, horizontally scrollable if > 3) */}
-                    <View
-                      style={{
-                        backgroundColor: "#EEF2F6",
-                        borderRadius: 9999,
-                        padding: 4,
-                        overflow: "hidden",
-                      }}
-                    >
-                      {containerTypes.length <= 3 ? (
-                        <View
+                {/* Set Body */}
+                {item.isExpanded && (
+                  <View className="px-4 pb-8">
+                    {/* Number of Containers Label & Delete Button (for 2nd card onward) */}
+                    <View className="flex-row items-center justify-center relative mb-1.5 min-h-[28px]">
+                     
+                      {item.setNumber > 1 && (
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() => setSetToDelete(item)}
+                          className="w-8 h-8 rounded-full bg-[#EF4444] items-center justify-center absolute right-0"
                           style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            width: "100%",
+                            shadowColor: "#EF4444",
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.2,
+                            shadowRadius: 2,
+                            elevation: 2,
                           }}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         >
-                          {containerTypes.map((cType) => {
-                            const isSelected =
-                              item.containerTypeId === cType.id ||
-                              (!item.containerTypeId && cType.id === containerTypes[0]?.id);
-
-                            return (
-                              <TouchableOpacity
-                                key={cType.id}
-                                activeOpacity={0.75}
-                                onPress={() => handleSelectContainerType(item.id, cType)}
-                                style={{
-                                  flex: 1,
-                                  height: 52,
-                                  borderRadius: 9999,
-                                  backgroundColor: isSelected ? "#FFFFFF" : "transparent",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <Text
-                                  style={{
-                                    fontSize: 14,
-                                    fontWeight: "700",
-                                    color: "#0F172A",
-                                  }}
-                                  numberOfLines={1}
-                                >
-                                  {cType.labelName}
-                                </Text>
-                                <Text
-                                  style={{
-                                    fontSize: 11,
-                                    color: "#64748B",
-                                    marginTop: 2,
-                                  }}
-                                  numberOfLines={1}
-                                >
-                                  {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
-                                </Text>
-                              </TouchableOpacity>
-                            );
-                          })}
-                        </View>
-                      ) : (
-                        <ScrollView
-                          horizontal
-                          showsHorizontalScrollIndicator={false}
-                          style={{ borderRadius: 9999, overflow: "hidden" }}
-                          contentContainerStyle={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                          }}
-                        >
-                          {containerTypes.map((cType) => {
-                            const isSelected =
-                              item.containerTypeId === cType.id ||
-                              (!item.containerTypeId && cType.id === containerTypes[0]?.id);
-
-                            const itemWidth = Math.max(
-                              80,
-                              Math.floor((containerSectionWidth - 8) / 3)
-                            );
-
-                            return (
-                              <TouchableOpacity
-                                key={cType.id}
-                                activeOpacity={0.75}
-                                onPress={() => handleSelectContainerType(item.id, cType)}
-                                style={{
-                                  width: itemWidth,
-                                  height: 52,
-                                  borderRadius: 9999,
-                                  backgroundColor: isSelected ? "#FFFFFF" : "transparent",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <Text
-                                  style={{
-                                    fontSize: 14,
-                                    fontWeight: "700",
-                                    color: "#0F172A",
-                                  }}
-                                  numberOfLines={1}
-                                >
-                                  {cType.labelName}
-                                </Text>
-                                <Text
-                                  style={{
-                                    fontSize: 11,
-                                    color: "#64748B",
-                                    marginTop: 2,
-                                  }}
-                                  numberOfLines={1}
-                                >
-                                  {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
-                                </Text>
-                              </TouchableOpacity>
-                            );
-                          })}
-                        </ScrollView>
+                          <MaterialIcons name="delete" size={16} color="#FFFFFF" />
+                        </TouchableOpacity>
                       )}
                     </View>
-                  </View>
-                  )}
 
-                  {/* Containers Count Input */}
-                  <TextInput
-                    value={item.crates}
-                    onChangeText={(val) => handleCratesChange(item.id, val)}
-                    placeholder={
-                      focusedSetId === item.id
-                        ? ""
-                        : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
-                    }
-                    placeholderTextColor="#94A3B8"
-                    onFocus={() => setFocusedSetId(item.id)}
-                    onBlur={() => setFocusedSetId(null)}
-                    keyboardType="number-pad"
-                    textAlign="center"
-                    cursorColor="#000000"
-                    selectionColor="rgba(0, 0, 0, 0.3)"
-                    className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
-                    style={{ textAlign: "center", textAlignVertical: "center", includeFontPadding: false, paddingVertical: 0 }}
-                  />
-
-                  {/* Weight Row with Scale Arrow / Reload Button */}
-                  {(() => {
-                    const cratesNum = parseInt(item.crates, 10);
-                    const isCratesValid = !isNaN(cratesNum) && cratesNum > 0;
-
-                    return (
-                      <View className="flex-row items-center gap-3">
-                        {/* Weight Display Box (Clickable to open scale modal) */}
-                        <TouchableOpacity
-                          disabled={!isCratesValid}
-                          activeOpacity={0.8}
-                          onPress={() => handleOpenScaleModal(item.id)}
-                          className="flex-1 bg-[#EEF2F6] rounded-full h-[50px] justify-center items-center px-4"
-                        >
-                          <Text
-                            className={`font-bold text-base ${
-                              item.weight !== null
-                                ? "text-[#0F172A]"
-                                : "text-[#94A3B8]"
-                            }`}
-                          >
-                            {item.weight !== null
-                              ? `${item.weight.toFixed(2)} ${t("Common.kg", "kg")}`
-                              : t("Common.kg", "kg")}
+                    {/* Container Type Section (only shown when container types data exists) */}
+                    {containerTypes.length > 0 && (
+                      <View
+                        className="mb-4"
+                        onLayout={(e) => {
+                          const w = e.nativeEvent.layout.width;
+                          if (w > 0) setContainerSectionWidth(w);
+                        }}
+                      >
+                        {/* Header Row */}
+                        <View className="flex-row items-center justify-between mb-2 px-1">
+                          <View className="flex-row items-center gap-1.5">
+                            <MaterialCommunityIcons
+                              name="view-column-outline"
+                              size={18}
+                              color="#475569"
+                            />
+                            <Text className="text-sm font-semibold text-[#334155]">
+                              {t("LoadingToVehicle.ContainerType", "Container Type")}
+                            </Text>
+                          </View>
+                          <Text className="text-xs text-[#64748B]">
+                            {t("LoadingToVehicle.SelectSize", "Select size")}
                           </Text>
-                        </TouchableOpacity>
+                        </View>
 
-                        {/* Scale Weight Button */}
-                        <TouchableOpacity
-                          disabled={!isCratesValid}
-                          activeOpacity={0.8}
-                          onPress={() => handleOpenScaleModal(item.id)}
-                          className={`w-[50px] h-[50px] rounded-full items-center justify-center ${
-                            isCratesValid ? "bg-black" : "bg-[#A0A4A8]"
-                          }`}
+                        {/* Pill Selector Box (max 3 visible, horizontally scrollable if > 3) */}
+                        <View
                           style={{
-                            shadowColor: "#000",
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: isCratesValid ? 0.2 : 0,
-                            shadowRadius: 2,
-                            elevation: isCratesValid ? 3 : 0,
+                            backgroundColor: "#EEF2F6",
+                            borderRadius: 9999,
+                            padding: 4,
+                            overflow: "hidden",
                           }}
                         >
-                          {item.weight !== null ? (
-                            <AntDesign name="reload" size={18} color="#FFFFFF" />
-                          ) : (
-                            <Ionicons
-                              name="arrow-forward"
-                              size={18}
-                              color="#FFFFFF"
-                            />
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  })()}
-                </View>
-              )}
+                          {containerTypes.length <= 3 ? (
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                width: "100%",
+                              }}
+                            >
+                              {containerTypes.map((cType) => {
+                                const isSelected =
+                                  item.containerTypeId === cType.id ||
+                                  (!item.containerTypeId && cType.id === containerTypes[0]?.id);
 
-              {/* Floating Add Button overlapping bottom border */}
+                                return (
+                                  <TouchableOpacity
+                                    key={cType.id}
+                                    activeOpacity={0.75}
+                                    onPress={() => handleSelectContainerType(item.id, cType)}
+                                    style={{
+                                      flex: 1,
+                                      height: 52,
+                                      borderRadius: 9999,
+                                      backgroundColor: isSelected ? "#FFFFFF" : "transparent",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <Text
+                                      style={{
+                                        fontSize: 14,
+                                        fontWeight: "700",
+                                        color: "#0F172A",
+                                      }}
+                                      numberOfLines={1}
+                                    >
+                                      {cType.labelName}
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        fontSize: 11,
+                                        color: "#64748B",
+                                        marginTop: 2,
+                                      }}
+                                      numberOfLines={1}
+                                    >
+                                      {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                                    </Text>
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </View>
+                          ) : (
+                            <ScrollView
+                              horizontal
+                              showsHorizontalScrollIndicator={false}
+                              style={{ borderRadius: 9999, overflow: "hidden" }}
+                              contentContainerStyle={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                              }}
+                            >
+                              {containerTypes.map((cType) => {
+                                const isSelected =
+                                  item.containerTypeId === cType.id ||
+                                  (!item.containerTypeId && cType.id === containerTypes[0]?.id);
+
+                                const itemWidth = Math.max(
+                                  80,
+                                  Math.floor((containerSectionWidth - 8) / 3)
+                                );
+
+                                return (
+                                  <TouchableOpacity
+                                    key={cType.id}
+                                    activeOpacity={0.75}
+                                    onPress={() => handleSelectContainerType(item.id, cType)}
+                                    style={{
+                                      width: itemWidth,
+                                      height: 52,
+                                      borderRadius: 9999,
+                                      backgroundColor: isSelected ? "#FFFFFF" : "transparent",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <Text
+                                      style={{
+                                        fontSize: 14,
+                                        fontWeight: "700",
+                                        color: "#0F172A",
+                                      }}
+                                      numberOfLines={1}
+                                    >
+                                      {cType.labelName}
+                                    </Text>
+                                    <Text
+                                      style={{
+                                        fontSize: 11,
+                                        color: "#64748B",
+                                        marginTop: 2,
+                                      }}
+                                      numberOfLines={1}
+                                    >
+                                      {cType.weight != null ? `${cType.weight} ${t("Common.kg", "kg")}` : ""}
+                                    </Text>
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </ScrollView>
+                          )}
+                        </View>
+                        <View className="mt-2">
+                         <Text className="text-center text-[#79747E] text-xs font-medium">
+                        {t("WeighGrade.NoOfContainers", "--No. of Containers--")}
+                      </Text>
+                      </View>
+                      </View>
+                    )}
+
+                    {/* Containers Count Input */}
+                    <TextInput
+                      value={item.crates}
+                      onChangeText={(val) => handleCratesChange(item.id, val)}
+                      placeholder={
+                        focusedSetId === item.id
+                          ? ""
+                          : `--${t("LoadingToVehicle.EnterTotalContainers", "Enter Total Containers Here")}--`
+                      }
+                      placeholderTextColor="#94A3B8"
+                      onFocus={() => setFocusedSetId(item.id)}
+                      onBlur={() => setFocusedSetId(null)}
+                      keyboardType="number-pad"
+                      textAlign="center"
+                      cursorColor="#000000"
+                      selectionColor="rgba(0, 0, 0, 0.3)"
+                      className="bg-[#EEF2F6] rounded-full h-[50px] px-4 font-bold text-base text-[#0F172A] mb-3"
+                      style={{ textAlign: "center", textAlignVertical: "center", includeFontPadding: false, paddingVertical: 0 }}
+                    />
+
+                    {/* Weight Row with Scale Arrow / Reload Button */}
+                    {(() => {
+                      const cratesNum = parseInt(item.crates, 10);
+                      const isCratesValid = !isNaN(cratesNum) && cratesNum > 0;
+
+                      return (
+                        <View className="flex-row items-center gap-3">
+                          {/* Weight Display Box (Clickable to open scale modal) */}
+                          <TouchableOpacity
+                            disabled={!isCratesValid}
+                            activeOpacity={0.8}
+                            onPress={() => handleOpenScaleModal(item.id)}
+                            className="flex-1 bg-[#EEF2F6] rounded-full h-[50px] justify-center items-center px-4"
+                          >
+                            <Text
+                              className={`font-bold text-base ${
+                                item.weight !== null
+                                  ? "text-[#0F172A]"
+                                  : "text-[#94A3B8]"
+                              }`}
+                            >
+                              {item.weight !== null
+                                ? `${item.weight.toFixed(2)} ${t("Common.kg", "kg")}`
+                                : t("Common.kg", "kg")}
+                            </Text>
+                          </TouchableOpacity>
+
+                          {/* Scale Weight Button */}
+                          <TouchableOpacity
+                            disabled={!isCratesValid}
+                            activeOpacity={0.8}
+                            onPress={() => handleOpenScaleModal(item.id)}
+                            className={`w-[50px] h-[50px] rounded-full items-center justify-center ${
+                              isCratesValid ? "bg-black" : "bg-[#A0A4A8]"
+                            }`}
+                            style={{
+                              shadowColor: "#000",
+                              shadowOffset: { width: 0, height: 2 },
+                              shadowOpacity: isCratesValid ? 0.2 : 0,
+                              shadowRadius: 2,
+                              elevation: isCratesValid ? 3 : 0,
+                            }}
+                          >
+                            {item.weight !== null ? (
+                              <AntDesign name="reload" size={18} color="#FFFFFF" />
+                            ) : (
+                              <Ionicons
+                                name="arrow-forward"
+                                size={18}
+                                color="#FFFFFF"
+                              />
+                            )}
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })()}
+                  </View>
+                )}
+              </View>
+
+              {/* Floating Add Button overlapping bottom border (outside the clipping view) */}
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={handleAddSet}

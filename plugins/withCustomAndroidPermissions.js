@@ -122,6 +122,47 @@ function processManifest(androidManifest) {
       perm.$["tools:remove"] = "android:maxSdkVersion";
     }
   }
+
+  // 7. Mark non-essential hardware features as optional (android:required="false")
+  // Fixes Google Play Console review blockers:
+  // - "android.hardware.screen.portrait affects Phone, Tablet, Desktop, and Android XR users"
+  // - "android.hardware.wifi affects Phone, Tablet, Desktop, and Android XR users"
+  // Also marks camera, location, and bluetooth features as optional for maximum device compatibility.
+  const optionalFeatures = [
+    "android.hardware.screen.portrait",
+    "android.hardware.wifi",
+    "android.hardware.camera",
+    "android.hardware.camera.autofocus",
+    "android.hardware.location",
+    "android.hardware.location.gps",
+    "android.hardware.location.network",
+    "android.hardware.bluetooth",
+    "android.hardware.bluetooth_le",
+  ];
+
+  if (!Array.isArray(androidManifest["uses-feature"])) {
+    androidManifest["uses-feature"] = [];
+  }
+
+  for (const feature of optionalFeatures) {
+    const existing = androidManifest["uses-feature"].find(
+      (f) => f?.$?.["android:name"] === feature
+    );
+
+    if (existing) {
+      if (!existing.$) existing.$ = {};
+      existing.$["android:required"] = "false";
+      existing.$["tools:replace"] = "android:required";
+    } else {
+      androidManifest["uses-feature"].push({
+        $: {
+          "android:name": feature,
+          "android:required": "false",
+          "tools:replace": "android:required",
+        },
+      });
+    }
+  }
 }
 
 /**
@@ -130,7 +171,9 @@ function processManifest(androidManifest) {
  */
 function withCustomAndroidPermissions(config) {
   config = withAndroidManifest(config, async (config) => {
-    processManifest(config.modResults.manifest);
+    if (config.modResults?.manifest) {
+      processManifest(config.modResults.manifest);
+    }
     return config;
   });
 
