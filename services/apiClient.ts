@@ -27,8 +27,7 @@
  */
 
 import axios from "axios";
-import store from "@/services/reducxStore";
-import { handleAuthError } from "@/services/apiInterceptor";
+import { setupAxiosInterceptors } from "@/services/apiInterceptor";
 import environment from "@/environment/environment";
 
 const apiClient = axios.create({
@@ -39,35 +38,7 @@ const apiClient = axios.create({
   },
 });
 
-// ─── Request interceptor — inject Bearer token automatically ─────────────────
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = store.getState().auth.token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// ─── Response interceptor — handle auth errors globally ──────────────────────
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const errorResponse = error.response;
-    if (
-      errorResponse &&
-      (errorResponse.status === 401 || errorResponse.status === 403)
-    ) {
-      const isHandled = handleAuthError(errorResponse.status, errorResponse.data);
-      if (isHandled) {
-        // Swallow the error — auth handler has already navigated away
-        return new Promise(() => {});
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// Setup unified request Bearer injection and silent refresh response interceptor
+setupAxiosInterceptors(apiClient);
 
 export default apiClient;

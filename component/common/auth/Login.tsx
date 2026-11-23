@@ -309,6 +309,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
       const {
         token,
+        refreshToken,
         passwordUpdateRequired,
         jobRole,
         empId: returnedEmpId,
@@ -330,6 +331,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
       const authPayload = {
         token,
+        refreshToken: refreshToken || null,
         jobRole,
         empId: (returnedEmpId || trimmedEmpId).toString(),
         id: data.userId || data.officer?.id || data.id,
