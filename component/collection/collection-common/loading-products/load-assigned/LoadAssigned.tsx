@@ -220,7 +220,7 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
           <TouchableOpacity
             onPress={handleGoToHome}
             activeOpacity={0.8}
-            className="w-full h-[54px] rounded-full bg-[#000000] items-center justify-center"
+            className="w-full min-h-[50px] px-4 py-3 rounded-full bg-[#000000] items-center justify-center"
             style={{
               shadowColor: "#000000",
               shadowOffset: { width: 0, height: 4 },
@@ -229,7 +229,14 @@ export default function LoadAssigned({ navigation, route }: LoadAssignedProps) {
               elevation: 5,
             }}
           >
-            <Text className="text-white font-extrabold text-base">
+            <Text
+              className="text-white font-extrabold text-base text-center"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+              allowFontScaling={false}
+              style={{ textAlign: "center", includeFontPadding: false }}
+            >
               {t("LoadAssigned.GoToHome", "Go to Home")}
             </Text>
           </TouchableOpacity>
