@@ -491,7 +491,7 @@ export default function LoadingToVehicleSummary({
               onPress={isViewOnly ? handleViewQRCode : handleConfirmAndContinue}
               disabled={submitting}
               activeOpacity={0.8}
-              className="w-full h-[50px] bg-[#000000] rounded-full items-center justify-center"
+              className="w-full min-h-[50px] px-4 py-3 bg-[#000000] rounded-full items-center justify-center"
               style={{
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
@@ -504,7 +504,17 @@ export default function LoadingToVehicleSummary({
               {submitting ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text className="text-white font-extrabold text-base">
+                <Text
+                  className="text-white font-extrabold text-base text-center"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                  allowFontScaling={false}
+                  style={{
+                    textAlign: "center",
+                    includeFontPadding: false,
+                  }}
+                >
                   {isViewOnly
                     ? t("LoadingToVehicleSummary.ViewQRCode", "View QR Code")
                     : t("LoadingToVehicleSummary.ConfirmAndContinue", "Confirm & Continue")}

@@ -2107,7 +2107,7 @@ export default function LoadingToVehicle({
               setShowFinalizeModal(true);
             }}
             activeOpacity={0.8}
-            className={`w-full h-[50px] rounded-full items-center justify-center ${
+            className={`w-full min-h-[50px] px-4 py-3 rounded-full items-center justify-center ${
               canFinishLoading ? "bg-[#000000]" : "bg-[#ACB5BE]"
             }`}
             style={
@@ -2123,8 +2123,12 @@ export default function LoadingToVehicle({
             }
           >
             <Text
-              className="text-white font-extrabold text-base"
-              style={{ includeFontPadding: false }}
+              className="text-white font-extrabold text-base text-center"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+              allowFontScaling={false}
+              style={{ textAlign: "center", includeFontPadding: false }}
             >
               {t("LoadingToVehicle.FinishLoading", "Finish Loading")}
             </Text>
@@ -2135,7 +2139,7 @@ export default function LoadingToVehicle({
             disabled={!canAddMoreItems}
             onPress={handleAddMoreItems}
             activeOpacity={0.8}
-            className={`w-full h-[50px] rounded-full items-center justify-center ${
+            className={`w-full min-h-[50px] px-4 py-3 rounded-full items-center justify-center ${
               canAddMoreItems ? "bg-[#980775]" : "bg-[#ACB5BE]"
             }`}
             style={
@@ -2151,8 +2155,12 @@ export default function LoadingToVehicle({
             }
           >
             <Text
-              className="text-white font-extrabold text-base"
-              style={{ includeFontPadding: false }}
+              className="text-white font-extrabold text-base text-center"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+              allowFontScaling={false}
+              style={{ textAlign: "center", includeFontPadding: false }}
             >
               {t("LoadingToVehicle.AddMoreItems", "Add More Items")}
             </Text>
