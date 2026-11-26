@@ -2,14 +2,14 @@
   "expo": {
     "name": "CoDi-Net",
     "slug": "CoDi-Net",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/app/adaptive-icon.png",
     "userInterfaceStyle": "automatic",
     "android": {
       "package": "com.polygonagro.Collector",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 18,
+      "versionCode": 20,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
@@ -151,7 +151,8 @@
           "enableBackgroundRemoteNotifications": true
         }
       ],
-      "./plugins/withCustomAndroidPermissions"
+      "./plugins/withCustomAndroidPermissions",
+      "./plugins/withRemoveScreenOrientation"
     ],
     "extra": {
       "eas": {
