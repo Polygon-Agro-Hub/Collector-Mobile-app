@@ -42,6 +42,7 @@ store.subscribe(async () => {
       previousToken = currentToken;
       const authState = {
         token: state.auth.token,
+        refreshToken: state.auth.refreshToken,
         jobRole: state.auth.jobRole,
         empId: state.auth.empId,
         id: state.auth.id,
