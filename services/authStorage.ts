@@ -35,7 +35,7 @@ const LEGACY_KEYS = [
 export const saveAuthData = async (data: StoredAuthState): Promise<void> => {
   try {
     const timestamp = new Date();
-    const expirationTime = new Date(timestamp.getTime() + 12 * 60 * 60 * 1000); // 12h matching JWT
+    const expirationTime = new Date(timestamp.getTime() + 16 * 60 * 60 * 1000); // 16h matching JWT
 
     const fullData: StoredAuthState = {
       ...data,

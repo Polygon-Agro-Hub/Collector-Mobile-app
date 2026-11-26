@@ -352,7 +352,7 @@ export const setupAxiosInterceptors = (instance: AxiosInstance): void => {
               originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
               return instance(originalRequest);
             } else {
-              // Refresh failed (refresh token expired after 4d, banned, or invalid)
+              // Refresh failed (refresh token expired after 14d, banned, or invalid)
               processQueue(error, null);
               const handled = handleAuthError(
                 refreshResponse.status,

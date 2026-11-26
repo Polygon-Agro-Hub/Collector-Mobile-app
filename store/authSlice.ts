@@ -123,8 +123,8 @@ const authSlice = createSlice({
       }
       const timestamp = new Date();
       const expirationTime = new Date(
-        timestamp.getTime() + 12 * 60 * 60 * 1000,
-      );
+        timestamp.getTime() + 16 * 60 * 60 * 1000,
+      ); // 16h matching JWT
       state.tokenStoredTime = timestamp.toISOString();
       state.tokenExpirationTime = expirationTime.toISOString();
     },
