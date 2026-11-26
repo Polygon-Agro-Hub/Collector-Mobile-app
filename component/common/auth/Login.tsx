@@ -309,6 +309,7 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
       const {
         token,
+        refreshToken,
         passwordUpdateRequired,
         jobRole,
         empId: returnedEmpId,
@@ -325,11 +326,12 @@ const Login: React.FC<LoginProps> = ({ navigation }) => {
 
       const timestamp = new Date();
       const expirationTime = new Date(
-        timestamp.getTime() + 12 * 60 * 60 * 1000,
-      ); // 12h matching JWT
+        timestamp.getTime() + 16 * 60 * 60 * 1000,
+      ); // 16h matching JWT
 
       const authPayload = {
         token,
+        refreshToken: refreshToken || null,
         jobRole,
         empId: (returnedEmpId || trimmedEmpId).toString(),
         id: data.userId || data.officer?.id || data.id,
