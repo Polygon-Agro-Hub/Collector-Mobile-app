@@ -13,6 +13,7 @@ export interface ActiveAssignmentState {
 
 interface AuthState {
   token: string | null;
+  refreshToken: string | null;
   jobRole: string | null;
   empId: string | null;
   id?: number | string | null;
@@ -26,6 +27,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   token: null,
+  refreshToken: null,
   jobRole: null,
   empId: null,
   id: null,
@@ -45,6 +47,7 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         token: string;
+        refreshToken?: string | null;
         jobRole: string;
         empId: string;
         id?: number | string | null;
@@ -57,6 +60,8 @@ const authSlice = createSlice({
     ) => {
       console.log("👤 User logged:", action.payload.empId);
       state.token = action.payload.token;
+      state.refreshToken =
+        action.payload.refreshToken ?? state.refreshToken ?? null;
       state.jobRole = action.payload.jobRole;
       state.empId = action.payload.empId;
 
@@ -105,8 +110,27 @@ const authSlice = createSlice({
     clearActiveAssignment: (state) => {
       state.activeAssignment = null;
     },
+    updateTokens: (
+      state,
+      action: PayloadAction<{
+        token: string;
+        refreshToken?: string | null;
+      }>,
+    ) => {
+      state.token = action.payload.token;
+      if (action.payload.refreshToken) {
+        state.refreshToken = action.payload.refreshToken;
+      }
+      const timestamp = new Date();
+      const expirationTime = new Date(
+        timestamp.getTime() + 16 * 60 * 60 * 1000,
+      ); // 16h matching JWT
+      state.tokenStoredTime = timestamp.toISOString();
+      state.tokenExpirationTime = expirationTime.toISOString();
+    },
     logoutUser: (state) => {
       state.token = null;
+      state.refreshToken = null;
       state.jobRole = null;
       state.empId = null;
       state.companyNameEnglish = null;
@@ -119,6 +143,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setActiveAssignment, clearActiveAssignment, logoutUser } = authSlice.actions;
+export const {
+  setUser,
+  setActiveAssignment,
+  clearActiveAssignment,
+  updateTokens,
+  logoutUser,
+} = authSlice.actions;
 export default authSlice.reducer;
 

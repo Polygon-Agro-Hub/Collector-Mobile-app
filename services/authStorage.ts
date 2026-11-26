@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface StoredAuthState {
   token: string | null;
+  refreshToken?: string | null;
   jobRole: string | null;
   empId: string | null;
   id?: number | string | null;
@@ -17,6 +18,7 @@ const AUTH_STORAGE_KEY = "@auth_state";
 
 const LEGACY_KEYS = [
   "token",
+  "refreshToken",
   "jobRole",
   "empid",
   "companyNameEnglish",
@@ -33,7 +35,7 @@ const LEGACY_KEYS = [
 export const saveAuthData = async (data: StoredAuthState): Promise<void> => {
   try {
     const timestamp = new Date();
-    const expirationTime = new Date(timestamp.getTime() + 12 * 60 * 60 * 1000); // 12h matching JWT
+    const expirationTime = new Date(timestamp.getTime() + 16 * 60 * 60 * 1000); // 16h matching JWT
 
     const fullData: StoredAuthState = {
       ...data,
@@ -47,6 +49,7 @@ export const saveAuthData = async (data: StoredAuthState): Promise<void> => {
     // 2. Backward-compatible individual key pairs
     const pairs: [string, string][] = [];
     if (fullData.token) pairs.push(["token", fullData.token]);
+    if (fullData.refreshToken) pairs.push(["refreshToken", fullData.refreshToken]);
     if (fullData.jobRole) pairs.push(["jobRole", fullData.jobRole]);
     if (fullData.empId) pairs.push(["empid", fullData.empId.toString()]);
     if (fullData.companyNameEnglish) pairs.push(["companyNameEnglish", fullData.companyNameEnglish]);
@@ -79,10 +82,12 @@ export const getAuthData = async (): Promise<StoredAuthState | null> => {
     // Fallback: check individual 'token' key if @auth_state is missing
     const fallbackToken = await AsyncStorage.getItem("token");
     if (fallbackToken) {
+      const fallbackRefreshToken = await AsyncStorage.getItem("refreshToken");
       const empId = await AsyncStorage.getItem("empid");
       const jobRole = await AsyncStorage.getItem("jobRole");
       return {
         token: fallbackToken,
+        refreshToken: fallbackRefreshToken,
         empId,
         jobRole,
       };
